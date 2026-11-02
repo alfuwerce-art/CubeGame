@@ -68,7 +68,7 @@ namespace CubeGame.Presentation.Rendering
             {
                 if (chunk != null)
                 {
-                    DestroyObject(chunk);
+                    DestroyTracked(chunk);
                 }
             }
 
@@ -76,7 +76,7 @@ namespace CubeGame.Presentation.Rendering
             {
                 if (mesh != null)
                 {
-                    DestroyObject(mesh);
+                    DestroyTracked(mesh);
                 }
             }
 
@@ -85,7 +85,7 @@ namespace CubeGame.Presentation.Rendering
             LastVertexCount = 0;
         }
 
-        private static void DestroyObject(Object target)
+        private static void DestroyTracked(Object target)
         {
             if (Application.isPlaying)
             {

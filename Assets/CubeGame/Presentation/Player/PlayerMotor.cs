@@ -83,7 +83,7 @@ namespace CubeGame.Presentation.Player
             float speed = Sprinting ? SprintSpeed : WalkSpeed;
             Vector3 horizontal = direction * (speed * Time.deltaTime);
 
-            if (_controller.isGrounded)
+            if (IsGrounded)
             {
                 if (_verticalSpeed < 0f)
                 {
@@ -98,6 +98,33 @@ namespace CubeGame.Presentation.Player
 
             _verticalSpeed += Gravity * Time.deltaTime;
             _controller.Move(horizontal + Vector3.up * (_verticalSpeed * Time.deltaTime));
+        }
+
+        /// <summary>
+        /// CharacterController keeps a skin width (0.08 m) between itself and the ground, and its
+        /// isGrounded flag is only refreshed by Move(). At high frame rates the per-frame downward
+        /// step becomes smaller than that gap, so isGrounded flickers to false while the character
+        /// visibly stands on the terrain (jump and step stop working). A short downward probe makes
+        /// the grounded state frame-rate independent. This is the gameplay truth; the raw
+        /// CharacterController.isGrounded is not reliable enough to test against.
+        /// </summary>
+        public bool IsGrounded
+        {
+            get
+            {
+                if (_controller != null && _controller.isGrounded)
+                {
+                    return true;
+                }
+
+                if (_verticalSpeed > 0f)
+                {
+                    return false;
+                }
+
+                Vector3 origin = transform.position + Vector3.up * 0.1f;
+                return Physics.Raycast(origin, Vector3.down, 0.25f, ~0, QueryTriggerInteraction.Ignore);
+            }
         }
     }
 }

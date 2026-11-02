@@ -121,6 +121,10 @@ namespace CubeGame.Presentation
             controller.stepOffset = 0.35f;
             controller.slopeLimit = 50f;
             playerObject.transform.position = new Vector3(spawnX + 0.5f, groundHeight + 1.2f, spawnZ + 0.5f);
+            // CharacterController keeps its own PhysX position. Its Move() in the very first Update
+            // otherwise starts from the origin and teleports the player back to (0,0,0) before any
+            // physics step has synced the transform (reproduced by PilotPlayModeTests).
+            Physics.SyncTransforms();
 
             var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             body.name = "PlayerBody";

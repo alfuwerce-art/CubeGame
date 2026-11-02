@@ -63,19 +63,24 @@ namespace CubeGame.Tests.PlayMode
             controller.height = 1.8f;
             controller.radius = 0.4f;
             controller.center = new Vector3(0f, 0.9f, 0f);
-            player.AddComponent<PlayerMotor>();
+            var motor = player.AddComponent<PlayerMotor>();
 
             player.transform.position = new Vector3(spawnX + 0.5f, groundHeight + 12f, spawnZ + 0.5f);
+            // The controller keeps its own PhysX position; without the explicit sync the first
+            // Move() starts from the origin (see PilotBootstrap.BuildScene).
+            Physics.SyncTransforms();
             yield return null;
 
             float startY = player.transform.position.y;
             float deadline = Time.time + 6f;
-            while (Time.time < deadline && !controller.isGrounded)
+            while (Time.time < deadline && !motor.IsGrounded)
             {
                 yield return new WaitForFixedUpdate();
             }
 
-            Assert.IsTrue(controller.isGrounded, "character did not land on the generated terrain");
+            Assert.IsTrue(motor.IsGrounded,
+                $"character did not land: pos={player.transform.position} startY={startY:F2} " +
+                $"ground={groundHeight} velocity={controller.velocity}");
             Assert.Less(player.transform.position.y, startY, "character did not fall");
             Assert.AreEqual(groundHeight, player.transform.position.y, 1.6f, "landing height is far from the height field");
 

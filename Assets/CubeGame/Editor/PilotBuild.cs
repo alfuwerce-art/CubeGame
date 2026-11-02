@@ -17,13 +17,15 @@ namespace CubeGame.EditorTools
         [MenuItem("CubeGame/Build pilot player")]
         public static void BuildStandalone()
         {
-            if (!File.Exists(PilotSceneBuilder.ScenePath))
+            string projectRoot = Path.GetDirectoryName(Application.dataPath);
+            string scenePath = Path.Combine(projectRoot, PilotSceneBuilder.ScenePath);
+            if (!File.Exists(scenePath))
             {
-                Debug.LogError($"[PilotBuild] scene missing: {PilotSceneBuilder.ScenePath}");
+                Debug.LogError($"[PilotBuild] scene missing: {scenePath}");
+                BatchMode.Fail("pilot scene is missing; run PilotSceneBuilder.Build first");
                 return;
             }
 
-            string projectRoot = Path.GetDirectoryName(Application.dataPath);
             string outputPath = Path.Combine(projectRoot, OutputDirectory);
             Directory.CreateDirectory(outputPath);
 
@@ -46,7 +48,12 @@ namespace CubeGame.EditorTools
             if (summary.result != BuildResult.Succeeded)
             {
                 Debug.LogError("[PilotBuild] build failed");
+                BatchMode.Fail($"build result={summary.result} errors={summary.totalErrors}");
+                return;
             }
+
+            Debug.Log($"[PilotBuild] BUILD_SUCCEEDED output={executable} " +
+                      $"size={(File.Exists(executable) ? new FileInfo(executable).Length : 0)}B");
         }
     }
 }

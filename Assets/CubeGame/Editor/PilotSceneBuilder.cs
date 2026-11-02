@@ -32,6 +32,7 @@ namespace CubeGame.EditorTools
                 if (shader == null)
                 {
                     Debug.LogError($"[PilotScene] shader not found: {ShaderName}");
+                    BatchMode.Fail($"shader not found: {ShaderName}");
                     return;
                 }
 
@@ -77,13 +78,14 @@ namespace CubeGame.EditorTools
             if (!EditorSceneManager.SaveScene(scene, ScenePath))
             {
                 Debug.LogError($"[PilotScene] failed to save scene {ScenePath}");
+                BatchMode.Fail($"failed to save scene {ScenePath}");
                 return;
             }
 
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log($"[PilotScene] scene saved: {ScenePath}; material: {MaterialPath}");
+            Debug.Log($"[PilotScene] SCENE_SAVED {ScenePath}; material: {MaterialPath}");
         }
 
         private static void EnsureFolder(string path)
