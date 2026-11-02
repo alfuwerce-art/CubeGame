@@ -1,4 +1,4 @@
-#requires -Version 5.1
+﻿#requires -Version 5.1
 <#
     CubeGame S01-PILOT — автоматический прогон Unity.
     Запускает продюсер: см. RUN_INSTRUCTIONS.md рядом с этим файлом.

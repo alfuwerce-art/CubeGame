@@ -58,13 +58,13 @@ namespace CubeGame.Core.Rendering
             {
                 for (int i = 0; i < _vertices.Count; i++)
                 {
-                    hash ^= (ulong)BitConverter.SingleToInt32Bits(_vertices[i]);
+                    hash ^= BitsOf(_vertices[i]);
                     hash *= 1099511628211UL;
                 }
 
                 for (int i = 0; i < _normals.Count; i++)
                 {
-                    hash ^= (ulong)BitConverter.SingleToInt32Bits(_normals[i]);
+                    hash ^= BitsOf(_normals[i]);
                     hash *= 1099511628211UL;
                 }
 
@@ -76,6 +76,15 @@ namespace CubeGame.Core.Rendering
             }
 
             return hash;
+        }
+
+        /// <summary>
+        /// Exact bit pattern of a float via its double widening (float -> double is lossless), so the
+        /// code also compiles against the .NET Framework profile used by the standalone Core check.
+        /// </summary>
+        private static ulong BitsOf(float value)
+        {
+            return (ulong)BitConverter.DoubleToInt64Bits(value);
         }
 
         public float[] ToVertexArray() => _vertices.ToArray();

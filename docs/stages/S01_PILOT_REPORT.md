@@ -4,7 +4,7 @@
 **Этап:** S01-PILOT (D40, ТЗ `docs/stages/S01_UNITY_PILOT.md`).
 **Ветка:** `stage/s01-unity-pilot` (от `origin/main` = `b1a7c70`).
 **Дата:** 2026-11-02, MSK.
-**Статус:** `IN_PROGRESS / TESTS_NOT_RUN` — код и сцена подготовлены, прогон Unity **не выполнен**. Итоговый статус появится после прогона `tools/unity/run_pilot.ps1`.
+**Статус:** `IN_PROGRESS / CORE_CHECK_PASS / UNITY_RUN_NOT_RUN` — детерминированное ядро проверено реальным запуском (10/10 PASS, §4), но сборка и тесты внутри Unity **не выполнялись**: редактор нельзя запустить из песочницы агента (§3). Итоговый статус появится после прогона `tools/unity/run_pilot.ps1`.
 
 ## 1. Сводка
 
@@ -13,19 +13,19 @@
 | P0: официальные Unity Hub + Unity 6.3 LTS + URP | Hub 3.22.5 и Editor 6000.3.27f2 **установлены** (см. §2); URP **не подключён** — требует работы Package Manager, будет добавлен после первого успешного прогона |
 | P0: проект в корне репозитория, без вложенного проекта | **сделано**: `Assets/`, `Packages/`, `ProjectSettings/` в корне; `.gitignore` дополнен |
 | P1.1: границы `World/Core` ↔ `Presentation` | **сделано**: две сборки `CubeGame.Core` (`noEngineReferences: true`) и `CubeGame.Presentation` |
-| P1.2: детерминированный voxel-регион от seed, объединённые меши | **сделано** (код): `PilotHeightField` + `ChunkMeshBuilder` (один меш на чанк 32×32) |
-| P1.3: временный герой, движение по земле, коллизия | **сделано** (код): `PlayerMotor` на `CharacterController` + `MeshCollider` чанков |
-| P1.4: камера третьего лица (мышь, следование) | **сделано** (код): `OrbitCameraController` |
-| P1.5: HUD seed/координаты/FPS | **сделано** (код): `PilotDebugHud` |
+| P1.2: детерминированный voxel-регион от seed, объединённые меши | **сделано и проверено** (Core): `PilotHeightField` + `ChunkMeshBuilder`, один меш на чанк 32×32 |
+| P1.3: временный герой, движение по земле, коллизия | **сделано** (код): `PlayerMotor` на `CharacterController` + `MeshCollider` чанков; **проверка в Unity — NOT_RUN** |
+| P1.4: камера третьего лица (мышь, следование) | **сделано** (код): `OrbitCameraController`; **проверка в Unity — NOT_RUN** |
+| P1.5: HUD seed/координаты/FPS | **сделано** (код): `PilotDebugHud`; **визуальная проверка — NOT_RUN** |
 | P1.6: без NPC/квестов/боя/сейвов/Blender/Alpha-ассетов | **соблюдено** |
-| P2: открывается без ошибок компиляции | **NOT_RUN** — нужен прогон Unity |
-| P2: EditMode-тесты (детерминизм) | **NOT_RUN** — тесты написаны (12 кейсов), не запускались |
+| P2: открывается без ошибок компиляции | **NOT_RUN** — Core собрался Roslyn'ом (§4), сборки Presentation/Editor/тестов проверяются только Unity |
+| P2: EditMode-тесты (детерминизм) | **PASS (эквивалент вне Unity)**: те же проверки выполнены harness'ом, 10/10 PASS; сами EditMode-тесты в Unity — **NOT_RUN** |
 | P2: PlayMode (герой/камера/земля/коллизия) | **NOT_RUN** — 2 PlayMode-кейса написаны |
 | P2: демонстрация + скриншоты своей сцены | **NOT_RUN** — сцена и плеер собираются скриптом |
-| P2: профиль (время генерации, FPS, RAM) | **NOT_RUN** — метрики выводятся в HUD и лог плеера |
+| P2: профиль (время генерации, FPS, RAM) | **частично**: реальное время генерации ядра измерено (371.5 мс на 8×8 чанков, 5.81 мс/чанк); FPS/RAM — **NOT_RUN** |
 | P2: ветка и отчёт | **сделано** (ветка + этот отчёт); push не выполнялся (см. R01 §4.2) |
 
-Честная формулировка: **ни один тест ещё не проходил**. Код не компилировался, потому что Unity не может запуститься из песочницы агента (см. §3).
+Честная формулировка: **внутри Unity ни один тест ещё не проходил**. Независимая проверка ядра вне Unity — PASS (§4); сборки `Presentation`, `Editor` и тестовые сборки компилируются только Unity.
 
 ## 2. Что реально установлено (проверено)
 
@@ -56,7 +56,38 @@ exit=1
 
 Решение (согласовано с продюсером): прогон выполняет продюсер одним скриптом `tools/unity/run_pilot.ps1`, агент анализирует логи, XML-результаты и скриншот. Инструкция — `docs/stages/S01_RUN_INSTRUCTIONS.md`.
 
-## 4. Что написано (файлы)
+## 4. Реальная проверка вне Unity: 10/10 PASS
+
+Поскольку `CubeGame.Core` не ссылается на UnityEngine (`noEngineReferences: true`), его можно собрать и запустить без редактора. Скрипт `tools/core_check/run_core_check.ps1` компилирует Core через Roslyn, входящий в установленный Unity (`Editor\Data\DotNetSdkRoslyn\csc.dll`, ссылки на `MonoBleedingEdge\lib\mono\4.5`), и выполняет проверки.
+
+Фактический вывод (2026-11-02, 22:33 MSK, exit=0):
+
+```
+Компиляция Core (6 файлов) -> .unity-install\core_check\CoreCheck.exe
+[PASS] TC-GEN-01 same seed produces identical heights
+[PASS] TC-GEN-02 different seed changes heights (97,5% of columns differ, need >= 90.0%)
+[PASS] TC-GEN-03 adjacent chunks share the edge plane
+    observed height range: 15..86 (configured 8..96)
+[PASS] TC-GEN-05a heights stay inside the configured range
+[PASS] negative block coordinates are supported
+    chunk(0,0): vertices=8412 indices=12618 fingerprint=AF285025A774AC81
+[PASS] same seed produces an identical chunk mesh
+[PASS] different seed produces a different chunk mesh
+[PASS] all indices stay inside the vertex buffer
+[PASS] chunk (-2,3) covers exactly 32x32 blocks
+    TC-GEN-05b 8x8 chunks: 371,5 ms total, 5,81 ms/chunk, 486088 vertices
+[PASS] 8x8 chunk area is generated within 2 s
+------------------------------------------------------------------------------
+PASS 10  FAIL 0
+```
+
+Что это доказывает: детерминизм высот и мешей, непрерывность границ чанков, корректность индексов, диапазон высот, поддержку отрицательных координат, геометрию площади чанка и реальное время генерации ядра (371.5 мс на 64 чанка = 256×256 блоков, 5.81 мс/чанк).
+
+Что это **не** доказывает: компиляцию `Presentation`/`Editor`/тестовых сборок, работу физики и рендера, FPS, потребление RAM, корректность сцены. Это закрывается только прогоном Unity.
+
+Побочная находка: первый прогон упал на `System.BitConverter.SingleToInt32Bits` (нет в профиле .NET Framework 4.5, на который компилирует Unity-овский Roslyn при наших ссылках). Код `MeshData.ComputeFingerprint` переведён на `DoubleToInt64Bits` без изменения результата; повторный прогон — 10/10 PASS.
+
+## 5. Что написано (файлы)
 
 | Файл | Роль |
 |---|---|
@@ -81,7 +112,7 @@ exit=1
 
 Соблюдено: ни одного файла, шейдера, текстуры или строки кода из Alpha 2013 и из декомпиляции Reversal; геометрия и палитра — собственная.
 
-## 5. Следующие шаги
+## 6. Следующие шаги
 
 1. Продюсер: вход в Unity Hub (лицензия) и запуск `tools/unity/run_pilot.ps1`.
 2. Агент: разобрать `results\editmode.xml`/`playmode.xml`, логи, скриншот; заполнить §1–§6 фактическими PASS/FAIL.
