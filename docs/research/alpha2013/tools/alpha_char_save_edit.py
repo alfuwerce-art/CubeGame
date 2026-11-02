@@ -15,15 +15,17 @@ not a game trainer and does not touch a running process.
 Usage:
   python alpha_char_save_edit.py <input.db> <output.db> --pos-raw X Y Z
   python alpha_char_save_edit.py <input.db> <output.db> --pos-blocks X Y Z
+  python alpha_char_save_edit.py <input.db> <output.db> --component-delta 0 64
   python alpha_char_save_edit.py <input.db> <output.db> --show
 
 --pos-blocks converts to the raw triple using the 2^24-units/block hypothesis
 (OQ-22; not an established constant). Use --pos-raw to avoid that assumption.
+--component-delta <0|1|2> <delta-blocks> edits one raw component; component
+order is still OQ-22, so the tool never calls it x/y/z.
 """
 
 from __future__ import annotations
 
-import os
 import shutil
 import sqlite3
 import struct
@@ -82,14 +84,30 @@ def main() -> int:
     if mode == "--show":
         print("show only: output not written")
         return 0
-    if mode not in ("--pos-raw", "--pos-blocks") or len(values) != 3:
-        raise SystemExit("error: expected --pos-raw|--pos-blocks X Y Z (or --show)")
-    nums = [float(v) for v in values]
-    if mode == "--pos-blocks":
-        raw = tuple(int(round(v * float(1 << 24))) for v in nums)
-        print(f"note: --pos-blocks uses the OQ-22 2^24 hypothesis; raw={raw}")
+    if mode == "--component-delta":
+        if len(values) != 2:
+            raise SystemExit("error: expected --component-delta <0|1|2> <delta-blocks>")
+        try:
+            component = int(values[0])
+            delta_blocks = float(values[1])
+        except ValueError:
+            raise SystemExit("error: --component-delta expects integer component and numeric delta")
+        if component not in (0, 1, 2):
+            raise SystemExit("error: component must be 0, 1 or 2")
+        raw = list(old_pos)
+        raw[component] += int(round(delta_blocks * float(1 << 24)))
+        raw = tuple(raw)
+        print(f"note: --component-delta uses the OQ-22 2^24 hypothesis and component index {component}; raw={raw}")
+    elif mode in ("--pos-raw", "--pos-blocks") and len(values) == 3:
+        nums = [float(v) for v in values]
+        if mode == "--pos-blocks":
+            raw = tuple(int(round(v * float(1 << 24))) for v in nums)
+            print(f"note: --pos-blocks uses the OQ-22 2^24 hypothesis; raw={raw}")
+        else:
+            raw = tuple(int(v) for v in nums)
     else:
-        raw = tuple(int(v) for v in nums)
+        raise SystemExit("error: expected --pos-raw|--pos-blocks X Y Z, "
+                         "--component-delta N D, or --show")
     if any(v < -(1 << 63) or v >= (1 << 63) for v in raw):
         raise SystemExit("error: position out of int64 range")
 
@@ -110,7 +128,9 @@ def main() -> int:
     finally:
         db.close()
     after = read_blob(dst)
-    print(f"output: {dst}  pos_raw={struct.unpack_from('<3q', after, 4)}")
+    after_pos = struct.unpack_from("<3q", after, 4)
+    print(f"output: {dst}  pos_raw={after_pos}")
+    print(f"        components={{0: {after_pos[0]}, 1: {after_pos[1]}, 2: {after_pos[2]}}}")
     print("OK: edited COPY written; original game files untouched")
     return 0
 

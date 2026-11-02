@@ -8,9 +8,10 @@ class, specialization. Works only with COPIES: open read-only, never writes.
 
 Field order per S00-R02 (`DATA_AND_SAVE_SCHEMAS.md` §L3). The position triple
 at 0x04..0x23 is three int64 fixed-point values copied from Creature
-+0x10/+0x18/+0x20 by GameWorld_serialize_state (0044d790). Its exact unit and
-meaning (current vs spawn position) remain OQ-22, so the probe prints the raw
-values and several interpretations without asserting one:
++0x10/+0x18/+0x20 by GameWorld_serialize_state (0044d790). Its exact unit,
+component order (x/y/z) and meaning (current vs spawn position) remain OQ-22,
+so the probe prints raw values for components 0,1,2 and several interpretations
+without asserting an axis or unit:
 
   * 2^24 units/block — hypothesis consistent with the 0x1000000 (=1 block)
     constant used for entity positions and with the explored map region 512;
@@ -40,6 +41,9 @@ def parse(blob: bytes) -> dict:
     raw_pos = take(0x18)
     out["pos_raw"] = struct.unpack("<3q", raw_pos)
     out["pos_raw_hex"] = raw_pos.hex()
+    out["pos_raw_components"] = {
+        f"component{i}": v for i, v in enumerate(out["pos_raw"])
+    }
     out["pos_raw_2pow24_blocks"] = [round(v / float(1 << 24), 6) for v in out["pos_raw"]]
     out["pos_raw_grid_units"] = [round(v / 65536.0, 3) for v in out["pos_raw"]]
     out["pos_raw_32_32"] = [round(v / 4294967296.0, 4) for v in out["pos_raw"]]
