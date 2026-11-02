@@ -63,7 +63,7 @@
 | `stage/s00-alpha-g0` | `a0af8aa90de7ede6493420846cc152ad9fe30a87` | G0_PASS **по отчёту агента**, READY_FOR_REVIEW; происхождение исходника неофициальное |
 | `stage/s00-static-r01` | `73893b62f3df5757139bf4a1e0ea63cd300d6530` | Четыре исследовательских документа; READY_FOR_REVIEW, ещё не принят |
 | `stage/s01-unity-pilot` | **`a8842783378bf2621e6a39a50e1f9ee2398cf245`** | Последний пилот **уже загружен на GitHub**, READY_FOR_REVIEW; требуются ревью кода/артефактов |
-| `stage/s00-deep-research` | **`f5f3984`** (опубликован до review-fix); review-fix `ea78cbd` + merge `origin/main` — в локальной ветке, push в этой сессии | S00-R02 **READY_FOR_REVIEW, не ACCEPTED**; все A…L рассмотрены (`PARTIAL`), 3 запуска на копии; FIX-01…FIX-06 внесены |
+| `stage/s00-deep-research` | **`f87d35d`** (review-fix + merge `origin/main`; до review-fix был `f5f3984`) | S00-R02 **READY_FOR_REVIEW, не ACCEPTED**; все A…L рассмотрены (`PARTIAL`), 3 запуска на копии; FIX-01…FIX-06 внесены; push выполнен |
 
 По финальному отчёту DeepSeek для пилота: Unity 6.3 Personal, импорт/компиляция PASS, **EditMode 10/10**, **PlayMode 2/2**, сцена/Windows exe/скриншот созданы, генерация 64 чанков. Это **результаты локального агента**, а не независимо воспроизведённые ChatGPT тесты. Скриншот и журналы в локальной `.unity-install/`, не в GitHub. **Нельзя обещать независимое принятие S01 без ревью.**
 
