@@ -18,3 +18,13 @@
 - [Следующее задание DeepSeek](docs/stages/NEXT_DEEPSEEK_TASK.md).
 
 - [Unity CLI — правила DeepSeek](docs/agents/UNITY_CLI_PROTOCOL.md) — обнаружение Editor, тесты, Pipeline и версии.
+
+## Актуальный приоритет: D41 (2026-11-03)
+
+- [Решение D41 — исследовать Alpha до реализации новых систем](docs/decisions/D41-research-before-port.md)
+- [Программа полного исследования R02, подсистемы A…L](docs/stages/S00_DEEP_RESEARCH.md)
+- [Справочник подтверждённых источников и визуальных референсов](docs/research/alpha2013/REFERENCE_ATLAS.md)
+- [Что реализуется средствами Unity, а не копированием Plasma](docs/architecture/UNITY_REUSE_MAP.md)
+- [Задание для DeepSeek](docs/stages/DEEPSEEK_RESEARCH_TASK.md)
+
+Пилот Unity 6.3 выполнен по отчёту агента; последний коммит пока требуется запушить в рабочую ветку для ревью. Этот пилот не означает переноса всех систем Alpha. URP — отдельная техническая миграция, экспериментальный Unity Pipeline — необязателен.
