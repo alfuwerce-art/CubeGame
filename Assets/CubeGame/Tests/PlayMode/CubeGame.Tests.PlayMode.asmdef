@@ -1,0 +1,23 @@
+{
+    "name": "CubeGame.Tests.PlayMode",
+    "rootNamespace": "CubeGame.Tests.PlayMode",
+    "references": [
+        "CubeGame.Core",
+        "CubeGame.Presentation",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

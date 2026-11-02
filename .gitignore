@@ -174,3 +174,6 @@ vite.config.ts.timestamp-*
 *.mdb
 *.opendb
 *.VC.db
+
+# Unity installers / caches downloaded by the agent (never committed)
+.unity-install/
