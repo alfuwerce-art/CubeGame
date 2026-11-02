@@ -1,6 +1,6 @@
 # S00-R02 — углублённое исследование Cube World Alpha 2013 перед переносом в Unity
 
-**Статус:** AUTHORIZED / NOT_STARTED; решение D41. Ранее завершена только первая статическая партия S00-R01 (READY_FOR_REVIEW), не весь анализ.
+**Статус:** AUTHORIZED / R02_READY_FOR_REVIEW (не ACCEPTED); решение D41. Все пакеты A…L рассмотрены, часть — `PARTIAL`; review-fix R02 (FIX-01…FIX-06) — 2026-11-03.
 **Исполнитель:** DeepSeek Harness `cubegame-dev`; метод STATIC-FIRST + targeted runtime validation.
 **Оригинал:** `D:\Games\Cube world` (read-only). **Reversal:** https://github.com/qad3n/CubeWorld-Reversal — справочный реконструированный C++/псевдокод, не компилируемый исходник.
 **Выход:** собранная/доказанная техническая картина Alpha, а не переписывание движка Plasma и не поток неподтверждённых догадок.

@@ -1,8 +1,9 @@
 # S01-PILOT — первый Unity-прототип CubeGame
 
-**Статус:** AUTHORIZED / BLOCKED_UNTIL_UNITY_INSTALLED (D40).
+**Статус:** `REPORTED_UNITY_PASS / READY_FOR_REVIEW` (не ACCEPTED). Ветка `stage/s01-unity-pilot` опубликована, remote HEAD `a884278`; результаты отчёта независимо не перепроверялись в S00 review-fix. Merge в `main` не выполнялся.
 **Исполнитель:** DeepSeek Harness (`cubegame-dev`).
 **Задача:** создать проверяемую, запускаемую маленькую сцену, а не «переписать всё Cube World» одним действием.
+**Историческая оговорка:** разделы P0 ниже описывают подготовку до установки Unity; фактическая версия Editor — `6000.3.27f2`, см. `ACTIVE_STAGE.md`.
 
 ## P0 — установка инструментов и подготовка (пока Unity/Blender отсутствуют)
 
