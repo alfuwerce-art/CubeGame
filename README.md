@@ -16,3 +16,5 @@
 - [S00-R01: статический анализ](docs/stages/S00_STATIC_R01.md).
 - [S01-PILOT: Unity-прототип](docs/stages/S01_UNITY_PILOT.md).
 - [Следующее задание DeepSeek](docs/stages/NEXT_DEEPSEEK_TASK.md).
+
+- [Unity CLI — правила DeepSeek](docs/agents/UNITY_CLI_PROTOCOL.md) — обнаружение Editor, тесты, Pipeline и версии.
