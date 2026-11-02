@@ -6,6 +6,7 @@
 - [Текущий этап](docs/ACTIVE_STAGE.md) — статус работ и следующий шаг.
 - [36 утверждённых решений](docs/planning/DECISIONS_001-036.md).
 - [DeepSeek Harness — настройка](docs/agents/DEEPSEEK_HARNESS_SETUP.md).
+- [DeepSeek Harness — статус](docs/agents/DEEPSEEK_SETUP_STATUS.md) — локальный пресет установлен; Unity отсутствует, S00-G0 ещё не завершён.
 - [Задача S00-G0](docs/stages/S00_G0_DEEPSEEK_TASK.md).
 - [Архитектурный ADR-0001](docs/architecture/ADR-0001-modular-monolith.md).
 
