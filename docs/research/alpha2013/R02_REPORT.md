@@ -19,13 +19,17 @@
 | B | `BEHAVIOR_SPECS/B_world.md` | PARTIAL | единицы, иерархия, формула шума (проверена лично), высоты, вода, пещеры, цепочка генерации, структуры, seed-потоки |
 | C | `BEHAVIOR_SPECS/C_streaming.md` | PARTIAL | зоны 64×64 блока, `ZoneTile` = 1 блок, пороги 8/10 зон, сохранение при выгрузке |
 | D | `BEHAVIOR_SPECS/D_character.md` | PARTIAL | создание героя, внешность, стартовый набор, XP/HP/Power, специальности, 11 рангов, 13 слотов |
-| E | `BEHAVIOR_SPECS/E_combat.md` | PARTIAL (ядро формул — STRONGLY_SUPPORTED) | HP, урон оружия, броня, haste, тайминги, резолв удара, хит/блок, XP, кривые |
+| E | `BEHAVIOR_SPECS/E_combat.md` | PARTIAL (ядро формул — STRONGLY_SUPPORTED) | HP, урон (с вариативностью ±25 %), броня, haste, тайминги, резолв удара, хит/блок, XP, кривые |
 | F | `BEHAVIOR_SPECS/F_items.md` | PARTIAL (модель и формулы — с машинной проверкой) | предмет = seed+тип+редкость+уровень+модификатор; единая формула статов; лут 30 рядов; крафт «число комплектов» |
 | G/H | `BEHAVIOR_SPECS/G_H_ai_npc_pets.md` | PARTIAL | дерево поведений, CombatBehavior, питомцы, расписания NPC, спавн элит, квестовые тексты |
+| I | `BEHAVIOR_SPECS/I_movement.md` | PARTIAL | гравитация 30/3, скорости-множители (6→20→×2), стамина, режимы, камера 50°/30°/зум 0…14; блокер — масштаб единиц |
+| J | `BEHAVIOR_SPECS/J_quests_dungeons.md` | PARTIAL | комнаты 3×3×3, «хозяин подземелья», цели на клетку (0/1/2), `mission` = 38 Б, награды |
 | K | `BEHAVIOR_SPECS/K_assets.md` | PARTIAL | `.cub` = 3×int32 + RGB-воксели (проверено на 3 моделях); `.plx` — DEFERRED |
 | L | `DATA_AND_SAVE_SCHEMAS.md` | PARTIAL | «ключ → блоб», блоб персонажа v11 до байта, измерения `reg`-блоба, целостность |
-| — | `OPEN_QUESTIONS.md`, `VALIDATION_CASES.md` | — | консолидированные UNKNOWN с планом; матрица проверок |
+| — | `OPEN_QUESTIONS.md`, `VALIDATION_CASES.md`, `SUBSYSTEM_TO_UNITY_MAP.md` | — | консолидированные UNKNOWN с планом; матрица проверок; таблица «Alpha → Unity → тесты» |
 | — | `tools/alpha_curves_reference.py`, `tools/alpha_item_stats_reference.py` | **PASS** | воспроизводимые проверки кривых и статов предметов |
+
+**Все 12 пакетов A…L рассмотрены и имеют явный статус** (условие gate из `S00_DEEP_RESEARCH.md`).
 
 ## 2. Факты, проверенные **фактически**
 
