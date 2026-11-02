@@ -21,3 +21,9 @@
 - [ACTIVE_STAGE](../ACTIVE_STAGE.md) — подготовка исследования S00; оригинальная Alpha пока не подтверждена.
 - [S00_ALPHA_RESEARCH.md](../stages/S00_ALPHA_RESEARCH.md) — конкретное ТЗ исследования.
 - [S00_COVERAGE_TEMPLATE.md](../stages/S00_COVERAGE_TEMPLATE.md) — пустой шаблон фактов/источников.
+
+## Новое решение D37
+
+- [D37: стратегия источников](../decisions/D37-source-strategy.md) — **утверждено**: Alpha изучаем по архивам, Steam 2019 — на ПК.
+- [S00 v2](../stages/S00_ALPHA_RESEARCH.md) — обновлённое ТЗ исследования.
+- [S00 Comparison](../research/S00_COMPARISON_MATRIX.md) — первоначальная таблица **предложений**, ещё не утверждённых игровых механик.
