@@ -174,3 +174,20 @@ vite.config.ts.timestamp-*
 *.mdb
 *.opendb
 *.VC.db
+
+# --- S00-R02 research workspace (D41) ---
+# Локальный клон реконструкции CubeWorld-Reversal, временные копии файлов Alpha,
+# рабочие заметки субагентов. В публичный репозиторий не попадает.
+.scratch/
+.unity-install/
+
+# --- Закрытые файлы Cube World Alpha 2013 (SRC-01) ---
+# Оригинальные бинарники/данные/сейвы Picroma. Хранятся только в D:\Games\Cube world
+# (read-only) и не коммитятся ни в каком виде. Правило-страховка от случайного add.
+data[0-9].db
+Save/
+*.cub
+*.plx
+Cube.exe
+Server.exe
+CubeLauncher.exe
