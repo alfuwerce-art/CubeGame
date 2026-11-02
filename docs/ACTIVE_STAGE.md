@@ -1,6 +1,6 @@
 # CubeGame — ACTIVE_STAGE
 
-**Дата решения:** 2026-11-03. **Рабочее название:** CubeGame (имя игры не утверждено).
+**Дата решения:** 2026-11-03. **Межчатовая память:** [PROJECT_MEMORY.md](../PROJECT_MEMORY.md). **Рабочее название:** CubeGame (имя игры не утверждено).
 **Ответственные:** DeepSeek Harness — исполнитель; ChatGPT — архитектура и ревью; продюсер — игровые и визуальные решения.
 **Актуальный приоритет:** [D41](decisions/D41-research-before-port.md): **углублённый разбор Alpha до переноса новых игровых систем**.
 **Архитектура:** модульный монолит [ADR-0001](architecture/ADR-0001-modular-monolith.md) утверждён; числовые/технические параметры — на проверке.
@@ -15,9 +15,9 @@
 
 ## S01-PILOT — СОЗДАН, ОЖИДАЕТ ПУБЛИКАЦИИ И РЕВЬЮ
 
-**Статус:** REPORTED_UNITY_PASS / READY_FOR_REVIEW / LATEST_PUSH_PENDING.
-DeepSeek сообщает: Unity Editor `6000.3.27f2`, лицензия активна, EditMode 10/10, PlayMode 2/2, сцена/Windows player/скриншот готовы. Эти результаты пока не проверены независимо в последнем коммите.
-**Разрешено:** опубликовать локальный коммит `a884278` в `stage/s01-unity-pilot`, без merge/force push. На GitHub последний проверенный HEAD был `b5d881b`.
+**Статус:** REPORTED_UNITY_PASS / READY_FOR_REVIEW / LATEST_PUSH_CONFIRMED_GITHUB (не независимое тестирование).
+DeepSeek сообщает: Unity Editor `6000.3.27f2`, лицензия активна, EditMode 10/10, PlayMode 2/2, сцена/Windows player/скриншот готовы. Последний коммит опубликован в GitHub, но указанные результаты пока не проверены ChatGPT независимым запуском Unity.
+**Подтверждено GitHub:** `stage/s01-unity-pilot` HEAD `a8842783378bf2621e6a39a50e1f9ee2398cf245`. Push уже выполнен. Merge/force push в main не разрешены.
 **URP:** разрешён отдельный обратимый технический trial после фиксации рабочего пилота.
 **Unity Pipeline (экспериментальный):** DEFERRED / OPTIONAL; автоматически не устанавливать.
 **Blender:** отсутствует, не требуется до S05.
