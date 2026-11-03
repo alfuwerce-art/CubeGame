@@ -1,0 +1,12 @@
+decoded payloads: 4
+built human-hair-m01: faces=776 verts=3104 bounds=(12,11,12)
+built human-head-m01: faces=494 verts=1976 bounds=(14,8,8)
+built iron-greatsword: faces=854 verts=3416 bounds=(3,37,13)
+built porcupine-body: faces=1266 verts=5064 bounds=(12,16,20)
+obj files: 4
+obj human-hair-m01: PASS groups=5 verts=1639 tris=1552 submeshes=5 bounds=(12,11,12) materials=5
+obj human-head-m01: PASS groups=8 verts=928 tris=988 submeshes=8 bounds=(14,8,8) materials=8
+obj iron-greatsword: PASS groups=7 verts=1662 tris=1708 submeshes=7 bounds=(3,37,13) materials=7
+obj porcupine-body: PASS groups=13 verts=3440 tris=2532 submeshes=13 bounds=(12,16,20) materials=13
+PILOT_RESULT=PASS
+REPORT_SAVED PilotOutput\report.json

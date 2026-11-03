@@ -2,17 +2,20 @@
 
 **Дата решения:** 2026-11-03. **Межчатовая память:** [PROJECT_MEMORY.md](../PROJECT_MEMORY.md). **Рабочее название:** CubeGame (имя игры не утверждено).
 **Ответственные:** DeepSeek Harness — исполнитель; ChatGPT — архитектура и ревью; продюсер — игровые и визуальные решения.
-**Активный этап:** **`S05A-0`** — первый пилот конвертации геометрии моделей Alpha 2013 → Unity; авторизация [D47](decisions/D47-s04-accepted-s05a0-authorized.md); рабочая ветка `stage/s05a-asset-conversion-pilot` (создаётся от коммита закрытия S04), отчёт пилота — [MODEL_CONVERSION_PILOT.md](research/alpha2013/MODEL_CONVERSION_PILOT.md). Решение [D46](decisions/D46-asset-conversion-first.md) и план [S05](stages/S05_ASSET_CONVERSION_PLAN.md) подготовлены в ветке `stage/s05-asset-conversion-plan` и переносятся в рабочую ветку S05A-0.
+**Активный этап:** **`S05A-0` → `READY_FOR_REVIEW`** — пилот конвертации геометрии моделей Alpha 2013 → Unity выполнен; авторизация [D47](decisions/D47-s04-accepted-s05a0-authorized.md); рабочая ветка `stage/s05a-asset-conversion-pilot`; отчёт — [MODEL_CONVERSION_PILOT.md](research/alpha2013/MODEL_CONVERSION_PILOT.md). Стратегия [D46](decisions/D46-asset-conversion-first.md), план [S05](stages/S05_ASSET_CONVERSION_PLAN.md).
 **Предыдущий этап:** **`S04-EQUIPMENT-COMBAT` → `ACCEPTED`** (решение продюсера 2026-11-03, [D47](decisions/D47-s04-accepted-s05a0-authorized.md); ревью ChatGPT `PASS`); `S03-COMBAT-CORE` (D45), `S02-CORE-FOUNDATION` (D44) и `S00-R02` (D43) приняты ранее.
 **D42:** [числа Alpha как референсы](decisions/D42-alpha-numbers-as-references.md) — статус **`ACCEPTED`** (решение продюсера 2026-11-03, утверждено независимо от OQ-23). До закрытия OQ-23 конкретные скорости в прототипе помечаются **`PLACEHOLDER_NOT_ALPHA`**; это не отменяет утверждение D42 и не является окончательным балансом.
 **Архитектура:** модульный монолит [ADR-0001](architecture/ADR-0001-modular-monolith.md) утверждён; числовые/технические параметры — по D42.
 
-## S05A-0 — ПИЛОТ КОНВЕРТАЦИИ ГЕОМЕТРИИ (авторизован 2026-11-03)
+## S05A-0 — ПИЛОТ КОНВЕРТАЦИИ ГЕОМЕТРИИ: `READY_FOR_REVIEW` (не `ACCEPTED`)
 
-**Статус:** запуск разрешён [D47](decisions/D47-s04-accepted-s05a0-authorized.md); отметка исполнителя по завершении — `READY_FOR_REVIEW`, не `ACCEPTED`.
-**Границы:** только три образца (персонаж/часть персонажа, существо/враг, оружие/предмет); изолированный Unity-проект; **никакой** массовой конвертации 2857 `.cub`, никаких запусков `Cube.exe`, никакой публикации оригинальных или конвертированных ассетов Alpha, никаких изменений кода/сцены S04.
-**S05A-1** (риги/анимации) и **S05B** (пакетное производство) — **NOT_AUTHORIZED**; стратегия — [D46](decisions/D46-asset-conversion-first.md), план — [S05](stages/S05_ASSET_CONVERSION_PLAN.md).
-**Среда:** Unity `6000.3.27f2`; источник `D:\Games\Cube world` — только чтение.
+**Статус:** выполнен 2026-11-04; авторизация [D47](decisions/D47-s04-accepted-s05a0-authorized.md). **Отчёт:** [MODEL_CONVERSION_PILOT.md](research/alpha2013/MODEL_CONVERSION_PILOT.md). **Ветка:** `stage/s05a-asset-conversion-pilot`.
+**Результат:** 3 образца (`human-head-m01.cub` — персонаж, `porcupine-body.cub` — существо, `iron-greatsword.cub` — оружие) + `human-hair-m01.cub` как отдельная часть; **все реально отображаются в Unity `6000.3.27f2`** (изолированный проект, 13 PNG). Геометрия, габариты, площадь поверхности и цвета совпадают двумя независимыми путями (собственный `Mesh` с vertex colors и импорт OBJ через `ModelImporter`). Тесты конвертера **26/26 PASS**; повторяемость подтверждена хешами.
+**Известные потери:** маркерные воксели (чистые RGB) становятся видимой геометрией; тинт-цвета (волосы) не восстанавливаются; масштабы/смещения сборки частей в `.cub` отсутствуют; нет нормалей/UV/рига. **Анимаций в ассетах нет** — предварительно: они считаются кодом (state id + матрицы костей), окончательно — вопрос `S05A-1`.
+**Матрица категорий:** оружие/предметы — `CONVERTIBLE` (проверенный образец); персонажи — `PARTIAL`; монстры — `PARTIAL`; броня, здания, окружение — `NOT_CHECKED`.
+**Границы соблюдены:** массовая конвертация 2857 `.cub` не запускалась; `Cube.exe` не запускался; оригинальные и конвертированные ассеты — только локально в `.scratch/` (в Git не попали); код/сцена S04 не изменялись.
+**S05A-1** (риги/анимации) и **S05B** (пакетное производство) — **NOT_AUTHORIZED**; запуск только отдельным решением продюсера.
+**Среда:** Unity `6000.3.27f2`; источник `D:\Games\Cube world` — только чтение (`mode=ro&immutable=1`).
 
 ## S04-EQUIPMENT-COMBAT — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
 

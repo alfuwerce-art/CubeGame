@@ -195,3 +195,5 @@ CubeLauncher.exe
 # Python bytecode (research reference scripts)
 __pycache__/
 *.pyc
+# Decoded .cub payloads (derived from closed Cube World Alpha assets — local only)
+*.cubdec
