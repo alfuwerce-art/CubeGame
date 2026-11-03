@@ -1,0 +1,112 @@
+{
+  "character": "human-male-proxy",
+  "status": "PROXY_NOT_ALPHA",
+  "notes": [
+    "Offsets below are a technical proxy: the original per-part offsets/pivots are not recovered.",
+    "The only evidence-backed relation is head<->hair: both are authored in the same space (hair skin voxels coincide 99% with head skin voxels), so hair offset is (0,0,0) in head space.",
+    "1 voxel = 1 Unity unit. No per-part scaling is applied.",
+    "Offsets are absolute character-space positions of each part's bounding-box min corner."
+  ],
+  "parts": [
+    {
+      "id": "body",
+      "model": "body1",
+      "parent": null,
+      "offset": [
+        -5.0,
+        3,
+        -4.0
+      ],
+      "evidence": "PROXY: torso rests on the feet, centred on the character axis"
+    },
+    {
+      "id": "head",
+      "model": "human-head-m01",
+      "parent": "body",
+      "offset": [
+        -7.0,
+        13,
+        -4.0
+      ],
+      "evidence": "PROXY: head sits on the torso top, centred"
+    },
+    {
+      "id": "hair",
+      "model": "human-hair-m01",
+      "parent": "head",
+      "offset": [
+        -7.0,
+        13,
+        -4.0
+      ],
+      "evidence": "PARTIAL: hair is authored in the same space as the head (99% of its scalp voxels coincide with head skin voxels), so it takes the head's absolute offset"
+    },
+    {
+      "id": "hand_l",
+      "model": "glove",
+      "parent": "body",
+      "offset": [
+        -10.0,
+        9,
+        -3.0
+      ],
+      "evidence": "PROXY: hand at shoulder height on the left side"
+    },
+    {
+      "id": "hand_r",
+      "model": "glove",
+      "parent": "body",
+      "offset": [
+        5.0,
+        9,
+        -3.0
+      ],
+      "evidence": "PROXY: hand at shoulder height on the right side"
+    },
+    {
+      "id": "foot_l",
+      "model": "foot",
+      "parent": "body",
+      "offset": [
+        -5.0,
+        0,
+        -4.0
+      ],
+      "evidence": "PROXY: foot on the ground under the torso"
+    },
+    {
+      "id": "foot_r",
+      "model": "foot",
+      "parent": "body",
+      "offset": [
+        0.0,
+        0,
+        -4.0
+      ],
+      "evidence": "PROXY: foot on the ground under the torso"
+    },
+    {
+      "id": "sword",
+      "model": "iron-greatsword",
+      "parent": "hand_r",
+      "offset": [
+        6.0,
+        9,
+        -6.5
+      ],
+      "evidence": "PROXY: grip centred inside the right hand; 1 voxel = 1 unit, no scaling (the greatsword is therefore longer than the character)"
+    }
+  ],
+  "markers": {
+    "hair": {
+      "hide": [
+        "green",
+        "blue"
+      ],
+      "keep": [
+        "red"
+      ],
+      "note": "red is the hair tint placeholder (PARTIAL); green/blue are tiny exposed clusters treated as attachment markers (PARTIAL)"
+    }
+  }
+}

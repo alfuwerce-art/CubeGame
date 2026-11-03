@@ -48,36 +48,49 @@ FACE_DEFS = (
 )
 
 
-def is_solid(model: VoxelModel, x: int, d: int, h: int) -> bool:
+def is_solid(model: VoxelModel, x: int, d: int, h: int, excluded=None) -> bool:
+    """True if the voxel belongs to the solid volume.
+
+    `excluded` is an optional set of voxel coordinates treated as empty; it lets a
+    caller hide confirmed marker voxels without touching the decoded payload.
+    """
     if not (0 <= x < model.width and 0 <= d < model.depth and 0 <= h < model.height):
+        return False
+    if excluded and (x, d, h) in excluded:
         return False
     px = model.pixels
     offset = ((h * model.depth + d) * model.width + x) * 3
     return bool(px[offset] or px[offset + 1] or px[offset + 2])
 
 
-def expected_face_count(model: VoxelModel) -> int:
+def expected_face_count(model: VoxelModel, excluded=None) -> int:
     """Number of culled quad faces (4 vertices each) for the model."""
     total = 0
     for h in range(model.height):
         for d in range(model.depth):
             for x in range(model.width):
-                if not is_solid(model, x, d, h):
+                if not is_solid(model, x, d, h, excluded):
                     continue
                 for (dx, dy, dz), _corners in FACE_DEFS:
                     # neighbour in voxel space: dy is height, dz is depth
-                    if not is_solid(model, x + dx, d + dz, h + dy):
+                    if not is_solid(model, x + dx, d + dz, h + dy, excluded):
                         total += 1
     return total
 
 
-def build_obj(model: VoxelModel, name: str, scale: float = 1.0) -> tuple[str, str]:
-    """Return (obj_text, mtl_text)."""
+def build_obj(model: VoxelModel, name: str, scale: float = 1.0, excluded=None) -> tuple[str, str]:
+    """Return (obj_text, mtl_text).
+
+    `excluded` hides the given voxel coordinates (see `is_solid`); the MTL keeps one
+    entry per colour that survived.
+    """
     colors: dict[tuple[int, int, int], int] = {}
-    for i in range(0, len(model.pixels), 3):
-        r, g, b = model.pixels[i], model.pixels[i + 1], model.pixels[i + 2]
-        if r or g or b:
-            colors.setdefault((r, g, b), len(colors) + 1)
+    for h in range(model.height):
+        for d in range(model.depth):
+            for x in range(model.width):
+                if not is_solid(model, x, d, h, excluded):
+                    continue
+                colors.setdefault(model.rgb_at(x, d, h), len(colors) + 1)
 
     mtl_lines: list[str] = ["# CubeGame S05A-0 pilot conversion — generated, do not edit"]
     mtl_lines.append(f"# source: {name}; voxels {model.width}x{model.depth}x{model.height}")
@@ -106,13 +119,12 @@ def build_obj(model: VoxelModel, name: str, scale: float = 1.0) -> tuple[str, st
     for h in range(model.height):
         for d in range(model.depth):
             for x in range(model.width):
-                if not is_solid(model, x, d, h):
+                if not is_solid(model, x, d, h, excluded):
                     continue
-                offset = ((h * model.depth + d) * model.width + x) * 3
-                color = (model.pixels[offset], model.pixels[offset + 1], model.pixels[offset + 2])
+                color = model.rgb_at(x, d, h)
                 index = colors[color]
                 for (dx, dy, dz), corners in FACE_DEFS:
-                    if is_solid(model, x + dx, d + dz, h + dy):
+                    if is_solid(model, x + dx, d + dz, h + dy, excluded):
                         continue
                     face_vertices = []
                     for cx, cy, cz in corners:
@@ -154,9 +166,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--scale", type=float, default=1.0, help="OBJ units per voxel")
     ap.add_argument("--dump-decoded", action="store_true",
                     help="also write <name>.cubdec (de-obfuscated payload) for the Unity builder")
+    ap.add_argument("--markers", type=Path, default=None,
+                    help="write marker/tint analysis for this model as JSON")
+    ap.add_argument("--exclude-markers", default="",
+                    help="comma-separated marker colours to hide from geometry "
+                         "(red|green|blue); empty = keep everything (default)")
     args = ap.parse_args(argv)
 
     from cub_format import parse_decoded
+    from cub_markers import excluded_voxels, marker_groups
 
     if args.db:
         if not args.key:
@@ -167,17 +185,36 @@ def main(argv: list[str] | None = None) -> int:
         model = parse_decoded(args.decoded.read_bytes())
         stem = args.name or args.decoded.stem
 
+    colors = [c.strip() for c in args.exclude_markers.split(",") if c.strip()]
+    unknown = [c for c in colors if c not in ("red", "green", "blue")]
+    if unknown:
+        ap.error(f"unknown marker colour(s): {unknown}")
+    excluded = excluded_voxels(model, colors) if colors else None
+
     args.out_dir.mkdir(parents=True, exist_ok=True)
-    obj_text, mtl_text = build_obj(model, stem, args.scale)
+    obj_text, mtl_text = build_obj(model, stem, args.scale, excluded)
     (args.out_dir / f"{stem}.obj").write_text(obj_text, encoding="utf-8", newline="\n")
     (args.out_dir / f"{stem}.mtl").write_text(mtl_text, encoding="utf-8", newline="\n")
     if args.dump_decoded:
         (args.out_dir / f"{stem}.cubdec").write_bytes(encode_model(model))
+    if args.markers:
+        import json
+        payload = {
+            "key": stem,
+            "dimensions": list(model.dimensions),
+            "solid_voxels": model.non_empty_count,
+            "excluded_marker_colours": colors,
+            "excluded_voxel_count": len(excluded or ()),
+            "marker_groups": marker_groups(model),
+        }
+        args.markers.parent.mkdir(parents=True, exist_ok=True)
+        args.markers.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    quads = expected_face_count(model)
+    quads = expected_face_count(model, excluded)
     print(f"{stem}: dims={model.width}x{model.depth}x{model.height} "
           f"solid={model.non_empty_count} faces={quads} vertices={quads * 4} "
-          f"materials={len({c for c in solid_pairs(model)})}")
+          f"materials={len({c for c in solid_pairs(model)})}"
+          + (f" excluded_markers={colors} ({len(excluded)} voxels)" if colors else ""))
     return 0
 
 

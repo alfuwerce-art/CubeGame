@@ -2,7 +2,7 @@
 
 **Рабочее название проекта:** `CubeGame`. **Окончательное название игры НЕ утверждено.**  
 **Репозиторий:** https://github.com/alfuwerce-art/CubeGame  
-**Обновлено:** 2026-11-04 (**S05A-0 → `ACCEPTED`** по D48, ограниченная приёмка после REVIEW-FIX-01: по отчёту DeepSeek Python 42/42, Unity-самотесты 19/19, 4 негативных сценария; 3 исходных образца + часть перенесены в Unity 6.3. **S05A-1 → DRAFT / NOT_AUTHORIZED**: разрешена подготовка ТЗ, не выполнение; S05B NOT_AUTHORIZED. **S04-EQUIPMENT-COMBAT → `ACCEPTED`** по D47; D42/D46 в силе; OQ остаются OPEN/PARTIAL).
+**Обновлено:** 2026-11-04 (**S05A-1 → `READY_FOR_REVIEW`** по D49: один технический персонаж собран из `.cub`-частей, маркеры/тинты/пивоты исследованы, собственный цикл проверен в EditMode и PlayMode; по отчёту DeepSeek Python 56/56, Unity-самотесты S05A-1 22/22, регресс S05A-0 19/19 и `PILOT_RESULT=PASS`. **S05A-0 → `ACCEPTED`** по D48. **S05B — NOT_AUTHORIZED**; **S04-EQUIPMENT-COMBAT → `ACCEPTED`** по D47; D42/D46 в силе; OQ остаются OPEN/PARTIAL).
 **Назначение:** общий контекст для **нового чата ChatGPT**, **DeepSeek Harness** и других будущих исполнителей. **Не заменяет** утверждённые решения, детальные ТЗ и фактические отчёты.  
 **Это живой документ.** Изменять по правилам раздела «Обновление памяти».
 
@@ -80,7 +80,19 @@
 
 **S00-R02 (на 2026-11-03):** ветка опубликована; пакеты A…L рассмотрены, часть — `PARTIAL`. Факты `RUNTIME_VERIFIED` (прошлые 3 запуска): max HP 268, порог XP 50, Berserker (`spec=0`). Финальная валидация 2026-11-03 использовала все 4 разрешённых запуска, но загрузка мира/персонажа не доведена: среда DSH блокирует foreground и ввод (`SetForegroundWindow`/`AttachThreadInput`/`SetCursorPos` → error 5). OQ-22 — `PARTIAL`, OQ-23 — `OPEN/BLOCKED`, движение не подтверждено. D42 — **`ACCEPTED`** (решение продюсера 2026-11-03), но до OQ-23 скорости — `PLACEHOLDER_NOT_ALPHA`. **S00-R02 закрыт продюсером 2026-11-03 со статусом `ACCEPTED`** — приёмка объёма исследования, **не** подтверждение полного паритета с Alpha; открытые вопросы сохранены.
 
-## 6. Последний принятый этап: S05A-0 — пилот конвертации геометрии
+## 6. Текущий этап: S05A-1 — сборка персонажа и анимационный пилот (`READY_FOR_REVIEW`)
+
+**Статус:** **`S05A-1` → `READY_FOR_REVIEW`** (2026-11-04; авторизация [D49](docs/decisions/D49-s05a1-authorized.md)); ветка `stage/s05a1-character-animation` от HEAD S05A-0 `47cc85c7b6160123534b99598964ba3fa9a7a035`. Отчёт — [CHARACTER_ASSEMBLY_ANIMATION_PILOT.md](docs/research/alpha2013/CHARACTER_ASSEMBLY_ANIMATION_PILOT.md). `ACCEPTED` не выставлялось.
+
+**Собран один технический гуманоид** из 8 узлов: `body1.cub` (торс+конечности, 10×10×8), `human-head-m01.cub` (14×8×8), `human-hair-m01.cub` (12×11×12), 2×`glove.cub` (5×4×6), 2×`foot.cub` (5×3×8), `iron-greatsword.cub` (3×37×13). Иерархия: `root → body → {head → hair, hand_l/hand_r (→ sword), foot_l/foot_r}`; пивоты в суставах. `CHARACTER_RESULT=PASS`, `PLAYMODE_RESULT=PASS` (40 реальных кадров).
+**Ключевые выводы:** у гуманоидов **нет отдельных моделей рук/ног** (в клиенте нет `leg*`, `-arm` только у монстров) — конечности часть `body*`; голова и волосы authored в одной системе координат (99% кожных вокселей совпадают без сдвига) — это единственная частично подтверждённая привязка; offsets/пивоты/масштаб — `PROXY_NOT_ALPHA`.
+**Маркеры:** код `VoxelModel_set_data` действительно собирает координаты чистых `(255,0,0)/(0,255,0)/(0,0,255)` в три списка и **не** удаляет их из цветового буфера. Роль зелёного/синего — `PARTIAL` (крошечные симметричные кластеры у макушки), красного в волосах — `PARTIAL` (есть во всех моделях волос, ни в одной голове/торсе; в `human-hair-base` 97% на поверхности) → кандидат на подстановочный цвет; механизм тинта `UNKNOWN`, тест смены цвета не реализован.
+**Анимации:** оригинального клипа нет (в поставке только `*.cub/*.png/*.wav/*.db/*.plx/*.ttf/*.dat`); поза считается кодом (id состояния, матрицы костей, движковые keyframes) — исходный цикл **не восстановлен** (`UNKNOWN`). Сделан один собственный технический цикл `technical_walk_NOT_ALPHA` (процедурный, 1.6 с), цикл замыкается, гнездо меча в кисти стабильно.
+**Тесты:** Python **56/56** (42 baseline + 14 маркеров), Unity-самотесты S05A-1 **22/22**, регресс S05A-0 **19/19** и полный прогон 4 образцов `PILOT_RESULT=PASS`.
+**Границы:** без запуска `Cube.exe`, без массовой конвертации, ассеты только в `.scratch/`, production-проект и S04 не затронуты. `S05B` — **NOT_AUTHORIZED**.
+**Следующий шаг:** ревью S05A-1 (ChatGPT) и решение продюсера; открытые вопросы — тинт/маркеры (механизм), реальные offsets сборки, восстановление исходного цикла.
+
+## 6a. S05A-0 — пилот конвертации геометрии (`ACCEPTED`, 2026-11-04)
 
 **Статус:** **`S05A-0 → ACCEPTED`** (продюсер 2026-11-04, [D48](docs/decisions/D48-s05a0-accepted-s05a1-draft.md); ревью ChatGPT `PASS` после REVIEW-FIX-01); ветка `stage/s05a-asset-conversion-pilot`. [Отчёт](docs/research/alpha2013/MODEL_CONVERSION_PILOT.md) (§13 — исправления, §14 — приёмка). Приёмка только геометрии и валидаторов на 4 образцах, не ригов/анимаций.
 
@@ -96,21 +108,21 @@
 
 **Решение D48, 2026-11-04:** [D48](docs/decisions/D48-s05a0-accepted-s05a1-draft.md) — закрытие S05A-0 `ACCEPTED` на основе ревью ChatGPT `PASS`. Отдельно разрешена **только подготовка** [черновика S05A-1](docs/stages/S05A1_CHARACTER_ASSEMBLY_ANIMATION_DRAFT.md), запуск S05A-1 и S05B не разрешён. Запрет публикации оригинальных/конвертированных ассетов сохраняется; в отчёте DeepSeek подтверждены 42/42 Python и 19/19 Unity self-tests, ChatGPT не выполнял независимый Unity запуск. Найденное X-зеркалирование OBJ — ограничение для следующего этапа. Массовую конвертацию не начинать.
 
-## 6a. S04-EQUIPMENT-COMBAT — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
+## 6b. S04-EQUIPMENT-COMBAT — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
 
 **Статус:** **`ACCEPTED`** — решение продюсера 2026-11-03 ([D47](docs/decisions/D47-s04-accepted-s05a0-authorized.md)); ревью ChatGPT `PASS`, `S04-REVIEW-FIX-01` принят. Приёмка ограниченная: принято техническое ядро интеграции экипировки и боя, а не паритет с Alpha 2013. Ветка `stage/s04-equipment-combat`; последний код-коммит — `369c32695ee1bbe21f0efe95994da5c931e1412e`. Merge в `main` не выполнялся.
 **Фактический прогон (Unity 6000.3.27f2, выполнено DeepSeek), отчёт [S04_REPORT](docs/stages/S04_REPORT.md):** компиляция PASS без `error CS`/`warning CS`; EditMode **296/296 passed**, PlayMode **17/17 passed**, failed=0; регрессии S01/S02/S03 внутри прогона; Python-эталоны `alpha_curves`/`alpha_items`/`alpha_combat` — PASS; `git diff --check` — чисто. Артефакты: `.unity-install/results/rf04_editmode.xml`, `rf04_playmode.xml`.
 **Реализовано в S04:** `Assets/CubeGame/Core/Equipment/` — `EquipmentSlot` (MainHand, OffHand, Chest, Gloves, Boots, Shoulders), `EquipmentLoadout` (совместимость типов, замена, снятие, запрет одного экземпляра в двух слотах, атомарные операции, защита коллекции слотов), `EquipmentStats` (на предмет и суммарно; урон оружия, `Armor`, `BlockValue` раздельно), `EquipmentCombatAdapter` (`CharacterSheet + предметы → CombatAttack`, `ComputeTargetArmor`, `ComputeMaxHealth`); в `CombatAttack` добавлен аддитивный `ItemWeaponDamageBonus` (`PARTIAL`, E2), `DamageResolver` учитывает его до разброса без изменения порядка RNG; `Assets/CubeGame/Presentation/Equipment/EquipmentCombatDemo.cs`.
 **Не закрыто приёмкой:** `OQ-01` `OPEN`, `OQ-02` `OPEN/PARTIAL`, `OQ-22` `PARTIAL`, `OQ-23` `OPEN/BLOCKED`, `OQ-24` `PARTIAL`, `OQ-25` `OPEN`, `OQ-26` `OPEN`, `S04-OQ-01` `OPEN` (двуручное оружие/щит/классовые правила), `S04-OQ-02` `OPEN` (выбор атакующей руки). Сохранение экипировки (стабильный `ItemInstanceId` + слоты + миграция v1→v2) — будущая задача; формат сохранений v1 не менялся.
 
-## 6b. S03-COMBAT-CORE — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
+## 6c. S03-COMBAT-CORE — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
 
 **Статус:** **`ACCEPTED`** — решение продюсера 2026-11-03 ([D45](docs/decisions/D45-s03-accepted-s04-authorized.md)); ревью ChatGPT `PASS`, `S03-REVIEW-FIX-01` принят. Ветка `stage/s03-combat-core`, последний проверенный HEAD — `943dea68fbe69e49c53cbb16b7b47c24e500691f`. Merge в `main` не выполнялся.
 **Фактический прогон (Unity 6000.3.27f2, выполнено DeepSeek), отчёт [S03_REPORT](docs/stages/S03_REPORT.md):** компиляция PASS, EditMode **251/251**, PlayMode **10/10**, failed=0; регрессии S01 (10/10 + 2/2) и S02 внутри прогона; Python-эталоны PASS.
 **Реализовано:** `Core/Combat` — формулы урона, разброс, попадание, митигация, пул здоровья, результат удара, резолвер, детерминированный RNG; `Presentation/Combat/CombatDemo`. Принято как техническая основа, **не** паритет с Alpha.
 **Сохранённые ограничения:** OQ-01 `OPEN`, OQ-02 `PARTIAL`, OQ-24 `PARTIAL`, OQ-25/OQ-26 `OPEN`, OQ-22/OQ-23 — как в S00/S02; способности, комбо, тайминги, threat/poise, элементальные проки, анимации/VFX, AI — вне S03.
 
-## 6c. S02-CORE-FOUNDATION — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
+## 6d. S02-CORE-FOUNDATION — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
 
 **Статус:** **`ACCEPTED`** — решение продюсера 2026-11-03 ([D44](docs/decisions/D44-s02-accepted-s03-authorized.md)); архитектурное ревью ChatGPT — `PASS`. Ветка `stage/s02-core-foundation`, последний проверенный HEAD — `626f21ed3d83f258386b35165a567ff52ec8b31c`. Merge в `main` не выполнялся.
 **Приёмка ограниченная:** приняты четыре модуля как техническая основа, а не паритет с Alpha 2013; открытые вопросы сохранены.
@@ -145,7 +157,9 @@
 - [D44](docs/decisions/D44-s02-accepted-s03-authorized.md): `S02-CORE-FOUNDATION` → `ACCEPTED` (ревью ChatGPT `PASS`) и авторизация `S03-COMBAT-CORE`; границы достоверности боевых механик.
 - [D45](docs/decisions/D45-s03-accepted-s04-authorized.md): `S03-COMBAT-CORE` → `ACCEPTED` (ревью ChatGPT `PASS`, `S03-REVIEW-FIX-01` принят) и авторизация `S04-EQUIPMENT-COMBAT`; границы достоверности экипировки и запреты S04.
 - [D46](docs/decisions/D46-asset-conversion-first.md): стратегия **conversion-first** для моделей и анимаций (принята 2026-11-03; подготовлена в ветке `stage/s05-asset-conversion-plan`, перенесена в рабочую ветку S05A-0). Утверждён принцип, **не** запуск этапа и **не** факт успешной конвертации.
-- [D47](docs/decisions/D47-s04-accepted-s05a0-authorized.md): **последнее применимое решение** — `S04-EQUIPMENT-COMBAT` → `ACCEPTED` (ревью ChatGPT `PASS`) и авторизация только `S05A-0` (пилот конвертации геометрии); S05A-1/S05B остаются без разрешения.
+- [D47](docs/decisions/D47-s04-accepted-s05a0-authorized.md): `S04-EQUIPMENT-COMBAT` → `ACCEPTED` и авторизация `S05A-0`.
+- [D48](docs/decisions/D48-s05a0-accepted-s05a1-draft.md): `S05A-0` → `ACCEPTED` (2026-11-04); разрешена подготовка ТЗ `S05A-1` (`DRAFT / NOT_AUTHORIZED`).
+- [D49](docs/decisions/D49-s05a1-authorized.md): **последнее применимое решение** — авторизация исполнения `S05A-1` (один персонаж, маркеры/тинты/пивоты, статическое исследование анимаций, один технический цикл в изолированной Unity); `S05B` и массовая конвертация не разрешены.
 - [ADR-0001](docs/architecture/ADR-0001-modular-monolith.md): модульный монолит ACCEPTED.
 - [ARCHITECTURE_PROPOSAL](docs/planning/ARCHITECTURE_PROPOSAL.md), [ROADMAP_DRAFT](docs/planning/ROADMAP_DRAFT.md) и [WORKFLOW_PROTOCOL_DRAFT](docs/planning/WORKFLOW_PROTOCOL_DRAFT.md): черновики; **не считать весь черновик архитектуры утверждённым**.
 

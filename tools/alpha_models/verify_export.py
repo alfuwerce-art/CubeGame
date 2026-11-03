@@ -87,7 +87,7 @@ def model_color(model, x: int, d: int, h: int) -> tuple[int, int, int]:
     return (model.pixels[offset], model.pixels[offset + 1], model.pixels[offset + 2])
 
 
-def expected_faces(model, scale: float = 1.0):
+def expected_faces(model, scale: float = 1.0, excluded=None):
     """Map every exposed voxel face to (square key, normal, colour).
 
     Keys live in *voxel* space (integers); ``scale`` is applied to the OBJ side
@@ -97,11 +97,11 @@ def expected_faces(model, scale: float = 1.0):
     for h in range(model.height):
         for d in range(model.depth):
             for x in range(model.width):
-                if not is_solid(model, x, d, h):
+                if not is_solid(model, x, d, h, excluded):
                     continue
                 color = model_color(model, x, d, h)
                 for (dx, dy, dz), corners in FACE_DEFS:
-                    if is_solid(model, x + dx, d + dz, h + dy):
+                    if is_solid(model, x + dx, d + dz, h + dy, excluded):
                         continue
                     # voxel (x, d, h) -> world (x, h, d) as in cub_to_obj.build_obj
                     points = frozenset(
@@ -164,9 +164,18 @@ def _describe(mapping, limit=MAX_EXAMPLES) -> str:
     return shown + suffix
 
 
-def verify(cubdec: Path, obj: Path, mtl: Path, scale: float = 1.0) -> tuple[bool, list[str], dict]:
-    """Run every check; return (ok, problems, stats)."""
+def verify(cubdec: Path, obj: Path, mtl: Path, scale: float = 1.0,
+           exclude_markers: tuple[str, ...] = ()) -> tuple[bool, list[str], dict]:
+    """Run every check; return (ok, problems, stats).
+
+    ``exclude_markers`` mirrors the converter option: marker groups named here are
+    expected to be absent from the OBJ and are ignored in the expected face set.
+    """
     model = parse_decoded(cubdec.read_bytes())
+    excluded = set()
+    if exclude_markers:
+        from cub_markers import excluded_voxels
+        excluded = excluded_voxels(model, list(exclude_markers))
     try:
         vertices, faces, face_materials = parse_obj(obj.read_text(encoding="utf-8"))
     except (ValueError, VerificationError) as exc:
@@ -178,7 +187,7 @@ def verify(cubdec: Path, obj: Path, mtl: Path, scale: float = 1.0) -> tuple[bool
 
     problems: list[str] = []
     try:
-        expected = expected_faces(model, scale)
+        expected = expected_faces(model, scale, excluded)
         actual = actual_faces(vertices, faces, face_materials, materials, scale)
     except VerificationError as exc:
         return False, [str(exc)], {}
@@ -236,7 +245,7 @@ def verify(cubdec: Path, obj: Path, mtl: Path, scale: float = 1.0) -> tuple[bool
 
     # bounds: the OBJ must cover exactly the solid voxel extent
     solid = [(x, d, h) for h in range(model.height) for d in range(model.depth)
-             for x in range(model.width) if is_solid(model, x, d, h)]
+             for x in range(model.width) if is_solid(model, x, d, h, excluded)]
     if not solid:
         problems.append("decoded model has no solid voxels")
         expected_extent = (0, 0, 0)
@@ -264,7 +273,7 @@ def verify(cubdec: Path, obj: Path, mtl: Path, scale: float = 1.0) -> tuple[bool
     # every usemtl must resolve, and every MTL colour must come from the model
     model_colors = {model_color(model, x, d, h)
                     for h in range(model.height) for d in range(model.depth)
-                    for x in range(model.width) if is_solid(model, x, d, h)}
+                    for x in range(model.width) if is_solid(model, x, d, h, excluded)}
     unknown = sorted({name for name in face_materials if name not in materials})
     if unknown:
         problems.append(f"usemtl without MTL entry: {unknown[:5]}")
@@ -294,9 +303,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--obj", required=True, type=Path)
     ap.add_argument("--mtl", required=True, type=Path)
     ap.add_argument("--scale", type=float, default=1.0)
+    ap.add_argument("--exclude-markers", default="",
+                    help="comma-separated marker colours the converter hid (red|green|blue)")
     args = ap.parse_args(argv)
 
-    ok, problems, stats = verify(args.cubdec, args.obj, args.mtl, args.scale)
+    marked = tuple(c.strip() for c in args.exclude_markers.split(",") if c.strip())
+    ok, problems, stats = verify(args.cubdec, args.obj, args.mtl, args.scale, marked)
     status = "PASS" if ok else "FAIL"
     print(f"{args.obj.name}: {status} faces={stats.get('faces')} expected={stats.get('expected_faces')} "
           f"verts={stats.get('vertices')} extent={stats.get('extent')} "
