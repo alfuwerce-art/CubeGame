@@ -1,7 +1,7 @@
 # S03 — COMBAT CORE (первая партия боевой системы)
 
 **Проект:** CubeGame (рабочее название не утверждено). **Этап:** `S03-COMBAT-CORE`.
-**Статус:** `AUTHORIZED / IN_PROGRESS` (решение продюсера 2026-11-03, [D44](../decisions/D44-s02-accepted-s03-authorized.md)); по завершении партии — `READY_FOR_REVIEW`, **не** `ACCEPTED`.
+**Статус:** **`ACCEPTED`** — решение продюсера **2026-11-03** ([D45](../decisions/D45-s03-accepted-s04-authorized.md)); архитектурное ревью ChatGPT — `PASS`, исправления `S03-REVIEW-FIX-01` приняты. Ранее: `AUTHORIZED / IN_PROGRESS` ([D44](../decisions/D44-s02-accepted-s03-authorized.md)) → `READY_FOR_REVIEW`. Приёмка ограниченная: боевое ядро как техническая основа, а не паритет с Alpha.
 **Ветка:** `stage/s03-combat-core` от принятого коммита S02 (`stage/s02-core-foundation` @ `1df7413`).
 **Unity:** `6000.3.27f2` (Unity 6.3 LTS), Built-in RP, без новых пакетов.
 **Архитектура:** [ADR-0001](../architecture/ADR-0001-modular-monolith.md) — чистая логика в `CubeGame.Core` без UnityEngine; Unity-слой только демонстрация.

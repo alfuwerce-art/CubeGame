@@ -3,7 +3,7 @@
 **Проект:** CubeGame. **Этап:** `S03-COMBAT-CORE` ([ТЗ](S03_COMBAT_CORE.md), [D44](../decisions/D44-s02-accepted-s03-authorized.md)).
 **Ветка:** `stage/s03-combat-core` (от принятого S02 `stage/s02-core-foundation` @ `1df7413`).
 **Дата прогона:** 2026-11-03, MSK. **Unity:** `6000.3.27f2`. Тесты выполнены локально **DeepSeek**, не независимо ChatGPT.
-**Статус:** `READY_FOR_REVIEW` — **не** `ACCEPTED`.
+**Статус:** **`ACCEPTED`** — решение продюсера **2026-11-03** ([D45](../decisions/D45-s03-accepted-s04-authorized.md)); архитектурное ревью ChatGPT — `PASS`, `S03-REVIEW-FIX-01` принят. Ранее — `READY_FOR_REVIEW`. Приёмка ограниченная: боевое ядро как техническая основа, **не** полный боевой паритет с Alpha 2013. Тесты выполнены локально **DeepSeek** (Unity 6000.3.27f2), не независимо ChatGPT.
 
 ## 1. Итог одной таблицей
 
@@ -105,6 +105,16 @@ HP 100 → 75, death = false
 
 **Итог прогона REVIEW-FIX-01 (Unity 6000.3.27f2, DeepSeek):** компиляция PASS без `error CS`/`warning CS`; EditMode **251/251 passed** (+19), PlayMode **10/10 passed**, failed=0; регрессии S01 (10/10 + 2/2) и S02 (все фикстуры) внутри прогона; Python-эталоны `alpha_curves`/`alpha_items`/`alpha_combat --check` — PASS (exit 0); `git diff --check` — чисто. Артефакты: `.unity-install/results/rf03_editmode.xml`, `.unity-install/results/rf03_playmode.xml`, логи `rf03_*.log`.
 
+## 5b. Закрытие S03 (2026-11-03)
+
+**Статус:** `ACCEPTED` ([D45](../decisions/D45-s03-accepted-s04-authorized.md)); ревью ChatGPT — `PASS`; три замечания `S03-REVIEW-FIX-01` приняты. Приёмка ограниченная: боевое ядро как техническая основа, а не паритет с Alpha 2013. Открытые вопросы (OQ-01, OQ-02, OQ-22…OQ-26) сохранены со своими статусами.
+
+**Замечание финального ревью (исправлено):** комментарий в `CombatOutcome.AbsorbedDamage` утверждал инвариант `AbsorbedDamage + AppliedDamage = RawDamage`. Для смертельного удара с избыточным уроном это неверно: `AppliedDamage` ограничен оставшимся HP. Комментарий исправлен без изменения вычислений:
+
+> корректен инвариант **`MitigationResult.AbsorbedDamage + MitigationResult.FinalDamage = RawDamage`**; в `CombatOutcome` сумма `absorbed + applied` может быть меньше `raw`, потому что `applied` обрезан клампом HP (пример: raw = 5, HP = 1 → absorbed 0, final 5, applied 1).
+
+Добавлен уточняющий тест `OverkillClampsAppliedButKeepsMitigationInvariant`.
+
 ## 6. Ограничения и что осталось неподтверждённым
 
 | Ограничение | Статус |
@@ -118,7 +128,7 @@ HP 100 → 75, death = false
 | Способности, комбо, тайминги, элементальные проки, threat, poise | вне S03 |
 | Множитель `abilityFactor · (ratio²·5.0 + base)` | вне S03 (нет подтверждённых входов `ratio`/`base`) |
 | HP после level-up, OQ-22/OQ-23 | по-прежнему `NOT_VERIFIED/BLOCKED` из S00/S02 |
-| Статус S03 | `READY_FOR_REVIEW`, приёмку делает продюсер/ChatGPT |
+| Статус S03 | **`ACCEPTED`** — решение продюсера 2026-11-03 ([D45](../decisions/D45-s03-accepted-s04-authorized.md)); приёмка ограниченная |
 
 **Осознанно не реализовано** (чтобы не выдавать догадку за Alpha): элементальные проки, «ярость»/threat-таблица, poise/стан, лечение отрицательным уроном по формуле Alpha, авто-блок, комбо-счётчик `+0x70`, любые тайминги атак.
 

@@ -2,7 +2,7 @@
 
 **Рабочее название проекта:** `CubeGame`. **Окончательное название игры НЕ утверждено.**  
 **Репозиторий:** https://github.com/alfuwerce-art/CubeGame  
-**Обновлено:** 2026-11-03 (**S03-COMBAT-CORE + REVIEW-FIX-01 → `READY_FOR_REVIEW`**: EditMode 251/251, PlayMode 10/10; S02 `ACCEPTED` (D44); S00-R02 `ACCEPTED`; D42 в силе; OQ-01/OQ-02/OQ-22…OQ-26 открыты или `PARTIAL`)
+**Обновлено:** 2026-11-03 (**S03-COMBAT-CORE → `ACCEPTED`** (D45); активен **S04-EQUIPMENT-COMBAT**; S02 и S00-R02 приняты ранее; D42 в силе; OQ-01/OQ-02/OQ-22…OQ-26 открыты или `PARTIAL`)
 **Назначение:** общий контекст для **нового чата ChatGPT**, **DeepSeek Harness** и других будущих исполнителей. **Не заменяет** утверждённые решения, детальные ТЗ и фактические отчёты.  
 **Это живой документ.** Изменять по правилам раздела «Обновление памяти».
 
@@ -65,7 +65,8 @@
 | `stage/s01-unity-pilot` | **`a8842783378bf2621e6a39a50e1f9ee2398cf245`** | Пилот **на GitHub**, `READY_FOR_REVIEW`; **технически перепроверен 2026-11-03**: импорт PASS, EditMode 10/10, PlayMode 2/2 |
 | `stage/s00-deep-research` | **`60ac26a89d1235612588726e6b28ae321f3da9ce`** (последний проверенный HEAD перед закрытием; коммит закрытия этапа — после него) | S00-R02 **`ACCEPTED`** — закрыт продюсером 2026-11-03 (ограниченная приёмка: объём исследования, а не паритет с Alpha). Пакеты A…L `PARTIAL`; FIX-01…FIX-07; OQ-22 `PARTIAL`, OQ-23 `OPEN/BLOCKED`, OQ-24 `PARTIAL`; D42 `ACCEPTED` |
 | `stage/s02-core-foundation` | **`626f21ed3d83f258386b35165a567ff52ec8b31c`** (+ коммит закрытия S02) | `S02-CORE-FOUNDATION` **`ACCEPTED`** (D44, 2026-11-03; ревью ChatGPT `PASS`); компиляция PASS, EditMode **170/170**, PlayMode **6/6** (выполнено DeepSeek) |
-| `stage/s03-combat-core` | **`d0e3dc8f22e7e9ac22be1036cf3c49410076ccc8`** (S03-REVIEW-FIX-01; партия S03 — `a673530`) | `S03-COMBAT-CORE` **`READY_FOR_REVIEW`**, не `ACCEPTED`; после REVIEW-FIX-01: компиляция PASS, EditMode **251/251**, PlayMode **10/10** (выполнено DeepSeek); отчёт `docs/stages/S03_REPORT.md` |
+| `stage/s03-combat-core` | **`943dea68fbe69e49c53cbb16b7b47c24e500691f`** (+ коммит закрытия S03) | `S03-COMBAT-CORE` **`ACCEPTED`** (D45, 2026-11-03; ревью ChatGPT `PASS`); компиляция PASS, EditMode **251/251**, PlayMode **10/10** (выполнено DeepSeek) |
+| `stage/s04-equipment-combat` | создаётся от принятого коммита S03 | `S04-EQUIPMENT-COMBAT` `AUTHORIZED / IN_PROGRESS` → `READY_FOR_REVIEW`; слоты, агрегатор статов, адаптер к бою, отчёт `docs/stages/S04_REPORT.md` |
 
 По финальному отчёту DeepSeek для пилота: Unity 6.3 Personal, импорт/компиляция PASS, **EditMode 10/10**, **PlayMode 2/2**, сцена/Windows exe/скриншот созданы, генерация 64 чанков. Это **результаты локального агента**, а не независимо воспроизведённые ChatGPT тесты. Скриншот и журналы в локальной `.unity-install/`, не в GitHub. **Нельзя обещать независимое принятие S01 без ревью.**
 
@@ -73,19 +74,22 @@
 
 **S00-R02 (на 2026-11-03):** ветка опубликована; пакеты A…L рассмотрены, часть — `PARTIAL`. Факты `RUNTIME_VERIFIED` (прошлые 3 запуска): max HP 268, порог XP 50, Berserker (`spec=0`). Финальная валидация 2026-11-03 использовала все 4 разрешённых запуска, но загрузка мира/персонажа не доведена: среда DSH блокирует foreground и ввод (`SetForegroundWindow`/`AttachThreadInput`/`SetCursorPos` → error 5). OQ-22 — `PARTIAL`, OQ-23 — `OPEN/BLOCKED`, движение не подтверждено. D42 — **`ACCEPTED`** (решение продюсера 2026-11-03), но до OQ-23 скорости — `PLACEHOLDER_NOT_ALPHA`. **S00-R02 закрыт продюсером 2026-11-03 со статусом `ACCEPTED`** — приёмка объёма исследования, **не** подтверждение полного паритета с Alpha; открытые вопросы сохранены.
 
-## 6. Текущий главный этап: S03-COMBAT-CORE
+## 6. Текущий главный этап: S04-EQUIPMENT-COMBAT
 
-**Статус:** **`READY_FOR_REVIEW`** (не `ACCEPTED`). Авторизация — продюсер, 2026-11-03 ([D44](docs/decisions/D44-s02-accepted-s03-authorized.md)); ветка `stage/s03-combat-core` от принятого коммита S02 (`1df7413`). ТЗ — [docs/stages/S03_COMBAT_CORE.md](docs/stages/S03_COMBAT_CORE.md), отчёт — [docs/stages/S03_REPORT.md](docs/stages/S03_REPORT.md).
+**Статус:** `AUTHORIZED / IN_PROGRESS` → по завершении `READY_FOR_REVIEW` (не `ACCEPTED`). Авторизация — продюсер, 2026-11-03 ([D45](docs/decisions/D45-s03-accepted-s04-authorized.md)); ветка `stage/s04-equipment-combat` от принятого коммита S03. ТЗ — [docs/stages/S04_EQUIPMENT_COMBAT.md](docs/stages/S04_EQUIPMENT_COMBAT.md), отчёт — [docs/stages/S04_REPORT.md](docs/stages/S04_REPORT.md).
 
-**Фактический прогон (Unity 6000.3.27f2, выполнено DeepSeek):** после **S03-REVIEW-FIX-01** — компиляция PASS без `error CS`/`warning CS`; EditMode **251/251 passed**, PlayMode **10/10 passed**, failed=0; первая партия дала 232/10, исправления добавили +19 EditMode. Регрессия S01 (10/10 + 2/2) и S02 (все фикстуры) внутри прогона. Эталонные скрипты `alpha_curves/items/combat --check` — PASS; `git diff --check` — чисто. Артефакты: `.unity-install/results/rf03_editmode.xml`, `.unity-install/results/rf03_playmode.xml`.
+**Объём S04 (и только он):** слоты `MainHand`, `OffHand`, `Chest`, `Gloves`, `Boots`, `Shoulders`; агрегатор характеристик надетых предметов через `ItemStatsCalculator`/`CharacterStats`; адаптер `CharacterSheet + Items → CombatAttack`; согласование с HP-моделью; техническая Unity-демонстрация смены оружия и брони. **Запрещено:** параллельная система статов, двойной `levelFactor`, подстановка `Armor`/`BlockValue` в HP (OQ-25 `OPEN`), автозапуск частичных механик, изменение RNG и формата сохранений, инвентарь/UI, модели, анимации, VFX, AI, хитбоксы, URP, запуск Alpha, merge в `main`.
 
-**S03-REVIEW-FIX-01 (2026-11-03):** FIX-01 — `AbsorbedDamage = min(raw, blockFraction·armor)`, расчётная защита вынесена в `DefenseCapacity`, `absorbed + final = raw`; FIX-02 — `AttackIdMultiplierApplied` только при найденном в таблице ID (неизвестный ID не меняет урон и не выдаётся за применённый); FIX-03 — `BlockThreshold` отвергает `level < 1`, проверка действует через `RollBlock`. Изменены `DamageMitigation`, `CombatOutcome`, `DamageResolver`, `CombatFormulas` и тесты; порядок RNG и результаты изменения HP не менялись; статус митигации остаётся `PARTIAL`. Подробности — [S03_REPORT](docs/stages/S03_REPORT.md) §5a.
+**Правила достоверности S04:** `REFERENCE_VERIFIED` — статы предметов по `alpha_item_stats_reference.py` и урон/HP по формулам S02/S03; `PARTIAL` — путь передачи статов предмета в бой (`base(0x180)·levelFactor(character) + Σ item_weaponDamage` по E2; порядок полностью не доказан), связь `TargetArmor ← Σ BlockValue` (E3); `UNKNOWN` — базовая `chance` (OQ-01), источник `+8 HP` из экипировки (OQ-25), правила двуручного оружия/щита/классов.
 
-**Реализовано в S03:** `Assets/CubeGame/Core/Combat/` — `CombatFormulas` (урон, разброс `1.25−0.5·roll/32767`, таблица ID атак, порог/бросок блока, модификатор шанса по подтипу оружия), `HitResolver` (`roll/32767 < chance`), `DamageMitigation` (`max(0, raw − blockFraction·armor)`), `HealthPool`, `CombatOutcome`, `CombatAttack`, `DamageResolver`, детерминированные `ICombatRandom`/`SeededCombatRandom`/`FixedCombatRandom`; `Assets/CubeGame/Presentation/Combat/CombatDemo.cs` — демонстрация удара с логом. Ядро без UnityEngine. Дополнительно: единая валидация `ItemModifier` в конструкторе `ItemInstance` (замечание ревью S02).
+## 6a. S03-COMBAT-CORE — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
 
-**Границы достоверности S03:** `REFERENCE_VERIFIED` — урон оружия и `levelFactor`, проверка попадания, формула порога блока; `STRONGLY_SUPPORTED` — разброс урона; `PARTIAL` — множители ID атак (только по явному флагу `UseAttackIdMultiplier`), модификатор шанса по подтипу (только при явно заданном слоте оружия), митигация и её порядок, `blockFraction`; `UNKNOWN` — базовая формула `chance` (OQ-01). Осознанно не реализованы: способности, комбо, тайминги, threat/poise, элементальные проки, анимации/VFX, AI.
+**Статус:** **`ACCEPTED`** — решение продюсера 2026-11-03 ([D45](docs/decisions/D45-s03-accepted-s04-authorized.md)); ревью ChatGPT `PASS`, `S03-REVIEW-FIX-01` принят. Ветка `stage/s03-combat-core`, последний проверенный HEAD — `943dea68fbe69e49c53cbb16b7b47c24e500691f`. Merge в `main` не выполнялся.
+**Фактический прогон (Unity 6000.3.27f2, выполнено DeepSeek), отчёт [S03_REPORT](docs/stages/S03_REPORT.md):** компиляция PASS, EditMode **251/251**, PlayMode **10/10**, failed=0; регрессии S01 (10/10 + 2/2) и S02 внутри прогона; Python-эталоны PASS.
+**Реализовано:** `Core/Combat` — формулы урона, разброс, попадание, митигация, пул здоровья, результат удара, резолвер, детерминированный RNG; `Presentation/Combat/CombatDemo`. Принято как техническая основа, **не** паритет с Alpha.
+**Сохранённые ограничения:** OQ-01 `OPEN`, OQ-02 `PARTIAL`, OQ-24 `PARTIAL`, OQ-25/OQ-26 `OPEN`, OQ-22/OQ-23 — как в S00/S02; способности, комбо, тайминги, threat/poise, элементальные проки, анимации/VFX, AI — вне S03.
 
-## 6a. S02-CORE-FOUNDATION — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
+## 6b. S02-CORE-FOUNDATION — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
 
 **Статус:** **`ACCEPTED`** — решение продюсера 2026-11-03 ([D44](docs/decisions/D44-s02-accepted-s03-authorized.md)); архитектурное ревью ChatGPT — `PASS`. Ветка `stage/s02-core-foundation`, последний проверенный HEAD — `626f21ed3d83f258386b35165a567ff52ec8b31c`. Merge в `main` не выполнялся.
 **Приёмка ограниченная:** приняты четыре модуля как техническая основа, а не паритет с Alpha 2013; открытые вопросы сохранены.
@@ -117,7 +121,8 @@
 - [D41](docs/decisions/D41-research-before-port.md): **последнее применимое** решение — Research-first перед дальнейшим расширением игры.
 - [D42](docs/decisions/D42-alpha-numbers-as-references.md): числа Alpha как референсы; статус **`ACCEPTED`** (продюсер, 2026-11-03; утверждён независимо от OQ-23). До закрытия OQ-23 скорости — `PLACEHOLDER_NOT_ALPHA`.
 - [D43](docs/decisions/D43-close-s00-s02-core-foundation.md): закрытие S00-R02 со статусом `ACCEPTED` (ограниченная приёмка) и авторизация `S02-CORE-FOUNDATION`; границы запретов S02.
-- [D44](docs/decisions/D44-s02-accepted-s03-authorized.md): **последнее применимое решение** — `S02-CORE-FOUNDATION` → `ACCEPTED` (ревью ChatGPT `PASS`) и авторизация `S03-COMBAT-CORE`; границы достоверности боевых механик и запреты S03.
+- [D44](docs/decisions/D44-s02-accepted-s03-authorized.md): `S02-CORE-FOUNDATION` → `ACCEPTED` (ревью ChatGPT `PASS`) и авторизация `S03-COMBAT-CORE`; границы достоверности боевых механик.
+- [D45](docs/decisions/D45-s03-accepted-s04-authorized.md): **последнее применимое решение** — `S03-COMBAT-CORE` → `ACCEPTED` (ревью ChatGPT `PASS`, `S03-REVIEW-FIX-01` принят) и авторизация `S04-EQUIPMENT-COMBAT`; границы достоверности экипировки и запреты S04.
 - [ADR-0001](docs/architecture/ADR-0001-modular-monolith.md): модульный монолит ACCEPTED.
 - [ARCHITECTURE_PROPOSAL](docs/planning/ARCHITECTURE_PROPOSAL.md), [ROADMAP_DRAFT](docs/planning/ROADMAP_DRAFT.md) и [WORKFLOW_PROTOCOL_DRAFT](docs/planning/WORKFLOW_PROTOCOL_DRAFT.md): черновики; **не считать весь черновик архитектуры утверждённым**.
 

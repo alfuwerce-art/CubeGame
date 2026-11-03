@@ -17,7 +17,8 @@
 - Codex: возможный дополнительный исполнитель/контролёр на этапе моделей и графики; пока роль не активирована.
 
 ## Обязательные границы
-- Работать только по утверждённому этапу. **`S02-CORE-FOUNDATION` → `ACCEPTED`** (продюсер 2026-11-03, [D44](docs/decisions/D44-s02-accepted-s03-authorized.md); ревью ChatGPT `PASS`). **Активный этап — `S03-COMBAT-CORE`** (`docs/stages/S03_COMBAT_CORE.md`, ветка `stage/s03-combat-core`), см. `docs/ACTIVE_STAGE.md`. S00-R02 закрыт `ACCEPTED` ранее (D43).
+- Работать только по утверждённому этапу. **`S03-COMBAT-CORE` → `ACCEPTED`** (продюсер 2026-11-03, [D45](docs/decisions/D45-s03-accepted-s04-authorized.md); ревью ChatGPT `PASS`). **Активный этап — `S04-EQUIPMENT-COMBAT`** (`docs/stages/S04_EQUIPMENT_COMBAT.md`, ветка `stage/s04-equipment-combat`), см. `docs/ACTIVE_STAGE.md`. S02 и S00-R02 приняты ранее (D44, D43).
+- **Экипировка S04:** использовать существующие вычислители (`ItemStatsCalculator`, `CharacterStats`), не создавать параллельную систему статов и не допускать двойного `levelFactor`; `Armor` и `BlockValue` не смешивать; HP от экипировки не «додумывать» (OQ-25 `OPEN`) — `EquipmentHealthBonus` остаётся явным.
 - **S01-PILOT опубликован и технически проверен** (`stage/s01-unity-pilot` @ `a8842783378bf2621e6a39a50e1f9ee2398cf245`); его статус — `READY_FOR_REVIEW` до отдельной приёмки продюсера/ChatGPT. Использование кода пилота как технической основы S02/S03 **не означает** приёмку пилота.
 - Открытые вопросы (`OQ-01 OPEN`, `OQ-02 PARTIAL`, `OQ-22 PARTIAL`, `OQ-23 OPEN/BLOCKED`, `OQ-24 PARTIAL`, `OQ-25 OPEN`, `OQ-26 OPEN`) сохраняются; неизвестные числа Alpha не выдавать за восстановленные. Скорости до OQ-23 — `PLACEHOLDER_NOT_ALPHA`. Новые запуски Alpha запрещены без отдельного разрешения.
 - Источник Alpha: `D:\Games\Cube world` — **только читать**, пока продюсер не разрешил иное. Путь сообщён, но пока не проверен.

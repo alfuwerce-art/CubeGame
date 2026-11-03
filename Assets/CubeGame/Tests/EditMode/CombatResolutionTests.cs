@@ -209,6 +209,30 @@ namespace CubeGame.Tests.EditMode
         }
 
         [Test]
+        public void OverkillClampsAppliedButKeepsMitigationInvariant()
+        {
+            // Инвариант относится к расчёту защиты, а не к HP:
+            // MitigationResult.AbsorbedDamage + MitigationResult.FinalDamage = RawDamage.
+            // AppliedDamage ограничен оставшимся HP, поэтому absorbed + applied может быть меньше raw.
+            MitigationResult mitigation = DamageMitigation.Apply(5.0, 0.0, 0.0);
+            Assert.That(mitigation.AbsorbedDamage + mitigation.FinalDamage, Is.EqualTo(5.0).Within(Tolerance));
+            Assert.That(mitigation.FinalDamage, Is.EqualTo(5.0).Within(Tolerance));
+
+            var target = new HealthPool(1.0);
+            CombatAttack attack = CreateAttack(weaponBase: 4.0, hitChance: 1.0); // 4 · 1.25 = 5
+
+            CombatOutcome outcome = new DamageResolver(new FixedCombatRandom(0, 0)).Resolve(attack, target);
+
+            Assert.That(outcome.RawDamage, Is.EqualTo(5.0).Within(Tolerance));
+            Assert.That(outcome.AbsorbedDamage, Is.EqualTo(0.0).Within(Tolerance));
+            Assert.That(outcome.AppliedDamage, Is.EqualTo(1.0).Within(Tolerance),
+                "overkill обрезается оставшимся HP");
+            Assert.That(outcome.AbsorbedDamage + outcome.AppliedDamage, Is.LessThan(outcome.RawDamage),
+                "absorbed + applied не равен raw при overkill — это ожидаемо");
+            Assert.IsTrue(outcome.KilledTarget);
+        }
+
+        [Test]
         public void FailureDuringCalculationLeavesHealthUntouched()
         {
             // Один бросок есть (попадание), второго нет → исключение до изменения HP.

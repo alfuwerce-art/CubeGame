@@ -101,7 +101,12 @@ namespace CubeGame.Core.Combat
 
         /// <summary>
         /// Фактически поглощено бронёй/блоком: <c>min(RawDamage, DefenseCapacity)</c>.
-        /// Всегда <c>AbsorbedDamage + AppliedDamage = RawDamage</c> при попадании.
+        ///
+        /// Инвариант относится к расчёту защиты, а не к HP:
+        /// <c>MitigationResult.AbsorbedDamage + MitigationResult.FinalDamage = RawDamage</c>.
+        /// Здесь <c>AbsorbedDamage + AppliedDamage</c> может быть меньше <c>RawDamage</c>, потому что
+        /// <see cref="AppliedDamage"/> ограничен оставшимся HP цели (overkill обрезается клампом),
+        /// например raw = 5 при HP = 1 → absorbed 0, final 5, applied 1.
         /// </summary>
         public double AbsorbedDamage { get; }
 
