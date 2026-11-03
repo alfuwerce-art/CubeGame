@@ -145,7 +145,7 @@ python tools\alpha_models\cub_to_obj.py --db ... --key "human-hair-m01.cub" --ou
 - Иерархия: `hierarchy.txt` (полный дамп имён, `localPosition`, `localScale`).
 - `PLAYMODE_RESULT=PASS`, exit 0: 40 реальных кадров `Update()`, кисти и голова двигаются, гнездо меча стабильно.
 
-**Локальные пути (не в Git):** `C:\Users\bow\Desktop\CubeGame\.scratch\s05a1\unity\CharacterPilot\PilotOutput\` — отчёт, 21 PNG, `hierarchy.txt`, `playmode.json`; логи — `.scratch\s05a1\unity\*.log`.
+**Локальные пути (не в Git):** `C:\Users\bow\Desktop\CubeGame\.scratch\s05a1\unity\CharacterPilot\PilotOutput\` — отчёт, 18 PNG, `hierarchy.txt`, `playmode.json`; логи — `.scratch\s05a1\unity\*.log`.
 
 ## 8. Тесты
 
