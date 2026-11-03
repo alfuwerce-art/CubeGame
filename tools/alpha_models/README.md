@@ -24,9 +24,9 @@ uint8[width * depth * height * 3]     // RGB, индекс = (h * depth + d) * w
 | `cub_probe.py` | инвентаризация `data1.db`: ключи, размеры, габариты, цвета (только метаданные) |
 | `cub_to_obj.py` | `.cub` → OBJ + MTL (один материал на цвет) и `--dump-decoded` (`.cubdec`) |
 | `cub_preview.py` | ортогональные превью (front/side/top) для проверки ориентации осей |
-| `verify_export.py` | независимая проверка целостности экспорта: число граней, площадь, габариты, материалы |
-| `tests/` | `unittest` на битые файлы, round-trip обфускации, отсечение скрытых граней, геометрию OBJ |
-| `unity/` | Editor-скрипт и шейдер изолированного Unity-проекта проверки (см. ниже) |
+| `verify_export.py` | пофасетная проверка экспорта: каждая грань OBJ сопоставляется с гранью вокселя (координаты, обход/нормаль, цвет/материал, кратность), плюс габариты и единичная площадь |
+| `tests/` | `unittest`: битые файлы, round-trip обфускации, отсечение скрытых граней, геометрия OBJ, 16 негативных кейсов порчи OBJ для `verify_export.py` |
+| `unity/` | Editor-скрипт проверки с валидаторами и самотестами, шейдер, образцы отчётов (см. ниже) |
 
 ## Быстрый прогон
 
@@ -61,6 +61,14 @@ $py = "python"   # любой Python 3.11+; Pillow нужен только дл�
 ```powershell
 & "D:\Unity\Hub\Editor\6000.3.27f2\Editor\Unity.exe" -batchmode -quit `
     -projectPath <путь проекта> -executeMethod ModelPilot.Run -logFile batch.log
+
+# самотесты валидаторов (негативные кейсы, без ассетов)
+& "D:\Unity\Hub\Editor\6000.3.27f2\Editor\Unity.exe" -batchmode -quit `
+    -projectPath <путь проекта> -executeMethod ModelPilot.RunSelfTests -logFile selftest.log
 ```
 
-Результат: `PilotOutput/report.json` (числа по двум независимым путям — собственный mesh с vertex colors и импорт OBJ через `ModelImporter`), `PilotOutput/report.txt` с маркером `PILOT_RESULT=PASS|FAIL` и PNG-скриншоты. Образец вывода — `unity/report.sample.json` (только числа, без ассетов).
+Результат `Run`: `PilotOutput/report.json` (числа по двум независимым путям — собственный mesh с vertex colors и импорт OBJ через `ModelImporter`, плюс `verdict` и `setProblems`), `PilotOutput/report.txt` с маркером `PILOT_RESULT=PASS|FAIL|EXCEPTION` и PNG-скриншоты. Любая проблема (нет пары `.cubdec`/`.obj`, лишний файл, пустой набор, несовпадение треугольников/габаритов, упавший импорт, исключение) даёт `FAIL` и ненулевой код возврата; папка `PilotOutput` очищается в начале прогона, чтобы старый `PASS` не пережил неудачу. Результат `RunSelfTests`: `PilotOutput/selftest.json` и маркер `SELFTEST_RESULT`.
+
+**Важно про зеркалирование:** Unity импортирует OBJ как правосторонний формат и переводит его в своё пространство через `x' = -x` (импортированные `bounds.min.x` отрицательны). Проверка это учитывает (`mirroredX`) и сравнивает с зеркально ожидаемыми `min`/размером; при необходимости точного совпадения с файлом используйте `Bake Axis Conversion` или предварительно инвертируйте X. Путь «собственный `Mesh` + vertex colors» от этого не зависит.
+
+Образцы вывода (только числа, без ассетов): `unity/report.sample.json`, `unity/report.sample.txt`, `unity/selftest.sample.json`.
