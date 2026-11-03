@@ -10,7 +10,7 @@
 ## S04-EQUIPMENT-COMBAT — ПАРТИЯ ВЫПОЛНЕНА, READY_FOR_REVIEW
 
 **Статус:** `READY_FOR_REVIEW` (не `ACCEPTED`). Авторизация — [D45](decisions/D45-s03-accepted-s04-authorized.md), 2026-11-03.
-**Ветка:** `stage/s04-equipment-combat` от принятого коммита S03 (`70a0658`). Merge в `main` не выполнялся.
+**Ветка:** `stage/s04-equipment-combat` от принятого коммита S03 (`70a0658`); последний проверенный опубликованный HEAD — **`d4f3ca4730ff8c66b853f0fce27767be8ab4f2fb`** (коммит синхронизации памяти — после него). Merge в `main` не выполнялся.
 **ТЗ:** [S04_EQUIPMENT_COMBAT.md](stages/S04_EQUIPMENT_COMBAT.md). **Отчёт:** [S04_REPORT.md](stages/S04_REPORT.md).
 **Фактические результаты (Unity 6000.3.27f2, выполнено DeepSeek):** компиляция PASS без `error CS`/`warning CS`; EditMode **288/288 passed**, PlayMode **17/17 passed**, failed=0. Новых тестов: **+36 EditMode** (Loadout 16, Stats 10, Integration 10), **+7 PlayMode**. Регрессии S01 (10/10 + 2/2), S02 и S03 внутри прогона. Эталонные скрипты `alpha_curves/items/combat --check` — PASS; `git diff --check` — чисто. Артефакты: `.unity-install/results/s04_editmode2.xml`, `.unity-install/results/s04_playmode2.xml`.
 **Реализовано:** `Core/Equipment` — слоты `MainHand/OffHand/Chest/Gloves/Boots/Shoulders`, `EquipmentLoadout` (совместимость, замена, запрет дублирования экземпляра, атомарность), `EquipmentStats` (урон/Armor/BlockValue раздельно), `EquipmentCombatAdapter`; в `CombatAttack` добавлен аддитивный `ItemWeaponDamageBonus` (учитывается в `DamageResolver` до разброса, RNG не изменён); `Presentation/Equipment/EquipmentCombatDemo` — смена оружия/брони и разница ударов при одном seed.
