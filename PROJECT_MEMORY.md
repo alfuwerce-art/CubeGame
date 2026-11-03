@@ -2,7 +2,7 @@
 
 **Рабочее название проекта:** `CubeGame`. **Окончательное название игры НЕ утверждено.**  
 **Репозиторий:** https://github.com/alfuwerce-art/CubeGame  
-**Обновлено:** 2026-11-03 (**S02-CORE-FOUNDATION выполнен → `READY_FOR_REVIEW`**; S00-R02 закрыт продюсером `ACCEPTED`; D43 фиксирует решение; D42 ACCEPTED; OQ-22/OQ-23 открыты, добавлены OQ-25/OQ-26)
+**Обновлено:** 2026-11-03 (**S02 REVIEW-FIX-01 выполнен** — EditMode 170/170, PlayMode 6/6; S00-R02 закрыт `ACCEPTED`; D43 и D42 в силе; OQ-22/OQ-23/OQ-25/OQ-26 открыты)
 **Назначение:** общий контекст для **нового чата ChatGPT**, **DeepSeek Harness** и других будущих исполнителей. **Не заменяет** утверждённые решения, детальные ТЗ и фактические отчёты.  
 **Это живой документ.** Изменять по правилам раздела «Обновление памяти».
 
@@ -64,7 +64,7 @@
 | `stage/s00-static-r01` | `73893b62f3df5757139bf4a1e0ea63cd300d6530` | Четыре исследовательских документа; READY_FOR_REVIEW, ещё не принят |
 | `stage/s01-unity-pilot` | **`a8842783378bf2621e6a39a50e1f9ee2398cf245`** | Пилот **на GitHub**, `READY_FOR_REVIEW`; **технически перепроверен 2026-11-03**: импорт PASS, EditMode 10/10, PlayMode 2/2 |
 | `stage/s00-deep-research` | **`60ac26a89d1235612588726e6b28ae321f3da9ce`** (последний проверенный HEAD перед закрытием; коммит закрытия этапа — после него) | S00-R02 **`ACCEPTED`** — закрыт продюсером 2026-11-03 (ограниченная приёмка: объём исследования, а не паритет с Alpha). Пакеты A…L `PARTIAL`; FIX-01…FIX-07; OQ-22 `PARTIAL`, OQ-23 `OPEN/BLOCKED`, OQ-24 `PARTIAL`; D42 `ACCEPTED` |
-| `stage/s02-core-foundation` | **`3f24da470dbee8a4a63f32f5d189070dbfd29b71`** (на GitHub; происхождение — от `stage/s01-unity-pilot` @ `a884278`) | `S02-CORE-FOUNDATION` **`READY_FOR_REVIEW`**, не `ACCEPTED`; модули A–D; Unity 6000.3.27f2: компиляция PASS, EditMode **132/132**, PlayMode **5/5**; отчёт `docs/stages/S02_REPORT.md` |
+| `stage/s02-core-foundation` | **`3f24da470dbee8a4a63f32f5d189070dbfd29b71`** (исходный HEAD партии; после REVIEW-FIX-01 — коммиты в той же ветке) | `S02-CORE-FOUNDATION` **`READY_FOR_REVIEW`**, не `ACCEPTED`; модули A–D; после REVIEW-FIX-01: компиляция PASS, EditMode **170/170**, PlayMode **6/6**; отчёт `docs/stages/S02_REPORT.md` |
 
 По финальному отчёту DeepSeek для пилота: Unity 6.3 Personal, импорт/компиляция PASS, **EditMode 10/10**, **PlayMode 2/2**, сцена/Windows exe/скриншот созданы, генерация 64 чанков. Это **результаты локального агента**, а не независимо воспроизведённые ChatGPT тесты. Скриншот и журналы в локальной `.unity-install/`, не в GitHub. **Нельзя обещать независимое принятие S01 без ревью.**
 
@@ -76,7 +76,9 @@
 
 **Статус:** **`READY_FOR_REVIEW`** (не `ACCEPTED`). Авторизация — продюсер, 2026-11-03 ([D43](docs/decisions/D43-close-s00-s02-core-foundation.md)); ветка `stage/s02-core-foundation` от проверенного `stage/s01-unity-pilot` @ `a884278`.
 
-**Фактический прогон 2026-11-03 (Unity 6000.3.27f2), отчёт [S02_REPORT](docs/stages/S02_REPORT.md):** компиляция PASS без `error CS`; EditMode **132/132 passed** (включая 10 регрессионных кейсов пилота); PlayMode **5/5 passed** (3 новых smoke + 2 регрессионных пилота); пересборка сцены `Pilot.unity` → `SCENE_SAVED`. Проверка S01 перед началом: импорт PASS, EditMode 10/10, PlayMode 2/2. Логи и XML — локально в `.unity-install/` (в `.gitignore`), в репозиторий не попадают.
+**Фактический прогон 2026-11-03 (Unity 6000.3.27f2), отчёт [S02_REPORT](docs/stages/S02_REPORT.md):** после **REVIEW-FIX-01** — компиляция PASS без `error CS`/`warning CS`, EditMode **170/170 passed**, PlayMode **6/6 passed**, failed=0 (было 132/132 и 5/5 до исправлений). Регрессия S01 внутри прогона: EditMode 10/10, PlayMode 2/2. Логи и XML — локально в `.unity-install/` (в `.gitignore`), в репозиторий не попадают.
+
+**REVIEW-FIX-01 (2026-11-03):** исправлены дефекты ревью — (FIX-01) полная валидация идентификаторов предметов, флагов и конечности чисел, `Corrupted` без исключений, атомарное применение загрузки; (FIX-02) переполнения `long`/`int`, защита от зависания и частичных изменений в `AddExperience`; (FIX-03) переполнение `int` в арифметике seed (`SeedMaterialIndex`, floor-mod как в Python-эталоне); (FIX-04) эталонные таблицы `levelFactor(51/101)` и текст `F_items.md`. Новых тестов: **+38 EditMode, +1 PlayMode**. Статусы: FIX-01/02/04 — `DONE`, FIX-03 — `DONE` (достоверность `PARTIAL`: разрядность `seed*8 mod 21` в Alpha не доказана).
 
 **Объём первой партии (и только он):**
 

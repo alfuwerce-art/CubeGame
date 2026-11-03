@@ -4,8 +4,9 @@
 **Ветка:** `stage/s02-core-foundation` (от `stage/s01-unity-pilot` @ `a8842783378bf2621e6a39a50e1f9ee2398cf245`).
 **Дата прогона:** 2026-11-03, MSK. **Android-устройств, облачных сервисов и платных API не использовалось.**
 **Статус:** `READY_FOR_REVIEW` — **не** `ACCEPTED`.
+**Актуальные результаты (после REVIEW-FIX-01, 2026-11-03):** компиляция PASS; EditMode **170/170**, PlayMode **6/6**, failed=0. Подробности — §5a; таблица §1 ниже описывает первый прогон партии (132/132 и 5/5) и оставлена как история.
 
-## 1. Итог одной таблицей
+## 1. Итог первой партии до REVIEW-FIX-01 (история)
 
 | # | Проверка | Результат | Артефакт |
 |---|---|---|---|
@@ -97,12 +98,25 @@ CUBEGAME_SAVE|<version>|<fnv1a64 hex>|<payload byte length>
 
 Множители типа атаки (`0x57 ×50`, `0x5b ×2`, `0x5d ×5`, `0x60 ×3`) **не реализованы**: их привязка к типам удара не восстановлена (OQ). Тест `AttackTypeMultipliersAreNotApplied` фиксирует это явно, чтобы никто не «додумал» формулу.
 
-## 5. Найденные расхождения в референсах (важно для ревью)
+## 5. Найденные расхождения в референсах (исправлены в REVIEW-FIX-01)
 
-1. **`alpha_curves_reference.py`, таблица `EXPECT_LEVEL_FACTOR_4DP` для `L=101`:** указано `5.6574`, точное значение формулы `2^(curve05(101)·3) = 5.6568542` → `5.6569`. Скрипт проходит только за счёт допуска `5e-4` (`|5.6569 − 5.6574| = 5e-4`). Сам скрипт считает правильно — неточна ожидаемая константа. В тестах S02 используется фактическое значение; предлагается поправить таблицу в следующей правке исследований.
-2. **`F_items.md §F2`, фраза «материальный множитель … в пределах ±5 %»:** формула `1 + (1 − (seed·8 mod 21)/20)` даёт 21 дискретное значение в диапазоне **1.0…2.0** (например, seed 0 → 2.0, seed 1 → 1.6), то есть до −50 % относительно максимума. Формула реализована как в эталонном скрипте; прозаическая оценка неточна.
+1. **`alpha_curves_reference.py`, таблица `EXPECT_LEVEL_FACTOR_4DP`:** `L=101` содержало `5.6574` вместо `5.6569`, а `L=51` — `4.4160` вместо `4.4164`. Обе строки проходили только за счёт допуска `5e-4`: для `L=101` разность в float64 равна `4.999999999999723e-4 ≤ 5e-4`, то есть проверка стояла ровно на границе и не ловила ошибку округления. Исправлено в REVIEW-FIX-01: значения точные, допуск ужесточён до `1e-9`.
+2. **`F_items.md §F2`, фраза «материальный множитель … в пределах ±5 %»:** формула `1 + (1 − (seed·8 mod 21)/20)` даёт 21 дискретное значение в диапазоне **1.0…2.0** (seed 0 → 2.0, seed 1 → 1.6). Формулировка исправлена, математика не менялась.
 
-Оба пункта — про текст исследований, а не про числа механик; кода Alpha они не касаются.
+Оба пункта касались текста исследований и эталонных констант; код Alpha они не затрагивают.
+
+## 5a. REVIEW-FIX-01 (2026-11-03) — исправления после ревью
+
+| FIX | Что исправлено | Доказательство |
+|---|---|---|
+| **FIX-01** (CRITICAL) | Валидация сохранений проверяет полный набор идентификаторов предмета: тип (`ItemInstance.IsSupportedType`), диапазон подтипа (`int → byte` без потери данных), подтип оружия `1…0x14`, «подтип только у оружия», известные модификаторы, маску флагов `0x7e` (`0x8|0x10`), конечность `baseHealth`/`weaponBase`/`equipmentHealthBonus`, инвариант «опыт < стоимости уровня». Ошибка любого поля → `LoadStatus.Corrupted`, без исключений (`SaveValidator.TryValidate` ловит внутренние ошибки). `CharacterSaveMapper` отказывается работать с непроверенными данными и не теряет точность при приведении подтипа. `CharacterSheetPresenter.ApplySaveGame` сначала строит модель в локальных переменных и только потом заменяет состояние | EditMode: `PersistenceTests` 28 кейсов (было 13), включая `UnknownItemTypeIsRejectedAsCorrupted`, `SubtypeBeyondByteRangeIsRejectedInsteadOfTruncated`, `InvalidWeaponUpgradeFlagsAreRejected`, `NonFiniteCharacterValuesAreRejectedByValidator`, `EveryLoadedSaveCanBeMappedWithoutExceptions`; PlayMode: `InvalidSaveDataLeavesPresenterUnchanged` |
+| **FIX-02** (HIGH) | `ProgressionState.AddExperience`: проверка переполнения `long`, предел одного начисления `MaxExperiencePerCall = 1e9` (не игровой кап), оценка числа повышений до цикла (защита от зависания на восстановленном абсурдном опыте), отказ при `level == int.MaxValue`, изменения применяются только в конце — при любой ошибке уровень и XP прежние | EditMode: `ProgressionTests` 51 кейс (было 45): `ExperienceNearLongMaxIsRejectedWithoutStateChange`, `HugeRestoredExperienceCannotHangOrPartiallyApply`, `LevelOverflowIsRejectedWithoutStateChange`, `MaximumLevelStillAcceptsExperienceBelowCost`, `LargeButValidExperienceIsAppliedQuickly` |
+| **FIX-03** (HIGH) | Арифметика seed: расширение до `long` **до** умножения (`SeedMaterialIndex`), floor-mod как в Python-эталоне; прежний `(long)(seed << 3)` переполнялся в `int` и для `int.MaxValue` давал материал 2.4 вместо 1.6 | EditMode: `ItemStatsTests` 59 кейсов (было 42): `SeedMaterialIndexMatchesPythonReference` (8 seed-значений), `ArmorMaterialMultiplierMatchesPythonReference` (7 значений), `SeedMaterialIndexIsPeriodicAndNeverNegative`, `LargeSeedDoesNotOverflowIntShift`; сохранение/загрузка крайних seed — `ValidSaveWithExtremeSeedStillLoadsAndMaps` |
+| **FIX-04** | Эталонная таблица и текст спецификации: `levelFactor(101) → 5.6569`, `levelFactor(51) → 4.4164`, допуск `_close` ужесточён до `1e-9` с объяснением прежнего «пограничного» PASS; `F_items.md`: «±5 %» → «21 значение в диапазоне 1.0…2.0». C# и Python используют одинаковые эталоны | `alpha_curves_reference.py --check` PASS, `alpha_item_stats_reference.py --check` PASS, `alpha_combat_reference.py --check` PASS |
+
+**Статус исправлений:** FIX-01 — `DONE`; FIX-02 — `DONE`; FIX-03 — `DONE` по реализации и тестам, но **`PARTIAL` по достоверности** (точная разрядность операции `seed*8 mod 21` в Alpha для отрицательных/огромных seed не доказана; воспроизводится единственный воспроизводимый эталон — Python-скрипт); FIX-04 — `DONE`.
+
+**Итог прогона REVIEW-FIX-01 (Unity 6000.3.27f2):** компиляция PASS (exit 0, без `error CS`/`warning CS`); EditMode **170/170 passed**, failed=0; PlayMode **6/6 passed**, failed=0; регрессия S01 внутри прогона — EditMode 10/10 (`ChunkMeshTests`, `TerrainDeterminismTests`), PlayMode 2/2 (`PilotPlayModeTests`). Артефакты: `.unity-install/results/rf01_editmode.xml`, `.unity-install/results/rf01_playmode.xml`, логи `.unity-install/logs/rf01_*.log`. Новых тестов: **+38 EditMode, +1 PlayMode**.
 
 ## 6. Ограничения и что осталось неподтверждённым
 
