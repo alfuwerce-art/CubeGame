@@ -2,19 +2,20 @@
 
 **Дата решения:** 2026-11-03. **Межчатовая память:** [PROJECT_MEMORY.md](../PROJECT_MEMORY.md). **Рабочее название:** CubeGame (имя игры не утверждено).
 **Ответственные:** DeepSeek Harness — исполнитель; ChatGPT — архитектура и ревью; продюсер — игровые и визуальные решения.
-**Активный этап:** **`S03-COMBAT-CORE`** — `AUTHORIZED / IN_PROGRESS` (решение продюсера 2026-11-03, [D44](decisions/D44-s02-accepted-s03-authorized.md)); ветка `stage/s03-combat-core`, ТЗ [S03_COMBAT_CORE.md](stages/S03_COMBAT_CORE.md), отчёт [S03_REPORT.md](stages/S03_REPORT.md). По завершении — `READY_FOR_REVIEW`, не `ACCEPTED`.
+**Активный этап:** **`S03-COMBAT-CORE`** — партия выполнена, статус **`READY_FOR_REVIEW`** (не `ACCEPTED`); авторизация [D44](decisions/D44-s02-accepted-s03-authorized.md), ветка `stage/s03-combat-core`, ТЗ [S03_COMBAT_CORE.md](stages/S03_COMBAT_CORE.md), отчёт [S03_REPORT.md](stages/S03_REPORT.md).
 **Предыдущий этап:** **`S02-CORE-FOUNDATION` → `ACCEPTED`** (решение продюсера 2026-11-03, ревью ChatGPT `PASS`); `S00-R02` закрыт `ACCEPTED` ранее.
 **D42:** [числа Alpha как референсы](decisions/D42-alpha-numbers-as-references.md) — статус **`ACCEPTED`** (решение продюсера 2026-11-03, утверждено независимо от OQ-23). До закрытия OQ-23 конкретные скорости в прототипе помечаются **`PLACEHOLDER_NOT_ALPHA`**; это не отменяет утверждение D42 и не является окончательным балансом.
 **Архитектура:** модульный монолит [ADR-0001](architecture/ADR-0001-modular-monolith.md) утверждён; числовые/технические параметры — по D42.
 
-## S03-COMBAT-CORE — АКТИВНЫЙ ЭТАП
+## S03-COMBAT-CORE — ПАРТИЯ ВЫПОЛНЕНА, READY_FOR_REVIEW
 
-**Статус:** `AUTHORIZED / IN_PROGRESS` → по завершении партии `READY_FOR_REVIEW` (не `ACCEPTED`). Авторизация — [D44](decisions/D44-s02-accepted-s03-authorized.md), 2026-11-03.
-**Ветка:** `stage/s03-combat-core` от принятого коммита S02. Merge в `main` не выполнялся.
+**Статус:** `READY_FOR_REVIEW` (не `ACCEPTED`). Авторизация — [D44](decisions/D44-s02-accepted-s03-authorized.md), 2026-11-03.
+**Ветка:** `stage/s03-combat-core` от принятого коммита S02 (`1df7413`). Merge в `main` не выполнялся.
 **ТЗ:** [S03_COMBAT_CORE.md](stages/S03_COMBAT_CORE.md). **Отчёт:** [S03_REPORT.md](stages/S03_REPORT.md).
-**Объём:** минимальное боевое ядро в `CubeGame.Core` (чистый C#, без UnityEngine): формулы урона оружия, разброс `1.25 − 0.5·roll/32767`, проверка попадания `roll/32767 < chance`, снижение урона бронёй/блоком, пул здоровья, результат удара с диагностикой; плюс минимальная Unity-демонстрация удара.
-**Границы достоверности:** `REFERENCE_VERIFIED` — база урона и `levelFactor`, проверка попадания, порог блока; `STRONGLY_SUPPORTED` — разброс урона; `PARTIAL` — множители по числовым ID атак (только по явному флагу), модификаторы шанса по подтипу оружия, митигация `rawDamage − blockFraction·armor`, автоматическое получение `blockFraction`; `UNKNOWN` — базовая формула `chance` (OQ-01). OQ-01/OQ-02/OQ-24/OQ-25/OQ-26 **не закрываются** в S03.
-**Запрещено в S03:** AI/NPC, полная система навыков, новые классы и баланс, анимации/VFX, переделка генерации мира, URP, инвентарь/лут, запуск Alpha без разрешения, копирование закрытого кода/ассетов, merge в `main`, force push, самостоятельное присвоение `ACCEPTED`.
+**Фактические результаты (Unity 6000.3.27f2, выполнено DeepSeek):** компиляция PASS без `error CS`/`warning CS`; EditMode **232/232 passed**, PlayMode **10/10 passed**, failed=0. Новых тестов: **+62 EditMode, +4 PlayMode**. Регрессия S01 (10/10 EditMode, 2/2 PlayMode) и S02 (все фикстуры) внутри прогона. Эталонные скрипты `alpha_curves/items/combat --check` — PASS (exit 0); `git diff --check` — чисто.
+**Реализовано:** `Core/Combat` — формулы урона, разброс, проверка попадания, митигация, пул здоровья, результат удара, резолвер; `Presentation/Combat/CombatDemo` — минимальная демонстрация удара. Ядро без UnityEngine (`noEngineReferences: true`).
+**Границы достоверности:** `REFERENCE_VERIFIED` — урон оружия/`levelFactor`, попадание, порог блока; `STRONGLY_SUPPORTED` — разброс урона; `PARTIAL` — множители ID атак (только по явному флагу), модификатор шанса по подтипу оружия, митигация и её порядок, `blockFraction`; `UNKNOWN` — базовая формула `chance` (OQ-01).
+**Сохранённые ограничения:** OQ-01/OQ-02/OQ-24/OQ-25/OQ-26 не закрыты; OQ-22/OQ-23 — как в S00/S02. Способности, комбо, тайминги, threat/poise, элементальные проки, анимации/VFX, AI — вне партии.
 
 ## S02-CORE-FOUNDATION — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
 

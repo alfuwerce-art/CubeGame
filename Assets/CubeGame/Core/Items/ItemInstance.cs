@@ -27,7 +27,7 @@ namespace CubeGame.Core.Items
             int powerBonus = 0,
             int stackCount = 1)
         {
-            if (!TryValidateValues(type, subtype, level, rarity, powerBonus, stackCount, out string error))
+            if (!TryValidateValues(type, subtype, level, rarity, powerBonus, stackCount, modifier, out string error))
             {
                 throw new ArgumentOutOfRangeException(nameof(type), $"Некорректные данные предмета: {error}.");
             }
@@ -166,7 +166,7 @@ namespace CubeGame.Core.Items
             var subtype = (byte)subtypeId;
             var modifier = (ItemModifier)(byte)modifierId;
 
-            if (!TryValidateValues(type, subtype, level, rarity, powerBonus, stackCount, out error))
+            if (!TryValidateValues(type, subtype, level, rarity, powerBonus, stackCount, modifier, out error))
             {
                 return false;
             }
@@ -216,7 +216,7 @@ namespace CubeGame.Core.Items
             }
         }
 
-        /// <summary>Проверка значений без исключения (используется валидатором сохранений).</summary>
+        /// <summary>Проверка значений без исключения (используется валидатором сохранений и конструктором).</summary>
         public static bool TryValidateValues(
             ItemType type,
             byte subtype,
@@ -224,11 +224,18 @@ namespace CubeGame.Core.Items
             int rarity,
             int powerBonus,
             int stackCount,
+            ItemModifier modifier,
             out string error)
         {
             if (!IsSupportedType((int)type))
             {
                 error = $"неизвестный тип предмета {(int)type}";
+                return false;
+            }
+
+            if (!IsSupportedModifier((int)modifier))
+            {
+                error = $"неизвестный модификатор {(int)modifier}";
                 return false;
             }
 

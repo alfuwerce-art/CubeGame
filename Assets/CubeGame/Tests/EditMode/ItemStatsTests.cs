@@ -247,6 +247,44 @@ namespace CubeGame.Tests.EditMode
             Assert.Throws<ArgumentOutOfRangeException>(() => new ItemInstance((ItemType)77, 0, 1, 0, 0));
         }
 
+        // --- S03: унифицированная валидация модификатора -----------------------
+
+        [TestCase(0x02)]
+        [TestCase(0x0A)]
+        [TestCase(0x99)]
+        [TestCase(-1)]
+        public void UnsupportedModifierIsRejectedByPublicConstructor(int modifierId)
+        {
+            // До S03 конструктор не проверял модификатор, хотя загрузка сохранений проверяла.
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => new ItemInstance(ItemType.Chest, 0, 1, 0, 0, (ItemModifier)(byte)modifierId));
+        }
+
+        [Test]
+        public void AllKnownModifiersAreAcceptedByPublicConstructor()
+        {
+            foreach (ItemModifier modifier in Enum.GetValues(typeof(ItemModifier)))
+            {
+                Assert.DoesNotThrow(
+                    () => new ItemInstance(ItemType.Chest, 0, 1, 0, 0, modifier),
+                    $"известный модификатор {(byte)modifier:X2} должен приниматься");
+            }
+        }
+
+        [Test]
+        public void ConstructorAndSavePathAgreeOnModifierValidation()
+        {
+            const int unsupported = 0x99;
+
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => new ItemInstance(ItemType.Chest, 0, 1, 0, 0, (ItemModifier)unsupported));
+
+            Assert.IsFalse(ItemInstance.TryCreateFromIdentifiers(
+                    (int)ItemType.Chest, 0, 1, 0, 0, unsupported, 0, 1, out _, out string error),
+                "путь сохранения тоже должен отвергать модификатор");
+            StringAssert.Contains("модификатор", error);
+        }
+
         [Test]
         public void ItemExposesEffectiveLevel()
         {
