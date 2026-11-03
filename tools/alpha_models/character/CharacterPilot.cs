@@ -799,7 +799,7 @@ public static class CharacterPilotVerifier
         foreach (var phase in new[] { 0.25f, 0.5f, 0.75f })
         {
             build.animator.Sample(phase);
-            RenderViews(cam, bounds, $"phase_{phase:0.00}");
+            RenderViews(cam, bounds, "phase_" + phase.ToString("0.00", CultureInfo.InvariantCulture));
         }
         build.animator.Sample(0f);
     }
