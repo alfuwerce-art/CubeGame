@@ -35,11 +35,11 @@
       "model": "human-hair-m01",
       "parent": "head",
       "offset": [
-        -7.0,
+        -6.0,
         13,
-        -4.0
+        -6.0
       ],
-      "evidence": "PARTIAL: hair is authored in the same space as the head (99% of its scalp voxels coincide with head skin voxels), so it takes the head's absolute offset"
+      "evidence": "PARTIAL: hair and head share the 18x16x16 authoring grid (99% of hair scalp voxels coincide with head skin voxels at zero grid shift), so the hair min corner = head min corner + (1,0,-2) grid delta"
     },
     {
       "id": "hand_l",

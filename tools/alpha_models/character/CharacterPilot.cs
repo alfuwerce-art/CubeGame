@@ -784,6 +784,16 @@ public static class CharacterPilotVerifier
         var bounds = AggregateBounds(build.root.transform);
         RenderViews(cam, bounds, "character");
 
+        // A sword-free pass, so the assembled body can be judged without the oversized blade
+        // (the greatsword is 37 units long in raw voxel units; see the report).
+        var sword = Find(build, "sword");
+        if (sword != null)
+        {
+            sword.gameObject.SetActive(false);
+            RenderViews(cam, bounds, "character_nosword");
+            sword.gameObject.SetActive(true);
+        }
+
         var head = Find(build, "head");
         if (head != null)
         {
@@ -809,9 +819,13 @@ public static class CharacterPilotVerifier
         var target = bounds.center;
         var radius = Mathf.Max(bounds.extents.magnitude, 0.5f);
         var distance = radius / Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad) * 1.15f;
+        // Face features (eyes at d=11 of the 16-deep head grid, solid range 4..11) sit on the
+        // HIGH-depth side, which is +Z after the (x, h, d) -> (x, y, z) mapping. "front" therefore
+        // looks from +Z; -Z is the back of the head.
         foreach (var (name, dir) in new[]
         {
             ("front", new Vector3(0f, 0.08f, 1f)),
+            ("back", new Vector3(0f, 0.08f, -1f)),
             ("side", new Vector3(1f, 0.08f, 0.05f)),
             ("threequarter", new Vector3(0.8f, 0.35f, 0.9f)),
         })

@@ -43,7 +43,7 @@
 character_human-male-proxy              (root, status = PROXY_NOT_ALPHA)
 ├─ part_body        worldMin (-5, 3, -4)   size (10,10,8)
 │  ├─ part_head     worldMin (-7,13, -4)   size (14, 8, 8)   pivot = верх головы
-│  │  └─ part_hair  worldMin (-7,13, -4)   size (12,11,12)   offset совпадает с головой
+│  │  └─ part_hair  worldMin (-6,13, -6)   size (12,11,12)   offset = голова + grid-дельта
 │  ├─ part_hand_l   worldMin (-10,9, -3)   size ( 5, 4, 6)   pivot = сустав кисти
 │  ├─ part_hand_r   worldMin (  5,9, -3)   size ( 5, 4, 6)   pivot = сустав кисти
 │  │  └─ part_sword worldMin (  6,9, -6.5) size ( 3,37,13)   offset в системе кисти
@@ -51,7 +51,10 @@ character_human-male-proxy              (root, status = PROXY_NOT_ALPHA)
 │  └─ part_foot_r   worldMin (  0,0, -4)   size ( 5, 3, 8)
 ```
 
-Правило, которое пришлось вывести и проверить: **пивот части стоит в суставе**, поэтому абсолютное начало части = `offset + joint`, а вложенная часть позиционируется относительно *пивота* родителя, а не его offset. Ошибка в этом правиле ловится валидатором (`world min != spec offset`).
+Два правила, которые пришлось вывести и проверить (оба ловятся валидаторами):
+
+1. **Пивот части стоит в суставе**: абсолютное начало части = `offset + joint`, а вложенная часть позиционируется относительно *пивота* родителя, а не его offset. Ошибка → `world min != spec offset`.
+2. **Волосы выравниваются по общей сетке, а не по минимальному углу bbox.** Голова и волосы authored в одной сетке 18×16×16; при совпадении min-углов волосы уезжали вперёд и закрывали лицо. Правильная привязка: `hair_offset = head_offset + (hair_solid_min − head_solid_min)`, где min берётся в координатах сетки. Для `human-head-m01`/`human-hair-m01`: `head_min = (2,2,4)`, `hair_min = (3,2,2)` → дельта `(1,0,−2)` → `hair_offset = (−7,13,−4) + (1,0,−2) = (−6,13,−6)`. После исправления глаза и лицо видны, волосы сидят на голове (см. снимки).
 
 ### 2.3 Достоверность параметров
 
@@ -59,7 +62,8 @@ character_human-male-proxy              (root, status = PROXY_NOT_ALPHA)
 |---|---|---|
 | Состав частей гуманоида | `VERIFIED_ALPHA` (данные + имена в клиенте) | список `*.cub` в `Cube.exe`, объёмы/габариты моделей |
 | Габариты и число граней каждой части | `VERIFIED` (данные) | декодирование `.cub`, пофасетная проверка S05A-0 |
-| **Голова ↔ волосы: offset (0,0,0) в общей системе** | `PARTIAL` (сильные данные) | у волос есть 286 «кожных» вокселей; 284 из них (99%) совпадают с кожей головы **без сдвига** — значит, модели authored в одной системе координат. Для орка тот же тест даёт сдвиг (0,4,−1) |
+| **Голова ↔ волосы: общая сетка 18×16×16, сдвиг 0 в координатах сетки** | `PARTIAL` (сильные данные) | у волос 286 «кожных» вокселей; 284 (99%) совпадают с кожей головы **без сдвига в сетке**; для орка тот же тест даёт сдвиг (0,4,−1). На уровне bbox-углов это даёт дельту (1,0,−2) |
+| **Сторона лица** | `VERIFIED` (данные) | зрачки/брови `human-head-m01` лежат на `d = 11` при заполненном диапазоне `d = 4…11` → лицо на **высокой** стороне глубины, то есть **+Z** после отображения `(x,h,d) → (x,y,z)` |
 | Offsets туловища/кистей/стоп | `PROXY_NOT_ALPHA` | оригинальные offsets в коде не восстановлены; сборка поставлена по измеренным габаритам (стопы на земле, голова на торсе, кисти на уровне плеч) |
 | Пивоты/оси вращения | `PROXY_NOT_ALPHA` | выбраны по смыслу сустава (верх кисти/головы, низ стопы) |
 | Масштаб «1 воксель = 1 unit», без масштабирования частей | `PROXY_NOT_ALPHA` | per-part scale в `.cub` нет; из-за этого голова (14) шире торса (10), а меч (37) длиннее персонажа (~24) — видно на снимках |
@@ -141,11 +145,11 @@ python tools\alpha_models\cub_to_obj.py --db ... --key "human-hair-m01.cub" --ou
 
 - `CHARACTER_RESULT=PASS`, exit 0: 8 частей, у всех `worldMin == spec offset`, `worldSize == габарит вокселей`, проблем 0.
 - Голова: зазор с торсом 0.000 (не отрывается и не утопает).
-- Снимки (локально): `character_{front,side,threequarter}.png`, `head_yaw_left/right_{front,side,threequarter}.png`, `phase_{0.25,0.50,0.75}_{front,side,threequarter}.png`.
+- Снимки (локально): `character_{front,back,side,threequarter}.png`, `character_nosword_{front,side,threequarter}.png`, `head_yaw_left/right_{front,side,threequarter}.png`, `phase_{0.25,0.50,0.75}_{front,side,threequarter}.png`.
 - Иерархия: `hierarchy.txt` (полный дамп имён, `localPosition`, `localScale`).
 - `PLAYMODE_RESULT=PASS`, exit 0: 40 реальных кадров `Update()`, кисти и голова двигаются, гнездо меча стабильно.
 
-**Локальные пути (не в Git):** `C:\Users\bow\Desktop\CubeGame\.scratch\s05a1\unity\CharacterPilot\PilotOutput\` — отчёт, 18 PNG, `hierarchy.txt`, `playmode.json`; логи — `.scratch\s05a1\unity\*.log`.
+**Локальные пути (не в Git):** `C:\Users\bow\Desktop\CubeGame\.scratch\s05a1\unity\CharacterPilot\PilotOutput\` — отчёт, 29 PNG, `hierarchy.txt`, `playmode.json`; логи — `.scratch\s05a1\unity\*.log`.
 
 ## 8. Тесты
 
