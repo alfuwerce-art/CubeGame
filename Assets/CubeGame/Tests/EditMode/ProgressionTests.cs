@@ -58,10 +58,11 @@ namespace CubeGame.Tests.EditMode
         [TestCase(5, 1.4142)]
         [TestCase(11, 2.0000)]
         [TestCase(21, 2.8284)]
-        [TestCase(51, 4.4160)]
-        // ПРИМЕЧАНИЕ (S02): в EXPECT-таблице alpha_curves_reference.py для L=101 указано 5.6574,
-        // но точное значение формулы 5.6568542 → 5.6569. Скрипт проходит за счёт допуска 5e-4;
-        // тест сверяется с формулой (см. S02_REPORT.md, найденные расхождения).
+        // REVIEW-FIX-01: эталонная таблица alpha_curves_reference.py исправлена —
+        // levelFactor(51) = 4.416358054 → 4.4164 (было 4.4160), levelFactor(101) = 5.656854249 → 5.6569
+        // (было 5.6574). Старый прогон печатал PASS только потому, что допуск 5e-4 «поглощал»
+        // ошибку округления (|5.6569 − 5.6574| в float64 = 4.999999999999723e-4).
+        [TestCase(51, 4.4164)]
         [TestCase(101, 5.6569)]
         public void LevelFactorMatchesAlphaReference(int level, double expected)
         {
@@ -198,6 +199,79 @@ namespace CubeGame.Tests.EditMode
             Assert.AreEqual(10, restored.Level);
             Assert.AreEqual(123, restored.Experience);
             Assert.AreEqual(360, restored.ExperienceToNextLevel);
+        }
+
+        // --- REVIEW-FIX-01 / FIX-02: безопасность прогрессии -------------------
+
+        [Test]
+        public void ExperienceNearLongMaxIsRejectedWithoutStateChange()
+        {
+            var progression = new ProgressionState(1, long.MaxValue - 5);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => progression.AddExperience(10));
+
+            Assert.AreEqual(1, progression.Level, "уровень не должен меняться при отказе");
+            Assert.AreEqual(long.MaxValue - 5, progression.Experience, "опыт не должен меняться при отказе");
+        }
+
+        [Test]
+        public void AmountAbovePerCallLimitIsRejectedWithoutStateChange()
+        {
+            var progression = new ProgressionState();
+
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => progression.AddExperience(ProgressionState.MaxExperiencePerCall + 1));
+
+            Assert.AreEqual(1, progression.Level);
+            Assert.AreEqual(0L, progression.Experience);
+        }
+
+        [Test]
+        public void HugeRestoredExperienceCannotHangOrPartiallyApply()
+        {
+            // 2e9 опыта при минимальной стоимости 50 — нижняя оценка ~1.9 млн повышений,
+            // больше лимита на вызов. Проверка обязана сработать до цикла (без зависания).
+            var progression = new ProgressionState(1, 2_000_000_000L);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => progression.AddExperience(1));
+
+            Assert.AreEqual(1, progression.Level, "состояние не должно меняться при отказе");
+            Assert.AreEqual(2_000_000_000L, progression.Experience);
+        }
+
+        [Test]
+        public void LevelOverflowIsRejectedWithoutStateChange()
+        {
+            var progression = new ProgressionState(int.MaxValue, 0);
+
+            Assert.Throws<InvalidOperationException>(() => progression.AddExperience(2000));
+
+            Assert.AreEqual(int.MaxValue, progression.Level);
+            Assert.AreEqual(0L, progression.Experience);
+        }
+
+        [Test]
+        public void MaximumLevelStillAcceptsExperienceBelowCost()
+        {
+            var progression = new ProgressionState(int.MaxValue, 0);
+
+            int gained = progression.AddExperience(AlphaMath.ExperienceCostForNextLevel(int.MaxValue) - 1);
+
+            Assert.AreEqual(0, gained, "на предельном уровне опыт можно копить, но не повышать его");
+            Assert.AreEqual(int.MaxValue, progression.Level);
+        }
+
+        [Test]
+        public void LargeButValidExperienceIsAppliedQuickly()
+        {
+            var progression = new ProgressionState();
+
+            int gained = progression.AddExperience(ProgressionState.MaxExperiencePerCall);
+
+            Assert.Greater(gained, 900_000, "1e9 опыта даёт около 950 тысяч уровней (стоимость ~1049)");
+            Assert.Less(progression.Experience, progression.ExperienceToNextLevel,
+                "после массового повышения остаток опыта меньше стоимости уровня");
+            Assert.AreEqual(1 + gained, progression.Level);
         }
     }
 }

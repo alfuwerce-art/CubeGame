@@ -14,8 +14,19 @@ namespace CubeGame.Core.Progression
         /// <summary>Минимальный уровень (Alpha: уровень начинается с 1).</summary>
         public const int MinLevel = 1;
 
-        /// <summary>Защита от бесконечного цикла при аномальных входных данных.</summary>
+        /// <summary>
+        /// Максимум опыта за один вызов <see cref="AddExperience"/>.
+        ///
+        /// Это НЕ игровой кап уровня (в Alpha верхнего капа не найдено, D7): ограничение защищает
+        /// от переполнения и от зависания на абсурдных входах. Опыт можно начислять повторно.
+        /// </summary>
+        public const long MaxExperiencePerCall = 1_000_000_000L;
+
+        /// <summary>Защита от бесконечного цикла: не больше миллиона повышений за один вызов.</summary>
         private const int MaxLevelUpsPerCall = 1_000_000;
+
+        /// <summary>Верхняя граница <c>cost(L)</c>: предел кривой 1050, поэтому <c>cost(L) &lt; 1050</c>.</summary>
+        private const int ExperienceCostUpperBound = 1050;
 
         private int _level;
         private long _experience;
@@ -56,6 +67,9 @@ namespace CubeGame.Core.Progression
         /// <summary>
         /// Добавляет опыт и повышает уровень, пока накопленного опыта хватает.
         /// Возвращает число полученных уровней (0, если уровня не было).
+        ///
+        /// Все проверки выполняются до изменения состояния, а сами изменения применяются в конце:
+        /// при любой ошибке уровень и опыт остаются прежними (никаких частичных начислений).
         /// </summary>
         public int AddExperience(long amount)
         {
@@ -69,21 +83,54 @@ namespace CubeGame.Core.Progression
                 return 0;
             }
 
-            _experience += amount;
-            int gained = 0;
-
-            while (_experience >= AlphaMath.ExperienceCostForNextLevel(_level))
+            if (amount > MaxExperiencePerCall)
             {
-                _experience -= AlphaMath.ExperienceCostForNextLevel(_level);
-                _level++;
-                gained++;
-
-                if (gained >= MaxLevelUpsPerCall)
-                {
-                    throw new InvalidOperationException("Слишком много повышений уровня за один вызов — проверьте входные данные.");
-                }
+                throw new ArgumentOutOfRangeException(
+                    nameof(amount),
+                    amount,
+                    $"Начисление {amount} превышает предел одного вызова {MaxExperiencePerCall}; состояние не изменено.");
             }
 
+            if (amount > long.MaxValue - _experience)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(amount),
+                    amount,
+                    "Начисление переполнит накопленный опыт (long); состояние не изменено.");
+            }
+
+            long totalExperience = _experience + amount;
+
+            // Стоимость уровня всегда меньше 1050, значит повышений будет не меньше
+            // totalExperience / 1050. Проверка до цикла исключает зависание на абсурдных данных.
+            long minimumLevelUps = totalExperience / ExperienceCostUpperBound;
+            if (minimumLevelUps > MaxLevelUpsPerCall)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(amount),
+                    amount,
+                    $"Ожидается не менее {minimumLevelUps} повышений уровня (предел {MaxLevelUpsPerCall} за вызов); состояние не изменено.");
+            }
+
+            int level = _level;
+            long experience = totalExperience;
+            int gained = 0;
+
+            while (experience >= AlphaMath.ExperienceCostForNextLevel(level))
+            {
+                if (level == int.MaxValue)
+                {
+                    throw new InvalidOperationException(
+                        "Уровень достиг предельного значения int; состояние прогресса не изменено.");
+                }
+
+                experience -= AlphaMath.ExperienceCostForNextLevel(level);
+                level++;
+                gained++;
+            }
+
+            _level = level;
+            _experience = experience;
             return gained;
         }
 

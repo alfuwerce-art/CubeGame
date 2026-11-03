@@ -87,12 +87,80 @@ namespace CubeGame.Tests.EditMode
             Assert.That(upgraded, Is.EqualTo(plain * 1.5).Within(Tolerance));
         }
 
+        // --- REVIEW-FIX-01 / FIX-03: арифметика seed ---------------------------
+
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(100)]
+        [TestCase(int.MaxValue)]
+        [TestCase(int.MinValue)]
+        [TestCase(-1)]
+        [TestCase(-7)]
+        [TestCase(-100)]
+        public void SeedMaterialIndexMatchesPythonReference(int seed)
+        {
+            // Эталон: python -c "print((seed << 3) % 0x15)" (неотрицательный остаток, как в
+            // alpha_item_stats_reference.py). Значения зафиксированы вручную из прогона 2026-11-03.
+            int expected;
+            switch (seed)
+            {
+                case 0: expected = 0; break;
+                case 1: expected = 8; break;
+                case 100: expected = 2; break;
+                case int.MaxValue: expected = 8; break;
+                case int.MinValue: expected = 5; break;
+                case -1: expected = 13; break;
+                case -7: expected = 7; break;
+                case -100: expected = 19; break;
+                default: throw new ArgumentOutOfRangeException(nameof(seed));
+            }
+
+            Assert.AreEqual(expected, ItemStatsCalculator.SeedMaterialIndex(seed),
+                $"индекс материала для seed={seed} должен совпадать с Python-эталоном");
+        }
+
+        [TestCase(0, 10.0)]
+        [TestCase(1, 8.0)]
+        [TestCase(100, 9.5)]
+        [TestCase(int.MaxValue, 8.0)]
+        [TestCase(int.MinValue, 8.75)]
+        [TestCase(-1, 6.75)]
+        [TestCase(-100, 5.25)]
+        public void ArmorMaterialMultiplierMatchesPythonReference(int seed, double expectedArmor)
+        {
+            // Нагрудник, уровень 1, редкость 0: base·5·1·(1 + (1 − index/20)).
+            double armor = ItemStatsCalculator.Armor(1, 0, ItemType.Chest, ItemModifier.None, seed);
+            Assert.That(armor, Is.EqualTo(expectedArmor).Within(Tolerance),
+                $"броня при seed={seed} (материальный множитель {ItemStatsCalculator.SeedMaterialMultiplier(seed)})");
+        }
+
+        [Test]
+        public void SeedMaterialIndexIsPeriodicAndNeverNegative()
+        {
+            for (int seed = -60; seed <= 60; seed++)
+            {
+                int index = ItemStatsCalculator.SeedMaterialIndex(seed);
+                Assert.That(index, Is.InRange(0, 20), $"индекс вне 0…20 для seed={seed}");
+                Assert.AreEqual(index, ItemStatsCalculator.SeedMaterialIndex(seed + 21),
+                    $"индекс должен повторяться с периодом 21 (seed={seed})");
+            }
+        }
+
+        [Test]
+        public void LargeSeedDoesNotOverflowIntShift()
+        {
+            // Прежняя реализация делала seed << 3 в int: для int.MaxValue сдвиг переполнялся
+            // и давал отрицательный остаток (материал 2.4 вместо 1.6). Проверяем оба края диапазона.
+            Assert.AreEqual(1.6, ItemStatsCalculator.SeedMaterialMultiplier(int.MaxValue), 1e-9);
+            Assert.AreEqual(1.75, ItemStatsCalculator.SeedMaterialMultiplier(int.MinValue), 1e-9);
+        }
+
         [Test]
         public void ArmorMaterialMultiplierDependsOnSeed()
         {
             // Alpha 004c70b0: materialMult = 1 + (1 - (seed*8 mod 21)/20), диапазон 1.0…2.0.
-            // Формулировка F_items «в пределах ±5 %» неточна: множитель принимает 21 дискретное
-            // значение от 1.0 до 2.0 (см. S02_REPORT.md, найденные расхождения).
+            // Формулировка F_items «в пределах ±5 %» была неточной; в REVIEW-FIX-01 исправлена
+            // в спецификации (формула не менялась).
             double seedZero = ItemStatsCalculator.Armor(1, 0, ItemType.Chest, ItemModifier.None, seed: 0);
             double seedOne = ItemStatsCalculator.Armor(1, 0, ItemType.Chest, ItemModifier.None, seed: 1);
             double seedLarge = ItemStatsCalculator.Armor(1, 0, ItemType.Chest, ItemModifier.None, seed: 100);

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using CubeGame.Core.Items;
+using CubeGame.Core.Progression;
 
 namespace CubeGame.Core.Persistence
 {
@@ -60,11 +62,39 @@ namespace CubeGame.Core.Persistence
 
     /// <summary>
     /// Проверка целостности данных сохранения до записи и после чтения.
-    /// Ошибки формулируются словами, чтобы запись в лог была диагностируемой.
+    ///
+    /// Правило: любой файл, прошедший <see cref="SaveService.Load"/>, должен безопасно
+    /// восстанавливаться через <see cref="CharacterSaveMapper"/> — поэтому здесь проверяются
+    /// не только числа персонажа, но и полный набор идентификаторов предметов
+    /// (тип, подтип, модификатор), флаги оружия и конечность дробных величин.
+    ///
+    /// Границы разделены на два вида:
+    /// 1) достоверные правила Alpha (D42): редкость 0…4, уровень с 1, подтип только у оружия;
+    /// 2) ограничения текущей модели/формата CubeGame: известный набор типов и модификаторов,
+    ///    подтип оружия 1…0x14 (имена вне таблицы Alpha не восстановлены, OQ-09), маска флагов
+    ///    <c>0x7e</c> только 0x8|0x10, не более <see cref="SaveFormat.MaxItems"/> предметов.
     /// </summary>
     public static class SaveValidator
     {
+        /// <summary>Разрешённые биты флагов апгрейдов оружия (Alpha <c>0x7e &amp; 0x8</c> / <c>0x7e &amp; 0x10</c>).</summary>
+        public const int SupportedWeaponUpgradeMask = 0x8 | 0x10;
+
         public static bool TryValidate(SaveGame data, out string error)
+        {
+            try
+            {
+                return TryValidateCore(data, out error);
+            }
+            catch (Exception exception)
+            {
+                // Валидатор обязан вернуть статус, а не исключение: повреждённый файл должен давать
+                // понятную причину, а не необработанное исключение в загрузке.
+                error = $"Внутренняя ошибка проверки сохранения: {exception.Message}";
+                return false;
+            }
+        }
+
+        private static bool TryValidateCore(SaveGame data, out string error)
         {
             if (data == null)
             {
@@ -97,6 +127,15 @@ namespace CubeGame.Core.Persistence
                 return false;
             }
 
+            // Инвариант модели прогрессии: накопленный опыт всегда меньше стоимости следующего
+            // уровня, иначе уровень был бы повышен. Нарушение означает противоречивое состояние.
+            int nextLevelCost = AlphaMath.ExperienceCostForNextLevel(character.level);
+            if (character.experience >= nextLevelCost)
+            {
+                error = $"Противоречивое состояние: опыт {character.experience} не меньше стоимости уровня {nextLevelCost}.";
+                return false;
+            }
+
             if (character.classId < 0 || character.classId >= 4)
             {
                 error = $"Некорректный id класса: {character.classId}.";
@@ -109,21 +148,28 @@ namespace CubeGame.Core.Persistence
                 return false;
             }
 
-            if (character.baseHealth <= 0f)
+            if (!IsFinitePositive(character.baseHealth))
             {
-                error = $"Некорректная база HP: {character.baseHealth}.";
+                error = $"Некорректная база HP: {character.baseHealth} (ожидается конечное положительное число).";
                 return false;
             }
 
-            if (character.weaponBase <= 0f)
+            if (!IsFinitePositive(character.weaponBase))
             {
-                error = $"Некорректная база урона: {character.weaponBase}.";
+                error = $"Некорректная база урона: {character.weaponBase} (ожидается конечное положительное число).";
                 return false;
             }
 
-            if (character.equipmentHealthBonus < 0f)
+            if (!IsFiniteNonNegative(character.equipmentHealthBonus))
             {
-                error = $"Отрицательный бонус экипировки: {character.equipmentHealthBonus}.";
+                error = $"Некорректный бонус экипировки: {character.equipmentHealthBonus} (ожидается конечное неотрицательное число).";
+                return false;
+            }
+
+            if (character.weaponUpgrades < 0
+                || (character.weaponUpgrades & ~SupportedWeaponUpgradeMask) != 0)
+            {
+                error = $"Некорректные флаги оружия: 0x{character.weaponUpgrades:X} (разрешены только биты 0x8 и 0x10).";
                 return false;
             }
 
@@ -148,33 +194,35 @@ namespace CubeGame.Core.Persistence
                     return false;
                 }
 
-                if (item.level < 1)
+                if (!ItemInstance.TryCreateFromIdentifiers(
+                        item.type,
+                        item.subtype,
+                        item.level,
+                        item.rarity,
+                        item.seed,
+                        item.modifier,
+                        item.powerBonus,
+                        item.stackCount,
+                        out _,
+                        out string itemError))
                 {
-                    error = $"Предмет #{i}: некорректный уровень {item.level}.";
-                    return false;
-                }
-
-                if (item.rarity < 0 || item.rarity > 4)
-                {
-                    error = $"Предмет #{i}: редкость {item.rarity} вне диапазона 0…4.";
-                    return false;
-                }
-
-                if (item.stackCount < 1)
-                {
-                    error = $"Предмет #{i}: размер стека {item.stackCount} меньше 1.";
-                    return false;
-                }
-
-                if (item.powerBonus < 0)
-                {
-                    error = $"Предмет #{i}: отрицательный powerBonus {item.powerBonus}.";
+                    error = $"Предмет #{i}: {itemError}.";
                     return false;
                 }
             }
 
             error = string.Empty;
             return true;
+        }
+
+        private static bool IsFinitePositive(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value) && value > 0f;
+        }
+
+        private static bool IsFiniteNonNegative(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value) && value >= 0f;
         }
     }
 }

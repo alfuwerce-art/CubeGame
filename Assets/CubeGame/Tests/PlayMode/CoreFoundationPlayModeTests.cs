@@ -122,5 +122,63 @@ namespace CubeGame.Tests.PlayMode
             UnityEngine.Object.Destroy(go);
             yield return null;
         }
+
+        [UnityTest]
+        public IEnumerator InvalidSaveDataLeavesPresenterUnchanged()
+        {
+            // Файл разбирается как JSON, но содержит недопустимый тип предмета (REVIEW-FIX-01):
+            // загрузка обязана вернуть Corrupted и не тронуть текущее состояние компонента.
+            var data = new SaveGame
+            {
+                formatVersion = SaveFormat.CurrentVersion,
+                character = new CharacterSaveData
+                {
+                    level = 9,
+                    experience = 0,
+                    classId = 3,
+                    specializationId = 1,
+                    baseHealth = 100f,
+                    weaponBase = 1f,
+                },
+                items = new System.Collections.Generic.List<ItemSaveData>
+                {
+                    new ItemSaveData
+                    {
+                        type = 999,
+                        subtype = 0,
+                        level = 10,
+                        rarity = 1,
+                        seed = 1,
+                        modifier = 0,
+                        powerBonus = 0,
+                        stackCount = 1,
+                    },
+                },
+            };
+
+            string payload = new JsonSaveSerializer().Serialize(data);
+            new FileSaveStore(_directory).Write(
+                "playmode",
+                SaveService.Frame(SaveFormat.CurrentVersion, payload));
+
+            var go = new GameObject("CharacterSheetInvalidSave");
+            var presenter = go.AddComponent<CharacterSheetPresenter>();
+            presenter.Configure(new FileSaveStore(_directory), new JsonSaveSerializer(), "playmode");
+            yield return null;
+
+            presenter.AddExperience(49);
+            int levelBefore = presenter.Level;
+            long experienceBefore = presenter.Experience;
+
+            LoadResult load = presenter.LoadFromDisk();
+
+            Assert.AreEqual(LoadStatus.Corrupted, load.Status, load.ToString());
+            Assert.AreEqual(levelBefore, presenter.Level, "уровень не должен меняться при неудачной загрузке");
+            Assert.AreEqual(experienceBefore, presenter.Experience, "опыт не должен меняться");
+            Assert.AreEqual(0, presenter.Items.Count, "предметы не должны появляться из некорректного файла");
+
+            UnityEngine.Object.Destroy(go);
+            yield return null;
+        }
     }
 }

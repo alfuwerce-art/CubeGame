@@ -76,7 +76,8 @@ namespace CubeGame.Core.Items
         /// <summary>
         /// Броня (Alpha <c>item_computeStat_armor</c> <c>004c70b0</c>): только нагрудник/обувь/перчатки/наплечники.
         /// <c>base · 5 · rarityFactor · materialMult</c>, где rarityFactor 1.0 у нагрудника и 0.5 у остальных,
-        /// а «материальный» множитель <c>1 + (1 - (seed*8 mod 21)/20)</c> даёт разброс в пределах ±5 %.
+        /// а «материальный» множитель <c>1 + (1 - (seed*8 mod 21)/20)</c> принимает 21 значение в диапазоне
+        /// <c>1.0…2.0</c> (см. <see cref="SeedMaterialMultiplier"/>; верхняя граница 2.0 — при seed, кратном 21).
         /// </summary>
         public static double Armor(int level, int rarity, ItemType type, ItemModifier modifier = ItemModifier.None,
             int seed = 0, int powerBonus = 0)
@@ -87,7 +88,7 @@ namespace CubeGame.Core.Items
             }
 
             double rarityFactor = type == ItemType.Chest ? 1.0 : 0.5;
-            double materialMultiplier = 1.0 + (1.0 - (long)(seed << 3) % 0x15 / 20.0);
+            double materialMultiplier = SeedMaterialMultiplier(seed);
 
             switch (modifier)
             {
@@ -104,6 +105,43 @@ namespace CubeGame.Core.Items
 
             double baseValue = MathPow2Mul(EffectiveLevel(level, powerBonus), rarity);
             return baseValue * 5.0 * rarityFactor * materialMultiplier;
+        }
+
+        /// <summary>
+        /// Индекс «материала» брони: <c>(seed * 8) mod 21</c> в диапазоне <c>0…20</c>.
+        ///
+        /// <para>
+        /// Арифметика: расширение до <c>long</c> выполняется ДО умножения, поэтому большие и
+        /// отрицательные seed не теряют данные из-за переполнения <c>int</c>. Остаток приводится
+        /// к неотрицательному значению (floor-mod), как в эталонном Python-скрипте
+        /// (<c>(seed &lt;&lt; 3) % 0x15</c>), где <c>%</c> всегда даёт неотрицательный результат.
+        /// </para>
+        /// <para>
+        /// СТАТУС: <c>PARTIAL</c>. Точная разрядность операции в Alpha для отрицательных/огромных seed
+        /// не доказана (возможна 32-битная арифметика с переполнением или знакопеременный остаток).
+        /// Здесь воспроизводится единственный воспроизводимый эталон — Python-скрипт S00-R02;
+        /// заменять его «более удобной» версией без доказательств запрещено (см. S02_REPORT REVIEW-FIX-01).
+        /// </para>
+        /// </summary>
+        public static int SeedMaterialIndex(int seed)
+        {
+            long scaled = (long)seed * 8L;
+            long remainder = scaled % 21L;
+            if (remainder < 0L)
+            {
+                remainder += 21L;
+            }
+
+            return (int)remainder;
+        }
+
+        /// <summary>
+        /// «Материальный» множитель брони <c>1 + (1 - index/20)</c>: диапазон <c>1.0…2.0</c>
+        /// (индекс 0 → 2.0, индекс 20 → 1.0). Это НЕ «±5 %»: формулировка в F_items исправлена в REVIEW-FIX-01.
+        /// </summary>
+        public static double SeedMaterialMultiplier(int seed)
+        {
+            return 1.0 + (1.0 - SeedMaterialIndex(seed) / 20.0);
         }
 
         /// <summary>

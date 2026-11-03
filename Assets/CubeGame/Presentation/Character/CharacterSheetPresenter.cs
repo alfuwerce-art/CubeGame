@@ -99,9 +99,15 @@ namespace CubeGame.Presentation.Character
                 throw new ArgumentNullException(nameof(data));
             }
 
-            _sheet = CharacterSaveMapper.ToCharacterSheet(data);
+            // Сначала полностью восстанавливаем модель в локальных переменных. Если преобразование
+            // не удалось, состояние компонента остаётся прежним (REVIEW-FIX-01, п.7): иначе при
+            // ошибке на предметах персонаж уже был бы подменён новыми данными.
+            CharacterSheet restoredSheet = CharacterSaveMapper.ToCharacterSheet(data);
+            List<ItemInstance> restoredItems = CharacterSaveMapper.ToItems(data);
+
+            _sheet = restoredSheet;
             _items.Clear();
-            _items.AddRange(CharacterSaveMapper.ToItems(data));
+            _items.AddRange(restoredItems);
         }
 
         public SaveResult SaveToDisk()

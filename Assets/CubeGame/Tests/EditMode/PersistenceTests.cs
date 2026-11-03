@@ -262,6 +262,202 @@ namespace CubeGame.Tests.EditMode
             Assert.AreEqual(LoadStatus.NotFound, _service.Load().Status);
         }
 
+        // --- REVIEW-FIX-01 / FIX-01: негативные проверки сохранений -------------
+
+        [Test]
+        public void UnknownItemTypeIsRejectedAsCorrupted()
+        {
+            SaveGame data = CreateSampleSave();
+            data.items[0].type = 999;
+
+            AssertCorrupted(data, "тип");
+        }
+
+        [Test]
+        public void SubtypeBeyondByteRangeIsRejectedInsteadOfTruncated()
+        {
+            SaveGame data = CreateSampleSave();
+            data.items[0].subtype = 256;
+
+            // Приведение int → byte дало бы 0 (тихая потеря данных) — загрузка обязана отказать.
+            AssertCorrupted(data, "подтип");
+        }
+
+        [Test]
+        public void InvalidWeaponSubtypeIsRejected()
+        {
+            SaveGame data = CreateSampleSave();
+            data.items[1].type = (int)ItemType.Weapon;
+            data.items[1].subtype = (int)WeaponSubtype.Torch + 1;
+
+            AssertCorrupted(data, "подтип оружия");
+        }
+
+        [Test]
+        public void NonWeaponWithSubtypeIsRejected()
+        {
+            SaveGame data = CreateSampleSave();
+            data.items[0].subtype = 3;
+
+            AssertCorrupted(data, "подтип");
+        }
+
+        [Test]
+        public void UnknownModifierIsRejected()
+        {
+            SaveGame data = CreateSampleSave();
+            data.items[0].modifier = 0x99;
+
+            AssertCorrupted(data, "модификатор");
+        }
+
+        [TestCase(0x4)]
+        [TestCase(0x20)]
+        [TestCase(0x100)]
+        [TestCase(-1)]
+        public void InvalidWeaponUpgradeFlagsAreRejected(int flags)
+        {
+            SaveGame data = CreateSampleSave();
+            data.character.weaponUpgrades = flags;
+
+            AssertCorrupted(data, "флаг");
+        }
+
+        [Test]
+        public void NullItemEntryIsRejected()
+        {
+            SaveGame data = CreateSampleSave();
+            data.items.Add(null);
+
+            AssertCorrupted(data, "null");
+        }
+
+        [Test]
+        public void NonFiniteCharacterValuesAreRejectedByValidator()
+        {
+            AssertValidatorRejects(save => save.character.baseHealth = float.NaN, "база HP");
+            AssertValidatorRejects(save => save.character.baseHealth = float.PositiveInfinity, "база HP");
+            AssertValidatorRejects(save => save.character.weaponBase = float.NaN, "база урона");
+            AssertValidatorRejects(save => save.character.weaponBase = float.NegativeInfinity, "база урона");
+            AssertValidatorRejects(save => save.character.equipmentHealthBonus = float.PositiveInfinity, "экипировки");
+            AssertValidatorRejects(save => save.character.equipmentHealthBonus = float.NaN, "экипировки");
+        }
+
+        [Test]
+        public void InconsistentExperienceIsRejected()
+        {
+            SaveGame data = CreateSampleSave();
+            // Инвариант модели: накопленный опыт меньше стоимости следующего уровня (cost(5) = 216).
+            data.character.experience = 216;
+
+            AssertCorrupted(data, "Противоречивое");
+        }
+
+        [Test]
+        public void ValidSaveWithExtremeSeedStillLoadsAndMaps()
+        {
+            SaveGame data = CreateSampleSave();
+            data.items[0].seed = int.MaxValue;
+            data.items[1].seed = int.MinValue;
+
+            Assert.IsTrue(_service.Save(data).IsSuccess);
+            LoadResult load = _service.Load();
+            Assert.IsTrue(load.IsSuccess, load.ToString());
+
+            List<ItemInstance> items = CharacterSaveMapper.ToItems(load.Data);
+            Assert.AreEqual(int.MaxValue, items[0].Seed, "seed не должен терять данные при сохранении");
+            Assert.AreEqual(int.MinValue, items[1].Seed);
+            Assert.AreEqual(8, ItemStatsCalculator.SeedMaterialIndex(items[0].Seed),
+                "int.MaxValue → (seed*8) mod 21 = 8 (как в Python-эталоне)");
+            Assert.AreEqual(5, ItemStatsCalculator.SeedMaterialIndex(items[1].Seed),
+                "int.MinValue → (seed*8) mod 21 = 5 (как в Python-эталоне)");
+        }
+
+        [Test]
+        public void MapperRejectsUnvalidatedData()
+        {
+            SaveGame data = CreateSampleSave();
+            data.items[0].type = 999;
+
+            // Прямой вызов API на непроверенных данных обязан давать понятное исключение,
+            // а не молча испорченный предмет.
+            Assert.Throws<ArgumentException>(() => CharacterSaveMapper.ToItems(data));
+            Assert.Throws<ArgumentException>(() => CharacterSaveMapper.ToCharacterSheet(data));
+        }
+
+        [Test]
+        public void EveryLoadedSaveCanBeMappedWithoutExceptions()
+        {
+            // Критерий REVIEW-FIX-01: если Load() вернул Success, преобразование в модель безопасно.
+            var mutations = new Action<SaveGame>[]
+            {
+                save => save.items[0].type = 999,
+                save => save.items[0].subtype = 256,
+                save => save.items[0].modifier = 0x99,
+                save => save.items[1].subtype = 0,
+                save => save.character.weaponUpgrades = 0x4,
+                save => save.character.baseHealth = float.NaN,
+                save => save.items.Add(null),
+                save => save.character.experience = 216,
+                save => save.items[0].rarity = 5,
+                save => save.items[0].level = 0,
+                save => save.items[0].stackCount = 0,
+                save => save.items[0].powerBonus = -1,
+                save => save.character.classId = 9,
+            };
+
+            foreach (Action<SaveGame> mutate in mutations)
+            {
+                SaveGame data = CreateSampleSave();
+                mutate(data);
+
+                LoadResult load = LoadRaw(data);
+                if (load.IsSuccess)
+                {
+                    Assert.DoesNotThrow(() => CharacterSaveMapper.ToCharacterSheet(load.Data));
+                    Assert.DoesNotThrow(() => CharacterSaveMapper.ToItems(load.Data));
+                }
+                else
+                {
+                    Assert.AreEqual(LoadStatus.Corrupted, load.Status, load.ToString());
+                }
+            }
+        }
+
+        private void AssertCorrupted(SaveGame data, string expectedMessageFragment)
+        {
+            Assert.IsFalse(SaveValidator.TryValidate(data, out string error), "валидатор должен отказать");
+            StringAssert.Contains(expectedMessageFragment, error);
+
+            LoadResult load = LoadRaw(data);
+            Assert.AreEqual(LoadStatus.Corrupted, load.Status, load.ToString());
+            Assert.IsNull(load.Data);
+        }
+
+        private void AssertValidatorRejects(Action<SaveGame> mutate, string expectedMessageFragment)
+        {
+            SaveGame data = CreateSampleSave();
+            mutate(data);
+
+            Assert.IsFalse(SaveValidator.TryValidate(data, out string error), "валидатор должен отказать");
+            StringAssert.Contains(expectedMessageFragment, error);
+
+            // Файл с NaN/Infinity: JsonUtility может не разобрать такие литералы, поэтому
+            // достаточно того, что загрузка не бросает исключение и не возвращает Success.
+            LoadResult load = LoadRaw(data);
+            Assert.AreNotEqual(LoadStatus.Success, load.Status, "некорректные числа не должны грузиться");
+        }
+
+        /// <summary>Пишет кадр с указанными данными напрямую в хранилище, минуя Save (тот сам валидирует).</summary>
+        private LoadResult LoadRaw(SaveGame data)
+        {
+            string payload = new JsonSaveSerializer().Serialize(data);
+            new FileSaveStore(_directory).Write(
+                SaveService.DefaultKey,
+                SaveService.Frame(SaveFormat.CurrentVersion, payload));
+            return _service.Load();
+        }
+
         private static SaveGame CreateSampleSave()
         {
             return new SaveGame

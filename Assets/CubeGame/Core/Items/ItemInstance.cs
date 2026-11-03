@@ -27,26 +27,9 @@ namespace CubeGame.Core.Items
             int powerBonus = 0,
             int stackCount = 1)
         {
-            ValidateTypeAndSubtype(type, subtype);
-
-            if (level < 1)
+            if (!TryValidateValues(type, subtype, level, rarity, powerBonus, stackCount, out string error))
             {
-                throw new ArgumentOutOfRangeException(nameof(level), level, "Уровень предмета начинается с 1.");
-            }
-
-            if (rarity < 0 || rarity > MaxRarity)
-            {
-                throw new ArgumentOutOfRangeException(nameof(rarity), rarity, "Редкость предмета: 0…4 (Alpha кламп 4).");
-            }
-
-            if (powerBonus < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(powerBonus), powerBonus, "powerBonus не может быть отрицательным.");
-            }
-
-            if (stackCount < 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(stackCount), stackCount, "Размер стека не меньше 1.");
+                throw new ArgumentOutOfRangeException(nameof(type), $"Некорректные данные предмета: {error}.");
             }
 
             Type = type;
@@ -134,33 +117,162 @@ namespace CubeGame.Core.Items
             return $"{Type}/{Subtype} L{Level} r{Rarity} seed={Seed} mod={(byte)Modifier:X2} power={PowerBonus} x{StackCount}";
         }
 
-        private static void ValidateTypeAndSubtype(ItemType type, byte subtype)
+        /// <summary>
+        /// Создаёт предмет из «сырых» целочисленных полей сохранения с полной проверкой.
+        ///
+        /// Зачем отдельный вход: в файле сохранения поля хранятся как <c>int</c>, и простое
+        /// приведение <c>int → byte</c> теряет данные (например, subtype = 256 превращается в 0).
+        /// Здесь проверяются тип, диапазон подтипа, модификатор и значения, поэтому предмет либо
+        /// создан корректно, либо возвращается диагностическая ошибка без исключения.
+        ///
+        /// Границы проверок разделены на два вида (см. S02_REPORT, REVIEW-FIX-01):
+        /// достоверные ограничения Alpha (редкость 0…4, уровень с 1, подтип только у оружия)
+        /// и ограничения текущей модели CubeGame (известный набор типов/модификаторов, подтип
+        /// оружия 1…0x14 — вне этой таблицы имена в Alpha отсутствуют, OQ-09).
+        /// </summary>
+        public static bool TryCreateFromIdentifiers(
+            int typeId,
+            int subtypeId,
+            int level,
+            int rarity,
+            int seed,
+            int modifierId,
+            int powerBonus,
+            int stackCount,
+            out ItemInstance item,
+            out string error)
         {
-            switch (type)
+            item = null;
+
+            if (typeId < byte.MinValue || typeId > byte.MaxValue || !IsSupportedType(typeId))
             {
-                case ItemType.Weapon:
-                    if (subtype > (byte)WeaponSubtype.Torch || subtype == 0)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(subtype), subtype, "Подтип оружия вне известного диапазона (1…0x14).");
-                    }
-
-                    break;
-                case ItemType.Formula:
-                case ItemType.Chest:
-                case ItemType.Boots:
-                case ItemType.Gloves:
-                case ItemType.Shoulders:
-                case ItemType.Amulet:
-                case ItemType.Ring:
-                    if (subtype != 0)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(subtype), subtype, "Для этого типа подтип не используется.");
-                    }
-
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, "Тип предмета вне модели S02.");
+                error = $"неизвестный тип предмета {typeId}";
+                return false;
             }
+
+            if (subtypeId < byte.MinValue || subtypeId > byte.MaxValue)
+            {
+                error = $"подтип {subtypeId} вне диапазона байта (0…255) — приведение потеряло бы данные";
+                return false;
+            }
+
+            if (modifierId < byte.MinValue || modifierId > byte.MaxValue || !IsSupportedModifier(modifierId))
+            {
+                error = $"неизвестный модификатор {modifierId}";
+                return false;
+            }
+
+            var type = (ItemType)(byte)typeId;
+            var subtype = (byte)subtypeId;
+            var modifier = (ItemModifier)(byte)modifierId;
+
+            if (!TryValidateValues(type, subtype, level, rarity, powerBonus, stackCount, out error))
+            {
+                return false;
+            }
+
+            item = new ItemInstance(type, subtype, level, rarity, seed, modifier, powerBonus, stackCount);
+            error = string.Empty;
+            return true;
+        }
+
+        /// <summary>Поддерживается ли тип предмета текущей моделью CubeGame.</summary>
+        public static bool IsSupportedType(int typeId)
+        {
+            switch (typeId)
+            {
+                case (int)ItemType.Formula:
+                case (int)ItemType.Weapon:
+                case (int)ItemType.Chest:
+                case (int)ItemType.Boots:
+                case (int)ItemType.Gloves:
+                case (int)ItemType.Shoulders:
+                case (int)ItemType.Amulet:
+                case (int)ItemType.Ring:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>Поддерживается ли модификатор текущей моделью CubeGame (смысл значений — OQ-09).</summary>
+        public static bool IsSupportedModifier(int modifierId)
+        {
+            switch (modifierId)
+            {
+                case (int)ItemModifier.None:
+                case (int)ItemModifier.M01:
+                case (int)ItemModifier.M0B:
+                case (int)ItemModifier.M0C:
+                case (int)ItemModifier.M12:
+                case (int)ItemModifier.M13:
+                case (int)ItemModifier.M17:
+                case (int)ItemModifier.M19:
+                case (int)ItemModifier.M1A:
+                case (int)ItemModifier.M1B:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>Проверка значений без исключения (используется валидатором сохранений).</summary>
+        public static bool TryValidateValues(
+            ItemType type,
+            byte subtype,
+            int level,
+            int rarity,
+            int powerBonus,
+            int stackCount,
+            out string error)
+        {
+            if (!IsSupportedType((int)type))
+            {
+                error = $"неизвестный тип предмета {(int)type}";
+                return false;
+            }
+
+            if (type == ItemType.Weapon)
+            {
+                // Границы взяты из таблицы подтипов Alpha (1…0x14); имена вне неё не восстановлены.
+                if (subtype < (byte)WeaponSubtype.Mace || subtype > (byte)WeaponSubtype.Torch)
+                {
+                    error = $"подтип оружия {subtype} вне известного диапазона 1…0x14";
+                    return false;
+                }
+            }
+            else if (subtype != 0)
+            {
+                error = $"для типа {(int)type} подтип должен быть 0, получено {subtype}";
+                return false;
+            }
+
+            if (level < 1)
+            {
+                error = $"уровень предмета {level} меньше 1";
+                return false;
+            }
+
+            if (rarity < 0 || rarity > MaxRarity)
+            {
+                error = $"редкость {rarity} вне диапазона 0…{MaxRarity}";
+                return false;
+            }
+
+            if (powerBonus < 0)
+            {
+                error = $"отрицательный powerBonus {powerBonus}";
+                return false;
+            }
+
+            if (stackCount < 1)
+            {
+                error = $"размер стека {stackCount} меньше 1";
+                return false;
+            }
+
+            error = string.Empty;
+            return true;
         }
     }
 }
