@@ -3,6 +3,7 @@
     "rootNamespace": "CubeGame.Tests.PlayMode",
     "references": [
         "CubeGame.Core",
+        "CubeGame.Persistence",
         "CubeGame.Presentation",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"

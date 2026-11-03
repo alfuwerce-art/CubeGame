@@ -3,6 +3,7 @@
     "rootNamespace": "CubeGame.Tests.EditMode",
     "references": [
         "CubeGame.Core",
+        "CubeGame.Persistence",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

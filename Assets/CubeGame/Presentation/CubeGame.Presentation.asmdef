@@ -2,7 +2,8 @@
     "name": "CubeGame.Presentation",
     "rootNamespace": "CubeGame.Presentation",
     "references": [
-        "CubeGame.Core"
+        "CubeGame.Core",
+        "CubeGame.Persistence"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

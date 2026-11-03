@@ -2,17 +2,21 @@
 
 **Дата решения:** 2026-11-03. **Межчатовая память:** [PROJECT_MEMORY.md](../PROJECT_MEMORY.md). **Рабочее название:** CubeGame (имя игры не утверждено).
 **Ответственные:** DeepSeek Harness — исполнитель; ChatGPT — архитектура и ревью; продюсер — игровые и визуальные решения.
-**Активный этап:** **`S02-CORE-FOUNDATION`** — `AUTHORIZED / IN_PROGRESS` (решение продюсера 2026-11-03), ветка `stage/s02-core-foundation`, ТЗ [S02_CORE_FOUNDATION.md](stages/S02_CORE_FOUNDATION.md).
+**Активный этап:** **`S02-CORE-FOUNDATION`** — первая партия выполнена, статус **`READY_FOR_REVIEW`** (не `ACCEPTED`); авторизация продюсера 2026-11-03, ветка `stage/s02-core-foundation`, ТЗ [S02_CORE_FOUNDATION.md](stages/S02_CORE_FOUNDATION.md), отчёт [S02_REPORT.md](stages/S02_REPORT.md).
 **Предыдущий этап:** `S00-R02` закрыт продюсером 2026-11-03 со статусом **`ACCEPTED`** (ограниченная приёмка — см. ниже). Гейт D41 «исследование до переноса новых систем» выполнен.
 **D42:** [числа Alpha как референсы](decisions/D42-alpha-numbers-as-references.md) — статус **`ACCEPTED`** (решение продюсера 2026-11-03, утверждено независимо от OQ-23). До закрытия OQ-23 конкретные скорости в прототипе помечаются **`PLACEHOLDER_NOT_ALPHA`**; это не отменяет утверждение D42 и не является окончательным балансом.
 **Архитектура:** модульный монолит [ADR-0001](architecture/ADR-0001-modular-monolith.md) утверждён; числовые/технические параметры — по D42.
 
-## S02-CORE-FOUNDATION — АКТИВНЫЙ ЭТАП
+## S02-CORE-FOUNDATION — ПАРТИЯ ВЫПОЛНЕНА, READY_FOR_REVIEW
 
-**Статус:** `AUTHORIZED / IN_PROGRESS`; по завершении партии — `READY_FOR_REVIEW` (не `ACCEPTED`).
+**Статус:** `READY_FOR_REVIEW` (не `ACCEPTED`). Авторизация — D43, 2026-11-03.
 **Ветка:** `stage/s02-core-foundation` (от проверенного `stage/s01-unity-pilot` @ `a8842783378bf2621e6a39a50e1f9ee2398cf245`).
-**ТЗ:** [S02_CORE_FOUNDATION.md](stages/S02_CORE_FOUNDATION.md). **Отчёт:** [S02_REPORT.md](stages/S02_REPORT.md).
+**ТЗ:** [S02_CORE_FOUNDATION.md](stages/S02_CORE_FOUNDATION.md). **Отчёт с фактическими прогонами:** [S02_REPORT.md](stages/S02_REPORT.md).
 **Объём первой партии:** модули A — Progression, B — Character Stats, C — Items Foundation, D — Persistence Foundation. Чистая логика отделена от Unity-представления (ADR-0001).
+**Фактические результаты прогона 2026-11-03 (Unity 6000.3.27f2):** компиляция PASS (без `error CS`); EditMode **132/132 passed** (включая 10 регрессионных кейсов пилота); PlayMode **5/5 passed** (3 новых smoke + 2 регрессионных пилота); пересборка сцены `Pilot.unity` — `SCENE_SAVED`. Логи/XML — локально в `.unity-install/` (в `.gitignore`).
+**Проверка S01 Pilot @ `a884278` (перед началом партии):** импорт PASS, EditMode **10/10**, PlayMode **2/2**, сцена и генерация целы; критических дефектов нет. S01 остаётся `READY_FOR_REVIEW` — использование кода не равно приёмке.
+**Открытые вопросы, найденные в S02:** OQ-25 (какой стат предмета даёт `+8` к HP) — `OPEN`; OQ-26 (семантика флагов `0x7e & 0x8/0x10`) — `OPEN`. Множители типа атаки в уроне не реализованы (`UNKNOWN`).
+**Расхождения в текстах исследований (не в коде):** `EXPECT_LEVEL_FACTOR_4DP[101]` в `alpha_curves_reference.py` (5.6574 вместо 5.6569) и формулировка «±5 %» для материального множителя в `F_items.md` — подробности в [S02_REPORT.md](stages/S02_REPORT.md) §5.
 **Запрещено в S02:** переделывать генерацию мира, полная боевая система, AI/NPC, питомцы, подземелья, квесты, модели/анимации, URP, управление Alpha через DSH, объявление неизвестных чисел Alpha восстановленными, merge в `main`.
 **Blender / URP / Pipeline:** не требуются и не подключаются в этой партии.
 
