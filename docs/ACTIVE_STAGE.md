@@ -10,7 +10,7 @@
 ## S02-CORE-FOUNDATION — ПАРТИЯ ВЫПОЛНЕНА, READY_FOR_REVIEW
 
 **Статус:** `READY_FOR_REVIEW` (не `ACCEPTED`). Авторизация — D43, 2026-11-03.
-**Ветка:** `stage/s02-core-foundation` (от проверенного `stage/s01-unity-pilot` @ `a8842783378bf2621e6a39a50e1f9ee2398cf245`); опубликованный HEAD — **`3f24da470dbee8a4a63f32f5d189070dbfd29b71`** (коммиты памяти после него). Merge в `main` не выполнялся.
+**Ветка:** `stage/s02-core-foundation` (от проверенного `stage/s01-unity-pilot` @ `a8842783378bf2621e6a39a50e1f9ee2398cf245`); последний проверенный опубликованный HEAD — **`722e3fb962618c218a1a9862bae2cc3ac8b77177`** (REVIEW-FIX-01; коммит синхронизации памяти — после него). Merge в `main` не выполнялся.
 **ТЗ:** [S02_CORE_FOUNDATION.md](stages/S02_CORE_FOUNDATION.md). **Отчёт с фактическими прогонами:** [S02_REPORT.md](stages/S02_REPORT.md).
 **Объём первой партии:** модули A — Progression, B — Character Stats, C — Items Foundation, D — Persistence Foundation. Чистая логика отделена от Unity-представления (ADR-0001).
 **Фактические результаты (после REVIEW-FIX-01, Unity 6000.3.27f2):** компиляция PASS (без `error CS`/`warning CS`); EditMode **170/170 passed** (включая 10 регрессионных кейсов пилота); PlayMode **6/6 passed** (4 новых smoke + 2 регрессионных пилота); failed=0. Первый прогон партии до исправлений — 132/132 и 5/5. Логи/XML — локально в `.unity-install/` (в `.gitignore`): `rf01_editmode.xml`, `rf01_playmode.xml`.
