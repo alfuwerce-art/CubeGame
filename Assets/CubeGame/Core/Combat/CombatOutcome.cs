@@ -37,6 +37,7 @@ namespace CubeGame.Core.Combat
             double rawDamage,
             double armor,
             double blockFraction,
+            double defenseCapacity,
             double absorbedDamage,
             double appliedDamage,
             double healthBefore,
@@ -54,6 +55,7 @@ namespace CubeGame.Core.Combat
             RawDamage = rawDamage;
             Armor = armor;
             BlockFraction = blockFraction;
+            DefenseCapacity = defenseCapacity;
             AbsorbedDamage = absorbedDamage;
             AppliedDamage = appliedDamage;
             HealthBefore = healthBefore;
@@ -91,7 +93,16 @@ namespace CubeGame.Core.Combat
 
         public double BlockFraction { get; }
 
-        /// <summary>Поглощено бронёй/блоком.</summary>
+        /// <summary>
+        /// Расчётная защита <c>blockFraction · armor</c> — сколько урона защита могла бы поглотить.
+        /// Диагностическая величина: может быть больше входящего удара (см. <see cref="AbsorbedDamage"/>).
+        /// </summary>
+        public double DefenseCapacity { get; }
+
+        /// <summary>
+        /// Фактически поглощено бронёй/блоком: <c>min(RawDamage, DefenseCapacity)</c>.
+        /// Всегда <c>AbsorbedDamage + AppliedDamage = RawDamage</c> при попадании.
+        /// </summary>
         public double AbsorbedDamage { get; }
 
         /// <summary>Фактически снятые HP (0 при промахе или мёртвой цели).</summary>
@@ -112,14 +123,14 @@ namespace CubeGame.Core.Combat
         {
             return new CombatOutcome(
                 CombatStatus.Miss, effectiveChance, hitRoll, 0.0, -1, 1.0,
-                false, 0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, healthBefore, healthBefore);
+                false, 0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, healthBefore, healthBefore);
         }
 
         public static CombatOutcome TargetAlreadyDead(double healthBefore)
         {
             return new CombatOutcome(
                 CombatStatus.TargetAlreadyDead, 0.0, -1, 0.0, -1, 1.0,
-                false, 0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, healthBefore, healthBefore);
+                false, 0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, healthBefore, healthBefore);
         }
 
         public static CombatOutcome Hit(
@@ -134,6 +145,7 @@ namespace CubeGame.Core.Combat
             double rawDamage,
             double armor,
             double blockFraction,
+            double defenseCapacity,
             double absorbedDamage,
             double appliedDamage,
             double healthBefore,
@@ -142,7 +154,7 @@ namespace CubeGame.Core.Combat
             return new CombatOutcome(
                 CombatStatus.Hit, effectiveChance, hitRoll, baseDamage, varianceRoll, varianceMultiplier,
                 attackIdMultiplierApplied, attackId, attackIdMultiplier, rawDamage, armor, blockFraction,
-                absorbedDamage, appliedDamage, healthBefore, healthAfter);
+                defenseCapacity, absorbedDamage, appliedDamage, healthBefore, healthAfter);
         }
 
         /// <summary>Однострочное описание для лога и тестов.</summary>
@@ -151,9 +163,11 @@ namespace CubeGame.Core.Combat
             return string.Format(
                 CultureInfo.InvariantCulture,
                 "status={0} chance={1:F3} hitRoll={2} base={3:F2} variance={4:F3} raw={5:F2} " +
-                "armor={6:F2} blockFraction={7:F3} absorbed={8:F2} applied={9:F2} hp={10:F2}->{11:F2} dead={12}",
+                "armor={6:F2} blockFraction={7:F3} capacity={8:F2} absorbed={9:F2} applied={10:F2} " +
+                "hp={11:F2}->{12:F2} dead={13}",
                 Status, EffectiveHitChance, HitRoll, BaseDamage, VarianceMultiplier, RawDamage,
-                Armor, BlockFraction, AbsorbedDamage, AppliedDamage, HealthBefore, HealthAfter, IsDead);
+                Armor, BlockFraction, DefenseCapacity, AbsorbedDamage, AppliedDamage,
+                HealthBefore, HealthAfter, IsDead);
         }
     }
 }

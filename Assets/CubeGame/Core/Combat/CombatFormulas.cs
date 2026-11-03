@@ -95,9 +95,15 @@ namespace CubeGame.Core.Combat
         /// <summary>
         /// Порог успешного блока: <c>int((1 − 1/((L−1)·0.05+1))·100 + 1)</c> (E6, <c>REFERENCE_VERIFIED</c>).
         /// L=1 → 1, L=2 → 5, L=5 → 17, L=10 → 32, L=20 → 49, L=50 → 72.
+        /// Уровень меньше 1 отвергается, как и в остальных игровых формулах (REVIEW-FIX-01).
         /// </summary>
         public static int BlockThreshold(int level)
         {
+            if (level < Progression.ProgressionState.MinLevel)
+            {
+                throw new ArgumentOutOfRangeException(nameof(level), level, "Уровень начинается с 1 (Alpha).");
+            }
+
             return (int)(AlphaMath.CurveLevel05(level) * 100.0 + 1.0);
         }
 

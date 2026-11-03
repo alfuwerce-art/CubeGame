@@ -9,9 +9,9 @@
 
 | Проверка | Результат | Артефакт |
 |---|---|---|
-| Компиляция проекта с боевым ядром | **PASS** (exit 0, без `error CS`/`warning CS`) | `.unity-install/logs/s03_import.log` |
-| EditMode (полный прогон) | **PASS 232/232**, failed=0 | `.unity-install/results/s03_editmode3.xml` |
-| PlayMode (полный прогон) | **PASS 10/10**, failed=0 | `.unity-install/results/s03_playmode.xml` |
+| Компиляция проекта с боевым ядром | **PASS** (exit 0, без `error CS`/`warning CS`) | `.unity-install/logs/rf03_import.log` |
+| EditMode (полный прогон, после REVIEW-FIX-01) | **PASS 251/251**, failed=0 | `.unity-install/results/rf03_editmode.xml` |
+| PlayMode (полный прогон, после REVIEW-FIX-01) | **PASS 10/10**, failed=0 | `.unity-install/results/rf03_playmode.xml` |
 | Регрессия S01 (сцена/генерация) | **PASS** — EditMode 10/10 (`ChunkMeshTests`, `TerrainDeterminismTests`), PlayMode 2/2 (`PilotPlayModeTests`) | те же XML |
 | Регрессия S02 | **PASS** — `ProgressionTests` 51, `CharacterStatsTests` 22, `ItemStatsTests` 65, `PersistenceTests` 28; PlayMode S02 4/4 | те же XML |
 | `alpha_curves_reference.py --check` | **PASS**, exit 0 | — |
@@ -19,8 +19,8 @@
 | `alpha_combat_reference.py --check` | **PASS**, exit 0 | — |
 | `git diff --check` | чисто, exit 0 | — |
 
-**Новых тестов:** +62 EditMode (170 → 232), +4 PlayMode (6 → 10).
-Разбивка EditMode по фикстурам: `CombatFormulaTests` 39, `CombatResolutionTests` 17, `ItemStatsTests` 65 (+6 к S02), `ProgressionTests` 51, `PersistenceTests` 28, `CharacterStatsTests` 22, `ChunkMeshTests` 5, `TerrainDeterminismTests` 5.
+**Итоговые тесты:** EditMode **251/251**, PlayMode **10/10**. Первая партия S03 дала 232/10 (+62 EditMode, +4 PlayMode к S02); REVIEW-FIX-01 добавил ещё **+19 EditMode** (232 → 251), PlayMode остался 10/10.
+Разбивка EditMode по фикстурам: `CombatFormulaTests` 53, `CombatResolutionTests` 22, `ItemStatsTests` 65, `ProgressionTests` 51, `PersistenceTests` 28, `CharacterStatsTests` 22, `ChunkMeshTests` 5, `TerrainDeterminismTests` 5.
 
 ## 2. Что реализовано
 
@@ -77,9 +77,11 @@ HP 100 → 75, death = false
 
 ```
 [Combat] status=Hit chance=1.000 hitRoll=20 base=1.00 variance=1.172 raw=1.17 armor=0.00
-         blockFraction=0.000 absorbed=0.00 applied=1.17 hp=100.00->98.83 dead=False
+         blockFraction=0.000 capacity=0.00 absorbed=0.00 applied=1.17 hp=100.00->98.83 dead=False
 [Combat] status=Hit chance=1.000 hitRoll=28 base=1.00 variance=1.140 raw=1.14 armor=0.00
-         blockFraction=0.000 absorbed=0.00 applied=0.50 hp=0.50->0.00 dead=True
+         blockFraction=0.000 capacity=0.00 absorbed=0.00 applied=0.50 hp=0.50->0.00 dead=True
+[Combat] status=Hit chance=0.600 hitRoll=11051 base=1.00 variance=1.170 raw=1.17 armor=5.00
+         blockFraction=0.250 capacity=1.25 absorbed=1.17 applied=0.00 hp=1000.00->1000.00 dead=False
 [Combat] status=TargetAlreadyDead chance=0.000 hitRoll=-1 ... applied=0.00 hp=0.00->0.00 dead=True
 ```
 
@@ -90,6 +92,18 @@ HP 100 → 75, death = false
 1. **Дефолт `CombatAttack.EquippedItemType = 3` включал частичный модификатор шанса.** Статистический тест (chance = 0.5 на 10 000 ударов) дал 2 545 попаданий вместо ожидаемых ~5 000: подтип оружия по умолчанию (0) попадал в группу `×0.5`, эффективный шанс становился 0.25. Исправлено: тип слота по умолчанию 0 («не оружие»), частичный модификатор применяется только по явной настройке; добавлен тест `WeaponSubtypeModifierIsAppliedOnlyWhenExplicitlyConfigured`. Это ровно тот случай, когда частичная механика не должна работать «по умолчанию».
 2. **Тест на потребление бросков был некорректен** (`FixedCombatRandom` исчерпывался, потому что бросок 16000 при chance 0.5 давал попадание). Исправлено на бросок 30000 (промах в обоих случаях); сам резолвер не менялся.
 3. **Единая валидация модификатора** (замечание ревью S02): конструктор `ItemInstance` раньше не проверял `ItemModifier`. Исправлено без изменения известных значений модификаторов, добавлены негативные тесты.
+
+## 5a. S03-REVIEW-FIX-01 (2026-11-03) — исправления по замечаниям ревью
+
+| FIX | Что исправлено | Доказательство |
+|---|---|---|
+| **FIX-01** (HIGH) — `AbsorbedDamage` | `absorbed` больше не равен `blockFraction · armor` безусловно: расчётная защита вынесена в отдельное поле `DefenseCapacity`, а `AbsorbedDamage = min(RawDamage, DefenseCapacity)`, `FinalDamage = max(0, RawDamage − AbsorbedDamage)`. Теперь поглощённое не превышает удар и `AbsorbedDamage + FinalDamage = RawDamage`. В лог добавлено `capacity=`. Изменение HP не изменилось (проверено теми же сценариями) | `MitigationControlTableMatchesReview` (5 контрольных строк: 1.25/10/0.5 → 1.25 + 0; 30/10/0.5 → 5 + 25; 20/0/1 → 0 + 20; 20/100/0 → 0 + 20; 0/10/1 → 0 + 0), `MitigationDefenseCapacityIsDiagnosticOnly`, `MitigationHandlesBoundaryBlockFractions` (0/0.25/1), `MitigationWithLargeFiniteValuesStaysFinite` (1e300 без `Infinity`); в резолвере — `MitigationIsAppliedBeforeHealthChange` |
+| **FIX-02** (MEDIUM) — `AttackIdMultiplierApplied` | Признак теперь означает **фактическое** применение: `UseAttackIdMultiplier && TryGetAttackIdMultiplier(...)`. Неизвестный ID не меняет урон, множитель остаётся `1.0`, признак `false` | `KnownAttackIdWithoutPermissionIsNotApplied`, `KnownAttackIdWithPermissionIsApplied` (0x5B → ×2, 0x57 → ×50), `UnknownAttackIdDoesNotFakeAppliedFlag` (0x55), `UnknownAttackIdOutcomeIsRepeatableAndKeepsBaseDamage` |
+| **FIX-03** (LOW) — `BlockThreshold` | Для `level < 1` — `ArgumentOutOfRangeException`, проверка действует и через `RollBlock()`; формула порога не менялась | `BlockThresholdRejectsLevelBelowOne` (−1, 0), `RollBlockRejectsLevelBelowOne` (−1, 0); существующая таблица порогов (1→1, 2→5, 5→17, 10→32, 20→49, 50→72) зелёная |
+
+**Публичные контракты:** `MitigationResult` и `CombatOutcome` получили поле `DefenseCapacity`; семантика `AbsorbedDamage` уточнена (диагностика, а не «потенциал защиты»). Порядок потребления RNG и результаты изменения HP не менялись. Статус алгоритма митигации остаётся `PARTIAL`; уточнение диагностической величины **не** объявляется новой подтверждённой механикой Alpha.
+
+**Итог прогона REVIEW-FIX-01 (Unity 6000.3.27f2, DeepSeek):** компиляция PASS без `error CS`/`warning CS`; EditMode **251/251 passed** (+19), PlayMode **10/10 passed**, failed=0; регрессии S01 (10/10 + 2/2) и S02 (все фикстуры) внутри прогона; Python-эталоны `alpha_curves`/`alpha_items`/`alpha_combat --check` — PASS (exit 0); `git diff --check` — чисто. Артефакты: `.unity-install/results/rf03_editmode.xml`, `.unity-install/results/rf03_playmode.xml`, логи `rf03_*.log`.
 
 ## 6. Ограничения и что осталось неподтверждённым
 

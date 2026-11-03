@@ -143,7 +143,9 @@ namespace CubeGame.Tests.EditMode
             CombatOutcome outcome = resolver.Resolve(attack, target);
 
             Assert.AreEqual(1.25, outcome.RawDamage, Tolerance);
-            Assert.AreEqual(5.0, outcome.AbsorbedDamage, Tolerance);
+            Assert.AreEqual(5.0, outcome.DefenseCapacity, Tolerance, "расчётная защита");
+            Assert.AreEqual(1.25, outcome.AbsorbedDamage, Tolerance,
+                "фактически поглощено не больше удара (REVIEW-FIX-01)");
             Assert.AreEqual(0.0, outcome.AppliedDamage, Tolerance, "урон не уходит в минус");
             Assert.AreEqual(100.0, target.CurrentHealth, Tolerance);
         }
@@ -216,6 +218,76 @@ namespace CubeGame.Tests.EditMode
             Assert.Throws<InvalidOperationException>(() => resolver.Resolve(CreateAttack(hitChance: 1.0), target));
 
             Assert.AreEqual(100.0, target.CurrentHealth, Tolerance, "HP не должно меняться при ошибке расчёта");
+        }
+
+        // --- REVIEW-FIX-01: признак применения множителя ID атаки --------------
+
+        [Test]
+        public void KnownAttackIdWithoutPermissionIsNotApplied()
+        {
+            CombatAttack attack = CreateAttack(hitChance: 1.0);
+            attack.AttackId = 0x5B; // известен, но механизм выключен
+            attack.UseAttackIdMultiplier = false;
+
+            CombatOutcome outcome = new DamageResolver(new FixedCombatRandom(0, 0)).Resolve(attack, new HealthPool(1000.0));
+
+            Assert.IsFalse(outcome.AttackIdMultiplierApplied, "без разрешения множитель не применяется");
+            Assert.That(outcome.AttackIdMultiplier, Is.EqualTo(1.0).Within(Tolerance));
+            Assert.That(outcome.RawDamage, Is.EqualTo(1.25).Within(Tolerance), "урон без множителя");
+        }
+
+        [TestCase(0x5B, 2.0)]
+        [TestCase(0x57, 50.0)]
+        public void KnownAttackIdWithPermissionIsApplied(int attackId, double multiplier)
+        {
+            CombatAttack attack = CreateAttack(hitChance: 1.0);
+            attack.AttackId = attackId;
+            attack.UseAttackIdMultiplier = true;
+
+            CombatOutcome outcome = new DamageResolver(new FixedCombatRandom(0, 0)).Resolve(attack, new HealthPool(1000.0));
+
+            Assert.IsTrue(outcome.AttackIdMultiplierApplied, "известный ID при включённом механизме должен применяться");
+            Assert.That(outcome.AttackIdMultiplier, Is.EqualTo(multiplier).Within(Tolerance));
+            Assert.That(outcome.RawDamage, Is.EqualTo(1.25 * multiplier).Within(1e-6));
+            Assert.AreEqual(attackId, outcome.AttackId);
+        }
+
+        [Test]
+        public void UnknownAttackIdDoesNotFakeAppliedFlag()
+        {
+            CombatAttack attack = CreateAttack(hitChance: 1.0);
+            attack.AttackId = 0x55; // в таблице отсутствует
+            attack.UseAttackIdMultiplier = true;
+
+            CombatOutcome outcome = new DamageResolver(new FixedCombatRandom(0, 0)).Resolve(attack, new HealthPool(1000.0));
+
+            Assert.IsFalse(outcome.AttackIdMultiplierApplied,
+                "неизвестный ID не должен выдаваться за применённый множитель (REVIEW-FIX-01)");
+            Assert.That(outcome.AttackIdMultiplier, Is.EqualTo(1.0).Within(Tolerance));
+            Assert.That(outcome.RawDamage, Is.EqualTo(1.25).Within(Tolerance), "урон не меняется");
+            StringAssert.Contains("raw=1.25", outcome.ToLogLine(), "лог показывает урон без множителя");
+        }
+
+        [Test]
+        public void UnknownAttackIdOutcomeIsRepeatableAndKeepsBaseDamage()
+        {
+            CombatAttack first = CreateAttack(hitChance: 1.0);
+            first.AttackId = 0x99;
+            first.UseAttackIdMultiplier = true;
+
+            CombatAttack second = CreateAttack(hitChance: 1.0);
+            second.AttackId = 0x99;
+            second.UseAttackIdMultiplier = true;
+
+            CombatOutcome outcomeA = new DamageResolver(new FixedCombatRandom(0, 0)).Resolve(first, new HealthPool(1000.0));
+            CombatOutcome outcomeB = new DamageResolver(new FixedCombatRandom(0, 0)).Resolve(second, new HealthPool(1000.0));
+
+            Assert.AreEqual(outcomeA.RawDamage, outcomeB.RawDamage, 1e-12, "результат воспроизводим");
+            Assert.AreEqual(outcomeA.AttackIdMultiplierApplied, outcomeB.AttackIdMultiplierApplied);
+            Assert.IsFalse(outcomeA.AttackIdMultiplierApplied);
+            Assert.AreEqual(outcomeA.BaseDamage, outcomeA.RawDamage / outcomeA.VarianceMultiplier, 1e-9,
+                "база не искажена неизвестным множителем");
+            StringAssert.Contains("status=Hit", outcomeA.ToLogLine());
         }
 
         [Test]

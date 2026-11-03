@@ -63,12 +63,17 @@ namespace CubeGame.Core.Combat
             double baseDamage = CombatFormulas.WeaponDamage(attack.WeaponBase, attack.Level, attack.Upgrades, attack.Stars);
             double rawDamage = baseDamage * variance;
 
-            bool attackIdApplied = attack.UseAttackIdMultiplier;
+            // PARTIAL: множитель применяется только если механизм разрешён вызывающим кодом
+            // (UseAttackIdMultiplier) И для конкретного ID найден в таблице. Неизвестный ID
+            // не меняет урон и не выдаётся за поддерживаемую атаку (REVIEW-FIX-01).
+            bool attackIdApplied = false;
             double attackIdMultiplier = 1.0;
-            if (attackIdApplied)
+            if (attack.UseAttackIdMultiplier
+                && CombatFormulas.TryGetAttackIdMultiplier(attack.AttackId, out double foundMultiplier))
             {
-                CombatFormulas.TryGetAttackIdMultiplier(attack.AttackId, out attackIdMultiplier);
-                rawDamage = CombatFormulas.ApplyAttackIdMultiplier(rawDamage, attack.AttackId);
+                attackIdApplied = true;
+                attackIdMultiplier = foundMultiplier;
+                rawDamage *= foundMultiplier;
             }
 
             // Защита считается до изменения HP: исключение здесь не оставляет половинчатого состояния.
@@ -88,6 +93,7 @@ namespace CubeGame.Core.Combat
                 rawDamage,
                 mitigation.Armor,
                 mitigation.BlockFraction,
+                mitigation.DefenseCapacity,
                 mitigation.AbsorbedDamage,
                 applied,
                 healthBefore,

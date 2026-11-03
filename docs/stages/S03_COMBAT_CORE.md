@@ -19,7 +19,7 @@
 |---|---|---|
 | A — Combat Formulas | `Core/Combat/CombatFormulas.cs` | урон оружия (база · `levelFactor` + подтверждённые флаги), разброс `1.25 − 0.5·roll/32767`, таблица множителей ID атак (изолированно), порог и бросок блока, модификатор шанса по подтипу оружия (изолированно) |
 | B — Hit Resolution | `Core/Combat/HitResolver.cs`, `Core/Combat/CombatRandom.cs` | `hit = roll/32767 < chance`, `HitOutcome`, детерминированные источники RNG (`SeededCombatRandom`, `FixedCombatRandom`) |
-| C — Armor / Block Mitigation | `Core/Combat/DamageMitigation.cs` | `final = max(0, rawDamage − blockFraction·armor)`, подробный результат снижения |
+| C — Armor / Block Mitigation | `Core/Combat/DamageMitigation.cs` | `defenseCapacity = blockFraction·armor` (диагностика), `absorbed = min(raw, defenseCapacity)`, `final = max(0, raw − absorbed)`; подробный результат снижения |
 | D — Health Pool / Outcome | `Core/Combat/HealthPool.cs`, `Core/Combat/CombatOutcome.cs` | текущее/максимальное HP, урон, лечение с клампом, смерть, запрет отрицательного HP, диагностика результата |
 | E — Damage Resolver | `Core/Combat/DamageResolver.cs`, `Core/Combat/CombatAttack.cs` | единый процесс `AttackInput → HitCheck → DamageCalculation → Mitigation → HealthPool → CombatOutcome` |
 | F — Unity-демонстрация | `Presentation/Combat/CombatDemo.cs` | компонент с тестовой целью, одна команда `Strike()`, вывод результата в лог |
@@ -36,7 +36,7 @@
 | Порог блока `int((1−1/((L−1)·0.05+1))·100+1)` | `REFERENCE_VERIFIED` | `CombatFormulas.BlockThreshold` |
 | Множители ID атак `0x57 ×50`, `0x5B ×2`, `0x5D ×5`, `0x60 ×3` | `PARTIAL` | `CombatFormulas` + **только** при `CombatAttack.UseAttackIdMultiplier = true` |
 | Модификаторы шанса по подтипу оружия (`×0.5`, `×0.3`) | `PARTIAL` | `ApplyWeaponSubtypeHitModifier` + только при явно заданном типе слота оружия |
-| Снижение урона `rawDamage − blockFraction·armor`, кламп 0 | `PARTIAL` | `DamageMitigation`; контрольный случай 30/10/0.5 → 25 |
+| Снижение урона: `absorbed = min(raw, blockFraction·armor)`, `final = max(0, raw − absorbed)` | `PARTIAL` | `DamageMitigation`; контрольный случай 30/10/0.5 → absorbed 5, final 25; `DefenseCapacity` — диагностическая величина |
 | Базовая формула `chance` персонажа | `UNKNOWN` (OQ-01) | шанс передаёт вызывающий код, значения по умолчанию нет |
 | Автоматическая доля блока из боевой серии (`+0x70`) | `PARTIAL` (OQ-24) | `blockFraction` передаётся явно, не вычисляется |
 | Порядок «блок → броня → HP» | `PARTIAL` (OQ-02) | реализован один порядок, отмечен как частичный |

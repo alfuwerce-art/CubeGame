@@ -1,3 +1,4 @@
+using System;
 using CubeGame.Core.Characters;
 using CubeGame.Core.Combat;
 using NUnit.Framework;
@@ -172,8 +173,26 @@ namespace CubeGame.Tests.EditMode
         [Test]
         public void BlockRollRejectsOutOfRangeValues()
         {
-            Assert.Throws<System.ArgumentOutOfRangeException>(() => CombatFormulas.RollBlock(1, -1));
-            Assert.Throws<System.ArgumentOutOfRangeException>(() => CombatFormulas.RollBlock(1, 101));
+            Assert.Throws<ArgumentOutOfRangeException>(() => CombatFormulas.RollBlock(1, -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => CombatFormulas.RollBlock(1, 101));
+        }
+
+        // --- REVIEW-FIX-01: уровень в пороге блока ----------------------------
+
+        [TestCase(-1)]
+        [TestCase(0)]
+        public void BlockThresholdRejectsLevelBelowOne(int level)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => CombatFormulas.BlockThreshold(level),
+                $"уровень {level} должен отвергаться, как и в остальных формулах");
+        }
+
+        [TestCase(-1)]
+        [TestCase(0)]
+        public void RollBlockRejectsLevelBelowOne(int level)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => CombatFormulas.RollBlock(level, 1),
+                "проверка уровня должна срабатывать и через RollBlock");
         }
 
         // --- Снижение урона (E3, PARTIAL) -------------------------------------
@@ -197,8 +216,67 @@ namespace CubeGame.Tests.EditMode
         public void MitigationNeverProducesNegativeDamage()
         {
             MitigationResult result = DamageMitigation.Apply(1.0, 100.0, 1.0);
+
             Assert.That(result.FinalDamage, Is.EqualTo(0.0).Within(Tolerance), "урон не уходит в минус");
-            Assert.That(result.AbsorbedDamage, Is.EqualTo(100.0).Within(Tolerance));
+            Assert.That(result.DefenseCapacity, Is.EqualTo(100.0).Within(Tolerance), "расчётная защита сохраняется для диагностики");
+            Assert.That(result.AbsorbedDamage, Is.EqualTo(1.0).Within(Tolerance),
+                "фактически поглощено не больше входящего урона (REVIEW-FIX-01)");
+        }
+
+        // --- REVIEW-FIX-01: фактически поглощённый урон ------------------------
+
+        [TestCase(1.25, 10.0, 0.5, 1.25, 0.0)]
+        [TestCase(30.0, 10.0, 0.5, 5.0, 25.0)]
+        [TestCase(20.0, 0.0, 1.0, 0.0, 20.0)]
+        [TestCase(20.0, 100.0, 0.0, 0.0, 20.0)]
+        [TestCase(0.0, 10.0, 1.0, 0.0, 0.0)]
+        public void MitigationControlTableMatchesReview(double raw, double armor, double fraction, double absorbed, double final)
+        {
+            MitigationResult result = DamageMitigation.Apply(raw, armor, fraction);
+
+            Assert.That(result.RawDamage, Is.EqualTo(raw).Within(Tolerance));
+            Assert.That(result.AbsorbedDamage, Is.EqualTo(absorbed).Within(Tolerance), "фактически поглощённый урон");
+            Assert.That(result.FinalDamage, Is.EqualTo(final).Within(Tolerance), "итоговый урон");
+            Assert.That(result.AbsorbedDamage, Is.LessThanOrEqualTo(result.RawDamage + Tolerance),
+                "поглощённое не может превышать входящий урон");
+            Assert.That(result.AbsorbedDamage + result.FinalDamage, Is.EqualTo(result.RawDamage).Within(1e-9),
+                "поглощённое + итоговое = входящий урон");
+        }
+
+        [Test]
+        public void MitigationDefenseCapacityIsDiagnosticOnly()
+        {
+            // Защита «могла бы» поглотить 5, но удар всего 1.25 → поглощено 1.25.
+            MitigationResult result = DamageMitigation.Apply(1.25, 10.0, 0.5);
+
+            Assert.That(result.DefenseCapacity, Is.EqualTo(5.0).Within(Tolerance), "расчётная защита");
+            Assert.That(result.AbsorbedDamage, Is.EqualTo(1.25).Within(Tolerance), "фактически предотвращено");
+            Assert.That(result.FinalDamage, Is.EqualTo(0.0).Within(Tolerance));
+        }
+
+        [TestCase(0.0)]
+        [TestCase(0.25)]
+        [TestCase(1.0)]
+        public void MitigationHandlesBoundaryBlockFractions(double fraction)
+        {
+            MitigationResult result = DamageMitigation.Apply(10.0, 8.0, fraction);
+
+            Assert.That(result.DefenseCapacity, Is.EqualTo(fraction * 8.0).Within(Tolerance));
+            Assert.That(result.AbsorbedDamage, Is.EqualTo(Math.Min(10.0, fraction * 8.0)).Within(Tolerance));
+            Assert.That(result.AbsorbedDamage + result.FinalDamage, Is.EqualTo(10.0).Within(1e-9));
+        }
+
+        [Test]
+        public void MitigationWithLargeFiniteValuesStaysFinite()
+        {
+            double large = 1e300;
+            MitigationResult result = DamageMitigation.Apply(large, large, 1.0);
+
+            Assert.IsFalse(double.IsInfinity(result.DefenseCapacity), "расчётная защита не должна становиться Infinity");
+            Assert.IsFalse(double.IsInfinity(result.AbsorbedDamage));
+            Assert.IsFalse(double.IsInfinity(result.FinalDamage));
+            Assert.That(result.AbsorbedDamage, Is.EqualTo(large).Within(1e300 * 1e-9));
+            Assert.That(result.FinalDamage, Is.EqualTo(0.0).Within(Tolerance));
         }
 
         [Test]

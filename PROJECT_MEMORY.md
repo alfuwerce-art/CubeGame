@@ -2,7 +2,7 @@
 
 **Рабочее название проекта:** `CubeGame`. **Окончательное название игры НЕ утверждено.**  
 **Репозиторий:** https://github.com/alfuwerce-art/CubeGame  
-**Обновлено:** 2026-11-03 (**S03-COMBAT-CORE выполнен → `READY_FOR_REVIEW`**: EditMode 232/232, PlayMode 10/10; S02 `ACCEPTED` (D44); S00-R02 `ACCEPTED`; D42 в силе; OQ-01/OQ-02/OQ-22…OQ-26 открыты или `PARTIAL`)
+**Обновлено:** 2026-11-03 (**S03-COMBAT-CORE + REVIEW-FIX-01 → `READY_FOR_REVIEW`**: EditMode 251/251, PlayMode 10/10; S02 `ACCEPTED` (D44); S00-R02 `ACCEPTED`; D42 в силе; OQ-01/OQ-02/OQ-22…OQ-26 открыты или `PARTIAL`)
 **Назначение:** общий контекст для **нового чата ChatGPT**, **DeepSeek Harness** и других будущих исполнителей. **Не заменяет** утверждённые решения, детальные ТЗ и фактические отчёты.  
 **Это живой документ.** Изменять по правилам раздела «Обновление памяти».
 
@@ -65,7 +65,7 @@
 | `stage/s01-unity-pilot` | **`a8842783378bf2621e6a39a50e1f9ee2398cf245`** | Пилот **на GitHub**, `READY_FOR_REVIEW`; **технически перепроверен 2026-11-03**: импорт PASS, EditMode 10/10, PlayMode 2/2 |
 | `stage/s00-deep-research` | **`60ac26a89d1235612588726e6b28ae321f3da9ce`** (последний проверенный HEAD перед закрытием; коммит закрытия этапа — после него) | S00-R02 **`ACCEPTED`** — закрыт продюсером 2026-11-03 (ограниченная приёмка: объём исследования, а не паритет с Alpha). Пакеты A…L `PARTIAL`; FIX-01…FIX-07; OQ-22 `PARTIAL`, OQ-23 `OPEN/BLOCKED`, OQ-24 `PARTIAL`; D42 `ACCEPTED` |
 | `stage/s02-core-foundation` | **`626f21ed3d83f258386b35165a567ff52ec8b31c`** (+ коммит закрытия S02) | `S02-CORE-FOUNDATION` **`ACCEPTED`** (D44, 2026-11-03; ревью ChatGPT `PASS`); компиляция PASS, EditMode **170/170**, PlayMode **6/6** (выполнено DeepSeek) |
-| `stage/s03-combat-core` | **`a6735301ecebb19717e7fa0948f866681d3e8205`** (от принятого S02 `1df7413`) | `S03-COMBAT-CORE` **`READY_FOR_REVIEW`**, не `ACCEPTED`; компиляция PASS, EditMode **232/232**, PlayMode **10/10** (выполнено DeepSeek); отчёт `docs/stages/S03_REPORT.md` |
+| `stage/s03-combat-core` | **`a6735301ecebb19717e7fa0948f866681d3e8205`** (партия S03; после REVIEW-FIX-01 — коммиты в той же ветке) | `S03-COMBAT-CORE` **`READY_FOR_REVIEW`**, не `ACCEPTED`; после REVIEW-FIX-01: компиляция PASS, EditMode **251/251**, PlayMode **10/10** (выполнено DeepSeek); отчёт `docs/stages/S03_REPORT.md` |
 
 По финальному отчёту DeepSeek для пилота: Unity 6.3 Personal, импорт/компиляция PASS, **EditMode 10/10**, **PlayMode 2/2**, сцена/Windows exe/скриншот созданы, генерация 64 чанков. Это **результаты локального агента**, а не независимо воспроизведённые ChatGPT тесты. Скриншот и журналы в локальной `.unity-install/`, не в GitHub. **Нельзя обещать независимое принятие S01 без ревью.**
 
@@ -77,7 +77,9 @@
 
 **Статус:** **`READY_FOR_REVIEW`** (не `ACCEPTED`). Авторизация — продюсер, 2026-11-03 ([D44](docs/decisions/D44-s02-accepted-s03-authorized.md)); ветка `stage/s03-combat-core` от принятого коммита S02 (`1df7413`). ТЗ — [docs/stages/S03_COMBAT_CORE.md](docs/stages/S03_COMBAT_CORE.md), отчёт — [docs/stages/S03_REPORT.md](docs/stages/S03_REPORT.md).
 
-**Фактический прогон (Unity 6000.3.27f2, выполнено DeepSeek):** компиляция PASS без `error CS`/`warning CS`; EditMode **232/232 passed**, PlayMode **10/10 passed**, failed=0; новых тестов +62/+4. Регрессия S01 (10/10 + 2/2) и S02 (все фикстуры) внутри прогона. Эталонные скрипты `alpha_curves/items/combat --check` — PASS. Артефакты: `.unity-install/results/s03_editmode3.xml`, `.unity-install/results/s03_playmode.xml`.
+**Фактический прогон (Unity 6000.3.27f2, выполнено DeepSeek):** после **S03-REVIEW-FIX-01** — компиляция PASS без `error CS`/`warning CS`; EditMode **251/251 passed**, PlayMode **10/10 passed**, failed=0; первая партия дала 232/10, исправления добавили +19 EditMode. Регрессия S01 (10/10 + 2/2) и S02 (все фикстуры) внутри прогона. Эталонные скрипты `alpha_curves/items/combat --check` — PASS; `git diff --check` — чисто. Артефакты: `.unity-install/results/rf03_editmode.xml`, `.unity-install/results/rf03_playmode.xml`.
+
+**S03-REVIEW-FIX-01 (2026-11-03):** FIX-01 — `AbsorbedDamage = min(raw, blockFraction·armor)`, расчётная защита вынесена в `DefenseCapacity`, `absorbed + final = raw`; FIX-02 — `AttackIdMultiplierApplied` только при найденном в таблице ID (неизвестный ID не меняет урон и не выдаётся за применённый); FIX-03 — `BlockThreshold` отвергает `level < 1`, проверка действует через `RollBlock`. Изменены `DamageMitigation`, `CombatOutcome`, `DamageResolver`, `CombatFormulas` и тесты; порядок RNG и результаты изменения HP не менялись; статус митигации остаётся `PARTIAL`. Подробности — [S03_REPORT](docs/stages/S03_REPORT.md) §5a.
 
 **Реализовано в S03:** `Assets/CubeGame/Core/Combat/` — `CombatFormulas` (урон, разброс `1.25−0.5·roll/32767`, таблица ID атак, порог/бросок блока, модификатор шанса по подтипу оружия), `HitResolver` (`roll/32767 < chance`), `DamageMitigation` (`max(0, raw − blockFraction·armor)`), `HealthPool`, `CombatOutcome`, `CombatAttack`, `DamageResolver`, детерминированные `ICombatRandom`/`SeededCombatRandom`/`FixedCombatRandom`; `Assets/CubeGame/Presentation/Combat/CombatDemo.cs` — демонстрация удара с логом. Ядро без UnityEngine. Дополнительно: единая валидация `ItemModifier` в конструкторе `ItemInstance` (замечание ревью S02).
 

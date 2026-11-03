@@ -5,11 +5,18 @@ namespace CubeGame.Core.Combat
     /// <summary>Подробный результат снижения урона (для логов, тестов и отчёта удара).</summary>
     public readonly struct MitigationResult
     {
-        public MitigationResult(double rawDamage, double armor, double blockFraction, double absorbedDamage, double finalDamage)
+        public MitigationResult(
+            double rawDamage,
+            double armor,
+            double blockFraction,
+            double defenseCapacity,
+            double absorbedDamage,
+            double finalDamage)
         {
             RawDamage = rawDamage;
             Armor = armor;
             BlockFraction = blockFraction;
+            DefenseCapacity = defenseCapacity;
             AbsorbedDamage = absorbedDamage;
             FinalDamage = finalDamage;
         }
@@ -23,7 +30,16 @@ namespace CubeGame.Core.Combat
         /// <summary>Доля брони, реально сработавшая (0…1).</summary>
         public double BlockFraction { get; }
 
-        /// <summary>Поглощённый бронёй урон.</summary>
+        /// <summary>
+        /// Расчётная защита <c>blockFraction · armor</c> — сколько урона защита могла бы поглотить.
+        /// Может быть больше входящего удара (диагностическая величина, не «поглощённый урон»).
+        /// </summary>
+        public double DefenseCapacity { get; }
+
+        /// <summary>
+        /// Фактически предотвращённый урон: <c>min(RawDamage, DefenseCapacity)</c>.
+        /// Никогда не превышает <see cref="RawDamage"/>, поэтому <c>AbsorbedDamage + FinalDamage = RawDamage</c>.
+        /// </summary>
         public double AbsorbedDamage { get; }
 
         /// <summary>Итоговый урон, не меньше нуля.</summary>
@@ -32,7 +48,7 @@ namespace CubeGame.Core.Combat
         public override string ToString()
         {
             return $"raw={RawDamage:F3} armor={Armor:F3} blockFraction={BlockFraction:F3} " +
-                   $"absorbed={AbsorbedDamage:F3} final={FinalDamage:F3}";
+                   $"capacity={DefenseCapacity:F3} absorbed={AbsorbedDamage:F3} final={FinalDamage:F3}";
         }
     }
 
@@ -62,14 +78,18 @@ namespace CubeGame.Core.Combat
                 throw new ArgumentOutOfRangeException(nameof(blockFraction), blockFraction, "Доля блока должна быть в диапазоне 0…1.");
             }
 
-            double absorbed = blockFraction * armor;
+            // Расчётная защита — сколько урона защита могла бы поглотить.
+            double defenseCapacity = blockFraction * armor;
+
+            // Фактически предотвращённый урон не может превысить сам удар (REVIEW-FIX-01).
+            double absorbed = Math.Min(rawDamage, defenseCapacity);
             double finalDamage = rawDamage - absorbed;
             if (finalDamage < 0.0)
             {
                 finalDamage = 0.0;
             }
 
-            return new MitigationResult(rawDamage, armor, blockFraction, absorbed, finalDamage);
+            return new MitigationResult(rawDamage, armor, blockFraction, defenseCapacity, absorbed, finalDamage);
         }
 
         private static void ValidateNonNegativeFinite(double value, string parameterName)
