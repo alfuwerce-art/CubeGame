@@ -1,7 +1,7 @@
 # S02 — CORE FOUNDATION (первая партия базовых систем CubeGame)
 
 **Проект:** CubeGame (рабочее название игры не утверждено).
-**Этап:** `S02-CORE-FOUNDATION`. **Статус:** `AUTHORIZED / IN_PROGRESS` (решение продюсера 2026-11-03, [D43](../decisions/D43-close-s00-s02-core-foundation.md)); после выполнения партии — `READY_FOR_REVIEW`, **не** `ACCEPTED`.
+**Этап:** `S02-CORE-FOUNDATION`. **Статус:** **`ACCEPTED`** — решение продюсера **2026-11-03** ([D44](../decisions/D44-s02-accepted-s03-authorized.md)), архитектурное ревью ChatGPT — `PASS`. Ранее: `AUTHORIZED / IN_PROGRESS` → `READY_FOR_REVIEW`. Приёмка — ограниченная: приняты четыре модуля как техническая основа, а не полный паритет с Alpha.
 **Ветка:** `stage/s02-core-foundation` (от проверенного `stage/s01-unity-pilot` @ `a8842783378bf2621e6a39a50e1f9ee2398cf245`).
 **Unity:** `6000.3.27f2` (Unity 6.3 LTS), Built-in RP. URP/Pipeline в этой партии не подключаются.
 **Архитектура:** [ADR-0001](../architecture/ADR-0001-modular-monolith.md) — модульный монолит.

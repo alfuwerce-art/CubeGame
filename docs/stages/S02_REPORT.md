@@ -3,7 +3,7 @@
 **Проект:** CubeGame (рабочее название). **Этап:** `S02-CORE-FOUNDATION` ([ТЗ](S02_CORE_FOUNDATION.md), [D43](../decisions/D43-close-s00-s02-core-foundation.md)).
 **Ветка:** `stage/s02-core-foundation` (от `stage/s01-unity-pilot` @ `a8842783378bf2621e6a39a50e1f9ee2398cf245`).
 **Дата прогона:** 2026-11-03, MSK. **Android-устройств, облачных сервисов и платных API не использовалось.**
-**Статус:** `READY_FOR_REVIEW` — **не** `ACCEPTED`.
+**Статус:** **`ACCEPTED`** — решение продюсера **2026-11-03** ([D44](../decisions/D44-s02-accepted-s03-authorized.md)); архитектурное ревью ChatGPT — `PASS`. Ранее — `READY_FOR_REVIEW`. Приёмка ограниченная: приняты модули A–D как техническая основа, а не паритет с Alpha 2013. Тесты выполнены локально **DeepSeek** (Unity 6000.3.27f2), а не независимо ChatGPT.
 **Актуальные результаты (после REVIEW-FIX-01, 2026-11-03):** компиляция PASS; EditMode **170/170**, PlayMode **6/6**, failed=0. Подробности — §5a; таблица §1 ниже описывает первый прогон партии (132/132 и 5/5) и оставлена как история.
 
 ## 1. Итог первой партии до REVIEW-FIX-01 (история)
@@ -130,7 +130,8 @@ CUBEGAME_SAVE|<version>|<fnv1a64 hex>|<payload byte length>
 | Движение/скорости | вне S02; до OQ-23 любые скорости — `PLACEHOLDER_NOT_ALPHA` |
 | URP, Pipeline | не подключались |
 | Сборка Windows-плеера в этом прогоне | `NOT_RUN` (в проверке S01 использован `-SkipPlayerRun`) |
-| Приёмка S01 / S02 | `READY_FOR_REVIEW`, приёмку делает продюсер/ChatGPT |
+| Приёмка S02 | **`ACCEPTED`** — решение продюсера 2026-11-03 ([D44](../decisions/D44-s02-accepted-s03-authorized.md)) |
+| Приёмка S01 Pilot | `READY_FOR_REVIEW`, приёмку делает продюсер/ChatGPT отдельно |
 
 ## 7. Критерии завершения партии
 

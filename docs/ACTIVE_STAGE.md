@@ -2,24 +2,29 @@
 
 **Дата решения:** 2026-11-03. **Межчатовая память:** [PROJECT_MEMORY.md](../PROJECT_MEMORY.md). **Рабочее название:** CubeGame (имя игры не утверждено).
 **Ответственные:** DeepSeek Harness — исполнитель; ChatGPT — архитектура и ревью; продюсер — игровые и визуальные решения.
-**Активный этап:** **`S02-CORE-FOUNDATION`** — первая партия выполнена, статус **`READY_FOR_REVIEW`** (не `ACCEPTED`); авторизация продюсера 2026-11-03, ветка `stage/s02-core-foundation`, ТЗ [S02_CORE_FOUNDATION.md](stages/S02_CORE_FOUNDATION.md), отчёт [S02_REPORT.md](stages/S02_REPORT.md).
-**Предыдущий этап:** `S00-R02` закрыт продюсером 2026-11-03 со статусом **`ACCEPTED`** (ограниченная приёмка — см. ниже). Гейт D41 «исследование до переноса новых систем» выполнен.
+**Активный этап:** **`S03-COMBAT-CORE`** — `AUTHORIZED / IN_PROGRESS` (решение продюсера 2026-11-03, [D44](decisions/D44-s02-accepted-s03-authorized.md)); ветка `stage/s03-combat-core`, ТЗ [S03_COMBAT_CORE.md](stages/S03_COMBAT_CORE.md), отчёт [S03_REPORT.md](stages/S03_REPORT.md). По завершении — `READY_FOR_REVIEW`, не `ACCEPTED`.
+**Предыдущий этап:** **`S02-CORE-FOUNDATION` → `ACCEPTED`** (решение продюсера 2026-11-03, ревью ChatGPT `PASS`); `S00-R02` закрыт `ACCEPTED` ранее.
 **D42:** [числа Alpha как референсы](decisions/D42-alpha-numbers-as-references.md) — статус **`ACCEPTED`** (решение продюсера 2026-11-03, утверждено независимо от OQ-23). До закрытия OQ-23 конкретные скорости в прототипе помечаются **`PLACEHOLDER_NOT_ALPHA`**; это не отменяет утверждение D42 и не является окончательным балансом.
 **Архитектура:** модульный монолит [ADR-0001](architecture/ADR-0001-modular-monolith.md) утверждён; числовые/технические параметры — по D42.
 
-## S02-CORE-FOUNDATION — ПАРТИЯ ВЫПОЛНЕНА, READY_FOR_REVIEW
+## S03-COMBAT-CORE — АКТИВНЫЙ ЭТАП
 
-**Статус:** `READY_FOR_REVIEW` (не `ACCEPTED`). Авторизация — D43, 2026-11-03.
-**Ветка:** `stage/s02-core-foundation` (от проверенного `stage/s01-unity-pilot` @ `a8842783378bf2621e6a39a50e1f9ee2398cf245`); последний проверенный опубликованный HEAD — **`722e3fb962618c218a1a9862bae2cc3ac8b77177`** (REVIEW-FIX-01; коммит синхронизации памяти — после него). Merge в `main` не выполнялся.
+**Статус:** `AUTHORIZED / IN_PROGRESS` → по завершении партии `READY_FOR_REVIEW` (не `ACCEPTED`). Авторизация — [D44](decisions/D44-s02-accepted-s03-authorized.md), 2026-11-03.
+**Ветка:** `stage/s03-combat-core` от принятого коммита S02. Merge в `main` не выполнялся.
+**ТЗ:** [S03_COMBAT_CORE.md](stages/S03_COMBAT_CORE.md). **Отчёт:** [S03_REPORT.md](stages/S03_REPORT.md).
+**Объём:** минимальное боевое ядро в `CubeGame.Core` (чистый C#, без UnityEngine): формулы урона оружия, разброс `1.25 − 0.5·roll/32767`, проверка попадания `roll/32767 < chance`, снижение урона бронёй/блоком, пул здоровья, результат удара с диагностикой; плюс минимальная Unity-демонстрация удара.
+**Границы достоверности:** `REFERENCE_VERIFIED` — база урона и `levelFactor`, проверка попадания, порог блока; `STRONGLY_SUPPORTED` — разброс урона; `PARTIAL` — множители по числовым ID атак (только по явному флагу), модификаторы шанса по подтипу оружия, митигация `rawDamage − blockFraction·armor`, автоматическое получение `blockFraction`; `UNKNOWN` — базовая формула `chance` (OQ-01). OQ-01/OQ-02/OQ-24/OQ-25/OQ-26 **не закрываются** в S03.
+**Запрещено в S03:** AI/NPC, полная система навыков, новые классы и баланс, анимации/VFX, переделка генерации мира, URP, инвентарь/лут, запуск Alpha без разрешения, копирование закрытого кода/ассетов, merge в `main`, force push, самостоятельное присвоение `ACCEPTED`.
+
+## S02-CORE-FOUNDATION — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
+
+**Статус:** **`ACCEPTED`** — решение продюсера 2026-11-03 ([D44](decisions/D44-s02-accepted-s03-authorized.md)); архитектурное ревью ChatGPT — `PASS`. Приёмка ограниченная: приняты модули A–D как техническая основа, а не паритет с Alpha 2013.
+**Ветка:** `stage/s02-core-foundation` (от `stage/s01-unity-pilot` @ `a884278`); последний проверенный HEAD — **`626f21ed3d83f258386b35165a567ff52ec8b31c`** (+ коммит закрытия S02). Merge в `main` не выполнялся.
 **ТЗ:** [S02_CORE_FOUNDATION.md](stages/S02_CORE_FOUNDATION.md). **Отчёт с фактическими прогонами:** [S02_REPORT.md](stages/S02_REPORT.md).
-**Объём первой партии:** модули A — Progression, B — Character Stats, C — Items Foundation, D — Persistence Foundation. Чистая логика отделена от Unity-представления (ADR-0001).
-**Фактические результаты (после REVIEW-FIX-01, Unity 6000.3.27f2):** компиляция PASS (без `error CS`/`warning CS`); EditMode **170/170 passed** (включая 10 регрессионных кейсов пилота); PlayMode **6/6 passed** (4 новых smoke + 2 регрессионных пилота); failed=0. Первый прогон партии до исправлений — 132/132 и 5/5. Логи/XML — локально в `.unity-install/` (в `.gitignore`): `rf01_editmode.xml`, `rf01_playmode.xml`.
-**REVIEW-FIX-01 (2026-11-03):** закрыты дефекты ревью — неполная валидация сохранений (тип/подтип/модификатор/флаги/NaN, `Corrupted` без исключений, без изменения состояния при отказе), переполнения и зависание прогрессии, переполнение `int` в арифметике seed, две неточности в эталонных таблицах. Новых тестов: **+38 EditMode, +1 PlayMode**. Подробности — [S02_REPORT.md](stages/S02_REPORT.md) §5a. Статус исправлений: FIX-01 `DONE`, FIX-02 `DONE`, FIX-03 `DONE` (по достоверности `PARTIAL` — точная разрядность `seed*8 mod 21` в Alpha не доказана), FIX-04 `DONE`.
-**Проверка S01 Pilot @ `a884278`:** импорт PASS, EditMode **10/10**, PlayMode **2/2**, сцена и генерация целы; критических дефектов нет. S01 остаётся `READY_FOR_REVIEW` — использование кода не равно приёмке.
-**Открытые вопросы:** OQ-25 (какой стат предмета даёт `+8` к HP) — `OPEN`; OQ-26 (семантика флагов `0x7e & 0x8/0x10`) — `OPEN`; разрядность seed-арифметики в Alpha — `PARTIAL`. Множители типа атаки в уроне не реализованы (`UNKNOWN`).
-**Ранее найденные расхождения в текстах исследований — исправлены в REVIEW-FIX-01:** `alpha_curves_reference.py` (`levelFactor(51)=4.4164`, `levelFactor(101)=5.6569`, допуск `1e-9`) и `F_items.md` («21 значение в диапазоне 1.0…2.0» вместо «±5 %»).
-**Запрещено в S02:** переделывать генерацию мира, полная боевая система, AI/NPC, питомцы, подземелья, квесты, модели/анимации, URP, управление Alpha через DSH, объявление неизвестных чисел Alpha восстановленными, merge в `main`.
-**Blender / URP / Pipeline:** не требуются и не подключаются в этой партии.
+**Объём принятой партии:** модули A — Progression, B — Character Stats, C — Items Foundation, D — Persistence Foundation. Чистая логика отделена от Unity-представления (ADR-0001).
+**Фактические результаты (после REVIEW-FIX-01, Unity 6000.3.27f2, выполнено DeepSeek):** компиляция PASS (без `error CS`/`warning CS`); EditMode **170/170 passed** (включая 10 регрессионных кейсов пилота); PlayMode **6/6 passed** (4 новых smoke + 2 регрессионных пилота); failed=0. Логи/XML — локально в `.unity-install/` (в `.gitignore`): `rf01_editmode.xml`, `rf01_playmode.xml`.
+**REVIEW-FIX-01 (2026-11-03):** закрыты дефекты ревью — неполная валидация сохранений, переполнения и зависание прогрессии, переполнение `int` в арифметике seed, две неточности в эталонных таблицах. FIX-01/02/04 — `DONE`; FIX-03 — `DONE` при достоверности `PARTIAL`.
+**Сохранённые ограничения S02:** OQ-25 `OPEN`, OQ-26 `OPEN`, seed-арифметика для крайних значений `PARTIAL`, множители типа атаки в S02 не реализованы (`UNKNOWN`).
 
 ## S00-DEEP-RESEARCH (R02) — ЭТАП ЗАКРЫТ
 
@@ -36,7 +41,7 @@
 
 **Статус:** `READY_FOR_REVIEW` (не `ACCEPTED`). Код используется как техническая основа S02, что **не** означает приёмку пилота.
 **Подтверждено GitHub:** `stage/s01-unity-pilot` HEAD `a8842783378bf2621e6a39a50e1f9ee2398cf245`. Merge/force push в main не разрешены.
-**Фактическая проверка 2026-11-03 (см. [S02_REPORT.md](stages/S02_REPORT.md)):** результат прогона фиксируется в отчёте S02; заявления прошлых сессий (EditMode 10/10, PlayMode 2/2) считаются `REPORTED`, пока не подтверждены текущим прогоном.
+**Фактическая проверка 2026-11-03 (см. [S02_REPORT.md](stages/S02_REPORT.md)):** импорт PASS, EditMode **10/10**, PlayMode **2/2** — выполнено DeepSeek; независимой проверки ChatGPT не было. Код S01 используется как основа S02/S03, но S01 остаётся `READY_FOR_REVIEW`.
 **URP:** отдельный обратимый trial возможен после фиксации baseline; в S02 не подключается.
 **Unity Pipeline (экспериментальный):** DEFERRED / OPTIONAL; автоматически не устанавливать.
 **Blender:** отсутствует, не требуется до S05.
