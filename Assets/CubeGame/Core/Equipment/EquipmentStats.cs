@@ -52,7 +52,21 @@ namespace CubeGame.Core.Equipment
             double totalArmor,
             double totalBlockValue)
         {
-            PerItem = perItem ?? throw new ArgumentNullException(nameof(perItem));
+            if (perItem == null)
+            {
+                throw new ArgumentNullException(nameof(perItem));
+            }
+
+            // Защитная копия: изменение исходной коллекции после создания резюме не должно менять
+            // результат агрегирования, а запись через приведение к IList бросает NotSupportedException
+            // (REVIEW-FIX-01).
+            var copy = new List<ItemComputedStats>(perItem.Count);
+            for (int i = 0; i < perItem.Count; i++)
+            {
+                copy.Add(perItem[i]);
+            }
+
+            PerItem = copy.AsReadOnly();
             MainHandDamage = mainHandDamage;
             OffHandDamage = offHandDamage;
             WeaponDamageBonus = weaponDamageBonus;
@@ -60,7 +74,7 @@ namespace CubeGame.Core.Equipment
             TotalBlockValue = totalBlockValue;
         }
 
-        /// <summary>Характеристики каждого надетого предмета.</summary>
+        /// <summary>Характеристики каждого надетого предмета (неизменяемый снимок).</summary>
         public IReadOnlyList<ItemComputedStats> PerItem { get; }
 
         public double MainHandDamage { get; }

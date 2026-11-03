@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CubeGame.Core.Characters;
 using CubeGame.Core.Equipment;
 using CubeGame.Core.Items;
@@ -154,6 +155,74 @@ namespace CubeGame.Tests.EditMode
             Assert.Throws<ArgumentNullException>(() => EquipmentStats.ComputeItem(EquipmentSlot.MainHand, null));
             Assert.Throws<ArgumentNullException>(() => EquipmentCombatAdapter.ComputeTargetArmor(null));
             Assert.Throws<ArgumentNullException>(() => EquipmentCombatAdapter.ComputeMaxHealth(null));
+            Assert.Throws<ArgumentNullException>(() => new EquipmentStatSummary(null, 0, 0, 0, 0, 0));
+        }
+
+        // --- REVIEW-FIX-01: защита EquipmentStatSummary.PerItem ----------------
+
+        [Test]
+        public void PerItemIsDefensiveCopyOfInputCollection()
+        {
+            var source = new List<ItemComputedStats>
+            {
+                new ItemComputedStats(CreateSword(level: 1, rarity: 0), EquipmentSlot.MainHand, 2.0, 0.0, 0.0),
+            };
+
+            var summary = new EquipmentStatSummary(source, 2.0, 0.0, 2.0, 0.0, 0.0);
+            source.Add(new ItemComputedStats(CreateGreatmace(level: 1, rarity: 0), EquipmentSlot.OffHand, 8.0, 0.0, 0.0));
+            source.Clear();
+
+            Assert.AreEqual(1, summary.PerItem.Count, "изменение исходного списка не влияет на резюме");
+            Assert.AreEqual(EquipmentSlot.MainHand, summary.PerItem[0].Slot);
+            Assert.That(summary.PerItem[0].WeaponDamage, Is.EqualTo(2.0).Within(Tolerance));
+        }
+
+        [Test]
+        public void PerItemCannotBeModifiedThroughIList()
+        {
+            EquipmentStatSummary summary = EquipmentStats.Compute(CreateLoadoutWithTwoItems());
+            var asList = summary.PerItem as IList<ItemComputedStats>;
+
+            Assert.IsNotNull(asList, "приведение к IList возможно только для попытки записи");
+            Assert.Throws<NotSupportedException>(() => asList.Add(default));
+            Assert.Throws<NotSupportedException>(() => asList.Clear());
+            Assert.Throws<NotSupportedException>(() => asList.RemoveAt(0));
+
+            Assert.AreEqual(2, summary.PerItem.Count, "количество не изменилось");
+        }
+
+        [Test]
+        public void PerItemKeepsOrderAndValues()
+        {
+            EquipmentStatSummary summary = EquipmentStats.Compute(CreateLoadoutWithTwoItems());
+
+            Assert.AreEqual(2, summary.PerItem.Count);
+            Assert.AreEqual(EquipmentSlot.MainHand, summary.PerItem[0].Slot, "порядок слотов сохраняется");
+            Assert.AreEqual(EquipmentSlot.Chest, summary.PerItem[1].Slot);
+            Assert.That(summary.PerItem[0].WeaponDamage, Is.EqualTo(2.0).Within(Tolerance));
+            Assert.That(summary.PerItem[1].BlockValue, Is.EqualTo(1.0).Within(Tolerance));
+        }
+
+        [Test]
+        public void RepeatedComputationProducesStableResult()
+        {
+            EquipmentLoadout loadout = CreateLoadoutWithTwoItems();
+
+            EquipmentStatSummary first = EquipmentStats.Compute(loadout);
+            EquipmentStatSummary second = EquipmentStats.Compute(loadout);
+
+            Assert.AreEqual(first.PerItem.Count, second.PerItem.Count);
+            Assert.That(second.WeaponDamageBonus, Is.EqualTo(first.WeaponDamageBonus).Within(Tolerance));
+            Assert.That(second.TotalBlockValue, Is.EqualTo(first.TotalBlockValue).Within(Tolerance));
+            Assert.That(second.PerItem[0].WeaponDamage, Is.EqualTo(first.PerItem[0].WeaponDamage).Within(Tolerance));
+        }
+
+        private static EquipmentLoadout CreateLoadoutWithTwoItems()
+        {
+            var loadout = new EquipmentLoadout();
+            loadout.Equip(EquipmentSlot.MainHand, CreateSword(level: 1, rarity: 0));
+            loadout.Equip(EquipmentSlot.Chest, new ItemInstance(ItemType.Chest, 0, 1, 0, seed: 0));
+            return loadout;
         }
 
         private static ItemInstance CreateSword(int level, int rarity, int seed = 1)

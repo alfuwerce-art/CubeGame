@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using CubeGame.Core.Items;
 
 namespace CubeGame.Core.Equipment
@@ -32,10 +33,16 @@ namespace CubeGame.Core.Equipment
             EquipmentSlot.Shoulders,
         };
 
+        /// <summary>
+        /// Неизменяемое представление слотов: приведение к массиву невозможно, а запись через
+        /// <see cref="IList{T}"/> бросает <see cref="NotSupportedException"/> (REVIEW-FIX-01).
+        /// </summary>
+        private static readonly ReadOnlyCollection<EquipmentSlot> ReadOnlySlots = Array.AsReadOnly(AllSlots);
+
         private readonly ItemInstance[] _slots = new ItemInstance[AllSlots.Length];
 
-        /// <summary>Все поддерживаемые слоты (фиксированный порядок).</summary>
-        public static IReadOnlyList<EquipmentSlot> Slots => AllSlots;
+        /// <summary>Все поддерживаемые слоты (фиксированный порядок, только чтение).</summary>
+        public static IReadOnlyList<EquipmentSlot> Slots => ReadOnlySlots;
 
         /// <summary>Совместим ли тип предмета со слотом.</summary>
         public static bool IsSlotCompatible(EquipmentSlot slot, ItemType itemType)

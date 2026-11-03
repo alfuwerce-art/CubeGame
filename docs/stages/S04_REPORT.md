@@ -11,13 +11,14 @@
 
 | Проверка | Результат | Артефакт |
 |---|---|---|
-| Компиляция Unity | **PASS** (exit 0, без `error CS`/`warning CS`) | `.unity-install/logs/s04_import.log` |
-| EditMode (полный прогон) | **PASS 288/288**, failed=0 | `.unity-install/results/s04_editmode2.xml` |
-| PlayMode (полный прогон) | **PASS 17/17**, failed=0 | `.unity-install/results/s04_playmode2.xml` |
+| Компиляция Unity | **PASS** (exit 0, без `error CS`/`warning CS`) | `.unity-install/logs/rf04_import.log` |
+| EditMode (полный прогон, после REVIEW-FIX-01) | **PASS 296/296**, failed=0 | `.unity-install/results/rf04_editmode.xml` |
+| PlayMode (полный прогон, после REVIEW-FIX-01) | **PASS 17/17**, failed=0 | `.unity-install/results/rf04_playmode.xml` |
 | Регрессия S01 | **PASS** — EditMode 10/10 (`ChunkMeshTests`, `TerrainDeterminismTests`), PlayMode 2/2 (`PilotPlayModeTests`) | те же XML |
 | Регрессия S02 | **PASS** — `ProgressionTests` 51, `CharacterStatsTests` 22, `ItemStatsTests` 65, `PersistenceTests` 28 | те же XML |
 | Регрессия S03 | **PASS** — `CombatFormulaTests` 53, `CombatResolutionTests` 23, PlayMode боя 4/4 | те же XML |
-| Новые тесты S04 | **+36 EditMode** (Loadout 16, Stats 10, Integration 10), **+7 PlayMode** | те же XML |
+| Новые тесты S04 | **+36 EditMode** (Loadout 16, Stats 10, Integration 10), **+7 PlayMode** | `s04_editmode2.xml`, `s04_playmode2.xml` |
+| REVIEW-FIX-01 | **+8 EditMode** (Loadout 16→20, Stats 10→14), PlayMode без изменений | `rf04_editmode.xml` |
 | `alpha_curves_reference.py --check` | **PASS**, exit 0 | — |
 | `alpha_item_stats_reference.py --check` | **PASS**, exit 0 | — |
 | `alpha_combat_reference.py --check` | **PASS**, exit 0 | — |
@@ -88,6 +89,17 @@ MaxHealth             = CharacterStats.CalcMaxHealth(..., sheet.EquipmentHealthB
 4. **OQ-25 остаётся `OPEN`**: HP от экипировки не выводится; MaxHP не меняется при смене брони — это ожидаемое ограничение партии.
 5. **Двуручное оружие, щит, классовые ограничения, «какая рука атакует»** — не реализованы; два оружия складываются в аддитивный вклад (как список `item_weaponDamage`), что помечено `PARTIAL` и требует решения продюсера/исследования.
 6. Открытый вопрос партии: **S04-OQ-01** — правила сочетаний оружия, двуручного оружия, щита и классовых ограничений; **S04-OQ-02** — выбор атакующей руки при двух оружиях.
+
+## 5a. S04-REVIEW-FIX-01 (2026-11-03) — защита коллекций
+
+| FIX | Что исправлено | Доказательство |
+|---|---|---|
+| **FIX-01** — `EquipmentLoadout.Slots` | Свойство возвращало внутренний статический массив `AllSlots`; через приведение `IReadOnlyList → EquipmentSlot[]` его можно было изменить извне. Теперь публикуется `ReadOnlyCollection<EquipmentSlot>` (`Array.AsReadOnly`): приведение к массиву невозможно, запись/добавление/удаление через `IList<EquipmentSlot>` бросает `NotSupportedException`. Публичный контракт `IReadOnlyList<EquipmentSlot>` и порядок шести слотов сохранены; `Equip`/`Unequip`/`GetEquipped`/`EquippedCount`/`IsSlotCompatible` не менялись | `SlotsCannotBeCastToArray`, `SlotsCannotBeModifiedThroughIList`, `SlotsKeepOrderAndNumericValues`, `LoadoutWorksAfterMutationAttempt` (EquipmentLoadoutTests 16 → 20) |
+| **FIX-02** — `EquipmentStatSummary.PerItem` | Резюме хранило переданную коллекцию как есть: изменение исходного списка после создания (или приведение к изменяемому интерфейсу) могло поменять результат агрегирования. Теперь конструктор делает защитную копию и публикует `ReadOnlyCollection`: изменение источника не влияет, `IList<ItemComputedStats>` бросает `NotSupportedException`. Формулы, агрегирование и порядок элементов не изменялись | `PerItemIsDefensiveCopyOfInputCollection`, `PerItemCannotBeModifiedThroughIList`, `PerItemKeepsOrderAndValues`, `RepeatedComputationProducesStableResult`, плюс `new EquipmentStatSummary(null, …)` → `ArgumentNullException` (EquipmentStatsTests 10 → 14) |
+
+**Что не менялось:** формулы урона и `levelFactor`, `DamageResolver` и порядок RNG, баланс и характеристики предметов, правила двуручного оружия/щитов/классов, формат сохранений, модели/анимации/графика, исследовательский контур Alpha. Статусы OQ сохранены. D46 и ветка `stage/s05-asset-conversion-plan` не затрагивались.
+
+**Итог прогона REVIEW-FIX-01 (Unity 6000.3.27f2, DeepSeek):** компиляция PASS без `error CS`/`warning CS`; EditMode **296/296 passed** (+8), PlayMode **17/17 passed**, failed=0; регрессии S01/S02/S03 внутри прогона; Python-эталоны `alpha_curves`/`alpha_items`/`alpha_combat --check` — PASS (exit 0); `git diff --check` — чисто. Артефакты: `.unity-install/results/rf04_editmode.xml`, `.unity-install/results/rf04_playmode.xml`, логи `rf04_*.log`.
 
 ## 6. Контракт будущего сохранения экипировки (не реализован)
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CubeGame.Core.Equipment;
 using CubeGame.Core.Items;
 using NUnit.Framework;
@@ -150,6 +151,72 @@ namespace CubeGame.Tests.EditMode
 
             Assert.IsFalse(EquipmentLoadout.IsSlotCompatible(EquipmentSlot.Chest, ItemType.Ring));
             Assert.IsFalse(EquipmentLoadout.IsSlotCompatible(EquipmentSlot.MainHand, ItemType.Amulet));
+        }
+
+        // --- REVIEW-FIX-01: защита коллекции Slots -----------------------------
+
+        [Test]
+        public void SlotsCannotBeCastToArray()
+        {
+            Assert.IsFalse(EquipmentLoadout.Slots is EquipmentSlot[],
+                "внутренний массив не должен быть доступен через приведение");
+        }
+
+        [Test]
+        public void SlotsCannotBeModifiedThroughIList()
+        {
+            var asList = EquipmentLoadout.Slots as IList<EquipmentSlot>;
+            Assert.IsNotNull(asList, "контракт IReadOnlyList сохраняется, приведение к IList допустимо только для чтения");
+
+            Assert.Throws<NotSupportedException>(() => asList[0] = EquipmentSlot.Boots,
+                "запись по индексу должна отвергаться");
+            Assert.Throws<NotSupportedException>(() => asList.Add(EquipmentSlot.Boots),
+                "добавление должно отвергаться");
+            Assert.Throws<NotSupportedException>(() => asList.RemoveAt(0),
+                "удаление должно отвергаться");
+
+            Assert.AreEqual(EquipmentSlot.MainHand, EquipmentLoadout.Slots[0], "содержимое не изменилось");
+            Assert.AreEqual(6, EquipmentLoadout.Slots.Count);
+        }
+
+        [Test]
+        public void SlotsKeepOrderAndNumericValues()
+        {
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    EquipmentSlot.MainHand,
+                    EquipmentSlot.OffHand,
+                    EquipmentSlot.Chest,
+                    EquipmentSlot.Gloves,
+                    EquipmentSlot.Boots,
+                    EquipmentSlot.Shoulders,
+                },
+                EquipmentLoadout.Slots,
+                "порядок и состав слотов не должны меняться");
+
+            Assert.AreEqual(0, (int)EquipmentSlot.MainHand);
+            Assert.AreEqual(1, (int)EquipmentSlot.OffHand);
+            Assert.AreEqual(2, (int)EquipmentSlot.Chest);
+            Assert.AreEqual(3, (int)EquipmentSlot.Gloves);
+            Assert.AreEqual(4, (int)EquipmentSlot.Boots);
+            Assert.AreEqual(5, (int)EquipmentSlot.Shoulders);
+        }
+
+        [Test]
+        public void LoadoutWorksAfterMutationAttempt()
+        {
+            var asList = EquipmentLoadout.Slots as IList<EquipmentSlot>;
+            Assert.Throws<NotSupportedException>(() => asList.Clear());
+
+            var loadout = new EquipmentLoadout();
+            ItemInstance sword = CreateSword(1);
+            loadout.Equip(EquipmentSlot.MainHand, sword);
+
+            Assert.AreSame(sword, loadout.GetEquipped(EquipmentSlot.MainHand), "экипировка работает как прежде");
+            Assert.AreEqual(1, loadout.EquippedCount);
+            Assert.AreEqual(6, EquipmentLoadout.Slots.Count, "список слотов не повреждён");
+            Assert.AreEqual(EquipmentSlot.Chest, EquipmentLoadout.Slots[2]);
         }
 
         private static ItemInstance CreateSword(int level, int seed = 1)
