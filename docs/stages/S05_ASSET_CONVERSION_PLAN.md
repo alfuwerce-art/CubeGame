@@ -1,6 +1,6 @@
 # S05 — план конвертации моделей и анимаций Alpha в Unity
 
-**Статус:** `S05A-0` — **AUTHORIZED** ([D47](../decisions/D47-s04-accepted-s05a0-authorized.md), 2026-11-03); `S05A-1` и `S05B` — **NOT_AUTHORIZED**.  
+**Статус:** `S05A-0` — **ACCEPTED** ([D48](../decisions/D48-s05a0-accepted-s05a1-draft.md), 2026-11-04; ранее авторизован D47); `S05A-1` — **DRAFT / NOT_AUTHORIZED** ([черновик ТЗ](S05A1_CHARACTER_ASSEMBLY_ANIMATION_DRAFT.md)); `S05B` — **NOT_AUTHORIZED**.  
 **Решение:** [D46](../decisions/D46-asset-conversion-first.md).  
 **Предшествующий этап:** S04-EQUIPMENT-COMBAT — **ACCEPTED** 2026-11-03 (D47); на дату составления плана был READY_FOR_REVIEW.  
 **Среда:** Unity 6000.3.27f2; источник D:\Games\Cube world — только чтение.
