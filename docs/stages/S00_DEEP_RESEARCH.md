@@ -1,6 +1,8 @@
 # S00-R02 — углублённое исследование Cube World Alpha 2013 перед переносом в Unity
 
-**Статус:** AUTHORIZED / R02_READY_FOR_REVIEW (не ACCEPTED); решение D41. Все пакеты A…L рассмотрены, часть — `PARTIAL`; review-fix R02 (FIX-01…FIX-07) — 2026-11-03. Финальная runtime-валидация: 4/4 запуска использованы, OQ-22/OQ-23 **BLOCKED** средой (foreground/input error 5); новых запусков без нового разрешения нет.
+**Статус:** **`ACCEPTED`** — решение продюсера **2026-11-03** (закрытие этапа как `S00-R02 CLOSED`, без требования полного паритета с Alpha 2013). До закрытия: AUTHORIZED / R02_READY_FOR_REVIEW; решение D41. Все пакеты A…L рассмотрены, часть — `PARTIAL`; review-fix R02 (FIX-01…FIX-07) — 2026-11-03. Финальная runtime-валидация: 4/4 запуска использованы, OQ-22/OQ-23 **BLOCKED** средой (foreground/input error 5); новых запусков без нового разрешения нет.
+
+> **Что означает `ACCEPTED` (ограничение приёмки).** Принят **объём и качество исследования** как достаточная база для перехода к реализации S02, а **не** утверждение, что все механики Alpha 2013 восстановлены. Открытые вопросы сохраняют статусы: OQ-22 — `PARTIAL`, OQ-23 — `OPEN/BLOCKED`, OQ-24 — `PARTIAL`, остальные — как в [OPEN_QUESTIONS.md](../research/alpha2013/OPEN_QUESTIONS.md). Пакеты A…L остаются `PARTIAL`, кроме явно указанных `STRONGLY_SUPPORTED`/`DIRECT` фрагментов. Неподтверждённые значения (скорости движения по OQ-23) — `PLACEHOLDER_NOT_ALPHA`. Новые запуски Alpha запрещены без отдельного разрешения продюсера.
 **Исполнитель:** DeepSeek Harness `cubegame-dev`; метод STATIC-FIRST + targeted runtime validation.
 **Оригинал:** `D:\Games\Cube world` (read-only). **Reversal:** https://github.com/qad3n/CubeWorld-Reversal — справочный реконструированный C++/псевдокод, не компилируемый исходник.
 **Выход:** собранная/доказанная техническая картина Alpha, а не переписывание движка Plasma и не поток неподтверждённых догадок.

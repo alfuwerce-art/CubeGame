@@ -2,7 +2,7 @@
 
 **Рабочее название проекта:** `CubeGame`. **Окончательное название игры НЕ утверждено.**  
 **Репозиторий:** https://github.com/alfuwerce-art/CubeGame  
-**Обновлено:** 2026-11-03 (FIX-07 + финальная runtime-валидация; D42 ACCEPTED; 4/4 запуска, OQ-22/OQ-23 blocked)
+**Обновлено:** 2026-11-03 (**S00-R02 закрыт продюсером — `ACCEPTED`**, этап закрытия зафиксирован; активен **S02-CORE-FOUNDATION**; D42 ACCEPTED; OQ-22/OQ-23 открыты)
 **Назначение:** общий контекст для **нового чата ChatGPT**, **DeepSeek Harness** и других будущих исполнителей. **Не заменяет** утверждённые решения, детальные ТЗ и фактические отчёты.  
 **Это живой документ.** Изменять по правилам раздела «Обновление памяти».
 
@@ -63,26 +63,33 @@
 | `stage/s00-alpha-g0` | `a0af8aa90de7ede6493420846cc152ad9fe30a87` | G0_PASS **по отчёту агента**, READY_FOR_REVIEW; происхождение исходника неофициальное |
 | `stage/s00-static-r01` | `73893b62f3df5757139bf4a1e0ea63cd300d6530` | Четыре исследовательских документа; READY_FOR_REVIEW, ещё не принят |
 | `stage/s01-unity-pilot` | **`a8842783378bf2621e6a39a50e1f9ee2398cf245`** | Последний пилот **уже загружен на GitHub**, READY_FOR_REVIEW; требуются ревью кода/артефактов |
-| `stage/s00-deep-research` | **`2200d77`** (review-fix + memory sync; финальная валидация FIX-07 — коммиты после) | S00-R02 **READY_FOR_REVIEW, не ACCEPTED**; все A…L рассмотрены (`PARTIAL`); FIX-01…FIX-07; runtime OQ-22/OQ-23 **BLOCKED** (4/4 запуска), D42 **ACCEPTED** |
+| `stage/s00-deep-research` | **`60ac26a89d1235612588726e6b28ae321f3da9ce`** (последний проверенный HEAD перед закрытием; коммит закрытия этапа — после него) | S00-R02 **`ACCEPTED`** — закрыт продюсером 2026-11-03 (ограниченная приёмка: объём исследования, а не паритет с Alpha). Пакеты A…L `PARTIAL`; FIX-01…FIX-07; OQ-22 `PARTIAL`, OQ-23 `OPEN/BLOCKED`, OQ-24 `PARTIAL`; D42 `ACCEPTED` |
+| `stage/s02-core-foundation` | создаётся от `stage/s01-unity-pilot` @ `a884278` | `S02-CORE-FOUNDATION` `AUTHORIZED / IN_PROGRESS` → `READY_FOR_REVIEW`; модули A–D, тесты Unity, отчёт `docs/stages/S02_REPORT.md` |
 
 По финальному отчёту DeepSeek для пилота: Unity 6.3 Personal, импорт/компиляция PASS, **EditMode 10/10**, **PlayMode 2/2**, сцена/Windows exe/скриншот созданы, генерация 64 чанков. Это **результаты локального агента**, а не независимо воспроизведённые ChatGPT тесты. Скриншот и журналы в локальной `.unity-install/`, не в GitHub. **Нельзя обещать независимое принятие S01 без ревью.**
 
 **Решение по S01:** push разрешён и выполнен; **слияние в main пока не разрешено**. URP — отдельный испытательный этап после фиксации baseline. Pipeline не обязателен.
 
-**S00-R02 (на 2026-11-03):** ветка опубликована; пакеты A…L рассмотрены, часть — `PARTIAL`. Факты `RUNTIME_VERIFIED` (прошлые 3 запуска): max HP 268, порог XP 50, Berserker (`spec=0`). Финальная валидация 2026-11-03 использовала все 4 разрешённых запуска, но загрузка мира/персонажа не доведена: среда DSH блокирует foreground и ввод (`SetForegroundWindow`/`AttachThreadInput`/`SetCursorPos` → error 5). OQ-22 — `PARTIAL`, OQ-23 — `OPEN/BLOCKED`, движение не подтверждено. D42 — **`ACCEPTED`** (решение продюсера 2026-11-03), но до OQ-23 скорости — `PLACEHOLDER_NOT_ALPHA`. S00-R02 **не принят**.
+**S00-R02 (на 2026-11-03):** ветка опубликована; пакеты A…L рассмотрены, часть — `PARTIAL`. Факты `RUNTIME_VERIFIED` (прошлые 3 запуска): max HP 268, порог XP 50, Berserker (`spec=0`). Финальная валидация 2026-11-03 использовала все 4 разрешённых запуска, но загрузка мира/персонажа не доведена: среда DSH блокирует foreground и ввод (`SetForegroundWindow`/`AttachThreadInput`/`SetCursorPos` → error 5). OQ-22 — `PARTIAL`, OQ-23 — `OPEN/BLOCKED`, движение не подтверждено. D42 — **`ACCEPTED`** (решение продюсера 2026-11-03), но до OQ-23 скорости — `PLACEHOLDER_NOT_ALPHA`. **S00-R02 закрыт продюсером 2026-11-03 со статусом `ACCEPTED`** — приёмка объёма исследования, **не** подтверждение полного паритета с Alpha; открытые вопросы сохранены.
 
-## 6. Текущий главный этап: исследование Alpha S00-R02 (D41)
+## 6. Текущий главный этап: S02-CORE-FOUNDATION
 
-**Главное решение D41:** до переноса **новых** игровых систем максимально исследовать весь технический контур Alpha, использовать восстановленные исходные структуры, файлы/сейвы, локальные выборочные тесты и историческую документацию. Только затем составлять собственную спецификацию Unity и реализовать на C#.
+**Статус:** `AUTHORIZED / IN_PROGRESS` (решение продюсера 2026-11-03), ветка `stage/s02-core-foundation` от проверенного `stage/s01-unity-pilot` @ `a884278`. По завершении партии — `READY_FOR_REVIEW`.
 
-- [S00_DEEP_RESEARCH](docs/stages/S00_DEEP_RESEARCH.md): **12 пакетов A–L**: бинарные структуры; генерация/мир; стриминг; персонаж/XP; бой; предметы; NPC; питомцы; движение/камера; данжи/квесты; модели/анимации/UI; сохранения.
-- [REFERENCE_ATLAS](docs/research/alpha2013/REFERENCE_ATLAS.md): Reversal, руководства 2013, wiki, версии и визуальные эталоны. При конфликтах — `UNKNOWN`, факт vs гипотеза.
-- [UNITY_REUSE_MAP](docs/architecture/UNITY_REUSE_MAP.md): не пересоздавать Plasma (D3D9/оконную систему/движок звука); использовать Unity Mesh/Physics/Input/Animator/Navigation/UI/Test Framework, собственный код — только для специфической игровой логики.
-- [Готовое задание DeepSeek](docs/stages/DEEPSEEK_RESEARCH_TASK.md).
-- [Исследование R01](https://github.com/alfuwerce-art/CubeGame/tree/stage/s00-static-r01/docs/research/alpha2013): `FILE_FORMATS.md`, `SYSTEM_MAP.md`, `GENERATION_MOVEMENT_SPEC.md`, `R01_REPORT.md` — **не терять и не начинать с нуля**.
-- Главный исследовательский внешний источник: https://github.com/qad3n/CubeWorld-Reversal — **декомпилированный псевдо-C**, не чистый исходный C++ и не Unity-проект; многие тела функций неполны. Проверять названия, параметры и формулы.
+**Объём первой партии (и только он):**
 
-**Приоритеты следующей работы:** (1) независимое ревью пилота `a884278`; (2) независимое ревью S00-R02 `stage/s00-deep-research` (FIX-01…FIX-07, READY_FOR_REVIEW, не ACCEPTED); (3) OQ-22/OQ-23 требуют нового разрешения и интерактивного запуска — лимит 4/4 исчерпан, текущий sandbox блокирует foreground/input; (4) позже URP trial отдельной веткой. Планы развития игры не означают разрешения сейчас внедрять все механики.
+- **A — Progression:** уровень, текущий XP, стоимость уровня, `levelFactor`, `starFactor`, подтверждённые кривые (эталон `docs/research/alpha2013/tools/alpha_curves_reference.py`). Чистый C#, без зависимости от Unity.
+- **B — Character Stats:** модель базовых характеристик, `calcMaxHealth`, подтверждённая часть `calcWeaponDamage`, влияние класса/специализации на HP, подтверждённые бонусы экипировки. Бой/попадания/блок/комбо — **вне** этой партии.
+- **C — Items Foundation:** тип, подтип, уровень, редкость, seed, модификаторы, базовые вычисляемые статы (эталон `alpha_item_stats_reference.py`). Крафт/лут/инвентарный UI — **вне** партии.
+- **D — Persistence Foundation:** версия формата, уровень/XP, характеристики, тестовые предметы, save/load через `Application.persistentDataPath`, защита от повреждённых данных, проверка версий. Формат Alpha v11 **не** копируется как обязательный.
+
+**Запрещено в S02:** переделывать генерацию мира, полная боевая система, AI/NPC, питомцы, подземелья, квесты, модели/анимации, URP, управление Alpha через DSH, выдавать неизвестные числа Alpha за восстановленные, merge в `main`.
+
+**Опора на S00-R02 (D42):** числа Alpha — `REFERENCE_VERIFIED`/`PARTIAL`/`PLACEHOLDER_NOT_ALPHA`; тесты сверяются с эталонными скриптами, а не с «ощущением». В S02 нет движения/скоростей, поэтому `PLACEHOLDER_NOT_ALPHA` применяется к любым будущим скоростным параметрам, а не к прогрессии/предметам.
+
+**Предыдущий (закрытый) этап S00-R02:** [S00_DEEP_RESEARCH](docs/stages/S00_DEEP_RESEARCH.md) — 12 пакетов A–L; [REFERENCE_ATLAS](docs/research/alpha2013/REFERENCE_ATLAS.md); [UNITY_REUSE_MAP](docs/architecture/UNITY_REUSE_MAP.md) (не пересоздавать Plasma); [R01](https://github.com/alfuwerce-art/CubeGame/tree/stage/s00-static-r01) — не терять. Внешний источник: https://github.com/qad3n/CubeWorld-Reversal — декомпилированный псевдо-C, не переносить тела кода.
+
+**Приоритеты следующей работы:** (1) `READY_FOR_REVIEW` по S02 и независимое ревью кода/тестов; (2) отдельная приёмка S01 Pilot и S00-R02 ChatGPT/продюсером; (3) OQ-22/OQ-23 требуют нового разрешения продюсера и интерактивного запуска (лимит 4/4 исчерпан, sandbox блокирует foreground/input); (4) далее — следующая партия систем по решению продюсера (кандидаты: боевые формулы/мировые данные), не расширяя S02 задним числом.
 
 ## 7. История решений: где смотреть
 
@@ -93,6 +100,7 @@
 - [D40](docs/decisions/D40-static-first-unity-pilot.md): параллельные S00-R01 и минимальный Unity S01 pilot.
 - [D41](docs/decisions/D41-research-before-port.md): **последнее применимое** решение — Research-first перед дальнейшим расширением игры.
 - [D42](docs/decisions/D42-alpha-numbers-as-references.md): числа Alpha как референсы; статус **`ACCEPTED`** (продюсер, 2026-11-03; утверждён независимо от OQ-23). До закрытия OQ-23 скорости — `PLACEHOLDER_NOT_ALPHA`.
+- [D43](docs/decisions/D43-close-s00-s02-core-foundation.md): **последнее применимое решение** — закрытие S00-R02 со статусом `ACCEPTED` (ограниченная приёмка) и авторизация `S02-CORE-FOUNDATION`; границы запретов S02.
 - [ADR-0001](docs/architecture/ADR-0001-modular-monolith.md): модульный монолит ACCEPTED.
 - [ARCHITECTURE_PROPOSAL](docs/planning/ARCHITECTURE_PROPOSAL.md), [ROADMAP_DRAFT](docs/planning/ROADMAP_DRAFT.md) и [WORKFLOW_PROTOCOL_DRAFT](docs/planning/WORKFLOW_PROTOCOL_DRAFT.md): черновики; **не считать весь черновик архитектуры утверждённым**.
 
