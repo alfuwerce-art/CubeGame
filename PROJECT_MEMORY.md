@@ -2,7 +2,7 @@
 
 **Рабочее название проекта:** `CubeGame`. **Окончательное название игры НЕ утверждено.**  
 **Репозиторий:** https://github.com/alfuwerce-art/CubeGame  
-**Обновлено:** 2026-11-03 (**S03-COMBAT-CORE → `ACCEPTED`** (D45); активен **S04-EQUIPMENT-COMBAT**; S02 и S00-R02 приняты ранее; D42 в силе; OQ-01/OQ-02/OQ-22…OQ-26 открыты или `PARTIAL`)
+**Обновлено:** 2026-11-03 (**S04-EQUIPMENT-COMBAT выполнен → `READY_FOR_REVIEW`**: EditMode 288/288, PlayMode 17/17; S03 `ACCEPTED` (D45); S02 и S00-R02 приняты ранее; D42 в силе; OQ-01/OQ-02/OQ-22…OQ-26 открыты или `PARTIAL`)
 **Назначение:** общий контекст для **нового чата ChatGPT**, **DeepSeek Harness** и других будущих исполнителей. **Не заменяет** утверждённые решения, детальные ТЗ и фактические отчёты.  
 **Это живой документ.** Изменять по правилам раздела «Обновление памяти».
 
@@ -66,7 +66,7 @@
 | `stage/s00-deep-research` | **`60ac26a89d1235612588726e6b28ae321f3da9ce`** (последний проверенный HEAD перед закрытием; коммит закрытия этапа — после него) | S00-R02 **`ACCEPTED`** — закрыт продюсером 2026-11-03 (ограниченная приёмка: объём исследования, а не паритет с Alpha). Пакеты A…L `PARTIAL`; FIX-01…FIX-07; OQ-22 `PARTIAL`, OQ-23 `OPEN/BLOCKED`, OQ-24 `PARTIAL`; D42 `ACCEPTED` |
 | `stage/s02-core-foundation` | **`626f21ed3d83f258386b35165a567ff52ec8b31c`** (+ коммит закрытия S02) | `S02-CORE-FOUNDATION` **`ACCEPTED`** (D44, 2026-11-03; ревью ChatGPT `PASS`); компиляция PASS, EditMode **170/170**, PlayMode **6/6** (выполнено DeepSeek) |
 | `stage/s03-combat-core` | **`943dea68fbe69e49c53cbb16b7b47c24e500691f`** (+ коммит закрытия S03) | `S03-COMBAT-CORE` **`ACCEPTED`** (D45, 2026-11-03; ревью ChatGPT `PASS`); компиляция PASS, EditMode **251/251**, PlayMode **10/10** (выполнено DeepSeek) |
-| `stage/s04-equipment-combat` | создаётся от принятого коммита S03 | `S04-EQUIPMENT-COMBAT` `AUTHORIZED / IN_PROGRESS` → `READY_FOR_REVIEW`; слоты, агрегатор статов, адаптер к бою, отчёт `docs/stages/S04_REPORT.md` |
+| `stage/s04-equipment-combat` | создаётся от принятого коммита S03 (`70a0658`); SHA — в коммите памяти после прогона | `S04-EQUIPMENT-COMBAT` **`READY_FOR_REVIEW`**, не `ACCEPTED`; компиляция PASS, EditMode **288/288**, PlayMode **17/17** (выполнено DeepSeek); отчёт `docs/stages/S04_REPORT.md` |
 
 По финальному отчёту DeepSeek для пилота: Unity 6.3 Personal, импорт/компиляция PASS, **EditMode 10/10**, **PlayMode 2/2**, сцена/Windows exe/скриншот созданы, генерация 64 чанков. Это **результаты локального агента**, а не независимо воспроизведённые ChatGPT тесты. Скриншот и журналы в локальной `.unity-install/`, не в GitHub. **Нельзя обещать независимое принятие S01 без ревью.**
 
@@ -76,11 +76,13 @@
 
 ## 6. Текущий главный этап: S04-EQUIPMENT-COMBAT
 
-**Статус:** `AUTHORIZED / IN_PROGRESS` → по завершении `READY_FOR_REVIEW` (не `ACCEPTED`). Авторизация — продюсер, 2026-11-03 ([D45](docs/decisions/D45-s03-accepted-s04-authorized.md)); ветка `stage/s04-equipment-combat` от принятого коммита S03. ТЗ — [docs/stages/S04_EQUIPMENT_COMBAT.md](docs/stages/S04_EQUIPMENT_COMBAT.md), отчёт — [docs/stages/S04_REPORT.md](docs/stages/S04_REPORT.md).
+**Статус:** **`READY_FOR_REVIEW`** (не `ACCEPTED`). Авторизация — продюсер, 2026-11-03 ([D45](docs/decisions/D45-s03-accepted-s04-authorized.md)); ветка `stage/s04-equipment-combat` от принятого коммита S03 (`70a0658`). ТЗ — [docs/stages/S04_EQUIPMENT_COMBAT.md](docs/stages/S04_EQUIPMENT_COMBAT.md), отчёт — [docs/stages/S04_REPORT.md](docs/stages/S04_REPORT.md).
 
-**Объём S04 (и только он):** слоты `MainHand`, `OffHand`, `Chest`, `Gloves`, `Boots`, `Shoulders`; агрегатор характеристик надетых предметов через `ItemStatsCalculator`/`CharacterStats`; адаптер `CharacterSheet + Items → CombatAttack`; согласование с HP-моделью; техническая Unity-демонстрация смены оружия и брони. **Запрещено:** параллельная система статов, двойной `levelFactor`, подстановка `Armor`/`BlockValue` в HP (OQ-25 `OPEN`), автозапуск частичных механик, изменение RNG и формата сохранений, инвентарь/UI, модели, анимации, VFX, AI, хитбоксы, URP, запуск Alpha, merge в `main`.
+**Фактический прогон (Unity 6000.3.27f2, выполнено DeepSeek):** компиляция PASS без `error CS`/`warning CS`; EditMode **288/288 passed**, PlayMode **17/17 passed**, failed=0; новых тестов +36 EditMode (Loadout 16, Stats 10, Integration 10) и +7 PlayMode. Регрессии S01 (10/10 + 2/2), S02 и S03 внутри прогона. Эталонные скрипты `alpha_curves/items/combat --check` — PASS; `git diff --check` — чисто. Артефакты: `.unity-install/results/s04_editmode2.xml`, `.unity-install/results/s04_playmode2.xml`.
 
-**Правила достоверности S04:** `REFERENCE_VERIFIED` — статы предметов по `alpha_item_stats_reference.py` и урон/HP по формулам S02/S03; `PARTIAL` — путь передачи статов предмета в бой (`base(0x180)·levelFactor(character) + Σ item_weaponDamage` по E2; порядок полностью не доказан), связь `TargetArmor ← Σ BlockValue` (E3); `UNKNOWN` — базовая `chance` (OQ-01), источник `+8 HP` из экипировки (OQ-25), правила двуручного оружия/щита/классов.
+**Реализовано в S04:** `Assets/CubeGame/Core/Equipment/` — `EquipmentSlot` (MainHand, OffHand, Chest, Gloves, Boots, Shoulders), `EquipmentLoadout` (совместимость типов, замена, снятие, запрет одного экземпляра в двух слотах, атомарные операции), `EquipmentStats` (на предмет и суммарно; урон оружия, `Armor`, `BlockValue` раздельно), `EquipmentCombatAdapter` (`CharacterSheet + предметы → CombatAttack`, `ComputeTargetArmor`, `ComputeMaxHealth`); в `CombatAttack` добавлен аддитивный `ItemWeaponDamageBonus` (`PARTIAL`, E2), `DamageResolver` учитывает его до разброса без изменения порядка RNG; `Assets/CubeGame/Presentation/Equipment/EquipmentCombatDemo.cs` — техническая демонстрация смены оружия/брони.
+
+**Границы достоверности S04:** `REFERENCE_VERIFIED` — статы предметов и формулы урона/HP из S02/S03; `PARTIAL` — аддитивный вклад оружия (`base(0x180)·levelFactor + флаги + Σ item_weaponDamage`), `TargetArmor ← Σ BlockValue` (E3); `UNKNOWN` — OQ-25 (источник `+8 HP` из экипировки не установлен, HP от предметов не выводится), OQ-01; правила двуручного оружия, щита, классовых ограничений и выбора атакующей руки не утверждены (S04-OQ-01, S04-OQ-02). Формат сохранений v1 не менялся; контракт слотов (`ItemInstanceId` + `slotId`, миграция v1→v2) — в [S04_REPORT](docs/stages/S04_REPORT.md) §6.
 
 ## 6a. S03-COMBAT-CORE — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
 

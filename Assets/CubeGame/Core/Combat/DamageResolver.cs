@@ -60,7 +60,8 @@ namespace CubeGame.Core.Combat
 
             int varianceRoll = _random.NextRoll();
             double variance = CombatFormulas.DamageVariance(varianceRoll);
-            double baseDamage = CombatFormulas.WeaponDamage(attack.WeaponBase, attack.Level, attack.Upgrades, attack.Stars);
+            double baseDamage = CombatFormulas.WeaponDamage(attack.WeaponBase, attack.Level, attack.Upgrades, attack.Stars)
+                                + attack.ItemWeaponDamageBonus;
             double rawDamage = baseDamage * variance;
 
             // PARTIAL: множитель применяется только если механизм разрешён вызывающим кодом

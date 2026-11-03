@@ -101,6 +101,26 @@ namespace CubeGame.Core.Combat
         /// <summary>Числовой ID атаки (Alpha <c>+0x68</c>); названия и назначение не установлены.</summary>
         public int AttackId { get; set; }
 
+        /// <summary>
+        /// Аддитивный вклад экипированного оружия (<c>Σ item_weaponDamage</c>), добавляемый к
+        /// <c>base(0x180)·levelFactor</c> уже после масштабирования уровнем персонажа.
+        ///
+        /// <para>
+        /// СТАТУС: <c>PARTIAL</c>. Структура восстановлена по E_combat §E2
+        /// (<c>base(0x180)·levelFactor + флаги + список item_weaponDamage</c>), но полный порядок
+        /// применения в Alpha не доказан. Величина <b>не</b> умножается на множитель уровня персонажа —
+        /// иначе получилось бы двойное масштабирование (<c>ItemStatsCalculator.WeaponDamage</c>
+        /// уже содержит множитель уровня предмета).
+        /// </para>
+        /// </summary>
+        public double ItemWeaponDamageBonus
+        {
+            get => _itemWeaponDamageBonus;
+            set => _itemWeaponDamageBonus = ValidateNonNegativeFinite(value, nameof(value));
+        }
+
+        private double _itemWeaponDamageBonus;
+
         private static double ValidateNonNegativeFinite(double value, string parameterName)
         {
             if (double.IsNaN(value) || double.IsInfinity(value) || value < 0.0)
