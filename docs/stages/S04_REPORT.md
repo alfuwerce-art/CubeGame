@@ -3,7 +3,7 @@
 **Проект:** CubeGame. **Этап:** `S04-EQUIPMENT-COMBAT` ([ТЗ](S04_EQUIPMENT_COMBAT.md), [D45](../decisions/D45-s03-accepted-s04-authorized.md)).
 **Ветка:** `stage/s04-equipment-combat` (от принятого S03 `stage/s03-combat-core` @ `70a0658`).
 **Дата прогона:** 2026-11-03, MSK. **Unity:** `6000.3.27f2`. Тесты выполнены локально **DeepSeek**, не независимо ChatGPT.
-**Статус:** `READY_FOR_REVIEW` — **не** `ACCEPTED`.
+**Статус:** **`ACCEPTED`** — решение продюсера 2026-11-03, архитектурное ревью ChatGPT `PASS`, `S04-REVIEW-FIX-01` принят ([D47](../decisions/D47-s04-accepted-s05a0-authorized.md)). Приёмка ограниченная: принято техническое ядро интеграции экипировки и боя, а **не** полное соответствие Alpha 2013. Изначально отчёт публиковался как `READY_FOR_REVIEW`; фактические результаты прогонов при приёмке не менялись.
 
 > Примечание к задаче: переданный текст ТЗ обрывался на разделе «## 12». Работа выполнена в объёме разделов 1–11 и стандартных требований проекта (D42/ADR-0001, отдельная ветка, обычный push, `READY_FOR_REVIEW`, без merge в `main`), зафиксированных в `AGENTS.md` и [D45](../decisions/D45-s03-accepted-s04-authorized.md).
 
@@ -131,3 +131,16 @@ MaxHealth             = CharacterStats.CalcMaxHealth(..., sheet.EquipmentHealthB
 1. Ревью S04 (контракты `EquipmentLoadout`, `EquipmentCombatAdapter`, поле `ItemWeaponDamageBonus`).
 2. Следующая партия (решение продюсера): стабильный `ItemInstanceId` + сохранение слотов (v2) — естественный следующий шаг, либо `S04-OQ-01/OQ-02` (правила сочетаний оружия) через статический разбор.
 3. Не начинать способности/AI/анимации без отдельного решения.
+
+## 9. Приёмка S04 (2026-11-03) — `ACCEPTED`
+
+**Решение:** продюсер 2026-11-03, [D47](../decisions/D47-s04-accepted-s05a0-authorized.md). Ревью ChatGPT — `PASS`; `S04-REVIEW-FIX-01` (FIX-01 защита `EquipmentLoadout.Slots`, FIX-02 защитная копия `EquipmentStatSummary.PerItem`) принят.
+
+| Параметр | Значение |
+|---|---|
+| Статус | **`ACCEPTED`** (ограниченная приёмка: техническое ядро, не паритет с Alpha 2013) |
+| Ветка | `stage/s04-equipment-combat` |
+| Baseline тестов при приёмке | EditMode **296/296**, PlayMode **17/17**, failed=0 (прогон DeepSeek, до приёмки не менялся) |
+| Merge в `main` | не выполнялся |
+
+**Что НЕ закрыто приёмкой:** `OQ-01` `OPEN`, `OQ-02` `OPEN/PARTIAL`, `OQ-22` `PARTIAL`, `OQ-23` `OPEN/BLOCKED`, `OQ-24` `PARTIAL`, `OQ-25` `OPEN`, `OQ-26` `OPEN`, `S04-OQ-01` `OPEN` (правила сочетаний/двуручного/щита/классов), `S04-OQ-02` `OPEN` (атакующая рука). Сохранение экипировки (стабильный `ItemInstanceId` + слоты + миграция v1→v2) остаётся будущей задачей; контракт — §6. S05A-1 и S05B не авторизованы.

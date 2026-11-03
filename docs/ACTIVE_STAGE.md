@@ -2,15 +2,22 @@
 
 **Дата решения:** 2026-11-03. **Межчатовая память:** [PROJECT_MEMORY.md](../PROJECT_MEMORY.md). **Рабочее название:** CubeGame (имя игры не утверждено).
 **Ответственные:** DeepSeek Harness — исполнитель; ChatGPT — архитектура и ревью; продюсер — игровые и визуальные решения.
-**Активный этап:** **`S04-EQUIPMENT-COMBAT`** — партия выполнена, статус **`READY_FOR_REVIEW`** (не `ACCEPTED`); авторизация [D45](decisions/D45-s03-accepted-s04-authorized.md), ветка `stage/s04-equipment-combat`, ТЗ [S04_EQUIPMENT_COMBAT.md](stages/S04_EQUIPMENT_COMBAT.md), отчёт [S04_REPORT.md](stages/S04_REPORT.md).
-**Предыдущий этап:** **`S03-COMBAT-CORE` → `ACCEPTED`** (решение продюсера 2026-11-03, ревью ChatGPT `PASS`); `S02-CORE-FOUNDATION` и `S00-R02` приняты ранее.
+**Активный этап:** **`S05A-0`** — первый пилот конвертации геометрии моделей Alpha 2013 → Unity; авторизация [D47](decisions/D47-s04-accepted-s05a0-authorized.md); рабочая ветка `stage/s05a-asset-conversion-pilot` (создаётся от коммита закрытия S04), отчёт пилота — `docs/research/alpha2013/MODEL_CONVERSION_PILOT.md` в этой ветке. Решение [D46](https://github.com/alfuwerce-art/CubeGame/blob/stage/s05-asset-conversion-plan/docs/decisions/D46-asset-conversion-first.md) и план [S05](https://github.com/alfuwerce-art/CubeGame/blob/stage/s05-asset-conversion-plan/docs/stages/S05_ASSET_CONVERSION_PLAN.md) подготовлены в ветке `stage/s05-asset-conversion-plan` и переносятся в рабочую ветку S05A-0.
+**Предыдущий этап:** **`S04-EQUIPMENT-COMBAT` → `ACCEPTED`** (решение продюсера 2026-11-03, [D47](decisions/D47-s04-accepted-s05a0-authorized.md); ревью ChatGPT `PASS`); `S03-COMBAT-CORE` (D45), `S02-CORE-FOUNDATION` (D44) и `S00-R02` (D43) приняты ранее.
 **D42:** [числа Alpha как референсы](decisions/D42-alpha-numbers-as-references.md) — статус **`ACCEPTED`** (решение продюсера 2026-11-03, утверждено независимо от OQ-23). До закрытия OQ-23 конкретные скорости в прототипе помечаются **`PLACEHOLDER_NOT_ALPHA`**; это не отменяет утверждение D42 и не является окончательным балансом.
 **Архитектура:** модульный монолит [ADR-0001](architecture/ADR-0001-modular-monolith.md) утверждён; числовые/технические параметры — по D42.
 
-## S04-EQUIPMENT-COMBAT — ПАРТИЯ ВЫПОЛНЕНА, READY_FOR_REVIEW
+## S05A-0 — ПИЛОТ КОНВЕРТАЦИИ ГЕОМЕТРИИ (авторизован 2026-11-03)
 
-**Статус:** `READY_FOR_REVIEW` (не `ACCEPTED`). Авторизация — [D45](decisions/D45-s03-accepted-s04-authorized.md), 2026-11-03.
-**Ветка:** `stage/s04-equipment-combat` от принятого коммита S03 (`70a0658`); последний проверенный опубликованный HEAD — **`369c32695ee1bbe21f0efe95994da5c931e1412e`** (S04-REVIEW-FIX-01; коммит синхронизации памяти — после него). Merge в `main` не выполнялся.
+**Статус:** запуск разрешён [D47](decisions/D47-s04-accepted-s05a0-authorized.md); отметка исполнителя по завершении — `READY_FOR_REVIEW`, не `ACCEPTED`.
+**Границы:** только три образца (персонаж/часть персонажа, существо/враг, оружие/предмет); изолированный Unity-проект; **никакой** массовой конвертации 2857 `.cub`, никаких запусков `Cube.exe`, никакой публикации оригинальных или конвертированных ассетов Alpha, никаких изменений кода/сцены S04.
+**S05A-1** (риги/анимации) и **S05B** (пакетное производство) — **NOT_AUTHORIZED**; стратегия — [D46](https://github.com/alfuwerce-art/CubeGame/blob/stage/s05-asset-conversion-plan/docs/decisions/D46-asset-conversion-first.md), план — [S05](https://github.com/alfuwerce-art/CubeGame/blob/stage/s05-asset-conversion-plan/docs/stages/S05_ASSET_CONVERSION_PLAN.md).
+**Среда:** Unity `6000.3.27f2`; источник `D:\Games\Cube world` — только чтение.
+
+## S04-EQUIPMENT-COMBAT — ПРИНЯТ (`ACCEPTED`, 2026-11-03)
+
+**Статус:** **`ACCEPTED`** — решение продюсера 2026-11-03 ([D47](decisions/D47-s04-accepted-s05a0-authorized.md)); архитектурное ревью ChatGPT — `PASS`, `S04-REVIEW-FIX-01` принят. Приёмка ограниченная: принято техническое ядро интеграции экипировки и боя, а не паритет с Alpha 2013. Ранее отчёт публиковался как `READY_FOR_REVIEW`.
+**Ветка:** `stage/s04-equipment-combat` от принятого коммита S03 (`70a0658`); последний код-коммит партии — **`369c32695ee1bbe21f0efe95994da5c931e1412e`** (S04-REVIEW-FIX-01), коммит закрытия S04 — после него. Merge в `main` не выполнялся.
 **ТЗ:** [S04_EQUIPMENT_COMBAT.md](stages/S04_EQUIPMENT_COMBAT.md). **Отчёт:** [S04_REPORT.md](stages/S04_REPORT.md).
 **Фактические результаты (Unity 6000.3.27f2, выполнено DeepSeek):** после **S04-REVIEW-FIX-01** — компиляция PASS без `error CS`/`warning CS`; EditMode **296/296 passed**, PlayMode **17/17 passed**, failed=0. Новых тестов: **+36 EditMode** (Loadout 16, Stats 10, Integration 10), **+7 PlayMode**; REVIEW-FIX-01 добавил **+8 EditMode**. Регрессии S01 (10/10 + 2/2), S02 и S03 внутри прогона. Эталонные скрипты `alpha_curves/items/combat --check` — PASS; `git diff --check` — чисто. Артефакты: `.unity-install/results/rf04_editmode.xml`, `.unity-install/results/rf04_playmode.xml`.
 **S04-REVIEW-FIX-01 (2026-11-03):** (FIX-01) `EquipmentLoadout.Slots` публикует `ReadOnlyCollection` вместо внутреннего массива — приведение к `EquipmentSlot[]` невозможно, запись через `IList` бросает `NotSupportedException`; (FIX-02) `EquipmentStatSummary` делает защитную копию `PerItem` и публикует неизменяемое представление. Формулы, RNG, баланс, формат сохранений и правила экипировки не менялись; статусы OQ сохранены; D46 и ветка `stage/s05-asset-conversion-plan` не затрагивались. Подробности — [S04_REPORT.md](stages/S04_REPORT.md) §5a.
