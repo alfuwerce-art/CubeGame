@@ -11,6 +11,15 @@
 //  * OnFinished is invoked at most once, and the sampler never calls EditorApplication.Exit itself
 //    (the editor side defers that until the play-mode transition has finished).
 //
+// S05A-2 (FIX-07/FIX-08):
+//  * this file is the ONLY writer of PilotOutput/playmode.txt and playmode.json. The lifecycle writes
+//    playmode_lifecycle.* and playmode_verdict.* and reads this report back verbatim, so the sampler's
+//    diagnostics can no longer be erased by a verdict downgrade;
+//  * the two-handed grip residual is recorded on every attack frame instead of being declared and never
+//    filled (the attack branch used to fail no matter what the animation did);
+//  * numbers are formatted with the invariant culture (a ru-RU machine used to print "не число");
+//  * in attack mode the sampler advances the attack clip deterministically over the run (see Update).
+//
 // Kept in the runtime assembly so Unity can actually add the component: MonoBehaviours that live in
 // an Editor assembly cannot be instantiated at runtime.
 
@@ -43,6 +52,13 @@ public class PlayModeSampler : MonoBehaviour
     /// <summary>When true the sampler validates the two-handed grip instead of the walk cycle.</summary>
     public bool AttackMode;
 
+    /// <summary>
+    /// World-space tolerance for the left palm on the secondary grip. The palm is solved onto the grip
+    /// every frame, so the residual is numerical; 0.02 world units = 2% of one voxel (1 voxel = 1 unit),
+    /// i.e. clearly below the smallest visible offset, while still catching a lost/broken solve.
+    /// </summary>
+    public const float GripTolerance = 0.02f;
+
     int _frames;
     Transform _head, _hand, _sword;
     readonly List<Vector3> _heads = new List<Vector3>();
@@ -61,11 +77,29 @@ public class PlayModeSampler : MonoBehaviour
             else if (t.name == "part_hand_r") _hand = t;
             else if (t.name == "part_sword") _sword = t;
         }
+        _animator = FindFirstObjectByType<ProceduralCharacterAnimator>();
+        if (!AttackMode || _animator == null) return;
+        // The attack is measured on the attack pose only: the sampler owns the phase (see Update), and a
+        // second Time.time-driven pose from the animator's own Update would fight with it.
+        _animator.AnimateInPlayMode = false;
+        _animator.TwoHandedAttack = true;
     }
 
     void Update()
     {
         if (_finished) return;
+        if (AttackMode)
+        {
+            // S05A-2: the attack clip is 0.4 s long (Alpha-derived phase timing), but 40 real Update()
+            // frames of a batch-mode run cover an uncontrolled, machine-dependent slice of it (the first
+            // measured run covered only 0.26 units of blade travel out of the 0.35 expected). The metric
+            // therefore has to be defined on the clip, not on wall-clock frames: the sampler advances the
+            // attack by exactly one full cycle over the run and measures every resulting pose.
+            if (_animator != null) _animator.Sample((float)_frames / FrameLimit);
+            // Every frame's residual is recorded, not just the last one: a solve that works at idle but
+            // drifts during the strike is exactly what the two-hand contract must catch.
+            _gripErrors.Add(_animator != null ? _animator.LeftPalmToSecondaryGrip() : float.NaN);
+        }
         if (_head != null) _heads.Add(_head.position);
         if (_hand != null) _hands.Add(_hand.position);
         if (_sword != null && _hand != null) _sockets.Add(_hand.InverseTransformPoint(_sword.position));
@@ -79,32 +113,30 @@ public class PlayModeSampler : MonoBehaviour
             problems.Add("PlayMode sampler could not find head/hand/sword parts");
         if (AttackMode)
         {
-            var animator = FindFirstObjectByType<CubeGame.CharacterPilot.ProceduralCharacterAnimator>();
-            if (animator != null)
-            {
-                var gripError = animator.LeftPalmToSecondaryGrip();
-                if (float.IsNaN(gripError) || gripError > 0.02f)
-                    problems.Add($"attack: left palm is {gripError:0.###} away from the secondary grip in PlayMode");
-                else
-                    Debug.Log($"[playmode] attack grip contact ok ({gripError:0.####})");
-            }
-            else problems.Add("attack: animator not found in PlayMode");
-        }
-        if (AttackMode)
-        {
             // D58: an attack is judged by what the attack does — the blade sweeps, the left palm stays
             // on the secondary grip, and the weapon stays fixed in the right hand.
+            if (_animator == null) problems.Add("attack: animator not found in PlayMode");
             problems.AddRange(Moved("blade tip", _tips, 0.35f));
             problems.AddRange(Moved("right hand", _hands, 0.02f));
             if (_gripErrors.Count == 0)
                 problems.Add("attack: animator did not report the two-hand grip");
             else
             {
+                var anyNaN = false;
                 var worst = 0f;
-                foreach (var e in _gripErrors) if (!float.IsNaN(e) && e > worst) worst = e;
-                if (float.IsNaN(worst)) problems.Add("attack: two-hand grip distance is NaN");
-                else if (worst > 0.02f)
-                    problems.Add($"attack: left palm left the secondary grip by {worst:0.###}");
+                foreach (var e in _gripErrors)
+                {
+                    if (float.IsNaN(e) || float.IsInfinity(e)) { anyNaN = true; continue; }
+                    if (e > worst) worst = e;
+                }
+                if (anyNaN)
+                    problems.Add("attack: two-hand grip distance is NaN (the animator lost its grip " +
+                                 "binding in PlayMode)");
+                else if (worst > GripTolerance)
+                    problems.Add($"attack: left palm left the secondary grip by {Num(worst)}");
+                else
+                    Debug.Log($"[playmode] attack grip contact ok over {_gripErrors.Count} frames " +
+                              $"(worst {Num(worst)})");
             }
         }
         else
@@ -127,6 +159,10 @@ public class PlayModeSampler : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Writes the sampler-owned report. Invariant culture only: on a ru-RU machine the default formatting
+    /// printed "не число" for NaN and "0,2581" for numbers, which makes the report machine-dependent.
+    /// </summary>
     void WriteReport(string result, List<string> problems)
     {
         Directory.CreateDirectory("PilotOutput");
@@ -134,18 +170,44 @@ public class PlayModeSampler : MonoBehaviour
         json.AppendLine("{");
         json.AppendLine($"  \"result\": \"{result}\",");
         json.AppendLine($"  \"session\": \"{SessionId}\",");
+        json.AppendLine($"  \"mode\": \"{(AttackMode ? "attack" : "walk")}\",");
         json.AppendLine($"  \"frames\": {_frames},");
         json.AppendLine($"  \"requiredFrames\": {RequiredFrames},");
         json.AppendLine($"  \"unityVersion\": \"{Application.unityVersion}\",");
-        json.AppendLine($"  \"headTravel\": \"{Travel(_heads).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture)}\",");
-        json.AppendLine($"  \"handTravel\": \"{Travel(_hands).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture)}\",");
+        json.AppendLine($"  \"headTravel\": \"{Num(Travel(_heads))}\",");
+        json.AppendLine($"  \"handTravel\": \"{Num(Travel(_hands))}\",");
+        if (AttackMode)
+        {
+            json.AppendLine($"  \"bladeTipTravel\": \"{Num(Travel(_tips))}\",");
+            json.AppendLine($"  \"worstGripError\": \"{Num(WorstGrip())}\",");
+            json.AppendLine($"  \"gripSamples\": {_gripErrors.Count},");
+        }
         json.AppendLine($"  \"problems\": [{string.Join(",", problems.ConvertAll(p => "\"" + p.Replace("\"", "'") + "\""))}]");
         json.AppendLine("}");
         File.WriteAllText("PilotOutput/playmode.json", json.ToString());
-        File.WriteAllText("PilotOutput/playmode.txt",
-            $"PLAYMODE_RESULT={result}\nsession={SessionId}\nframes={_frames}/{RequiredFrames}\n" +
-            string.Join("\n", problems) + "\n");
+        var text = new StringBuilder();
+        text.AppendLine($"PLAYMODE_RESULT={result}");
+        text.AppendLine($"session={SessionId}");
+        text.AppendLine($"frames={_frames}/{RequiredFrames}");
+        foreach (var problem in problems) text.AppendLine(problem);
+        File.WriteAllText("PilotOutput/playmode.txt", text.ToString());
     }
+
+    float WorstGrip()
+    {
+        var worst = 0f;
+        foreach (var e in _gripErrors)
+        {
+            if (float.IsNaN(e) || float.IsInfinity(e)) return float.NaN;
+            if (e > worst) worst = e;
+        }
+        return worst;
+    }
+
+    static string Num(float value) =>
+        float.IsNaN(value) ? "NaN" :
+        float.IsInfinity(value) ? "inf" :
+        value.ToString("0.####", System.Globalization.CultureInfo.InvariantCulture);
 
     static List<string> Moved(string label, List<Vector3> frames, float minimum)
     {
@@ -157,7 +219,7 @@ public class PlayModeSampler : MonoBehaviour
         }
         var travel = Travel(frames);
         if (travel < minimum)
-            problems.Add($"{label}: does not move in PlayMode (travel {travel:0.####} < {minimum})");
+            problems.Add($"{label}: does not move in PlayMode (travel {Num(travel)} < {Num(minimum)})");
         return problems;
     }
 

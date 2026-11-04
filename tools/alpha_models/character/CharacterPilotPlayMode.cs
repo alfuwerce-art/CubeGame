@@ -16,6 +16,15 @@
 // FIX-04 (kept): pre-flight checks refuse to enter PlayMode on a broken assembly.
 // FIX-05 (kept): the editor exit is never called from inside a play-mode transition callback.
 //
+// FIX-07 (S05A-2): the lifecycle verdict no longer overwrites the sampler's report.
+//   The sampler owns PilotOutput/playmode.txt and PilotOutput/playmode.json and is the only writer of
+//   those files. The lifecycle writes PilotOutput/playmode_lifecycle.{txt,json} and a combined
+//   PilotOutput/playmode_verdict.{txt,json} that carries BOTH the sampler problems (verbatim, read back
+//   from the sampler report) and the lifecycle reasons. When the sampler never wrote a report, the
+//   lifecycle report says so explicitly instead of substituting a lifecycle-only verdict for it.
+//   Before FIX-07 the downgrade path called WritePlayModeFailure(), which replaced playmode.txt and
+//   erased the sampler's diagnostics - the run then showed only "verdict downgraded to FAIL".
+//
 // Test hooks (command line, never used by a normal run):
 //   -pilotFrames N            sampler collects N frames (requirement stays 40 -> FAIL)
 //   -pilotSkipAnimator        animator omitted (pre-flight FAIL)
@@ -185,9 +194,13 @@ public static partial class CharacterPilotVerifier
 
             if (failures.Count > 0)
             {
-                WritePlayModeFailure("FAIL", 0, RequiredPlayModeFrames, failures);
+                // FIX-07: the sampler never ran, so the lifecycle report says exactly that instead of
+                // writing a lifecycle-only playmode.txt on the sampler's behalf.
+                WritePlayModeReports(OutputDir, "FAIL", PlayModeSessionId, 0, RequiredPlayModeFrames,
+                    SamplerNotRun, failures);
                 WriteEventsReport("FAIL", failures);
-                throw new Exception("PLAYMODE_RESULT=FAIL - assembly is not playable, see PilotOutput/playmode.txt");
+                throw new Exception("PLAYMODE_RESULT=FAIL - assembly is not playable, see PilotOutput/" +
+                                    LifecycleReportFile);
             }
 
             AddPlayModeCameraAndLight();
@@ -226,8 +239,15 @@ public static partial class CharacterPilotVerifier
             {
                 failures.Add("exception: " + e.Message);
                 WritePlayModeException(e);
-                WriteEventsReport("EXCEPTION", failures);
             }
+            // FIX-07: on an exception before the sampler ran there is no sampler report at all; say so.
+            WritePlayModeReports(OutputDir, "FAIL", PlayModeSessionId, 0, RequiredPlayModeFrames,
+                File.Exists(Path.Combine(OutputDir, SamplerReportFile)) ? SamplerPresent : SamplerNotWritten,
+                failures);
+            // The events report keeps the old distinction: an exception is not a plain pre-flight refusal.
+            WriteEventsReport(
+                failures.Any(f => f.StartsWith("exception:", StringComparison.Ordinal)) ? "EXCEPTION" : "FAIL",
+                failures);
             throw;
         }
     }
@@ -373,25 +393,39 @@ public static partial class CharacterPilotVerifier
         if (EditorExitExecuted) return;
         EditorExitExecuted = true;
         var ordering = ValidateEventOrder(PlayModeEvents);
-        var resultPath = Path.Combine(OutputDir, "playmode.txt");
-        var text = File.Exists(resultPath) ? File.ReadAllText(resultPath) : "";
+        // FIX-07: read-only access to the sampler report. Nothing in this method may rewrite it.
+        var samplerPath = Path.Combine(OutputDir, SamplerReportFile);
+        var samplerReportExists = File.Exists(samplerPath);
+        var text = samplerReportExists ? File.ReadAllText(samplerPath) : "";
+        var samplerResult = ExtractSamplerResult(text);
         var passed = code == 0 &&
-                     text.Contains("PLAYMODE_RESULT=PASS") &&
+                     samplerReportExists &&
+                     samplerResult == "PASS" &&
                      text.Contains(PlayModeSessionId) &&
                      ordering.Count == 0 && !DuplicateSamplerFinish &&
                      !DuplicateHandlerRegistration && !ForbiddenExitAttempt;
+
+        var reasons = new List<string>(ordering);
         if (!passed)
         {
             code = code == 0 ? 1 : code;
             foreach (var problem in ordering) Mark("LIFECYCLE_PROBLEM", problem);
-            var reasons = new List<string>(ordering)
-            {
-                $"lifecycle: verdict downgraded to FAIL before exit (sampler={SamplerFinished}, " +
-                $"duplicateFinish={DuplicateSamplerFinish}, duplicateHandler={DuplicateHandlerRegistration}, " +
-                $"forbiddenExit={ForbiddenExitAttempt})",
-            };
-            WritePlayModeFailure("FAIL", CountFrames(text), RequiredPlayModeFrames, reasons);
+            if (!samplerReportExists)
+                reasons.Add($"lifecycle: the sampler did not write {SamplerReportFile}; " +
+                            "no sampler diagnostics exist for this run");
+            else if (samplerResult != "PASS")
+                reasons.Add($"lifecycle: sampler verdict is {samplerResult}");
+            if (!text.Contains(PlayModeSessionId))
+                reasons.Add("lifecycle: the sampler report belongs to session " + SessionOf(text) +
+                            ", not " + PlayModeSessionId);
+            reasons.Add($"lifecycle: verdict downgraded to FAIL before exit (sampler={SamplerFinished}, " +
+                        $"duplicateFinish={DuplicateSamplerFinish}, duplicateHandler={DuplicateHandlerRegistration}, " +
+                        $"forbiddenExit={ForbiddenExitAttempt})");
         }
+
+        WritePlayModeReports(OutputDir, passed ? "PASS" : "FAIL", PlayModeSessionId,
+            samplerReportExists ? CountFrames(text) : 0, RequiredPlayModeFrames,
+            samplerReportExists ? SamplerPresent : SamplerNotWritten, reasons);
         Mark(MarkExitExecuted, $"code={code}");
         WriteEventsReport(passed ? "PASS" : "FAIL", ordering);
         Debug.Log($"pilot exit: leaving editor with code {code} (session {PlayModeSessionId})");
@@ -468,23 +502,173 @@ public static partial class CharacterPilotVerifier
         File.WriteAllText(Path.Combine(OutputDir, "playmode_events.json"), json.ToString(), new UTF8Encoding(false));
     }
 
-    static void WritePlayModeFailure(string verdict, int frames, int requiredFrames,
-        List<string> problems)
+    // ------------------------------------------------------------------
+    // reports (FIX-07: the sampler report is read-only for the lifecycle)
+    // ------------------------------------------------------------------
+
+    /// <summary>Sampler-owned artifacts. PlayModeSampler is the only writer of these two files.</summary>
+    internal const string SamplerReportFile = "playmode.txt";
+    internal const string LifecycleReportFile = "playmode_lifecycle.txt";
+    internal const string LifecycleReportJson = "playmode_lifecycle.json";
+    internal const string VerdictReportFile = "playmode_verdict.txt";
+    internal const string VerdictReportJson = "playmode_verdict.json";
+
+    /// <summary>How the sampler report relates to this run (written into the lifecycle report).</summary>
+    internal const string SamplerPresent = "present";
+    internal const string SamplerNotWritten = "not-written";
+    internal const string SamplerNotRun = "not-run";
+
+    internal static string SamplerExplain(string status)
     {
+        switch (status)
+        {
+            case SamplerPresent: return "present";
+            case SamplerNotWritten:
+                return "not-written (the sampler never wrote " + SamplerReportFile +
+                       "; no sampler diagnostics exist for this run)";
+            case SamplerNotRun:
+                return "not-run (PlayMode was never entered; the sampler produced nothing)";
+            default: return "unknown";
+        }
+    }
+
+    internal static string ExtractSamplerResult(string samplerText)
+    {
+        if (string.IsNullOrEmpty(samplerText)) return "none";
+        foreach (var raw in LineSplit(samplerText))
+        {
+            var line = raw.Trim();
+            const string prefix = "PLAYMODE_RESULT=";
+            if (line.StartsWith(prefix, StringComparison.Ordinal))
+                return line.Substring(prefix.Length).Trim();
+        }
+        return "none";
+    }
+
+    internal static string SessionOf(string samplerText)
+    {
+        if (string.IsNullOrEmpty(samplerText)) return "<none>";
+        foreach (var raw in LineSplit(samplerText))
+        {
+            var line = raw.Trim();
+            const string prefix = "session=";
+            if (line.StartsWith(prefix, StringComparison.Ordinal))
+                return line.Substring(prefix.Length).Trim();
+        }
+        return "<none>";
+    }
+
+    /// <summary>
+    /// The sampler problem list, verbatim. PlayModeSampler writes three header lines
+    /// (PLAYMODE_RESULT=, session=, frames=) and then one problem per line, so everything after the
+    /// header is a problem and is returned unchanged.
+    /// </summary>
+    internal static List<string> ExtractSamplerProblems(string samplerText)
+    {
+        var problems = new List<string>();
+        if (string.IsNullOrEmpty(samplerText)) return problems;
+        var lines = LineSplit(samplerText);
+        int i = 0;
+        while (i < lines.Length && IsSamplerHeader(lines[i].Trim())) i++;
+        for (; i < lines.Length; i++)
+        {
+            var line = lines[i].TrimEnd();
+            if (line.Length > 0) problems.Add(line);
+        }
+        return problems;
+    }
+
+    static bool IsSamplerHeader(string line) =>
+        line.StartsWith("PLAYMODE_RESULT=", StringComparison.Ordinal) ||
+        line.StartsWith("session=", StringComparison.Ordinal) ||
+        line.StartsWith("frames=", StringComparison.Ordinal);
+
+    static string[] LineSplit(string text) => text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+
+    /// <summary>
+    /// Text of a lifecycle or combined report. Both lists are always printed; an absent sampler report
+    /// is named as such instead of being replaced by a lifecycle-only verdict.
+    /// </summary>
+    internal static string ComposeReportText(string header, string verdict, string session,
+        int frames, int requiredFrames, string samplerStatus, string samplerText,
+        IReadOnlyList<string> lifecycleProblems)
+    {
+        var samplerResult = samplerStatus == SamplerPresent ? ExtractSamplerResult(samplerText) : "none";
+        var samplerProblems = samplerStatus == SamplerPresent
+            ? ExtractSamplerProblems(samplerText)
+            : new List<string>();
+        var reasons = lifecycleProblems ?? new List<string>();
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"{header}={verdict}");
+        sb.AppendLine($"session={session}");
+        sb.AppendLine($"frames={frames}/{requiredFrames}");
+        sb.AppendLine($"sampler_report={SamplerExplain(samplerStatus)}");
+        sb.AppendLine($"sampler_result={samplerResult}");
+        sb.AppendLine($"sampler_problems={samplerProblems.Count}");
+        sb.AppendLine($"lifecycle_problems={reasons.Count}");
+        sb.AppendLine($"--- sampler problems (verbatim, from {SamplerReportFile}) ---");
+        if (samplerProblems.Count == 0) sb.AppendLine("(none)");
+        else foreach (var problem in samplerProblems) sb.AppendLine(problem);
+        sb.AppendLine("--- lifecycle problems ---");
+        if (reasons.Count == 0) sb.AppendLine("(none)");
+        else foreach (var problem in reasons) sb.AppendLine(problem);
+        return sb.ToString();
+    }
+
+    internal static string ComposeReportJson(string verdict, string session, int frames, int requiredFrames,
+        string samplerStatus, string samplerText, IReadOnlyList<string> lifecycleProblems)
+    {
+        var samplerResult = samplerStatus == SamplerPresent ? ExtractSamplerResult(samplerText) : "none";
+        var samplerProblems = samplerStatus == SamplerPresent
+            ? ExtractSamplerProblems(samplerText)
+            : new List<string>();
+        var reasons = lifecycleProblems ?? new List<string>();
         var json = new StringBuilder();
         json.AppendLine("{");
         json.AppendLine($"  \"result\": {Q(verdict)},");
-        json.AppendLine($"  \"session\": {Q(PlayModeSessionId)},");
+        json.AppendLine($"  \"session\": {Q(session)},");
         json.AppendLine($"  \"frames\": {frames},");
         json.AppendLine($"  \"requiredFrames\": {requiredFrames},");
         json.AppendLine($"  \"unityVersion\": {Q(Application.unityVersion)},");
-        json.AppendLine($"  \"problems\": [{string.Join(",", problems.Select(Q))}]");
+        json.AppendLine($"  \"samplerReport\": {Q(samplerStatus)},");
+        json.AppendLine($"  \"samplerResult\": {Q(samplerResult)},");
+        json.AppendLine($"  \"samplerProblems\": [{string.Join(",", samplerProblems.Select(Q))}],");
+        json.AppendLine($"  \"lifecycleProblems\": [{string.Join(",", reasons.Select(Q))}]");
         json.AppendLine("}");
-        File.WriteAllText(Path.Combine(OutputDir, "playmode.json"), json.ToString(), new UTF8Encoding(false));
-        File.WriteAllText(Path.Combine(OutputDir, "playmode.txt"),
-            $"PLAYMODE_RESULT={verdict}\nsession={PlayModeSessionId}\nframes={frames}/{requiredFrames}\n" +
-            string.Join("\n", problems) + "\n", new UTF8Encoding(false));
-        Debug.Log($"PLAYMODE_RESULT={verdict} (lifecycle/pre-play checks)");
+        return json.ToString();
+    }
+
+    /// <summary>
+    /// Writes playmode_lifecycle.* and playmode_verdict.* into <paramref name="outputDir"/>.
+    /// Never writes playmode.txt / playmode.json: those belong to the sampler, and the sampler's
+    /// problem list is read back from disk and embedded verbatim in both new reports.
+    /// </summary>
+    internal static void WritePlayModeReports(string outputDir, string verdict, string session,
+        int frames, int requiredFrames, string samplerStatus, IReadOnlyList<string> lifecycleProblems)
+    {
+        Directory.CreateDirectory(outputDir);
+        var samplerText = "";
+        if (samplerStatus == SamplerPresent)
+        {
+            var samplerPath = Path.Combine(outputDir, SamplerReportFile);
+            if (File.Exists(samplerPath)) samplerText = File.ReadAllText(samplerPath);
+            else samplerStatus = SamplerNotWritten;
+        }
+        var utf8 = new UTF8Encoding(false);
+        File.WriteAllText(Path.Combine(outputDir, LifecycleReportFile),
+            ComposeReportText("PLAYMODE_LIFECYCLE_RESULT", verdict, session, frames, requiredFrames,
+                samplerStatus, samplerText, lifecycleProblems), utf8);
+        File.WriteAllText(Path.Combine(outputDir, LifecycleReportJson),
+            ComposeReportJson(verdict, session, frames, requiredFrames, samplerStatus, samplerText,
+                lifecycleProblems), utf8);
+        File.WriteAllText(Path.Combine(outputDir, VerdictReportFile),
+            ComposeReportText("PLAYMODE_VERDICT", verdict, session, frames, requiredFrames,
+                samplerStatus, samplerText, lifecycleProblems), utf8);
+        File.WriteAllText(Path.Combine(outputDir, VerdictReportJson),
+            ComposeReportJson(verdict, session, frames, requiredFrames, samplerStatus, samplerText,
+                lifecycleProblems), utf8);
+        Debug.Log($"PLAYMODE_LIFECYCLE_RESULT={verdict} (sampler_report={samplerStatus}, see {LifecycleReportFile} and {VerdictReportFile})");
     }
 
     static void WritePlayModeException(Exception e)
@@ -492,10 +676,9 @@ public static partial class CharacterPilotVerifier
         try
         {
             Directory.CreateDirectory(OutputDir);
+            // FIX-07: the exception report is lifecycle-owned as well; playmode.txt stays sampler-owned.
             File.WriteAllText(Path.Combine(OutputDir, "playmode_exception.txt"), e.ToString(),
                 new UTF8Encoding(false));
-            File.WriteAllText(Path.Combine(OutputDir, "playmode.txt"),
-                $"PLAYMODE_RESULT=EXCEPTION\nsession={PlayModeSessionId}\n{e}\n", new UTF8Encoding(false));
         }
         catch (Exception nested)
         {

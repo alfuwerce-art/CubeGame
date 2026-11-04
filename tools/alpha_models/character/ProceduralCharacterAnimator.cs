@@ -54,6 +54,23 @@ namespace CubeGame.CharacterPilot
             }
             Bind(Find("part_body"), Find("part_head"), Find("part_hair"), Find("part_hand_l"),
                 Find("part_hand_r"), Find("part_foot_l"), Find("part_foot_r"), Find("part_sword"));
+
+            // S05A-2 GRIP: the grip contract must survive the PlayMode scene reload as well. The grip
+            // transforms are private runtime fields (not serialized), while the voxel grip points are
+            // serialized, so a saved GripBound flag is enough to re-wire the contract here.
+            if (GripBound)
+            {
+                BindGrip(Find("part_sword"), Find("part_hand_l"), PrimaryGripVoxel, SecondaryGripVoxel,
+                    LeftHandGripLocal);
+                Debug.Log($"ProceduralCharacterAnimator: grip contract restored after scene reload " +
+                          $"(GripBound={GripBound}, IsBound={IsBound})");
+            }
+            else if (TwoHandedAttack)
+            {
+                // The attack would silently keep the left hand at its home pose, so say it out loud.
+                Debug.LogWarning("ProceduralCharacterAnimator: two-handed attack enabled but the grip " +
+                                 "contract was never bound; the left hand will not reach the secondary grip");
+            }
         }
 
         public void Bind(Transform body, Transform head, Transform hair, Transform handLeft,

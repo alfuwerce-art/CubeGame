@@ -38,6 +38,14 @@ public partial class ProceduralCharacterAnimator : MonoBehaviour
         /// <summary>Enables the two-handed attack instead of the walk cycle.</summary>
         public bool TwoHandedAttack;
 
+        /// <summary>
+        /// True when the grip contract (weapon transform, left hand transform, grip points) is wired.
+        /// Serialized because entering PlayMode reloads the scene: the private Transform fields below are
+        /// not serialized, so AutoBind() must restore the contract from this flag plus the voxel points.
+        /// Without it the left-hand solve silently did nothing and LeftPalmToSecondaryGrip() returned NaN.
+        /// </summary>
+        public bool GripBound;
+
         Transform _gripSword, _gripLeftHand;
 
         public void BindGrip(Transform sword, Transform leftHand, Vector3 primary, Vector3 secondary,
@@ -48,6 +56,7 @@ public partial class ProceduralCharacterAnimator : MonoBehaviour
             PrimaryGripVoxel = primary;
             SecondaryGripVoxel = secondary;
             LeftHandGripLocal = leftHandGripLocal;
+            GripBound = sword != null && leftHand != null;
         }
 
         /// <summary>Attack phase 0..1 mapped to named stages (for the report and the tests).</summary>

@@ -1000,20 +1000,26 @@ public static partial class CharacterPilotVerifier
             }
             // FIX-01/02/03 cases (two-pass geometry, source frames/skin alignment, real scene hierarchy)
             var fix = FixSelfTests.Run();
-            if (fix.cases > 0)
+            // S05A-2: pose adapter (Alpha-pose -> Unity hierarchy, TEST_DATA_NOT_ALPHA) and the PlayMode
+            // report separation (the sampler's diagnostics must survive a lifecycle verdict downgrade).
+            var pose = PoseAdapterSelfTests.Run();
+            var reports = PlayModeReportSelfTests.Run();
+            foreach (var block in new[] { fix, pose, reports })
             {
-                var fixJson = fix.json;
-                if (fixJson.Length > 2) json.Append(',').Append(fixJson, 1, fixJson.Length - 2);
-                failed += fix.failed;
+                if (block.cases <= 0) continue;
+                var blockJson = block.json;
+                if (blockJson.Length > 2) json.Append(',').Append(blockJson, 1, blockJson.Length - 2);
+                failed += block.failed;
             }
-            var total = cases.Count + fix.cases;
+            var total = cases.Count + fix.cases + pose.cases + reports.cases;
             json.Append(']');
 
             Directory.CreateDirectory(OutputDir);
             File.WriteAllText(Path.Combine(OutputDir, "selftest.json"), json.ToString(), new UTF8Encoding(false));
             File.WriteAllText(Path.Combine(OutputDir, "selftest.txt"),
                 $"SELFTEST_RESULT={(failed == 0 ? "PASS" : "FAIL")}\ncases={total} failed={failed}\n" +
-                $"base_cases={cases.Count} fix_cases={fix.cases}\n",
+                $"base_cases={cases.Count} fix_cases={fix.cases} pose_adapter_cases={pose.cases} " +
+                $"report_cases={reports.cases}\n",
                 new UTF8Encoding(false));
             Debug.Log($"SELFTEST_RESULT={(failed == 0 ? "PASS" : "FAIL")} cases={total} failed={failed}");
             return failed > 0;
