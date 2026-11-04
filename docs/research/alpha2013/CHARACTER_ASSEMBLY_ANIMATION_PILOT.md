@@ -1,9 +1,9 @@
 # S05A-1 — сборка персонажа и анимационный пилот
 
-**Проект:** CubeGame. **Этап:** `S05A-1` ([D49](../../decisions/D49-s05a1-authorized.md), [D48](../../decisions/D48-s05a0-accepted-s05a1-draft.md), стратегия [D46](../../decisions/D46-asset-conversion-first.md)).
+**Проект:** CubeGame. **Этап:** `S05A-1` (приёмка [D50](../../decisions/D50-s05a1-accepted-s05a2-planning.md), авторизация [D49](../../decisions/D49-s05a1-authorized.md), [D48](../../decisions/D48-s05a0-accepted-s05a1-draft.md), стратегия [D46](../../decisions/D46-asset-conversion-first.md)).
 **Ветка:** `stage/s05a1-character-animation` (от принятого `S05A-0` HEAD `47cc85c7b6160123534b99598964ba3fa9a7a035`).
 **Дата:** 2026-11-04 (MSK). **Исполнитель:** DeepSeek Harness (локальный ПК). **Unity:** `6000.3.27f2`, изолированный проект.
-**Статус:** **`READY_FOR_REVIEW`** — не `ACCEPTED`.
+**Статус:** **`S05A-1 — ACCEPTED`** — ограниченная техническая приёмка по [D50](../../decisions/D50-s05a1-accepted-s05a2-planning.md) (2026-11-04), после финального ревью ChatGPT `PASS`. Числа в ранних разделах — исторические результаты до REVIEW-FIX-03; окончательные приведены в §14–16.
 
 > Примечание к задаче: текст ТЗ, переданный исполнителю, обрывался в §11 на фразе «Проверенную иерархию и Transform-пара…». Требования к отчёту восстановлены по [черновику ТЗ S05A-1](../../stages/S05A1_CHARACTER_ASSEMBLY_ANIMATION_DRAFT.md) в репозитории (раздел D) — расхождений не обнаружено.
 
