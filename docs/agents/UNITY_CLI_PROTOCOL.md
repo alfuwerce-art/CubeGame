@@ -28,7 +28,7 @@
 ## 2. Чтение и диагностика — без изменений состояния
 
 ```powershell
-cd 'C:\Users\bow\Desktop\CubeGame'
+cd 'D:\Projects\CubeGame'
 git status --short --branch
 (Get-Command unity).Source
 unity --version

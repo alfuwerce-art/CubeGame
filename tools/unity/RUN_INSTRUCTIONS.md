@@ -8,7 +8,7 @@
 Обычный PowerShell (не нужен администратор):
 
 ```powershell
-cd 'C:\Users\bow\Desktop\CubeGame'
+cd 'D:\Projects\CubeGame'
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\unity\run_pilot.ps1
 ```
 
@@ -91,7 +91,7 @@ COMMIT=<hash>
 
 ## Ручная проверка демонстрации (P2)
 
-1. Открыть `C:\Users\bow\Desktop\CubeGame` в Unity 6000.3.27f2.
+1. Открыть `D:\Projects\CubeGame` в Unity 6000.3.27f2.
 2. Открыть сцену `Assets/Scenes/Pilot.unity` (или выполнить пункт меню `CubeGame > Build pilot scene`).
 3. Play: WASD — движение, Shift — бег, Space — прыжок, ПКМ/курсор — обзор мышью, Esc — освободить курсор.
 4. HUD показывает seed, координаты блока и чанка, FPS.

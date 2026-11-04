@@ -41,7 +41,7 @@
 | Unity Editor | **6000.3.27f2** (22188f149405), `D:\Unity\Hub\Editor\6000.3.27f2` | изолированный проект проверки, batchmode |
 | Python (system) | 3.13.14 | запуск скриптов |
 | Python (bundled DSH) | 3.12.14, **Pillow 12.3.0**, sqlite3 3.53.1 | превью-рендер, тесты |
-| Git | рабочий репозиторий `C:\Users\bow\Desktop\CubeGame` | ветка `stage/s05a-asset-conversion-pilot` |
+| Git | рабочий репозиторий `D:\Projects\CubeGame` | ветка `stage/s05a-asset-conversion-pilot` |
 | Собственный набор | `tools/alpha_models/` (`cub_format.py`, `cub_probe.py`, `cub_to_obj.py`, `cub_preview.py`, `verify_export.py`, `tests/`, `unity/`) | декодирование, конвертация, проверки |
 
 **Существующие решения (шаг B) — проверялись до написания своего кода:**

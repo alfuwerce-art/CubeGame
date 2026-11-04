@@ -29,7 +29,7 @@
 
 ## Незавершённое
 
-1. Открыть **новую** сессию CubeGame Dev (workspace указан на `C:\Users\bow\Desktop\CubeGame`) с `workspace-write / ask`.
+1. Открыть **новую** сессию CubeGame Dev (workspace указан на `D:\Projects\CubeGame`) с `workspace-write / ask`.
 2. Настроить identity только в CubeGame: `git config --local user.name <username>` и `git config --local user.email <точный GitHub noreply либо подтверждённый email>`. Не угадывать privacy-адрес: см. https://github.com/settings/emails .
 3. `plugins/` в рабочей копии отмечен как untracked: не коммитить без проверки содержимого и отсутствия секретов/локальных путей. Если бандл нужен для воспроизводимости, позже опубликовать **санитизированную** декларацию отдельно от runtime/пакетных файлов. Не включать весь каталог автоматически.
 4. Выполнить **только S00-G0**: инвентаризация, хеши, проверка безопасности, подтверждённый запуск/сохранение. Агент ещё не запускал Alpha.

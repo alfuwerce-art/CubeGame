@@ -47,7 +47,7 @@
 
 - URL: `https://github.com/qad3n/CubeWorld-Reversal`
 - **Зафиксированный коммит:** `e6e906e4b2644806ef19c2e1f12ebc636c347f7c` («Add reverse-engineered game struct field offsets», 2026-07-21).
-- Клон для анализа: локальный `C:\Users\bow\Desktop\CubeGame\.scratch\CubeWorld-Reversal` (**не** входит в git CubeGame, `_scratch` исключён из индекса).
+- Клон для анализа: локальный `D:\Projects\CubeGame\.scratch\CubeWorld-Reversal` (**не** входит в git CubeGame, `_scratch` исключён из индекса).
 - Инструмент авторов: Ghidra 12.1.2 headless. Клиент: 12 983 функции, 1 370 игровых; сервер 6 152 / 288. Классов `cube::` — 55 (клиент) / 25 (сервер), 23 общих.
 - Вспомогательные индексы: `cube/attribution.tsv` (адрес → имя → класс), `cube/RENAMES.tsv` (адрес → предложенное осмысленное имя), `cube/GAP_ANALYSIS.md` (уверенность по `FUN_*`), `cube/include/cube_types.h` (экспорт структур + **подтверждённые смещения полей**).
 - **Ограничения:** это декомпилированный псевдокод, а не исходники; MSVC-оптимизация теряет параметры, часть выражений деградирована (в телах встречаются неинициализированные `self`, `world`, `column`). Имена `FUN_*` и комментарии `[AUDIT] proposed: ... (confidence: ...)` — **предложения**, не истина. Копирование тел функций в CubeGame запрещено; используем собственные описания алгоритмов и константы.

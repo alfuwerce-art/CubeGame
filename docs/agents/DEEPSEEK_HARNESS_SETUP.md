@@ -9,12 +9,12 @@
 
 ## 1. Рабочий каталог (предлагаемый путь)
 
-`C:\Users\bow\Desktop\CubeGame` — **предложение**, не уже существующий путь. Альтернатива — любой отдельно выбранный пользователем каталог.
+`D:\Projects\CubeGame` — **предложение**, не уже существующий путь. Альтернатива — любой отдельно выбранный пользователем каталог.
 
 Безопасная команда PowerShell (без перезаписи существующей папки):
 
 ```powershell
-$repo = Join-Path $HOME 'Desktop\CubeGame'
+$repo = 'D:\Projects\CubeGame'
 if (Test-Path -LiteralPath $repo) {
     if (-not (Test-Path -LiteralPath (Join-Path $repo '.git'))) {
         throw "Папка уже существует и не является Git-репозиторием: $repo"

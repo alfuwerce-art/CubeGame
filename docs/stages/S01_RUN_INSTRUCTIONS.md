@@ -9,7 +9,7 @@
 3. Запустить скрипт:
 
 ```powershell
-cd C:\Users\bow\Desktop\CubeGame
+cd D:\Projects\CubeGame
 powershell -ExecutionPolicy Bypass -File tools\unity\run_pilot.ps1
 ```
 

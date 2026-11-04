@@ -50,9 +50,9 @@ CLI 1.0.0-beta.13 поддерживает команды `install`, `upgrade`, 
 ## 4. Команда установки (только после разрешения)
 
 ```powershell
-cd 'C:\Users\bow\Desktop\CubeGame'
+cd 'D:\Projects\CubeGame'
 git status --short                      # ветка stage/s01-unity-pilot, рабочее дерево зафиксировано
-unity pipeline install --project-path 'C:\Users\bow\Desktop\CubeGame' --package-version 0.9.1-exp.1
+unity pipeline install --project-path 'D:\Projects\CubeGame' --package-version 0.9.1-exp.1
 git diff -- Packages/manifest.json Packages/packages-lock.json
 ```
 
@@ -60,7 +60,7 @@ git diff -- Packages/manifest.json Packages/packages-lock.json
 
 ```powershell
 unity pipeline list                 # ожидается Pipeline=true, версия 0.9.1-exp.1
-unity status --project-path 'C:\Users\bow\Desktop\CubeGame'
+unity status --project-path 'D:\Projects\CubeGame'
 unity command --help
 ```
 
