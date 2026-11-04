@@ -20,7 +20,13 @@ namespace CubeGame.CharacterPilot
 public partial class ProceduralCharacterAnimator : MonoBehaviour
     {
         public const string TwoHandedClipName = "two_handed_attack_NOT_ALPHA";
-        public const float TwoHandedCycleSeconds = 1.1f;
+        // Alpha timings (RECONSTRUCTED_FROM_EVIDENCE): combat_getAttackWindup@0x0043caa0 = 100 ms,
+        // combat_getAttackTiming@0x0043d1a0 contact = 100 ms, combat_getReloadFrames@0x00447310 recovery = 200 ms
+        // for ability types 2..4. Poses stay ORIGINAL_NOT_ALPHA; only the phase timing comes from Alpha.
+        public const float TwoHandedWindupSeconds = 0.100f;
+        public const float TwoHandedContactSeconds = 0.100f;
+        public const float TwoHandedRecoverySeconds = 0.200f;
+        public const float TwoHandedCycleSeconds = TwoHandedWindupSeconds + TwoHandedContactSeconds + TwoHandedRecoverySeconds;
 
         /// <summary>Grip data derived from the weapon geometry (voxel space).</summary>
         public Vector3 PrimaryGripVoxel;

@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using CubeGame.CharacterPilot;
 using UnityEngine;
 
 public class PlayModeSampler : MonoBehaviour
@@ -47,6 +48,9 @@ public class PlayModeSampler : MonoBehaviour
     readonly List<Vector3> _heads = new List<Vector3>();
     readonly List<Vector3> _hands = new List<Vector3>();
     readonly List<Vector3> _sockets = new List<Vector3>();
+    readonly List<float> _gripErrors = new List<float>();
+    ProceduralCharacterAnimator _animator;
+    readonly List<Vector3> _tips = new List<Vector3>();
     bool _finished;
 
     void Awake()
@@ -65,6 +69,7 @@ public class PlayModeSampler : MonoBehaviour
         if (_head != null) _heads.Add(_head.position);
         if (_hand != null) _hands.Add(_hand.position);
         if (_sword != null && _hand != null) _sockets.Add(_hand.InverseTransformPoint(_sword.position));
+        if (_sword != null) _tips.Add(_sword.TransformPoint(0f, 30f, 0f));
         _frames++;
         if (_frames < FrameLimit) return;
         _finished = true;
@@ -85,8 +90,28 @@ public class PlayModeSampler : MonoBehaviour
             }
             else problems.Add("attack: animator not found in PlayMode");
         }
-        problems.AddRange(Moved("head", _heads, 0.002f));
-        problems.AddRange(Moved("hand", _hands, 0.02f));
+        if (AttackMode)
+        {
+            // D58: an attack is judged by what the attack does — the blade sweeps, the left palm stays
+            // on the secondary grip, and the weapon stays fixed in the right hand.
+            problems.AddRange(Moved("blade tip", _tips, 0.35f));
+            problems.AddRange(Moved("right hand", _hands, 0.02f));
+            if (_gripErrors.Count == 0)
+                problems.Add("attack: animator did not report the two-hand grip");
+            else
+            {
+                var worst = 0f;
+                foreach (var e in _gripErrors) if (!float.IsNaN(e) && e > worst) worst = e;
+                if (float.IsNaN(worst)) problems.Add("attack: two-hand grip distance is NaN");
+                else if (worst > 0.02f)
+                    problems.Add($"attack: left palm left the secondary grip by {worst:0.###}");
+            }
+        }
+        else
+        {
+            problems.AddRange(Moved("head", _heads, 0.002f));
+            problems.AddRange(Moved("hand", _hands, 0.02f));
+        }
         problems.AddRange(SocketSteady(_sockets));
         if (_frames < RequiredFrames)
             problems.Add($"only {_frames} frames were processed, {RequiredFrames} required");
