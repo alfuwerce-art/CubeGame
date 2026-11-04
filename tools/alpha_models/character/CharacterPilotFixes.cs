@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CubeGame.CharacterPilot;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -394,6 +395,98 @@ public static partial class CharacterPilotVerifier
             {
                 Add("head/hair skin voxels coincide in character space", true,
                     new List<string> { $"payload missing: {headPayload}" }, "payload missing");
+            }
+
+            // ---------------- FIX-06: lifecycle event order ----------------
+            var good = new[]
+            {
+                MarkSessionStarted, MarkEntered, MarkSamplerFinished, MarkExitRequested,
+                MarkExiting, MarkEditModeEntered, MarkExitScheduled, MarkExitExecuted,
+            };
+            Add("lifecycle: correct order passes", false, ValidateEventOrder(good));
+            Add("lifecycle: exit before sampler finish fails", true, ValidateEventOrder(new[]
+            {
+                MarkSessionStarted, MarkEntered, MarkExitRequested, MarkExiting,
+                MarkEditModeEntered, MarkExitScheduled, MarkExitExecuted,
+            }), "before the sampler completed");
+            Add("lifecycle: exit executed before EditMode fails", true, ValidateEventOrder(new[]
+            {
+                MarkSessionStarted, MarkEntered, MarkSamplerFinished, MarkExitRequested,
+                MarkExitExecuted,
+            }), "before EditMode was entered");
+            Add("lifecycle: duplicate sampler finish fails", true, ValidateEventOrder(new[]
+            {
+                MarkSessionStarted, MarkEntered, MarkSamplerFinished, MarkSamplerFinished,
+                MarkExitRequested, MarkEditModeEntered, MarkExitScheduled, MarkExitExecuted,
+            }), "more than once");
+            Add("lifecycle: rejected exit attempt fails", true, ValidateEventOrder(new[]
+            {
+                MarkSessionStarted, MarkEntered, MarkExitRejected, MarkSamplerFinished,
+                MarkExitRequested, MarkEditModeEntered, MarkExitScheduled, MarkExitExecuted,
+            }), "while still in PlayMode");
+            Add("lifecycle: exit not last fails", true, ValidateEventOrder(new[]
+            {
+                MarkSessionStarted, MarkEntered, MarkSamplerFinished, MarkExitRequested,
+                MarkEditModeEntered, MarkExitScheduled, MarkExitExecuted, "LIFECYCLE_PROBLEM",
+            }), "not the last");
+            Add("lifecycle: empty log fails", true, ValidateEventOrder(new string[0]), "no events");
+
+            // ---------------- FIX-07: animator binding contract ----------------
+            {
+                var host = new GameObject("binding_contract_test");
+                try
+                {
+                    Transform Make(string name)
+                    {
+                        var go = new GameObject(name);
+                        go.transform.SetParent(host.transform, false);
+                        return go.transform;
+                    }
+                    var parts = new[]
+                    {
+                        Make("body"), Make("head"), Make("hair"), Make("hand_l"),
+                        Make("hand_r"), Make("foot_l"), Make("foot_r"), Make("sword"),
+                    };
+                    var animator = host.AddComponent<ProceduralCharacterAnimator>();
+
+                    animator.Bind(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
+                    Add("binding: all eight parts bound", false,
+                        animator.IsBound ? new List<string>() : new List<string> { "IsBound is false" });
+
+                    animator.Bind(parts[0], parts[1], null, parts[3], parts[4], parts[5], parts[6], parts[7]);
+                    Add("binding: missing hair leaves IsBound false", false,
+                        animator.IsBound ? new List<string> { "IsBound is true without hair" } : new List<string>());
+
+                    animator.Bind(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], null);
+                    Add("binding: missing sword leaves IsBound false", false,
+                        animator.IsBound ? new List<string> { "IsBound is true without sword" } : new List<string>());
+
+                    animator.Bind(parts[0], null, parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
+                    Add("binding: missing head leaves IsBound false", false,
+                        animator.IsBound ? new List<string> { "IsBound is true without head" } : new List<string>());
+
+                    animator.Bind(parts[0], parts[1], parts[2], null, parts[4], parts[5], parts[6], parts[7]);
+                    Add("binding: missing hand leaves IsBound false", false,
+                        animator.IsBound ? new List<string> { "IsBound is true without hand_l" } : new List<string>());
+
+                    animator.Bind(parts[0], parts[1], parts[2], parts[3], parts[4], null, parts[6], parts[7]);
+                    Add("binding: missing foot leaves IsBound false", false,
+                        animator.IsBound ? new List<string> { "IsBound is true without foot_l" } : new List<string>());
+
+                    animator.Bind(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
+                    var bindingBuild = new AssemblyBuild { animator = animator, parts = new Dictionary<string, Transform>() };
+                    foreach (var id in new[] { "body", "head", "hair", "hand_l", "hand_r", "foot_l", "foot_r", "sword" })
+                        bindingBuild.parts[id] = parts[0];
+                    Add("preflight: fully bound animator passes the binding check", false,
+                        ValidatePlayModePrerequisites(bindingBuild).FindAll(p => p.Contains("Animator")));
+                    animator.Bind(parts[0], parts[1], null, parts[3], parts[4], parts[5], parts[6], parts[7]);
+                    Add("preflight: unbound animator is rejected", true,
+                        ValidatePlayModePrerequisites(bindingBuild), "not bound");
+                }
+                finally
+                {
+                    Object.DestroyImmediate(host);
+                }
             }
 
             // ---------------- FIX-04: PlayMode verdict helpers ----------------

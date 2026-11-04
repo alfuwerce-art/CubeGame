@@ -28,10 +28,14 @@ namespace CubeGame.CharacterPilot
         Vector3 _bodyHome, _headHome, _handLeftHome, _handRightHome, _footLeftHome, _footRightHome;
         Quaternion _bodyHomeRot, _headHomeRot, _handLeftHomeRot, _handRightHomeRot;
 
-        /// <summary>True when the eight parts are wired; PlayMode refuses to run otherwise.</summary>
+        /// <summary>
+        /// True only when all eight parts of the character contract are wired:
+        /// body, head, hair, hand_l, hand_r, foot_l, foot_r, sword. PlayMode refuses to run otherwise.
+        /// </summary>
         public bool IsBound =>
-            _body != null && _head != null && _handLeft != null && _handRight != null &&
-            _footLeft != null && _footRight != null;
+            _body != null && _head != null && _hair != null &&
+            _handLeft != null && _handRight != null &&
+            _footLeft != null && _footRight != null && _sword != null;
 
         void Awake()
         {
@@ -55,13 +59,18 @@ namespace CubeGame.CharacterPilot
         public void Bind(Transform body, Transform head, Transform hair, Transform handLeft,
                          Transform handRight, Transform footLeft, Transform footRight, Transform sword)
         {
-            if (body == null || head == null || handLeft == null || handRight == null ||
-                footLeft == null || footRight == null)
+            if (body == null || head == null || hair == null || handLeft == null ||
+                handRight == null || footLeft == null || footRight == null || sword == null)
             {
-                Debug.LogWarning("ProceduralCharacterAnimator: incomplete binding, animation disabled");
+                // The contract is all eight parts: a character without hair or weapon is not animateable
+                // for this pilot, so the animator stays unbound (IsBound == false) and disabled.
+                Debug.LogWarning("ProceduralCharacterAnimator: incomplete binding (need body, head, hair, " +
+                                 "hand_l, hand_r, foot_l, foot_r, sword), animation disabled");
+                _body = _head = _hair = _handLeft = _handRight = _footLeft = _footRight = _sword = null;
                 enabled = false;
                 return;
             }
+            enabled = true;
             _body = body; _head = head; _hair = hair;
             _handLeft = handLeft; _handRight = handRight;
             _footLeft = footLeft; _footRight = footRight; _sword = sword;

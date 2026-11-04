@@ -36,6 +36,9 @@ public class PlayModeSampler : MonoBehaviour
     /// <summary>Session id issued by RunPlayMode; copied verbatim into the report.</summary>
     public string SessionId = "";
 
+    /// <summary>Test hook: report completion twice, so the lifecycle duplicate guard can be exercised.</summary>
+    public bool TriggerDoubleFinish;
+
     int _frames;
     Transform _head, _hand, _sword;
     readonly List<Vector3> _heads = new List<Vector3>();
@@ -76,6 +79,11 @@ public class PlayModeSampler : MonoBehaviour
         WriteReport(result, problems);
         Debug.Log($"PLAYMODE_RESULT={result} frames={_frames} session={SessionId}");
         OnFinished?.Invoke(problems.Count == 0 ? 0 : 1);
+        if (TriggerDoubleFinish)
+        {
+            Debug.Log("[lifecycle] test hook: reporting sampler completion a second time");
+            OnFinished?.Invoke(problems.Count == 0 ? 0 : 1);
+        }
     }
 
     void WriteReport(string result, List<string> problems)

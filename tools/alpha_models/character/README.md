@@ -8,7 +8,7 @@
 | `CharacterPilotFixes.cs` | S05A-1-REVIEW-FIX-01: двухпроходный расчёт координат (FIX-01), размещение по исходной сетке + проверка кожных вокселей (FIX-02), независимая проверка `Transform.parent` (FIX-03), выгрузка геометрии для кросс-проверки с Python |
 | `ProceduralCharacterAnimator.cs` | технический цикл `technical_walk_NOT_ALPHA` (детерминированный `Sample(t)` + `Update()` в PlayMode) |
 | `PlayModeSampler.cs` | 40 реальных кадров PlayMode: движение частей + стабильность меча в кисти; `RequiredFrames` (40) отделён от `FrameLimit`, в отчёт пишется `session` |
-| `CharacterPilotPlayMode.cs` | точка входа PlayMode: предполётные проверки (сборка, 8 узлов, аниматор), отложенный безопасный выход из редактора, отчёты FAIL/EXCEPTION |
+| `CharacterPilotPlayMode.cs` | точка входа PlayMode: предполётные проверки (сборка, 8 узлов, аниматор), жизненный цикл `OnFinished → isPlaying=false → EnteredEditMode → отложенный Exit`, журнал событий и `ValidateEventOrder`, отчёты FAIL/EXCEPTION |
 | `assembly.sample.json` | образец спеки сборки: имена частей, offsets в пространстве персонажа, статусы достоверности (без данных моделей) |
 | `VertexColorUnlit.shader` | unlit-шейдер vertex colors (общий с S05A-0) |
 
@@ -39,5 +39,12 @@
 |---|---|
 | `-pilotFrames N` | сэмплер соберёт `N` кадров вместо 40; требование остаётся 40, поэтому `N < 40` даёт `FAIL` |
 | `-pilotSkipAnimator` | `BuildCharacter` не добавляет `ProceduralCharacterAnimator`; PlayMode обязан отказаться |
+| `-pilotUnbindHair` | после сборки аниматор привязывается без волос: `IsBound == false`, предполётная проверка даёт `FAIL` |
+| `-pilotDoubleFinish` | сэмплер сообщает о завершении дважды: должен сработать `SAMPLER_FINISHED_DUPLICATE` |
+| `-pilotDoubleRegister` | обработчик `playModeStateChanged` регистрируется дважды: `STATE_HANDLER_DUPLICATE` |
+| `-pilotExitBeforeEditMode` | попытка выйти до `EnteredEditMode`: отказ и `FAIL` |
+| `-pilotForceExitEarly` | PlayMode останавливается до окончания сэмплирования: `FAIL` с диагностикой |
 
-`RunPlayMode` не запускает PlayMode, если сборка неполная, отсутствует часть или аниматор: пишет `PLAYMODE_RESULT=FAIL` с причинами и завершается ненулевым кодом. Выход из редактора выполняется отложенно (тик `EditorApplication.update`) — синхронный `EditorApplication.Exit()` из `playModeStateChanged` вызывал `0xC0000005`.
+`RunPlayMode` не запускает PlayMode, если сборка неполная, отсутствует часть или аниматор: пишет `PLAYMODE_RESULT=FAIL` с причинами и завершается ненулевым кодом.
+
+Жизненный цикл (S05A-1-REVIEW-FIX-03): сэмплер сообщает о завершении → `EditorApplication.isPlaying = false` → по `EnteredEditMode` планируется выход → тик `EditorApplication.update` подтверждает, что редактор не в PlayMode → `EditorApplication.Exit(code)`. Журнал `PilotOutput/playmode_events.txt` содержит последовательность `PLAYMODE_SESSION_STARTED → PLAYMODE_ENTERED → SAMPLER_FINISHED → PLAYMODE_EXIT_REQUESTED → PLAYMODE_EXITING → EDITMODE_ENTERED → EDITOR_EXIT_SCHEDULED → EDITOR_EXIT_EXECUTED`; нарушение порядка даёт `FAIL`. Синхронный `Exit()` из `playModeStateChanged` вызывал `0xC0000005` и больше не используется.

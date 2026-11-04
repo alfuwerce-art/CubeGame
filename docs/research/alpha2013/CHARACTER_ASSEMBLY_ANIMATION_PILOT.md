@@ -432,7 +432,121 @@ PlayMode, не глядя на `build.problems`. Если части не хва
 5. Остальные ограничения этапа не менялись: offsets/пивоты/масштаб — `PROXY_NOT_ALPHA`, тинт и семантика
    маркеров — `PARTIAL`/`UNKNOWN`, исходный анимационный цикл — `UNKNOWN / NOT_REPRODUCED`.
 
-## 14. Итоговый статус
+## 14. S05A-1-REVIEW-FIX-03 (2026-11-04) — жизненный цикл PlayMode и полный контракт привязки
 
-`S05A-1-REVIEW-FIX-02 — READY_FOR_REVIEW`. `ACCEPTED` не выставляется. `S05B`, массовая конвертация и
+Ревью: `PASS WITH ONE FINAL LIFECYCLE FIX`. Устранены два последних замечания; содержательные ограничения этапа
+не менялись. Статус остаётся `READY_FOR_REVIEW`.
+
+### 14.1 FIX-06 — корректный жизненный цикл PlayMode
+
+**Дефект.** `PlayModeSampler.OnFinished` вызывал `RequestEditorExitAfterTransition(code)` **до** запроса
+`EditorApplication.isPlaying = false`. Отложенный `EditorApplication.Exit()` мог сработать через 10 тиков
+`EditorApplication.update`, пока редактор ещё находился в PlayMode. Три прошлых прогона с кодом 0 этого не
+доказывали: последовательность состояний не проверялась.
+
+**Исправление.** Прямой вызов выхода из `OnFinished` удалён. Теперь:
+
+1. `RunPlayMode` выполняет предполётные проверки и запускает PlayMode.
+2. `PlayModeSampler` собирает ≥ 40 кадров (`RequiredFrames`) и пишет отчёт со своим `session`.
+3. `OnFinished(code)` фиксирует результат (однократно: повторный вызов помечается `SAMPLER_FINISHED_DUPLICATE`)
+   и **только** запрашивает `EditorApplication.isPlaying = false` (маркер `PLAYMODE_EXIT_REQUESTED`).
+4. Unity проходит штатный переход (`PLAYMODE_EXITING`).
+5. По `PlayModeStateChange.EnteredEditMode` (маркер `EDITMODE_ENTERED`) вычисляется порядок событий и только
+   тогда планируется выход (`EDITOR_EXIT_SCHEDULED`); обработчик `playModeStateChanged` при этом отписывается.
+6. `EditorApplication.update` подтверждает, что редактор уже не в PlayMode
+   (`!EditorApplication.isPlaying && !EditorApplication.isPlayingOrWillChangePlaymode`); если это не так —
+   выход отклоняется (`EDITOR_EXIT_ABORTED`) и итог принудительно `FAIL`.
+7. Выход выполняется с фактическим кодом: 0 при PASS, ненулевой при FAIL/EXCEPTION (`EDITOR_EXIT_EXECUTED`).
+
+**Защита жизненного цикла:** статическое состояние сбрасывается в начале каждого запуска
+(`ResetLifecycleState`); отписка от `playModeStateChanged` и `EditorApplication.update`; очистка
+`PlayModeSampler.OnFinished`; флаги `SamplerFinished`, `DuplicateSamplerFinish`, `DuplicateHandlerRegistration`,
+`ForbiddenExitAttempt`, `EditModeReached`, `EditorExitExecuted`, `ExitPumpInstalled`; бюджет ожидания
+`ExitMaxTicks = 600` вместо бесконечного ожидания; проверка `session` в отчёте перед вердиктом; диагностика
+неожиданного завершения PlayMode («sampler never reported completion»); контролируемый `FAIL`, если PlayMode
+закончился раньше сэмплирования.
+
+### 14.2 FIX-07 — привязка аниматора проверяет все восемь узлов
+
+**Дефект.** `ProceduralCharacterAnimator.IsBound` проверял шесть ссылок: отсутствие `hair` или `sword`
+считалось нормальной привязкой, а `Bind()` допускал `null` для волос и меча.
+
+**Исправление.** `IsBound` проверяет все восемь узлов (`body, head, hair, hand_l, hand_r, foot_l, foot_r,
+sword`); `Bind()` при отсутствии любого из них очищает ссылки, выключает компонент и оставляет
+`IsBound == false`; `AutoBind()` работает по тому же контракту. `ValidatePlayModePrerequisites` отвергает
+неполную привязку, поэтому PlayMode не запускается. Формулы `technical_walk_NOT_ALPHA` не менялись.
+
+### 14.3 Реальная последовательность событий (журнал)
+
+Успешный запуск (`PilotOutput/playmode_events.txt`), одинаковый во всех трёх прогонах:
+
+```text
+PLAYMODE_SESSION_STARTED
+PLAYMODE_ENTERED
+SAMPLER_FINISHED code=0
+PLAYMODE_EXIT_REQUESTED
+PLAYMODE_EXITING
+EDITMODE_ENTERED
+EDITOR_EXIT_SCHEDULED code=0
+EDITOR_EXIT_EXECUTED code=0
+```
+
+Порядок проверяется функцией `ValidateEventOrder`; нарушения (выход до `EDITMODE_ENTERED`, отсутствие
+`SAMPLER_FINISHED`, дубли, попытка выхода в PlayMode, выход не последним событием) переводят итог в `FAIL`
+независимо от содержимого `playmode.txt`.
+
+### 14.4 Результаты запусков
+
+Положительные (три последовательных запуска Unity, каждый со своим `session`):
+
+| Запуск | Вердикт | Кадры | Порядок событий | `Crash!!!` | Exit code |
+|---|---|---|---|---|---|
+| 1 | PASS | 40/40 | полный, без дублей | 0 | **0** |
+| 2 | PASS | 40/40 | полный, без дублей | 0 | **0** |
+| 3 | PASS | 40/40 | полный, без дублей | 0 | **0** |
+
+Негативные (локальная копия данных; ресурсы Alpha не изменялись):
+
+| Сценарий | Вердикт | Кадры | Exit code | Диагностика |
+|---|---|---|---|---|
+| нет волос (`no_hair`) | FAIL | 0/40 | 1 | `payload hair.cubdec not found`, `missing part node 'hair'` |
+| нет меча (`no_sword`) | FAIL | 0/40 | 1 | `payload sword.cubdec not found` |
+| неполная привязка (`-pilotUnbindHair`) | FAIL | 0/40 | 1 | `Animator is not bound to the eight parts` |
+| 10 кадров (`-pilotFrames 10`) | FAIL | 10/40 | 1 | `verdict downgraded to FAIL before exit` |
+| ошибка сборки (нет `head.cubdec`) | FAIL | 0/40 | 1 | `payload head.cubdec not found` |
+| PlayMode завершился до сэмплера (`-pilotForceExitEarly`) | FAIL | 0/40 | 1 | `sampler never reported completion`, `PlayMode ended before the sampler completed` |
+| повторное завершение сэмплера (`-pilotDoubleFinish`) | FAIL | 40/40 | 1 | `SAMPLER_FINISHED_DUPLICATE`, `duplicateFinish=True` |
+| повторная регистрация обработчика (`-pilotDoubleRegister`) | FAIL | 40/40 | 1 | `STATE_HANDLER_DUPLICATE`, `duplicateHandler=True` |
+| выход до `EnteredEditMode` (`-pilotExitBeforeEditMode`) | FAIL | 40/40 | 1 | `EDITOR_EXIT_REJECTED`, `attempted while still in PlayMode` |
+
+Во всех двенадцати запусках (3 положительных + 9 негативных) `Crash!!!` = 0, аварийного `0xC0000005` нет.
+
+### 14.5 Регрессия
+
+| Проверка | Результат |
+|---|---|
+| Python `unittest` | **62/62 PASS** |
+| Unity-самотесты S05A-1 | **69/69 PASS** (23 базовых + 46 по FIX-01…FIX-07) |
+| Unity-самотесты S05A-0 | **19/19 PASS**, exit 0 |
+| Конверсия 4 моделей S05A-0 | **PASS**, exit 0 |
+| Сборка персонажа | **`CHARACTER_RESULT=PASS`**, exit 0 |
+| PlayMode ×3 | PASS, 40/40, exit 0, порядок событий полный |
+| `git diff --check` | чисто |
+
+### 14.6 Остаточные ограничения
+
+1. Задержка выхода (10 тиков) остаётся «гигиенической»: гарантией служит подтверждённый `EDITMODE_ENTERED`
+   и проверка `!isPlaying` перед `Exit()`; сама задержка ничего не доказывает и в отчёте не трактуется как
+   доказательство.
+2. `-pilotFrames`, `-pilotSkipAnimator`, `-pilotUnbindHair`, `-pilotDoubleFinish`, `-pilotDoubleRegister`,
+   `-pilotExitBeforeEditMode`, `-pilotForceExitEarly` — тестовые хуки командной строки; обычный запуск их не
+   использует. Часть негативных сценариев (ранний выход, повторное завершение, повторная регистрация)
+   **симулируется** хуками через реальные колбэки Unity; это отмечено в отчёте.
+3. Защита от зависания — внешний таймаут запуска плюс собственный бюджет `ExitMaxTicks`; бесконечного ожидания нет.
+4. Содержательные ограничения прежние: offsets/пивоты/масштаб — `PROXY_NOT_ALPHA`; тинт и семантика маркеров —
+   `PARTIAL`/`UNKNOWN`; исходный анимационный цикл — `UNKNOWN / NOT_REPRODUCED`.
+
+## 15. Итоговый статус
+
+`S05A-1-REVIEW-FIX-03 — READY_FOR_REVIEW`. `ACCEPTED` не выставляется. `S05B`, массовая конвертация и
 производственные сцены не затрагивались; `main` не изменялся, force push не выполнялся.
