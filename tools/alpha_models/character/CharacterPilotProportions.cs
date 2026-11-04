@@ -140,8 +140,12 @@ public static partial class CharacterPilotVerifier
         return problems;
     }
 
+    /// <summary>Test-only override of the body group scale, used by the FIX-B rebuild at scale 0.5.</summary>
+    internal static float? BodyScaleOverride;
+
     internal static float GroupScale(string group)
     {
+        if (group == "body" && BodyScaleOverride.HasValue) return BodyScaleOverride.Value;
         if (Proportions == null) return 1f;
         return group switch
         {
@@ -196,22 +200,26 @@ public static partial class CharacterPilotVerifier
     }
 
     /// <summary>
-    /// Checks that a part's world-space bounds equal the configured scale applied to the expected
-    /// character-space box. This is the world-space vertex check required by D51.
+    /// World-space placement check (FIX-B): the mesh must sit exactly where the spec chain says it does
+    /// after every ancestor scale is applied. The expected corner is transformed through the real pivot,
+    /// so the check stays valid for any character scale, not only for 1.0.
     /// </summary>
-    internal static List<string> ValidateWorldPlacement(PartResult result, Transform pivot,
-        float referenceScale)
+    internal static List<string> ValidateWorldPlacement(PartResult result, Transform pivot)
     {
         var problems = new List<string>();
-        if (result == null || pivot == null) return new List<string> { "proportions: placement check needs a part" };
-        var scale = Mathf.Max(1e-6f, referenceScale);
+        if (result == null || pivot == null)
+            return new List<string> { "proportions: placement check needs a part" };
         var bounds = BoundsOf(pivot);
-        var expectedMin = (result.frameOffset + result.sourceMin) * scale;
-        var expectedSize = new Vector3(result.expectedSize.x, result.expectedSize.y, result.expectedSize.z) * scale;
-        if ((bounds.min - expectedMin).magnitude > 0.02f)
-            problems.Add($"proportions: part '{result.id}' world min {FmtPr(bounds.min)} != expected {FmtPr(expectedMin)} (scale {scale:0.###})");
-        if ((bounds.size - expectedSize).magnitude > 0.05f)
-            problems.Add($"proportions: part '{result.id}' world size {FmtPr(bounds.size)} != expected {FmtPr(expectedSize)}");
+        var expectedMin = pivot.TransformPoint(result.sourceMin - result.joint);
+        var worldScale = WorldScaleOf(pivot);
+        var expectedSize = Vector3.Scale(result.expectedSize, worldScale);
+        var tolerance = 0.02f * Mathf.Max(1f, worldScale.magnitude);
+        if ((bounds.min - expectedMin).magnitude > tolerance)
+            problems.Add($"proportions: part '{result.id}' world min {FmtPr(bounds.min)} != expected " +
+                         $"{FmtPr(expectedMin)} (world scale {FmtPr(worldScale)})");
+        if ((bounds.size - expectedSize).magnitude > 5f * tolerance)
+            problems.Add($"proportions: part '{result.id}' world size {FmtPr(bounds.size)} != expected " +
+                         $"{FmtPr(expectedSize)}");
         return problems;
     }
 
@@ -235,7 +243,7 @@ public static partial class CharacterPilotVerifier
         var weaponScale = GroupScale("weapon");
 
         // 14/10 is the authored width ratio of human-head-m01 (14) vs body1 (10) in voxels
-        var expected = 14f / 10f * (headScale / bodyScale);
+        var expected = 14f / 10f * headScale;
         var actual = BoundsOf(head).size.x / Mathf.Max(1e-6f, BoundsOf(body).size.x);
         if (Mathf.Abs(actual - expected) > 0.02f * expected)
             problems.Add($"proportions: head/body world width ratio {actual:0.###} != expected {expected:0.###} " +

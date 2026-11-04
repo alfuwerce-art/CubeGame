@@ -72,6 +72,10 @@ public static partial class CharacterPilotVerifier
             var source = VoxelColor(x, z, y);
             bool masked = IsMask(x, z, y);
             var uv = uvs[i];
+            // FIX-A: the shader reads the mask from COLOR.a, so the alpha channel itself is validated
+            var alpha = colors[i].a;
+            if (masked && alpha < 0.5f) mismatchedInside++;
+            if (!masked && alpha >= 0.5f) mismatchedOutside++;
             for (int c = 0; c < 4; c++)
             {
                 var actual = colors[i + c];

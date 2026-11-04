@@ -16,7 +16,7 @@ using UnityEngine;
 namespace CubeGame.CharacterPilot
 {
     [DisallowMultipleComponent]
-    public class ProceduralCharacterAnimator : MonoBehaviour
+    public partial class ProceduralCharacterAnimator : MonoBehaviour
     {
         public const string ClipName = "technical_walk_NOT_ALPHA";
         public const float CycleSeconds = 1.6f;
@@ -111,6 +111,14 @@ namespace CubeGame.CharacterPilot
             // Hair and sword are children and are deliberately left untouched: their local offsets
             // are the authored placement, and the socket invariant checks that they stay constant.
             // (An earlier version reset the sword offset here, which the socket test caught.)
+
+            // S05A-2 GRIP (D52): the two-handed attack overlays its own pose and then solves the left
+            // hand onto the secondary grip. Status: ORIGINAL_NOT_ALPHA.
+            if (TwoHandedAttack)
+            {
+                SampleTwoHanded(t);
+                AttachLeftHandToSecondaryGrip();
+            }
         }
 
         void Update()

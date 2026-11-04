@@ -413,6 +413,32 @@ public static partial class CharacterPilotVerifier
                     new List<string> { $"payload missing: {headPayload}" }, "payload missing");
             }
 
+            // ---------------- S05A-2 GRIP (D52) ----------------
+            {
+                var swordPath = Path.Combine(DataDir, "sword.cubdec");
+                if (File.Exists(swordPath))
+                {
+                    var grip = DeriveGrip(swordPath);
+                    Add("grip: geometry derives a valid handle", false, ValidateGripGeometry(grip));
+                    Add("grip: handle sits below the guard", false,
+                        grip.handleYMax < grip.guardYMin
+                            ? new List<string>()
+                            : new List<string> { $"handle {grip.handleYMax} overlaps guard {grip.guardYMin}" });
+                    Add("grip: primary grip is above the secondary one", false,
+                        grip.primaryGrip.y > grip.secondaryGrip.y
+                            ? new List<string>()
+                            : new List<string> { "primary grip is not above the secondary grip" });
+                    var broken = grip;
+                    broken.primaryGrip.y = grip.guardYMin + 2f;   // on the guard/blade
+                    Add("grip: a grip on the guard is rejected", true,
+                        ValidateGripGeometry(broken), "outside the handle rows");
+                    var tooClose = grip;
+                    tooClose.secondaryGrip.y = grip.primaryGrip.y;
+                    Add("grip: grips that coincide are rejected", true,
+                        ValidateGripGeometry(tooClose), "too close");
+                }
+            }
+
             // ---------------- S05A-2: C+ proportions and tint ----------------
             {
                 var config = ProportionsConfig.Load(Path.Combine(DataDir, "proportions.json"));

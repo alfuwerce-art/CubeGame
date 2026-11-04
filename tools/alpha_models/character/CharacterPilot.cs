@@ -103,7 +103,9 @@ public static partial class CharacterPilotVerifier
         public Dictionary<string, Vector3> pivotOrigins = new Dictionary<string, Vector3>();
         public List<PartResult> results = new List<PartResult>();
         public List<string> problems = new List<string>();
-        public ProceduralCharacterAnimator animator;
+        public ProceduralCharacterAnimator animator;        public GripGeometry grip;              // S05A-2: derived from the weapon geometry
+        public Vector3 handGripLocal;          // palm point inside the right hand (hand-local voxels)
+
     }
 
     // ------------------------------------------------------------------
@@ -332,8 +334,26 @@ public static partial class CharacterPilotVerifier
             return build;
         }
 
-        // ---- S05A-2 C+: group scales, tint colour and their checks ----
+        // ---- S05A-2 GRIP (D52): the weapon is placed by its handle, then checked in world space ----
         build.problems.AddRange(ApplyGroupScales(build));
+        build.problems.AddRange(PlaceSwordOnGrip(build));
+        if (build.parts.ContainsKey("sword") && System.IO.File.Exists(Path.Combine(DataDir, "sword.cubdec")))
+        {
+            build.grip = DeriveGrip(Path.Combine(DataDir, "sword.cubdec"));
+            build.problems.AddRange(ValidateGripGeometry(build.grip));
+            build.problems.AddRange(ValidateGripContact("idle/right", Find(build, "hand_r"),
+                build.handGripLocal, Find(build, "sword"), build.grip.primaryGrip, build.grip, 0.02f));
+            build.problems.AddRange(ValidateBladeClearance(Find(build, "sword"), build.grip,
+                BoundsOf(Find(build, "head")), BoundsOf(Find(build, "body")), 0.05f));
+        }
+
+        // ---- FIX-B: every part must sit where the spec chain says, at any character scale ----
+        foreach (var placementResult in build.results)
+        {
+            if (build.parts.TryGetValue(placementResult.id, out var placementPivot))
+                build.problems.AddRange(ValidateWorldPlacement(placementResult, placementPivot));
+        }
+
         build.problems.AddRange(ValidateGroupScaleRatios(build));
         build.problems.AddRange(ValidateGroundContact(BoundsOf(Find(build, "foot_l")).min,
             BoundsOf(Find(build, "foot_r")).min));
@@ -352,7 +372,47 @@ public static partial class CharacterPilotVerifier
         build.animator.Bind(Find(build, "body"), Find(build, "head"), Find(build, "hair"),
             Find(build, "hand_l"), Find(build, "hand_r"), Find(build, "foot_l"),
             Find(build, "foot_r"), Find(build, "sword"));
+        // S05A-2 GRIP: the animator needs the grip contract to drive the left hand during the attack
+        if (build.grip.handleRadius > 0f)
+            build.animator.BindGrip(Find(build, "sword"), Find(build, "hand_l"),
+                build.grip.primaryGrip, build.grip.secondaryGrip, HandGripLocal(build, "hand_l"));
         return build;
+    }
+
+    /// <summary>Palm point of a hand part in its own local space (voxel units, mesh space).</summary>
+    internal static Vector3 HandGripLocal(AssemblyBuild build, string id)
+    {
+        var result = build.results.FirstOrDefault(r => r.id == id);
+        if (result == null) return Vector3.zero;
+        var palmCentreVoxel = result.sourceMin +
+                              new Vector3(result.expectedSize.x, result.expectedSize.y, result.expectedSize.z) * 0.5f;
+        return palmCentreVoxel - result.joint;
+    }
+
+    /// <summary>
+    /// Places the sword so that its derived primary grip coincides with the palm of the right hand.
+    /// The weapon keeps its own C+ scale, so the grip point is scaled before solving.
+    /// </summary>
+    internal static List<string> PlaceSwordOnGrip(AssemblyBuild build)
+    {
+        var problems = new List<string>();
+        var hand = Find(build, "hand_r");
+        var sword = Find(build, "sword");
+        if (hand == null || sword == null)
+            return new List<string> { "grip: cannot place the weapon, hand or sword is missing" };
+        var payload = Path.Combine(DataDir, "sword.cubdec");
+        if (!System.IO.File.Exists(payload))
+            return new List<string> { "grip: sword payload is missing" };
+        var grip = DeriveGrip(payload);
+        build.handGripLocal = HandGripLocal(build, "hand_r");
+        // blade axis (sword local Y) follows the hand's local Y; the handle slides into the palm
+        sword.localRotation = Quaternion.identity;
+        var scaledGrip = Vector3.Scale(grip.primaryGrip, sword.localScale);
+        sword.localPosition = build.handGripLocal - scaledGrip;
+        if (build.animator != null)
+            build.animator.BindGrip(sword, Find(build, "hand_l"), grip.primaryGrip, grip.secondaryGrip,
+                HandGripLocal(build, "hand_l"));
+        return problems;
     }
 
     static Transform Find(AssemblyBuild build, string id) =>
