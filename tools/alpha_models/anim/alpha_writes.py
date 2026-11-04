@@ -191,7 +191,7 @@ def _scan_stores(blob: bytes, start: int, end: int) -> tuple[Optional[float], Op
     position is no longer instruction-aligned, and a stray 0xE9 byte would be mistaken for
     a jump.
     """
-    for offset in (0, 9):
+    for offset in (0, 5, 9, 12):        # store after: none | push8+lea3 | push8+lea7 | push32+lea7
         position = start + offset
         if position + 6 > end:
             continue
