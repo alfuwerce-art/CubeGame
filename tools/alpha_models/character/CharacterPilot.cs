@@ -88,6 +88,9 @@ public static partial class CharacterPilotVerifier
         public int vertices;
         public int triangles;
         public int hiddenMarkers;
+        public int maskVertices;      // T3 tint: vertices inside the mask (uv2.x = 1)
+        public int maskVoxels;        // T3 tint: visible voxels whose colour equals the mask colour
+        public Mesh mesh;             // built mesh, kept for the per-voxel tint check
         public string evidence = "";
         public List<string> problems = new List<string>();
     }
@@ -251,6 +254,7 @@ public static partial class CharacterPilotVerifier
         var shader = Shader.Find("CubeGamePilot/VertexColorUnlit");
         if (shader == null) throw new InvalidOperationException("vertex colour shader missing");
         var markers = LoadMarkerMetadata();
+        LoadProportions();
 
         build.root = new GameObject("character_" + build.spec.character);
         var done = new HashSet<string>();
@@ -328,6 +332,21 @@ public static partial class CharacterPilotVerifier
             return build;
         }
 
+        // ---- S05A-2 C+: group scales, tint colour and their checks ----
+        build.problems.AddRange(ApplyGroupScales(build));
+        build.problems.AddRange(ValidateGroupScaleRatios(build));
+        build.problems.AddRange(ValidateGroundContact(BoundsOf(Find(build, "foot_l")).min,
+            BoundsOf(Find(build, "foot_r")).min));
+        ApplyHairTintMaterial(build);
+        var hairResultForTint = build.results.FirstOrDefault(r => r.id == "hair");
+        if (hairResultForTint != null && Proportions?.tint != null && hairResultForTint.mesh != null)
+        {
+            var maskSet = new HashSet<int>(Proportions.tint.MaskPacked);
+            build.problems.AddRange(ValidateTintByVoxel(Path.Combine(DataDir, "hair.cubdec"),
+                hairResultForTint.mesh, maskSet, HairTintColor(), hairResultForTint.maskVertices));
+            build.problems.AddRange(ValidateMaskVoxelsPreserved(Path.Combine(DataDir, "hair.cubdec"), maskSet));
+        }
+
         build.animator = build.root.AddComponent<ProceduralCharacterAnimator>();
         build.animator.AnimateInPlayMode = false;
         build.animator.Bind(Find(build, "body"), Find(build, "head"), Find(build, "hair"),
@@ -368,7 +387,11 @@ public static partial class CharacterPilotVerifier
         }
         result.hiddenMarkers = hidden.Count;
 
-        var built = BuildMeshFromPayload(payloadPath, hidden, part.id);
+        // T3 tint (D51): only the hair carries the mask channel; other parts keep their palette as authored.
+        HashSet<int> mask = part.id == "hair" && Proportions?.tint != null
+            ? new HashSet<int>(Proportions.tint.MaskPacked)
+            : null;
+        var built = BuildMeshFromPayload(payloadPath, hidden, part.id, mask);
         if (built.problems.Count > 0)
         {
             result.problems.AddRange(built.problems);
@@ -378,6 +401,9 @@ public static partial class CharacterPilotVerifier
         result.vertices = built.vertices;
         result.triangles = built.triangles;
         result.expectedSize = built.extent;
+        result.maskVertices = built.maskVertices;
+        result.maskVoxels = built.maskVoxels;
+        result.mesh = built.mesh;
 
         if (saveAssets)
         {
@@ -475,6 +501,8 @@ public static partial class CharacterPilotVerifier
         public Vector3 extent;
         public Vector3 gridMin;   // (x, h, d) of the first visible voxel inside the grid
         public Vector3 gridSize;  // full voxel grid size
+        public int maskVertices;  // vertices whose source voxel colour equals the tint mask colour
+        public int maskVoxels;    // visible voxels carrying the tint mask colour
         public List<string> problems = new List<string>();
     }
 
@@ -487,7 +515,8 @@ public static partial class CharacterPilotVerifier
     /// first vertices by a still-evolving minimum, which distorted geometry whenever a later voxel
     /// had a smaller coordinate on some axis.
     /// </summary>
-    static BuiltMesh BuildMeshFromPayload(string path, HashSet<(int, int, int)> hidden, string name)
+    static BuiltMesh BuildMeshFromPayload(string path, HashSet<(int, int, int)> hidden, string name,
+        HashSet<int> tintMask = null)
     {
         var built = new BuiltMesh();
         var bytes = File.ReadAllBytes(path);
@@ -539,6 +568,8 @@ public static partial class CharacterPilotVerifier
         var cols = new List<Color>();
         var norms = new List<Vector3>();
         var tris = new List<int>();
+        var maskUv = new List<Vector2>();   // uv2.x = 1 exactly for voxels of the tint mask colour
+        int maskVertices = 0, maskVoxels = 0;
         int faceCount = 0;
         for (int h = 0; h < height; h++)
         for (int d = 0; d < depth; d++)
@@ -546,22 +577,31 @@ public static partial class CharacterPilotVerifier
         {
             if (!Solid(x, d, h)) continue;
             int o = 12 + ((h * depth + d) * width + x) * 3;
-            var color = new Color(bytes[o] / 255f, bytes[o + 1] / 255f, bytes[o + 2] / 255f, 1f);
+            var masked = tintMask != null &&
+                         tintMask.Contains((bytes[o] << 16) | (bytes[o + 1] << 8) | bytes[o + 2]);
+            // RGB stays the untouched source colour; the alpha channel only carries the tint mask
+            // (the material is opaque and unlit, so alpha has no other meaning here).
+            var color = new Color(bytes[o] / 255f, bytes[o + 1] / 255f, bytes[o + 2] / 255f,
+                masked ? 1f : 0f);
+            var maskFaces = 0;
             for (int f = 0; f < 6; f++)
             {
                 var n = FaceNormals[f];
                 if (Solid(x + n[0], d + n[2], h + n[1])) continue;
                 faceCount++;
+                if (masked) maskFaces++;
                 int baseIndex = verts.Count;
                 foreach (var c in FaceCorners[f])
                 {
                     verts.Add(new Vector3(x + c[0], h + c[1], d + c[2]));
                     norms.Add(new Vector3(n[0], n[1], n[2]));
                     cols.Add(color);
+                    maskUv.Add(new Vector2(masked ? 1f : 0f, 0f));
                 }
                 tris.Add(baseIndex); tris.Add(baseIndex + 1); tris.Add(baseIndex + 2);
                 tris.Add(baseIndex); tris.Add(baseIndex + 2); tris.Add(baseIndex + 3);
             }
+            if (masked && maskFaces > 0) maskVoxels++;
         }
         if (faceCount == 0)
         {
@@ -574,9 +614,13 @@ public static partial class CharacterPilotVerifier
         mesh.SetVertices(verts);
         mesh.SetNormals(norms);
         mesh.SetColors(cols);
+        mesh.SetUVs(1, maskUv);   // TEXCOORD1 = tint mask
         mesh.SetTriangles(tris, 0);
         mesh.RecalculateBounds();
 
+        maskVertices = maskUv.Count(v => v.x > 0.5f);
+        built.maskVertices = maskVertices;
+        built.maskVoxels = maskVoxels;
         built.mesh = mesh;
         built.faces = faceCount;
         built.vertices = mesh.vertexCount;

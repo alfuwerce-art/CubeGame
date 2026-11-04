@@ -295,6 +295,22 @@ public static partial class CharacterPilotVerifier
     // FIX-01/02/03 self-tests
     // ------------------------------------------------------------------
 
+    /// <summary>Builds a raw `.cubdec` payload (header + RGB voxels) for the synthetic tests.</summary>
+    internal static byte[] BuildPayload((byte r, byte g, byte b)[] voxels, int width, int depth, int height)
+    {
+        var bytes = new byte[12 + voxels.Length * 3];
+        BitConverter.GetBytes(width).CopyTo(bytes, 0);
+        BitConverter.GetBytes(depth).CopyTo(bytes, 4);
+        BitConverter.GetBytes(height).CopyTo(bytes, 8);
+        for (int i = 0; i < voxels.Length; i++)
+        {
+            bytes[12 + i * 3] = voxels[i].r;
+            bytes[13 + i * 3] = voxels[i].g;
+            bytes[14 + i * 3] = voxels[i].b;
+        }
+        return bytes;
+    }
+
     internal static class FixSelfTests
     {
         internal static (int cases, int failed, string json) Run()
@@ -395,6 +411,58 @@ public static partial class CharacterPilotVerifier
             {
                 Add("head/hair skin voxels coincide in character space", true,
                     new List<string> { $"payload missing: {headPayload}" }, "payload missing");
+            }
+
+            // ---------------- S05A-2: C+ proportions and tint ----------------
+            {
+                var config = ProportionsConfig.Load(Path.Combine(DataDir, "proportions.json"));
+                Add("s05a2: shipped proportions config is valid", false,
+                    ValidateProportionsConfig(config));
+                var broken = ProportionsConfig.Load(Path.Combine(DataDir, "proportions.json"));
+                broken.groups.weapon.scale = "0";
+                Add("s05a2: zero weapon scale is rejected", true,
+                    ValidateProportionsConfig(broken), "must be positive");
+                var noStatus = ProportionsConfig.Load(Path.Combine(DataDir, "proportions.json"));
+                noStatus.groups.head_hair.status = "";
+                Add("s05a2: group without evidence status is rejected", true,
+                    ValidateProportionsConfig(noStatus), "no evidence status");
+
+                var baseline = ProportionsConfig.Load(Path.Combine(DataDir, "proportions.baseline.json"));
+                Add("s05a2: baseline config keeps every group at 1.0", false,
+                    Mathf.Approximately(baseline.groups.body.Value, 1f) &&
+                    Mathf.Approximately(baseline.groups.head_hair.Value, 1f) &&
+                    Mathf.Approximately(baseline.groups.weapon.Value, 1f)
+                        ? new List<string>()
+                        : new List<string> { "baseline is not neutral" });
+
+                // synthetic model: red marker, decorative dark red, green, white base
+                var synth = new GeometryCase
+                {
+                    name = "tint_mask_4x1x1",
+                    width = 4, depth = 1, height = 1, hidden = new List<(int, int, int)>(),
+                    payload = BuildPayload(new (byte, byte, byte)[]
+                    {
+                        (255, 0, 0), (200, 0, 0), (0, 255, 0), (255, 255, 255),
+                    }, 4, 1, 1),
+                };
+                var synthPath = Path.Combine(tempDir, synth.name + ".cubdec");
+                File.WriteAllBytes(synthPath, synth.payload);
+                var maskSet = new HashSet<int> { (255 << 16) | (0 << 8) | 0, (255 << 16) | (255 << 8) | 255 };
+                var tinted = BuildMeshFromPayload(synthPath, new HashSet<(int, int, int)>(), synth.name, maskSet);
+                var tint = new Color(0.5f, 0.25f, 0.1f, 1f);
+                Add("s05a2: tint verified per voxel coordinate", false,
+                    ValidateTintByVoxel(synthPath, tinted.mesh, maskSet, tint, tinted.maskVertices));
+                Add("s05a2: decorative red outside the mask survives", false,
+                    ValidateMaskVoxelsPreserved(synthPath, maskSet));
+                Add("s05a2: mask does not cover the decorative red", false,
+                    ValidateTintByVoxel(synthPath, tinted.mesh,
+                        new HashSet<int> { (255 << 16) | (255 << 8) | 255 }, tint, -1)
+                        .Any(x => x.Contains("mask covers")) ? new List<string>() : new List<string> { "mask count not checked" });
+                var noMask = BuildMeshFromPayload(synthPath, new HashSet<(int, int, int)>(), synth.name);
+                Add("s05a2: without a mask nothing is tinted", false,
+                    noMask.maskVertices == 0
+                        ? new List<string>()
+                        : new List<string> { $"{noMask.maskVertices} vertices were masked without a mask" });
             }
 
             // ---------------- FIX-06: lifecycle event order ----------------

@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "baseline": "S05A-1 accepted look (scale 1, no tint)",
+  "notes": [
+    "Reference configuration: every group scale is 1.0 and the tint weight is 0, reproducing the accepted S05A-1 appearance exactly."
+  ],
+  "groups": {
+    "body": {
+      "scale": "1.0",
+      "status": "VERIFIED_ALPHA",
+      "evidence": "baseline",
+      "appliesTo": []
+    },
+    "head_hair": {
+      "scale": "1.0",
+      "status": "VERIFIED_ALPHA",
+      "evidence": "baseline",
+      "appliesTo": []
+    },
+    "weapon": {
+      "scale": "1.0",
+      "status": "PROXY_NOT_ALPHA",
+      "evidence": "baseline (no weapon correction)",
+      "appliesTo": []
+    }
+  },
+  "tint": {
+    "mode": "mask",
+    "maskColor": [
+      255,
+      0,
+      0
+    ],
+    "status": "PARTIAL",
+    "palettes": [
+      {
+        "name": "blonde",
+        "r": 214,
+        "g": 180,
+        "b": 90
+      },
+      {
+        "name": "brown",
+        "r": 110,
+        "g": 74,
+        "b": 42
+      },
+      {
+        "name": "black",
+        "r": 38,
+        "g": 34,
+        "b": 32
+      },
+      {
+        "name": "auburn",
+        "r": 150,
+        "g": 62,
+        "b": 34
+      },
+      {
+        "name": "white",
+        "r": 232,
+        "g": 228,
+        "b": 220
+      }
+    ],
+    "active": [
+      214,
+      180,
+      90
+    ]
+  }
+}
