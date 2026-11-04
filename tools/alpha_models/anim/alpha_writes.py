@@ -42,7 +42,12 @@ CREATURE_DRAW_MODEL_END = 0x00423F20
 
 @dataclass(frozen=True)
 class WriteSite:
-    """One ``*arrayElem_stride4(i) = value`` site recovered from code bytes."""
+    """One accessor call site recovered from code bytes.
+
+    The accessor returns ``base + index*4``; the caller then either stores into the returned
+    pointer (a pose *write*) or reads from it (a pose *read*). Both matter: the reviewed report
+    counted every call as a write, which is wrong for this function.
+    """
 
     call_va: int
     index: int
@@ -51,6 +56,7 @@ class WriteSite:
     value: Optional[float]
     value_va: Optional[int]
     value_encoding: str  # "imm32" | "xmm0" | "none"
+    access: str = "unknown"   # "read" | "write" | "unknown"
 
     def slot_va_relative(self, frame_size: int, pushed: int = 4, bias: int = 0) -> Optional[int]:
         """ebp-relative offset of the written slot, or None when not stack based.
@@ -76,7 +82,77 @@ class WriteSite:
         value = "?" if self.value is None else f"{self.value:g}"
         slot = f"{self.slot_kind}{self.slot_disp:+#x}"
         return (f"0x{self.call_va:08X}  {self.local_name(frame_size, bias):<14} "
-                f"slot={slot:<12} index={index}  value={value:<12} ({self.value_encoding})")
+                f"slot={slot:<12} index={index}  value={value:<12} ({self.value_encoding})"
+                f"  access={self.access}")
+
+
+# --- accessor semantics: what the caller does with the returned pointer ------------------
+
+#: Instruction shapes that store through ``eax`` (the accessor's result).
+_STORE_TO_EAX = (b"\xf3\x0f\x11\x00", b"\xc7\x00")
+#: Instruction shapes that load from ``eax`` (the accessor's result).
+_LOAD_FROM_EAX = (b"\xf3\x0f\x10\x00", b"\x8b\x08", b"\x8b\x10", b"\xd9\x00",
+                  b"\xf3\x0f\x10\x40", b"\xf3\x0f\x10\x48")
+#: Instructions that overwrite ``eax`` — after them the accessor result is gone.
+_CLOBBER_EAX = (b"\xb8", b"\x8b\x04\x24", b"\x8d\x84\x24", b"\x33\xc0", b"\x8b\xc6", b"\x8b\xc7")
+
+
+def classify_access(blob: bytes, call_position: int, gap_end: int) -> str:
+    """Decide whether the accessor result is stored to, loaded from, or neither.
+
+    ``eax`` holds the accessor's result until something overwrites it. The compiler is free to
+    schedule the use *after* the next call's argument setup, so the whole gap up to the next
+    call is scanned. A clobber of ``eax`` before any use means the value is passed on in a
+    register or dropped — reported as ``unknown`` rather than guessed.
+    """
+    position = call_position + 5
+    limit = max(position, gap_end)
+    while position < limit:
+        window = blob[position:position + 6]
+        if any(window.startswith(prefix) for prefix in _STORE_TO_EAX):
+            return "write"
+        if any(window.startswith(prefix) for prefix in _LOAD_FROM_EAX):
+            return "read"
+        if any(window.startswith(prefix) for prefix in _CLOBBER_EAX):
+            return "unknown"
+        position += 1
+    return "unknown"
+
+
+def scan_call_sites(image: pe_bytes.Image, start_va: int, end_va: int,
+                    accessors: tuple[int, ...] = (ARRAY_ELEM_STRIDE4, ARRAY_ELEM_STRIDE8),
+                    ) -> list[WriteSite]:
+    """Every accessor call in the range, decoded or not.
+
+    Sites whose base is not a stack slot (e.g. ``lea ecx,[esi+0x80]`` in the drawing code) keep
+    ``slot_kind == "absolute"`` with ``slot_disp`` = 0 and ``local_name() == "?"``, so callers can
+    tell "decoded" from "seen but not attributable" instead of silently dropping them.
+    """
+    start_offset = image.offset_of(start_va)
+    end_offset = image.offset_of(end_va - 1) + 1
+    blob = image.data[start_offset:end_offset]
+    targets = {target & 0xFFFFFFFF for target in accessors}
+    calls: list[tuple[int, int]] = []
+    for position in range(0, len(blob) - 4):
+        if blob[position] != 0xE8:
+            continue
+        call_va = start_va + position
+        if (call_va + 5 + struct.unpack_from("<i", blob, position + 1)[0]) & 0xFFFFFFFF in targets:
+            calls.append((position, call_va))
+
+    sites: list[WriteSite] = []
+    for order, (position, call_va) in enumerate(calls):
+        gap_end = calls[order + 1][0] if order + 1 < len(calls) else min(len(blob), position + 40)
+        shape = _find_ecx_load(blob, position)
+        value, value_offset, encoding = _scan_stores(blob, position + 5, gap_end)
+        value_va = start_va + value_offset if value_offset is not None else None
+        access = classify_access(blob, position, gap_end)
+        if shape is None:
+            sites.append(WriteSite(call_va, -1, "absolute", 0, value, value_va, encoding, access))
+            continue
+        index, slot_kind, slot_disp = shape
+        sites.append(WriteSite(call_va, index, slot_kind, slot_disp, value, value_va, encoding, access))
+    return sites
 
 
 def decode_frame_size(image: pe_bytes.Image, function_va: int) -> int:
@@ -205,36 +281,14 @@ def _scan_stores(blob: bytes, start: int, end: int) -> tuple[Optional[float], Op
 def scan_write_sites(image: pe_bytes.Image, start_va: int, end_va: int,
                      accessors: tuple[int, ...] = (ARRAY_ELEM_STRIDE4, ARRAY_ELEM_STRIDE8),
                      ) -> list[WriteSite]:
-    """Collect every accessor call site and the value stored into the returned pointer.
+    """Decoded accessor sites only (kept for callers that want attributable slots).
 
-    The value of site *N* lives in the gap between call *N* and call *N+1*: the compiler
-    stores through ``eax`` (site *N*'s result) and may schedule that store after the
-    argument setup of the next call, so gaps — not fixed offsets — are what is scanned.
+    Delegates to :func:`scan_call_sites` so the read/write classification cannot drift between
+    the two entry points; sites whose base lives in a register are dropped here and stay visible
+    through :func:`scan_call_sites`.
     """
-    start_offset = image.offset_of(start_va)
-    end_offset = image.offset_of(end_va - 1) + 1
-    blob = image.data[start_offset:end_offset]
-    targets = {target & 0xFFFFFFFF for target in accessors}
-    calls: list[tuple[int, int]] = []
-    for position in range(0, len(blob) - 4):
-        if blob[position] != 0xE8:
-            continue
-        call_va = start_va + position
-        rel = struct.unpack_from("<i", blob, position + 1)[0]
-        if (call_va + 5 + rel) & 0xFFFFFFFF in targets:
-            calls.append((position, call_va))
-
-    sites: list[WriteSite] = []
-    for order, (position, call_va) in enumerate(calls):
-        shape = _find_ecx_load(blob, position)
-        if shape is None:
-            continue
-        index, slot_kind, slot_disp = shape
-        gap_end = calls[order + 1][0] if order + 1 < len(calls) else min(len(blob), position + 40)
-        value, value_offset, encoding = _scan_stores(blob, position + 5, gap_end)
-        value_va = start_va + value_offset if value_offset is not None else None
-        sites.append(WriteSite(call_va, index, slot_kind, slot_disp, value, value_va, encoding))
-    return sites
+    return [site for site in scan_call_sites(image, start_va, end_va, accessors)
+            if site.slot_kind in ("esp", "ebp")]
 
 
 def to_pe(path: str) -> pe_bytes.Image:
