@@ -2,10 +2,11 @@
   "character": "human-male-proxy",
   "status": "PROXY_NOT_ALPHA",
   "notes": [
-    "Offsets below are a technical proxy: the original per-part offsets/pivots are not recovered.",
-    "The only evidence-backed relation is head<->hair: both are authored in the same space (hair skin voxels coincide 99% with head skin voxels), so hair offset is (0,0,0) in head space.",
+    "Offsets are TECHNICAL PROXY values; the original per-part offsets/pivots are not recovered.",
+    "Placement (FIX-02): frameOffset = origin of the model's own voxel grid in character space; joint = pivot inside that grid. mesh vertices stay in grid coordinates, so the filled area keeps its offset inside the grid (no bounding-box trimming).",
+    "Evidence-backed relation: head and hair share the 18x16x16 authoring grid (99% of hair scalp voxels coincide with head skin voxels at zero grid shift), therefore they share frameOffset.",
     "1 voxel = 1 Unity unit. No per-part scaling is applied.",
-    "Offsets are absolute character-space positions of each part's bounding-box min corner."
+    "Status: PROXY_NOT_ALPHA for body/hands/feet/sword placement; PARTIAL for head<->hair alignment."
   ],
   "parts": [
     {
@@ -14,10 +15,20 @@
       "parent": null,
       "offset": [
         -5.0,
-        3,
+        3.0,
         -4.0
       ],
-      "evidence": "PROXY: torso rests on the feet, centred on the character axis"
+      "evidence": "PROXY: torso rests on the feet, centred on the character axis",
+      "frameOffset": [
+        -5.0,
+        3.0,
+        -4.0
+      ],
+      "joint": [
+        0.0,
+        0.0,
+        0.0
+      ]
     },
     {
       "id": "head",
@@ -25,10 +36,20 @@
       "parent": "body",
       "offset": [
         -7.0,
-        13,
+        13.0,
         -4.0
       ],
-      "evidence": "PROXY: head sits on the torso top, centred"
+      "evidence": "PROXY: head sits on the torso top, centred",
+      "frameOffset": [
+        -9.0,
+        11.0,
+        -8.0
+      ],
+      "joint": [
+        9.0,
+        10,
+        8.0
+      ]
     },
     {
       "id": "hair",
@@ -36,10 +57,20 @@
       "parent": "head",
       "offset": [
         -6.0,
-        13,
+        13.0,
         -6.0
       ],
-      "evidence": "PARTIAL: hair and head share the 18x16x16 authoring grid (99% of hair scalp voxels coincide with head skin voxels at zero grid shift), so the hair min corner = head min corner + (1,0,-2) grid delta"
+      "evidence": "PARTIAL: hair and head share the 18x16x16 authoring grid (99% of hair scalp voxels coincide with head skin voxels at zero grid shift), so the hair min corner = head min corner + (1,0,-2) grid delta",
+      "frameOffset": [
+        -9.0,
+        11.0,
+        -8.0
+      ],
+      "joint": [
+        0.0,
+        0.0,
+        0.0
+      ]
     },
     {
       "id": "hand_l",
@@ -47,10 +78,20 @@
       "parent": "body",
       "offset": [
         -10.0,
-        9,
+        9.0,
         -3.0
       ],
-      "evidence": "PROXY: hand at shoulder height on the left side"
+      "evidence": "PROXY: hand at shoulder height on the left side",
+      "frameOffset": [
+        -10.0,
+        9.0,
+        -3.0
+      ],
+      "joint": [
+        2.5,
+        4,
+        3.0
+      ]
     },
     {
       "id": "hand_r",
@@ -58,10 +99,20 @@
       "parent": "body",
       "offset": [
         5.0,
-        9,
+        9.0,
         -3.0
       ],
-      "evidence": "PROXY: hand at shoulder height on the right side"
+      "evidence": "PROXY: hand at shoulder height on the right side",
+      "frameOffset": [
+        5.0,
+        9.0,
+        -3.0
+      ],
+      "joint": [
+        2.5,
+        4,
+        3.0
+      ]
     },
     {
       "id": "foot_l",
@@ -69,10 +120,20 @@
       "parent": "body",
       "offset": [
         -5.0,
-        0,
+        0.0,
         -4.0
       ],
-      "evidence": "PROXY: foot on the ground under the torso"
+      "evidence": "PROXY: foot on the ground under the torso",
+      "frameOffset": [
+        -5.0,
+        0.0,
+        -4.0
+      ],
+      "joint": [
+        2.5,
+        0,
+        4.0
+      ]
     },
     {
       "id": "foot_r",
@@ -80,10 +141,20 @@
       "parent": "body",
       "offset": [
         0.0,
-        0,
+        0.0,
         -4.0
       ],
-      "evidence": "PROXY: foot on the ground under the torso"
+      "evidence": "PROXY: foot on the ground under the torso",
+      "frameOffset": [
+        0.0,
+        0.0,
+        -4.0
+      ],
+      "joint": [
+        2.5,
+        0,
+        4.0
+      ]
     },
     {
       "id": "sword",
@@ -91,10 +162,20 @@
       "parent": "hand_r",
       "offset": [
         6.0,
-        9,
+        9.0,
         -6.5
       ],
-      "evidence": "PROXY: grip centred inside the right hand; 1 voxel = 1 unit, no scaling (the greatsword is therefore longer than the character)"
+      "evidence": "PROXY: grip centred inside the right hand; 1 voxel = 1 unit, no scaling (the greatsword is therefore longer than the character)",
+      "frameOffset": [
+        6.0,
+        9.0,
+        -6.5
+      ],
+      "joint": [
+        0.0,
+        0.0,
+        0.0
+      ]
     }
   ],
   "markers": {

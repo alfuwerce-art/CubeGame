@@ -23,7 +23,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-public static class CharacterPilotVerifier
+public static partial class CharacterPilotVerifier
 {
     const string DataDir = "Assets/CharacterPilot/data";
     const string OutputDir = "PilotOutput";
@@ -54,7 +54,12 @@ public static class CharacterPilotVerifier
         public string id;
         public string model;
         public string parent;
-        public float[] offset;
+        // FIX-02: placement is defined by the source grid frame, not by a trimmed bounding box.
+        // frameOffset = origin of the model's voxel grid in character space;
+        // joint       = pivot position inside that grid (anatomical joint).
+        public float[] frameOffset;
+        public float[] joint;
+        public float[] offset;   // legacy/derived value kept for the report; not used for placement
         public string evidence;
     }
 
@@ -72,6 +77,10 @@ public static class CharacterPilotVerifier
         public string model;
         public string parent;
         public Vector3 offset;
+        public Vector3 frameOffset;
+        public Vector3 joint;
+        public Vector3 sourceMin;      // filled-area origin inside the model's own grid
+        public Vector3 gridSize;
         public Vector3 worldMin;
         public Vector3 worldSize;
         public Vector3 expectedSize;
@@ -142,9 +151,18 @@ public static class CharacterPilotVerifier
         return problems;
     }
 
-    internal static List<string> ValidateOrientation(string id, Vector3 localMin, Vector3 expectedSize)
+    /// <summary>
+    /// The mesh is emitted in the model's grid coordinates, so its minimum must land exactly on the
+    /// grid minimum of the visible voxels: any shift means the geometry was re-centred (old FIX-01
+    /// bug) or mirrored (OBJ import path).
+    /// </summary>
+    internal static List<string> ValidateOrientation(string id, Vector3 localMin, Vector3 expectedSize,
+        Vector3 gridMin)
     {
         var problems = new List<string>();
+        if ((localMin - gridMin).magnitude > Tol)
+            problems.Add($"part '{id}': mesh min {Fmt(localMin)} != grid min {Fmt(gridMin)} " +
+                         "(geometry re-centred or mirrored)");
         if (localMin.x < -Tol || localMin.y < -Tol || localMin.z < -Tol)
             problems.Add($"part '{id}': mesh min {Fmt(localMin)} is negative (mirrored or mis-centred)");
         if (expectedSize.x <= 0f || expectedSize.y <= 0f || expectedSize.z <= 0f)
@@ -245,17 +263,33 @@ public static class CharacterPilotVerifier
             build.problems.AddRange(result.problems);
         }
 
+        // FIX-03: the spec is checked on its own, and the built scene is checked independently by
+        // reading real Transform.parent links instead of trusting PartResult (which mirrors the spec).
         build.problems.AddRange(ValidateHierarchy(
             build.spec.parts.Select(p => p.id).ToList(),
-            build.results.Select(r => r.id).ToList(),
+            build.spec.parts.Select(p => p.id).ToList(),
             build.spec.parts.Select(p => p.parent).ToList(),
-            build.results.Select(r => r.parent).ToList()));
+            build.spec.parts.Select(p => p.parent).ToList()));
+        build.problems.AddRange(ValidateHierarchyFromScene(build.root.transform, build.spec.parts));
 
         if (build.parts.TryGetValue("body", out var body) && build.parts.TryGetValue("head", out var head))
         {
             var bodyTop = BoundsOf(body).max.y;
             var headMin = BoundsOf(head).min.y;
             build.problems.AddRange(ValidateHeadAttachment(new Vector3(0f, bodyTop, 0f), new Vector3(0f, headMin, 0f)));
+        }
+
+        // FIX-02: head and hair must share the source grid frame, and their skin voxels must still
+        // coincide in character space (the evidence the alignment rests on).
+        var headResult = build.results.FirstOrDefault(r => r.id == "head");
+        var hairResult = build.results.FirstOrDefault(r => r.id == "hair");
+        if (headResult != null && hairResult != null)
+        {
+            build.problems.AddRange(ValidateSharedFrame("head", headResult.frameOffset,
+                "hair", hairResult.frameOffset));
+            build.problems.AddRange(ValidateSkinAlignment(
+                Path.Combine(DataDir, "head.cubdec"), headResult.frameOffset,
+                Path.Combine(DataDir, "hair.cubdec"), hairResult.frameOffset));
         }
 
         var required = new[] { "body", "head", "hair", "hand_l", "hand_r", "foot_l", "foot_r", "sword" };
@@ -326,7 +360,21 @@ public static class CharacterPilotVerifier
             AssetDatabase.SaveAssets();
         }
 
-        var joint = JointOffsetFor(part.id, built.extent);
+        // FIX-02: the part is placed by its SOURCE GRID FRAME, not by its trimmed bounding box.
+        // mesh vertices are in grid coordinates, the pivot sits at the anatomical joint inside that
+        // grid, and the frame origin (frameOffset) is what the spec pins down. Head and hair share
+        // the same 18x16x16 authoring grid, so giving them the same frameOffset reproduces the
+        // original voxel relationship (verified separately by the scalp-voxel test).
+        var frameOffset = part.frameOffset != null && part.frameOffset.Length >= 3
+            ? ToVector(part.frameOffset)
+            : ToVector(part.offset) - built.gridMin;
+        var joint = part.joint != null && part.joint.Length >= 3
+            ? ToVector(part.joint)
+            : JointOffsetFor(part.id, built.extent);
+        result.frameOffset = frameOffset;
+        result.joint = joint;
+        result.sourceMin = built.gridMin;
+        result.gridSize = built.gridSize;
         Transform parentTransform;
         // The pivot sits at the joint, so a part's absolute origin is (offset + joint). A nested
         // part must therefore be placed relative to the parent pivot origin, not to the parent offset.
@@ -349,9 +397,9 @@ public static class CharacterPilotVerifier
 
         var pivot = new GameObject("part_" + part.id).transform;
         pivot.SetParent(parentTransform, false);
-        pivot.localPosition = result.offset + joint - parentOrigin;
+        pivot.localPosition = frameOffset + joint - parentOrigin;
         pivot.localRotation = Quaternion.identity;
-        build.pivotOrigins[part.id] = result.offset + joint;
+        build.pivotOrigins[part.id] = frameOffset + joint;
 
         var meshGo = new GameObject("mesh").transform;
         meshGo.SetParent(pivot, false);
@@ -367,9 +415,12 @@ public static class CharacterPilotVerifier
         var bounds = BoundsOf(pivot);
         result.worldMin = bounds.min;
         result.worldSize = bounds.size;
-        result.problems.AddRange(ValidatePartPlacement(part.id, result.offset, built.extent,
+        // expected world position of the filled area = frame origin + its offset inside the grid
+        var expectedWorldMin = frameOffset + built.gridMin;
+        result.problems.AddRange(ValidatePartPlacement(part.id, expectedWorldMin, built.extent,
             bounds.min, bounds.size));
-        result.problems.AddRange(ValidateOrientation(part.id, built.mesh.bounds.min, built.extent));
+        result.problems.AddRange(ValidateOrientation(part.id, built.mesh.bounds.min,
+            built.extent, built.gridMin));
         return result;
     }
 
@@ -394,9 +445,20 @@ public static class CharacterPilotVerifier
         public Mesh mesh;
         public int faces, vertices, triangles;
         public Vector3 extent;
+        public Vector3 gridMin;   // (x, h, d) of the first visible voxel inside the grid
+        public Vector3 gridSize;  // full voxel grid size
         public List<string> problems = new List<string>();
     }
 
+    /// <summary>
+    /// Builds a mesh from a decoded `.cubdec` payload in GRID coordinates (no trimming), so the
+    /// filled area keeps its original offset inside the model's voxel grid (FIX-02).
+    ///
+    /// FIX-01: min/max are computed in a first pass over all visible voxels; the second pass emits
+    /// vertices relative to nothing but the grid origin. The previous single-pass version offset the
+    /// first vertices by a still-evolving minimum, which distorted geometry whenever a later voxel
+    /// had a smaller coordinate on some axis.
+    /// </summary>
     static BuiltMesh BuildMeshFromPayload(string path, HashSet<(int, int, int)> hidden, string name)
     {
         var built = new BuiltMesh();
@@ -424,21 +486,37 @@ public static class CharacterPilotVerifier
             return bytes[o] != 0 || bytes[o + 1] != 0 || bytes[o + 2] != 0;
         }
 
+        // ---- pass 1: final bounds of the visible voxels (mask applied) ----
+        int minX = int.MaxValue, minD = int.MaxValue, minH = int.MaxValue;
+        int maxX = int.MinValue, maxD = int.MinValue, maxH = int.MinValue;
+        int solidCount = 0;
+        for (int h = 0; h < height; h++)
+        for (int d = 0; d < depth; d++)
+        for (int x = 0; x < width; x++)
+        {
+            if (!Solid(x, d, h)) continue;
+            solidCount++;
+            minX = Math.Min(minX, x); maxX = Math.Max(maxX, x);
+            minD = Math.Min(minD, d); maxD = Math.Max(maxD, d);
+            minH = Math.Min(minH, h); maxH = Math.Max(maxH, h);
+        }
+        if (solidCount == 0)
+        {
+            built.problems.Add($"{name}: no visible voxels (empty model or fully masked by markers)");
+            return built;
+        }
+
+        // ---- pass 2: faces in grid coordinates (no trimming, so grid offsets survive) ----
         var verts = new List<Vector3>();
         var cols = new List<Color>();
         var norms = new List<Vector3>();
         var tris = new List<int>();
-        int minX = int.MaxValue, minD = int.MaxValue, minH = int.MaxValue;
-        int maxX = int.MinValue, maxD = int.MinValue, maxH = int.MinValue;
         int faceCount = 0;
         for (int h = 0; h < height; h++)
         for (int d = 0; d < depth; d++)
         for (int x = 0; x < width; x++)
         {
             if (!Solid(x, d, h)) continue;
-            minX = Math.Min(minX, x); maxX = Math.Max(maxX, x);
-            minD = Math.Min(minD, d); maxD = Math.Max(maxD, d);
-            minH = Math.Min(minH, h); maxH = Math.Max(maxH, h);
             int o = 12 + ((h * depth + d) * width + x) * 3;
             var color = new Color(bytes[o] / 255f, bytes[o + 1] / 255f, bytes[o + 2] / 255f, 1f);
             for (int f = 0; f < 6; f++)
@@ -449,8 +527,7 @@ public static class CharacterPilotVerifier
                 int baseIndex = verts.Count;
                 foreach (var c in FaceCorners[f])
                 {
-                    // re-centre so the mesh min corner sits at the local origin
-                    verts.Add(new Vector3(x + c[0] - minX, h + c[1] - minH, d + c[2] - minD));
+                    verts.Add(new Vector3(x + c[0], h + c[1], d + c[2]));
                     norms.Add(new Vector3(n[0], n[1], n[2]));
                     cols.Add(color);
                 }
@@ -477,6 +554,85 @@ public static class CharacterPilotVerifier
         built.vertices = mesh.vertexCount;
         built.triangles = mesh.triangles.Length / 3;
         built.extent = new Vector3(maxX - minX + 1, maxH - minH + 1, maxD - minD + 1);
+        built.gridMin = new Vector3(minX, minH, minD);
+        built.gridSize = new Vector3(width, height, depth);
+        return built;
+    }
+
+    /// <summary>
+    /// The pre-FIX-01 algorithm, kept only so the self-test can reproduce the defect: it trims with
+    /// a minimum that keeps changing while vertices are emitted, so early vertices use a stale min.
+    /// </summary>
+    static BuiltMesh BuildMeshFromPayloadLegacySinglePass(string path, HashSet<(int, int, int)> hidden,
+        string name)
+    {
+        var built = new BuiltMesh();
+        var bytes = File.ReadAllBytes(path);
+        if (bytes.Length < 12)
+        {
+            built.problems.Add($"{name}: payload shorter than the 12-byte header");
+            return built;
+        }
+        int width = BitConverter.ToInt32(bytes, 0);
+        int depth = BitConverter.ToInt32(bytes, 4);
+        int height = BitConverter.ToInt32(bytes, 8);
+        long expectedBytes = 12L + (long)width * depth * height * 3L;
+        if (width <= 0 || depth <= 0 || height <= 0 || expectedBytes != bytes.Length)
+        {
+            built.problems.Add($"{name}: bad header");
+            return built;
+        }
+
+        bool Solid(int x, int d, int h)
+        {
+            if (x < 0 || x >= width || d < 0 || d >= depth || h < 0 || h >= height) return false;
+            if (hidden.Contains((x, d, h))) return false;
+            int o = 12 + ((h * depth + d) * width + x) * 3;
+            return bytes[o] != 0 || bytes[o + 1] != 0 || bytes[o + 2] != 0;
+        }
+
+        var verts = new List<Vector3>();
+        var tris = new List<int>();
+        int minX = int.MaxValue, minD = int.MaxValue, minH = int.MaxValue;
+        int maxX = int.MinValue, maxD = int.MinValue, maxH = int.MinValue;
+        int faceCount = 0;
+        for (int h = 0; h < height; h++)
+        for (int d = 0; d < depth; d++)
+        for (int x = 0; x < width; x++)
+        {
+            if (!Solid(x, d, h)) continue;
+            minX = Math.Min(minX, x); maxX = Math.Max(maxX, x);
+            minD = Math.Min(minD, d); maxD = Math.Max(maxD, d);
+            minH = Math.Min(minH, h); maxH = Math.Max(maxH, h);
+            for (int f = 0; f < 6; f++)
+            {
+                var n = FaceNormals[f];
+                if (Solid(x + n[0], d + n[2], h + n[1])) continue;
+                faceCount++;
+                int baseIndex = verts.Count;
+                foreach (var c in FaceCorners[f])
+                    verts.Add(new Vector3(x + c[0] - minX, h + c[1] - minH, d + c[2] - minD));
+                tris.Add(baseIndex); tris.Add(baseIndex + 1); tris.Add(baseIndex + 2);
+                tris.Add(baseIndex); tris.Add(baseIndex + 2); tris.Add(baseIndex + 3);
+            }
+        }
+        if (faceCount == 0)
+        {
+            built.problems.Add($"{name}: no visible faces");
+            return built;
+        }
+        var mesh = new Mesh { name = name };
+        if (verts.Count > 65000) mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        mesh.SetVertices(verts);
+        mesh.SetTriangles(tris, 0);
+        mesh.RecalculateBounds();
+        built.mesh = mesh;
+        built.faces = faceCount;
+        built.vertices = verts.Count;
+        built.triangles = tris.Count / 3;
+        built.extent = new Vector3(maxX - minX + 1, maxH - minH + 1, maxD - minD + 1);
+        built.gridMin = new Vector3(minX, minH, minD);
+        built.gridSize = new Vector3(width, height, depth);
         return built;
     }
 
@@ -709,9 +865,11 @@ public static class CharacterPilotVerifier
                 ("degenerate part fails", true, "degenerate", () => ValidatePartPlacement(
                     "head", Vector3.zero, new Vector3(1f, 1f, 1f), Vector3.zero, Vector3.zero)),
                 ("negative mesh min fails", true, "negative", () => ValidateOrientation(
-                    "head", new Vector3(-1f, 0f, 0f), new Vector3(14f, 8f, 8f))),
+                    "head", new Vector3(-1f, 0f, 0f), new Vector3(14f, 8f, 8f), new Vector3(-1f, 0f, 0f))),
+                ("re-centred mesh fails", true, "grid min", () => ValidateOrientation(
+                    "head", Vector3.zero, new Vector3(14f, 8f, 8f), new Vector3(2f, 2f, 4f))),
                 ("clean mesh min passes", false, null, () => ValidateOrientation(
-                    "head", Vector3.zero, new Vector3(14f, 8f, 8f))),
+                    "head", new Vector3(2f, 2f, 4f), new Vector3(14f, 8f, 8f), new Vector3(2f, 2f, 4f))),
                 ("head attached passes", false, null, () =>
                     ValidateHeadAttachment(new Vector3(0f, 13f, 0f), new Vector3(0f, 13f, 0f))),
                 ("head detached fails", true, "floats", () =>
@@ -750,14 +908,24 @@ public static class CharacterPilotVerifier
                 json.Append($"{{\"name\":{Q(c.name)},\"expected\":{(c.expectProblems ? "\"problems\"" : "\"clean\"")}," +
                             $"\"passed\":{(pass ? "true" : "false")},\"problems\":[{string.Join(",", problems.Select(Q))}]}}");
             }
+            // FIX-01/02/03 cases (two-pass geometry, source frames/skin alignment, real scene hierarchy)
+            var fix = FixSelfTests.Run();
+            if (fix.cases > 0)
+            {
+                var fixJson = fix.json;
+                if (fixJson.Length > 2) json.Append(',').Append(fixJson, 1, fixJson.Length - 2);
+                failed += fix.failed;
+            }
+            var total = cases.Count + fix.cases;
             json.Append(']');
 
             Directory.CreateDirectory(OutputDir);
             File.WriteAllText(Path.Combine(OutputDir, "selftest.json"), json.ToString(), new UTF8Encoding(false));
             File.WriteAllText(Path.Combine(OutputDir, "selftest.txt"),
-                $"SELFTEST_RESULT={(failed == 0 ? "PASS" : "FAIL")}\ncases={cases.Count} failed={failed}\n",
+                $"SELFTEST_RESULT={(failed == 0 ? "PASS" : "FAIL")}\ncases={total} failed={failed}\n" +
+                $"base_cases={cases.Count} fix_cases={fix.cases}\n",
                 new UTF8Encoding(false));
-            Debug.Log($"SELFTEST_RESULT={(failed == 0 ? "PASS" : "FAIL")} cases={cases.Count} failed={failed}");
+            Debug.Log($"SELFTEST_RESULT={(failed == 0 ? "PASS" : "FAIL")} cases={total} failed={failed}");
             return failed > 0;
         }
     }
@@ -936,8 +1104,12 @@ public static class CharacterPilotVerifier
             var r = build.results[i];
             sb.AppendLine("  {");
             sb.AppendLine($"    \"id\": {Q(r.id)}, \"model\": {Q(r.model)}, \"parent\": {Q(r.parent ?? "<root>")},");
-            sb.AppendLine($"    \"offset\": {Q(Fmt(r.offset))}, \"worldMin\": {Q(Fmt(r.worldMin))},");
-            sb.AppendLine($"    \"worldSize\": {Q(Fmt(r.worldSize))}, \"expectedSize\": {Q(Fmt(r.expectedSize))},");
+            sb.AppendLine($"    \"legacyOffset\": {Q(Fmt(r.offset))},");
+            // FIX-02 coordinate chain: source grid frame -> filled-area offset -> pivot -> world
+            sb.AppendLine($"    \"frameOffset\": {Q(Fmt(r.frameOffset))}, \"joint\": {Q(Fmt(r.joint))},");
+            sb.AppendLine($"    \"sourceMin\": {Q(Fmt(r.sourceMin))}, \"gridSize\": {Q(Fmt(r.gridSize))},");
+            sb.AppendLine($"    \"worldMin\": {Q(Fmt(r.worldMin))}, \"worldSize\": {Q(Fmt(r.worldSize))},");
+            sb.AppendLine($"    \"expectedSize\": {Q(Fmt(r.expectedSize))},");
             sb.AppendLine($"    \"faces\": {r.faces}, \"vertices\": {r.vertices}, \"triangles\": {r.triangles},");
             sb.AppendLine($"    \"hiddenMarkers\": {r.hiddenMarkers}, \"evidence\": {Q(r.evidence)},");
             sb.AppendLine($"    \"problems\": [{string.Join(",", r.problems.Select(Q))}]");
