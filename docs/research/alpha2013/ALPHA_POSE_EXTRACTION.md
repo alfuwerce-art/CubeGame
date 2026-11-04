@@ -134,7 +134,9 @@ python -m unittest tools.alpha_models.tests.test_alpha_write_scan
 | `ALPHA_POSES_EXTRACTED` | **`PARTIAL`** — 73 состояния, 522 записи, 90 статических значений, привязка к конечностям не доказана |
 | `ALPHA_LIMB_TRANSFORM` | **`PARTIAL`** — два момента одного канала доказаны (−100° / −60°), конечность не определена |
 | `TRANSFERRED_FROM_ALPHA` | **не присваивается** |
-| `UNITY_ATTACK_TEST` / адаптер | см. [UNITY_POSE_ADAPTER_REPORT.md](UNITY_POSE_ADAPTER_REPORT.md) |
+| `ORIGINAL_ANIMATION_IN_UNITY` | **`PARTIAL`** — реальные числа Alpha (−100°/−60°/−250°) прошли через адаптер и подтверждены кватернионом с нулевым отклонением, но привязка канала к части не доказана |
+| `UNITY_ADAPTER` | **`PASS`** — три формы входа, проверки и провенанс, 34 новых самопроверки, `SELFTEST_RESULT=PASS cases=116` |
+| `UNITY_ATTACK_TEST` | **`PASS`** — `PLAYMODE_RESULT=PASS frames=40/40`, exit 0, `worstGripError=0`; исходный FAIL восстановлен и устранён |
 
 ## 8. Следующий шаг (конкретный)
 
