@@ -15,6 +15,17 @@ using Object = UnityEngine.Object;
 
 public static partial class CharacterPilotVerifier
 {
+    /// <summary>
+    /// The hierarchy the pilot requires, independent of whatever the spec file says. A corrupted spec
+    /// (for example head reparented to a hand) must not be able to validate itself.
+    /// </summary>
+    internal static readonly Dictionary<string, string> CanonicalParents = new Dictionary<string, string>
+    {
+        { "body", null }, { "head", "body" }, { "hair", "head" },
+        { "hand_l", "body" }, { "hand_r", "body" },
+        { "foot_l", "body" }, { "foot_r", "body" }, { "sword", "hand_r" },
+    };
+
     static readonly HashSet<(byte, byte, byte)> SkinColors = new HashSet<(byte, byte, byte)>
     {
         (255, 211, 182), (255, 203, 182), (255, 221, 207),
@@ -57,17 +68,27 @@ public static partial class CharacterPilotVerifier
         foreach (var duplicate in duplicates.Distinct())
             problems.Add($"scene: duplicate part node '{duplicate}'");
 
-        var expected = spec.ToDictionary(p => p.id, p => string.IsNullOrWhiteSpace(p.parent) ? null : p.parent);
-        foreach (var id in expected.Keys.Where(k => !actual.ContainsKey(k)).OrderBy(k => k))
+        // expected parents come from the canonical map; the spec is only checked for agreement
+        var specParents = spec.ToDictionary(p => p.id,
+            p => string.IsNullOrWhiteSpace(p.parent) ? null : p.parent);
+        foreach (var id in CanonicalParents.Keys.Where(k => !actual.ContainsKey(k)).OrderBy(k => k))
             problems.Add($"scene: missing part node '{id}'");
-        foreach (var id in actual.Keys.Where(k => !expected.ContainsKey(k)).OrderBy(k => k))
+        foreach (var id in actual.Keys.Where(k => !CanonicalParents.ContainsKey(k)).OrderBy(k => k))
             problems.Add($"scene: unexpected part node '{id}'");
-        foreach (var id in expected.Keys.Where(actual.ContainsKey).OrderBy(k => k))
+
+        foreach (var id in CanonicalParents.Keys.Where(actual.ContainsKey).OrderBy(k => k))
         {
-            var want = expected[id] ?? "<root>";
+            var want = CanonicalParents[id] ?? "<root>";
             var got = actual[id] ?? "<root>";
             if (want != got)
                 problems.Add($"scene: part '{id}' Transform.parent is '{got}', expected '{want}'");
+        }
+        foreach (var id in CanonicalParents.Keys.Where(specParents.ContainsKey).OrderBy(k => k))
+        {
+            var canonical = CanonicalParents[id] ?? "<root>";
+            var specParent = specParents[id] ?? "<root>";
+            if (canonical != specParent)
+                problems.Add($"spec: part '{id}' parent is '{specParent}' but the required parent is '{canonical}'");
         }
         return problems;
     }
@@ -375,6 +396,16 @@ public static partial class CharacterPilotVerifier
                     new List<string> { $"payload missing: {headPayload}" }, "payload missing");
             }
 
+            // ---------------- FIX-04: PlayMode verdict helpers ----------------
+            Add("playmode verdict: 40 frames clean passes", false,
+                ValidatePlayModeResult(40, 40, new List<string>()));
+            Add("playmode verdict: 39 frames fails", true,
+                ValidatePlayModeResult(39, 40, new List<string>()), "frames");
+            Add("playmode verdict: animation problem fails", true,
+                ValidatePlayModeResult(40, 40, new List<string> { "head: does not move" }), "does not move");
+            Add("playmode verdict: empty sample list fails", true,
+                ValidatePlayModeResult(0, 40, new List<string>()), "required");
+
             // ---------------- FIX-03: hierarchy read from the real scene ----------------
             var build = BuildCharacter(false);
             Add("scene hierarchy matches the spec", false,
@@ -391,6 +422,18 @@ public static partial class CharacterPilotVerifier
             var hair = Find(build, "hair");
             var sword = Find(build, "sword");
             var root = build.root.transform;
+
+            // the spec is compared with the canonical map, so a corrupted spec fails on its own
+            var corruptedSpec = build.spec.parts
+                .Select(p => new PartSpec
+                {
+                    id = p.id, model = p.model, parent = p.parent,
+                    frameOffset = p.frameOffset, joint = p.joint, offset = p.offset, evidence = p.evidence,
+                })
+                .ToArray();
+            corruptedSpec.First(p => p.id == "head").parent = "hand_l";
+            Add("spec: head reparented to a hand fails", true,
+                ValidateHierarchyFromScene(root, corruptedSpec), "required parent");
 
             if (head != null && hair != null && sword != null)
             {

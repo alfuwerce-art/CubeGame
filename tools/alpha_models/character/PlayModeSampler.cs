@@ -1,9 +1,15 @@
 // S05A-1 pilot — PlayMode sampler (runtime assembly).
 //
-// Added to the character root before entering PlayMode. Records real Update() frames, checks that
-// the animator moves parts and that the weapon keeps a constant offset in the hand, writes
-// PilotOutput/playmode.* and then hands control back through OnFinished (the editor-side caller
-// stops PlayMode and quits Unity with the matching exit code).
+// Records real Update() frames of the assembled hierarchy, checks that the animator moves parts and
+// that the weapon keeps a constant offset in the hand, writes PilotOutput/playmode.* and then hands
+// control back through OnFinished.
+//
+// S05A-1-REVIEW-FIX-02:
+//  * the verdict requires at least RequiredFrames collected frames (a short run fails);
+//  * the report carries the session id issued by RunPlayMode, so a stale report cannot be mistaken
+//    for a fresh one;
+//  * OnFinished is invoked at most once, and the sampler never calls EditorApplication.Exit itself
+//    (the editor side defers that until the play-mode transition has finished).
 //
 // Kept in the runtime assembly so Unity can actually add the component: MonoBehaviours that live in
 // an Editor assembly cannot be instantiated at runtime.
@@ -18,13 +24,22 @@ public class PlayModeSampler : MonoBehaviour
 {
     public static Action<int> OnFinished;
 
-    const int FramesToSample = 40;
+    /// <summary>Frames the run must collect before it may report PASS.</summary>
+    public int RequiredFrames = 40;
+
+    /// <summary>
+    /// Frames the sampler actually collects. Normally equal to RequiredFrames; the `-pilotFrames N`
+    /// test hook lowers it so a prematurely finished run must report FAIL.
+    /// </summary>
+    public int FrameLimit = 40;
+
+    /// <summary>Session id issued by RunPlayMode; copied verbatim into the report.</summary>
+    public string SessionId = "";
 
     int _frames;
     Transform _head, _hand, _sword;
     readonly List<Vector3> _heads = new List<Vector3>();
     readonly List<Vector3> _hands = new List<Vector3>();
-    readonly List<Vector3> _swords = new List<Vector3>();
     readonly List<Vector3> _sockets = new List<Vector3>();
     bool _finished;
 
@@ -43,27 +58,35 @@ public class PlayModeSampler : MonoBehaviour
         if (_finished) return;
         if (_head != null) _heads.Add(_head.position);
         if (_hand != null) _hands.Add(_hand.position);
-        if (_sword != null)
-        {
-            _swords.Add(_sword.position);
-            if (_hand != null) _sockets.Add(_hand.InverseTransformPoint(_sword.position));
-        }
+        if (_sword != null && _hand != null) _sockets.Add(_hand.InverseTransformPoint(_sword.position));
         _frames++;
-        if (_frames < FramesToSample) return;
+        if (_frames < FrameLimit) return;
         _finished = true;
 
         var problems = new List<string>();
-        if (_heads.Count == 0 || _hands.Count == 0 || _swords.Count == 0)
+        if (_heads.Count == 0 || _hands.Count == 0 || _sockets.Count == 0)
             problems.Add("PlayMode sampler could not find head/hand/sword parts");
         problems.AddRange(Moved("head", _heads, 0.002f));
         problems.AddRange(Moved("hand", _hands, 0.02f));
         problems.AddRange(SocketSteady(_sockets));
+        if (_frames < RequiredFrames)
+            problems.Add($"only {_frames} frames were processed, {RequiredFrames} required");
 
+        var result = problems.Count == 0 ? "PASS" : "FAIL";
+        WriteReport(result, problems);
+        Debug.Log($"PLAYMODE_RESULT={result} frames={_frames} session={SessionId}");
+        OnFinished?.Invoke(problems.Count == 0 ? 0 : 1);
+    }
+
+    void WriteReport(string result, List<string> problems)
+    {
         Directory.CreateDirectory("PilotOutput");
         var json = new StringBuilder();
         json.AppendLine("{");
-        json.AppendLine($"  \"result\": \"{(problems.Count == 0 ? "PASS" : "FAIL")}\",");
+        json.AppendLine($"  \"result\": \"{result}\",");
+        json.AppendLine($"  \"session\": \"{SessionId}\",");
         json.AppendLine($"  \"frames\": {_frames},");
+        json.AppendLine($"  \"requiredFrames\": {RequiredFrames},");
         json.AppendLine($"  \"unityVersion\": \"{Application.unityVersion}\",");
         json.AppendLine($"  \"headTravel\": \"{Travel(_heads).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture)}\",");
         json.AppendLine($"  \"handTravel\": \"{Travel(_hands).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture)}\",");
@@ -71,11 +94,8 @@ public class PlayModeSampler : MonoBehaviour
         json.AppendLine("}");
         File.WriteAllText("PilotOutput/playmode.json", json.ToString());
         File.WriteAllText("PilotOutput/playmode.txt",
-            $"PLAYMODE_RESULT={(problems.Count == 0 ? "PASS" : "FAIL")}\nframes={_frames}\n" +
-            string.Join("\n", problems));
-        Debug.Log($"PLAYMODE_RESULT={(problems.Count == 0 ? "PASS" : "FAIL")} frames={_frames}");
-
-        OnFinished?.Invoke(problems.Count == 0 ? 0 : 1);
+            $"PLAYMODE_RESULT={result}\nsession={SessionId}\nframes={_frames}/{RequiredFrames}\n" +
+            string.Join("\n", problems) + "\n");
     }
 
     static List<string> Moved(string label, List<Vector3> frames, float minimum)

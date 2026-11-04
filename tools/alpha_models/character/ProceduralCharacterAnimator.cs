@@ -28,6 +28,11 @@ namespace CubeGame.CharacterPilot
         Vector3 _bodyHome, _headHome, _handLeftHome, _handRightHome, _footLeftHome, _footRightHome;
         Quaternion _bodyHomeRot, _headHomeRot, _handLeftHomeRot, _handRightHomeRot;
 
+        /// <summary>True when the eight parts are wired; PlayMode refuses to run otherwise.</summary>
+        public bool IsBound =>
+            _body != null && _head != null && _handLeft != null && _handRight != null &&
+            _footLeft != null && _footRight != null;
+
         void Awake()
         {
             // Entering PlayMode reloads the scene, so the private binding fields are null there.

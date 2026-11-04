@@ -316,7 +316,123 @@ skin-alignment → FAIL; `sourceMin` разреженной модели не в
 по порядку, триангулированные индексы, число граней и `grid min`. Обе реализации работают в системе координат
 сетки, поэтому совпадение точное.
 
-## 13. Итоговый статус
+## 13. S05A-1-REVIEW-FIX-02 (2026-11-04) — надёжность PlayMode и корректное завершение Unity
 
-`S05A-1-REVIEW-FIX-01 — READY_FOR_REVIEW`. `ACCEPTED` не выставляется. `S05B`, массовая конвертация и
+Ревью: два оставшихся замечания. Оба устранены; статус этапа остаётся `READY_FOR_REVIEW`.
+
+### 13.1 Исходные причины
+
+**FIX-04 — ложный `PASS` в PlayMode.** `RunPlayMode()` вызывал `BuildCharacter(false)` и сразу переходил в
+PlayMode, не глядя на `build.problems`. Если части не хватало, аниматор не был привязан или иерархия была
+сломана, сцена всё равно собиралась частично: сэмплер честно отсчитывал 40 кадров, находил голову/кисть/меч
+(или не находил) и мог записать `PLAYMODE_RESULT=PASS`, хотя персонажа фактически не было.
+
+**FIX-05 — `0xC0000005` (STATUS_ACCESS_VIOLATION) после PlayMode.** Причина подтверждена логом:
+`EditorApplication.Exit(0)` вызывался **синхронно из обработчика `playModeStateChanged(EnteredEditMode)`**,
+то есть внутри `UnityEditor.EditorApplication:Internal_PlayModeStateChanged`. В `final_fix_playmode.log` это
+видно дословно: строка `PlayMode ended, exiting with code 0` с трейсом
+`<RunPlayMode>b__1 (PlayModeStateChange)` → сразу `Crash!!!`. То есть редактор уничтожался в момент, когда
+сам ещё разбирал переход состояния PlayMode.
+
+### 13.2 Что изменено в коде
+
+| Файл | Изменение |
+|---|---|
+| `CharacterPilotPlayMode.cs` (новый) | точка входа `RunPlayMode`, предполётные проверки, отложенный выход, отчёты FAIL/EXCEPTION |
+| `CharacterPilot.cs` | старый `RunPlayMode` удалён; добавлена проверка касания земли `ValidateGroundContact`; хук `-pilotSkipAnimator`; канонический порядок проверяется ниже |
+| `CharacterPilotFixes.cs` | `CanonicalParents` — требуемая иерархия, независимая от спеки; `ValidateHierarchyFromScene` сравнивает сцену **и** спеку с этой картой |
+| `PlayModeSampler.cs` | `RequiredFrames` (40) отделён от `FrameLimit`; в отчёт пишется `session`; `OnFinished` вызывается не более одного раза |
+| `ProceduralCharacterAnimator.cs` | свойство `IsBound` — проверка, что все восемь узлов привязаны |
+
+**Предполётные проверки (`ValidatePlayModePrerequisites`)** — при любой проблеме PlayMode не запускается:
+проблемы сборки, отсутствие любой из восьми частей, отсутствие `ProceduralCharacterAnimator`, несвязанный
+аниматор. Отчёт пишется как `PLAYMODE_RESULT=FAIL` со списком причин, процесс завершается с ненулевым кодом
+(исключение из `-executeMethod`), ничего не «прогоняется вхолостую».
+
+**Единые правила вердикта:**
+
+| Условие | Итог |
+|---|---|
+| Чистая сборка, ≥ 40 кадров, анимация и крепление оружия PASS, отчёт со свежей сессией, процесс завершился 0 | `PASS` |
+| Ошибка сборки / иерархии / размещения / отсутствует часть / нет аниматора | `FAIL` (PlayMode не запускается, exit ≠ 0) |
+| Меньше 40 кадров | `FAIL` (сэмплер отчитывается сам) |
+| Ошибка анимации или крепления оружия | `FAIL` |
+| Ошибка C#/Unity | `EXCEPTION` |
+| Отчёт PASS, но процесс упал | `CRASH` / FAIL (проверяется снаружи по коду завершения) |
+| Отчёт отсутствует или от другой сессии | `FAIL` (в отчёте обязателен `session`, выданный запуском) |
+
+**Жизненный цикл PlayMode после FIX-05:** сборка → предполётные проверки → камера/свет → сэмплер с
+`SessionId`/`RequiredFrames`/`FrameLimit` → `EditorApplication.isPlaying = true` → сэмплер собирает кадры,
+пишет отчёт и вызывает `OnFinished(code)` → редактор ставит `isPlaying = false` → по
+`playModeStateChanged(EnteredEditMode)` обработчик **отписывается** и планирует выход через
+`EditorApplication.update` с задержкой 10 тиков (`RequestEditorExitAfterTransition`) → выход выполняется уже
+в обычном тике редактора, вне перехода состояния.
+
+### 13.3 Диагностика `0xC0000005`
+
+* Код: `-1073741819` = `0xC0000005` (STATUS_ACCESS_VIOLATION), а не штатное завершение.
+* Место: сразу после `EditorApplication.Exit(0)` из `playModeStateChanged` (трейс в логе).
+* Отключённый domain reload (`EnterPlayModeOptions.DisableDomainReload`) сам по себе не был причиной: с ним
+  и с отложенным выходом авария исчезла; при этом без domain reload статические колбэки сэмплера выживают —
+  это по-прежнему нужно.
+* Повторная регистрация обработчиков исключена: `playModeStateChanged` отписывается в первом же вызове,
+  `PlayModeSampler.OnFinished` вызывает один раз (`_finished`), установка exit-пумпа защищена флагом
+  `ExitPumpInstalled`.
+* Итог: **авария устранена**, три последовательных полных запуска завершились кодом 0 без строки `Crash!!!`.
+
+### 13.4 Результаты запусков (фактические)
+
+Положительные (каждый — отдельный запуск Unity `6000.3.27f2`, новый `session`):
+
+| Запуск | `PLAYMODE_RESULT` | Кадры | `Crash!!!` в логе | Код завершения Unity |
+|---|---|---|---|---|
+| `playmode_a` | PASS | 40/40 | 0 | **0** |
+| `playmode_b` | PASS | 40/40 | 0 | **0** |
+| `playmode_c` | PASS | 40/40 | 0 | **0** |
+
+Негативные (данные пилота мутировались в локальной копии, оригинальные ресурсы Alpha не изменялись):
+
+| Сценарий | Итог | Код завершения | Диагностика |
+|---|---|---|---|
+| нет `head.cubdec` | FAIL | 1 | `build: part 'head': payload head.cubdec not found`, `missing part node 'hair'` |
+| нет `hand_l.cubdec` | FAIL | 1 | `build: part 'hand_l': payload … not found`, `missing parts after build: hand_l` |
+| нет `sword.cubdec` | FAIL | 1 | `build: part 'sword': payload … not found` |
+| у головы родитель `hand_l` | FAIL | 1 | `scene: part 'head' Transform.parent is 'hand_l', expected 'body'` + `spec: … required parent is 'body'` |
+| сдвиг `frameOffset` волос на 1 | FAIL | 1 | `must share the source grid frame`, `skin alignment: only 279/286 (97.6%)` |
+| `frameOffset` торса поднят на 1 | FAIL | 1 | `head sinks 1 into the torso` (+ выход за землю) |
+| нет аниматора (`-pilotSkipAnimator`) | FAIL | 1 | `playmode: ProceduralCharacterAnimator is missing` |
+| преждевременный конец (`-pilotFrames 10`) | FAIL | 1 | `only 10 frames were processed, 40 required` |
+| старый PASS-отчёт перед падающим запуском | FAIL | 1 | отчёт перезаписан, причины сборки на месте |
+| корректная сборка | PASS | **0** | — |
+
+Во всех девяти негативных сценариях `Crash!!!` в логах = 0.
+
+### 13.5 Регрессия после исправлений
+
+| Проверка | Результат |
+|---|---|
+| Python `unittest` | **62/62 PASS** |
+| Unity-самотесты S05A-1 | **54/54 PASS** (23 базовых + 31 по FIX-01…FIX-04) |
+| Unity-самотесты S05A-0 | **19/19 PASS**, exit 0 |
+| Конверсия 4 моделей S05A-0 | **PASS**, exit 0 |
+| Сборка персонажа | **`CHARACTER_RESULT=PASS`**, exit 0 |
+| PlayMode ×3 | **PASS**, 40/40, exit 0, без аварий |
+| `git diff --check` | чисто |
+
+### 13.6 Остаточные риски
+
+1. Сэмплер считает кадры `Update()`; при экстремально медленном старте плеера PlayMode всё равно дождётся 40
+   кадров, но зависание возможно при неинициализированной графике — тогда сработает внешний таймаут, а не PASS.
+2. Отложенный выход опирается на `EditorApplication.update`; если редактор занят длительной операцией,
+   завершение сдвинется на несколько тиков (не влияет на вердикт).
+3. Проверка иерархии опирается на канонический список из восьми узлов; добавление новых частей потребует
+   обновить `CanonicalParents`, иначе сцена получит `unexpected part node`.
+4. `-pilotFrames` / `-pilotSkipAnimator` — тестовые хуки командной строки; в обычном запуске не используются и
+   документированы в README.
+5. Остальные ограничения этапа не менялись: offsets/пивоты/масштаб — `PROXY_NOT_ALPHA`, тинт и семантика
+   маркеров — `PARTIAL`/`UNKNOWN`, исходный анимационный цикл — `UNKNOWN / NOT_REPRODUCED`.
+
+## 14. Итоговый статус
+
+`S05A-1-REVIEW-FIX-02 — READY_FOR_REVIEW`. `ACCEPTED` не выставляется. `S05B`, массовая конвертация и
 производственные сцены не затрагивались; `main` не изменялся, force push не выполнялся.

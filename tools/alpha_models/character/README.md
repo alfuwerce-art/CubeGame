@@ -7,7 +7,8 @@
 | `CharacterPilot.cs` | Editor-скрипт: сборка из частей по `assembly.json`, валидаторы (иерархия, размещение, ориентация, крепление головы, гнездо оружия, движение, замыкание цикла), 49 самотестов, снимки, отчёты |
 | `CharacterPilotFixes.cs` | S05A-1-REVIEW-FIX-01: двухпроходный расчёт координат (FIX-01), размещение по исходной сетке + проверка кожных вокселей (FIX-02), независимая проверка `Transform.parent` (FIX-03), выгрузка геометрии для кросс-проверки с Python |
 | `ProceduralCharacterAnimator.cs` | технический цикл `technical_walk_NOT_ALPHA` (детерминированный `Sample(t)` + `Update()` в PlayMode) |
-| `PlayModeSampler.cs` | 40 реальных кадров PlayMode: движение частей + стабильность меча в кисти |
+| `PlayModeSampler.cs` | 40 реальных кадров PlayMode: движение частей + стабильность меча в кисти; `RequiredFrames` (40) отделён от `FrameLimit`, в отчёт пишется `session` |
+| `CharacterPilotPlayMode.cs` | точка входа PlayMode: предполётные проверки (сборка, 8 узлов, аниматор), отложенный безопасный выход из редактора, отчёты FAIL/EXCEPTION |
 | `assembly.sample.json` | образец спеки сборки: имена частей, offsets в пространстве персонажа, статусы достоверности (без данных моделей) |
 | `VertexColorUnlit.shader` | unlit-шейдер vertex colors (общий с S05A-0) |
 
@@ -30,4 +31,13 @@
 & "D:\Unity\Hub\Editor\6000.3.27f2\Editor\Unity.exe" -batchmode -projectPath <проект> -executeMethod CharacterPilotVerifier.RunPlayMode -logFile playmode.log
 ```
 
-Ожидаемые маркеры: `CHARACTER_RESULT=PASS`, `SELFTEST_RESULT=PASS`, `PLAYMODE_RESULT=PASS`.
+Ожидаемые маркеры: `CHARACTER_RESULT=PASS`, `SELFTEST_RESULT=PASS`, `PLAYMODE_RESULT=PASS`, и для PlayMode — код завершения процесса `0`.
+
+Тестовые хуки командной строки (только для негативных прогонов, в обычной работе не используются):
+
+| Хук | Действие |
+|---|---|
+| `-pilotFrames N` | сэмплер соберёт `N` кадров вместо 40; требование остаётся 40, поэтому `N < 40` даёт `FAIL` |
+| `-pilotSkipAnimator` | `BuildCharacter` не добавляет `ProceduralCharacterAnimator`; PlayMode обязан отказаться |
+
+`RunPlayMode` не запускает PlayMode, если сборка неполная, отсутствует часть или аниматор: пишет `PLAYMODE_RESULT=FAIL` с причинами и завершается ненулевым кодом. Выход из редактора выполняется отложенно (тик `EditorApplication.update`) — синхронный `EditorApplication.Exit()` из `playModeStateChanged` вызывал `0xC0000005`.

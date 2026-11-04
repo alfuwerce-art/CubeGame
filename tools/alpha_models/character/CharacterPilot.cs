@@ -170,6 +170,18 @@ public static partial class CharacterPilotVerifier
         return problems;
     }
 
+    /// <summary>Both feet must rest on the ground plane (y = 0) of the character space.</summary>
+    internal static List<string> ValidateGroundContact(Vector3 leftFootMin, Vector3 rightFootMin)
+    {
+        var problems = new List<string>();
+        foreach (var (name, min) in new[] { ("foot_l", leftFootMin), ("foot_r", rightFootMin) })
+        {
+            if (Mathf.Abs(min.y) > 0.02f)
+                problems.Add($"part '{name}': bottom is at y={min.y:0.###}, expected 0 (feet must touch the ground)");
+        }
+        return problems;
+    }
+
     internal static List<string> ValidateHeadAttachment(Vector3 bodyTop, Vector3 headMin)
     {
         var problems = new List<string>();
@@ -292,11 +304,27 @@ public static partial class CharacterPilotVerifier
                 Path.Combine(DataDir, "hair.cubdec"), hairResult.frameOffset));
         }
 
+        // Both feet must touch the ground; a wrong vertical frameOffset lifts or sinks them.
+        var leftFoot = Find(build, "foot_l");
+        var rightFoot = Find(build, "foot_r");
+        if (leftFoot != null && rightFoot != null)
+        {
+            build.problems.AddRange(ValidateGroundContact(BoundsOf(leftFoot).min,
+                BoundsOf(rightFoot).min));
+        }
+
         var required = new[] { "body", "head", "hair", "hand_l", "hand_r", "foot_l", "foot_r", "sword" };
         var missing = required.Where(id => !build.parts.ContainsKey(id)).ToList();
         if (missing.Count > 0)
         {
             build.problems.Add("missing parts after build: " + string.Join(", ", missing));
+            return build;
+        }
+
+        if (CommandLineFlag("-pilotSkipAnimator"))
+        {
+            // Test hook: leaves the assembly without an animator so RunPlayMode must refuse to run.
+            build.problems.Add("test hook: ProceduralCharacterAnimator intentionally omitted");
             return build;
         }
 
@@ -777,49 +805,7 @@ public static partial class CharacterPilotVerifier
     // PlayMode
     // ------------------------------------------------------------------
 
-    [MenuItem("CubeGame Pilot/Run PlayMode animation check")]
-    public static void RunPlayMode()
-    {
-        Directory.CreateDirectory(OutputDir);
-        CleanOutputs("playmode", "report_exception");
-        // Entering PlayMode normally reloads the domain, which would clear the static
-        // OnFinished/playModeStateChanged hooks; this isolated project disables that reload.
-        EditorSettings.enterPlayModeOptionsEnabled = true;
-        EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload;
-        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-        var build = BuildCharacter(false);
-        var camera = new GameObject("PilotCamera").AddComponent<Camera>();
-        camera.clearFlags = CameraClearFlags.SolidColor;
-        camera.backgroundColor = new Color(0.10f, 0.10f, 0.13f, 1f);
-        var light = new GameObject("PilotLight").AddComponent<Light>();
-        light.type = LightType.Directional;
-        light.intensity = 1f;
-        light.transform.rotation = Quaternion.Euler(35f, -35f, 0f);
-
-        build.animator.AnimateInPlayMode = true;
-        var exitCode = 0;
-        PlayModeSampler.OnFinished = code =>
-        {
-            Debug.Log($"PlayMode sampling finished with exit code {code}");
-            exitCode = code;
-            EditorApplication.isPlaying = false;
-        };
-        EditorApplication.playModeStateChanged += state =>
-        {
-            if (state != PlayModeStateChange.EnteredEditMode) return;
-            var resultPath = Path.Combine(OutputDir, "playmode.txt");
-            var ok = File.Exists(resultPath) &&
-                     File.ReadAllText(resultPath).Contains("PLAYMODE_RESULT=PASS");
-            var code = ok ? 0 : Math.Max(1, exitCode);
-            Debug.Log($"PlayMode ended, exiting with code {code}");
-            EditorApplication.Exit(code);
-        };
-        var sampler = build.root.AddComponent<PlayModeSampler>();
-        sampler.enabled = true;
-        EditorSceneManager.SaveScene(scene, ScenePath);
-        Debug.Log($"playmode assembly built: parts={build.parts.Count} problems={build.problems.Count}");
-        EditorApplication.isPlaying = true;
-    }
+    // PlayMode entry point moved to CharacterPilotPlayMode.cs (S05A-1-REVIEW-FIX-02).
 
     // ------------------------------------------------------------------
     // self-tests
