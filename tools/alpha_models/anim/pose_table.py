@@ -195,6 +195,39 @@ def cross_check(blocks: list[StateBlock], source_cases: dict[int, list[float]],
     }
 
 
+def write_probe_document(blocks: list[StateBlock], args) -> None:
+    """Write the static values of one channel as a probe document for the Unity adapter.
+
+    Only values recovered from the bytes are exported, each with the instruction address it was
+    read from, so the Unity side can say exactly where a number came from. The document is
+    produced locally: it contains original game values and therefore never goes into Git.
+    """
+    block = next((b for b in blocks if b.state == args.probe_state), None)
+    if block is None:
+        raise pe_bytes.PEError(f"state {args.probe_state} does not exist (1..{len(blocks)})")
+    moments = [
+        {"name": f"write_0x{write.address:08X}", "value": round(write.value, 6),
+         "address": f"0x{write.address:08X}", "encoding": write.encoding}
+        for write in block.writes
+        if write.slot == args.probe_slot and write.component == args.probe_component
+        and write.value is not None
+    ]
+    document = {
+        "source": os.path.abspath(args.exe),
+        "generator": "tools/alpha_models/anim/pose_table.py",
+        "function": "Creature_drawModel@004128F0",
+        "state": args.probe_state,
+        "blockStart": f"0x{block.start:08X}",
+        "slot": args.probe_slot,
+        "component": args.probe_component,
+        "moments": moments,
+    }
+    with open(args.probe_out, "w", encoding="utf-8") as handle:
+        json.dump(document, handle, indent=1)
+    print(f"probe        : {args.probe_out} ({len(moments)} static moments for "
+          f"{args.probe_slot}[{args.probe_component}] in state {args.probe_state})")
+
+
 def format_state(block: StateBlock, limit: Optional[int] = None) -> str:
     lines = [f"state {block.state}: 0x{block.start:08X}..0x{block.end:08X} "
              f"({len(block.writes)} channel writes)"]
@@ -218,6 +251,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument("--all", action="store_true", help="print every state")
     parser.add_argument("--limit", type=int, default=0, help="max writes printed per state")
     parser.add_argument("--json", help="write the full table as JSON")
+    parser.add_argument("--probe-out",
+                        help="write a Unity probe document with the static values of one channel")
+    parser.add_argument("--probe-state", type=int, default=1, help="state used for --probe-out")
+    parser.add_argument("--probe-slot", default="local_15fc", help="channel slot used for --probe-out")
+    parser.add_argument("--probe-component", type=int, default=0,
+                        help="channel component (0=x, 1=y, 2=z) used for --probe-out")
     args = parser.parse_args(argv)
 
     start, end = aw.CREATURE_DRAW_MODEL, aw.CREATURE_DRAW_MODEL_END
@@ -279,6 +318,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         ok = ok and summary["slotNamesPresentInSource"] == summary["writes"]
         if summary["staticValues"]:
             ok = ok and summary["staticValuesPresentInCaseBody"] > 0
+    if args.probe_out:
+        write_probe_document(blocks, args)
     print(f"resolved     : {resolved}/{total} writes tied to a stack slot")
     print("POSE_TABLE_RESULT=" + ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
