@@ -67,12 +67,12 @@ public partial class ProceduralCharacterAnimator : MonoBehaviour
             // body: lean back during the windup, drive forward on the strike, return on recovery
             float lean = -22f * windup + 40f * strike - 18f * recover;
             _body.localRotation = _bodyHomeRot * Quaternion.Euler(lean * 0.35f, 0f, 0f);
-            _body.localPosition = _bodyHome + new Vector3(0f, -0.15f * strike, 0.6f * strike - 0.4f * recover);
+            _body.localPosition = _bodyHome + new Vector3(0f, -0.15f * strike + 0.15f * recover, 0.6f * strike - 0.6f * recover);
 
             // right arm raises the blade behind the head, then swings down and forward
             float armLift = 70f * windup - 110f * strike + 40f * recover;
             _handRight.localRotation = _handRightHomeRot * Quaternion.Euler(armLift, 0f, 0f);
-            _handRight.localPosition = _handRightHome + new Vector3(0f, 1.2f * windup - 2.0f * strike, 0f);
+            _handRight.localPosition = _handRightHome + new Vector3(0f, 1.2f * windup - 2.0f * strike + 0.8f * recover, 0f);
 
             // head follows the target, not the blade
             _head.localRotation = _headHomeRot * Quaternion.Euler(6f * windup - 14f * strike + 8f * recover, 0f, 0f);

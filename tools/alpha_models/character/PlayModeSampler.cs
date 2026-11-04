@@ -39,6 +39,9 @@ public class PlayModeSampler : MonoBehaviour
     /// <summary>Test hook: report completion twice, so the lifecycle duplicate guard can be exercised.</summary>
     public bool TriggerDoubleFinish;
 
+    /// <summary>When true the sampler validates the two-handed grip instead of the walk cycle.</summary>
+    public bool AttackMode;
+
     int _frames;
     Transform _head, _hand, _sword;
     readonly List<Vector3> _heads = new List<Vector3>();
@@ -69,6 +72,19 @@ public class PlayModeSampler : MonoBehaviour
         var problems = new List<string>();
         if (_heads.Count == 0 || _hands.Count == 0 || _sockets.Count == 0)
             problems.Add("PlayMode sampler could not find head/hand/sword parts");
+        if (AttackMode)
+        {
+            var animator = FindFirstObjectByType<CubeGame.CharacterPilot.ProceduralCharacterAnimator>();
+            if (animator != null)
+            {
+                var gripError = animator.LeftPalmToSecondaryGrip();
+                if (float.IsNaN(gripError) || gripError > 0.02f)
+                    problems.Add($"attack: left palm is {gripError:0.###} away from the secondary grip in PlayMode");
+                else
+                    Debug.Log($"[playmode] attack grip contact ok ({gripError:0.####})");
+            }
+            else problems.Add("attack: animator not found in PlayMode");
+        }
         problems.AddRange(Moved("head", _heads, 0.002f));
         problems.AddRange(Moved("hand", _hands, 0.02f));
         problems.AddRange(SocketSteady(_sockets));

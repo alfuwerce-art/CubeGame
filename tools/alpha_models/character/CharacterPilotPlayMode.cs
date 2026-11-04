@@ -193,11 +193,20 @@ public static partial class CharacterPilotVerifier
             AddPlayModeCameraAndLight();
             build.animator.AnimateInPlayMode = true;
 
+            // FIX-03: `-pilotAttack` runs PlayMode with the two-handed attack instead of the walk cycle,
+            // so the shipped animation is what actually gets sampled live.
+            if (CommandLineFlag("-pilotAttack"))
+            {
+                build.animator.TwoHandedAttack = true;
+                Debug.Log("[playmode] attack mode: two_handed_attack_%s sampler");
+            }
+
             var sampler = build.root.AddComponent<PlayModeSampler>();
             sampler.SessionId = PlayModeSessionId;
             sampler.RequiredFrames = RequiredPlayModeFrames;
             sampler.FrameLimit = frameLimit;
             sampler.TriggerDoubleFinish = CommandLineFlag("-pilotDoubleFinish");
+            sampler.AttackMode = CommandLineFlag("-pilotAttack");
             sampler.enabled = true;
 
             PlayModeSampler.OnFinished = HandleSamplerFinished;

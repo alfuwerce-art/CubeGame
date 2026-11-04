@@ -76,8 +76,16 @@ public static partial class CharacterPilotVerifier
                     problems.Add($"attack: right hand left the grip at t={t:0.###} ({phase}), offset {right:0.###}");
                 if (left > GripTolerance)
                     problems.Add($"attack: left hand left the secondary grip at t={t:0.###} ({phase}), offset {left:0.###}");
-                var clearance = ValidateBladeClearance(sword, grip, headBounds, bodyBounds, 0.05f);
-                if (clearance.Count > 0 && i > 0 && i < AttackSamples) bladeHits++;
+                // FIX-01: the head/torso bounds are recomputed for EVERY sample (they move with the
+                // pose) and a single collision must fail the run, not just be counted.
+                var headNow = BoundsOf(Find(build, "head"));
+                var bodyNow = BoundsOf(Find(build, "body"));
+                var clearance = ValidateBladeClearance(sword, grip, headNow, bodyNow, 0.02f);
+                if (clearance.Count > 0)
+                {
+                    bladeHits++;
+                    problems.Add($"attack: blade collision at t={t:0.###} ({phase}): {clearance[0]}");
+                }
                 if (i == 0 || i == AttackSamples)
                 {
                     // idle poses at both ends must match exactly (loop closure)
@@ -99,6 +107,22 @@ public static partial class CharacterPilotVerifier
             var closure = Vector3.Distance(handPositions.First(), handPositions.Last());
             if (closure > 0.02f)
                 problems.Add($"attack: pose does not return to idle (closure {closure:0.###})");
+
+            // FIX-02: the seam must be checked across the wrap (t -> 1-eps -> 0), not only at the ends
+            animator.Sample(1f - 1e-4f);
+            var beforeWrapHand = handRight.position;
+            var beforeWrapSword = sword.position;
+            var beforeWrapRotation = sword.rotation;
+            animator.Sample(0f);
+            var seamHand = Vector3.Distance(beforeWrapHand, handRight.position);
+            var seamSword = Vector3.Distance(beforeWrapSword, sword.position);
+            var seamRotation = Quaternion.Angle(beforeWrapRotation, sword.rotation);
+            if (seamHand > 0.02f)
+                problems.Add($"attack: seam jump in the hand pose across t=1-eps -> 0 ({seamHand:0.####})");
+            if (seamSword > 0.02f || seamRotation > 1f)
+                problems.Add($"attack: seam jump in the weapon transform ({seamSword:0.####}, {seamRotation:0.##} deg)");
+            summary.Add($"seam: hand {seamHand:0.####}, sword {seamSword:0.####}, rotation {seamRotation:0.##} deg");
+            if (bladeHits > 0) summary.Add($"blade collisions: {bladeHits}");
             summary.Add($"attack: max right offset {rightOffsets.Max():0.####}, max left offset {leftOffsets.Max():0.####}, closure {closure:0.####}");
 
             // ---- close-up and idle renders ----
