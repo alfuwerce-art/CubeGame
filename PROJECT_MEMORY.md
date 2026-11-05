@@ -1,5 +1,7 @@
 # CubeGame — межчатовая память проекта (PROJECT_MEMORY)
 
+**Решение архитектуры 2026-11-06:** [ADR-0002 — Data-Driven Layered Architecture](docs/architecture/ADR-0002-data-driven-layered.md) принята **как принцип реализации внутри ADR-0001**, без переписывания S02–S04 и без расширения S05A-2. Действует [план аудита и дальнейшего внедрения](docs/architecture/DATA_DRIVEN_ADOPTION_PLAN.md); приёмка и авторизация этапов не изменены. Изменение документации — в отдельной review-ветке, не в `main`.
+
 **Рабочее название проекта:** `CubeGame`. **Окончательное название игры НЕ утверждено.**  
 **Репозиторий:** https://github.com/alfuwerce-art/CubeGame  
 **Обновлено:** 2026-11-06. **S05A-2 — IN_PROGRESS / REVIEW OPEN**, техническое продолжение Claude — **READY_FOR_REVIEW**. Ветка `codex/s05a2-claude-continuation` от `3d4a2fb` (включает `43a1ba6`): 93 поддержанных action ID / 60 drawModel states — `EMULATED_ALPHA_CODE`, 8 `BLOCKED`. Python 178 PASS; Unity EditMode 29/29; полный контроллер 93/93 при 30/60/120 Гц (16 975 / 33 837 / 67 420 кадров), ошибки поз и стыков 0. Независимый oracle replay 3115/3115, max_abs 0 с восстановленным входом камеры. Формула тела сохранена, оружие — отдельный слой; переходы Unity явно отделены от Alpha-поз. Последний принятый этап — S05A-1 (D50); **S05B NOT_AUTHORIZED**. [Отчёт](docs/reports/S05A2_CLAUDE_CONTINUATION_REPORT.md), [методичка](docs/agents/ANIMATION_SYSTEM_PLAYBOOK.md).
