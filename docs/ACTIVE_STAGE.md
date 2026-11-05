@@ -1,5 +1,7 @@
 # CubeGame — ACTIVE_STAGE
 
+**Архитектура (решение продюсера 2026-11-06):** [ADR-0002 — Data-Driven Layered внутри модульного монолита](architecture/ADR-0002-data-driven-layered.md) — утверждены принципы для нового кода, [поэтапное внедрение](architecture/DATA_DRIVEN_ADOPTION_PLAN.md) без массового рефакторинга. **S05A-2 остаётся IN_PROGRESS / REVIEW OPEN; S05B NOT_AUTHORIZED.** Архитектурный документ не разрешает новые игровые этапы.
+
 **Актуализация 2026-11-06 — продолжение Claude, Codex: `READY_FOR_REVIEW`.** Ветка `codex/s05a2-claude-continuation` от `3d4a2fb` (включает `43a1ba6`), по прямому поручению продюсера. Автоматический oracle-baking и полный контроллер: 93 action ID (60 drawModel states) `EMULATED_ALPHA_CODE`, 8 `BLOCKED`; Python 178 PASS, EditMode 29/29, PlayMode всех 93 действий при 30/60/120 Гц — PASS (16 975 / 33 837 / 67 420 кадров), ошибки поз и стыков 0. Полный независимый replay 3115 живых кадров — PASS, max_abs 0; исправлен вход камеры, порог не ослаблялся. Слой оружия, реальный хват и конечная рукоять проверены; ядро формулы тела сохранено. Переходы пилота имеют статус `UNITY_TRANSITION`, не извлечённые Alpha-переходы. [Отчёт](reports/S05A2_CLAUDE_CONTINUATION_REPORT.md), [методичка](agents/ANIMATION_SYSTEM_PLAYBOOK.md). **S05A-2 — IN_PROGRESS / REVIEW OPEN, не ACCEPTED; S05B NOT_AUTHORIZED.** История ниже сохраняется.
 
 **Дата решения:** 2026-11-04. **Межчатовая память:** [PROJECT_MEMORY.md](../PROJECT_MEMORY.md). **Рабочее название:** CubeGame (имя игры не утверждено).
