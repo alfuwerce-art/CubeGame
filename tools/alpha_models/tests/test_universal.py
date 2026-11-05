@@ -141,9 +141,9 @@ class RigResolverTests(unittest.TestCase):
         self.assertIn("weapon", b.parts)
 
     def test_unverified_block_and_kind_branch_are_exceptions(self):
-        wings = cr.resolve(0x37, appearance({"body": 1, "head": 2, "foot": 3, "slot_9a": 4}))
-        self.assertFalse(wings.supported)
-        self.assertTrue(any("UNVERIFIED_DRAW_BLOCK" in e for e in wings.exceptions))
+        offhand = cr.resolve(0x20, appearance(CAT), equipment=("offhand",))
+        self.assertFalse(offhand.supported)
+        self.assertTrue(any("UNVERIFIED_DRAW_BLOCK" in e for e in offhand.exceptions))
         mole = cr.resolve(0x57, appearance(CAT))
         self.assertTrue(any("KIND_SPECIFIC_CODE" in e for e in mole.exceptions))
         self.assertFalse(cr.resolve(0x50, appearance({})).supported)          # no parts at all
@@ -243,7 +243,7 @@ class UniversalClipTests(unittest.TestCase):
     def test_wrong_slot_unknown_and_unverified_sites_are_rejected(self):
         for kw, code in (({"slot_over": {"tail": "0x2F"}}, "SLOT_MISMATCH"),
                          ({"site_over": {"tail": 0x41F8BD}}, "UNKNOWN_DRAW_SITE"),
-                         ({"site_over": {"tail": 0x4238C5}}, "UNVERIFIED_BLOCK")):
+                         ({"site_over": {"tail": 0x421DFA}}, "UNVERIFIED_BLOCK")):
             fr = uclip.load_capture(write([record(0.3, 0.0, **kw)]))[0]
             self.assertTrue(any(p.startswith(code) for p in fr.problems), (code, fr.problems))
             self.assertFalse(uclip.usable(fr, uclip.frame_resolution(fr)))
@@ -353,8 +353,10 @@ class PrepareRefusalTests(unittest.TestCase):
             self.assertEqual(out["PREPARE_RESULT"], "FAIL")
             self.assertTrue(any(p.startswith("NO_FAMILY_CLIPS") for p in out["problems"]))
             self.assertEqual(len(out["skipped_clips"]), 1)
-            out2 = pl.prepare_unity({"kind": "0x37", "clips": clips}, os.path.join(tmp, "proj2"))   # Crow: wings
-            self.assertTrue(any(p.startswith("UNSUPPORTED") for p in out2["problems"]))
+            out2 = pl.prepare_unity({"kind": "0x37", "clips": clips}, os.path.join(tmp, "proj2"))   # Crow: wings now verified
+            self.assertTrue(any(p.startswith("NO_FAMILY_CLIPS") for p in out2["problems"]))
+            out3 = pl.prepare_unity({"kind": "0x57", "clips": clips}, os.path.join(tmp, "proj3"))   # kind-specific code
+            self.assertTrue(any(p.startswith("UNSUPPORTED") for p in out3["problems"]))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 

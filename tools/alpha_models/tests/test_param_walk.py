@@ -122,29 +122,37 @@ class ClassificationTests(unittest.TestCase):
         self.assertIn("head_lean_ai", v["terms"])
         self.assertEqual(pw.TERMS["head_lean_ai"][0], "VERIFIED")
 
-    def test_airborne_bit1_is_code_only(self):
+    def test_airborne_bit1_is_verified(self):
         v = pw.classify(full_app(pw.SYNTHETIC_APPEARANCES["airborne_bit1"]), ["body", "foot_l", "foot_r"])
-        self.assertEqual(v["status"], "FORMULA_CODE_ONLY_TERMS")
-        self.assertEqual(v["code_only_terms"], ["airborne_bit1"])
+        self.assertEqual(v["status"], "FORMULA_VERIFIED", v)
+        self.assertEqual(v["code_only_terms"], [])
+        self.assertIn("airborne_bit1", v["terms"])
 
-    def test_unknown_terms_and_parts_need_research(self):
-        self.assertEqual(pw.classify(full_app(QUAD, angle_48=10.0), ["body"])["status"], "NEEDS_RESEARCH")
-        self.assertEqual(pw.classify(full_app(QUAD, angle_50=5.0), ["body", "hand_l", "hand_r"])["status"],
-                         "NEEDS_RESEARCH")
-        # hand rest angles do not matter without hands
-        self.assertEqual(pw.classify(full_app(QUAD, angle_50=5.0), ["body"])["status"], "FORMULA_VERIFIED")
-        self.assertEqual(pw.classify(full_app(QUAD), ["body", "slot9a_a"])["status"], "NEEDS_RESEARCH")
+    def test_unmodelled_parts_and_kind_exceptions_need_research(self):
+        # Every formula term is now VERIFIED (drawModel emulation, 2026-11-05); NEEDS_RESEARCH is
+        # reached only through unmodelled parts and kind-specific code, never through a term level.
+        self.assertEqual(pw.classify(full_app(QUAD), ["body", "weapon"])["status"], "NEEDS_RESEARCH")
         self.assertEqual(pw.classify(full_app(QUAD), ["body"], kind_exceptions=["KIND_SPECIFIC_CODE 0x57"])["status"],
                          "NEEDS_RESEARCH")
+        # formerly UNKNOWN/CODE_ONLY terms are now VERIFIED and classify as such
+        self.assertEqual(pw.classify(full_app(QUAD, angle_48=10.0), ["body"])["status"], "FORMULA_VERIFIED")
+        self.assertEqual(pw.classify(full_app(QUAD, angle_50=5.0), ["body", "hand_l", "hand_r"])["status"],
+                         "FORMULA_VERIFIED")
+        self.assertEqual(pw.classify(full_app(QUAD), ["body", "slot9a_a"])["status"], "FORMULA_VERIFIED")
+        # hand rest angles are exercised only when hands are present
+        self.assertNotIn("hand_rest_angles", pw.classify(full_app(QUAD, angle_50=5.0), ["body"])["terms"])
+        self.assertIn("hand_rest_angles", pw.classify(full_app(QUAD, angle_50=5.0), ["body", "hand_l", "hand_r"])["terms"])
 
-    def test_angle_58_is_code_only_with_feet(self):
+    def test_angle_58_is_verified_with_feet(self):
         v = pw.classify(full_app(QUAD, angle_58=12.0), ["body", "foot_l", "foot_r"])
-        self.assertEqual(v["status"], "FORMULA_CODE_ONLY_TERMS")
-        self.assertEqual(pw.classify(full_app(QUAD, angle_58=12.0), ["body"])["status"], "FORMULA_VERIFIED")
+        self.assertEqual(v["status"], "FORMULA_VERIFIED", v)
+        self.assertIn("foot_angle_58", v["terms"])
+        # foot_angle_58 is exercised only when feet are present
+        self.assertNotIn("foot_angle_58", pw.classify(full_app(QUAD, angle_58=12.0), ["body"])["terms"])
 
     def test_generate_clip_refuses_research_and_marks_status(self):
         with self.assertRaises(ValueError):
-            pw.generate_walk_clip(full_app(QUAD, angle_48=3.0), 0x99, "alpha_creature/x", ["body"], 0.19)
+            pw.generate_walk_clip(full_app(QUAD), 0x99, "alpha_creature/x", ["body", "weapon"], 0.19)
         clip = pw.generate_walk_clip(full_app(QUAD), 0x99, "alpha_creature/x", ["body", "foot_l", "foot_r"], 0.19,
                                      keys=24, speed_xy=3.7)
         self.assertEqual(clip["status"], "RECONSTRUCTED_FROM_EVIDENCE")
@@ -169,11 +177,11 @@ class ClassificationTests(unittest.TestCase):
         table = {"kinds": {
             "0x90": {"appearance": dict(full_app(QUAD), slots=slots(body=1, head=2, hand=3, foot=4, tail=5))},
             "0x91": {"appearance": dict(full_app(BIPED), slots=slots(body=1, head=2, hand=3, foot=4))},
-            "0x92": {"appearance": dict(full_app(QUAD), slots=slots(body=1, slot_9a=7))},
+            "0x57": {"appearance": dict(full_app(QUAD), slots=slots(body=1))},   # kind-specific drawModel guards
         }}
         cov = pw.coverage(table)
         st = {r["kind"]: r["status"] for r in cov["kinds"]}
-        self.assertEqual(st, {"0x90": "FORMULA_VERIFIED", "0x91": "FORMULA_VERIFIED", "0x92": "NEEDS_RESEARCH"})
+        self.assertEqual(st, {"0x90": "FORMULA_VERIFIED", "0x91": "FORMULA_VERIFIED", "0x57": "NEEDS_RESEARCH"})
 
 
 @unittest.skipUnless(HAVE_CAPTURES, "local Alpha captures (.scratch) not present")
