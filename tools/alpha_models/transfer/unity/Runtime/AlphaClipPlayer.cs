@@ -31,7 +31,7 @@ namespace CubeGame.AlphaTransfer
         public void LoadClips()
         {
             _rig = GetComponent<AlphaRig>();
-            _clips.Clear(); _maps.Clear(); Problems.Clear();
+            _clips.Clear(); _maps.Clear(); Problems.Clear(); _current = null; Cursor = 0;
             foreach (var asset in clipAssets)
             {
                 if (asset == null) { Problems.Add("CLIP_ASSET_NULL"); continue; }
@@ -43,13 +43,14 @@ namespace CubeGame.AlphaTransfer
                     map[i] = _rig.IndexOf(clip.Data.parts[i]);
                     if (map[i] < 0) Problems.Add($"CLIP_PART_NOT_IN_RIG {clip.Data.name} {clip.Data.parts[i]}");
                 }
+                if (_clips.ContainsKey(clip.Data.name)) { Problems.Add($"CLIP_NAME_DUPLICATE {clip.Data.name}"); continue; }
                 _clips[clip.Data.name] = clip;
                 _maps[clip.Data.name] = map;
             }
         }
 
         public IEnumerable<string> ClipNames => _clips.Keys;
-        public AlphaClip Get(string name) => _clips.TryGetValue(name, out var c) ? c : null;
+        public AlphaClip Get(string name) => name != null && _clips.TryGetValue(name, out var c) ? c : null;
 
         public bool Play(string name, float cursor = 0f)
         {
@@ -107,9 +108,14 @@ namespace CubeGame.AlphaTransfer
 
         void Update()
         {
+            Advance(Time.deltaTime);
+        }
+
+        public void Advance(float dt)
+        {
             if (_current == null) return;
             var d = _current.Data;
-            float step = d.param == "walk_phase" ? d.phaseRate * Time.deltaTime : Time.deltaTime * 1000f;
+            float step = d.param == "walk_phase" ? d.phaseRate * dt : dt * 1000f;
             Cursor += step * speed;
             if (!d.loop && Cursor > d.duration) Cursor = d.duration;
             ApplyAt(Cursor);

@@ -30,6 +30,9 @@ namespace CubeGame.AlphaTransfer
     [Serializable]
     public class AlphaLocomotionSpec
     {
+        public int weaponSubtype = -1;
+        public float weaponScale = 1f;
+        public string weaponStatus;
         public string format;
         public string kind;
         public string rig;

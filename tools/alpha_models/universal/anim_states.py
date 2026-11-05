@@ -170,6 +170,8 @@ def bake_action(oracle, kind, action, weapon=(0, 0), offhand=(0, 0), dt_ms=16, t
     anchor Alpha used internally (e.g. weapon in hand during the strike)."""
     from tools.alpha_models.anim import mat4
     from tools.alpha_models.universal import creature_rig as cr
+    if not isinstance(dt_ms, int) or dt_ms <= 0 or tail_ms < 0:
+        raise ValueError("INVALID_BAKE_STEP")
     if creature_bytes is None:
         c, _ = oracle.creature(kind, seed)
         c[0x5C] |= 1
@@ -181,12 +183,16 @@ def bake_action(oracle, kind, action, weapon=(0, 0), offhand=(0, 0), dt_ms=16, t
     em.set_u8(0x68, 0)
     em.set_f32(0x1188, 0.0)
     for dt in (600, 600, 16):                     # settle the smoothing at idle
-        em.frame(dt_ms=dt)
+        idle = em.frame(dt_ms=dt)
     timings = action_timings(oracle.image, bytes(em.creature), action, weapon)
     if duration_ms is None:
-        duration_ms = timings["attack_timing"] if isinstance(timings["attack_timing"], int) and timings["attack_timing"] > 0 else 1000
+        duration_ms = timings["attack_timing"]
+    if not isinstance(duration_ms, int) or not 0 < duration_ms <= 30000:
+        raise ValueError(f"ACTION_DURATION_UNPROVEN action={action} timings={timings}")
     frames, t, state = [], 0, None
-    while t <= duration_ms + tail_ms:
+    sample_times = sorted(set(range(0, duration_ms + tail_ms + 1, dt_ms)) | {duration_ms, duration_ms + tail_ms})
+    previous_t = -dt_ms
+    for t in sample_times:
         a = action if t <= duration_ms else 0
         em.set_u8(0x68, a)
         em.set_i32(0x6C, t if a else t - duration_ms)
@@ -195,7 +201,8 @@ def bake_action(oracle, kind, action, weapon=(0, 0), offhand=(0, 0), dt_ms=16, t
         struct.pack_into("<i", em.this, 8, s)
         if a:
             state = s
-        fr = em.frame(dt_ms=dt_ms)
+        fr = em.frame(dt_ms=t - previous_t)
+        previous_t = t
         Pi = mat4.inverse_affine(fr["placement"])
         joints = {}
         for p in fr["parts"]:
@@ -206,8 +213,8 @@ def bake_action(oracle, kind, action, weapon=(0, 0), offhand=(0, 0), dt_ms=16, t
             anc = cr.anchor(b.anchor, size, kind=kind, on_back=True)
             joints[b.name] = mat4.mul(mat4.mul(mat4.translate(*anc), p["matrix"]), Pi)
         frames.append({"t": t, "action": a, "state": s, "joints": joints})
-        t += dt_ms
-    return {"state": state, "timings": timings, "duration_ms": duration_ms, "frames": frames}
+    return {"state": state, "timings": timings, "duration_ms": duration_ms, "frames": frames,
+            "idle": idle, "dt_ms": dt_ms, "weapon": list(weapon), "offhand": list(offhand), "kind": kind}
 
 
 def baked_clip(bake, kind, family_id, name, parts):
@@ -215,8 +222,12 @@ def baked_clip(bake, kind, family_id, name, parts):
     from tools.alpha_models.universal import creature_rig as cr
     keys = []
     for f in bake["frames"]:
-        if all(p in f["joints"] for p in parts):
-            keys.append({"x": float(f["t"]), "m": {p: f["joints"][p] for p in parts}})
+        if not all(p in f["joints"] for p in parts):
+            raise ValueError(f"ACTION_PARTS_MISSING t={f['t']} expected={parts} actual={list(f['joints'])}")
+        keys.append({"x": float(f["t"]), "m": {p: f["joints"][p] for p in parts}})
+    if len(keys) < 2:
+        raise ValueError("ACTION_NO_KEYS")
+    recovery = next((f["t"] for f in bake["frames"] if f["action"] == 0), None)
     return {
         "format": "cubegame.alpha_clip/2", "rig": family_id, "rig_kind_source": f"0x{kind:02x}", "name": name,
         "status": "EMULATED_ALPHA_CODE", "param": "time_ms", "loop": False,
@@ -224,7 +235,11 @@ def baked_clip(bake, kind, family_id, name, parts):
         "parts": [{"name": n, "anchor": cr.BY_NAME[n].anchor, "mirrored": cr.BY_NAME[n].mirrored,
                    "draw_site": f"0x{cr.BY_NAME[n].draw_site:06X}", "slot": f"0x{cr.BY_NAME[n].slot:02X}"} for n in parts],
         "source": {"generator": "alpha_oracle drawModel emulation", "state": bake["state"],
-                   "timings": bake["timings"], "action_end_ms": bake["duration_ms"], "weapon_on_back": True},
+                   "timings": bake["timings"], "action_end_ms": bake["duration_ms"],
+                   "recovery_start_ms": recovery, "sample_dt_ms": bake.get("dt_ms"),
+                   "weapon": bake.get("weapon"), "offhand": bake.get("offhand"),
+                   "weapon_on_back": True,
+                   "anchor_policy": "fixed back anchor absorbs Alpha hand/back changes into J; no pose edits"},
         "duration": keys[-1]["x"] if keys else 0.0,
         "keys": keys,
     }

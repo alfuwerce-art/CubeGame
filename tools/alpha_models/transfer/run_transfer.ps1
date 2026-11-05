@@ -17,6 +17,9 @@ param(
   # Universal pipeline: a job file (kind, seed variant, equipment) replaces -Models/-Clips; the
   # rig, models and motion-family clips are then prepared by tools.alpha_models.universal.pipeline.
   [string]$UniversalJob = '',
+  [string]$Python = 'python',
+  [ValidateSet(30,60,120)][int]$ControllerFps = 60,
+  [switch]$CaptureController,
   [switch]$SkipPlayMode,
   [switch]$Test
 )
@@ -92,7 +95,11 @@ function Invoke-NegativeTests {
     Assert 'isolation_keeps_history_copy' ((Get-ChildItem -Path (Join-Path $tmp 'TransferOutput_history') -Recurse -Filter 'selftest.txt').Count -eq 1)
   }
   finally {
-    Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue
+    $resolvedTmp = [System.IO.Path]::GetFullPath($tmp)
+    $tempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
+    if (-not $resolvedTmp.StartsWith($tempRoot, [System.StringComparison]::OrdinalIgnoreCase) -or
+        (Split-Path $resolvedTmp -Leaf) -notlike 'run_transfer_selftest_*') { throw 'Unsafe self-test cleanup path' }
+    Remove-Item -LiteralPath $resolvedTmp -Recurse -Force -ErrorAction SilentlyContinue
   }
   $failed = ($results | Where-Object { -not $_.Pass }).Count
   Write-Output ("NEGATIVE_TESTS_RESULT={0} cases={1} failed={2}" -f ($(if ($failed -eq 0) { 'PASS' } else { 'FAIL' })), $results.Count, $failed)
@@ -102,6 +109,16 @@ function Invoke-NegativeTests {
 
 # --------------------------------------------------------------------- main
 if ($Test) { Invoke-NegativeTests }
+
+$Project = [System.IO.Path]::GetFullPath($Project)
+$scratchRoot = [System.IO.Path]::GetFullPath((Join-Path $repo '.scratch')) + [System.IO.Path]::DirectorySeparatorChar
+if (-not $Project.StartsWith($scratchRoot, [System.StringComparison]::OrdinalIgnoreCase)) { throw 'Transfer project must stay inside repository .scratch' }
+$lockPath = Join-Path $Project 'Temp\UnityLockfile'
+if (Test-Path -LiteralPath $lockPath) {
+  try { $staleLock = [System.IO.File]::Open($lockPath, 'Open', 'ReadWrite', 'None'); $staleLock.Dispose() }
+  catch { throw 'Unity project is already open; close it before running this project' }
+  Remove-Item -LiteralPath $lockPath # only an unlocked stale file, inside the verified project
+}
 
 if (-not (Test-Path -LiteralPath $Unity)) { throw "Unity 6000.3.27f2 not found at $Unity (do not use 6.6)" }
 
@@ -120,9 +137,9 @@ Copy-Item -Force "$src\Editor\*"  "$Project\Assets\AlphaTransfer\Scripts\Editor\
 Push-Location $repo
 try {
   if ($UniversalJob) {
-    python -m tools.alpha_models.universal.pipeline prepare-unity --job $UniversalJob --project $Project --db $Db
+    & $Python -m tools.alpha_models.universal.pipeline prepare-unity --job $UniversalJob --project $Project --db $Db
   } else {
-    python -m tools.alpha_models.transfer.prepare_unity --db $Db --project $Project --clips $Clips --models $Models
+    & $Python -m tools.alpha_models.transfer.prepare_unity --db $Db --project $Project --clips $Clips --models $Models
   }
   if ($LASTEXITCODE -ne 0) { throw "PREPARE_RESULT=FAIL (python exit $LASTEXITCODE)" }
 } finally { Pop-Location }
@@ -137,7 +154,9 @@ function Invoke-Unity([string]$method, [string]$log, [switch]$NoQuit) {
   if (-not $NoQuit) { $ua = @('-quit') + $ua }
   # PlayMode and screenshots need a graphics device: drop -nographics for them
   if ($method -like '*PlayMode*' -or $method -like '*AlphaTransferEditor.Run') { $ua = $ua | Where-Object { $_ -ne '-nographics' } }
-  $p = Start-Process -FilePath $Unity -ArgumentList $ua -Wait -PassThru -NoNewWindow
+  if ($method -like '*AlphaControllerPlayMode*') { $ua += @('-controllerFps', $ControllerFps) }
+  if ($method -like '*AlphaControllerPlayMode*' -and $CaptureController) { $ua += '-controllerCapture' }
+  $p = Start-Process -FilePath $Unity -ArgumentList $ua -Wait -PassThru -WindowStyle Hidden
   return [int]$p.ExitCode
 }
 
@@ -148,8 +167,10 @@ function Show-Verdict([string]$label, $verdict, [object]$exit) {
 
 $e1 = Invoke-Unity 'CubeGame.AlphaTransfer.Editor.AlphaTransferSelfTests.Run' "$out\selftest.log"
 $v1 = Resolve-Verdict "$out\selftest.txt" 'SELFTEST_RESULT' $e1
+if ($v1.Verdict -ne 'PASS') { Show-Verdict 'SELFTEST_RESULT' $v1 $e1; Write-Output 'RESULT=FAIL'; exit 1 }
 $e2 = Invoke-Unity 'CubeGame.AlphaTransfer.Editor.AlphaTransferEditor.Run' "$out\transfer.log"
 $v2 = Resolve-Verdict "$out\transfer_report.txt" 'TRANSFER_RESULT' $e2
+if ($v2.Verdict -ne 'PASS') { Show-Verdict 'TRANSFER_RESULT' $v2 $e2; Write-Output 'RESULT=FAIL'; exit 1 }
 $v3 = [pscustomobject]@{ Verdict = 'NOT_RUN'; Problems = @() }; $e3 = 'NOT_RUN'
 if (-not $SkipPlayMode) {
   $e3 = Invoke-Unity 'CubeGame.AlphaTransfer.Editor.AlphaTransferPlayMode.Run' "$out\playmode.log" -NoQuit
@@ -169,6 +190,13 @@ if ($loco) {
   }
 }
 
+$controller = Test-Path -LiteralPath "$Project\Assets\AlphaTransfer\Data\actions.json"
+$v6 = [pscustomobject]@{ Verdict = 'NOT_RUN'; Problems = @() }; $e6 = 'NOT_RUN'
+if ($controller -and -not $SkipPlayMode) {
+  $e6 = Invoke-Unity 'CubeGame.AlphaTransfer.Editor.AlphaControllerPlayMode.Run' "$out\controller_playmode.log" -NoQuit
+  $v6 = Resolve-Verdict "$out\controller_playmode.txt" 'CONTROLLER_PLAYMODE_RESULT' $e6
+}
+
 Show-Verdict 'SELFTEST_RESULT' $v1 $e1
 Show-Verdict 'TRANSFER_RESULT' $v2 $e2
 Show-Verdict 'PLAYMODE_RESULT' $v3 $e3
@@ -176,10 +204,12 @@ if ($loco) {
   Show-Verdict 'PARAMWALK_RESULT' $v4 $e4
   Show-Verdict 'LOCOMOTION_PLAYMODE_RESULT' $v5 $e5
 }
+if ($controller) { Show-Verdict 'CONTROLLER_PLAYMODE_RESULT' $v6 $e6 }
 Write-Output "REPORTS=$out"
 
 $allPass = ($v1.Verdict -eq 'PASS') -and ($v2.Verdict -eq 'PASS') -and ($SkipPlayMode -or ($v3.Verdict -eq 'PASS'))
 if ($loco) { $allPass = $allPass -and ($v4.Verdict -eq 'PASS') -and ($SkipPlayMode -or ($v5.Verdict -eq 'PASS')) }
+if ($controller) { $allPass = $allPass -and $loco -and ($SkipPlayMode -or ($v6.Verdict -eq 'PASS')) }
 if (-not $allPass) { Write-Output "RESULT=FAIL"; exit 1 }
 Write-Output "RESULT=PASS"
 exit 0

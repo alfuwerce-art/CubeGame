@@ -1,0 +1,13 @@
+{
+ "kind": "0x02",
+ "seed_variant": [0, 0],
+ "variant": "s05a2_human_original_mechanisms_greatsword",
+ "locomotion": "formula",
+ "amp": 0.19,
+ "speed_xy": 3.7,
+ "reference_capture": {"path": "D:/Projects/CubeGame/.scratch/s05a2/cap/session2.jsonl", "kind": "0x02"},
+ "equipment": {"weapon": {"subtype": 15, "model": "iron-greatsword.cub"}},
+ "action_manifest": ".scratch/animsys/human_actions_extended/actions.json",
+ "clips": ".scratch/animsys/human_actions_extended",
+ "note": "One S05A-2 humanoid. Explicit offline oracle actions are EMULATED_ALPHA_CODE. Body and back-weapon locomotion are RECONSTRUCTED_FROM_EVIDENCE. Speed inputs remain research inputs."
+}

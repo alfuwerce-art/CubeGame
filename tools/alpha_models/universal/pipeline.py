@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import collections
 import glob
+import hashlib
 import json
 import os
 import sqlite3
@@ -154,6 +155,7 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
         os.remove(old)    # a stale clip/model of another family must never be picked up
     con = sqlite3.connect(f"file:{db}?mode=ro&immutable=1", uri=True)
     parts_out = []
+    handle = None
     for p in res.parts:
         idx = res.models[p]
         name = registry.get(idx) if isinstance(idx, int) else None
@@ -168,6 +170,10 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
             continue
         decoded = deobfuscate(row[0])
         model = parse_decoded(decoded)
+        if p == 'weapon':
+            from tools.alpha_models.transfer.prepare_unity import weapon_handle
+            try: handle=weapon_handle(model)
+            except ValueError as e: problems.append(str(e))
         size = (model.width, model.depth, model.height)
         (data_dir / "models" / f"{p}.cubdec").write_bytes(decoded)
         rule = cr.BY_NAME[p].anchor
@@ -179,22 +185,63 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
     rig_json = {"rig": res.family_id, "variant": job.get("variant", f"kind_0x{kind:02x}"),
                 "weaponSubtype": subtype, "parts": parts_out,
                 "kind": kind, "placementScale": app["size"][0] / 11.2}
+    if handle:
+        rig_json.update(weaponHandleMinZ=handle[0],weaponHandleMaxZ=handle[1])
     (data_dir / "rig.json").write_text(json.dumps(rig_json, indent=1), encoding="utf-8")
     written, skipped = [], []
+    manifest_path = job.get('action_manifest')
+    approved_actions = {}
+    if manifest_path:
+        manifest = json.loads(Path(manifest_path).read_text(encoding='utf8'))
+        if (manifest.get('BAKE_RESULT') != 'PASS' or manifest.get('kind') != kind or manifest.get('rig') != res.family_id
+                or manifest.get('weapon') != [3, subtype] or manifest.get('offhand') != [0, 0]
+                or manifest.get('seed_variant') != list(seed)):
+            problems.append('ACTION_MANIFEST_CONTEXT_MISMATCH')
+        else:
+            approved_actions = {e['clip']: e for e in manifest['actions'] if e['status'] == 'EMULATED_ALPHA_CODE'}
+        if not approved_actions:
+            problems.append('ACTION_MANIFEST_HAS_NO_SUPPORTED_ACTIONS')
     for path in sorted(glob.glob(os.path.join(clips_dir, "*.alphaclip.json"))):
         clip = json.load(open(path, encoding="utf-8"))
         if clip.get("rig") != res.family_id:
             skipped.append(f"{os.path.basename(path)} rig={clip.get('rig')}")
             continue
-        if clip.get("status") != "TRANSFERRED_FROM_ALPHA":
+        emulated = clip.get('status') == 'EMULATED_ALPHA_CODE'
+        approved = approved_actions.get(clip.get('name'))
+        if emulated and (not approved or approved.get('sha256') != hashlib.sha256(Path(path).read_bytes()).hexdigest()):
+            problems.append(f"ACTION_NOT_APPROVED_OR_HASH_MISMATCH {clip.get('name')}")
+            continue
+        if clip.get("status") != "TRANSFERRED_FROM_ALPHA" and not (emulated and approved):
             skipped.append(f"{os.path.basename(path)} status={clip.get('status')}")
             continue
         if sorted(p["name"] for p in clip["parts"]) != sorted(res.parts):
             skipped.append(f"{os.path.basename(path)} parts={[p['name'] for p in clip['parts']]} != rig {res.parts}")
             continue
+        if emulated:
+            captured_weapon=next((p.get('captured_size') for p in clip['parts'] if p['name']=='weapon'),None)
+            actual_weapon=next((p['size'] for p in parts_out if p['name']=='weapon'),None)
+            if captured_weapon!=actual_weapon:
+                problems.append(f"ACTION_WEAPON_GEOMETRY_SIZE_MISMATCH {clip['name']}")
+                continue
         uc = _unity_clip(clip, res.parts)
         (data_dir / "clips" / f"{clip['name']}.json").write_text(json.dumps(uc), encoding="utf-8")
         written.append(clip["name"])
+    for n in approved_actions:
+        if n not in written:
+            problems.append(f'ACTION_CLIP_MISSING {n}')
+    if manifest_path:
+        priority={57:0,58:1,67:2}
+        ordered=sorted(approved_actions,key=lambda n:(priority.get(approved_actions[n]['action'],3),approved_actions[n]['action']))
+        (data_dir / 'actions.json').write_text(json.dumps({'requiredClips': ordered,
+            'blockedActions': [e for e in manifest['actions'] if e['status'] == 'BLOCKED']}), encoding='utf8')
+        ref=Path(manifest_path).parent/'weapon_reference.json'
+        if not ref.exists() or manifest.get('weapon_reference_sha256')!=hashlib.sha256(ref.read_bytes()).hexdigest():
+            problems.append('WEAPON_REFERENCE_MISSING_OR_HASH_MISMATCH')
+        else:
+            (data_dir/'weapon_reference.json').write_bytes(ref.read_bytes())
+    elif (data_dir / 'actions.json').exists():
+        (data_dir / 'actions.json').unlink()
+        if (data_dir/'weapon_reference.json').exists(): (data_dir/'weapon_reference.json').unlink()
     loco = None
     for old in ("locomotion.json", "paramwalk_golden.json", "paramwalk_reference.json"):
         if (data_dir / old).exists():
@@ -222,10 +269,16 @@ def _prepare_locomotion(job, kind, app, res, parts_out, data_dir, have_captured_
     named "walk", or "walk_formula" when a captured walk of the family is also present.
     """
     from tools.alpha_models.universal import param_walk as pw
-    if any(p not in pw.MODELLED_PARTS for p in res.parts):
+    from tools.alpha_models.universal import weapon_locomotion
+    weapon = job.get('equipment', {}).get('weapon')
+    body_parts = [p for p in res.parts if p != 'weapon']
+    if any(p not in pw.MODELLED_PARTS for p in body_parts) or ('weapon' in res.parts and not weapon):
         problems.append(f"LOCOMOTION_PARTS_NOT_MODELLED {[p for p in res.parts if p not in pw.MODELLED_PARTS]}")
         return None, None
-    spec = pw.locomotion_spec(app, kind, res.family_id, res.parts)
+    spec = pw.locomotion_spec(app, kind, res.family_id, body_parts)
+    if weapon:
+        spec.update(weaponSubtype=int(weapon['subtype']), weaponScale=app['scale_weapon'],
+                    weaponStatus='RECONSTRUCTED_FROM_EVIDENCE')
     if spec["status"] == "NEEDS_RESEARCH":
         problems.append(f"LOCOMOTION_NEEDS_RESEARCH unknown_terms={spec['unknown_terms']}")
         return spec, None
@@ -240,10 +293,18 @@ def _prepare_locomotion(job, kind, app, res, parts_out, data_dir, have_captured_
         else:
             (data_dir / "paramwalk_reference.json").write_text(json.dumps(rdata), encoding="utf-8")
             spec["reference_frames"] = len(rdata["frames"])
-    clip = pw.generate_walk_clip(app, kind, res.family_id, res.parts, amp=float(job.get("amp", 0.19)),
+    clip = pw.generate_walk_clip(app, kind, res.family_id, body_parts, amp=float(job.get("amp", 0.19)),
                                  boost=bool(job.get("boost", False)),
                                  accelerating=bool(job.get("accelerating", False)),
                                  speed_xy=float(job.get("speed_xy", 3.7)))
+    if weapon:
+        block = cr.BY_NAME['weapon']
+        clip['parts'].append({'name':'weapon', 'anchor':'weapon', 'mirrored':False,
+                              'draw_site': f'0x{block.draw_site:06X}', 'slot':f'0x{block.slot:02X}'})
+        for k in clip['keys']:
+            s = pw.WalkState(k['x'], float(job.get('amp',.19)), boost=bool(job.get('boost',False)))
+            k['m']['weapon'] = weapon_locomotion.joint(app, s, int(weapon['subtype']))
+        clip['source']['weapon_layer'] = 'RECONSTRUCTED_FROM_EVIDENCE; separate back-weapon formula'
     sizes = {p["name"]: p["size"] for p in parts_out}
     for p in clip["parts"]:
         p["captured_size"] = sizes[p["name"]]

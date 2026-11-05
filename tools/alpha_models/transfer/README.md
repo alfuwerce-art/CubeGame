@@ -1,5 +1,7 @@
 # `tools/alpha_models/transfer` — перенос оригинальных анимаций Alpha в Unity (S05A-2)
 
+**Дополнение 2026-11-06:** рабочий контроллер и автоматические oracle-actions одного гуманоида — [методичка](../../../docs/agents/ANIMATION_SYSTEM_PLAYBOOK.md), [отчёт](../../../docs/reports/S05A2_CLAUDE_CONTINUATION_REPORT.md). Новые клипы имеют статус `EMULATED_ALPHA_CODE`; явные Unity-переходы не выдаются за извлечённые Alpha. Актуальные EditMode-самотесты: **29**, включая реальные часы 30/60/120 Гц и интерполяцию оружия вокруг хвата. Старые числа ниже относятся к первоначальному пилоту.
+
 Методичка (порядок работы, форматы, пороги, типичные ошибки): [ANIMATION_TRANSFER_PLAYBOOK.md](../../../docs/agents/ANIMATION_TRANSFER_PLAYBOOK.md).
 Отчёт с фактическими числами: [ALPHA_ANIMATION_TRANSFER.md](../../../docs/research/alpha2013/ALPHA_ANIMATION_TRANSFER.md).
 

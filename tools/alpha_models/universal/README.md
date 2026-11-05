@@ -1,5 +1,8 @@
 # tools/alpha_models/universal — универсальный конвейер Alpha → Unity (прототип)
 
+Продолжение системы одного гуманоида (Codex, 2026-11-06): [ANIMATION_SYSTEM_PLAYBOOK](../../../docs/agents/ANIMATION_SYSTEM_PLAYBOOK.md), [отчёт](../../../docs/reports/S05A2_CLAUDE_CONTINUATION_REPORT.md).
+`action_baker.py` автоматизирует существующий oracle и ведёт полный реестр отказов; `validate_oracle.py` проверяет его по живым pre-draw захватам; `weapon_locomotion.py` — отдельный слой оружия. S05B не разрешён.
+
 Исследование: [UNIVERSAL_ANIMATION_SYSTEM_RESEARCH.md](../../../docs/research/alpha2013/UNIVERSAL_ANIMATION_SYSTEM_RESEARCH.md) ·
 архитектура (DRAFT): [UNIVERSAL_ASSET_ANIMATION_PIPELINE.md](../../../docs/architecture/UNIVERSAL_ASSET_ANIMATION_PIPELINE.md) ·
 методичка: [UNIVERSAL_TRANSFER_PLAYBOOK.md](../../../docs/agents/UNIVERSAL_TRANSFER_PLAYBOOK.md) ·

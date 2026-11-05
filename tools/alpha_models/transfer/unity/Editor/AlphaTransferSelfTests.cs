@@ -51,9 +51,95 @@ namespace CubeGame.AlphaTransfer.Editor
             return o.ToArray();
         }
 
+        // Isolated synthetic controller: one body, no Alpha assets or extracted poses.
+        static GameObject ControllerRig(out AlphaAnimationController controller)
+        {
+            var go = new GameObject("synthetic_controller");
+            var rig=go.AddComponent<AlphaRig>(); rig.rigId="alpha_creature/synthetic";
+            var p=new GameObject("body").transform;p.parent=go.transform;
+            var m=new GameObject("mesh").transform;m.parent=p;
+            rig.partNames=new[]{"body"};rig.parts=new[]{p};rig.meshes=new[]{m};
+            rig.sizes=new[]{Vector3Int.one};rig.anchors=new[]{"center"};
+            var loco=go.AddComponent<AlphaLocomotionDriver>();loco.amplitude=0;
+            var spec=new AlphaLocomotionSpec {format=AlphaLocomotionSpec.Format,rig=rig.rigId,status="FORMULA_VERIFIED",
+                parts=rig.partNames,terms=new string[0],code_only_terms=new string[0],unknown_terms=new string[0],
+                @params=new AlphaLocomotionParams {size=new[]{1f,1f,2f}}};
+            loco.specAsset=new TextAsset(JsonUtility.ToJson(spec));
+            var d=new AlphaClipData { name="action_001",status="EMULATED_ALPHA_CODE",rig=rig.rigId,param="time_ms",
+                duration=500,actionCode=1,drawState=1,actionEndMs=100,recoveryStartMs=116,weaponOnBack=true,
+                parts=rig.partNames,capturedSizes=new[]{1,1,1},provenance="TEST_DATA_NOT_ALPHA",validation="{}",
+                keys=new[]{new AlphaClipKey{x=0,m=AlphaSpace.Translate(Vector3.zero)},
+                    new AlphaClipKey{x=100,m=AlphaSpace.Translate(Vector3.right)},
+                    new AlphaClipKey{x=116,m=AlphaSpace.Translate(Vector3.zero)},new AlphaClipKey{x=500,m=AlphaSpace.Translate(Vector3.zero)}} };
+            go.AddComponent<AlphaClipPlayer>().clipAssets=new[]{new TextAsset(JsonUtility.ToJson(d))};
+            controller=go.AddComponent<AlphaAnimationController>();controller.requiredClips=new[]{"action_001"};
+            return go;
+        }
+
         static void Register()
         {
             Cases.Clear();
+            Add("weapon_interpolation_keeps_grip_between_rotating_keys",()=>
+            {
+                var a=Matrix4x4.TRS(new Vector3(0,10,0),Quaternion.identity,Vector3.one);
+                var b=Matrix4x4.TRS(new Vector3(-10,0,0),Quaternion.Euler(0,0,90),Vector3.one);
+                var d=JsonUtility.FromJson<AlphaClipData>(ClipJson("synthetic",new[]{"weapon"},
+                    new[]{AlphaSpace.ToAlpha(a),AlphaSpace.ToAlpha(b)},new[]{0f,100f}));
+                d.twoHandedAttack=true;d.weaponOnBack=true;d.capturedSizes=new[]{3,3,28};
+                var problems=new List<string>();var clip=AlphaClip.Parse(JsonUtility.ToJson(d),"synthetic",problems);
+                if(clip==null)return string.Join(";",problems);
+                var pose=new PartPose[1];clip.Sample(50,pose);
+                var grip=pose[0].position+pose[0].rotation*new Vector3(0,-10,0);
+                return Expect(grip.magnitude<1e-4f,"interpolation detached weapon from grip: "+grip);
+            });
+            Add("controller_missing_required_action_fails_closed",()=>
+            {
+                var go=ControllerRig(out var c);
+                try {c.requiredClips=new[]{"action_999"};return Expect(!c.Init()&&!c.Initialized,"missing action accepted");}
+                finally {UnityEngine.Object.DestroyImmediate(go);}
+            });
+            Add("controller_empty_library_fails_closed",()=>
+            {
+                var go=ControllerRig(out var c);
+                try {go.GetComponent<AlphaClipPlayer>().clipAssets=new TextAsset[0];return Expect(!c.Init(),"empty library accepted");}
+                finally {UnityEngine.Object.DestroyImmediate(go);}
+            });
+            Add("controller_rejects_invalid_clock",()=>
+            {
+                var go=ControllerRig(out var c);
+                try {if(!c.Init())return string.Join(";",c.Problems);c.Step(float.NaN);return Expect(c.Problems.Contains("CONTROLLER_INVALID_CLOCK"),"NaN clock accepted");}
+                finally {UnityEngine.Object.DestroyImmediate(go);}
+            });
+            foreach(int fps in new[]{30,60,120})
+            {
+                int rate=fps;
+                Add("controller_full_cycle_single_clock_"+rate,()=>
+                {
+                    var go=ControllerRig(out var c);
+                    try
+                    {
+                        if(!c.Init()||!c.PlayAction("action_001"))return string.Join(";",c.Problems);
+                        float dt=1f/rate;int n=0;bool sawAction=false,sawRecovery=false;
+                        while(c.InAction && ++n<rate*3)
+                        {
+                            if(c.Phase==AlphaControllerPhase.Action)
+                            {
+                                float before=c.actions.Cursor;c.Step(dt);
+                                if(Mathf.Abs(c.actions.Cursor-before-dt*1000f)>1e-3f)return "action clock advanced twice or wrong units";
+                                sawAction=true;
+                            }
+                            else c.Step(dt);
+                            sawRecovery|=c.Phase==AlphaControllerPhase.Recovery;
+                        }
+                        if(c.InAction||!sawAction||!sawRecovery)return "sequence incomplete";
+                        if(c.Problems.Count>0)return string.Join(";",c.Problems);
+                        if(go.GetComponent<AlphaRig>().parts[0].localPosition.magnitude>1e-4f)return "did not return to idle";
+                        float expected=c.entrySeconds+.5f+c.exitSeconds;
+                        return Expect(Mathf.Abs(n*dt-expected)<=4*dt,$"wall time differs {n*dt} expected~{expected}");
+                    }
+                    finally {UnityEngine.Object.DestroyImmediate(go);}
+                });
+            }
             Add("alpha_translation_maps_y_z_swap", () =>
             {
                 var u = AlphaSpace.ToUnity(AlphaSpace.Translate(new Vector3(1, 2, 3)));

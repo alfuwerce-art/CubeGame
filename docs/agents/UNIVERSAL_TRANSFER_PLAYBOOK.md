@@ -1,5 +1,7 @@
 # Методичка: универсальный перенос моделей и анимаций Alpha → Unity (для DeepSeek)
 
+**Дополнение 2026-11-06:** контроллер/action-бейкинг одного гуманоида описаны в [ANIMATION_SYSTEM_PLAYBOOK](ANIMATION_SYSTEM_PLAYBOOK.md). Массовая обработка/S05B остаётся запрещённой. Это дополнение не авторизует другие виды.
+
 **Статус технологии:** прототип, `READY_FOR_REVIEW` (не ACCEPTED). Проверено на **трёх планах тела** (гуманоид 8 частей, четвероногое с хвостом 7 частей, «тело + 2 ноги» 3 части), **трёх семействах движения** и **пяти видах** (два из них — без запуска Alpha). **S05B не разрешён**: методичка готовит пакетный перенос, но не запускает его. Массовую обработку не начинать без решения продюсера.
 **Читать вместе с:** [ANIMATION_TRANSFER_PLAYBOOK.md](ANIMATION_TRANSFER_PLAYBOOK.md) (гуманоид, атака, вход в мир, захват — шаги A–I остаются в силе), [исследование](../research/alpha2013/UNIVERSAL_ANIMATION_SYSTEM_RESEARCH.md), [архитектура](../architecture/UNIVERSAL_ASSET_ANIMATION_PIPELINE.md), [отчёт прототипа](../research/alpha2013/UNIVERSAL_TRANSFER_PROTOTYPE_REPORT.md).
 

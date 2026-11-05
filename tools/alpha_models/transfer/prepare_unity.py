@@ -52,6 +52,26 @@ def exposed_faces(model):
     return n
 
 
+def weapon_handle(model):
+    """Current sword: the contiguous narrow base ends at the first wider guard slice.
+
+    Coordinates are Alpha grid coordinates; return actual voxel extents, not a fitted animation.
+    Refuse an ambiguous shape instead of blessing a hand anywhere on an infinite blade axis.
+    """
+    sections=[]
+    for z in range(model.height):
+        xy=[(x,y) for y in range(model.depth) for x in range(model.width)
+            if model.rgb_at(x,y,z) not in (None,(0,0,0))]
+        if xy: sections.append((z,(min(x for x,y in xy),max(x for x,y in xy),min(y for x,y in xy),max(y for x,y in xy))))
+    if not sections: raise ValueError('WEAPON_HANDLE_EMPTY')
+    first,bb=sections[0]
+    for z,b in sections[1:]:
+        if b[0]<bb[0] or b[1]>bb[1] or b[2]<bb[2] or b[3]>bb[3]:
+            if z-first<2 or not first<=4<z: raise ValueError('WEAPON_GRIP_NOT_IN_HANDLE')
+            return float(first),float(z)
+    raise ValueError('WEAPON_HANDLE_GUARD_UNPROVEN')
+
+
 def unity_clip(clip, part_order):
     names = [p["name"] for p in clip["parts"]]
     if sorted(names) != sorted(part_order):
@@ -72,6 +92,11 @@ def unity_clip(clip, part_order):
         "param": clip["param"], "loop": bool(clip["loop"]), "duration": float(clip["duration"]),
         "phaseRate": float(src.get("phase_rate_rad_per_s", 0.0)),
         "weaponOnBack": bool(src.get("weapon_on_back", False)),
+        "actionCode": int(src.get("action", -1)),
+        "drawState": int(src.get("state", 0)),
+        "actionEndMs": float(src.get("action_end_ms", 0) or 0),
+        "recoveryStartMs": float(src.get("recovery_start_ms", 0) or 0),
+        "twoHandedAttack": bool(src.get("two_handed_attack", False)),
         "parts": list(part_order),
         "capturedSizes": [int(v) for n in part_order for v in by[n]["captured_size"]],
         "keys": keys,

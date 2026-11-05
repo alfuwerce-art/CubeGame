@@ -65,6 +65,7 @@ namespace CubeGame.AlphaTransfer.Editor
             rig.rigId = spec.rig;
             rig.variant = spec.variant;
             rig.weaponSubtype = spec.weaponSubtype;
+            rig.weaponHandleMinZ=spec.weaponHandleMinZ;rig.weaponHandleMaxZ=spec.weaponHandleMaxZ;
             int n = spec.parts.Length;
             rig.partNames = new string[n]; rig.parts = new Transform[n]; rig.meshes = new Transform[n];
             rig.sizes = new Vector3Int[n]; rig.anchors = new string[n];
@@ -165,7 +166,7 @@ namespace CubeGame.AlphaTransfer.Editor
                         report.AppendLine($"SEAM {name} {seam.text}");
                         if (!seam.ok) problems.Add($"SEAM {name} {seam.text}");
                     }
-                    if (!clip.Data.weaponOnBack && clip.PartIndex("weapon") >= 0)
+                    if ((!clip.Data.weaponOnBack || clip.Data.twoHandedAttack) && clip.PartIndex("weapon") >= 0)
                     {
                         var grip = Grip(rig, player, clip, report);
                         if (grip != null) problems.Add(grip);
@@ -254,25 +255,35 @@ namespace CubeGame.AlphaTransfer.Editor
             if (w < 0 || hr < 0 || hl < 0) return "GRIP_PARTS_MISSING";
             player.Play(clip.Data.name);
             float worstMain = 0f, worstSecondRadial = 0f, minAlong = float.MaxValue, maxAlong = float.MinValue;
+            float worstOutside=0;
+            if(clip.Data.twoHandedAttack && !(rig.weaponHandleMaxZ>rig.weaponHandleMinZ)) return "GRIP_HANDLE_GEOMETRY_UNPROVEN";
             var inv = 1f / RootScale;
             for (int k = 0; k < clip.Data.keys.Length; k++)
             {
+                if (clip.Data.twoHandedAttack && clip.Data.keys[k].x > clip.Data.actionEndMs) continue;
                 player.ApplyAt(clip.Data.keys[k].x);
                 var wm = rig.meshes[w];
-                var grip = wm.TransformPoint(AlphaSpace.GridToUnity(rig.AnchorOf(w)));
+                // Oracle clips use a fixed back anchor. The actual hand grip stays at grid Z=4,
+                // independently of that representation (the model's handle runs along grid Z).
+                var handGrip = new Vector3(rig.sizes[w].x*.5f,rig.sizes[w].y*.5f,4f);
+                var grip = wm.TransformPoint(AlphaSpace.GridToUnity(handGrip));
                 var axis = wm.TransformDirection(Vector3.up).normalized;     // Alpha grid Z (blade length)
                 Vector3 Centre(int i) => rig.meshes[i].TransformPoint(AlphaSpace.GridToUnity(new Vector3(rig.sizes[i].x, rig.sizes[i].y, rig.sizes[i].z) * 0.5f));
                 float main = Vector3.Distance(Centre(hr), grip) * inv;
                 var rel = Centre(hl) - grip;
                 float along = Vector3.Dot(rel, axis) * inv;
                 float radial = (rel - axis * Vector3.Dot(rel, axis)).magnitude * inv;
+                float axisScale=wm.TransformVector(Vector3.up).magnitude*inv;
+                float lo=(rig.weaponHandleMinZ-4)*axisScale,hi=(rig.weaponHandleMaxZ-4)*axisScale;
+                if(clip.Data.twoHandedAttack)worstOutside=Mathf.Max(worstOutside,Mathf.Max(lo-along,along-hi));
                 worstMain = Mathf.Max(worstMain, main);
                 worstSecondRadial = Mathf.Max(worstSecondRadial, radial);
                 minAlong = Mathf.Min(minAlong, along); maxAlong = Mathf.Max(maxAlong, along);
             }
             // hand grid 5x6x4: the handle passes through the second hand when radial <= 2.5
-            bool ok = worstMain <= 0.05f && worstSecondRadial <= 2.5f;
+            bool ok = worstMain <= 0.05f && worstSecondRadial <= 2.5f && worstOutside <= 1e-3f;
             report.AppendLine($"GRIP {clip.Data.name} main_hand_to_grip_max_vox={worstMain:0.0000} second_hand_radial_max_vox={worstSecondRadial:0.000} second_hand_along_handle_vox=[{minAlong:0.00},{maxAlong:0.00}] {(ok ? "OK" : "FAIL")}");
+            if(clip.Data.twoHandedAttack)report.AppendLine($"  HANDLE geometry_grid_z=[{rig.weaponHandleMinZ},{rig.weaponHandleMaxZ}] second_hand_outside_segment_vox={worstOutside:0.000000}");
             return ok ? null : $"GRIP {clip.Data.name} main={worstMain} radial={worstSecondRadial}";
         }
 
@@ -289,6 +300,8 @@ namespace CubeGame.AlphaTransfer.Editor
                 if (c.Data.keys.Length == 1) frames.Add((name, 0f, "pose"));
                 else if (c.Data.param == "walk_phase")
                     for (int i = 0; i < 4; i++) frames.Add((name, c.Data.duration * i / 4f, $"phase{i * 90:000}"));
+                else if (name.StartsWith("action_") && !c.Data.twoHandedAttack)
+                    frames.Add((name, c.Data.actionEndMs*.6f, "action"));
                 else
                     foreach (var ms in new[] { 0f, 300f, 600f, 765f, 793f, 807f, 822f, 900f, 1300f, c.Data.duration })
                         if (ms <= c.Data.duration) frames.Add((name, ms, $"t{ms:0000}"));
@@ -301,7 +314,7 @@ namespace CubeGame.AlphaTransfer.Editor
                 foreach (var v in views)
                 {
                     var target = rig.transform.position + new Vector3(0f, 0.2f, 0f);
-                    cam.transform.position = target + v.dir.normalized * 7.5f;
+                    cam.transform.position = target + v.dir.normalized * 10f;
                     cam.transform.LookAt(target);
                     var tex = Render(cam, 360, 360);
                     File.WriteAllBytes(Path.Combine(dir, $"{clipName}_{label}_{v.name}.png"), tex.EncodeToPNG());
@@ -314,6 +327,8 @@ namespace CubeGame.AlphaTransfer.Editor
             {
                 var sheet = Sheet(kv.Value);
                 File.WriteAllBytes(Path.Combine(OutDir, $"sheet_{kv.Key}.png"), sheet.EncodeToPNG());
+                UnityEngine.Object.DestroyImmediate(sheet);
+                foreach(var tile in kv.Value) UnityEngine.Object.DestroyImmediate(tile);
             }
             report.AppendLine($"SHOTS frames={frames.Count} views={views.Length} sheets={tiles.Count} dir={dir}");
         }

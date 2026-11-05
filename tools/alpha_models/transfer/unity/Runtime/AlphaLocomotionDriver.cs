@@ -46,7 +46,8 @@ namespace CubeGame.AlphaTransfer
             for (int i = 0; i < _rig.partNames.Length; i++)
             {
                 var n = _rig.partNames[i];
-                if (!AlphaParamWalk.IsModelled(n)) { if (n != "weapon") Problems.Add($"LOCOMOTION_PART_NOT_MODELLED {n}"); continue; }
+                if (!AlphaParamWalk.IsModelled(n) && !(n == "weapon" && Spec.weaponSubtype >= 0))
+                { if (n != "weapon") Problems.Add($"LOCOMOTION_PART_NOT_MODELLED {n}"); continue; }
                 idx.Add(i); names.Add(n);
             }
             _parts = idx.ToArray(); _names = names.ToArray();
@@ -73,7 +74,7 @@ namespace CubeGame.AlphaTransfer
             var s = Input;
             for (int k = 0; k < _parts.Length; k++)
             {
-                var j = AlphaParamWalk.Joint(Spec.@params, s, _names[k]);
+                var j = Joint(_names[k]);
                 var u = AlphaSpace.ToUnity(j);
                 if (!AlphaSpace.Decompose(u, out var pos, out var rot, out var scl)) { Problems.Add($"LOCOMOTION_NOT_TRS {_names[k]}"); continue; }
                 var t = _rig.parts[_parts[k]];
@@ -83,6 +84,8 @@ namespace CubeGame.AlphaTransfer
         }
 
         public IReadOnlyList<string> PartNames => _names;
+        public float[] Joint(string part) => part == "weapon" ? AlphaWeaponLocomotion.Joint(Spec, Input)
+            : AlphaParamWalk.Joint(Spec.@params, Input, part);
 
         void Start() { Load(); Apply(); }
 

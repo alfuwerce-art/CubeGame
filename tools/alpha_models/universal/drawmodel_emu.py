@@ -705,7 +705,7 @@ class Emulator:
     def set_this_i32(self, idx, v):
         struct.pack_into("<i", self.this, 4 * idx, v)
 
-    def frame(self, dt_ms=16, count_flags=0, max_steps=2_000_000):
+    def frame(self, dt_ms=16, count_flags=0, max_steps=2_000_000, camera_xy_fixed=None):
         """Run drawModel once; returns {"parts": [...], "placement": P, "steps": n}."""
         L = Layout
         run = DrawModelRun(self.image)
@@ -724,8 +724,8 @@ class Emulator:
         # vecA / vecB: the NEGATED camera world x / y (int64 fixed point; drawModel adds them to the
         # creature position). Using -creature x / y puts the creature at the origin: the float32
         # placement stays small and exact (the world position does not change any joint frame).
-        for dst, src in ((0x100, 0x10), (0x110, 0x18)):
-            v = -struct.unpack_from("<q", self.creature, src)[0]
+        for axis, (dst, src) in enumerate(((0x100, 0x10), (0x110, 0x18))):
+            v = -struct.unpack_from("<q", self.creature, src)[0] if camera_xy_fixed is None else camera_xy_fixed[axis]
             struct.pack_into("<q", misc, dst, v)
         struct.pack_into("<II", misc, 0x800, L.MISC + 0x800, L.MISC + 0x800)   # empty buff list
         mv = m.map(L.MVEC, 0x100)

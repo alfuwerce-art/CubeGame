@@ -28,6 +28,7 @@ namespace CubeGame.AlphaTransfer
         public string rig;
         public string variant;
         public int weaponSubtype;
+        public float weaponHandleMinZ, weaponHandleMaxZ;
         public AlphaRigPartSpec[] parts;
     }
 
@@ -39,6 +40,7 @@ namespace CubeGame.AlphaTransfer
         public string rigId = RigId;
         public string variant;
         public int weaponSubtype = -1;
+        public float weaponHandleMinZ, weaponHandleMaxZ;
         public string[] partNames = new string[0];
         public Transform[] parts = new Transform[0];
         public Transform[] meshes = new Transform[0];

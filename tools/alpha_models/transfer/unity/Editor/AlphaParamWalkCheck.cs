@@ -126,6 +126,23 @@ namespace CubeGame.AlphaTransfer.Editor
                         if (rig != null && rig.rig != spec.rig) problems.Add($"LOCOMOTION_RIG_MISMATCH {spec.rig} != {rig.rig}");
                         foreach (var part in rig?.parts ?? new AlphaRigPartSpec[0])
                             if (!AlphaParamWalk.IsModelled(part.name) && part.name != "weapon") problems.Add($"PART_NOT_MODELLED {part.name}");
+                        if (spec.weaponSubtype>=0)
+                        {
+                            string weaponPath=Path.Combine(DataDir,"weapon_reference.json");
+                            if(!File.Exists(weaponPath)) problems.Add("WEAPON_ORACLE_REFERENCE_MISSING");
+                            else
+                            {
+                                var reference=JsonUtility.FromJson<ParamWalkGolden>(File.ReadAllText(weaponPath));
+                                float worst=0;int count=0;
+                                foreach(var c in reference.cases)
+                                {
+                                    var input=new AlphaWalkInput{phase=c.phase,amp=c.amp,boost=c.boost,onGround=c.onGround};
+                                    worst=Mathf.Max(worst,AlphaSpace.MaxAbsDiff(AlphaWeaponLocomotion.Joint(spec,input),c.m));count++;
+                                }
+                                if(count==0||worst>GoldenAbs) problems.Add($"WEAPON_ORACLE_MISMATCH cases={count} max_abs={worst}");
+                                report.AppendLine($"WEAPON_ORACLE cases={count} reference_status={reference.status} formula_status=RECONSTRUCTED_FROM_EVIDENCE max_abs={worst:0.0000000}");
+                            }
+                        }
                     }
                 }
                 // SELF

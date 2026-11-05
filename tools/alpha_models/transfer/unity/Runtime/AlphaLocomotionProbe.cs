@@ -52,7 +52,7 @@ namespace CubeGame.AlphaTransfer
             foreach (var name in _driver.PartNames)
             {
                 int i = _rig.IndexOf(name);
-                var u = AlphaSpace.ToUnity(AlphaParamWalk.Joint(_driver.Spec.@params, s, name));
+                var u = AlphaSpace.ToUnity(_driver.Joint(name));
                 AlphaSpace.Decompose(u, out var pos, out var rot, out _);
                 _maxPosErr = Mathf.Max(_maxPosErr, (_rig.parts[i].localPosition - pos).magnitude);
                 _maxRotErr = Mathf.Max(_maxRotErr, Quaternion.Angle(_rig.parts[i].localRotation, rot));

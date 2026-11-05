@@ -26,6 +26,9 @@ namespace CubeGame.AlphaTransfer
         public float duration;
         public float phaseRate;       // rad/s (walk), 0 for time clips
         public bool weaponOnBack;
+        public int actionCode = -1, drawState;
+        public float actionEndMs, recoveryStartMs;
+        public bool twoHandedAttack;
         public string[] parts;
         public int[] capturedSizes;
         public AlphaClipKey[] keys;
@@ -46,8 +49,15 @@ namespace CubeGame.AlphaTransfer
         public AlphaClipData Data { get; }
         public int PartCount => Data.parts.Length;
         readonly PartPose[][] _poses;   // [key][part]
+        readonly int _weaponPivotPart;
+        readonly Vector3 _weaponGripOffset;
 
-        AlphaClip(AlphaClipData data, PartPose[][] poses) { Data = data; _poses = poses; }
+        AlphaClip(AlphaClipData data, PartPose[][] poses)
+        {
+            Data=data;_poses=poses;
+            _weaponPivotPart=data.twoHandedAttack && data.weaponOnBack ? Array.IndexOf(data.parts,"weapon") : -1;
+            if(_weaponPivotPart>=0)_weaponGripOffset=new Vector3(0,4-data.capturedSizes[3*_weaponPivotPart+2]*.5f,0);
+        }
 
         public int PartIndex(string part) => Array.IndexOf(Data.parts, part);
 
@@ -64,14 +74,20 @@ namespace CubeGame.AlphaTransfer
             if (d.parts == null || d.parts.Length == 0) problems.Add($"CLIP_NO_PARTS {tag}");
             if (d.keys == null || d.keys.Length == 0) problems.Add($"CLIP_NO_KEYS {tag}");
             if (string.IsNullOrEmpty(d.status)) problems.Add($"CLIP_NO_STATUS {tag}");
+            if (string.IsNullOrEmpty(d.name)) problems.Add("CLIP_NO_NAME");
+            if (float.IsNaN(d.duration) || float.IsInfinity(d.duration) || d.duration < 0) problems.Add($"CLIP_DURATION_INVALID {tag}");
             if (problems.Count > 0) return null;
             int n = d.parts.Length;
+            if (new HashSet<string>(d.parts).Count != n) problems.Add($"CLIP_DUPLICATE_PART {tag}");
+            if (d.keys.Length > 1 && !(d.duration > 0)) problems.Add($"CLIP_DURATION_INVALID {tag}");
             if (d.capturedSizes == null || d.capturedSizes.Length != 3 * n) problems.Add($"CLIP_SIZES_BAD {tag}");
             var poses = new PartPose[d.keys.Length][];
             float prevX = float.NegativeInfinity;
             for (int k = 0; k < d.keys.Length; k++)
             {
                 var key = d.keys[k];
+                if (key == null || float.IsNaN(key.x) || float.IsInfinity(key.x) || key.x < 0)
+                { problems.Add($"CLIP_TIME_INVALID {tag} key={k}"); return null; }
                 if (key.m == null || key.m.Length != 16 * n) { problems.Add($"CLIP_KEY_SIZE {tag} key={k}"); return null; }
                 if (!(key.x > prevX)) problems.Add($"CLIP_KEYS_NOT_INCREASING {tag} key={k}");
                 prevX = key.x;
@@ -87,7 +103,8 @@ namespace CubeGame.AlphaTransfer
                     poses[k][p] = new PartPose { position = pos, rotation = rot, scale = scl };
                 }
             }
-            if (d.loop && d.keys[d.keys.Length - 1].x > d.duration) problems.Add($"CLIP_KEY_BEYOND_DURATION {tag}");
+            if (d.keys[d.keys.Length - 1].x > d.duration) problems.Add($"CLIP_KEY_BEYOND_DURATION {tag}");
+            if (!d.loop && d.keys.Length > 1 && d.keys[d.keys.Length - 1].x != d.duration) problems.Add($"CLIP_END_KEY_MISSING {tag}");
             return problems.Count > 0 ? null : new AlphaClip(d, poses);
         }
 
@@ -136,12 +153,21 @@ namespace CubeGame.AlphaTransfer
             for (int p = 0; p < PartCount; p++)
             {
                 var pa = _poses[a][p]; var pb = _poses[b][p];
+                // Fixed-back storage must interpolate a swinging weapon around the actual grip.
+                // Lerp of model-centre translations opens an artificial hand gap between exact keys.
+                if(p==_weaponPivotPart)
+                {
+                    pa.position+=pa.rotation*Vector3.Scale(pa.scale,_weaponGripOffset);
+                    pb.position+=pb.rotation*Vector3.Scale(pb.scale,_weaponGripOffset);
+                }
                 output[p] = new PartPose
                 {
                     position = Vector3.LerpUnclamped(pa.position, pb.position, u),
                     rotation = Quaternion.Slerp(pa.rotation, pb.rotation, u),
                     scale = Vector3.LerpUnclamped(pa.scale, pb.scale, u),
                 };
+                if(p==_weaponPivotPart)
+                    output[p].position-=output[p].rotation*Vector3.Scale(output[p].scale,_weaponGripOffset);
             }
         }
     }
