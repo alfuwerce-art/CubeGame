@@ -1,0 +1,15 @@
+{
+  "variant": "s05a2_female_headf01_hairf01",
+  "weapon_subtype": 15,
+  "note": "Additional compatible humanoid variant (DeepSeek S05A-2 step 6): female head (human-head-f01) and female hair (human-hair-f01) whose GRID SIZE differs (18x22x16 vs the male 18x16x16), driven by the SAME captured clips. This tests the claim that the joint frame J is model-size independent across a real size change, not just a weapon swap. body3/head-f01 differ from body1/head-m01 only by tint (same geometry); hair-f01 differs in both geometry and size.",
+  "parts": {
+    "body": "body3.cub",
+    "head": "human-head-f01.cub",
+    "hair": "human-hair-f01.cub",
+    "weapon": "iron-greatsword.cub",
+    "hand_l": "glove.cub",
+    "hand_r": "glove.cub",
+    "foot_l": "foot.cub",
+    "foot_r": "foot.cub"
+  }
+}

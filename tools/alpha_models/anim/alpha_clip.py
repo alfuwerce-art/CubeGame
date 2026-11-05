@@ -16,7 +16,7 @@ CLI::
     python -m tools.alpha_models.anim.alpha_clip summary  CAPTURE.jsonl
     python -m tools.alpha_models.anim.alpha_clip build    CAPTURE.jsonl --out-dir DIR [--walk]
             [--state 2 --action 57 --name attack_2h_a57] [--idle]
-    python -m tools.alpha_models.anim.alpha_clip compare  CAPTURE_A.jsonl CAPTURE_B.jsonl --state 2
+    python -m tools.alpha_models.anim.alpha_clip compare  CLIP.alphaclip.json CAPTURE.jsonl
 """
 from __future__ import annotations
 
