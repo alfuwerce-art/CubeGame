@@ -124,12 +124,12 @@ def _kernel32():
     return _k32
 
 
-def _read(handle, address, size):
+def _read(handle, address, size, k=None):
     if not address:
         return None
+    k = k or _kernel32()
     buffer = ctypes.create_string_buffer(size)
     got = ctypes.c_size_t()
-    k = _kernel32()
     if not k.ReadProcessMemory(handle, ctypes.c_void_p(address), buffer, size, ctypes.byref(got)):
         return None
     if got.value != size:
@@ -137,18 +137,18 @@ def _read(handle, address, size):
     return buffer.raw[:got.value]
 
 
-def _u32(handle, address):
-    raw = _read(handle, address, 4)
+def _u32(handle, address, k=None):
+    raw = _read(handle, address, 4, k=k)
     return struct.unpack("<I", raw)[0] if raw else None
 
 
-def _i16s(handle, address, count=8):
-    raw = _read(handle, address, count * 2)
+def _i16s(handle, address, count=8, k=None):
+    raw = _read(handle, address, count * 2, k=k)
     return list(struct.unpack("<%dh" % count, raw)) if raw else None
 
 
-def exe_base(pid):
-    k = _kernel32()
+def exe_base(pid, k=None):
+    k = k or _kernel32()
     snap = k.CreateToolhelp32Snapshot(0x8, pid)
     entry = MODULEENTRY32()
     entry.dwSize = ctypes.sizeof(MODULEENTRY32)
@@ -164,7 +164,7 @@ def exe_base(pid):
     return None, None
 
 
-def capture(handle, ctx) -> dict:
+def capture(handle, ctx, k=None) -> dict:
     """Build a plain dict from the registers at the breakpoint (no process writes)."""
     creature = ctx.Eax
     self_ptr = ctx.Edi
@@ -183,11 +183,11 @@ def capture(handle, ctx) -> dict:
         },
         "creature": {"ptr": f"0x{creature:08X}"},
     }
-    entry["creature"]["indices_8c_9a"] = _i16s(handle, creature + 0x8C)
-    entry["creature"]["ids_14_22"] = _i16s(handle, creature + 0x14)
-    entry["creature"]["ids_2c_22"] = _i16s(handle, creature + 0x2C + 0x14)
-    begin = _u32(handle, vector + 4)
-    end = _u32(handle, vector + 8)
+    entry["creature"]["indices_8c_9a"] = _i16s(handle, creature + 0x8C, k=k)
+    entry["creature"]["ids_14_22"] = _i16s(handle, creature + 0x14, k=k)
+    entry["creature"]["ids_2c_22"] = _i16s(handle, creature + 0x2C + 0x14, k=k)
+    begin = _u32(handle, vector + 4, k=k)
+    end = _u32(handle, vector + 8, k=k)
     entry["model_vector"] = {
         "ptr": f"0x{vector:08X}",
         "begin": None if begin is None else f"0x{begin:08X}",
@@ -199,36 +199,47 @@ def capture(handle, ctx) -> dict:
         if idx < 0 or begin is None:
             resolved[slot] = {"index": idx, "model_ptr": None}
             continue
-        ptr = _u32(handle, begin + idx * 4)
+        ptr = _u32(handle, begin + idx * 4, k=k)
         resolved[slot] = {"index": idx, "model_ptr": None if ptr is None else f"0x{ptr:08X}"}
     entry["model_vector"]["resolved_by_slot"] = resolved
     return entry
 
 
-def run_probe(pid, max_hits=DEFAULT_MAX_HITS, on_hit=None, out=None):
-    """Run the debug loop. Returns (hits, events). ``on_hit(dict)`` is called per capture."""
-    k = _kernel32()
+def run_probe(pid, max_hits=DEFAULT_MAX_HITS, on_hit=None, out=None, kernel=None,
+              base=None, module=None):
+    """Run the debug loop. Returns (hits, events). ``on_hit(dict)`` is called per capture.
+
+    ``kernel`` may be a fake for unit tests; ``base``/``module`` may be supplied to bypass
+    module enumeration. The INT3 byte is always restored in ``finally`` — including when
+    ``DebugActiveProcess`` fails or an exception escapes the debug loop — and the detach
+    calls are only made when the debugger was actually attached.
+    """
+    k = kernel or _kernel32()
     handle = k.OpenProcess(PROCESS_ALL_ACCESS, False, pid)
     if not handle:
         raise RuntimeError(f"OpenProcess failed: {ctypes.get_last_error()}")
-    base, module = exe_base(pid)
+    if base is None:
+        base, module = exe_base(pid, k=k)
+    if base is None:
+        k.CloseHandle(handle)
+        raise RuntimeError("Cube.exe module not found in the process")
     target = base + MODEL_READ_RVA
-    original = _read(handle, target, 1)
-    if original[0] != 0x0F:
+    original = _read(handle, target, 1, k=k)
+    if original is None or original[0] != 0x0F:
         k.CloseHandle(handle)
-        raise RuntimeError(f"unexpected byte 0x{original[0]:02X} at 0x{target:08X} "
-                           f"(expected 0x0F movsx/movzx opcode)")
-    written = ctypes.c_size_t()
-    k.WriteProcessMemory(handle, ctypes.c_void_p(target), b"\xcc", 1, ctypes.byref(written))
-    if not k.DebugActiveProcess(pid):
-        k.CloseHandle(handle)
-        raise RuntimeError(f"DebugActiveProcess failed: {ctypes.get_last_error()}")
+        raise RuntimeError(f"unexpected byte at 0x{target:08X} (expected 0x0F movsx/movzx opcode)")
 
+    written = ctypes.c_size_t()
     hits, seen = [], []
+    attached = False
     armed = True
     pending_step = False
     event = DEBUG_EVENT()
     try:
+        k.WriteProcessMemory(handle, ctypes.c_void_p(target), b"\xcc", 1, ctypes.byref(written))
+        if not k.DebugActiveProcess(pid):
+            raise RuntimeError(f"DebugActiveProcess failed: {ctypes.get_last_error()}")
+        attached = True
         while True:
             if not k.WaitForDebugEvent(ctypes.byref(event), 4000):
                 break
@@ -245,7 +256,7 @@ def run_probe(pid, max_hits=DEFAULT_MAX_HITS, on_hit=None, out=None):
                 context = WOW64_CONTEXT()
                 context.ContextFlags = 0x10007
                 if k.Wow64GetThreadContext(thread, ctypes.byref(context)):
-                    entry = capture(handle, context)
+                    entry = capture(handle, context, k=k)
                     hits.append(entry)
                     if on_hit:
                         on_hit(entry)
@@ -279,14 +290,25 @@ def run_probe(pid, max_hits=DEFAULT_MAX_HITS, on_hit=None, out=None):
                 continue
             k.ContinueDebugEvent(event.dwProcessId, event.dwThreadId, DBG_CONTINUE)
     finally:
-        # Clean detach: restore the byte, stop killing on exit, detach.
-        k.WriteProcessMemory(handle, ctypes.c_void_p(target), original, 1, ctypes.byref(written))
+        # Always restore the original instruction byte, even on abnormal termination.
         try:
-            k.DebugSetProcessKillOnExit(False)
+            k.WriteProcessMemory(handle, ctypes.c_void_p(target), original, 1,
+                                 ctypes.byref(written))
         except Exception:
             pass
-        k.DebugActiveProcessStop(pid)
-        k.CloseHandle(handle)
+        if attached:
+            try:
+                k.DebugSetProcessKillOnExit(False)
+            except Exception:
+                pass
+            try:
+                k.DebugActiveProcessStop(pid)
+            except Exception:
+                pass
+        try:
+            k.CloseHandle(handle)
+        except Exception:
+            pass
     if out:
         with open(out, "w", encoding="utf-8") as fh:
             json.dump({"hits": hits, "events": seen, "module": module,

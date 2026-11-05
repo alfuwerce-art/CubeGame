@@ -86,23 +86,35 @@ class ScanSynthetic(unittest.TestCase):
         self.assertEqual([h.field for h in hits], [0x8C, 0x8E, 0x94])
 
 
+DEFAULT_ALPHA_EXE = r"D:\Projects\CubeGame\.scratch\alphatest2\Cube.exe"
+
+
+def resolve_alpha_exe() -> str:
+    """Path to the local Cube.exe; env ``CUBEWORLD_ALPHA_EXE`` overrides the default."""
+    return os.environ.get("CUBEWORLD_ALPHA_EXE", DEFAULT_ALPHA_EXE)
+
+
 class ScanRealImage(unittest.TestCase):
-    """Optional integration check against the local Alpha copy (skipped when absent).
+    """Optional integration check against the local Alpha copy.
 
     The eight known instruction addresses in the shipped Cube.exe are the load sites of the
     model-index fields (creature+0x8c..+0x9a); the scanner must recover exactly them.
+
+    Path resolution: env ``CUBEWORLD_ALPHA_EXE`` (full path to Cube.exe) overrides the
+    default. The test is **SKIP** when the file is absent, **PASS** when the eight reads are
+    recovered, **FAIL** otherwise — the runner reports these states explicitly.
     """
 
-    EXE = r"D:\Projects\CubeGame\.scratch\alphatest2\Cube.exe"
     KNOWN = [
         (0x00412A42, 0x8C), (0x00412A6C, 0x8E), (0x00412A9F, 0x90), (0x00412AD2, 0x92),
         (0x00412B05, 0x94), (0x00412B38, 0x96), (0x00412B6B, 0x9A), (0x00412B9E, 0x98),
     ]
 
-    @unittest.skipUnless(os.path.exists(EXE), "local Alpha copy not present")
+    @unittest.skipUnless(os.path.exists(resolve_alpha_exe()),
+                         "local Alpha copy not present (set CUBEWORLD_ALPHA_EXE)")
     def test_recovers_the_eight_model_index_reads(self):
         from tools.alpha_models.anim.pe_bytes import load
-        image = load(self.EXE)
+        image = load(resolve_alpha_exe())
         hits = scan_exe_image(image, 0x004128F0, 0x00423F20)
         # The eight creature-field reads are word loads (movsx ecx,[eax+0xNN]); the function
         # also contains dword stack-local reads (mov eax,[esp+0xNN]) which are not these.
