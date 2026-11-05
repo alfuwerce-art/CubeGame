@@ -18,6 +18,10 @@ namespace CubeGame.AlphaTransfer
         public float entrySeconds = .15f, recoveryBlendSeconds = .18f, exitSeconds = .12f;
         public float stopAmplitudePerSecond = 1.2f; // Unity input policy, PLACEHOLDER_NOT_ALPHA
         public bool externalClock, nativeLifecycle;
+        // Entity contract mode LOCOMOTION_ONLY: no evidenced action profile for this body plan, so the
+        // controller owns walk/stop/idle only and refuses every action request (no humanoid fallback).
+        public bool locomotionOnly;
+        public string actionsBlockedReason;
         public string CurrentAction { get; private set; }
         public bool InAction => CurrentAction != null;
         public bool Initialized { get; private set; }
@@ -50,7 +54,16 @@ namespace CubeGame.AlphaTransfer
             locomotion.Load(); Problems.AddRange(locomotion.Problems);
             actions.LoadClips(); Problems.AddRange(actions.Problems);
             var names = requiredClips.Length > 0 ? requiredClips : actions.ClipNames.Where(n => n.StartsWith("action_")).ToArray();
-            if (names.Length == 0) Problems.Add("CONTROLLER_NO_REQUIRED_ACTIONS");
+            if (locomotionOnly)
+            {
+                if (string.IsNullOrEmpty(actionsBlockedReason)) Problems.Add("CONTROLLER_LOCOMOTION_ONLY_WITHOUT_REASON");
+                var actionLike = actions.ClipNames.Where(n => n.StartsWith("action_") || n.StartsWith("native_") || n.StartsWith("held_")
+                    || Array.IndexOf(AlphaEntityContract.ActionCategories, AlphaEntityContract.CategoryOf(actions.Get(n).Data)) >= 0).ToArray();
+                if (requiredClips.Length > 0 || actionLike.Length > 0)
+                    Problems.Add("CONTROLLER_LOCOMOTION_ONLY_HAS_ACTIONS " + string.Join(",", requiredClips.Concat(actionLike)));
+                names = new string[0];
+            }
+            else if (names.Length == 0) Problems.Add("CONTROLLER_NO_REQUIRED_ACTIONS");
             foreach (var n in names)
             {
                 var clip = actions.Get(n);
@@ -79,6 +92,7 @@ namespace CubeGame.AlphaTransfer
         public bool PlayAction(string name)
         {
             if (!Initialized && !Init()) return false;
+            if (locomotionOnly) { Events.Add("action_refused:ACTIONS_BLOCKED " + name); return false; }
             if (Phase != AlphaControllerPhase.Locomotion) return false;
             if (name == null || actions.Get(name) == null || !name.StartsWith("action_"))
             { Problems.Add("ACTION_CLIP_MISSING " + name); return false; }
@@ -126,6 +140,7 @@ namespace CubeGame.AlphaTransfer
         public bool PlayNativeAction(string name)
         {
             if(!Initialized && !Init())return false;
+            if(locomotionOnly){Events.Add("native_refused:ACTIONS_BLOCKED "+name);return false;}
             var clip=actions.Get(name);
             if(clip==null || (clip.Data.category!="NATIVE_LIFECYCLE" && clip.Data.category!="HELD_STATE")
                 || Array.IndexOf(requiredClips,name)<0){Problems.Add("NATIVE_CLIP_MISSING "+name);return false;}

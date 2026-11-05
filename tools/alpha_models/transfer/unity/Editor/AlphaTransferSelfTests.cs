@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -76,6 +77,37 @@ namespace CubeGame.AlphaTransfer.Editor
             return go;
         }
 
+        // Synthetic entity contracts (TEST_DATA_NOT_ALPHA): structure only, any body plan.
+        static AlphaEntityContract SynthContract(string rig, bool actions, params (string name, string role, string mirror, string anchor)[] parts)
+        {
+            return new AlphaEntityContract {
+                format=AlphaEntityContract.Format, kind="0xff", category="TEST", bodyPlan="plan/test", rig=rig,
+                controllerMode=actions?AlphaEntityContract.ModeActions:AlphaEntityContract.ModeLocomotionOnly,
+                actionProfile=actions?"test_profile":"", actionTrigger=actions?"player_input":"",
+                actionsStatus=actions?"AVAILABLE":"BLOCKED", actionsReason=actions?"":"NO_VERIFIED_ACTION_TRIGGER (test)",
+                weaponLayer="NONE", transitions="UNITY_TRANSITION", readiness="AUTO_READY",
+                walkSources=new[]{"RECONSTRUCTED_FROM_EVIDENCE"}, idleSources=new[]{"RECONSTRUCTED_FROM_EVIDENCE"},
+                allowedClipProvenance=(string[])AlphaEntityContract.ClipProvenance.Clone(),
+                allowedCategories=actions?new[]{"MOTION","HELD_STATE","NATIVE_LIFECYCLE","LOOP_LOCOMOTION","STATIC_POSE"}:new[]{"LOOP_LOCOMOTION","STATIC_POSE"},
+                parts=parts.Select(p=>new AlphaEntityPart{name=p.name,role=p.role,mirrorOf=p.mirror,anchor=p.anchor}).ToArray() };
+        }
+
+        static AlphaRig SynthRig(GameObject go, string rig, params (string name, string anchor)[] parts)
+        {
+            var r=go.AddComponent<AlphaRig>();r.rigId=rig;
+            r.partNames=parts.Select(p=>p.name).ToArray();r.anchors=parts.Select(p=>p.anchor).ToArray();
+            r.parts=new Transform[parts.Length];r.meshes=new Transform[parts.Length];r.sizes=new Vector3Int[parts.Length];
+            for(int i=0;i<parts.Length;i++){r.parts[i]=new GameObject(parts[i].name).transform;r.parts[i].parent=go.transform;
+                r.meshes[i]=new GameObject("mesh").transform;r.meshes[i].parent=r.parts[i];r.sizes[i]=Vector3Int.one;}
+            return r;
+        }
+
+        static string ContractRoundTrip(AlphaEntityContract c, out AlphaEntityContract parsed)
+        {
+            var problems=new List<string>();parsed=AlphaEntityContract.Parse(JsonUtility.ToJson(c),problems);
+            return problems.Count==0?null:string.Join(";",problems);
+        }
+
         static void Register()
         {
             Cases.Clear();
@@ -102,6 +134,109 @@ namespace CubeGame.AlphaTransfer.Editor
                 var pose=new PartPose[1];clip.Sample(50,pose);
                 var grip=pose[0].position+pose[0].rotation*new Vector3(0,-10,0);
                 return Expect(grip.magnitude<1e-4f,"interpolation detached weapon from grip: "+grip);
+            });
+            // ---------------------------------------------------------------- entity contract
+            var quad=new[]{("body","core","","center"),("tail","tail","","tail"),("head","head","","center"),
+                ("hand_l","fore_limb","hand_r","center"),("hand_r","fore_limb","hand_l","center"),
+                ("foot_l","hind_limb","foot_r","center"),("foot_r","hind_limb","foot_l","center")};
+            var quadRig=quad.Select(p=>(p.Item1,p.Item4)).ToArray();
+            Add("entity_contract_quadruped_locomotion_only_valid",()=>
+            {
+                var go=new GameObject("e");try{var rig=SynthRig(go,"alpha_creature/q",quadRig);
+                    var err=ContractRoundTrip(SynthContract("alpha_creature/q",false,quad),out var c);if(err!=null)return err;
+                    var v=c.Validate(rig,new AlphaClip[0],false);return Expect(v.Count==0,string.Join(";",v));}
+                finally{UnityEngine.Object.DestroyImmediate(go);}
+            });
+            Add("entity_contract_three_part_plan_valid",()=>
+            {
+                var plan=new[]{("body","core","","center"),("foot_l","hind_limb","foot_r","center"),("foot_r","hind_limb","foot_l","center")};
+                var go=new GameObject("e");try{var rig=SynthRig(go,"alpha_creature/r",plan.Select(p=>(p.Item1,p.Item4)).ToArray());
+                    var err=ContractRoundTrip(SynthContract("alpha_creature/r",false,plan),out var c);if(err!=null)return err;
+                    var v=c.Validate(rig,new AlphaClip[0],false);return Expect(v.Count==0,string.Join(";",v));}
+                finally{UnityEngine.Object.DestroyImmediate(go);}
+            });
+            Add("entity_contract_rejects_action_clip_on_locomotion_only_entity",()=>
+            {
+                var go=new GameObject("e");try{var rig=SynthRig(go,"alpha_creature/q",quadRig);
+                    ContractRoundTrip(SynthContract("alpha_creature/q",false,quad),out var c);
+                    var d=JsonUtility.FromJson<AlphaClipData>(ClipJson("alpha_creature/q",new[]{"body"},new[]{AlphaSpace.Translate(Vector3.zero),AlphaSpace.Translate(Vector3.zero)},new[]{0f,100f}));
+                    d.status="EMULATED_ALPHA_CODE";d.name="action_057";var probs=new List<string>();
+                    var clip=AlphaClip.Parse(JsonUtility.ToJson(d),"alpha_creature/q",probs);
+                    var v=c.Validate(rig,new[]{clip},false);
+                    return Expect(v.Any(x=>x.StartsWith("CONTRACT_CLIP_CATEGORY_NOT_ALLOWED")),"humanoid-style action accepted on a locomotion-only body plan");}
+                finally{UnityEngine.Object.DestroyImmediate(go);}
+            });
+            Add("entity_contract_rejects_unknown_provenance",()=>
+            {
+                var go=new GameObject("e");try{var rig=SynthRig(go,"alpha_creature/q",quadRig);
+                    ContractRoundTrip(SynthContract("alpha_creature/q",false,quad),out var c);
+                    var d=JsonUtility.FromJson<AlphaClipData>(ClipJson("alpha_creature/q",new[]{"body"},new[]{AlphaSpace.Translate(Vector3.zero),AlphaSpace.Translate(Vector3.zero)},new[]{0f,6.28f},true,6.28f,"walk_phase"));
+                    d.status="ORIGINAL_NOT_ALPHA";var probs=new List<string>();
+                    var clip=AlphaClip.Parse(JsonUtility.ToJson(d),"alpha_creature/q",probs);
+                    var v=c.Validate(rig,new[]{clip},false);
+                    return Expect(v.Any(x=>x.StartsWith("CONTRACT_CLIP_PROVENANCE_NOT_ALLOWED")),"non-Alpha provenance accepted");}
+                finally{UnityEngine.Object.DestroyImmediate(go);}
+            });
+            Add("entity_contract_blocked_actions_need_reason",()=>
+            {
+                var c=SynthContract("alpha_creature/q",false,quad);c.actionsReason="";
+                return Expect(ContractRoundTrip(c,out _)?.Contains("CONTRACT_BLOCKED_ACTIONS_NEED_REASON")==true,"silent BLOCKED accepted");
+            });
+            Add("entity_contract_actions_mode_needs_profile_and_registry",()=>
+            {
+                var c=SynthContract("alpha_creature/q",true,quad);c.actionProfile="";
+                if(ContractRoundTrip(c,out _)?.Contains("CONTRACT_ACTIONS_WITHOUT_EVIDENCED_PROFILE")!=true)return "action mode without profile accepted";
+                var go=new GameObject("e");try{var rig=SynthRig(go,"alpha_creature/q",quadRig);
+                    ContractRoundTrip(SynthContract("alpha_creature/q",true,quad),out var ok);
+                    return Expect(ok.Validate(rig,new AlphaClip[0],false).Any(x=>x.StartsWith("CONTRACT_ACTION_REGISTRY_MISMATCH")),"action mode without registry accepted");}
+                finally{UnityEngine.Object.DestroyImmediate(go);}
+            });
+            Add("entity_contract_rejects_part_set_anchor_and_mirror_errors",()=>
+            {
+                var go=new GameObject("e");try{
+                    var rig=SynthRig(go,"alpha_creature/q",quadRig.Where(p=>p.Item1!="tail").ToArray());
+                    ContractRoundTrip(SynthContract("alpha_creature/q",false,quad),out var c);
+                    if(!c.Validate(rig,new AlphaClip[0],false).Any(x=>x.StartsWith("CONTRACT_PART_SET_MISMATCH")))return "missing part accepted";
+                    var bad=quad.Select(p=>p.Item1=="hand_r"?("hand_r","fore_limb","foot_l","center"):p).ToArray();
+                    var rig2=SynthRig(new GameObject("e2"){hideFlags=HideFlags.None},"alpha_creature/q",quadRig);
+                    try{ContractRoundTrip(SynthContract("alpha_creature/q",false,bad),out var c2);
+                        if(!c2.Validate(rig2,new AlphaClip[0],false).Any(x=>x.StartsWith("CONTRACT_MIRROR_PAIR_BROKEN")))return "broken mirror pair accepted";
+                        var wrongAnchor=quad.Select(p=>p.Item1=="tail"?("tail","tail","","center"):p).ToArray();
+                        ContractRoundTrip(SynthContract("alpha_creature/q",false,wrongAnchor),out var c3);
+                        return Expect(c3.Validate(rig2,new AlphaClip[0],false).Any(x=>x.StartsWith("CONTRACT_ANCHOR_MISMATCH")),"wrong anchor accepted");}
+                    finally{UnityEngine.Object.DestroyImmediate(rig2.gameObject);}}
+                finally{UnityEngine.Object.DestroyImmediate(go);}
+            });
+            Add("entity_contract_rejects_foreign_rig",()=>
+            {
+                var go=new GameObject("e");try{var rig=SynthRig(go,"alpha_creature/other",quadRig);
+                    ContractRoundTrip(SynthContract("alpha_creature/q",false,quad),out var c);
+                    return Expect(c.Validate(rig,new AlphaClip[0],false).Any(x=>x.StartsWith("CONTRACT_RIG_MISMATCH")),"foreign rig accepted");}
+                finally{UnityEngine.Object.DestroyImmediate(go);}
+            });
+            Add("controller_locomotion_only_inits_without_actions_and_refuses_requests",()=>
+            {
+                var go=ControllerRig(out var c);
+                try{
+                    go.GetComponent<AlphaClipPlayer>().clipAssets=new TextAsset[0];c.requiredClips=new string[0];
+                    c.locomotionOnly=true;c.actionsBlockedReason="NO_VERIFIED_ACTION_TRIGGER (test)";
+                    if(!c.Init())return string.Join(";",c.Problems);
+                    if(c.PlayAction("action_001")||c.PlayNativeAction("native_057"))return "locomotion-only controller accepted an action";
+                    for(int i=0;i<30;i++)c.Step(1f/60);
+                    return Expect(c.Problems.Count==0&&c.Phase==AlphaControllerPhase.Locomotion&&!c.InAction,"locomotion-only controller left locomotion: "+string.Join(";",c.Problems));
+                }finally{UnityEngine.Object.DestroyImmediate(go);}
+            });
+            Add("controller_locomotion_only_rejects_action_library_and_missing_reason",()=>
+            {
+                var go=ControllerRig(out var c);
+                try{
+                    c.requiredClips=new string[0];c.locomotionOnly=true;c.actionsBlockedReason="x";
+                    if(c.Init()||!c.Problems.Any(p=>p.StartsWith("CONTROLLER_LOCOMOTION_ONLY_HAS_ACTIONS")))return "action library accepted in locomotion-only mode";
+                    var go2=ControllerRig(out var c2);
+                    try{go2.GetComponent<AlphaClipPlayer>().clipAssets=new TextAsset[0];c2.requiredClips=new string[0];c2.locomotionOnly=true;
+                        return Expect(!c2.Init()&&c2.Problems.Contains("CONTROLLER_LOCOMOTION_ONLY_WITHOUT_REASON"),"silent locomotion-only mode accepted");}
+                    finally{UnityEngine.Object.DestroyImmediate(go2);}
+                }finally{UnityEngine.Object.DestroyImmediate(go);}
             });
             Add("controller_missing_required_action_fails_closed",()=>
             {

@@ -32,6 +32,7 @@ from pathlib import Path
 
 from tools.alpha_models.anim import pe_bytes as pb
 from tools.alpha_models.universal import alpha_static as st
+from tools.alpha_models.universal import contract as ct
 from tools.alpha_models.universal import creature_rig as cr
 from tools.alpha_models.universal import uclip
 
@@ -182,6 +183,15 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
         parts_out.append({"name": p, "model": name, "file": f"models/{p}.cubdec", "size": list(size),
                           "anchor": rule, "mirrored": cr.BY_NAME[p].mirrored,
                           "expectedVertices": _exposed_faces(model) * 4})
+    entity = _entity_contract(exe, kind, seed, app, registry, res, parts_out, job)
+    acts = entity["channels"]["actions"]
+    if job.get("action_manifest") and acts["status"] != "AVAILABLE":
+        problems.append("ACTIONS_WITHOUT_VERIFIED_PROFILE " + "; ".join(acts["reasons"]))
+    if weapon and entity["channels"]["equipment"]["weapon"]["status"] != "SUPPORTED":
+        problems.append(f"WEAPON_LAYER_NOT_SUPPORTED {entity['channels']['equipment']['weapon']['reasons']}")
+    if (data_dir / "contract.json").exists():
+        (data_dir / "contract.json").unlink()   # written last, from what was actually imported
+    imported = []
     rig_json = {"rig": res.family_id, "variant": job.get("variant", f"kind_0x{kind:02x}"),
                 "weaponSubtype": subtype, "parts": parts_out,
                 "kind": kind, "placementScale": app["size"][0] / 11.2}
@@ -226,12 +236,15 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
         uc = _unity_clip(clip, res.parts)
         (data_dir / "clips" / f"{clip['name']}.json").write_text(json.dumps(uc), encoding="utf-8")
         written.append(clip["name"])
+        imported.append(_imported(uc))
     for n in approved_actions:
         if n not in written:
             problems.append(f'ACTION_CLIP_MISSING {n}')
     if manifest_path:
-        priority={57:0,58:1,67:2}
-        ordered=sorted(approved_actions,key=lambda n:(priority.get(approved_actions[n]['action'],3),approved_actions[n]['action']))
+        # required-clip order comes from the action profile (its verified primary chain first)
+        chain = ct.ACTION_PROFILES[acts["profile"]]["primary_chain"] if acts.get("profile") else []
+        priority = {a: i for i, a in enumerate(chain)}
+        ordered=sorted(approved_actions,key=lambda n:(priority.get(approved_actions[n]['action'],len(chain)),approved_actions[n]['action']))
         (data_dir / 'actions.json').write_text(json.dumps({'requiredClips': ordered,
             'blockedActions': [e for e in manifest['actions'] if e['status'] == 'BLOCKED']}), encoding='utf8')
         ref=Path(manifest_path).parent/'weapon_reference.json'
@@ -256,14 +269,56 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
         loco, wf = _prepare_locomotion(job, kind, app, res, parts_out, data_dir, "walk" in written, problems)
         if wf:
             written.append(wf)
+            imported.append(_imported(json.loads((data_dir / "clips" / f"{wf}.json").read_text(encoding="utf-8"))))
     if not written:
         problems.append(f"NO_FAMILY_CLIPS {res.family_id} in {clips_dir}")
+    uc_contract = ct.unity_contract(entity)
+    if uc_contract["controllerMode"] == "ACTIONS" and not manifest_path:
+        # profile exists, but this job imports no action library: the Unity entity is honestly
+        # locomotion-only (the controller must not expect actions it does not have)
+        uc_contract.update(controllerMode="LOCOMOTION_ONLY", actionsStatus="BLOCKED", actionProfile="",
+                           actionTrigger="", actionsReason=f"ACTION_LIBRARY_NOT_IMPORTED (profile {acts['profile']} "
+                                                           "exists; job has no action_manifest)",
+                           allowedCategories=["LOOP_LOCOMOTION", "STATIC_POSE"])
+    # the Unity contract lists what was really imported; walk/idle sources follow the imported clips
+    uc_contract["importedClips"] = imported
+    uc_contract["walkSources"] = sorted({c["status"] for c in imported if c["category"] == "LOOP_LOCOMOTION"})
+    uc_contract["idleSources"] = sorted({c["status"] for c in imported if c["category"] == "STATIC_POSE"}
+                                        | ({"RECONSTRUCTED_FROM_EVIDENCE"} if loco else set()))
+    for c in imported:
+        if c["category"] not in uc_contract["allowedCategories"]:
+            problems.append(f"CONTRACT_CATEGORY_NOT_ALLOWED {c['name']} {c['category']}")
+    (data_dir / "contract.json").write_text(json.dumps(uc_contract, indent=1), encoding="utf-8")
     result = "PASS" if not problems else "FAIL"
     out = {"PREPARE_RESULT": result, "problems": problems, "kind": f"0x{kind:02x}",
            "family_id": res.family_id, "parts": res.parts, "models": [p["model"] for p in parts_out],
            "clips": written, "skipped_clips": skipped, "locomotion": loco}
     print(json.dumps(out, indent=1))
     return out
+
+
+def _imported(uc):
+    """(name, status, category) of a Unity clip; category rule = AlphaEntityContract.CategoryOf."""
+    if uc.get("loop") and uc.get("param") == "walk_phase":
+        cat = "LOOP_LOCOMOTION"
+    elif uc.get("param") == "time_ms" and uc.get("duration") == 0:
+        cat = "STATIC_POSE"
+    else:
+        cat = uc.get("category") or "MOTION"
+    return {"name": uc["name"], "status": uc["status"], "category": cat}
+
+
+def _entity_contract(exe, kind, seed, app, registry, res, parts_out, job):
+    """Entity contract of the prepared specimen (exact seed appearance from the emulator)."""
+    image = pb.load(exe)
+    emu = st.AppearanceEmulator(image)
+    spec_fams = ct.specimen_families_from_appearances(
+        lambda k, s: st.decode_appearance(emu.run(k, *s)["raw"]))
+    key = f"0x{kind:02x}"
+    table = {"kinds": {key: {"appearance": app}}, "registry": {str(i): n for i, n in registry.items()},
+             "model_sizes": {p["model"]: p["size"] for p in parts_out}}
+    return ct.describe(kind, table["kinds"][key], table, None, seed_variant=seed,
+                       equipment=job.get("equipment"), spec_families=spec_fams)
 
 
 def _prepare_locomotion(job, kind, app, res, parts_out, data_dir, have_captured_walk, problems):

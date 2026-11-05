@@ -18,7 +18,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from tools.alpha_models.anim import mat4
 from tools.alpha_models.anim.alpha_clip import pose_error, decompose, compose
 from tools.alpha_models.universal import alpha_oracle, anim_states as states, creature_rig as cr
-from tools.alpha_models.universal import alpha_static, drawmodel_emu as de, param_walk as pw
+from tools.alpha_models.universal import alpha_static, contract, drawmodel_emu as de, param_walk as pw
 from tools.alpha_models.universal import weapon_locomotion
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -105,7 +105,8 @@ def joints(oracle, frame, kind):
 
 
 def _bake_one(payload):
-    exe, sizes, kind, seed, weapon, parts, family, exe_hash, dt_ms, out, action = payload
+    exe, sizes, kind, seed, weapon, parts, family, exe_hash, dt_ms, out, action, profile_id = payload
+    profile = contract.ACTION_PROFILES[profile_id]
     oracle = alpha_oracle.load(str(exe), str(sizes))
     c, _ = oracle.creature(kind, seed)
     name = f'action_{action:03d}'
@@ -119,14 +120,14 @@ def _bake_one(payload):
         if not 1 <= entry['state'] <= 73:
             raise ValueError('NO_ACTION_DRAW_STATE')
         bake = states.bake_action(oracle, kind, action, weapon=weapon, seed=seed, dt_ms=dt_ms, tail_ms=1800,
-                                 dynamic_parts=action in (22,23,26,71,72))
+                                 dynamic_parts=action in profile['dynamic_part_actions'])
         rest, captured_sizes = joints(oracle, bake['idle'], kind)
         check = validate_bake(bake, parts, rest)
         clip = states.baked_clip(bake, kind, family, name, parts)
         for p in clip['parts']:
             p['captured_size'] = captured_sizes[p['name']]
         clip['source'].update({'action': action, 'exe_sha256': exe_hash, 'seed_variant': list(seed),
-            'runtime_capture': False, 'two_handed_attack': action in (57,58,67),
+            'runtime_capture': False, 'two_handed_attack': action in profile['grip_checked_actions'],
             'duration_policy': 'native combat_getAttackTiming observation window; gameplay lifetime not inferred'})
         clip['validation'] = check
         dest.write_text(json.dumps(clip), encoding='utf8')
@@ -140,16 +141,21 @@ def _bake_one(payload):
 
 def bake_job(job, actions, out, exe=DEFAULT_EXE, sizes=DEFAULT_SIZES, dt_ms=16, workers=1):
     out = local_output(out)
-    alpha_static.verify_exe(str(exe))
-    oracle = alpha_oracle.load(str(exe), str(sizes))
     kind = int(str(job['kind']), 0)
-    if kind != 2:
-        raise ValueError('S05A2_ONLY_CURRENT_HUMAN_0X02')
+    seed = tuple(job.get('seed_variant', (0,0)))
+    # Only a verified action-profile specimen may be baked (today: the one S05A-2 humanoid). The
+    # gate is evidence data (contract.ACTION_PROFILES), not a creature name or limb count.
+    profile_id = contract.profile_for_specimen(kind, seed)
+    if profile_id is None:
+        raise ValueError(f'ACTION_PROFILE_REQUIRED kind=0x{kind:02x} seed={list(seed)}: no verified action specimen')
+    profile = contract.ACTION_PROFILES[profile_id]
     weapon_spec = job.get('equipment', {}).get('weapon', {})
     weapon = (3, int(weapon_spec['subtype'])) if weapon_spec else (0, 0)
-    if weapon not in ((3,15), (3,16), (3,17)):
-        raise ValueError('S05A2_REQUIRES_VERIFIED_TWO_HANDED_WEAPON')
-    seed = tuple(job.get('seed_variant', (0,0)))
+    req = profile.get('equipment', {}).get('weapon')
+    if req and (weapon[0] != req['type'] or weapon[1] not in req['subtypes']):
+        raise ValueError(f'PROFILE_REQUIRES_VERIFIED_WEAPON {req}')
+    alpha_static.verify_exe(str(exe))
+    oracle = alpha_oracle.load(str(exe), str(sizes))
     c, app = oracle.creature(kind, seed)
     res = cr.resolve(kind, app, equipment=('weapon',))
     manifest = {'format': 'cubegame.alpha_actions/1', 'kind': kind, 'rig': res.family_id,
@@ -158,8 +164,9 @@ def bake_job(job, actions, out, exe=DEFAULT_EXE, sizes=DEFAULT_SIZES, dt_ms=16, 
                 'status': 'EMULATED_ALPHA_CODE', 'BAKE_RESULT': 'IN_PROGRESS',
                 'action_semantics': 'pose library, not gameplay authorization',
                 'actions': []}
+    manifest['profile'] = profile_id
     payloads = [(str(exe), str(sizes), kind, seed, weapon, res.parts, res.family_id,
-                 manifest['exe_sha256'], dt_ms, str(out), a) for a in actions]
+                 manifest['exe_sha256'], dt_ms, str(out), a, profile_id) for a in actions]
     (out / 'actions.json').write_text(json.dumps(manifest, indent=1), encoding='utf8')
     with ProcessPoolExecutor(max_workers=workers) as pool:
         futures = [pool.submit(_bake_one,p) for p in payloads]

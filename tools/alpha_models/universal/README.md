@@ -15,7 +15,11 @@
 | `creature_rig.py` | блоки отрисовки `drawModel`, правила якорей, разрешение рига, семейства движения, исключения |
 | `uclip.py` | захват → клипы любого проверенного плана тела (ходьба, покой), проверки |
 | `param_walk.py` | **параметрическая ходьба**: формулы `drawModel` состояния 0 (эталон для C#), члены формулы и их доказательность, классификатор `classify`/`coverage`, клип/спецификация для Unity, проверка против захвата ([исследование](../../../docs/research/alpha2013/PARAMETRIC_WALK_SYSTEM.md), [спецификация](../../../docs/architecture/PARAMETRIC_LOCOMOTION_SPEC.md), [методичка](../../../docs/agents/PARAMETRIC_WALK_PLAYBOOK.md)) |
-| `pipeline.py` | CLI: `scan`, `build-clips`, `prepare-unity` (+ `"locomotion": "formula"`), `batch`, `param-walk-validate`, `param-walk-coverage` |
+| `pipeline.py` | CLI: `scan`, `build-clips`, `prepare-unity` (+ `"locomotion": "formula"`, пишет `Data/contract.json`), `batch`, `param-walk-validate`, `param-walk-coverage` |
+| `contract.py` | **единый контракт** сущности/частей/анимаций (`cubegame.entity_contract/1`): категория по структуре, роли частей, каналы walk/idle/actions/equipment/visibility/lifecycle, происхождение, профили действий как записи доказательств ([архитектура](../../../docs/architecture/UNIVERSAL_ENTITY_CONTRACT.md)) |
+| `transfer_planner.py` | **планировщик переноса**: `scan`, `plan` (AUTO_READY / NEEDS_RESEARCH / BLOCKED, задания, `coverage.csv`), `validate`, `pilot` (только allowlist эталонов), `batch` (отказ до S05B) |
 | `jobs/*.json` | задания Unity (вид, вариант моделей, экипировка) — без данных Alpha |
 
-Только стандартная библиотека Python 3.13. Все данные Alpha (таблицы, захваты, клипы, проекты Unity) — в `.scratch/universal` (не в Git). Тесты: `tools/alpha_models/tests/test_universal.py`, `tools/alpha_models/tests/test_param_walk.py`.
+Только стандартная библиотека Python 3.13. Все данные Alpha (таблицы, захваты, клипы, проекты Unity) — в `.scratch/universal` (не в Git). Тесты: `tools/alpha_models/tests/test_universal.py`, `tools/alpha_models/tests/test_param_walk.py`, `tools/alpha_models/tests/test_transfer_contract.py` (контракт, планировщик, независимость от гуманоида).
+
+Продолжение 2026-11-06 (S05A2-UNIVERSAL-CONTINUE-01): [отчёт](../../../docs/reports/S05A2_UNIVERSAL_CONTINUATION_REPORT.md).

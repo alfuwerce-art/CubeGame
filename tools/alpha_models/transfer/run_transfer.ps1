@@ -139,6 +139,9 @@ try {
   if ($UniversalJob) {
     & $Python -m tools.alpha_models.universal.pipeline prepare-unity --job $UniversalJob --project $Project --db $Db
   } else {
+    # the legacy S05A-2 path has no entity contract: never validate a stale one from a universal run
+    $staleContract = Join-Path $Project 'Assets\AlphaTransfer\Data\contract.json'
+    if (Test-Path -LiteralPath $staleContract) { Remove-Item -LiteralPath $staleContract }
     & $Python -m tools.alpha_models.transfer.prepare_unity --db $Db --project $Project --clips $Clips --models $Models
   }
   if ($LASTEXITCODE -ne 0) { throw "PREPARE_RESULT=FAIL (python exit $LASTEXITCODE)" }
@@ -154,7 +157,7 @@ function Invoke-Unity([string]$method, [string]$log, [switch]$NoQuit) {
   if (-not $NoQuit) { $ua = @('-quit') + $ua }
   # PlayMode and screenshots need a graphics device: drop -nographics for them
   if ($method -like '*PlayMode*' -or $method -like '*AlphaTransferEditor.Run') { $ua = $ua | Where-Object { $_ -ne '-nographics' } }
-  if ($method -like '*AlphaControllerPlayMode*') { $ua += @('-controllerFps', $ControllerFps) }
+  if ($method -like '*AlphaControllerPlayMode*' -or $method -like '*AlphaEntityPlayMode.Run') { $ua += @('-controllerFps', $ControllerFps) }
   if ($method -like '*AlphaControllerPlayMode*' -and $CaptureController) { $ua += '-controllerCapture' }
   $p = Start-Process -FilePath $Unity -ArgumentList $ua -Wait -PassThru -WindowStyle Hidden
   return [int]$p.ExitCode
@@ -209,6 +212,20 @@ if($native){
   }
 }
 
+# unified entity contract (universal jobs: Data/contract.json is mandatory): EditMode check of
+# rig + clip library + controller mode, then the controller PlayMode scenario of the entity
+$contract = Test-Path -LiteralPath "$Project\Assets\AlphaTransfer\Data\contract.json"
+$v9=[pscustomobject]@{Verdict='NOT_RUN';Problems=@()};$e9='NOT_RUN'
+$v10=[pscustomobject]@{Verdict='NOT_RUN';Problems=@()};$e10='NOT_RUN'
+if ($contract) {
+  $e9 = Invoke-Unity 'CubeGame.AlphaTransfer.Editor.AlphaEntityPlayMode.Check' "$out\entity_contract.log"
+  $v9 = Resolve-Verdict "$out\entity_contract.txt" 'ENTITY_CONTRACT_RESULT' $e9
+  if ($loco -and -not $SkipPlayMode) {
+    $e10 = Invoke-Unity 'CubeGame.AlphaTransfer.Editor.AlphaEntityPlayMode.Run' "$out\entity_playmode.log" -NoQuit
+    $v10 = Resolve-Verdict "$out\entity_playmode.txt" 'ENTITY_PLAYMODE_RESULT' $e10
+  }
+}
+
 Show-Verdict 'SELFTEST_RESULT' $v1 $e1
 Show-Verdict 'TRANSFER_RESULT' $v2 $e2
 Show-Verdict 'PLAYMODE_RESULT' $v3 $e3
@@ -218,12 +235,15 @@ if ($loco) {
 }
 if ($controller) { Show-Verdict 'CONTROLLER_PLAYMODE_RESULT' $v6 $e6 }
 if($native){Show-Verdict 'NATIVE_LIFECYCLE_RESULT' $v7 $e7;Show-Verdict 'NATIVE_LIFECYCLE_PLAYMODE_RESULT' $v8 $e8}
+if ($contract) { Show-Verdict 'ENTITY_CONTRACT_RESULT' $v9 $e9; if ($loco) { Show-Verdict 'ENTITY_PLAYMODE_RESULT' $v10 $e10 } }
 Write-Output "REPORTS=$out"
 
 $allPass = ($v1.Verdict -eq 'PASS') -and ($v2.Verdict -eq 'PASS') -and ($SkipPlayMode -or ($v3.Verdict -eq 'PASS'))
 if ($loco) { $allPass = $allPass -and ($v4.Verdict -eq 'PASS') -and ($SkipPlayMode -or ($v5.Verdict -eq 'PASS')) }
 if ($controller) { $allPass = $allPass -and $loco -and ($SkipPlayMode -or ($v6.Verdict -eq 'PASS')) }
 if($native){$allPass=$allPass -and $controller -and ($v7.Verdict -eq 'PASS') -and ($SkipPlayMode -or ($v8.Verdict -eq 'PASS'))}
+if ($UniversalJob -and -not $contract) { Write-Output 'ENTITY_CONTRACT_RESULT=FAIL contract.json missing'; $allPass = $false }
+if ($contract) { $allPass = $allPass -and ($v9.Verdict -eq 'PASS'); if ($loco) { $allPass = $allPass -and ($SkipPlayMode -or ($v10.Verdict -eq 'PASS')) } }
 if (-not $allPass) { Write-Output "RESULT=FAIL"; exit 1 }
 Write-Output "RESULT=PASS"
 exit 0

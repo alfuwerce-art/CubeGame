@@ -4,6 +4,8 @@
 **Исследование-основание:** [UNIVERSAL_ANIMATION_SYSTEM_RESEARCH.md](../research/alpha2013/UNIVERSAL_ANIMATION_SYSTEM_RESEARCH.md). **Результаты прототипа:** [UNIVERSAL_TRANSFER_PROTOTYPE_REPORT.md](../research/alpha2013/UNIVERSAL_TRANSFER_PROTOTYPE_REPORT.md). **Методичка:** [UNIVERSAL_TRANSFER_PLAYBOOK.md](../agents/UNIVERSAL_TRANSFER_PLAYBOOK.md).
 **Границы:** локальный исследовательский прототип (D54). Не S05B, не production-Unity; все данные Alpha — только `.scratch`. Перед релизом — собственные/лицензированные ассеты.
 
+> **Обновление 2026-11-06 (S05A2-UNIVERSAL-CONTINUE-01):** поверх этой схемы введены единый контракт сущности/частей/анимаций и планировщик переноса (SCAN/PLAN/VALIDATE/PILOT/BATCH) — [UNIVERSAL_ENTITY_CONTRACT](UNIVERSAL_ENTITY_CONTRACT.md). Таблица §6 устарела: по текущим данным 151 из 156 видов AUTO_READY по геометрии + ходьбе/покою (формула + проверенные блоки крыльев/`slot_98`), см. [отчёт](../reports/S05A2_UNIVERSAL_CONTINUATION_REPORT.md). Очередь `pipeline batch` сохранена как исторический формат; актуальная — `transfer_planner plan`.
+
 ---
 
 ## 1. Принцип

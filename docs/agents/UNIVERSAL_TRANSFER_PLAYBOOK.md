@@ -1,5 +1,7 @@
 # Методичка: универсальный перенос моделей и анимаций Alpha → Unity (для DeepSeek)
 
+**Дополнение 2026-11-06 (S05A2-UNIVERSAL-CONTINUE-01, Claude Code):** единый контракт сущности и планировщик переноса — раздел 7 ниже, архитектура [UNIVERSAL_ENTITY_CONTRACT](../architecture/UNIVERSAL_ENTITY_CONTRACT.md), отчёт [S05A2_UNIVERSAL_CONTINUATION_REPORT](../reports/S05A2_UNIVERSAL_CONTINUATION_REPORT.md). Шаги 1–6 ниже остаются в силе; новый вид теперь начинается с `transfer_planner plan`, а не с ручного задания.
+
 **Дополнение 2026-11-06:** контроллер/action-бейкинг одного гуманоида описаны в [ANIMATION_SYSTEM_PLAYBOOK](ANIMATION_SYSTEM_PLAYBOOK.md). Массовая обработка/S05B остаётся запрещённой. Это дополнение не авторизует другие виды.
 
 **Статус технологии:** прототип, `READY_FOR_REVIEW` (не ACCEPTED). Проверено на **трёх планах тела** (гуманоид 8 частей, четвероногое с хвостом 7 частей, «тело + 2 ноги» 3 части), **трёх семействах движения** и **пяти видах** (два из них — без запуска Alpha). **S05B не разрешён**: методичка готовит пакетный перенос, но не запускает его. Массовую обработку не начинать без решения продюсера.
@@ -118,3 +120,19 @@ python -m tools.alpha_models.universal.pipeline build-clips --capture .scratch\u
 3. **Крылья** (`slot_9a`, 13 видов) и **`slot_98`** (10 видов): по одному захвату + правило якоря (§3).
 4. **Проверка семейств в рантайме**: при случае снять два разных вида одного семейства (например, Cat 0x1e и WhiteCat 0x20) и сравнить `validate_against` — сейчас равенство доказано только статически.
 5. Только после 1–4 и решения продюсера — пакетный режим по очереди.
+
+## 7. Планировщик и контракт (с 2026-11-06)
+
+Порядок для любого вида (без правки кода):
+
+```powershell
+python -m tools.alpha_models.universal.transfer_planner plan --out-dir .scratch/universal/plan
+python -m tools.alpha_models.universal.transfer_planner validate --manifest .scratch/lifecycle/library/actions.json
+python -m tools.alpha_models.universal.transfer_planner pilot --kinds 0x20,0x1e,0x3f,0x02 --execute
+```
+
+* `plan.md` / `coverage.csv` — у каждого вида категория по структуре, план тела, источники ходьбы/покоя, статус действий и причина, `AUTO_READY / NEEDS_RESEARCH / BLOCKED`. Задания `jobs/auto_*.json` сгенерированы: формула ходьбы, эталонный захват семейства (найден по SHA256), библиотека действий профиля — если есть.
+* `pilot` обрабатывает **только** `PILOT_ALLOWLIST`. Другой вид → `REFUSED` (exit 2). Расширение списка — решение продюсера, не правка ради PASS.
+* `batch` всегда `NOT_AUTHORIZED` (exit 3), пока S05B не разрешён.
+* В Unity обязательны `ENTITY_CONTRACT_RESULT=PASS` и (при формуле ходьбы) `ENTITY_PLAYMODE_RESULT=PASS`; смотреть `entity_contract.txt`, `entity_playmode.txt`, `entity_frames/`.
+* Действия появляются у вида только через запись в `contract.ACTION_PROFILES` (образец + закреплённое семейство + триггер) после исследования **его** запуска. Правила ввода гуманоида на других существ не переносить; `POSES_FAMILY_COMPATIBLE_TRIGGER_UNPROVEN` — не повод импортировать позы.
