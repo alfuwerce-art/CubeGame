@@ -1,0 +1,10 @@
+{
+ "kind": "0x20",
+ "seed_variant": [0, 0],
+ "variant": "whitecat_0x20_formula_vs_alpha",
+ "locomotion": "formula",
+ "amp": 0.19,
+ "speed_xy": 3.57,
+ "reference_capture": {"path": "D:/Projects/CubeGame/.scratch/universal/cap/batch1.jsonl", "kind": "0x20"},
+ "note": "Parametric walk checked against the captured WhiteCat frames in Unity (ALPHA check). The captured clip stays 'walk'; the formula clip is 'walk_formula'."
+}

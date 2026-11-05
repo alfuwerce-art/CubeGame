@@ -13,6 +13,11 @@
 | `unity/Runtime/AlphaClip.cs` | клип: разбор с проверками, сэмплирование (lerp/slerp) |
 | `unity/Runtime/AlphaRig.cs` | плоский риг `root → part_* → mesh`, правила якорей, чтение матрицы обратно в пространство Alpha |
 | `unity/Runtime/AlphaClipPlayer.cs` | проигрыватель (время в мс / фаза ходьбы), слой наклона взгляда |
+| `unity/Runtime/AlphaParamWalk.cs` | параметрическая ходьба Alpha (порт `universal/param_walk.py`): кадры суставов по фазе/амплитуде/параметрам вида |
+| `unity/Runtime/AlphaLocomotionDriver.cs` | позирует риг формулой каждый кадр (скорость, амплитуда, ×1.25, наклон головы) — без клипов |
+| `unity/Runtime/AlphaLocomotionProbe.cs` | PlayMode-проверка драйвера: поза = формула, развёртка амплитуды, сглаживание наклона |
+| `unity/Editor/AlphaParamWalkCheck.cs` | SPEC / синтетика / GOLDEN (C# = Python) / ALPHA (C# против захвата) → `paramwalk.txt` |
+| `unity/Editor/AlphaParamWalkPlayMode.cs` | безопасный вход/выход PlayMode для драйвера → `locomotion_playmode.txt` |
 | `unity/Runtime/VoxelMesh.cs` | меш из `.cubdec` в координатах сетки (те же грани, что у Alpha) |
 | `unity/Runtime/AlphaPlayModeProbe.cs` | проверка в реальных кадрах PlayMode |
 | `unity/Runtime/VoxelShaded.shader` | вершинные цвета + постоянный свет для снимков |

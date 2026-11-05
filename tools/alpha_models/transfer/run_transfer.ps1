@@ -156,12 +156,30 @@ if (-not $SkipPlayMode) {
   $v3 = Resolve-Verdict "$out\playmode.txt" 'PLAYMODE_RESULT' $e3
 }
 
+# parametric walk (job "locomotion": "formula" -> Data/locomotion.json): formula checks + driver PlayMode
+$loco = Test-Path -LiteralPath "$Project\Assets\AlphaTransfer\Data\locomotion.json"
+$v4 = [pscustomobject]@{ Verdict = 'NOT_RUN'; Problems = @() }; $e4 = 'NOT_RUN'
+$v5 = [pscustomobject]@{ Verdict = 'NOT_RUN'; Problems = @() }; $e5 = 'NOT_RUN'
+if ($loco) {
+  $e4 = Invoke-Unity 'CubeGame.AlphaTransfer.Editor.AlphaParamWalkCheck.Run' "$out\paramwalk.log"
+  $v4 = Resolve-Verdict "$out\paramwalk.txt" 'PARAMWALK_RESULT' $e4
+  if (-not $SkipPlayMode) {
+    $e5 = Invoke-Unity 'CubeGame.AlphaTransfer.Editor.AlphaParamWalkPlayMode.Run' "$out\locomotion_playmode.log" -NoQuit
+    $v5 = Resolve-Verdict "$out\locomotion_playmode.txt" 'LOCOMOTION_PLAYMODE_RESULT' $e5
+  }
+}
+
 Show-Verdict 'SELFTEST_RESULT' $v1 $e1
 Show-Verdict 'TRANSFER_RESULT' $v2 $e2
 Show-Verdict 'PLAYMODE_RESULT' $v3 $e3
+if ($loco) {
+  Show-Verdict 'PARAMWALK_RESULT' $v4 $e4
+  Show-Verdict 'LOCOMOTION_PLAYMODE_RESULT' $v5 $e5
+}
 Write-Output "REPORTS=$out"
 
 $allPass = ($v1.Verdict -eq 'PASS') -and ($v2.Verdict -eq 'PASS') -and ($SkipPlayMode -or ($v3.Verdict -eq 'PASS'))
+if ($loco) { $allPass = $allPass -and ($v4.Verdict -eq 'PASS') -and ($SkipPlayMode -or ($v5.Verdict -eq 'PASS')) }
 if (-not $allPass) { Write-Output "RESULT=FAIL"; exit 1 }
 Write-Output "RESULT=PASS"
 exit 0

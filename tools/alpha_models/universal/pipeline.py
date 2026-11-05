@@ -7,6 +7,8 @@ Stages (docs/architecture/UNIVERSAL_ASSET_ANIMATION_PIPELINE.md):
   prepare-unity Binding Generator + Unity data for ONE kind (models from the static tables,
                 clips of its motion family); refuses unsupported kinds and foreign clips
   batch         Batch Orchestrator: every kind -> AUTO_READY | NEEDS_CAPTURE | EXCEPTION queue
+  param-walk-validate  parametric walk formula (param_walk.py) vs every frame of a capture
+  param-walk-coverage  every kind/family -> FORMULA_VERIFIED | FORMULA_CODE_ONLY_TERMS | NEEDS_RESEARCH
 
 All Alpha-derived outputs (tables, clips, models) are written under ``.scratch`` only (D54).
 
@@ -193,14 +195,70 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
         uc = _unity_clip(clip, res.parts)
         (data_dir / "clips" / f"{clip['name']}.json").write_text(json.dumps(uc), encoding="utf-8")
         written.append(clip["name"])
+    loco = None
+    for old in ("locomotion.json", "paramwalk_golden.json", "paramwalk_reference.json"):
+        if (data_dir / old).exists():
+            (data_dir / old).unlink()      # never leave a stale spec/reference of another kind
+    if job.get("locomotion") == "formula":
+        loco, wf = _prepare_locomotion(job, kind, app, res, parts_out, data_dir, "walk" in written, problems)
+        if wf:
+            written.append(wf)
     if not written:
         problems.append(f"NO_FAMILY_CLIPS {res.family_id} in {clips_dir}")
     result = "PASS" if not problems else "FAIL"
     out = {"PREPARE_RESULT": result, "problems": problems, "kind": f"0x{kind:02x}",
            "family_id": res.family_id, "parts": res.parts, "models": [p["model"] for p in parts_out],
-           "clips": written, "skipped_clips": skipped}
+           "clips": written, "skipped_clips": skipped, "locomotion": loco}
     print(json.dumps(out, indent=1))
     return out
+
+
+def _prepare_locomotion(job, kind, app, res, parts_out, data_dir, have_captured_walk, problems):
+    """Parametric walk data for Unity (job "locomotion": "formula").
+
+    Writes locomotion.json (spec for AlphaLocomotionDriver), paramwalk_golden.json (synthetic C#/Python
+    cross-check) and, if the job names a capture of THIS motion family, paramwalk_reference.json
+    (captured Alpha joint frames, local only). Adds a formula walk clip (RECONSTRUCTED_FROM_EVIDENCE)
+    named "walk", or "walk_formula" when a captured walk of the family is also present.
+    """
+    from tools.alpha_models.universal import param_walk as pw
+    if any(p not in pw.MODELLED_PARTS for p in res.parts):
+        problems.append(f"LOCOMOTION_PARTS_NOT_MODELLED {[p for p in res.parts if p not in pw.MODELLED_PARTS]}")
+        return None, None
+    spec = pw.locomotion_spec(app, kind, res.family_id, res.parts)
+    if spec["status"] == "NEEDS_RESEARCH":
+        problems.append(f"LOCOMOTION_NEEDS_RESEARCH unknown_terms={spec['unknown_terms']}")
+        return spec, None
+    (data_dir / "locomotion.json").write_text(json.dumps(spec, indent=1), encoding="utf-8")
+    (data_dir / "paramwalk_golden.json").write_text(json.dumps(pw.golden_cases()), encoding="utf-8")
+    ref = job.get("reference_capture")
+    if ref:
+        frames = uclip.load_capture(ref["path"], kind=int(str(ref["kind"]), 0))
+        rdata = pw.reference_frames(frames, ref["path"])
+        if rdata["rig"] != res.family_id:
+            problems.append(f"REFERENCE_FAMILY_MISMATCH {rdata['rig']} != {res.family_id}")
+        else:
+            (data_dir / "paramwalk_reference.json").write_text(json.dumps(rdata), encoding="utf-8")
+            spec["reference_frames"] = len(rdata["frames"])
+    clip = pw.generate_walk_clip(app, kind, res.family_id, res.parts, amp=float(job.get("amp", 0.19)),
+                                 boost=bool(job.get("boost", False)),
+                                 accelerating=bool(job.get("accelerating", False)),
+                                 speed_xy=float(job.get("speed_xy", 3.7)))
+    sizes = {p["name"]: p["size"] for p in parts_out}
+    for p in clip["parts"]:
+        p["captured_size"] = sizes[p["name"]]
+    clip["name"] = "walk_formula" if have_captured_walk else "walk"
+    uc = _unity_clip(clip, res.parts)
+    (data_dir / "clips" / f"{clip['name']}.json").write_text(json.dumps(uc), encoding="utf-8")
+    spec["clip"] = clip["name"]
+    return spec, clip["name"]
+
+
+def batch_has_clips(clips_root, family_id):
+    for p in glob.glob(os.path.join(family_dir(clips_root, family_id), "*.alphaclip.json")):
+        if json.load(open(p, encoding="utf-8")).get("status") == "TRANSFERRED_FROM_ALPHA":
+            return True
+    return False
 
 
 # --------------------------------------------------------------------------- batch
@@ -284,7 +342,35 @@ def main(argv=None):
     q.add_argument("--static", required=True)
     q.add_argument("--clips-root", default=r"D:\Projects\CubeGame\.scratch\universal\clips")
     q.add_argument("--out", required=True)
+    v = sub.add_parser("param-walk-validate")
+    v.add_argument("--capture", required=True)
+    v.add_argument("--kind", required=True, type=lambda x: int(x, 0))
+    v.add_argument("--creature", default=None)
+    c = sub.add_parser("param-walk-coverage")
+    c.add_argument("--static", required=True)
+    c.add_argument("--clips-root", default=r"D:\Projects\CubeGame\.scratch\universal\clips")
+    c.add_argument("--out", required=True)
     a = ap.parse_args(argv)
+    if a.cmd == "param-walk-validate":
+        from tools.alpha_models.universal import param_walk as pw
+        r = pw.validate_capture(uclip.load_capture(a.capture, kind=a.kind, creature=a.creature))
+        # every part except the smoothed head lean (reported by its one-step prediction)
+        body = {p: x for p, x in r["parts"].items() if p not in ("head", "hair")}
+        ok = r["frames"] > 0 and bool(body) and all(
+            x["max_pos_vox"] <= pw.VALIDATE_MAX_POS_VOX and x["max_rot_deg"] <= pw.VALIDATE_MAX_ROT_DEG for x in body.values())
+        print(json.dumps({"PARAMWALK_VALIDATE": "PASS" if ok else "FAIL", **r}, indent=1))
+        return 0 if ok else 1
+    if a.cmd == "param-walk-coverage":
+        from tools.alpha_models.universal import param_walk as pw
+        table = json.load(open(a.static, encoding="utf-8"))
+        fams = sorted({cr.resolve(int(k, 16), e["appearance"]).family_id for k, e in table["kinds"].items()
+                       if e.get("appearance")})
+        r = pw.coverage(table, captured_families=[f for f in fams if batch_has_clips(a.clips_root, f)])
+        os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
+        with open(a.out, "w", encoding="utf-8") as fh:
+            json.dump(r, fh, indent=1)
+        print(json.dumps({"PARAMWALK_COVERAGE": "DONE", **r["metrics"]}, indent=1))
+        return 0
     if a.cmd == "scan":
         return st.main(["scan", "--exe", a.exe, "--db", a.db, "--decomp", a.decomp, "--out", a.out])
     if a.cmd == "build-clips":

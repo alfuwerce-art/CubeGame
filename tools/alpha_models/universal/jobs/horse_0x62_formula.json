@@ -1,0 +1,9 @@
+{
+ "kind": "0x62",
+ "seed_variant": [0, 0],
+ "variant": "horse_0x62_formula_only",
+ "locomotion": "formula",
+ "amp": 0.19,
+ "speed_xy": 3.7,
+ "note": "NOT captured, no family clip: parametric walk only (FORMULA_VERIFIED). Status RECONSTRUCTED_FROM_EVIDENCE."
+}
