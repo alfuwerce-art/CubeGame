@@ -286,3 +286,18 @@ python -m unittest discover -s tools/alpha_models/tests -t .
 `DEBUGGER_RUNTIME=PASS`, `CREATURE_POINTER=NOT_FOUND`, `MODEL_VECTOR=NOT_FOUND`,
 `BODY_PART_MAPPING=NOT_FOUND`, `ANIMATION_CHANNEL_BINDING=NOT_FOUND`,
 `UNITY_ORIGINAL_ANIMATION=BLOCKED`.
+
+
+## 10. S05A2-D58-RUNTIME-STRUCT: существо и вектор моделей сняты (продолжение §9.4)
+
+Запланированный в §9.4 шаг выполнен — точка останова перенесена внутрь функции на чтение
+`movsx ecx, word ptr [eax+0x8c]` (RVA `0x12A42`), где `eax = *this` уже инициализирован.
+Результат и проверки — отдельный отчёт [CREATURE_RUNTIME_CAPTURE.md](CREATURE_RUNTIME_CAPTURE.md),
+инструменты — [tools/alpha_models/runtime/](../../../tools/alpha_models/runtime/README.md).
+
+Коротко: `CREATURE_POINTER=VERIFIED` (реальный указатель существа в `eax`), `MODEL_VECTOR=VERIFIED`
+(`esi` = глобальный вектор моделей), 8 полей `+0x8c..+0x9a` = 8 индексов `data1.db`
+(333→`dragon-body.cub`, 334→`dragon-foot.cub`), слот модели→матрица части→канал восстановлены.
+Отладчик теперь отсоединяется без падения игры (проверено: процесс жив после 120 снятий).
+`UNITY_ALPHA_MOTION=BLOCKED` — игрок и два состояния в этой сессии не сняты, `TRANSFERRED_FROM_ALPHA`
+не присвоен.
