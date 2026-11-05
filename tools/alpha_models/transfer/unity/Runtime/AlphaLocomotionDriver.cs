@@ -72,6 +72,7 @@ namespace CubeGame.AlphaTransfer
         {
             if (Spec == null) return;
             var s = Input;
+            _rig.SetAllVisible(true);
             for (int k = 0; k < _parts.Length; k++)
             {
                 var j = Joint(_names[k]);

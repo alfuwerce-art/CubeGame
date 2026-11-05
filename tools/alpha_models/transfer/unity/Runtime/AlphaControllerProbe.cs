@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Linq;
 using UnityEngine;
 
 namespace CubeGame.AlphaTransfer
@@ -28,6 +29,8 @@ namespace CubeGame.AlphaTransfer
         bool _entered, _acted, _recovered, _exited, _busyChecked;
         AlphaControllerPhase _lastPhase;
         PartPose[] _prev, _firstAction;
+        bool[] _previousVisible,_firstActionVisible;
+        int _visibilityChanges,_hiddenFrames;
         readonly List<string> _problems = new List<string>();
         readonly List<string> _results = new List<string>();
         readonly List<string> _captureLog = new List<string>();
@@ -45,9 +48,9 @@ namespace CubeGame.AlphaTransfer
             _c.locomotion.followAmplitude = false; _c.locomotion.amplitude = 0;
             if (!_c.Init()) { _problems.AddRange(_c.Problems); Finish(); return; }
             _c.locomotion.Apply();
-            _names = _c.requiredClips;
+            _names = _c.requiredClips.Where(n=>_c.actions.Get(n).Data.category=="MOTION").ToArray();
             if (_names.Length == 0) { _problems.Add("NO_REQUIRED_REGISTRY"); Finish(); return; }
-            _prev = Snapshot(); _lastPhase = _c.Phase;
+            _prev = Snapshot();_previousVisible=Visible(); _lastPhase = _c.Phase;
         }
 
         PartPose[] Snapshot()
@@ -58,10 +61,13 @@ namespace CubeGame.AlphaTransfer
             return p;
         }
 
-        void Compare(PartPose[] expected)
+        bool[] Visible(){var v=new bool[_rig.parts.Length];for(int i=0;i<v.Length;i++)v[i]=_rig.IsVisible(i);return v;}
+        void Compare(PartPose[] expected,bool[] visible=null)
         {
             for (int i = 0; i < expected.Length; i++)
             {
+                if(visible!=null && _rig.IsVisible(i)!=visible[i])_problems.Add("RUNTIME_VISIBILITY_MISMATCH "+_rig.partNames[i]);
+                if(visible!=null&&!visible[i])continue;
                 var t = _rig.parts[i];
                 float p = Vector3.Distance(t.localPosition, expected[i].position);
                 float r = Quaternion.Angle(t.localRotation, expected[i].rotation);
@@ -74,6 +80,7 @@ namespace CubeGame.AlphaTransfer
         void CheckPose()
         {
             var expected = new PartPose[_rig.parts.Length];
+            var visible=new bool[_rig.parts.Length];
             bool formula = _c.Phase == AlphaControllerPhase.Locomotion || _c.Phase == AlphaControllerPhase.Stopping
                 || _c.Phase == AlphaControllerPhase.ExitingAction;
             if (formula)
@@ -83,22 +90,24 @@ namespace CubeGame.AlphaTransfer
                     int i = _rig.IndexOf(name);
                     AlphaSpace.Decompose(AlphaSpace.ToUnity(_c.locomotion.Joint(name)), out var p,out var r,out var s);
                     expected[i] = new PartPose { position=p,rotation=r,scale=s };
+                    visible[i]=true;
                 }
             }
             else
             {
                 var clip = _c.actions.Current; var source = new PartPose[clip.PartCount];
-                clip.Sample(_c.actions.Cursor, source);
-                for (int i = 0; i < source.Length; i++) expected[_rig.IndexOf(clip.Data.parts[i])] = source[i];
+                clip.Sample(_c.actions.Cursor, source);var mask=new bool[clip.PartCount];clip.SampleVisibility(_c.actions.Cursor,mask);
+                for (int i = 0; i < source.Length; i++){int p=_rig.IndexOf(clip.Data.parts[i]);expected[p]=source[i];visible[p]=mask[i];}
             }
             if (_c.IsBlending)
                 for (int i = 0; i < expected.Length; i++)
                 {
+                    if(!visible[i]||!_c.BlendFromVisible[i])continue;
                     var a = _c.BlendFrom[i]; var b = expected[i]; float u = _c.BlendWeight;
                     expected[i] = new PartPose { position=Vector3.Lerp(a.position,b.position,u),
                         rotation=Quaternion.Slerp(a.rotation,b.rotation,u), scale=Vector3.Lerp(a.scale,b.scale,u) };
                 }
-            Compare(expected);
+            Compare(expected,visible);
         }
 
         void LateUpdate()
@@ -107,6 +116,11 @@ namespace CubeGame.AlphaTransfer
             _frame++; _stageFrames++;
             if (_c.Problems.Count > 0) { _problems.AddRange(_c.Problems); Finish(); return; }
             CheckPose();
+            for(int i=0;i<_rig.parts.Length;i++)
+            {
+                if(_previousVisible[i]!=_rig.IsVisible(i))_visibilityChanges++;
+                if(!_rig.IsVisible(i))_hiddenFrames++;
+            }
             if(captureFirstAction && _n==0 && _frame%4==0) Capture();
             if (_c.Phase == AlphaControllerPhase.EnteringAction) _entered = true;
             if (_c.Phase == AlphaControllerPhase.Recovery) _recovered = true;
@@ -114,6 +128,7 @@ namespace CubeGame.AlphaTransfer
             if (_c.Phase == AlphaControllerPhase.Recovery && _lastPhase == AlphaControllerPhase.Action)
                 for (int i=0;i<_prev.Length;i++)
                 {
+                    if(!_previousVisible[i]||!_rig.IsVisible(i))continue;
                     _jump = Mathf.Max(_jump,Vector3.Distance(_prev[i].position,_rig.parts[i].localPosition));
                     _jumpRot = Mathf.Max(_jumpRot,Quaternion.Angle(_prev[i].rotation,_rig.parts[i].localRotation));
                 }
@@ -121,9 +136,10 @@ namespace CubeGame.AlphaTransfer
             {
                 _acted = true;
                 CheckGrip();
-                if (_firstAction == null) _firstAction = Snapshot();
+                if (_firstAction == null){_firstAction = Snapshot();_firstActionVisible=Visible();}
                 for (int i=0;i<_firstAction.Length;i++)
                 {
+                    if(!_firstActionVisible[i]||!_rig.IsVisible(i))continue;
                     _motion = Mathf.Max(_motion,Vector3.Distance(_firstAction[i].position,_rig.parts[i].localPosition));
                     _motionRot = Mathf.Max(_motionRot,Quaternion.Angle(_firstAction[i].rotation,_rig.parts[i].localRotation));
                 }
@@ -157,6 +173,11 @@ namespace CubeGame.AlphaTransfer
                         if (!_entered || !_acted || !_recovered || !_exited || !_busyChecked) _problems.Add("MISSING_ACTION_PHASE "+_names[_n]);
                         if (_motion <= .001f && _motionRot <= .05f) _problems.Add("ACTION_STATIC "+_names[_n]);
                         _results.Add($"ACTION {_names[_n]} status={_c.actions.Current.Data.status} phases=enter,action,recovery,exit,idle motion_vox={_motion:0.0000} rotation_deg={_motionRot:0.0000}");
+                        if(_c.actions.Current.Data.visibilityMode=="EXPLICIT_NATIVE_DRAW")
+                        {
+                            if(_visibilityChanges<2||_hiddenFrames==0)_problems.Add("DYNAMIC_VISIBILITY_NOT_EXERCISED "+_names[_n]);
+                            _results.Add($"  VISIBILITY transitions={_visibilityChanges} hidden_part_frames={_hiddenFrames}");
+                        }
                         if(_c.actions.Current.Data.twoHandedAttack)
                         {
                             if(_mainGrip>.05f||_secondRadial>2.5f||_outsideHandle>1e-3f||_bladeTravel<30f)
@@ -175,10 +196,11 @@ namespace CubeGame.AlphaTransfer
                         _entered=_acted=_recovered=_exited=_busyChecked=false; _firstAction=null;
                         _motion=_motionRot=0; _stage=0; _stageFrames=0;
                         _mainGrip=_secondRadial=_outsideHandle=_bladeTravel=0;_hasTip=false;
+                        _visibilityChanges=_hiddenFrames=0;
                     }
                     break;
             }
-            _lastPhase=_c.Phase; _prev=Snapshot();
+            _lastPhase=_c.Phase; _prev=Snapshot();_previousVisible=Visible();
         }
 
         void CheckGrip()

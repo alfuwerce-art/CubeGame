@@ -239,6 +239,12 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
             problems.append('WEAPON_REFERENCE_MISSING_OR_HASH_MISMATCH')
         else:
             (data_dir/'weapon_reference.json').write_bytes(ref.read_bytes())
+        life=Path(manifest_path).parent/'lifecycle.json'
+        if manifest.get('lifecycle_sha256'):
+            if not life.exists() or hashlib.sha256(life.read_bytes()).hexdigest()!=manifest['lifecycle_sha256']:
+                problems.append('LIFECYCLE_REFERENCE_HASH_MISMATCH')
+            else:(data_dir/'lifecycle.json').write_bytes(life.read_bytes())
+        elif (data_dir/'lifecycle.json').exists():(data_dir/'lifecycle.json').unlink()
     elif (data_dir / 'actions.json').exists():
         (data_dir / 'actions.json').unlink()
         if (data_dir/'weapon_reference.json').exists(): (data_dir/'weapon_reference.json').unlink()

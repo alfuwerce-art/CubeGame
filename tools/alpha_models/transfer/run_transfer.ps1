@@ -197,6 +197,18 @@ if ($controller -and -not $SkipPlayMode) {
   $v6 = Resolve-Verdict "$out\controller_playmode.txt" 'CONTROLLER_PLAYMODE_RESULT' $e6
 }
 
+$native=Test-Path -LiteralPath "$Project\Assets\AlphaTransfer\Data\lifecycle.json"
+$v7=[pscustomobject]@{Verdict='NOT_RUN';Problems=@()};$e7='NOT_RUN'
+$v8=[pscustomobject]@{Verdict='NOT_RUN';Problems=@()};$e8='NOT_RUN'
+if($native){
+  $e7=Invoke-Unity 'CubeGame.AlphaTransfer.Editor.AlphaLifecycleChecks.Run' "$out\native_lifecycle.log"
+  $v7=Resolve-Verdict "$out\native_lifecycle.txt" 'NATIVE_LIFECYCLE_RESULT' $e7
+  if(-not $SkipPlayMode){
+    $e8=Invoke-Unity 'CubeGame.AlphaTransfer.Editor.AlphaControllerPlayMode.RunNative' "$out\native_lifecycle_playmode.log" -NoQuit
+    $v8=Resolve-Verdict "$out\native_lifecycle_playmode.txt" 'NATIVE_LIFECYCLE_PLAYMODE_RESULT' $e8
+  }
+}
+
 Show-Verdict 'SELFTEST_RESULT' $v1 $e1
 Show-Verdict 'TRANSFER_RESULT' $v2 $e2
 Show-Verdict 'PLAYMODE_RESULT' $v3 $e3
@@ -205,11 +217,13 @@ if ($loco) {
   Show-Verdict 'LOCOMOTION_PLAYMODE_RESULT' $v5 $e5
 }
 if ($controller) { Show-Verdict 'CONTROLLER_PLAYMODE_RESULT' $v6 $e6 }
+if($native){Show-Verdict 'NATIVE_LIFECYCLE_RESULT' $v7 $e7;Show-Verdict 'NATIVE_LIFECYCLE_PLAYMODE_RESULT' $v8 $e8}
 Write-Output "REPORTS=$out"
 
 $allPass = ($v1.Verdict -eq 'PASS') -and ($v2.Verdict -eq 'PASS') -and ($SkipPlayMode -or ($v3.Verdict -eq 'PASS'))
 if ($loco) { $allPass = $allPass -and ($v4.Verdict -eq 'PASS') -and ($SkipPlayMode -or ($v5.Verdict -eq 'PASS')) }
 if ($controller) { $allPass = $allPass -and $loco -and ($SkipPlayMode -or ($v6.Verdict -eq 'PASS')) }
+if($native){$allPass=$allPass -and $controller -and ($v7.Verdict -eq 'PASS') -and ($SkipPlayMode -or ($v8.Verdict -eq 'PASS'))}
 if (-not $allPass) { Write-Output "RESULT=FAIL"; exit 1 }
 Write-Output "RESULT=PASS"
 exit 0

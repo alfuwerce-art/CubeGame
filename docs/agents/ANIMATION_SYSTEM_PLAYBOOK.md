@@ -1,9 +1,9 @@
 # Один гуманоид: Alpha oracle → action clips → Unity controller
 
-**S05A-2; Codex продолжает Claude от `3d4a2fb`, включая `43a1ba6`.**
-**Проверено 2026-11-06:** 93 action ID / 60 states, 8 `BLOCKED`; Python 178, EditMode 29; все 93 действия PlayMode 30/60/120 Гц PASS. Подробные артефакты и границы доказательств — в отчёте.
-Рабочая ветка `codex/s05a2-claude-continuation`. S05B не разрешён.
-Отчёт: [S05A2_CLAUDE_CONTINUATION_REPORT](../reports/S05A2_CLAUDE_CONTINUATION_REPORT.md).
+**S05A-2; S05A2-CONTINUE-02, 2026-11-06.** Рабочая ветка `codex/s05a2-action-lifecycle` от `222e700` предыдущего продолжения Claude. S05B не разрешён.
+Текущий результат: 98 движущихся ID + HELD_STATE 79, 51/80 BLOCKED_CONTEXT; прежние 93 клипа сохранены побайтово. Три native-clock варианта перекрывают уже имеющиеся ID. Полный gameplay lifecycle не объявляется восстановленным.
+Отчёт и точные прогоны: [S05A2_ACTION_LIFECYCLE_REPORT](../reports/S05A2_ACTION_LIFECYCLE_REPORT.md); [правила и доказательства](../research/alpha2013/ALPHA_ACTION_LIFECYCLE.md).
+Предыдущий baseline: [S05A2_CLAUDE_CONTINUATION_REPORT](../reports/S05A2_CLAUDE_CONTINUATION_REPORT.md).
 Исследование: [ALPHA_ANIMATION_SYSTEM](../research/alpha2013/ALPHA_ANIMATION_SYSTEM.md).
 
 ## 1. Источники и статусы
@@ -11,10 +11,10 @@
 - `TRANSFERRED_FROM_ALPHA`: прежние клипы из живых GPU-матриц. Их исходники и метод сохранены.
 - `EMULATED_ALPHA_CODE`: новые action-клипы; исполняются исходные байты resolver/drawModel существующим строгим эмулятором Claude.
 - `RECONSTRUCTED_FROM_EVIDENCE`: параметрическая ходьба и отдельный слой оружия на спине.
-- `BLOCKED`: неподтверждённая длительность, отсутствующая/дополнительная часть, неподдержанный вызов, статичная поза, неполное восстановление.
+- `BLOCKED`: неподтверждённый контекст/тайминг, необъяснённая отсутствующая/дополнительная часть, неподдержанный вызов, неполное восстановление. Статичная поза законна для явно доказанного `HELD_STATE`.
 - `UNITY_TRANSITION`: переходы entry/recovery/exit в контроллере. Это политика Unity-пилота, а не извлечённые переходы Alpha.
 
-Положительный `combat_getAttackTiming` задаёт **окно исследования renderer**, не доказывает игровую доступность способности, её ввод или условие завершения в игровом update. Такие правила отдельно не восстанавливались. Не переименовывать ID в догаданные способности.
+Положительный `combat_getAttackTiming` задаёт **окно исследования renderer**, не доказывает игровую доступность способности, её ввод или условие завершения в игровом update. В текущем продолжении отдельно восстановлена ограниченная часть input update; её область задают native profiles и таблица доказательств. Не переименовывать остальные ID в догаданные способности.
 
 ## 2. Бейкинг
 
@@ -87,4 +87,35 @@ python -m pytest tools/alpha_models/tests -q -p no:cacheprovider
 
 ## 5. Продолжение DeepSeek
 
-Изучать `BLOCKED` записи по конкретной причине. Смена/скрытие экипировки требует отдельного контракта видимости/наборов частей, а не удаления проверок. Игровые lifetimes и условия прерывания требуют исследования update-кода. Новые персонажи/массовая конвертация — только после решения продюсера о S05B. Художественную приёмку не объявлять.
+Изучать `BLOCKED` записи по конкретной причине. Контракт скрытия реализован ниже; новые модели/slots требуют нового доказательства. Полный lifecycle и условия прерывания требуют дальнейшего исследования update-кода. Новые персонажи/массовая конвертация — только после решения продюсера о S05B. Художественную приёмку не объявлять. Продюсер отдельно сообщил, что проблема хвата второй руки исправлена: реализацию сохранять.
+
+## 6. Dynamic Parts и native input lifecycle
+
+Повторить ограниченный текущий пилот из корня **той же** рабочей копии:
+
+```powershell
+python -m tools.alpha_models.universal.action_baker --job tools/alpha_models/universal/jobs/human_0x02_actions.json --actions 22,23,26,71,72 --workers 4 --out .scratch/lifecycle/dynamic
+python -m tools.alpha_models.universal.lifecycle_pipeline
+python -m tools.alpha_models.universal.lifecycle_research
+& tools/alpha_models/transfer/run_transfer.ps1 -UniversalJob tools/alpha_models/universal/jobs/human_0x02_lifecycle.json -ControllerFps 60 -CaptureController
+```
+
+`lifecycle_pipeline` читает прежнюю `.scratch/animsys/human_actions_extended`, не изменяет её payloads, добавляет пять динамических клипов, `held_079` и три native-clock варианта. Это локальная зависимость: чистый Git checkout без исходных исследовательских данных не содержит защищённых клипов. Все native правила/позы остаются `.scratch`.
+
+Sparse clip v3: `source.visibility_mode=EXPLICIT_NATIVE_DRAW`, на каждом ключе `visible` в порядке `parts`, в `m` ровно видимые матрицы. В Unity сначала `SampleVisibility`, затем `AlphaRig.Apply(..., mask)`. Скрытая часть не имеет `KeyMatrix/KeyPose`; не достраивать её нулевой матрицей. Выключение Renderer ступенчатое; позы интерполируются только между двумя видимыми ключами. Новые неизвестные draw sites и неполные **видимые** части — FAIL.
+
+Категории обязательны: `MOTION`, `HELD_STATE`, `NATIVE_LIFECYCLE`; неизвестная категория — FAIL. Старые 93 + новые пять проходят полный controller probe; native/held не исключаются из приёмки: отдельный обязательный native EditMode и сценарий проверяют их. Все declared assets проходят Init/parse. Не считать число clip records числом уникальных action ID.
+
+`AlphaNativeDriver` — отдельный тестовый frontend существующего контроллера. Он отключает автономные часы контроллера и подаёт один dt. Native entry двигает source clock; прежний standalone `PlayAction` сохраняет старое поведение и сбрасывает native lifetime. Primary может прервать action по исходным helper-правилам; обычный `PlayAction` сохраняет busy guard. Пороговые тайминги input-правил читаются из локального профиля и не вшиты в C#-движок. Начальный idle age 200 мс — тестовый вход, не извлечённое правило. `NativeIdle()` вызывается по native timeout и оставляет timer; .15/.18/.12 s crossfades остаются `UNITY_TRANSITION`.
+
+Для class-1/4 greatsword, `+0x70=0`, пустого item1020/buff context: renderer strike 57/58=1382 мс, 67=492 мс; input-tail idle первый раз на 10001 мс, если secondary не удержан. 79 — latched pose, без duration-таймера; `ActivateHeldForTest()` обозначен как TEST_ADAPTER и не заменяет неизвестные ресурсы/GUI. Native bake начинается из settled idle, поэтому весь непрерывный smoothing при произвольном interrupt не объявляется извлечённым.
+
+При наличии `Data/lifecycle.json` runner **обязательно** проверяет `native_lifecycle.txt` и `native_lifecycle_playmode.txt`, exit 0 и session текущего запуска. Делать последовательные прогоны `-ControllerFps 30`, `60`, `120`; параллельный доступ к одному Unity-проекту запрещён. Во время запуска не менять `Assets/.../Scripts`: reload может потерять callback. Каждый MonoBehaviour должен находиться в одноимённом `.cs`.
+
+Реальный GIF/контактный лист, встроенные Windows библиотеки:
+
+```powershell
+& C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -NoProfile -STA -File tools/alpha_models/transfer/controller_preview.ps1 -Source native -Out D:/Projects/CubeGame/.scratch/lifecycle/visuals
+```
+
+Скрипт читает `native_frames.tsv`; frame labels включают action, timer и weapon visibility. GIF сокращает неподвижное ожидание, полные длительности смотреть в журнале. Кадры не заменять эскизом/рендером вне Unity.

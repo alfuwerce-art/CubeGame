@@ -121,9 +121,13 @@ namespace CubeGame.AlphaTransfer
         {
             var expect = new PartPose[clip.PartCount];
             clip.Sample(_player.Cursor, expect);
+            var visible=new bool[clip.PartCount];clip.SampleVisibility(_player.Cursor,visible);
             for (int p = 0; p < clip.PartCount; p++)
             {
-                var t = _rig.parts[_rig.IndexOf(clip.Data.parts[p])];
+                int r=_rig.IndexOf(clip.Data.parts[p]);
+                if(_rig.IsVisible(r)!=visible[p])_problems.Add("VISIBILITY_MISMATCH "+clip.Data.parts[p]);
+                if(!visible[p])continue;
+                var t = _rig.parts[r];
                 _maxPosErr = Mathf.Max(_maxPosErr, (t.localPosition - expect[p].position).magnitude);
                 _maxRotErr = Mathf.Max(_maxRotErr, Quaternion.Angle(t.localRotation, expect[p].rotation));
             }

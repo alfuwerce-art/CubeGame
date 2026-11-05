@@ -79,6 +79,17 @@ namespace CubeGame.AlphaTransfer.Editor
         static void Register()
         {
             Cases.Clear();
+            Add("standalone_action_clears_previous_native_lifetime",()=>
+            {
+                var go=ControllerRig(out var c);
+                try{
+                    if(!c.Init())return string.Join(";",c.Problems);
+                    c.nativeLifecycle=true;
+                    if(!c.PlayAction("action_001")||c.nativeLifecycle)return "native lifetime leaked into standalone action";
+                    for(int i=0;i<180&&c.InAction;i++)c.Step(1f/60);
+                    return Expect(!c.InAction,"standalone action no longer completes after native owner");
+                }finally{UnityEngine.Object.DestroyImmediate(go);}
+            });
             Add("weapon_interpolation_keeps_grip_between_rotating_keys",()=>
             {
                 var a=Matrix4x4.TRS(new Vector3(0,10,0),Quaternion.identity,Vector3.one);

@@ -22,6 +22,7 @@ namespace CubeGame.AlphaTransfer
         AlphaRig _rig;
         AlphaClip _current;
         PartPose[] _buffer = new PartPose[0];
+        bool[] _visibility=new bool[0];
         public float Cursor { get; private set; }
         public int FramesApplied { get; private set; }
         public List<string> Problems { get; } = new List<string>();
@@ -60,6 +61,7 @@ namespace CubeGame.AlphaTransfer
             playing = name;
             Cursor = cursor;
             if (_buffer.Length != clip.PartCount) _buffer = new PartPose[clip.PartCount];
+            if (_visibility.Length != clip.PartCount) _visibility = new bool[clip.PartCount];
             _rig.SetWeaponOnBack(clip.Data.weaponOnBack);
             ApplyAt(Cursor);
             return true;
@@ -70,7 +72,8 @@ namespace CubeGame.AlphaTransfer
         {
             if (_current == null) return;
             _current.Sample(x, _buffer);
-            _rig.Apply(_buffer, _maps[_current.Data.name]);
+            _current.SampleVisibility(x,_visibility);
+            _rig.Apply(_buffer, _maps[_current.Data.name],_visibility);
             if (Mathf.Abs(lookPitchDeg) > 1e-6f) ApplyLookPitch(lookPitchDeg);
             FramesApplied++;
         }
@@ -88,6 +91,7 @@ namespace CubeGame.AlphaTransfer
         {
             int i = _rig.IndexOf(part);
             if (i < 0) return;
+            if(!_rig.IsVisible(i))return;
             var t = _rig.parts[i];
             // J' = T(0,0,p) Rx(k*pitch) T(0,0,-p) J  (Alpha row-vector) == rotate in the part frame
             // J = S*T(0,0,3)*Rx*... -> the neck pivot is at 3/s in the part's local frame

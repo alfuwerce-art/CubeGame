@@ -13,6 +13,7 @@ namespace CubeGame.AlphaTransfer
     {
         public float x;
         public float[] m;
+        public int[] visible; // v3: one 0/1 per part; m contains ONLY visible matrices
     }
 
     [Serializable]
@@ -28,7 +29,10 @@ namespace CubeGame.AlphaTransfer
         public bool weaponOnBack;
         public int actionCode = -1, drawState;
         public float actionEndMs, recoveryStartMs;
+        public string category = "MOTION";
+        public float nativeIdleAtMs, gripEndMs;
         public bool twoHandedAttack;
+        public string visibilityMode = "STATIC_ALL";
         public string[] parts;
         public int[] capturedSizes;
         public AlphaClipKey[] keys;
@@ -49,12 +53,13 @@ namespace CubeGame.AlphaTransfer
         public AlphaClipData Data { get; }
         public int PartCount => Data.parts.Length;
         readonly PartPose[][] _poses;   // [key][part]
+        readonly bool[][] _visible;
         readonly int _weaponPivotPart;
         readonly Vector3 _weaponGripOffset;
 
-        AlphaClip(AlphaClipData data, PartPose[][] poses)
+        AlphaClip(AlphaClipData data, PartPose[][] poses, bool[][] visible)
         {
-            Data=data;_poses=poses;
+            Data=data;_poses=poses;_visible=visible;
             _weaponPivotPart=data.twoHandedAttack && data.weaponOnBack ? Array.IndexOf(data.parts,"weapon") : -1;
             if(_weaponPivotPart>=0)_weaponGripOffset=new Vector3(0,4-data.capturedSizes[3*_weaponPivotPart+2]*.5f,0);
         }
@@ -76,28 +81,49 @@ namespace CubeGame.AlphaTransfer
             if (string.IsNullOrEmpty(d.status)) problems.Add($"CLIP_NO_STATUS {tag}");
             if (string.IsNullOrEmpty(d.name)) problems.Add("CLIP_NO_NAME");
             if (float.IsNaN(d.duration) || float.IsInfinity(d.duration) || d.duration < 0) problems.Add($"CLIP_DURATION_INVALID {tag}");
+            if(d.category!="MOTION"&&d.category!="HELD_STATE"&&d.category!="NATIVE_LIFECYCLE")
+                problems.Add("CLIP_CATEGORY_UNKNOWN "+tag);
+            if(d.category=="HELD_STATE"&&(d.loop||d.param!="time_ms"||d.actionCode<0||d.actionEndMs!=0||d.recoveryStartMs!=0))
+                problems.Add("HELD_TIMELINE_INVALID "+tag);
+            if(d.category=="NATIVE_LIFECYCLE"&&(d.loop||d.param!="time_ms"||d.actionCode<0||!(d.gripEndMs>0)
+                ||!(d.actionEndMs<d.nativeIdleAtMs)||!(d.gripEndMs<d.nativeIdleAtMs)
+                ||d.recoveryStartMs!=d.nativeIdleAtMs||!(d.nativeIdleAtMs<d.duration)))
+                problems.Add("NATIVE_TIMELINE_INVALID "+tag);
             if (problems.Count > 0) return null;
             int n = d.parts.Length;
             if (new HashSet<string>(d.parts).Count != n) problems.Add($"CLIP_DUPLICATE_PART {tag}");
             if (d.keys.Length > 1 && !(d.duration > 0)) problems.Add($"CLIP_DURATION_INVALID {tag}");
             if (d.capturedSizes == null || d.capturedSizes.Length != 3 * n) problems.Add($"CLIP_SIZES_BAD {tag}");
+            bool dynamic=d.visibilityMode=="EXPLICIT_NATIVE_DRAW";
+            if(!dynamic && !string.IsNullOrEmpty(d.visibilityMode) && d.visibilityMode!="STATIC_ALL")problems.Add("CLIP_VISIBILITY_MODE_UNKNOWN "+tag);
             var poses = new PartPose[d.keys.Length][];
+            var visible=new bool[d.keys.Length][];
             float prevX = float.NegativeInfinity;
             for (int k = 0; k < d.keys.Length; k++)
             {
                 var key = d.keys[k];
                 if (key == null || float.IsNaN(key.x) || float.IsInfinity(key.x) || key.x < 0)
                 { problems.Add($"CLIP_TIME_INVALID {tag} key={k}"); return null; }
-                if (key.m == null || key.m.Length != 16 * n) { problems.Add($"CLIP_KEY_SIZE {tag} key={k}"); return null; }
+                visible[k]=new bool[n];int matrixCount=0;
+                if(dynamic && (key.visible==null || key.visible.Length!=n)){problems.Add("CLIP_VISIBILITY_MISSING "+tag);return null;}
+                if(!dynamic && key.visible!=null && key.visible.Length>0){problems.Add("CLIP_UNDECLARED_VISIBILITY "+tag);return null;}
+                for(int p=0;p<n;p++)
+                {
+                    if(dynamic && key.visible[p]!=0 && key.visible[p]!=1){problems.Add("CLIP_VISIBILITY_INVALID "+tag);return null;}
+                    visible[k][p]=!dynamic||key.visible[p]==1;if(visible[k][p])matrixCount++;
+                }
+                if (key.m == null || key.m.Length != 16 * matrixCount) { problems.Add($"CLIP_KEY_SIZE {tag} key={k}"); return null; }
                 if (!(key.x > prevX)) problems.Add($"CLIP_KEYS_NOT_INCREASING {tag} key={k}");
                 prevX = key.x;
                 poses[k] = new PartPose[n];
+                int offset=0;
                 for (int p = 0; p < n; p++)
                 {
+                    if(!visible[k][p])continue; // absent native draw: no fabricated pose
                     for (int i = 0; i < 16; i++)
-                        if (float.IsNaN(key.m[16 * p + i]) || float.IsInfinity(key.m[16 * p + i]))
+                        if (float.IsNaN(key.m[offset + i]) || float.IsInfinity(key.m[offset + i]))
                         { problems.Add($"CLIP_NAN {tag} key={k} part={d.parts[p]}"); return null; }
-                    var u = AlphaSpace.ToUnity(key.m, 16 * p);
+                    var u = AlphaSpace.ToUnity(key.m, offset);offset+=16;
                     if (!AlphaSpace.Decompose(u, out var pos, out var rot, out var scl))
                     { problems.Add($"CLIP_NOT_TRS {tag} key={k} part={d.parts[p]}"); return null; }
                     poses[k][p] = new PartPose { position = pos, rotation = rot, scale = scl };
@@ -105,18 +131,30 @@ namespace CubeGame.AlphaTransfer
             }
             if (d.keys[d.keys.Length - 1].x > d.duration) problems.Add($"CLIP_KEY_BEYOND_DURATION {tag}");
             if (!d.loop && d.keys.Length > 1 && d.keys[d.keys.Length - 1].x != d.duration) problems.Add($"CLIP_END_KEY_MISSING {tag}");
-            return problems.Count > 0 ? null : new AlphaClip(d, poses);
+            return problems.Count > 0 ? null : new AlphaClip(d, poses,visible);
         }
 
         /// <summary>Exact Alpha joint matrix of a key (no interpolation) for verification.</summary>
         public float[] KeyMatrix(int key, int part)
         {
+            if(!_visible[key][part])throw new InvalidOperationException("HIDDEN_PART_HAS_NO_MATRIX");
             var m = new float[16];
-            Array.Copy(Data.keys[key].m, 16 * part, m, 0, 16);
+            int offset=0;for(int p=0;p<part;p++)if(_visible[key][p])offset+=16;
+            Array.Copy(Data.keys[key].m, offset, m, 0, 16);
             return m;
         }
 
-        public PartPose KeyPose(int key, int part) => _poses[key][part];
+        public PartPose KeyPose(int key, int part) => _visible[key][part]?_poses[key][part]:throw new InvalidOperationException("HIDDEN_PART_HAS_NO_POSE");
+        public bool KeyVisible(int key,int part)=>_visible[key][part];
+
+        public void SampleVisibility(float x,bool[] output)
+        {
+            if(Data.loop && Data.keys.Length>1)x=Mathf.Repeat(x,Data.duration);
+            int lo=0,hi=Data.keys.Length;
+            while(lo+1<hi){int mid=(lo+hi)/2;if(Data.keys[mid].x<=x)lo=mid;else hi=mid;}
+            if(Data.loop && x<Data.keys[0].x)lo=Data.keys.Length-1;
+            Array.Copy(_visible[lo],output,PartCount);
+        }
 
         public void Sample(float x, PartPose[] output)
         {
@@ -152,6 +190,8 @@ namespace CubeGame.AlphaTransfer
         {
             for (int p = 0; p < PartCount; p++)
             {
+                if(!_visible[a][p]){output[p]=default;continue;}
+                if(!_visible[b][p]){output[p]=_poses[a][p];continue;}
                 var pa = _poses[a][p]; var pb = _poses[b][p];
                 // Fixed-back storage must interpolate a swinging weapon around the actual grip.
                 // Lerp of model-centre translations opens an artificial hand gap between exact keys.

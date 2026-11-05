@@ -161,7 +161,7 @@ def equip(creature, offset, item_type, subtype, level=1):
 
 
 def bake_action(oracle, kind, action, weapon=(0, 0), offhand=(0, 0), dt_ms=16, tail_ms=700, seed=(0, 0),
-                creature_bytes=None, this_bytes=b"", duration_ms=None):
+                creature_bytes=None, this_bytes=b"", duration_ms=None, dynamic_parts=False,native_timer_carry=False):
     """Run Alpha's renderer resolver + drawModel through idle -> action -> back to idle.
 
     Returns {"state", "timings", "duration_ms", "frames": [{"t", "action", "state", "joints"}]} with
@@ -191,12 +191,21 @@ def bake_action(oracle, kind, action, weapon=(0, 0), offhand=(0, 0), dt_ms=16, t
         raise ValueError(f"ACTION_DURATION_UNPROVEN action={action} timings={timings}")
     frames, t, state = [], 0, None
     sample_times = sorted(set(range(0, duration_ms + tail_ms + 1, dt_ms)) | {duration_ms, duration_ms + tail_ms})
+    if native_timer_carry:sample_times=sorted(set(sample_times)|{duration_ms+1})
+    if dynamic_parts:
+        boundaries=[duration_ms,duration_ms//2]
+        for names in (('windup',),('windup','reload'),('windup','reload','stamina')):
+            if all(isinstance(timings[n],int) and timings[n]>=0 for n in names):
+                boundaries.append(sum(timings[n] for n in names))
+        if isinstance(timings.get('windup'),int):boundaries.append(timings['windup']+300)
+        sample_times=sorted(set(sample_times)|{v+d for v in boundaries for d in (-1,0,1) if 0<=v+d<=duration_ms+tail_ms})
     previous_t = -dt_ms
     for t in sample_times:
         a = action if t <= duration_ms else 0
         em.set_u8(0x68, a)
-        em.set_i32(0x6C, t if a else t - duration_ms)
-        struct.pack_into("<i", em.this, 4, t if a else t - duration_ms)
+        timer=t if a or native_timer_carry else t-duration_ms
+        em.set_i32(0x6C,timer)
+        struct.pack_into("<i", em.this, 4,timer)
         s = resolve_state(oracle.image, a, weapon, offhand, em.creature[0x130]) if a else 0
         struct.pack_into("<i", em.this, 8, s)
         if a:
@@ -204,32 +213,39 @@ def bake_action(oracle, kind, action, weapon=(0, 0), offhand=(0, 0), dt_ms=16, t
         fr = em.frame(dt_ms=t - previous_t)
         previous_t = t
         Pi = mat4.inverse_affine(fr["placement"])
-        joints = {}
+        joints = {};unsupported=[]
         for p in fr["parts"]:
             b = cr.BY_DRAW_SITE.get(p["draw_site"])
             size = oracle.sizes.get(p.get("model_index"))
             if b is None or size is None or b.anchor == "unknown":
+                unsupported.append(p['draw_site'])
                 continue
             anc = cr.anchor(b.anchor, size, kind=kind, on_back=True)
             joints[b.name] = mat4.mul(mat4.mul(mat4.translate(*anc), p["matrix"]), Pi)
-        frames.append({"t": t, "action": a, "state": s, "joints": joints})
+        frames.append({"t": t, "action": a, "state": s, "joints": joints,"unsupported_draw_sites":unsupported})
     return {"state": state, "timings": timings, "duration_ms": duration_ms, "frames": frames,
-            "idle": idle, "dt_ms": dt_ms, "weapon": list(weapon), "offhand": list(offhand), "kind": kind}
+            "idle": idle, "dt_ms": dt_ms, "weapon": list(weapon), "offhand": list(offhand), "kind": kind,
+            "dynamic_parts":dynamic_parts}
 
 
 def baked_clip(bake, kind, family_id, name, parts):
     """cubegame.alpha_clip/2 time clip (status EMULATED_ALPHA_CODE) from bake_action output."""
     from tools.alpha_models.universal import creature_rig as cr
     keys = []
+    dynamic=bake.get('dynamic_parts',False)
     for f in bake["frames"]:
-        if not all(p in f["joints"] for p in parts):
+        if f.get('unsupported_draw_sites'):raise ValueError(f"UNSUPPORTED_NATIVE_DRAW {f['unsupported_draw_sites']}")
+        if set(f['joints'])-set(parts):raise ValueError('UNEXPECTED_NATIVE_PART')
+        if not dynamic and not all(p in f["joints"] for p in parts):
             raise ValueError(f"ACTION_PARTS_MISSING t={f['t']} expected={parts} actual={list(f['joints'])}")
-        keys.append({"x": float(f["t"]), "m": {p: f["joints"][p] for p in parts}})
+        key={"x":float(f['t']),"m":{p:f['joints'][p] for p in parts if p in f['joints']}}
+        if dynamic:key['visible']=[int(p in f['joints']) for p in parts]
+        keys.append(key)
     if len(keys) < 2:
         raise ValueError("ACTION_NO_KEYS")
     recovery = next((f["t"] for f in bake["frames"] if f["action"] == 0), None)
     return {
-        "format": "cubegame.alpha_clip/2", "rig": family_id, "rig_kind_source": f"0x{kind:02x}", "name": name,
+        "format": "cubegame.alpha_clip/3" if dynamic else "cubegame.alpha_clip/2", "rig": family_id, "rig_kind_source": f"0x{kind:02x}", "name": name,
         "status": "EMULATED_ALPHA_CODE", "param": "time_ms", "loop": False,
         "axes": "alpha_row_vector: X right, Y forward, Z up; 1 unit = 1 model voxel",
         "parts": [{"name": n, "anchor": cr.BY_NAME[n].anchor, "mirrored": cr.BY_NAME[n].mirrored,
@@ -239,6 +255,7 @@ def baked_clip(bake, kind, family_id, name, parts):
                    "recovery_start_ms": recovery, "sample_dt_ms": bake.get("dt_ms"),
                    "weapon": bake.get("weapon"), "offhand": bake.get("offhand"),
                    "weapon_on_back": True,
+                   "visibility_mode":"EXPLICIT_NATIVE_DRAW" if dynamic else "STATIC_ALL",
                    "anchor_policy": "fixed back anchor absorbs Alpha hand/back changes into J; no pose edits"},
         "duration": keys[-1]["x"] if keys else 0.0,
         "keys": keys,

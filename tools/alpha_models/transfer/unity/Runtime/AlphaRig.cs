@@ -77,12 +77,23 @@ namespace CubeGame.AlphaTransfer
 
         public bool WeaponOnBack => _weaponOnBack;
 
-        public void Apply(PartPose[] poses, int[] clipToRig)
+        bool[] _visibility;
+        public bool IsVisible(int part){var r=meshes[part]?.GetComponent<Renderer>();return r!=null?r.enabled:_visibility==null||_visibility[part];}
+        public void SetVisible(int part,bool visible)
+        {
+            if(_visibility==null||_visibility.Length!=parts.Length){_visibility=new bool[parts.Length];for(int i=0;i<_visibility.Length;i++)_visibility[i]=true;}
+            _visibility[part]=visible;var r=meshes[part]?.GetComponent<Renderer>();if(r!=null)r.enabled=visible;
+        }
+        public void SetAllVisible(bool visible){for(int p=0;p<parts.Length;p++)SetVisible(p,visible);}
+
+        public void Apply(PartPose[] poses, int[] clipToRig, bool[] visible=null)
         {
             for (int i = 0; i < clipToRig.Length; i++)
             {
                 int r = clipToRig[i];
                 if (r < 0) continue;
+                SetVisible(r,visible==null||visible[i]);
+                if(visible!=null&&!visible[i])continue;
                 var t = parts[r];
                 t.localPosition = poses[i].position;
                 t.localRotation = poses[i].rotation;

@@ -23,6 +23,8 @@ namespace CubeGame.AlphaTransfer.Editor
         static int _exitCode = 3;
         static string _session;
         static bool _timedOut;
+        static bool _native;
+        public static void RunNative(){_native=true;Run();}
 
         [Serializable] class Registry { public string[] requiredClips; }
 
@@ -47,8 +49,6 @@ namespace CubeGame.AlphaTransfer.Editor
             driver.specAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(SpecPath);
             var controller = rig.GetComponent<AlphaAnimationController>();
             if (controller == null) controller = rig.gameObject.AddComponent<AlphaAnimationController>();
-            var probe = rig.GetComponent<AlphaControllerProbe>();
-            if (probe == null) probe = rig.gameObject.AddComponent<AlphaControllerProbe>();
             var player = rig.GetComponent<AlphaClipPlayer>();
             string action = null;
             foreach (var a in player.clipAssets) if (a != null && a.name.StartsWith("action_")) { action = a.name; break; }
@@ -59,12 +59,22 @@ namespace CubeGame.AlphaTransfer.Editor
             if (controller.requiredClips == null || controller.requiredClips.Length == 0
                 || controller.requiredClips.Any(n => !player.clipAssets.Any(a => a != null && a.name == n)))
             { Debug.LogError("CONTROLLER_PLAYMODE_RESULT=FAIL required action clip missing"); EditorApplication.Exit(1); return; }
-            probe.actionClip = action; probe.session = _session;
             var args = Environment.GetCommandLineArgs(); int at = Array.IndexOf(args, "-controllerFps");
-            probe.captureFirstAction=Array.IndexOf(args,"-controllerCapture")>=0;
-            if (at >= 0 && at+1 < args.Length) probe.fps = int.Parse(args[at+1]);
-            if (probe.fps != 30 && probe.fps != 60 && probe.fps != 120) throw new ArgumentException("controllerFps must be 30,60,120");
-            EditorSceneManager.SaveScene(scene, LocoScene);
+            int fps=at>=0&&at+1<args.Length?int.Parse(args[at+1]):60;
+            if (fps != 30 && fps != 60 && fps != 120) throw new ArgumentException("controllerFps must be 30,60,120");
+            bool capture=Array.IndexOf(args,"-controllerCapture")>=0;
+            if(_native){
+                foreach(var p in rig.GetComponents<AlphaControllerProbe>())Object.DestroyImmediate(p);
+                var native=rig.gameObject.AddComponent<AlphaNativeDriver>();native.manualClock=true;
+                native.specAsset=AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/AlphaTransfer/Data/lifecycle.json");
+                controller.externalClock=true;
+                var probe=rig.gameObject.AddComponent<AlphaNativeProbe>();probe.fps=fps;probe.session=_session;probe.capture=capture;
+                AlphaNativeProbe.Finished=false;AlphaNativeProbe.Verdict="NOT_RUN";
+            }else{
+                var probe=rig.gameObject.AddComponent<AlphaControllerProbe>();probe.actionClip=action;probe.session=_session;
+                probe.fps=fps;probe.captureFirstAction=capture;
+            }
+            EditorSceneManager.SaveScene(scene, _native?"Assets/AlphaTransfer/AlphaNativeScene.unity":LocoScene);
             EditorSettings.enterPlayModeOptionsEnabled = true;
             EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload;
             EditorApplication.playModeStateChanged += OnState;
@@ -77,9 +87,10 @@ namespace CubeGame.AlphaTransfer.Editor
         {
             if (s == PlayModeStateChange.EnteredEditMode)
             {
-                string report = Path.Combine(Application.dataPath,"..","TransferOutput","controller_playmode.txt");
+                string report = Path.Combine(Application.dataPath,"..","TransferOutput",_native?"native_lifecycle_playmode.txt":"controller_playmode.txt");
                 bool fresh = File.Exists(report) && File.ReadAllText(report).Contains("session="+_session);
-                _exitCode = _timedOut ? 3 : AlphaControllerProbe.Finished && fresh && AlphaControllerProbe.Verdict == "PASS" ? 0 : 1;
+                bool pass=_native?AlphaNativeProbe.Finished&&AlphaNativeProbe.Verdict=="PASS":AlphaControllerProbe.Finished&&AlphaControllerProbe.Verdict=="PASS";
+                _exitCode = _timedOut ? 3 : pass&&fresh ? 0 : 1;
                 _exitScheduled = true;
             }
         }

@@ -45,9 +45,11 @@ def validate_bake(bake, parts, rest):
         if f['t'] <= prev:
             raise ValueError('ACTION_TIME_NOT_INCREASING')
         prev = f['t']
-        if set(f['joints']) != set(parts):
+        if f.get('unsupported_draw_sites'):raise ValueError('UNSUPPORTED_NATIVE_DRAW')
+        if (set(f['joints'])-set(parts)) or (not bake.get('dynamic_parts') and set(f['joints']) != set(parts)):
             raise ValueError(f"ACTION_PART_SET_CHANGED t={f['t']} parts={list(f['joints'])}")
         for n in parts:
+            if n not in f['joints']:continue
             m = f['joints'][n]
             if len(m) != 16 or not all(math.isfinite(x) for x in m):
                 raise ValueError(f'ACTION_NONFINITE {n}')
@@ -57,6 +59,7 @@ def validate_bake(bake, parts, rest):
                 raise ValueError(f'ACTION_NOT_TRS {n}')
             pos, rot, _ = pose_error(m, rest[n])
             peak_pos, peak_rot = max(peak_pos, pos), max(peak_rot, rot)
+    if set(frames[-1]['joints'])!=set(parts):raise ValueError('ACTION_RECOVERY_PARTS_NOT_RESTORED')
     end = [pose_error(frames[-1]['joints'][n], rest[n]) for n in parts]
     max_pos, max_rot = max(e[0] for e in end), max(e[1] for e in end)
     if max_pos > .001 or max_rot > .05:
@@ -67,8 +70,9 @@ def validate_bake(bake, parts, rest):
     switches = []
     for a, b in zip(frames, frames[1:]):
         if a['state'] != b['state']:
-            es = [pose_error(a['joints'][n], b['joints'][n]) for n in parts]
-            switches.append({'t': b['t'], 'max_pos': max(e[0] for e in es), 'max_rot': max(e[1] for e in es)})
+            es = [pose_error(a['joints'][n], b['joints'][n]) for n in parts if n in a['joints'] and n in b['joints']]
+            switches.append({'t': b['t'], 'jointly_visible_parts':len(es),
+                'max_pos': max((e[0] for e in es),default=0), 'max_rot': max((e[1] for e in es),default=0)})
     return {'frames': len(frames), 'peak_pos_vox': peak_pos, 'peak_rot_deg': peak_rot,
             'end_pos_vox': max_pos, 'end_rot_deg': max_rot, 'raw_state_switches': switches, **active}
 
@@ -76,10 +80,11 @@ def validate_bake(bake, parts, rest):
 def active_window_motion(frames, duration_ms):
     """A static held pose plus a hand/back switch is not a verified moving action clip."""
     active=[f for f in frames if f['t']<=duration_ms]
-    pos=rot=0.0
+    pos=rot=0.0;first={}
     for f in active[1:]:
         for n,m in f['joints'].items():
-            e=pose_error(m,active[0]['joints'][n]);pos=max(pos,e[0]);rot=max(rot,e[1])
+            baseline=first.setdefault(n,active[0]['joints'].get(n,m))
+            e=pose_error(m,baseline);pos=max(pos,e[0]);rot=max(rot,e[1])
     if pos<=.001 and rot<=.05:
         raise ValueError('ACTION_STATIC_ACTIVE_WINDOW; held pose/input-dependent action not verified as animation')
     return {'active_motion_vox':pos,'active_rotation_deg':rot}
@@ -113,7 +118,8 @@ def _bake_one(payload):
         entry['timings'] = states.action_timings(oracle.image, c, action, weapon)
         if not 1 <= entry['state'] <= 73:
             raise ValueError('NO_ACTION_DRAW_STATE')
-        bake = states.bake_action(oracle, kind, action, weapon=weapon, seed=seed, dt_ms=dt_ms, tail_ms=1800)
+        bake = states.bake_action(oracle, kind, action, weapon=weapon, seed=seed, dt_ms=dt_ms, tail_ms=1800,
+                                 dynamic_parts=action in (22,23,26,71,72))
         rest, captured_sizes = joints(oracle, bake['idle'], kind)
         check = validate_bake(bake, parts, rest)
         clip = states.baked_clip(bake, kind, family, name, parts)

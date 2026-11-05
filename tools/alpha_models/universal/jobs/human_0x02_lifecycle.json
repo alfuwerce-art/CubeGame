@@ -1,0 +1,8 @@
+{
+ "kind":"0x02", "seed_variant":[0,0], "variant":"s05a2_same_human_lifecycle",
+ "locomotion":"formula", "amp":0.19, "speed_xy":3.7,
+ "equipment":{"weapon":{"subtype":15,"model":"iron-greatsword.cub"}},
+ "reference_capture":{"path":"D:/Projects/CubeGame/.scratch/s05a2/cap/session2.jsonl","kind":"0x02"},
+ "action_manifest":".scratch/lifecycle/library/actions.json", "clips":".scratch/lifecycle/library",
+ "note":"Same humanoid. Preserve original 93 pose clips; explicit native visibility and limited verified input lifecycle are layered on top."
+}

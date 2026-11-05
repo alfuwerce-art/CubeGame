@@ -211,6 +211,8 @@ namespace CubeGame.AlphaTransfer.Editor
                 for (int p = 0; p < clip.PartCount; p++)
                 {
                     int r = rig.IndexOf(clip.Data.parts[p]);
+                    if(rig.IsVisible(r)!=clip.KeyVisible(k,p))throw new Exception("NATIVE_VISIBILITY_MISMATCH "+clip.Data.name);
+                    if(!clip.KeyVisible(k,p))continue;
                     var got = rig.ReadAlphaModelMatrix(r);
                     var exp = Expected(rig, clip, k, p, r);
                     worst = Mathf.Max(worst, AlphaSpace.MaxAbsDiff(got, exp));
@@ -260,7 +262,7 @@ namespace CubeGame.AlphaTransfer.Editor
             var inv = 1f / RootScale;
             for (int k = 0; k < clip.Data.keys.Length; k++)
             {
-                if (clip.Data.twoHandedAttack && clip.Data.keys[k].x > clip.Data.actionEndMs) continue;
+                if (clip.Data.twoHandedAttack && clip.Data.keys[k].x > (clip.Data.gripEndMs>0?clip.Data.gripEndMs:clip.Data.actionEndMs)) continue;
                 player.ApplyAt(clip.Data.keys[k].x);
                 var wm = rig.meshes[w];
                 // Oracle clips use a fixed back anchor. The actual hand grip stays at grid Z=4,

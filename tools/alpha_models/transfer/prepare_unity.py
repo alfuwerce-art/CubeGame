@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import glob
 import json
+import math
 import os
 import sqlite3
 import sys
@@ -77,14 +78,33 @@ def unity_clip(clip, part_order):
     if sorted(names) != sorted(part_order):
         raise ValueError(f"clip {clip['name']} parts {names} != rig {part_order}")
     keys = []
+    mode=clip.get('source',{}).get('visibility_mode','STATIC_ALL')
+    if mode not in ('STATIC_ALL','EXPLICIT_NATIVE_DRAW'):raise ValueError('CLIP_VISIBILITY_MODE_UNKNOWN')
+    dynamic=mode=='EXPLICIT_NATIVE_DRAW'
+    previous=-1
     for k in clip["keys"]:
+        if not math.isfinite(k['x']) or k['x']<=previous or k['x']<0 or k['x']>clip['duration']:
+            raise ValueError('CLIP_TIME_INVALID')
+        previous=k['x']
         flat = []
+        visible=None
+        if dynamic:
+            flags=k.get('visible')
+            if flags is None or len(flags)!=len(names) or any(v not in (0,1) for v in flags):raise ValueError('CLIP_VISIBILITY_BAD')
+            visible=[flags[names.index(n)] for n in part_order]
+            if set(k['m'])!={n for n,v in zip(names,flags) if v}:raise ValueError('CLIP_VISIBLE_MATRIX_MISMATCH')
+        elif 'visible' in k:raise ValueError('CLIP_UNDECLARED_VISIBILITY')
         for n in part_order:
+            if dynamic and not visible[part_order.index(n)]:continue
             m = k["m"][n]
             if len(m) != 16:
                 raise ValueError(f"clip {clip['name']}: matrix of {n} has {len(m)} values")
-            flat.extend(float(v) for v in m)
-        keys.append({"x": float(k["x"]), "m": flat})
+            values=[float(v) for v in m]
+            if not all(math.isfinite(v) for v in values):raise ValueError('CLIP_NONFINITE_MATRIX')
+            flat.extend(values)
+        key={"x":float(k['x']),"m":flat}
+        if dynamic:key['visible']=visible
+        keys.append(key)
     src = clip.get("source", {})
     by = {p["name"]: p for p in clip["parts"]}
     return {
@@ -92,6 +112,10 @@ def unity_clip(clip, part_order):
         "param": clip["param"], "loop": bool(clip["loop"]), "duration": float(clip["duration"]),
         "phaseRate": float(src.get("phase_rate_rad_per_s", 0.0)),
         "weaponOnBack": bool(src.get("weapon_on_back", False)),
+        "visibilityMode":src.get('visibility_mode','STATIC_ALL'),
+        "category":src.get('category','MOTION'),
+        "nativeIdleAtMs":float(src.get('native_idle_at_ms',0) or 0),
+        "gripEndMs":float(src.get('grip_end_ms',0) or 0),
         "actionCode": int(src.get("action", -1)),
         "drawState": int(src.get("state", 0)),
         "actionEndMs": float(src.get("action_end_ms", 0) or 0),
