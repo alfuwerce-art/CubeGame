@@ -12,7 +12,7 @@
 | Есть ли в Alpha анимация ходьбы у каждого вида? | Нет. Ходьба = одна формула `drawModel` от фазы, амплитуды и параметров внешности вида |
 | Нужен ли захват, чтобы получить ходьбу нового вида? | Только если вид использует непроверенный член формулы (`classify` → `code_only_terms` / `unknown_terms`) |
 | Чем различаются виды? | Значениями внешности; кодом — только флаг `flags&1` («четвероногое» качание), обе ветви проверены |
-| Точность формулы | ≤ 0.00034 вокселя / ≤ 0.0004° на 2576 кадрах Alpha (все амплитуды) |
+| Точность формулы | ≤ 0.00034 вокселя / ≤ 0.0004° на 4101 установившемся кадре Alpha (игрок, NPC-люди, кот, бегун; все амплитуды) |
 | Статус поз из формулы | всегда `RECONSTRUCTED_FROM_EVIDENCE`, никогда `TRANSFERRED_FROM_ALPHA` |
 | Можно ли менять формулу? | Нет. Ядро (`param_walk.joints`, `TERMS`, `AlphaParamWalk.Joint`) меняет только архитектор |
 
@@ -29,7 +29,7 @@ python -m tools.alpha_models.universal.pipeline param-walk-coverage --static .sc
 | `status` | Что делать |
 |---|---|
 | `FORMULA_VERIFIED` | шаг 2 — подключать |
-| `FORMULA_CODE_ONLY_TERMS` | подключать можно; в отчёте перечислить `code_only_terms`. Если член открыт у многих видов (`head_lean_ai` — 22 семейства), предложить архитектору один проверочный захват (шаг 4) |
+| `FORMULA_CODE_ONLY_TERMS` | подключать можно; в отчёте перечислить `code_only_terms`. Сейчас открыт только `airborne_bit1` (2 вида). Если член открыт у многих видов, предложить архитектору один проверочный захват (шаг 4) |
 | `NEEDS_RESEARCH` | не подключать; записать в отчёт `unknown_terms`/`reasons`, задача архитектору |
 
 ### Шаг 2. Задание (единственный создаваемый файл, в Git)
@@ -48,7 +48,7 @@ python -m tools.alpha_models.universal.pipeline param-walk-coverage --static .sc
 }
 ```
 
-Правила: без `equipment` (оружие — не часть формулы); `accelerating: true` только если нужно показать ИИ-наклон головы (+5°, CODE_ONLY — указать в отчёте); если у семейства **есть** захват — добавить `"reference_capture": {"path": "D:/Projects/CubeGame/.scratch/<…>.jsonl", "kind": "0xNN"}` (только прямые слэши: обратные ломают JSON).
+Правила: без `equipment` (оружие — не часть формулы); `accelerating: true` для ИИ-существ (наклон головы +5°, VERIFIED на NPC-людях); если у семейства **есть** захват — добавить `"reference_capture": {"path": "D:/Projects/CubeGame/.scratch/<…>.jsonl", "kind": "0xNN"}` (только прямые слэши: обратные ломают JSON).
 
 ### Шаг 3. Прогон Unity
 
@@ -79,9 +79,9 @@ python -m tools.alpha_models.universal.pipeline param-walk-validate --capture .s
 
 ### Шаг 5. Регрессия и отчёт
 
-* `python -m unittest discover -s tools/alpha_models/tests -t .` — всё OK (на момент написания 159 тестов);
+* `python -m unittest discover -s tools/alpha_models/tests -t .` — всё OK (на момент написания 161 тест);
 * `run_transfer.ps1 -Test` — 10/10;
-* регрессия формулы против захватов: `jobs/whitecat_0x20_formula.json` (+ `plainrunner_0x3f`, `human_0x02`) — `PARAMWALK_RESULT=PASS` с `ALPHA` ≤ 0.001;
+* регрессия формулы против захватов: `jobs/whitecat_0x20_formula.json` (+ `plainrunner_0x3f`, `human_0x02`, `human_0x02_npc`) — `PARAMWALK_RESULT=PASS` с `ALPHA` ≤ 0.001;
 * отчёт: вид, семейство, `status`, `code_only_terms`, маркеры Unity, пути к `TransferOutput`; статус клипа — `RECONSTRUCTED_FROM_EVIDENCE`; `git status` — ничего из `.scratch`.
 
 ## 2. Что нельзя
@@ -108,7 +108,7 @@ python -m tools.alpha_models.universal.pipeline param-walk-validate --capture .s
 
 ## 4. Приоритет (когда продюсер разрешит масштабирование)
 
-1. 44 семейства `FORMULA_VERIFIED` (сначала 16 с конечностями, затем 28 «только тело»);
-2. один проверочный захват ИИ-гуманоида → `head_lean_ai` → 22 семейства становятся `FORMULA_VERIFIED`;
+1. 66 семейств `FORMULA_VERIFIED` (сначала 22 гуманоидных и 16 с конечностями, затем 28 «только тело»); `head_lean_ai` уже проверен захватом NPC-людей (`.scratch\paramwalk\cap_npc_human.jsonl`, задание `jobs/human_0x02_npc_formula.json`);
+2. `airborne_bit1` (2 вида) — захват в прыжке/падении, по согласию архитектора;
 3. захват одного вида с `hand_rest_angles` (12 семейств) — исследование архитектора;
 4. крылья и `slot_98` — по [UNIVERSAL_TRANSFER_PLAYBOOK §3](UNIVERSAL_TRANSFER_PLAYBOOK.md).

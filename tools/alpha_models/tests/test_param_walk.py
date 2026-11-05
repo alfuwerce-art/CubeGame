@@ -18,6 +18,7 @@ from tools.alpha_models.universal import param_walk as pw
 SCRATCH = r"D:\Projects\CubeGame\.scratch"
 CAP_HUMAN = os.path.join(SCRATCH, "s05a2", "cap", "session2.jsonl")
 CAP_BATCH = os.path.join(SCRATCH, "universal", "cap", "batch1.jsonl")
+CAP_NPC = os.path.join(SCRATCH, "paramwalk", "cap_npc_human.jsonl")
 STATIC = os.path.join(SCRATCH, "universal", "static", "alpha_static.json")
 HAVE_CAPTURES = os.path.exists(CAP_HUMAN) and os.path.exists(CAP_BATCH)
 
@@ -115,10 +116,16 @@ class ClassificationTests(unittest.TestCase):
         v = pw.classify(full_app(QUAD), ["body", "head", "tail", "hand_l", "hand_r", "foot_l", "foot_r"])
         self.assertEqual(v["status"], "FORMULA_VERIFIED", v)
 
-    def test_biped_head_needs_ai_lean_term(self):
+    def test_biped_head_uses_verified_ai_lean_term(self):
         v = pw.classify(full_app(BIPED), ["body", "head", "hand_l", "hand_r", "foot_l", "foot_r"])
+        self.assertEqual(v["status"], "FORMULA_VERIFIED", v)
+        self.assertIn("head_lean_ai", v["terms"])
+        self.assertEqual(pw.TERMS["head_lean_ai"][0], "VERIFIED")
+
+    def test_airborne_bit1_is_code_only(self):
+        v = pw.classify(full_app(pw.SYNTHETIC_APPEARANCES["airborne_bit1"]), ["body", "foot_l", "foot_r"])
         self.assertEqual(v["status"], "FORMULA_CODE_ONLY_TERMS")
-        self.assertIn("head_lean_ai", v["code_only_terms"])
+        self.assertEqual(v["code_only_terms"], ["airborne_bit1"])
 
     def test_unknown_terms_and_parts_need_research(self):
         self.assertEqual(pw.classify(full_app(QUAD, angle_48=10.0), ["body"])["status"], "NEEDS_RESEARCH")
@@ -166,7 +173,7 @@ class ClassificationTests(unittest.TestCase):
         }}
         cov = pw.coverage(table)
         st = {r["kind"]: r["status"] for r in cov["kinds"]}
-        self.assertEqual(st, {"0x90": "FORMULA_VERIFIED", "0x91": "FORMULA_CODE_ONLY_TERMS", "0x92": "NEEDS_RESEARCH"})
+        self.assertEqual(st, {"0x90": "FORMULA_VERIFIED", "0x91": "FORMULA_VERIFIED", "0x92": "NEEDS_RESEARCH"})
 
 
 @unittest.skipUnless(HAVE_CAPTURES, "local Alpha captures (.scratch) not present")
@@ -176,7 +183,7 @@ class LocalAlphaEvidenceTests(unittest.TestCase):
     def check(self, path, kind, expect_parts):
         from tools.alpha_models.universal import uclip
         r = pw.validate_capture(uclip.load_capture(path, kind=kind))
-        self.assertGreater(r["frames"], 500)
+        self.assertGreater(r["frames"], 400)   # compared steady frames (settling window reported apart)
         self.assertEqual(set(r["parts"]), set(expect_parts))
         for p, v in r["parts"].items():
             if p in ("head", "hair") and r["head_lean_one_step"]:
@@ -196,6 +203,12 @@ class LocalAlphaEvidenceTests(unittest.TestCase):
         lean = r["head_lean_one_step"]
         self.assertGreater(lean["frames"], 500)
         self.assertLess(lean["p95_deg"], 0.05)
+
+    @unittest.skipUnless(os.path.exists(CAP_NPC), "NPC human capture not present")
+    def test_npc_humans_ai_head_lean(self):
+        r = self.check(CAP_NPC, 0x02, ["body", "head", "hair", "hand_l", "hand_r", "foot_l", "foot_r"])
+        self.assertGreater(r["head_lean_settled_frames_by_target"].get("5", 0), 500)   # settled at +5 deg
+        self.assertLess(r["head_lean_one_step"]["p95_deg"], 0.05)
 
     @unittest.skipUnless(os.path.exists(STATIC), "static table not present")
     def test_coverage_of_all_kinds(self):

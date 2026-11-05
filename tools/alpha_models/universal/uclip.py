@@ -56,6 +56,9 @@ class Frame:
     appearance: bytes
     parts: dict = field(default_factory=dict)
     problems: list = field(default_factory=list)
+    # locomotion inputs (param_walk): AI acceleration along the velocity and creature+0x124 flags
+    accelerating: bool = False
+    flags_124: int = 0
 
 
 def _boost(h):
@@ -66,6 +69,14 @@ def _boost(h):
     vel = struct.unpack_from("<f", h, 0x38)[0] ** 2 + struct.unpack_from("<f", h, 0x34)[0] ** 2
     return bool((((fl124 & 1) == 0 or (b5c & 4) == 0) and (fl124 & 0x40)) and acc > 0.1 and vel > 0.1) \
         or h[0x68] == ord("0")
+
+
+def _accelerating(h):
+    """GameController.cpp:5719-5728 (non-boost branch): horizontal acceleration creature+0x40 with
+    |a_xy|^2 > 0.1 and a . v(creature+0x34) > 0 — an AI creature speeding up along its motion."""
+    ax, ay = struct.unpack_from("<2f", h, 0x40)
+    vx, vy = struct.unpack_from("<2f", h, 0x34)
+    return ax * ax + ay * ay > 0.1 and ax * vx + ay * vy > 0.0
 
 
 def load_capture(path, kind=None, creature=None):
@@ -87,7 +98,8 @@ def load_capture(path, kind=None, creature=None):
                        time_ms=struct.unpack_from("<i", this, 4)[0],
                        action=r["fields"]["type_68"], amp=r["fields"]["amp_1188"] or 0.0,
                        phase=r["fields"]["phase_118c"] or 0.0, boost=_boost(h),
-                       placement=r.get("placement"), appearance=h[0x78:0x78 + st.APPEARANCE_SIZE])
+                       placement=r.get("placement"), appearance=h[0x78:0x78 + st.APPEARANCE_SIZE],
+                       accelerating=_accelerating(h), flags_124=struct.unpack_from("<H", h, 0x124)[0])
             if not r.get("frame_check", False):
                 fr.problems.append("FRAME_CHECK_FAILED")
             if fr.placement is None:

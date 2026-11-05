@@ -99,7 +99,7 @@ accelerating, onGround;  bool Load(); void Step(float dt); void Apply(); AlphaWa
 | `seed_variant` | нет (`[0,0]`) | вариант моделей вида |
 | `locomotion` | да | `"formula"` |
 | `amp` | нет (0.19) | амплитуда клипа формулы (устойчивая ходьба в захватах 0.19–0.193) |
-| `boost`, `accelerating` | нет (false) | ×1.25 / ускорение ИИ (наклон головы +5°, CODE_ONLY) |
+| `boost`, `accelerating` | нет (false) | ×1.25 / ускорение ИИ (наклон головы +5°, VERIFIED на NPC-людях) |
 | `speed_xy` | нет (3.7) | скорость для скорости фазы клипа; 3.7 — медиана ИИ кота/бегуна (`PLACEHOLDER`, не параметр вида) |
 | `reference_capture` | нет | `{"path": "D:/…/cap.jsonl", "kind": "0xNN"}` — захват **этого же семейства** для проверки ALPHA; путь с прямыми слэшами |
 | `equipment` | **запрещено** | оружие — не часть формулы (`LOCOMOTION_PARTS_NOT_MODELLED`) |
@@ -117,7 +117,7 @@ accelerating, onGround;  bool Load(); void Step(float dt); void Apply(); AlphaWa
 
 | Проверка | Где | Порог |
 |---|---|---|
-| формула vs захват (все части, кроме сглаживаемой головы) | `param-walk-validate`, `test_param_walk` | ≤ 1e-3 вокс., ≤ 0.01° |
+| формула vs захват (все части, кроме сглаживаемой головы; установившиеся кадры: `this[2]=0`, действие 0, `creature+0x124` без битов кроме 0x40, ≥ 1 с после состояния вне области; переходные — отдельно в `settling`) | `param-walk-validate`, `test_param_walk` | ≤ 1e-3 вокс., ≤ 0.01° |
 | сглаживание головы (одношаговый прогноз) | то же | p95 < 0.05° |
 | C# = Python (GOLDEN) | `AlphaParamWalkCheck` | max |Δ| ≤ 2e-4 |
 | C# vs захват (ALPHA) | `AlphaParamWalkCheck` | ≤ 1e-3 вокс., ≤ 0.05° |

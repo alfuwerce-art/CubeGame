@@ -231,8 +231,9 @@ TERMS = {
     "hand_quadruped": ("VERIFIED", "WhiteCat (flags bit0 = 1): double shoulder pitch e4/d0"),
     "foot":           ("VERIFIED", "3 kinds: hip pitch d0/e4 x2, lift, 3|w|, scale_foot 0.98/1.0/1.5"),
     "head_lean_boost": ("VERIFIED", "human player: +10 deg, smoothing 1-0.99^dt_ms (fit 9.5-10.5 /s)"),
-    "head_lean_ai":   ("CODE_ONLY", "flags bit0 = 0, AI accelerating: +5 deg by the code pattern of the "
-                                   "verified boost branch (GameController.cpp:5719-5735); no NPC head captured"),
+    "head_lean_ai":   ("VERIFIED", "NPC humans 0x02 (AI, accelerating along the velocity): settled lean "
+                                  "+5.000 deg on 1578 frames of cap_npc_human/survey1 (2026-11-05), smoothing "
+                                  "one-step p95 0.0002 deg; predicted from the code pattern before the capture"),
     "foot_angle_58":  ("CODE_ONLY", "rotX(angle_58 + d0) first on foot_l, last on foot_r (7306/7357)"),
     "airborne_bit1":  ("CODE_ONLY", "flags bit1: swing and lift = 0 while creature+0x5c bit0 is clear"),
     "root_angle_48":  ("UNKNOWN", "rotX(angle_48 + lean) on the root, compensated on the head (5960, 6243); "
@@ -354,6 +355,13 @@ def locomotion_spec(app, kind, family_id, parts):
 
 
 # --------------------------------------------------------------------------- validation vs Alpha
+SCOPE_FLAGS_124 = 0x40       # creature+0x124 bits inside the locomotion scope (boost input only)
+# drawModel smooths its pose-state arrays (body/hand rotations of action states) toward their
+# targets with 1 - 0.99^dt_ms; after leaving an out-of-scope state (or at a capture start, whose
+# history is unknown) the residue decays below 1e-4 of its start value within 1 s. Frames inside
+# that window are compared and REPORTED separately ("settling"), not hidden and not thresholded.
+SETTLE_S = 1.0
+
 def validate_capture(frames, *, lean_from_capture=True):
     """Formula vs every usable state-0/action-0 frame of a capture (uclip.Frame list).
 
@@ -363,13 +371,23 @@ def validate_capture(frames, *, lean_from_capture=True):
     """
     from tools.alpha_models.anim.alpha_clip import decompose, pose_error
     from tools.alpha_models.universal import uclip, alpha_static as st
-    per_part, lean_err, prev = {}, [], None
-    used = 0
+    per_part, lean_err = {}, []
+    lean_by_target = {}
+    prev = {}            # creature -> (position in that creature's record sequence, t, measured lean)
+    seq = {}
+    used = out_of_scope = 0
+    since, settling = {}, {}
     for f in frames:
+        n = seq[f.creature] = seq.get(f.creature, -1) + 1
         res = uclip.frame_resolution(f)
-        if not uclip.usable(f, res) or f.state != 0 or f.action != 0:
-            prev = None
+        if not uclip.usable(f, res) or f.state != 0 or f.action != 0 or f.flags_124 & ~SCOPE_FLAGS_124:
+            # creature+0x124 bits other than the boost input (0x40) switch drawModel paths that are
+            # not part of the locomotion formula (e.g. 0x1 sitting/riding, 0x4 turn lean): not compared
+            out_of_scope += 1
+            prev.pop(f.creature, None)
+            since.pop(f.creature, None)
             continue
+        t0 = since.setdefault(f.creature, f.t)
         app = st.decode_appearance(f.appearance)
         captured = uclip.joints(f)
         parts = [p for p in captured if p in MODELLED_PARTS]
@@ -377,16 +395,24 @@ def validate_capture(frames, *, lean_from_capture=True):
         if "head" in captured and not (app["flags"] & 1):
             _, q, _ = decompose(captured["head"])
             measured = math.degrees(2 * math.atan2(q[1], q[0]))
-            target = head_lean_target(app, f.boost, False)
-            if lean_from_capture and prev is not None and f.index - prev[0] == 1 and 0 < f.t - prev[1] < 0.05:
-                lean = lean_step(prev[2], target, (f.t - prev[1]) * 1000.0)
+            target = head_lean_target(app, f.boost, f.accelerating)
+            p = prev.get(f.creature)
+            if lean_from_capture and p is not None and n - p[0] == 1 and 0 < f.t - p[1] < 0.05:
+                lean = lean_step(p[2], target, (f.t - p[1]) * 1000.0)
                 lean_err.append(abs(lean - measured))
-            elif lean_from_capture:
-                lean = None if prev is None else measured  # first frame of a run: no history to predict from
-            prev = (f.index, f.t, measured)
-            if lean is None and lean_from_capture:
+                if abs(measured - target) < 1e-3:
+                    lean_by_target[target] = lean_by_target.get(target, 0) + 1
+            prev[f.creature] = (n, f.t, measured)
+            if lean is None and lean_from_capture:      # no consecutive history: smoothing not testable
                 parts = [p for p in parts if p not in ("head", "hair")]
-        model = joints(app, WalkState(f.phase, f.amp, f.boost, head_lean_deg=lean), parts)
+        model = joints(app, WalkState(f.phase, f.amp, f.boost, head_lean_deg=lean,
+                                      accelerating=f.accelerating), parts)
+        if f.t - t0 < SETTLE_S:
+            for p in parts:
+                e = pose_error(model[p], captured[p])
+                w = settling.setdefault(p, [0, 0.0, 0.0])
+                settling[p] = [w[0] + 1, max(w[1], e[0]), max(w[2], e[1])]
+            continue
         used += 1
         for p in parts:
             per_part.setdefault(p, []).append(pose_error(model[p], captured[p]))
@@ -397,7 +423,10 @@ def validate_capture(frames, *, lean_from_capture=True):
                       "max_rot_deg": rot[-1], "p95_rot_deg": rot[int(0.95 * (len(rot) - 1))],
                       "max_scale": max(e[2] for e in errs)}
     allp = [v for v in summary.values()]
-    return {"frames": used, "parts": summary,
+    return {"frames": used, "out_of_scope_frames": out_of_scope,
+            "settling": {p: {"frames": v[0], "max_pos_vox": v[1], "max_rot_deg": v[2]} for p, v in settling.items()},
+            "head_lean_settled_frames_by_target": {f"{k:g}": v for k, v in sorted(lean_by_target.items())},
+            "parts": summary,
             "max_pos_vox": max((v["max_pos_vox"] for v in allp), default=None),
             "max_rot_deg": max((v["max_rot_deg"] for v in allp), default=None),
             "head_lean_one_step": ({"frames": len(lean_err), "max_deg": max(lean_err),
@@ -441,10 +470,14 @@ def reference_frames(frames, capture_path, max_frames=400):
     from tools.alpha_models.anim.alpha_clip import decompose
     from tools.alpha_models.universal import uclip, alpha_static as st
     rows, app0, kind, rig = [], None, None, None
-    usable = []
+    usable, since = [], {}
     for f in frames:
         res = uclip.frame_resolution(f)
-        if uclip.usable(f, res) and f.state == 0 and f.action == 0:
+        if not uclip.usable(f, res) or f.state != 0 or f.action != 0 or f.flags_124 & ~SCOPE_FLAGS_124:
+            since.pop(f.creature, None)
+            continue
+        # same scope as validate_capture: skip the settling window after an out-of-scope state
+        if f.t - since.setdefault(f.creature, f.t) >= SETTLE_S:
             usable.append((f, res))
     step = max(1, len(usable) // max_frames)
     for f, res in usable[::step]:
