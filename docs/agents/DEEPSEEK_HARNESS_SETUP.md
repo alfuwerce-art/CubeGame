@@ -1,6 +1,6 @@
 # CubeGame — настройка DeepSeek Harness на Windows
 
-**Статус:** инструкция по настройке; фактический пресет `cubegame-dev` уже создан и используется локально. **Рабочий каталог после миграции D56 — `D:\Projects\CubeGame`** (старая C:-копия `C:\Users\bow\Desktop\CubeGame` сохранена как резерв).  
+**Статус:** инструкция по настройке; фактический пресет `cubegame-dev` уже создан и используется локально. **Рабочий каталог после миграции D56 — `D:\Projects\CubeGame`** (старая C:-копия `C:\Users\bow\Desktop\CubeGame` сохранена как резерв).
 **Среда:** DeepSeek Harness Desktop, Windows 11; профиль Desktop в `C:\Users\bow\.dsh\profiles\desktop\cordis.patch.yml`, пресет — `@local/cubegame-dev-preset` (источник в репозитории: `plugins/cubegame-dev-preset/`). Старые пресеты других проектов не трогать.
 
 ## Цель
