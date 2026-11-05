@@ -57,6 +57,8 @@ namespace CubeGame.AlphaTransfer
             if (rule == "center") return centre;
             // tail block (GameController.cpp:6212-6219): translate(-sx/2, -sy, -sz/2)
             if (rule == "tail") return new Vector3(size.x * 0.5f, size.y, size.z * 0.5f);
+            // wings (slot_9a, drawModel emulation): attached by the root edge
+            if (rule == "wing") return new Vector3(size.x * 0.5f, 0f, size.z * 0.5f);
             if (rule == "weapon") return weaponOnBack ? centre : new Vector3(size.x * 0.5f, size.y * 0.5f, 4f);
             throw new ArgumentException($"unknown anchor rule {rule}");
         }

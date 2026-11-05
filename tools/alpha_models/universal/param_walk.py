@@ -161,8 +161,13 @@ def core(app, state):
 def joints(app, state, parts):
     """Joint frames J (row-vector, without the anchor) for the requested universal block names."""
     k = core(app, state)
-    bob = mat4.translate(0.0, 0.0, k["bob"])          # base frame of self+0x3b / self+0x4b
+    a48 = float(app.get("angle_48", 0.0))
+    # base frame of self+0x3b / self+0x4b: bob, then the root pitch angle_48 (GameController.cpp
+    # 5960: rotX(angle_48 + lean array), lean array 0 in state 0) — verified by drawModel emulation
+    bob = chain([mat4.translate(0.0, 0.0, k["bob"]), rot_x(a48)])
     quad = bool(app["flags"] & 1)
+    rest_l = (float(app.get("angle_4c", 0.0)), -float(app.get("angle_50", 0.0)), -float(app.get("angle_54", 0.0)))
+    rest_r = (float(app.get("angle_4c", 0.0)), float(app.get("angle_50", 0.0)), float(app.get("angle_54", 0.0)))
     out = {}
     for name in parts:
         if name == "body":       # GameController.cpp:6096-6105
@@ -173,7 +178,7 @@ def joints(app, state, parts):
             hx, hy, hz = app["offset_head"]
             out[name] = chain([mat4.translate(hx, hy, hz - k["bob"] * 0.5),
                                mat4.translate(0.0, 0.0, -NECK_PIVOT),
-                               rot_x(head_lean(app, state)),
+                               rot_x(-a48 + head_lean(app, state)),     # head cancels the root pitch
                                mat4.translate(0.0, 0.0, NECK_PIVOT),
                                scale(app["scale_head"])], bob)
         elif name == "tail":     # 6199-6215
@@ -186,10 +191,13 @@ def joints(app, state, parts):
         elif name in ("hand_l", "hand_r"):   # 7139-7229
             left = name == "hand_l"
             pitch = k["e4"] if left else k["d0"]
+            rx, ry, rz = rest_l if left else rest_r       # hand rest angles (angle_4c/50/54)
             ops = [rot_x(pitch)] if quad else []
             ops.append(mat4.translate(*(k["hand_l"] if left else k["hand_r"])))
+            ops += [rot_z(rz), rot_y(ry)]
             if quad:
                 ops.append(rot_x(pitch))
+            ops.append(rot_x(rx))
             s = app["scale_hand"]
             ops.append(scale(s) if left else scale(-s, s, s))
             out[name] = chain(ops, bob)
@@ -205,12 +213,29 @@ def joints(app, state, parts):
                                mat4.translate(fx, fy, k["foot_z"] + fz + k["lift_r"]),
                                scale(app["scale_foot"]),
                                rot_x(app["angle_58"] + k["e4"])])
+        elif name in ("slot9a_a", "slot9a_b"):   # wings, GameController.cpp:7238-7299
+            v = app["offset_a0"]
+            wing = math.cos(state.phase * 0.5) * state.amp * 90.0 - 45.0
+            left = name == "slot9a_a"
+            out[name] = chain([mat4.translate(-v[0] if left else v[0], v[1], v[2]),
+                               rot_x(app["angle_5c"]), rot_y(wing if left else -wing),
+                               rot_z(-90.0), rot_x(90.0), scale(app["scale_44"])],
+                              mat4.translate(0.0, 0.0, k["bob"]))   # no root pitch on wings
+        elif name in ("slot98_a", "slot98_b"):   # elbows of big creatures, GameController.cpp:6355-6405
+            left = name == "slot98_a"
+            hx, hz = app["offset_hand"][0], app["offset_hand"][2]
+            h = k["hand_l"] if left else k["hand_r"]
+            shoulder = ((hx * -0.3 + h[0]) * 0.5 if left else (h[0] + hx * 0.3) * 0.5,
+                        (h[1] - 8.0) * 0.25, (h[2] + hz + 12.0) * 0.5)
+            mid = [(a + b) * 0.5 for a, b in zip(h, shoulder)]
+            out[name] = chain([mat4.translate(*mid), scale(app["scale_34"])], bob)
         else:
             raise KeyError(f"part {name!r} has no locomotion formula (block not modelled)")
     return out
 
 
-MODELLED_PARTS = ("body", "head", "hair", "tail", "hand_l", "hand_r", "foot_l", "foot_r")
+MODELLED_PARTS = ("body", "head", "hair", "tail", "hand_l", "hand_r", "foot_l", "foot_r",
+                  "slot9a_a", "slot9a_b", "slot98_a", "slot98_b")
 
 
 # --------------------------------------------------------------------------- formula terms
@@ -231,15 +256,20 @@ TERMS = {
     "hand_quadruped": ("VERIFIED", "WhiteCat (flags bit0 = 1): double shoulder pitch e4/d0"),
     "foot":           ("VERIFIED", "3 kinds: hip pitch d0/e4 x2, lift, 3|w|, scale_foot 0.98/1.0/1.5"),
     "head_lean_boost": ("VERIFIED", "human player: +10 deg, smoothing 1-0.99^dt_ms (fit 9.5-10.5 /s)"),
+    "wings":          ("VERIFIED", "Owl 0x5c, Hornet 0x35, Crow 0x37 vs Alpha drawModel emulation: cos(phase/2)*amp*90-45, "
+                                  "offset_a0, angle_5c, scale_44, anchor (sx/2, 0, sz/2), base without root pitch"),
+    "elbows_slot98":  ("VERIFIED", "Troll 0x6c, Minotaur 0x52, Golem 0x6f vs emulation: (hand + shoulder)/2, scale_34, centre anchor"),
     "head_lean_ai":   ("VERIFIED", "NPC humans 0x02 (AI, accelerating along the velocity): settled lean "
                                   "+5.000 deg on 1578 frames of cap_npc_human/survey1 (2026-11-05), smoothing "
                                   "one-step p95 0.0002 deg; predicted from the code pattern before the capture"),
-    "foot_angle_58":  ("CODE_ONLY", "rotX(angle_58 + d0) first on foot_l, last on foot_r (7306/7357)"),
-    "airborne_bit1":  ("CODE_ONLY", "flags bit1: swing and lift = 0 while creature+0x5c bit0 is clear"),
-    "root_angle_48":  ("UNKNOWN", "rotX(angle_48 + lean) on the root, compensated on the head (5960, 6243); "
-                                 "which base frames include it is not established"),
-    "hand_rest_angles": ("UNKNOWN", "angle_4c/50/54 seed smoothed hand rotation arrays in state 0 "
-                                   "(2190-2197, mirrored on the left); chain not established"),
+    "foot_angle_58":  ("VERIFIED", "Hornet 0x35 (angle_58 30) vs drawModel emulation: rotX(angle_58 + d0) first "
+                                  "on foot_l, last on foot_r"),
+    "airborne_bit1":  ("VERIFIED", "Owl 0x5c, Hornet 0x35 (flags bit1) vs emulation on/off ground: swing and lift = 0 "
+                                  "while creature+0x5c bit0 is clear"),
+    "root_angle_48":  ("VERIFIED", "Owl -10, Hornet -45 vs emulation: rotX(angle_48) after the bob on the body/hand base, "
+                                  "head cancels it (rotX(-angle_48) about the neck); feet and wings exclude it"),
+    "hand_rest_angles": ("VERIFIED", "Koala, Skeleton, Crab, PlantCreature, Imp, Penguin vs emulation: hand rotZ(rz) rotY(ry) "
+                                    "[quadruped pitch] rotX(rx) after the position; left (a4c, -a50, -a54), right (a4c, a50, a54)"),
 }
 
 
@@ -254,6 +284,10 @@ def terms_used(app, parts):
             used.append("hand_quadruped" if quad else "hand_biped")
         elif p in ("foot_l", "foot_r"):
             used.append("foot")
+        elif p.startswith("slot9a"):
+            used.append("wings")
+        elif p.startswith("slot98"):
+            used.append("elbows_slot98")
     if not quad and ("head" in parts or "hair" in parts):
         used += ["head_lean_boost", "head_lean_ai"]
     if any(p in parts for p in ("foot_l", "foot_r")) and float(app["angle_58"]) != 0.0:
@@ -341,8 +375,9 @@ def generate_walk_clip(app, kind, family_id, parts, amp, boost=False, keys=72, a
 
 
 SPEC_FIELDS = ("flags", "size", "scale_head", "scale_body", "scale_hand", "scale_foot", "scale_tail",
-               "pitch_tail", "angle_58", "offset_body", "offset_head", "offset_hand", "offset_foot",
-               "offset_tail")
+               "scale_34", "scale_44", "pitch_tail", "angle_48", "angle_4c", "angle_50", "angle_54",
+               "angle_58", "angle_5c", "offset_body", "offset_head", "offset_hand", "offset_foot",
+               "offset_tail", "offset_a0")
 
 
 def locomotion_spec(app, kind, family_id, parts):
@@ -439,11 +474,15 @@ SYNTHETIC_APPEARANCES = {   # TEST_DATA_NOT_ALPHA: invented values that exercise
     "biped": {"flags": 0x00, "size": [1.0, 1.0, 2.0], "scale_head": 1.1, "scale_body": 0.9, "scale_hand": 1.2,
               "scale_foot": 0.8, "scale_tail": 1.3, "pitch_tail": -20.0, "angle_58": 0.0,
               "offset_body": [0.0, 1.0, -3.0], "offset_head": [0.0, 2.0, 6.0], "offset_hand": [5.0, 1.0, -1.0],
-              "offset_foot": [2.0, 0.5, -9.0], "offset_tail": [0.0, -6.0, 1.0]},
+              "offset_foot": [2.0, 0.5, -9.0], "offset_tail": [0.0, -6.0, 1.0],
+              "scale_34": 0.9, "scale_44": 1.1, "angle_48": 0.0, "angle_4c": 0.0, "angle_50": 0.0,
+              "angle_54": 0.0, "angle_5c": 0.0, "offset_a0": [3.0, -2.0, 1.0]},
 }
 SYNTHETIC_APPEARANCES["quadruped"] = dict(SYNTHETIC_APPEARANCES["biped"], flags=0x01)
 SYNTHETIC_APPEARANCES["airborne_bit1"] = dict(SYNTHETIC_APPEARANCES["biped"], flags=0x02)
 SYNTHETIC_APPEARANCES["hip_angle_58"] = dict(SYNTHETIC_APPEARANCES["quadruped"], angle_58=12.0)
+SYNTHETIC_APPEARANCES["root_and_hands"] = dict(SYNTHETIC_APPEARANCES["biped"], angle_48=-20.0, angle_4c=15.0,
+                                               angle_50=-30.0, angle_54=25.0, angle_5c=10.0)
 
 
 def golden_cases():

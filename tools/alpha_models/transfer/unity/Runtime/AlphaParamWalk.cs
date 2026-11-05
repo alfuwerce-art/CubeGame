@@ -20,10 +20,11 @@ namespace CubeGame.AlphaTransfer
     {
         public int flags;
         public float[] size = new float[3];
-        public float scale_head = 1f, scale_body = 1f, scale_hand = 1f, scale_foot = 1f, scale_tail = 1f;
-        public float pitch_tail, angle_58;
+        public float scale_head = 1f, scale_body = 1f, scale_hand = 1f, scale_foot = 1f, scale_tail = 1f,
+                     scale_34 = 1f, scale_44 = 1f;
+        public float pitch_tail, angle_48, angle_4c, angle_50, angle_54, angle_58, angle_5c;
         public float[] offset_body = new float[3], offset_head = new float[3], offset_hand = new float[3],
-                       offset_foot = new float[3], offset_tail = new float[3];
+                       offset_foot = new float[3], offset_tail = new float[3], offset_a0 = new float[3];
     }
 
     [Serializable]
@@ -69,13 +70,20 @@ namespace CubeGame.AlphaTransfer
         public const float NeckPivot = 3f;
         public const float LeanLerpPerMs = 0.01f;         // array_lerp(.., dt_ms, 0.01)
 
-        public static readonly string[] ModelledParts = { "body", "head", "hair", "tail", "hand_l", "hand_r", "foot_l", "foot_r" };
+        public static readonly string[] ModelledParts = { "body", "head", "hair", "tail", "hand_l", "hand_r", "foot_l", "foot_r",
+                                                          "slot9a_a", "slot9a_b", "slot98_a", "slot98_b" };
 
         // ------------------------------------------------------------------ row-vector helpers
         public static float[] RotX(float deg)
         {
             float a = deg * Mathf.Deg2Rad, c = Mathf.Cos(a), s = Mathf.Sin(a);
             return new float[] { 1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1 };
+        }
+
+        public static float[] RotY(float deg)
+        {
+            float a = deg * Mathf.Deg2Rad, c = Mathf.Cos(a), s = Mathf.Sin(a);
+            return new float[] { c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1 };
         }
 
         public static float[] RotZ(float deg)
@@ -132,7 +140,9 @@ namespace CubeGame.AlphaTransfer
             float liftR = grounded ? 0f : s.amp * 4f * (1f - c);
             float bob = 4f * Mathf.Abs(w);
             float footZ = 3f * Mathf.Abs(w);
-            var bobBase = T(0, 0, bob);
+            var liftOnly = T(0, 0, bob);
+            var bobBase = Chain(Identity, T(0, 0, bob), RotX(p.angle_48));      // root pitch (angle_48)
+            float hx0 = p.offset_hand[0], hz0 = p.offset_hand[2];
 
             switch (part)
             {
@@ -141,7 +151,7 @@ namespace CubeGame.AlphaTransfer
                 case "head":
                 case "hair":
                     return Chain(bobBase, T(p.offset_head[0], p.offset_head[1], p.offset_head[2] - bob * 0.5f),
-                        T(0, 0, -NeckPivot), RotX(s.headLeanDeg), T(0, 0, NeckPivot), Scale(p.scale_head));
+                        T(0, 0, -NeckPivot), RotX(-p.angle_48 + s.headLeanDeg), T(0, 0, NeckPivot), Scale(p.scale_head));
                 case "tail":
                     return Chain(bobBase, T(p.offset_body), T(p.offset_tail), RotX(p.pitch_tail), RotZ(-wDeg),
                         Scale(p.scale_tail), Scale(p.scale_body));
@@ -162,8 +172,10 @@ namespace CubeGame.AlphaTransfer
                     y += 2.1f - s.amp * 5f;
                     float pitch = left ? e4 : d0;
                     var sc = left ? Scale(p.scale_hand) : Scale(-p.scale_hand, p.scale_hand, p.scale_hand);
-                    return quad ? Chain(bobBase, RotX(pitch), T(x, y, z), RotX(pitch), sc)
-                                : Chain(bobBase, T(x, y, z), sc);
+                    // hand rest angles: left (a4c, -a50, -a54), right (a4c, a50, a54)
+                    float rx = p.angle_4c, ry = left ? -p.angle_50 : p.angle_50, rz = left ? -p.angle_54 : p.angle_54;
+                    return quad ? Chain(bobBase, RotX(pitch), T(x, y, z), RotZ(rz), RotY(ry), RotX(pitch), RotX(rx), sc)
+                                : Chain(bobBase, T(x, y, z), RotZ(rz), RotY(ry), RotX(rx), sc);
                 }
                 case "foot_l":
                     return Chain(Identity, RotX(p.angle_58 + d0),
@@ -173,6 +185,33 @@ namespace CubeGame.AlphaTransfer
                     return Chain(Identity, RotX(e4),
                         T(p.offset_foot[0], p.offset_foot[1], footZ + p.offset_foot[2] + liftR),
                         Scale(p.scale_foot), RotX(p.angle_58 + e4));
+                case "slot9a_a":
+                case "slot9a_b":
+                {
+                    bool left = part == "slot9a_a";
+                    float wing = Mathf.Cos(s.phase * 0.5f) * s.amp * 90f - 45f;
+                    var v = p.offset_a0;
+                    return Chain(liftOnly, T(left ? -v[0] : v[0], v[1], v[2]), RotX(p.angle_5c), RotY(left ? wing : -wing),
+                        RotZ(-90f), RotX(90f), Scale(p.scale_44));
+                }
+                case "slot98_a":
+                case "slot98_b":
+                {
+                    bool left = part == "slot98_a";
+                    float r = hx0 * s.amp + hx0;     // recompute the hand point exactly like case hand_*
+                    float hx, hy, hz;
+                    if (!quad)
+                    {
+                        hx = (left ? -1f : 1f) * Mathf.Cos(w) * r;
+                        hy = p.offset_hand[1] + (left ? -1f : 1f) * Mathf.Sin(w) * r;
+                        hz = (hz0 - 4.1f) + s.amp * 6f;
+                    }
+                    else { hx = left ? -hx0 : hx0; hy = p.offset_hand[1]; hz = hz0; }
+                    hy += 2.1f - s.amp * 5f;
+                    float sx = left ? (hx0 * -0.3f + hx) * 0.5f : (hx + hx0 * 0.3f) * 0.5f;
+                    float sy = (hy - 8f) * 0.25f, sz = (hz + hz0 + 12f) * 0.5f;
+                    return Chain(bobBase, T((hx + sx) * 0.5f, (hy + sy) * 0.5f, (hz + sz) * 0.5f), Scale(p.scale_34));
+                }
                 default:
                     throw new ArgumentException($"part {part} has no locomotion formula");
             }

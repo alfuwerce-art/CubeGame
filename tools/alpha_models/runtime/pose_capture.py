@@ -63,7 +63,9 @@ CREATURE_FIELDS = [
     ("f_1190", 0x1190, "<f"),
 ]
 CREATURE_DUMP = (0x0, 0x180)       # raw creature header kept for later field discovery
-THIS_DUMP = (0x0, 0x100)           # drawModel `this` (state self[2]; model slots self[0x2f..0x3a])
+THIS_DUMP = (0x0, 0x100)
+FULL_CREATURE_SIZE = 0x1400        # --full: creature struct incl. equipment, buffs, +0x11c0
+FULL_THIS_SIZE = 0x900             # --full: drawModel this incl. pose arrays and part matrices           # drawModel `this` (state self[2]; model slots self[0x2f..0x3a])
 # drawModel model slots (this + 4*idx): the mesh drawn by every part is one of these pointers, so
 # `mesh == self[slot]` identifies WHICH model a draw call renders independent of the call site.
 # Slot <- source (Creature_drawModel prologue, GameController.cpp:2118-2200; equipment overrides):
@@ -116,6 +118,7 @@ class Capture:
     def __init__(self, pid, exe_path, target=None, max_records=400, max_seconds=30.0,
                  out=None, auto_parts=5, kinds=None, per_kind=1):
         self.pid = pid
+        self.full_dump = False
         self.k = dp._kernel32()
         self.handle = self.k.OpenProcess(dp.PROCESS_ALL_ACCESS, False, pid)
         if not self.handle:
@@ -216,7 +219,27 @@ class Capture:
                 fields[name] = struct.unpack(fmt, raw)[0] if raw else None
             this_raw = self.read(ctx.Edi + THIS_DUMP[0], THIS_DUMP[1])
             cr_raw = self.read(creature + CREATURE_DUMP[0], CREATURE_DUMP[1])
+            full = {}
+            if self.full_dump:
+                # offline drawModel emulation inputs (drawmodel_emu): the WHOLE creature struct,
+                # the drawModel `this` with its smoothed pose arrays, and the call arguments
+                # (param_5 = frame dt in ms, the count/flags mask, the yaw pointer)
+                args = self.read(ctx.Ebp + 8, 40)
+                if args:
+                    a = struct.unpack("<10I", args)
+                    full["args"] = list(a)
+                    full["dt_ms"] = struct.unpack("<i", args[16:20])[0]
+                    full["count_flags"] = a[8]
+                    yaw = self.read(a[9], 4) if a[9] else None
+                    full["out_yaw"] = struct.unpack("<f", yaw)[0] if yaw else None
+                cfull = self.read(creature, FULL_CREATURE_SIZE)
+                tfull = self.read(ctx.Edi, FULL_THIS_SIZE)
+                full["creature_full"] = cfull.hex() if cfull else None
+                head = self.u32(creature + 0x1178)
+                full["buffs_empty"] = bool(head) and self.u32(head) == head   # std::list sentinel
+                full["this_full"] = tfull.hex() if tfull else None
             self.current = {
+                **full,
                 "t": time.perf_counter(),
                 "creature": f"0x{creature:08X}",
                 "kind": kind,
@@ -441,6 +464,9 @@ def main(argv=None):
                          "0x20,0x1e; captures up to --per-kind creatures of each kind in one "
                          "session instead of --target")
     ap.add_argument("--per-kind", type=int, default=1)
+    ap.add_argument("--full", action="store_true",
+                    help="also dump the whole creature struct, drawModel this and call args "
+                         "(inputs for the offline drawModel emulator)")
     ap.add_argument("--records", type=int, default=400)
     ap.add_argument("--seconds", type=float, default=30.0)
     a = ap.parse_args(argv)
@@ -452,6 +478,7 @@ def main(argv=None):
     cap = Capture(a.pid, a.exe, target=None if kinds else target,
                   max_records=a.records, max_seconds=a.seconds, out=a.out,
                   auto_parts=0 if kinds else a.auto_parts, kinds=kinds, per_kind=a.per_kind)
+    cap.full_dump = a.full
     recs = cap.run()
     print(f"POSE_CAPTURE records={len(recs)} player_resolved={cap.player_resolved} target="
           f"{'0x%08X' % cap.target if cap.target else None} creatures_seen={len(cap.creature_seen)}")

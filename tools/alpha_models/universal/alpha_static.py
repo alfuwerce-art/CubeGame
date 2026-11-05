@@ -360,6 +360,20 @@ def model_sizes(db_path, names):
     return out
 
 
+def registry_model_sizes(db_path, registry):
+    """{index: [x, y, z]} for EVERY registry model (equipment included), from the .cub header only
+    (first three int32 of the deobfuscated blob; no voxel data is converted). Read-only."""
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from cub_format import deobfuscate  # noqa: E402
+    con = sqlite3.connect(f"file:{db_path}?mode=ro&immutable=1", uri=True)
+    out = {}
+    for idx, name in registry.items():
+        row = con.execute("select value from blobs where key=?", (name,)).fetchone()
+        if row is not None:
+            out[int(idx)] = list(struct.unpack_from("<3i", deobfuscate(row[0]), 0))
+    return out
+
+
 def scan(exe, db=None, decomp=None):
     verify_exe(exe)
     image = pb.load(exe)

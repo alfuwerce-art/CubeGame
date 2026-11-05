@@ -68,12 +68,16 @@ BLOCKS = (
     # drawn in a capture yet: their anchors are NOT established -> such creatures are queued.
     DrawBlock("neck_item", 0x4200EF, 0x4200C8, 0x3A, "unknown", False, "UNVERIFIED", "slot 0x3a (equipment +0x418)"),
     DrawBlock("shoulder_item", 0x42028C, 0x420265, 0x39, "unknown", False, "UNVERIFIED", "slot 0x39 (equipment +0x878)"),
-    DrawBlock("slot98_a", 0x420CD2, 0x420CC3, 0x32, "unknown", False, "UNVERIFIED", "slot 0x32 (appearance +0x20)"),
-    DrawBlock("slot98_b", 0x420DE1, 0x420DD2, 0x32, "unknown", False, "UNVERIFIED", "slot 0x32 (appearance +0x20)"),
+    DrawBlock("slot98_a", 0x420CD2, 0x420CC3, 0x32, "center", False, "VERIFIED",
+              "slot 0x32 (appearance +0x20); anchor and chain from Alpha drawModel emulation (anchor_probe, "
+              "Troll/Minotaur/Golem), emulator verified against runtime captures to 1e-6"),
+    DrawBlock("slot98_b", 0x420DE1, 0x420DD2, 0x32, "center", False, "VERIFIED", "as slot98_a (right)"),
     DrawBlock("offhand_a", 0x421DFA, 0x421DD7, 0x38, "unknown", False, "UNVERIFIED", "slot 0x38 (equipment +0x990)"),
     DrawBlock("offhand_b", 0x42231B, 0x4222F8, 0x38, "unknown", False, "UNVERIFIED", "slot 0x38 (equipment +0x990)"),
-    DrawBlock("slot9a_a", 0x42377A, 0x42376B, 0x34, "unknown", False, "UNVERIFIED", "slot 0x34 (appearance +0x22)"),
-    DrawBlock("slot9a_b", 0x4238C5, 0x4238B6, 0x34, "unknown", False, "UNVERIFIED", "slot 0x34 (appearance +0x22)"),
+    DrawBlock("slot9a_a", 0x42377A, 0x42376B, 0x34, "wing", False, "VERIFIED",
+              "wings, slot 0x34 (appearance +0x22); anchor (sx/2, 0, sz/2) from drawModel emulation "
+              "(anchor_probe on Owl/Crow), chain verified on Owl/Hornet/Crow"),
+    DrawBlock("slot9a_b", 0x4238C5, 0x4238B6, 0x34, "wing", False, "VERIFIED", "as slot9a_a (right wing)"),
 )
 BY_DRAW_SITE = {b.draw_site: b for b in BLOCKS}
 BY_NAME = {b.name: b for b in BLOCKS}
@@ -96,6 +100,8 @@ def anchor(rule, size, kind=None, on_back=None, subtype=None):
         return (sx / 2.0, sy / 2.0, sz / 2.0)
     if rule == "tail":
         return (sx / 2.0, float(sy), sz / 2.0)
+    if rule == "wing":
+        return (sx / 2.0, 0.0, sz / 2.0)
     if rule == "head":
         if kind == 0x65:
             return (sx / 2.0, sy * 0.2, sz / 2.0)
