@@ -40,9 +40,14 @@ namespace CubeGame.AlphaTransfer.Editor
             if (!File.Exists(path)) { problems.Add($"RIG_SPEC_MISSING {path}"); return null; }
             var spec = JsonUtility.FromJson<AlphaRigSpec>(File.ReadAllText(path));
             if (spec == null || spec.parts == null || spec.parts.Length == 0) { problems.Add("RIG_SPEC_EMPTY"); return null; }
-            if (spec.rig != AlphaRig.RigId) problems.Add($"RIG_ID_MISMATCH {spec.rig}");
-            if (Array.IndexOf(AlphaRig.TwoHandedSubtypes, spec.weaponSubtype) < 0)
+            bool creature = spec.rig != null && spec.rig.StartsWith(AlphaRig.CreatureRigPrefix) && spec.rig.Length > AlphaRig.CreatureRigPrefix.Length;
+            if (spec.rig != AlphaRig.RigId && !creature) problems.Add($"RIG_ID_MISMATCH {spec.rig}");
+            bool hasWeapon = spec.parts.Any(p => p.name == "weapon");
+            if ((spec.rig == AlphaRig.RigId || hasWeapon) && Array.IndexOf(AlphaRig.TwoHandedSubtypes, spec.weaponSubtype) < 0)
                 problems.Add($"WEAPON_SUBTYPE_NOT_VERIFIED {spec.weaponSubtype} (verified: 15,16,17)");
+            foreach (var p in spec.parts)
+                if (p.anchor != "center" && p.anchor != "weapon" && p.anchor != "tail")
+                    problems.Add($"ANCHOR_RULE_NOT_ESTABLISHED {p.name} {p.anchor}");
             return spec;
         }
 
@@ -54,9 +59,10 @@ namespace CubeGame.AlphaTransfer.Editor
             var mat = new Material(shader) { name = "AlphaVoxel" };
             AssetDatabase.CreateAsset(mat, GenDir + "/AlphaVoxel.mat");
 
-            var go = new GameObject("AlphaHumanoid");
+            var go = new GameObject(spec.rig == AlphaRig.RigId ? "AlphaHumanoid" : "AlphaCreature");
             go.transform.localScale = Vector3.one * RootScale;
             var rig = go.AddComponent<AlphaRig>();
+            rig.rigId = spec.rig;
             rig.variant = spec.variant;
             rig.weaponSubtype = spec.weaponSubtype;
             int n = spec.parts.Length;

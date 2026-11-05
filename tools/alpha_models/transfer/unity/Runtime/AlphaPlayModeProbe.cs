@@ -28,6 +28,10 @@ namespace CubeGame.AlphaTransfer
         Vector3 _prevTip; bool _haveTip; float _tipTravel, _tipMaxStep;
         float _attackCursorEnd; int _attackFrames, _walkFramesDone, _idleFrames;
         float _t0;
+        bool _humanoid;
+        // universal rigs: per-part motion range over the real walk frames (anatomy-neutral)
+        Vector3[] _posMin, _posMax; Quaternion[] _rot0; float[] _rotRange;
+        readonly List<string> _notAvailable = new List<string>();
 
         void Start()
         {
@@ -38,8 +42,18 @@ namespace CubeGame.AlphaTransfer
             _player = GetComponent<AlphaClipPlayer>(); _rig = GetComponent<AlphaRig>();
             _player.LoadClips();
             _problems.AddRange(_player.Problems);
+            // The humanoid rig keeps the full S05A-2 contract (walk + attack + idle are mandatory).
+            // A universal creature rig must have a walk; attack/idle are run only if they exist
+            // (absent ones are reported as NOT_AVAILABLE, never treated as played).
+            _humanoid = _rig.rigId == AlphaRig.RigId;
             foreach (var n in new[] { walkClip, attackClip, idleClip })
-                if (_player.Get(n) == null) _problems.Add($"CLIP_MISSING {n}");
+                if (_player.Get(n) == null)
+                {
+                    if (_humanoid || n == walkClip) _problems.Add($"CLIP_MISSING {n}");
+                    else _notAvailable.Add(n);
+                }
+            if (_notAvailable.Contains(attackClip)) attackClip = null;
+            if (_notAvailable.Contains(idleClip)) idleClip = null;
             _t0 = Time.realtimeSinceStartup;
             if (_problems.Count > 0) { Finish(); return; }
             _player.Play(walkClip);
@@ -54,10 +68,19 @@ namespace CubeGame.AlphaTransfer
             if (_phase == 0)
             {
                 int fl = _rig.IndexOf("foot_l");
-                float z = _rig.parts[fl].localPosition.z;
-                _footMin = Mathf.Min(_footMin, z); _footMax = Mathf.Max(_footMax, z);
+                if (fl >= 0)
+                {
+                    float z = _rig.parts[fl].localPosition.z;
+                    _footMin = Mathf.Min(_footMin, z); _footMax = Mathf.Max(_footMax, z);
+                }
+                TrackMotion();
                 _walkPhaseTravel = _player.Cursor;
-                if (++_walkFramesDone >= walkFrames) { _phase = 1; _player.Play(attackClip); }
+                if (++_walkFramesDone >= walkFrames)
+                {
+                    if (attackClip != null) { _phase = 1; _player.Play(attackClip); }
+                    else if (idleClip != null) { _phase = 2; _player.Play(idleClip); }
+                    else Finish();
+                }
             }
             else if (_phase == 1)
             {
@@ -67,11 +90,30 @@ namespace CubeGame.AlphaTransfer
                 if (_haveTip) { float step = (tip - _prevTip).magnitude; _tipTravel += step; _tipMaxStep = Mathf.Max(_tipMaxStep, step); }
                 _prevTip = tip; _haveTip = true;
                 _attackCursorEnd = _player.Cursor;
-                if (_player.Cursor >= clip.Data.duration || _attackFrames >= maxAttackFrames) { _phase = 2; _player.Play(idleClip); }
+                if (_player.Cursor >= clip.Data.duration || _attackFrames >= maxAttackFrames)
+                {
+                    if (idleClip != null) { _phase = 2; _player.Play(idleClip); } else Finish();
+                }
             }
             else
             {
                 if (++_idleFrames >= 5) Finish();
+            }
+        }
+
+        void TrackMotion()
+        {
+            int n = _rig.parts.Length;
+            if (_posMin == null)
+            {
+                _posMin = new Vector3[n]; _posMax = new Vector3[n]; _rot0 = new Quaternion[n]; _rotRange = new float[n];
+                for (int i = 0; i < n; i++) { _posMin[i] = _posMax[i] = _rig.parts[i].localPosition; _rot0[i] = _rig.parts[i].localRotation; }
+            }
+            for (int i = 0; i < n; i++)
+            {
+                var p = _rig.parts[i].localPosition;
+                _posMin[i] = Vector3.Min(_posMin[i], p); _posMax[i] = Vector3.Max(_posMax[i], p);
+                _rotRange[i] = Mathf.Max(_rotRange[i], Quaternion.Angle(_rot0[i], _rig.parts[i].localRotation));
             }
         }
 
@@ -90,20 +132,35 @@ namespace CubeGame.AlphaTransfer
         void Finish()
         {
             float secs = Time.realtimeSinceStartup - _t0;
-            var attack = _player.Get(attackClip);
+            var attack = attackClip != null ? _player.Get(attackClip) : null;
             float footSwing = _footMax - _footMin;
             if (_walkFramesDone < walkFrames) _problems.Add($"WALK_FRAMES {_walkFramesDone}<{walkFrames}");
-            if (footSwing < 4f) _problems.Add($"WALK_FEET_STATIC swing={footSwing:0.00}vox");
+            // Humanoid contract (S05A-2, unchanged): the left foot must swing >= 4 voxels forward.
+            // Universal creature rigs: anatomy differs (a runner's tall foot mostly ROTATES, 0.8 vox
+            // forward in Alpha's own data), so the check is "the walk is not frozen": in real
+            // PlayMode frames some part turns >= 10 deg or moves >= 1 voxel (the runtime pose is
+            // separately required to equal the clip pose at every frame, see CheckPose).
+            float bestRot = 0f, bestMove = 0f; string bestPart = "-";
+            if (_posMin != null)
+                for (int i = 0; i < _rotRange.Length; i++)
+                {
+                    float mv = (_posMax[i] - _posMin[i]).magnitude;   // part localPosition is in voxels (root carries the 0.1 scale)
+                    if (_rotRange[i] > bestRot) { bestRot = _rotRange[i]; bestPart = _rig.partNames[i]; }
+                    bestMove = Mathf.Max(bestMove, mv);
+                }
+            if (_humanoid) { if (footSwing < 4f) _problems.Add($"WALK_FEET_STATIC swing={footSwing:0.00}vox"); }
+            else if (bestRot < 10f && bestMove < 1f) _problems.Add($"WALK_STATIC max_part_rot={bestRot:0.0}deg max_part_move={bestMove:0.00}vox");
             if (attack != null && _attackCursorEnd < attack.Data.duration) _problems.Add($"ATTACK_NOT_COMPLETED cursor={_attackCursorEnd:0} < {attack.Data.duration:0}");
-            if (_tipTravel < 30f) _problems.Add($"ATTACK_BLADE_STATIC tipTravel={_tipTravel:0.0}vox");
+            if (attackClip != null && _tipTravel < 30f) _problems.Add($"ATTACK_BLADE_STATIC tipTravel={_tipTravel:0.0}vox");
             if (_maxPosErr > 1e-3f || _maxRotErr > 0.05f) _problems.Add($"RUNTIME_POSE_MISMATCH pos={_maxPosErr} rot={_maxRotErr}");
-            if (_idleFrames < 5 && _problems.Count == 0) _problems.Add("IDLE_NOT_REACHED");
+            if (idleClip != null && _idleFrames < 5 && _problems.Count == 0) _problems.Add("IDLE_NOT_REACHED");
             Verdict = _problems.Count == 0 ? "PASS" : "FAIL";
             _log.AppendLine($"PLAYMODE_RESULT={Verdict}");
             _log.AppendLine($"frames_total={_total} simulated_dt=1/60 real_seconds={secs:0.00}");
-            _log.AppendLine($"walk_frames={_walkFramesDone} walk_phase_travel_rad={_walkPhaseTravel:0.00} foot_l_swing_vox={footSwing:0.00}");
+            _log.AppendLine($"walk_frames={_walkFramesDone} walk_phase_travel_rad={_walkPhaseTravel:0.00} foot_l_swing_vox={(_footMax >= _footMin ? footSwing : 0f):0.00} max_part_rot_deg={bestRot:0.0} ({bestPart}) max_part_move_vox={bestMove:0.00}");
             _log.AppendLine($"attack_frames={_attackFrames} attack_cursor_end_ms={_attackCursorEnd:0} attack_duration_ms={(attack != null ? attack.Data.duration : -1):0} blade_tip_travel_vox={_tipTravel:0.0} blade_tip_max_step_vox={_tipMaxStep:0.00}");
             _log.AppendLine($"idle_frames={_idleFrames}");
+            _log.AppendLine($"rig={_rig.rigId} humanoid_contract={_humanoid} not_available=[{string.Join(",", _notAvailable)}]");
             _log.AppendLine($"runtime_pose_max_pos_err={_maxPosErr:0.000000} runtime_pose_max_rot_err_deg={_maxRotErr:0.0000}");
             _log.AppendLine($"problems={_problems.Count}");
             foreach (var p in _problems) _log.AppendLine("  - " + p);

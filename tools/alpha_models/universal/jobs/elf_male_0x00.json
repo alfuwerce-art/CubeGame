@@ -1,0 +1,7 @@
+{
+ "kind": "0x00",
+ "seed_variant": [0, 0],
+ "variant": "elf_male_0x00_no_alpha_run",
+ "equipment": {"weapon": {"model": "iron-greatsword.cub", "subtype": 15}},
+ "note": "NOT captured: same motion family as the captured human male (kind 0x02); universal walk/idle clips of the family; weapon layer from the S05A-1 set."
+}

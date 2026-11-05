@@ -14,6 +14,9 @@ param(
   [string]$Clips   = 'D:\Projects\CubeGame\.scratch\s05a2\clips',
   [string]$Models  = 'D:\Projects\CubeGame\tools\alpha_models\transfer\models.s05a1_greatsword.json',
   [string]$Unity   = 'D:\Unity\Hub\Editor\6000.3.27f2\Editor\Unity.exe',
+  # Universal pipeline: a job file (kind, seed variant, equipment) replaces -Models/-Clips; the
+  # rig, models and motion-family clips are then prepared by tools.alpha_models.universal.pipeline.
+  [string]$UniversalJob = '',
   [switch]$SkipPlayMode,
   [switch]$Test
 )
@@ -116,7 +119,11 @@ Copy-Item -Force "$src\Editor\*"  "$Project\Assets\AlphaTransfer\Scripts\Editor\
 # 2. data (local only: .scratch is git-ignored)
 Push-Location $repo
 try {
-  python -m tools.alpha_models.transfer.prepare_unity --db $Db --project $Project --clips $Clips --models $Models
+  if ($UniversalJob) {
+    python -m tools.alpha_models.universal.pipeline prepare-unity --job $UniversalJob --project $Project --db $Db
+  } else {
+    python -m tools.alpha_models.transfer.prepare_unity --db $Db --project $Project --clips $Clips --models $Models
+  }
   if ($LASTEXITCODE -ne 0) { throw "PREPARE_RESULT=FAIL (python exit $LASTEXITCODE)" }
 } finally { Pop-Location }
 

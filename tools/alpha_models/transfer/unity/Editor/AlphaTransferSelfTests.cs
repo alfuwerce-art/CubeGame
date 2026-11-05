@@ -145,6 +145,48 @@ namespace CubeGame.AlphaTransfer.Editor
                 var c = AlphaRig.Anchor("weapon", new Vector3Int(3, 13, 37), true);
                 return Expect(Near(a, new Vector3(5, 4, 5)) && Near(b, new Vector3(1.5f, 6.5f, 4f)) && Near(c, new Vector3(1.5f, 6.5f, 18.5f)), $"{a} {b} {c}");
             });
+            // ---- universal creature rig (synthetic; TEST_DATA_NOT_ALPHA) ----
+            Add("anchor_tail_rule", () =>
+            {
+                var t = AlphaRig.Anchor("tail", new Vector3Int(4, 5, 10), true);
+                bool threw = false;
+                try { AlphaRig.Anchor("unknown", new Vector3Int(4, 5, 10), true); } catch (ArgumentException) { threw = true; }
+                return Expect(Near(t, new Vector3(2f, 5f, 5f)) && threw, $"tail {t} unknownThrew={threw}");
+            });
+            Add("creature_rig_accepts_own_family_rejects_others", () =>
+            {
+                const string fam = "alpha_creature/0123456789";
+                var ok = new List<string>(); var bad = new List<string>(); var hum = new List<string>();
+                var k = new[] { AlphaSpace.Translate(Vector3.zero) };
+                var c1 = AlphaClip.Parse(ClipJson(fam, new[] { "tail" }, k, new[] { 0f }), fam, ok);
+                var c2 = AlphaClip.Parse(ClipJson("alpha_creature/ffffffffff", new[] { "tail" }, k, new[] { 0f }), fam, bad);
+                var c3 = AlphaClip.Parse(ClipJson(AlphaRig.RigId, new[] { "body" }, k, new[] { 0f }), fam, hum);
+                return Expect(c1 != null && c2 == null && c3 == null && bad.Exists(x => x.StartsWith("CLIP_RIG_MISMATCH"))
+                              && hum.Exists(x => x.StartsWith("CLIP_RIG_MISMATCH")), $"{c1 != null} {c2 == null} {c3 == null} {string.Join(";", ok)}");
+            });
+            Add("creature_rig_tail_roundtrip", () =>
+            {
+                var go = new GameObject("t"); go.transform.localScale = Vector3.one * 0.1f;
+                try
+                {
+                    var rig = go.AddComponent<AlphaRig>();
+                    rig.rigId = "alpha_creature/0123456789";
+                    rig.partNames = new[] { "tail" };
+                    rig.parts = new[] { new GameObject("p").transform }; rig.parts[0].SetParent(go.transform, false);
+                    rig.meshes = new[] { new GameObject("mesh").transform }; rig.meshes[0].SetParent(rig.parts[0], false);
+                    rig.sizes = new[] { new Vector3Int(4, 5, 10) };
+                    rig.anchors = new[] { "tail" };
+                    rig.SetWeaponOnBack(true);
+                    var j = AlphaSpace.Mul(AlphaSpace.Mul(RowScale(1.1f, 1.1f, 1.1f), RowRotX(-30)), AlphaSpace.Translate(new Vector3(0, -8, -1)));
+                    var p = new List<string>();
+                    var c = AlphaClip.Parse(ClipJson(rig.rigId, rig.partNames, new[] { j }, new[] { 0f }), rig.rigId, p);
+                    if (c == null) return string.Join(";", p);
+                    var o = new PartPose[1]; c.Sample(0, o); rig.Apply(o, new[] { 0 });
+                    float d = AlphaSpace.MaxAbsDiff(rig.ReadAlphaModelMatrix(0), AlphaSpace.Mul(AlphaSpace.Translate(-rig.AnchorOf(0)), j));
+                    return Expect(d < 1e-4f && Near(rig.AnchorOf(0), new Vector3(2, 5, 5)), $"max diff {d} anchor {rig.AnchorOf(0)}");
+                }
+                finally { UnityEngine.Object.DestroyImmediate(go); }
+            });
             Add("voxel_mesh_counts_exposed_faces", () =>
             {
                 var bytes = new byte[12 + 2 * 3];

@@ -63,7 +63,25 @@ CREATURE_FIELDS = [
     ("f_1190", 0x1190, "<f"),
 ]
 CREATURE_DUMP = (0x0, 0x180)       # raw creature header kept for later field discovery
-THIS_DUMP = (0x0, 0xC0)            # drawModel `this` object (state at +8 = self[2])
+THIS_DUMP = (0x0, 0x100)           # drawModel `this` (state self[2]; model slots self[0x2f..0x3a])
+# drawModel model slots (this + 4*idx): the mesh drawn by every part is one of these pointers, so
+# `mesh == self[slot]` identifies WHICH model a draw call renders independent of the call site.
+# Slot <- source (Creature_drawModel prologue, GameController.cpp:2118-2200; equipment overrides):
+MODEL_SLOTS = {
+    0x2F: "head",      # creature+0x8c (appearance+0x14)
+    0x30: "hair",      # creature+0x8e (appearance+0x16)
+    0x33: "hand",      # creature+0x90 (appearance+0x18) | equipment +0x760 (gloves)
+    0x36: "foot",      # creature+0x92 (appearance+0x1a) | equipment +0x648 (boots)
+    0x31: "body",      # creature+0x94 (appearance+0x1c) | equipment +0x530 (chest)
+    0x35: "tail",      # creature+0x96 (appearance+0x1e)
+    0x32: "slot_98",   # creature+0x98 (appearance+0x20)
+    0x34: "slot_9a",   # creature+0x9a (appearance+0x22)
+    0x37: "weapon",    # equipment +0xaa8
+    0x38: "offhand",   # equipment +0x990
+    0x39: "shoulder",  # equipment +0x878
+    0x3A: "neck",      # equipment +0x418
+}
+KIND_OFFSET = 0x64                 # creature kind (creature_generateAppearance(kindOut=creature+100))
 MESH_DUMP = (0x0, 0x60)            # mesh object header (sizes, buffers)
 # Creature_drawModel prologue: push ebp; mov ebp,esp; and esp,-8; sub esp,0x1730; push esi;
 # push edi; mov edi,ecx; mov [esp+0x20],edi.  So in the body, the decompiler's local_1720
@@ -96,7 +114,7 @@ def static_sites(exe_path):
 
 class Capture:
     def __init__(self, pid, exe_path, target=None, max_records=400, max_seconds=30.0,
-                 out=None, auto_parts=5):
+                 out=None, auto_parts=5, kinds=None, per_kind=1):
         self.pid = pid
         self.k = dp._kernel32()
         self.handle = self.k.OpenProcess(dp.PROCESS_ALL_ACCESS, False, pid)
@@ -125,6 +143,12 @@ class Capture:
         for va in self.part_sites:
             if self.original[va] != b"\xe8":
                 raise RuntimeError(f"call byte mismatch at 0x{va:08X}")
+        # kind targeting (universal pipeline): capture creatures whose creature+0x64 is in
+        # `kinds`; up to `per_kind` distinct creatures of each kind are followed in ONE session.
+        self.kinds = set(kinds) if kinds else None
+        self.per_kind = per_kind
+        self.kind_targets = {}             # creature ptr -> kind (locked once chosen)
+        self.kind_of = {}                  # every creature seen -> kind
         self.want_player = target == "player"
         self.player_resolved = False
         self.target = None if target in (None, "player") else target
@@ -166,6 +190,7 @@ class Capture:
     # --- handlers -------------------------------------------------------------------
     def _finish_current(self):
         if self.current is not None and self.current["parts"]:
+            self.current.pop("_slots", None)
             self.records.append(self.current)
         self.current = None
 
@@ -174,11 +199,17 @@ class Capture:
         self._finish_current()
         idx = dp._i16s(self.handle, creature + 0x8C, k=self.k) or []
         self.creature_seen.setdefault(creature, idx)
+        kind_raw = self.read(creature + KIND_OFFSET, 4)
+        kind = struct.unpack("<I", kind_raw)[0] if kind_raw else None
+        self.kind_of.setdefault(creature, kind)
+        if self.kinds is not None and kind in self.kinds and creature not in self.kind_targets:
+            if sum(1 for k in self.kind_targets.values() if k == kind) < self.per_kind:
+                self.kind_targets[creature] = kind
         if self.target is None and self.auto_parts:
             used = [i for i in idx if i >= 0]
             if len(used) == self.auto_parts:
                 self.target = creature
-        if creature == self.target:
+        if creature == self.target or creature in self.kind_targets:
             fields = {}
             for name, off, fmt in CREATURE_FIELDS:
                 raw = self.read(creature + off, struct.calcsize(fmt))
@@ -188,6 +219,7 @@ class Capture:
             self.current = {
                 "t": time.perf_counter(),
                 "creature": f"0x{creature:08X}",
+                "kind": kind,
                 "this": f"0x{ctx.Edi:08X}",
                 "state": struct.unpack("<i", this_raw[8:12])[0] if this_raw else None,
                 "indices": idx,
@@ -228,6 +260,20 @@ class Capture:
         part = dict(self.pending_upload or {})
         part["draw_site"] = f"0x{va - self.delta:06X}"
         part["mesh"] = f"0x{mesh:08X}"
+        slots = self.current.get("_slots")
+        if slots is None:
+            # the slots are filled by the drawModel prologue AFTER the gate, so they are read
+            # live at the first draw call of this record (and kept in the record for audit)
+            raw = self.read(self._this, THIS_DUMP[1]) or b""
+            self.current["this_slots_hdr"] = raw[0xBC:0xF0].hex() if raw else None
+            slots = {}
+            for idx in MODEL_SLOTS:
+                if 4 * idx + 4 <= len(raw):
+                    slots.setdefault(struct.unpack_from("<I", raw, 4 * idx)[0], []).append(idx)
+            self.current["_slots"] = slots
+        hit = slots.get(mesh, [])
+        part["slot"] = f"0x{hit[0]:02X}" if len(hit) == 1 else (None if not hit else
+                                                                [f"0x{h:02X}" for h in hit])
         part["mesh_hdr"] = hdr.hex() if hdr else None
         self.current["parts"].append(part)
         self.pending_upload = None
@@ -390,18 +436,29 @@ def main(argv=None):
                          "'auto' (first creature with --auto-parts slots) or a hex pointer")
     ap.add_argument("--auto-parts", type=int, default=5,
                     help="auto-select the first creature with this many model slots (5 = human)")
+    ap.add_argument("--kinds", default=None,
+                    help="universal pipeline: comma list of creature kinds (creature+0x64), e.g. "
+                         "0x20,0x1e; captures up to --per-kind creatures of each kind in one "
+                         "session instead of --target")
+    ap.add_argument("--per-kind", type=int, default=1)
     ap.add_argument("--records", type=int, default=400)
     ap.add_argument("--seconds", type=float, default=30.0)
     a = ap.parse_args(argv)
-    target = a.target if a.target == "player" else (None if a.target == "auto" else int(a.target, 16))
-    cap = Capture(a.pid, a.exe, target=target,
+    kinds = [int(k, 0) for k in a.kinds.split(",")] if a.kinds else None
+    if kinds:
+        target = "kinds"
+    else:
+        target = a.target if a.target == "player" else (None if a.target == "auto" else int(a.target, 16))
+    cap = Capture(a.pid, a.exe, target=None if kinds else target,
                   max_records=a.records, max_seconds=a.seconds, out=a.out,
-                  auto_parts=a.auto_parts)
+                  auto_parts=0 if kinds else a.auto_parts, kinds=kinds, per_kind=a.per_kind)
     recs = cap.run()
     print(f"POSE_CAPTURE records={len(recs)} player_resolved={cap.player_resolved} target="
           f"{'0x%08X' % cap.target if cap.target else None} creatures_seen={len(cap.creature_seen)}")
     for c, idx in cap.creature_seen.items():
-        print(f"  creature 0x{c:08X} indices={idx}")
+        mark = " TARGET" if c in cap.kind_targets else ""
+        kind = cap.kind_of.get(c)
+        print(f"  creature 0x{c:08X} kind={kind if kind is None else hex(kind)} indices={idx}{mark}")
     if recs:
         print(f"  parts/record={len(recs[0]['parts'])} state0={recs[0]['state']}")
 

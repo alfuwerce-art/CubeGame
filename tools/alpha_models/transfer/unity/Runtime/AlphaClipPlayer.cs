@@ -35,7 +35,7 @@ namespace CubeGame.AlphaTransfer
             foreach (var asset in clipAssets)
             {
                 if (asset == null) { Problems.Add("CLIP_ASSET_NULL"); continue; }
-                var clip = AlphaClip.Parse(asset.text, AlphaRig.RigId, Problems);
+                var clip = AlphaClip.Parse(asset.text, string.IsNullOrEmpty(_rig.rigId) ? AlphaRig.RigId : _rig.rigId, Problems);
                 if (clip == null) continue;
                 var map = new int[clip.PartCount];
                 for (int i = 0; i < map.Length; i++)

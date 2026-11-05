@@ -34,6 +34,9 @@ namespace CubeGame.AlphaTransfer
     public class AlphaRig : MonoBehaviour
     {
         public const string RigId = "alpha_humanoid_v1";
+        /// <summary>Universal pipeline rigs: "alpha_creature/&lt;motion family hash&gt;" (creature_rig.py).</summary>
+        public const string CreatureRigPrefix = "alpha_creature/";
+        public string rigId = RigId;
         public string variant;
         public int weaponSubtype = -1;
         public string[] partNames = new string[0];
@@ -52,6 +55,8 @@ namespace CubeGame.AlphaTransfer
         {
             var centre = new Vector3(size.x * 0.5f, size.y * 0.5f, size.z * 0.5f);
             if (rule == "center") return centre;
+            // tail block (GameController.cpp:6212-6219): translate(-sx/2, -sy, -sz/2)
+            if (rule == "tail") return new Vector3(size.x * 0.5f, size.y, size.z * 0.5f);
             if (rule == "weapon") return weaponOnBack ? centre : new Vector3(size.x * 0.5f, size.y * 0.5f, 4f);
             throw new ArgumentException($"unknown anchor rule {rule}");
         }
