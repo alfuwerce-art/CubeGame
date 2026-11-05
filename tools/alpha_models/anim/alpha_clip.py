@@ -192,8 +192,10 @@ def pose_error(ma, mb):
 #   head/hair: mat4_rotateX(pitch - ch + x) right before translate(0,0,3) * scale  (6253, 6299)
 #   weapon in hand: mat4_rotateAxisAngle(pitch*0.5 + ch, X) right before scale (6607, 6785)
 # so in the joint frame it is a pure X rotation about the neck (3*scale below the joint) or about
-# the grip (the joint itself). Clips are stored at pitch 0: J0 = T(0,0,p)*Rx(-k*pitch)*T(0,0,-p)*J.
-# Verified on two captures with pitch 0 and -3.78 deg: residual 0.000 deg head, 0.02 deg weapon.
+# the grip (the joint itself). With J = S*T(0,0,3)*Rx*..., the neck pivot sits at 3/s in the joint
+# frame, so clips are stored at pitch 0: J0 = T(0,0,3/s)*Rx(-k*pitch)*T(0,0,-3/s)*J.
+# Verified on two captures with pitch 0 and -3.78 deg: residual 0.0002 vox / 0.000 deg head,
+# 0.02 deg weapon.
 PITCH_LAYER = {"head": (1.0, 3.0), "hair": (1.0, 3.0), "weapon": (0.5, 0.0)}
 
 
@@ -208,8 +210,8 @@ def pitch_layer(name, j, pitch_deg, on_back):
         return j
     k, pivot = PITCH_LAYER[name]
     s = decompose(j)[2][0]
-    corr = mat4.mul(mat4.mul(mat4.translate(0, 0, pivot * abs(s)), _rx(k * pitch_deg)),
-                    mat4.translate(0, 0, -pivot * abs(s)))
+    corr = mat4.mul(mat4.mul(mat4.translate(0, 0, pivot / abs(s)), _rx(k * pitch_deg)),
+                    mat4.translate(0, 0, -pivot / abs(s)))
     return mat4.mul(corr, j)
 
 
@@ -293,7 +295,7 @@ def build_time_clip(frames, capture_path, state, action, name, on_back=False, su
             for n in joints[i])
         if moved:
             last_move = i
-    end = min(len(run) - 1, last_move + 1)
+    end = max(1, last_move)   # the frame that reaches the final pose; later frames only hold it
     keys = [{"x": float(run[i].time_ms), "m": joints[i]} for i in range(end + 1)]
     clip = _clip_header(name, "time_ms", False, run[:end + 1], capture_path, {
         "drawmodel_state": state, "action_creature_68": action,
@@ -317,14 +319,19 @@ def _steady_walk(frames, amp_ratio):
 
 
 def _walk_keys(steady, phi0):
-    keys = sorted(((fr.phase - phi0) % TWO_PI, fr) for fr in steady)
+    """All steady frames as keys ordered by phase (kept complete for leave-one-cycle-out)."""
+    keys = sorted((((fr.phase - phi0) % TWO_PI, fr.index), fr) for fr in steady)
+    return [{"x": x, "m": _frame_joints(fr, on_back=True), "_cycle": int((fr.phase - phi0) // TWO_PI),
+             "_frame": fr.index} for (x, _), fr in keys]
+
+
+def _dedupe(keys, eps=1e-4):
     out, last = [], None
-    for x, fr in keys:
-        if last is not None and x - last < 1e-4:
+    for k in keys:
+        if last is not None and k["x"] - last < eps:
             continue
-        out.append({"x": x, "m": _frame_joints(fr, on_back=True), "_cycle": int((fr.phase - phi0) // TWO_PI),
-                    "_frame": fr.index})
-        last = x
+        out.append({"x": k["x"], "m": k["m"]})
+        last = k["x"]
     return out
 
 
@@ -349,7 +356,7 @@ def build_walk_clip(frames, capture_path, name="walk", amp_ratio=0.97):
                          "(GameController.cpp:2244-2256)",
     })
     clip["duration"] = TWO_PI
-    clip["keys"] = [{"x": k["x"], "m": k["m"]} for k in keys]
+    clip["keys"] = _dedupe(keys)
     clip["_keys_full"] = keys
     clip["_steady_frames"] = steady
     return clip
@@ -410,7 +417,7 @@ def validate_walk(clip, steady):
     cycles = sorted({k["_cycle"] for k in full})
     errs = []
     for c in cycles:
-        train = [{"x": k["x"], "m": k["m"]} for k in full if k["_cycle"] != c]
+        train = _dedupe([k for k in full if k["_cycle"] != c])
         if len(train) < 8:
             continue
         sub = dict(clip, keys=train)

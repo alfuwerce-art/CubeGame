@@ -102,3 +102,39 @@ function Save-AlphaShot([string]$Path, [double]$Scale = 0.5) {
 function Click-Alpha([int]$X, [int]$Y) { $c = Get-AlphaClient; [AlphaWin]::SetCursorPos($c.X+$X, $c.Y+$Y) | Out-Null; Start-Sleep -Milliseconds 150; [AlphaWin]::mouse_event(2,0,0,0,[UIntPtr]::Zero); Start-Sleep -Milliseconds 80; [AlphaWin]::mouse_event(4,0,0,0,[UIntPtr]::Zero) }
 function Key-Alpha([int]$Vk, [int]$HoldMs = 80) { [AlphaWin]::Key($Vk,$false) | Out-Null; Start-Sleep -Milliseconds $HoldMs; [AlphaWin]::Key($Vk,$true) | Out-Null }
 function Mouse-Alpha([string]$Button = 'left', [int]$HoldMs = 80) { $d = @{left=2;right=8}[$Button]; [AlphaWin]::MouseBtn($d) | Out-Null; Start-Sleep -Milliseconds $HoldMs; [AlphaWin]::MouseBtn($d*2) | Out-Null }
+function Wheel-Alpha([int]$Notches = -5) {
+  # MOUSEEVENTF_WHEEL via SendInput; negative = towards the user (zoom out in Alpha)
+  for ($i = 0; $i -lt [math]::Abs($Notches); $i++) {
+    $inp = New-Object AlphaWin+INPUT[] 1; $inp[0].type = 0
+    $inp[0].u.mi.f = 0x0800; $inp[0].u.mi.d = [BitConverter]::ToUInt32([BitConverter]::GetBytes([int](120 * [math]::Sign($Notches))), 0)
+    [void][AlphaWin]::SendInput(1, $inp, [Runtime.InteropServices.Marshal]::SizeOf([type][AlphaWin+INPUT]))
+    Start-Sleep -Milliseconds 80
+  }
+}
+function Save-AlphaBurst([string]$Dir, [int]$Count = 40, [int]$IntervalMs = 40) {
+  # timestamped screenshot burst of the client area (for Alpha <-> Unity visual comparison)
+  New-Item -ItemType Directory -Force -Path $Dir | Out-Null
+  $c = Get-AlphaClient
+  $bmp = New-Object System.Drawing.Bitmap $c.W, $c.H
+  $g = [System.Drawing.Graphics]::FromImage($bmp)
+  $sw = [Diagnostics.Stopwatch]::StartNew(); $frames = @()
+  for ($i = 0; $i -lt $Count; $i++) {
+    $t = $sw.Elapsed.TotalMilliseconds
+    $g.CopyFromScreen($c.X, $c.Y, 0, 0, $bmp.Size)
+    $ms = New-Object IO.MemoryStream; $bmp.Save($ms, [Drawing.Imaging.ImageFormat]::Png)
+    $frames += [pscustomobject]@{ t = [math]::Round($t, 1); bytes = $ms.ToArray() }; $ms.Dispose()
+    Start-Sleep -Milliseconds $IntervalMs
+  }
+  $g.Dispose(); $bmp.Dispose()
+  $i = 0; foreach ($f in $frames) { [IO.File]::WriteAllBytes((Join-Path $Dir ('f{0:d3}_{1:00000}ms.png' -f $i, $f.t)), $f.bytes); $i++ }
+  "BURST frames=$($frames.Count) dir=$Dir"
+}
+function Move-AlphaMouse([int]$Dx, [int]$Dy, [int]$Steps = 10) {
+  # relative mouse motion (camera look in Alpha): MOUSEEVENTF_MOVE in small steps
+  for ($i = 0; $i -lt $Steps; $i++) {
+    $inp = New-Object AlphaWin+INPUT[] 1; $inp[0].type = 0
+    $inp[0].u.mi.f = 0x0001; $inp[0].u.mi.dx = [int]($Dx / $Steps); $inp[0].u.mi.dy = [int]($Dy / $Steps)
+    [void][AlphaWin]::SendInput(1, $inp, [Runtime.InteropServices.Marshal]::SizeOf([type][AlphaWin+INPUT]))
+    Start-Sleep -Milliseconds 30
+  }
+}

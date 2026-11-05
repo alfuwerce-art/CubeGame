@@ -7,6 +7,9 @@
 | `pe_bytes.py` | минимальный PE32-ридер (RVA ↔ файловое смещение) и поиск вызовов `E8 rel32`; только стандартная библиотека |
 | `alpha_writes.py` | восстановление сайтов `*arrayElem_stride4(i) = value`: скрытая база в `ECX`, компонента из `push`, значение из `mov [eax],imm32` / `movss [eax],xmm0` |
 | `pose_table.py` | CLI: таблица состояний `Creature_drawModel` (`switch` @ `0x413AF6`, таблица @ `0x423D4C`) и сверка с реконструкцией |
+| `mat4.py` | матрицы 4×4 в соглашении Alpha (строки-векторы) |
+| `humanoid_rig.py` | **S05A2-TRANSFER:** 8 частей гуманоида (адреса отрисовки, слоты, доказательства), правила якорей, проверка совместимости моделей |
+| `alpha_clip.py` | **S05A2-TRANSFER:** захват `pose_capture` → модельно-независимые клипы (`summary`/`build`/`compare`), слой наклона, проверки повторяемости. Порядок работы — [ANIMATION_TRANSFER_PLAYBOOK.md](../../../docs/agents/ANIMATION_TRANSFER_PLAYBOOK.md) |
 
 ## Зачем это нужно
 

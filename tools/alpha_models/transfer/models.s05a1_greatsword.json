@@ -1,0 +1,15 @@
+{
+ "variant": "s05a1_human_greatsword",
+ "weapon_subtype": 15,
+ "note": "S05A-1 humanoid model set; two-handed sword = item category 3, subtype 15 (greatsword). The attack clip was captured with a greatmace (subtype 17); combat_selectAttackAnim and the weapon draw block treat 15/16/17 identically.",
+ "parts": {
+  "body": "body1.cub",
+  "head": "human-head-m01.cub",
+  "hair": "human-hair-m01.cub",
+  "weapon": "iron-greatsword.cub",
+  "hand_l": "glove.cub",
+  "hand_r": "glove.cub",
+  "foot_l": "foot.cub",
+  "foot_r": "foot.cub"
+ }
+}

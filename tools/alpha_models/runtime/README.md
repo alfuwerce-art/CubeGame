@@ -8,6 +8,10 @@
 |---|---|
 | `model_read_scan.py` | статический поиск инструкций, читающих 8 индексов моделей `creature+0x8c..+0x9a` (чистый Python, тестируется) |
 | `drawmodel_probe.py` | рантайм-отладчик (ctypes): точка останова на чтении индекса, съём `eax`=существо / `edi`=this / `esi`=вектор моделей |
+| `pose_capture.py` | **S05A-2 перенос:** 27 точек `render_uploadModelViewMatrices` + 27 точек `GameController_draw_mesh` внутри `drawModel`, только для игрока (`gameController+0x8006D0` @ `0x4A6B93`); пишет реальные матрицы частей, размещение `local_14e0`, поля существа. Отсоединение без падения игры |
+| `alpha_window.ps1` | окно локальной копии: запуск с резервной копией `Save`, фокус, клики в клиентских координатах, клавиши/мышь (`SendInput`), снимки и серии снимков |
+| `alpha_enter_world.ps1` | меню → персонаж → мир, с контрольным снимком каждого шага |
+| `alpha_capture_session.ps1` | сценарий «покой → ходьба → атака» с одновременным `pose_capture` и проверкой `CUBE_ALIVE` |
 
 ## Что доказано (S05A2-D58)
 
@@ -48,6 +52,8 @@ python -m unittest tools.alpha_models.tests.test_model_read_scan
 исключения начинается со смещения 16. Отсоединение чистое: байт восстанавливается,
 незавершённый single-step доводится до конца (снимается trap-флаг), и перед
 `DebugActiveProcessStop` ставится `DebugSetProcessKillOnExit(FALSE)`.
+
+Перенос анимаций целиком — [ANIMATION_TRANSFER_PLAYBOOK.md](../../../docs/agents/ANIMATION_TRANSFER_PLAYBOOK.md).
 
 ## Границы достоверности
 
