@@ -92,3 +92,22 @@
 [ANIMATION_SYSTEM_PLAYBOOK](../agents/ANIMATION_SYSTEM_PLAYBOOK.md) содержит команды, статусы, артефакты и разбор отказов. [ALPHA_ANIMATION_SYSTEM](../research/alpha2013/ALPHA_ANIMATION_SYSTEM.md) описывает механизм и границу доказательств. До отдельного решения продюсера использовать систему только для текущего гуманоида.
 
 Сохранены чужие незакоммиченные изменения: `CharacterPilotGripAttack.cs` (line ending) и `Assets/CubeGame/Core/Domain.meta`; в коммиты Codex не включаются. Единственная рабочая директория — D:, без новых копий или worktree.
+
+## 7. Коммиты и проверяемые артефакты
+
+- Реализация, тесты и документация: [ab8b86e601be1a7d66439345d226476a7ab434a2](https://github.com/alfuwerce-art/CubeGame/commit/ab8b86e601be1a7d66439345d226476a7ab434a2), опубликовано в [рабочей ветке](https://github.com/alfuwerce-art/CubeGame/tree/codex/s05a2-claude-continuation). Основа — [3d4a2fb](https://github.com/alfuwerce-art/CubeGame/commit/3d4a2fb), все предшествующие коммиты Claude сохранены.
+- Проверка публикации: local HEAD совпал с `origin/codex/s05a2-claude-continuation`. В индексе только собственные исходники/методички; запрещённых расширений и секретов не обнаружено. `.scratch` и визуалы подтверждённо git-ignored. `main` не изменён, merge/force push не выполнялись.
+
+Локальные ссылки доступны в рабочей копии на ПК; эти защищённые исследовательские артефакты **не опубликованы**:
+
+| Артефакт | Ссылка |
+|---|---|
+| Python 178 + 5 subtests | [python_final.log](D:/Projects/CubeGame/.scratch/animsys/python_final.log) |
+| Полный runner и exit-коды | [controller_final_run.log](D:/Projects/CubeGame/.scratch/animsys/controller_final_run.log) |
+| EditMode 29/29 | [selftest.txt](D:/Projects/CubeGame/.scratch/s05a2/unity/AlphaTransfer/TransferOutput/selftest.txt) |
+| Геометрия / все ключи / хват / seam | [transfer_report.txt](D:/Projects/CubeGame/.scratch/s05a2/unity/AlphaTransfer/TransferOutput/transfer_report.txt) |
+| PlayMode 30 / 60 / 120 Гц | [30](D:/Projects/CubeGame/.scratch/s05a2/unity/AlphaTransfer/TransferOutput/controller_playmode_30.txt), [60](D:/Projects/CubeGame/.scratch/s05a2/unity/AlphaTransfer/TransferOutput/controller_playmode_60.txt), [120](D:/Projects/CubeGame/.scratch/s05a2/unity/AlphaTransfer/TransferOutput/controller_playmode_120.txt) |
+| 3115 живых кадров → oracle | [oracle_validation_camera.json](D:/Projects/CubeGame/.scratch/animsys/oracle_validation_camera.json) |
+| Полный реестр action→state→timings→status | [actions.json](D:/Projects/CubeGame/.scratch/animsys/human_actions_extended/actions.json) |
+| Реальный цикл контроллера | [GIF](D:/Projects/CubeGame/.scratch/animsys/visuals/controller_preview.gif), [контактный лист](D:/Projects/CubeGame/.scratch/animsys/visuals/controller_contact_sheet.png) |
+| Прежнее прямое сравнение Alpha/Unity | [compare_alpha_unity_attack.png](D:/Projects/CubeGame/.scratch/s05a2/visual/compare_alpha_unity_attack.png) |
