@@ -141,11 +141,17 @@ class RigResolverTests(unittest.TestCase):
         self.assertIn("weapon", b.parts)
 
     def test_unverified_block_and_kind_branch_are_exceptions(self):
-        offhand = cr.resolve(0x20, appearance(CAT), equipment=("offhand",))
-        self.assertFalse(offhand.supported)
-        self.assertTrue(any("UNVERIFIED_DRAW_BLOCK" in e for e in offhand.exceptions))
-        mole = cr.resolve(0x57, appearance(CAT))
-        self.assertTrue(any("KIND_SPECIFIC_CODE" in e for e in mole.exceptions))
+        # D64: offhand blocks are established by drawModel emulation
+        self.assertTrue(cr.resolve(0x20, appearance(CAT), equipment=("offhand",)).supported)
+        saved = cr._WALK_ORACLE
+        try:
+            cr._WALK_ORACLE = {}
+            mole = cr.resolve(0x57, appearance(CAT))
+            self.assertTrue(any("KIND_SPECIFIC_CODE" in e for e in mole.exceptions))
+            cr._WALK_ORACLE = {"0x57": {"status": "ORACLE_VERIFIED"}}
+            self.assertFalse(any("KIND_SPECIFIC_CODE" in e for e in cr.resolve(0x57, appearance(CAT)).exceptions))
+        finally:
+            cr._WALK_ORACLE = saved
         self.assertFalse(cr.resolve(0x50, appearance({})).supported)          # no parts at all
 
     def test_anchor_rules(self):
@@ -242,8 +248,12 @@ class UniversalClipTests(unittest.TestCase):
 
     def test_wrong_slot_unknown_and_unverified_sites_are_rejected(self):
         for kw, code in (({"slot_over": {"tail": "0x2F"}}, "SLOT_MISMATCH"),
-                         ({"site_over": {"tail": 0x41F8BD}}, "UNKNOWN_DRAW_SITE"),
-                         ({"site_over": {"tail": 0x421DFA}}, "UNVERIFIED_BLOCK")):
+                         ({"site_over": {"tail": 0x41F800}}, "UNKNOWN_DRAW_SITE"),     # not a draw site
+                         ({"site_over": {"tail": 0x42231B}}, "UNVERIFIED_BLOCK")):    # offhand_b, forced below
+            saved = cr.BY_DRAW_SITE[0x42231B]
+            cr.BY_DRAW_SITE[0x42231B] = cr.DrawBlock(saved.name, saved.draw_site, saved.upload_site, saved.slot,
+                                                     "unknown", False, "UNVERIFIED", "test")
+            self.addCleanup(cr.BY_DRAW_SITE.__setitem__, 0x42231B, saved)
             fr = uclip.load_capture(write([record(0.3, 0.0, **kw)]))[0]
             self.assertTrue(any(p.startswith(code) for p in fr.problems), (code, fr.problems))
             self.assertFalse(uclip.usable(fr, uclip.frame_resolution(fr)))
@@ -355,8 +365,10 @@ class PrepareRefusalTests(unittest.TestCase):
             self.assertEqual(len(out["skipped_clips"]), 1)
             out2 = pl.prepare_unity({"kind": "0x37", "clips": clips}, os.path.join(tmp, "proj2"))   # Crow: wings now verified
             self.assertTrue(any(p.startswith("NO_FAMILY_CLIPS") for p in out2["problems"]))
-            out3 = pl.prepare_unity({"kind": "0x57", "clips": clips}, os.path.join(tmp, "proj3"))   # kind-specific code
-            self.assertTrue(any(p.startswith("UNSUPPORTED") for p in out3["problems"]))
+            # D64: 0x57 (kind-specific drawModel code) is ORACLE_VERIFIED -> handled like any family
+            out3 = pl.prepare_unity({"kind": "0x57", "clips": clips}, os.path.join(tmp, "proj3"))
+            self.assertFalse(any(p.startswith("UNSUPPORTED") for p in out3["problems"]))
+            self.assertTrue(any(p.startswith("NO_FAMILY_CLIPS") for p in out3["problems"]))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 

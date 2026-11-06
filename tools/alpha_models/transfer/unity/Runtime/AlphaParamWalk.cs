@@ -177,8 +177,10 @@ namespace CubeGame.AlphaTransfer
                     var sc = left ? Scale(p.scale_hand) : Scale(-p.scale_hand, p.scale_hand, p.scale_hand);
                     // hand rest angles: left (a4c, -a50, -a54), right (a4c, a50, a54)
                     float rx = p.angle_4c, ry = left ? -p.angle_50 : p.angle_50, rz = left ? -p.angle_54 : p.angle_54;
-                    return quad ? Chain(bobBase, RotX(pitch), T(x, y, z), RotZ(rz), RotY(ry), RotX(pitch), RotX(rx), sc)
-                                : Chain(bobBase, T(x, y, z), RotZ(rz), RotY(ry), RotX(rx), sc);
+                    // D64: hands do NOT receive the root pitch angle_48 (drawModel oracle, InsectGuard 0x36:
+                    // with bobBase the hands were off by exactly angle_48 = -45 deg; with the lift only: 0.0)
+                    return quad ? Chain(liftOnly, RotX(pitch), T(x, y, z), RotZ(rz), RotY(ry), RotX(pitch), RotX(rx), sc)
+                                : Chain(liftOnly, T(x, y, z), RotZ(rz), RotY(ry), RotX(rx), sc);
                 }
                 case "foot_l":
                     return Chain(Identity, RotX(p.angle_58 + d0),

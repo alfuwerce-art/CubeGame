@@ -61,14 +61,16 @@ BLOCK_ROLES = {
     "hand_l": "fore_limb", "hand_r": "fore_limb", "foot_l": "hind_limb", "foot_r": "hind_limb",
     "slot98_a": "mid_limb", "slot98_b": "mid_limb", "slot9a_a": "wing", "slot9a_b": "wing",
     "weapon": "equipment", "offhand_a": "equipment", "offhand_b": "equipment",
-    "shoulder_item": "equipment", "neck_item": "equipment",
+    "shoulder_item": "equipment", "neck_item": "equipment", "quiver": "equipment",
+    "quiver_offhand": "equipment", "quiver_item": "equipment",
+    "special_item": "equipment", "held_item": "equipment", "pet_item": "equipment", "lamp_item": "equipment",
 }
 MIRROR_PAIRS = {"hand_l": "hand_r", "hand_r": "hand_l", "foot_l": "foot_r", "foot_r": "foot_l",
                 "slot98_a": "slot98_b", "slot98_b": "slot98_a", "slot9a_a": "slot9a_b", "slot9a_b": "slot9a_a",
-                "offhand_a": "offhand_b", "offhand_b": "offhand_a"}
+                }   # D64: offhand_b is NOT a mirror of offhand_a (separate block for subtypes 4/12/20)
 # Anchor rules the Unity rig implements (AlphaRig.Anchor). "head" is "center" for every kind except
 # the kind-specific 0x65 branch, which is refused by the rig resolver.
-UNITY_ANCHOR_RULES = ("center", "tail", "wing", "weapon")
+UNITY_ANCHOR_RULES = ("center", "tail", "wing", "weapon", "neck", "lamp", "pet")   # + by_subtype -> equipment_anchor()
 
 
 def unity_anchor(rule):
@@ -183,6 +185,57 @@ def _creature_ai_profiles(path=NPC_EVIDENCE_PATH):
 
 
 ACTION_PROFILES.update(_creature_ai_profiles())
+
+# D64 / B-1: every other kind's AI launches, executed with the NPC state as an explicit CONDITION
+# (catalog/trigger_catalog.py -> catalog/npc_trigger_evidence.json). A D60 profile of the same kind
+# keeps precedence. The profile carries the UNARMED launches (bakeable without a weapon layer); the
+# weapon-conditional launches are listed, and need the weapon layer of that rig before baking.
+TRIGGER_EVIDENCE_PATH = os.path.join(os.path.dirname(__file__), "..", "catalog", "npc_trigger_evidence.json")
+
+
+def _d64_ai_profiles(path=TRIGGER_EVIDENCE_PATH):
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as fh:
+        ev = json.load(fh)
+    have = {s["kind"] for p in ACTION_PROFILES.values() for s in p["specimens"]}
+    out = {}
+    for k, e in ev.get("kinds", {}).items():
+        kind = int(k, 16)
+        if kind in have or e.get("status") != "TRIGGER_EMULATED_CONDITIONAL" or not e.get("unarmed_actions")                 or not e.get("family_id"):
+            continue
+        launched = {int(a): int(v["write_vas"][0], 16) for a, v in e["unarmed_actions"].items()}
+        name = (e.get("name_hint") or "kind").lower()
+        out[f"alpha_actions/creature_ai_d64_{name}_{k}"] = {
+            "status": "EMULATED_ALPHA_CODE",
+            "specimens": [{"kind": kind, "seed_variant": [0, 0]}],
+            "seeds_checked": [[0, 0]],
+            "evidence_families": [e["family_id"]],
+            "trigger": "creature_ai",
+            "trigger_scope": (f"CombatBehavior::vfunc_0 attack choice {ev['region']} executed over "
+                              f"{ev['condition_domains']['count']} NPC states (class x spec x weapon); unarmed "
+                              "launches listed with their class/spec conditions; target/world gates PARTIAL"),
+            "requires_parts": [],
+            "equipment": {},
+            "specimen_equipment": {},
+            "equipment_observed": False,
+            "categories": ["MOTION"],
+            "primary_chain": sorted(launched),
+            "launched_actions": launched,
+            "launch_conditions": {int(a): v["class_spec"] for a, v in e["unarmed_actions"].items()},
+            "weapon_conditional_actions": sorted(int(a) for a in e.get("weapon_actions", {})
+                                                 if a not in e["unarmed_actions"]),
+            "grip_checked_actions": [],
+            "dynamic_part_actions": [],
+            "blocked_examples": {},
+            "live_check": "NOT_CAPTURED",
+            "authorization": "D64 (method) / D63 (scope)",
+            "evidence": "docs/reports/S05B2_CLAUDE_FULL_RESEARCH_REPORT.md; catalog/npc_trigger_evidence.json",
+        }
+    return out
+
+
+ACTION_PROFILES.update(_d64_ai_profiles())
 
 # Trigger domains. Only player_input of the specimen above is evidenced. Creature AI launches of
 # non-player kinds are an explicit open domain: they must never default to the humanoid rules.

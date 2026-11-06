@@ -99,9 +99,16 @@ class StructureTests(unittest.TestCase):
 class ReadinessTests(unittest.TestCase):
     def test_kind_specific_code_needs_research(self):
         k = next(iter(sorted(__import__("tools.alpha_models.universal.alpha_static", fromlist=["x"]).KIND_SPECIAL_BRANCHES)))
-        e = describe(k, BIPED)
-        self.assertEqual(e["readiness"], "NEEDS_RESEARCH")
-        self.assertTrue(any(r.startswith("KIND_SPECIFIC_CODE") for r in e["reasons"]))
+        saved = cr._WALK_ORACLE
+        try:
+            cr._WALK_ORACLE = {}                       # no oracle evidence -> research, as before D64
+            e = describe(k, BIPED)
+            self.assertEqual(e["readiness"], "NEEDS_RESEARCH")
+            self.assertTrue(any(r.startswith("KIND_SPECIFIC_CODE") for r in e["reasons"]))
+            cr._WALK_ORACLE = {f"0x{k:02x}": {"status": "ORACLE_VERIFIED"}}   # D64: executed drawModel == formula
+            self.assertEqual(describe(k, BIPED)["readiness"], "AUTO_READY")
+        finally:
+            cr._WALK_ORACLE = saved
 
     def test_unresolved_model_is_blocked(self):
         t = table({0x90: LEGS})
@@ -242,6 +249,9 @@ class PlannerTests(unittest.TestCase):
         self.t = table({0x90: BIPED, 0x91: QUAD, 0x92: LEGS, 0x93: ODD, 0x57: BIPED, 0x94: app(0)})
 
     def test_scan_and_plan_buckets(self):
+        saved = cr._WALK_ORACLE
+        cr._WALK_ORACLE = {}          # synthetic table: the 0x57 appearance here is not the oracle-checked one
+        self.addCleanup(setattr, cr, "_WALK_ORACLE", saved)
         s = tp.scan(self.t)
         self.assertEqual(s["metrics"]["kinds"], 6)
         p = tp.plan(s)
@@ -254,7 +264,8 @@ class PlannerTests(unittest.TestCase):
         self.assertNotIn("job", by["0x57"])
         md = tp.plan_markdown(p)
         self.assertIn("| 0x93 |", md)
-        self.assertEqual(p["batch"]["authorized"], [["D59", "s05b1"], ["D60", "s05ba"], ["D62", "s05b2"]])
+        self.assertEqual(p["batch"]["authorized"], [["D59", "s05b1"], ["D60", "s05ba"], ["D62", "s05b2"],
+                                                    ["D63", "d63_full"], ["D63", "d63_actions"]])
         self.assertIn("NOT_AUTHORIZED", p["batch"]["other"])
 
     def test_pilot_refuses_kinds_outside_allowlist(self):
@@ -263,7 +274,10 @@ class PlannerTests(unittest.TestCase):
         self.assertIn("NOT_IN_PILOT_ALLOWLIST", r["problems"][0])
 
     def test_batch_only_producer_scopes_are_authorized(self):
-        self.assertEqual(tp.BATCH_AUTHORIZATIONS, (("D59", "s05b1"), ("D60", "s05ba"), ("D62", "s05b2")))
+        self.assertEqual(tp.BATCH_AUTHORIZATIONS, (("D59", "s05b1"), ("D60", "s05ba"), ("D62", "s05b2"),
+                                                   ("D63", "d63_full"), ("D63", "d63_actions")))
+        # D64: the full-catalog scopes additionally need the producer's approval flag (CLI)
+        self.assertEqual(tp.main(["batch", "--authorization", "D63", "--scope", "d63_full"]), 3)
         for auth, scope in ((None, None), ("S05B", None), ("D99", "s05b1"), ("D59", None), ("D59", "s05b2"),
                             ("D58", "s05b1"), ("d59", "s05b1"), ("D60", "s05b1"), ("D59", "s05ba"),
                             ("D60", "s05b2"), ("D62", "s05b1"), ("D62", "s05ba"), ("D61", "s05b2"),

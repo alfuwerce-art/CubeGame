@@ -200,7 +200,9 @@ def joints(app, state, parts):
             ops.append(rot_x(rx))
             s = app["scale_hand"]
             ops.append(scale(s) if left else scale(-s, s, s))
-            out[name] = chain(ops, bob)
+            # D64: the hands get the bob lift but NOT the root pitch angle_48 (walk_oracle: InsectGuard
+            # 0x36, the only kind with hands and angle_48 != 0, was off by exactly 45 deg; now 0.0)
+            out[name] = chain(ops, mat4.translate(0.0, 0.0, k["bob"]))
         elif name == "foot_l":   # 7302-7323
             fx, fy, fz = app["offset_foot"]
             out[name] = chain([rot_x(app["angle_58"] + k["d0"]),

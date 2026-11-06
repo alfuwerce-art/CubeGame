@@ -69,6 +69,10 @@ namespace CubeGame.AlphaTransfer
             if (rule == "tail") return new Vector3(size.x * 0.5f, size.y, size.z * 0.5f);
             // wings (slot_9a, drawModel emulation): attached by the root edge
             if (rule == "wing") return new Vector3(size.x * 0.5f, 0f, size.z * 0.5f);
+            // D64 equipment_probe (drawModel executed): amulet, lamp and pet-slot item anchors
+            if (rule == "neck") return new Vector3(size.x * 0.5f, 0f, size.z);
+            if (rule == "lamp") return new Vector3(size.x * 0.5f, size.y * 0.5f, size.z);
+            if (rule == "pet") return new Vector3(size.x * 0.5f, size.y * 0.5f, 0f);
             if (rule == "weapon") return weaponOnBack ? centre : new Vector3(size.x * 0.5f, size.y * 0.5f, 4f);
             throw new ArgumentException($"unknown anchor rule {rule}");
         }

@@ -528,6 +528,12 @@ class CPU:
             _, reg, k, v = self.modrm()
             self.wr(k, v, 1, 1 if self.cond(op & 0xF) else 0)
             return
+        if 0x40 <= op <= 0x4F:                        # cmovcc r, r/m (the source is always read)
+            _, reg, k, v = self.modrm()
+            val = self.rd(k, v, size)
+            if self.cond(op & 0xF):
+                self.put(reg, size, val)
+            return
         if op in (0xB6, 0xB7, 0xBE, 0xBF):
             src = 1 if op in (0xB6, 0xBE) else 2
             _, reg, k, v = self.modrm()

@@ -220,7 +220,13 @@ def bake_action(oracle, kind, action, weapon=(0, 0), offhand=(0, 0), dt_ms=16, t
             if b is None or size is None or b.anchor == "unknown":
                 unsupported.append(p['draw_site'])
                 continue
-            anc = cr.anchor(b.anchor, size, kind=kind, on_back=True)
+            rule = b.anchor
+            if b.name in cr.EQUIPMENT_ANCHOR_BY_SUBTYPE:       # D64: subtype-dependent fixed anchors
+                sub = (offhand if b.name.startswith("offhand") else weapon)[1]
+                rule = cr.equipment_anchor(b.name, sub)
+                if rule == "center" and b.anchor == "weapon":
+                    rule = "weapon"
+            anc = cr.anchor(rule, size, kind=kind, on_back=True)
             joints[b.name] = mat4.mul(mat4.mul(mat4.translate(*anc), p["matrix"]), Pi)
         frames.append({"t": t, "action": a, "state": s, "joints": joints,"unsupported_draw_sites":unsupported})
     return {"state": state, "timings": timings, "duration_ms": duration_ms, "frames": frames,

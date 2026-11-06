@@ -179,9 +179,22 @@ class ClassificationTests(unittest.TestCase):
             "0x91": {"appearance": dict(full_app(BIPED), slots=slots(body=1, head=2, hand=3, foot=4))},
             "0x57": {"appearance": dict(full_app(QUAD), slots=slots(body=1))},   # kind-specific drawModel guards
         }}
-        cov = pw.coverage(table)
-        st = {r["kind"]: r["status"] for r in cov["kinds"]}
-        self.assertEqual(st, {"0x90": "FORMULA_VERIFIED", "0x91": "FORMULA_VERIFIED", "0x57": "NEEDS_RESEARCH"})
+        from tools.alpha_models.universal import creature_rig as cr
+        saved = cr._WALK_ORACLE
+        try:
+            # D64: a kind with its own drawModel branches stays NEEDS_RESEARCH WITHOUT oracle evidence ...
+            cr._WALK_ORACLE = {}
+            st = {r["kind"]: r["status"] for r in pw.coverage(table)["kinds"]}
+            self.assertEqual(st, {"0x90": "FORMULA_VERIFIED", "0x91": "FORMULA_VERIFIED", "0x57": "NEEDS_RESEARCH"})
+            # ... and becomes automatic only when the executed drawModel matched the formula
+            cr._WALK_ORACLE = {"0x57": {"status": "ORACLE_VERIFIED"}}
+            st = {r["kind"]: r["status"] for r in pw.coverage(table)["kinds"]}
+            self.assertEqual(st["0x57"], "FORMULA_VERIFIED")
+            cr._WALK_ORACLE = {"0x57": {"status": "ORACLE_MISMATCH"}}
+            st = {r["kind"]: r["status"] for r in pw.coverage(table)["kinds"]}
+            self.assertEqual(st["0x57"], "NEEDS_RESEARCH")
+        finally:
+            cr._WALK_ORACLE = saved
 
 
 @unittest.skipUnless(HAVE_CAPTURES, "local Alpha captures (.scratch) not present")

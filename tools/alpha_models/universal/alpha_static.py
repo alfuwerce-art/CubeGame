@@ -250,7 +250,8 @@ def _decode_inline_index(blob):
         if blob[i:i + 2] != bytes.fromhex("8b0b"):
             continue
         j = i + 2
-        if blob[j:j + 2] == bytes.fromhex("6a01"):
+        if blob[j:j + 2] in (bytes.fromhex("6a01"), bytes.fromhex("6a00")):
+            # push <load flag> (1 = markers, 0 = no marker colours: hair/eyes, D61); both seen
             j += 2
         if blob[j:j + 2] == bytes.fromhex("8b89"):
             disp = int.from_bytes(blob[j + 2:j + 6], "little")
@@ -265,14 +266,33 @@ def _decode_inline_index(blob):
     return found
 
 
-def model_registry(image):
-    """index -> .cub name for the creature model vector; plus decoding statistics."""
+def _load_flag(blob):
+    """Load flag (3rd argument of VoxelModel_load_from_file_or_buffer, stored at model+0x55): the
+    last ``push 0|1`` immediately before the call (``6a 00|01`` followed by at most the
+    ``mov ecx/edx`` + ``push reg`` pair the compiler places between them). None if not decodable."""
+    for i in range(len(blob) - 2, max(len(blob) - 24, 0) - 1, -1):
+        if blob[i] == 0x6A and blob[i + 1] in (0, 1):
+            return blob[i + 1]
+    return None
+
+
+def model_registry(image, detail=False):
+    """index -> .cub name of Alpha's shared model vector (creature parts, items, props).
+
+    ``GameController_load_game_assets`` is ONE straight-line function (the decompilation shows the
+    exception-state counter ``local_8`` increasing monotonically through all 2557 loads), so the
+    load order is the address order. ``VoxelModel_load_from_file_or_buffer`` loads INTO the
+    vector element, therefore when an index is loaded twice the LATER load is what Alpha keeps
+    (D64 / B-3: index 1300 = orc-head-m01.cub, then orc-head.cub). Overwritten loads are reported.
+
+    detail=True also returns {index: {"name", "load_flag", "call_va", "overwritten": [...]}}."""
     lo, hi = LOAD_ASSETS_VA, LOAD_ASSETS_VA + LOAD_ASSETS_SPAN
     loads = find_call_sites(image.read, lo, hi, VOXEL_LOAD_VA)
     vcalls = sorted(find_call_sites(image.read, lo, hi, VECTOR_AT_VA))
-    registry, stats, prev = {}, {"loads": len(loads), "member_slot": 0, "no_name": 0,
-                                 "several_names": 0, "several_vector_calls": 0,
-                                 "undecoded_index": 0, "conflicts": 0}, lo
+    registry, info = {}, {}
+    stats, prev = {"loads": len(loads), "member_slot": 0, "no_name": 0, "several_names": 0,
+                   "several_vector_calls": 0, "undecoded_index": 0, "conflicts": 0,
+                   "overwritten_loads": 0}, lo
     for call in loads:
         blob = image.read(prev, call - prev)
         names = []
@@ -289,34 +309,39 @@ def model_registry(image):
         if len(names) > 1:
             stats["several_names"] += 1
             continue
+        idx = None
         if not vs:
-            # inlined vector access: `mov ecx,[ebx]` (vector begin) ; `push 1` ;
-            # `mov ecx,[ecx+disp32|disp8]` -> element disp/4 of the SAME vector (ebx = &vector,
-            # exactly the register `vector_at_stride4` receives in ECX in the other pattern)
+            # inlined vector access: `mov ecx,[ebx]` (vector begin) ; `push 0|1` (load flag) ;
+            # `mov ecx,[ecx+disp32|disp8]` -> element disp/4 of the SAME vector
             idx = _decode_inline_index(blob)
             if idx is None:
                 stats["member_slot"] += 1
                 continue
             stats["inline_index"] = stats.get("inline_index", 0) + 1
-            if idx in registry and registry[idx] != names[0]:
-                stats["conflicts"] += 1
-                registry[idx] = registry[idx] + "|" + names[0]
-            else:
-                registry[idx] = names[0]
-            continue
-        if len(vs) > 1:
-            stats["several_vector_calls"] += 1
-            continue
-        idx = _decode_vector_index(image, vs[0])
-        if idx is None:
-            stats["undecoded_index"] += 1
-            continue
-        if idx in registry and registry[idx] != names[0]:
-            stats["conflicts"] += 1
-            registry[idx] = registry[idx] + "|" + names[0]
         else:
-            registry[idx] = names[0]
+            last = vs[-1]
+            if len(vs) > 1:
+                # a generator loop runs before the load (sphinx01.cub, VA 0x51BCC2): only the LAST
+                # vector call feeds the load, and only if no other call sits between them
+                stats["several_vector_calls"] += 1
+                tail = image.read(last + 5, call - last - 5)
+                if 0xE8 in tail or len(tail) > 24:
+                    stats["undecoded_index"] += 1
+                    continue
+            idx = _decode_vector_index(image, last)
+            if idx is None:
+                stats["undecoded_index"] += 1
+                continue
+        rec = {"name": names[0], "load_flag": _load_flag(blob), "call_va": f"0x{call:06X}", "overwritten": []}
+        if idx in info:
+            stats["conflicts"] += 1
+            stats["overwritten_loads"] += 1
+            rec["overwritten"] = info[idx]["overwritten"] + [{"name": info[idx]["name"], "call_va": info[idx]["call_va"]}]
+        info[idx] = rec
+        registry[idx] = names[0]
     stats["indexed"] = len(registry)
+    if detail:
+        return registry, stats, info
     return registry, stats
 
 
@@ -378,7 +403,7 @@ def scan(exe, db=None, decomp=None):
     verify_exe(exe)
     image = pb.load(exe)
     table = kind_table(image)
-    registry, reg_stats = model_registry(image)
+    registry, reg_stats, reg_detail = model_registry(image, detail=True)
     names = kind_names(decomp, image) if decomp else {}
     used = set()
     for e in table.values():
@@ -391,6 +416,10 @@ def scan(exe, db=None, decomp=None):
         "kinds": {f"0x{k:02x}": {**v, "name_hint": names.get(k)} for k, v in table.items()},
         "registry_stats": reg_stats,
         "registry": {str(k): v for k, v in sorted(registry.items())},
+        # D64: load flag (model+0x55, D61 marker rule) and loads a later load of the same index replaced
+        "registry_load": {str(k): {"load_flag": v["load_flag"], "call_va": v["call_va"],
+                                   "overwritten": [o["name"] for o in v["overwritten"]]}
+                          for k, v in sorted(reg_detail.items())},
         "model_sizes": sizes,
         "unresolved_slot_indices": sorted(i for i in used if i not in registry),
     }

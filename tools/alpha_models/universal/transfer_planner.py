@@ -55,7 +55,11 @@ PILOT_ALLOWLIST = {
 # id or scope is refused. D59 (2026-11-06): S05B-1 locomotion. D60 (2026-11-06): S05B-A creature actions.
 # D62 (2026-11-06): S05B-2 new motion family of a never-imported kind set (one family per batch until the
 # producer approves the first one); every other decision/scope pair stays refused.
-BATCH_AUTHORIZATIONS: tuple = (("D59", "s05b1"), ("D60", "s05ba"), ("D62", "s05b2"))
+BATCH_AUTHORIZATIONS: tuple = (("D59", "s05b1"), ("D60", "s05ba"), ("D62", "s05b2"), ("D63", "d63_full"),
+                               ("D63", "d63_actions"))
+# D64: the D63 full-catalog run starts only after the producer approved the D64 research result;
+# the runner requires this explicit acknowledgement (no silent start by any agent)
+APPROVAL_REQUIRED = {("D63", "d63_full"): "--producer-approved-d64", ("D63", "d63_actions"): "--producer-approved-d64"}
 
 # Unity locomotion inputs the planner may fill in. They are NOT Alpha data: amplitude 0.19 is the
 # steady-walk value seen in captures; speed 3.7 is the median AI walk speed of the captured cat/runner.
@@ -478,7 +482,8 @@ def batch(authorization=None, scope=None, table=None, clips_root=None, phases=(1
     run_slots = br.emulator_slots(exe or pl.DEFAULT_EXE)
     inputs = {"static_sha256": table.get("_sha256"), "exe_sha256": table.get("exe_sha256"),
               "captures": sorted({(r.get("job") or {}).get("reference_capture", {}).get("sha256", "")
-                                  for r in p["entities"] if int(r["kind"], 16) in sc["kinds"]} - {""})}
+                                  for r in p["entities"] if not isinstance(sc["kinds"], str)
+                                  and int(r["kind"], 16) in sc["kinds"]} - {""})}
     if dry_run:
         rows, problems = br.select_scope(p, sc)
         if problems:
@@ -498,7 +503,16 @@ def batch(authorization=None, scope=None, table=None, clips_root=None, phases=(1
         from tools.alpha_models.anim import pe_bytes as pb
         inputs["npc_evidence_sha256"] = _file_sha256(ct.NPC_EVIDENCE_PATH)
         image = pb.load(str(exe or pl.DEFAULT_EXE))
-        evidence_check = lambda kinds: br.evidence_drift(image, kinds)
+        if isinstance(sc["kinds"], str):
+            # D64 profiles: the committed trigger evidence must match the code that produced it
+            # (re-executing 280 NPC states per kind is the trigger_catalog job, not a pre-flight check)
+            from tools.alpha_models.catalog import trigger_catalog as tc
+            inputs["trigger_evidence_sha256"] = _file_sha256(str(tc.EVIDENCE_PATH))
+            d60 = {s["kind"] for p in ct.ACTION_PROFILES.values() if p.get("authorization", "").startswith("D60")
+                   for s in p["specimens"]}
+            evidence_check = lambda kinds: tc.evidence_drift() + br.evidence_drift(image, [k for k in kinds if k in d60])
+        else:
+            evidence_check = lambda kinds: br.evidence_drift(image, kinds)
     summary = br.execute(scope, p, table, run_slots, runner, out_root, inputs, reg_runner, phases,
                          evidence_check=evidence_check)
     if summary.get("BATCH_RESULT") != "REFUSED":
@@ -534,9 +548,14 @@ def main(argv=None):
             s.add_argument("--phase", type=int, choices=(1, 2), action="append", default=None)
             s.add_argument("--dry-run", action="store_true")
             s.add_argument("--out-dir", default=None)
+            s.add_argument("--producer-approved-d64", action="store_true",
+                           help="required for D63/d63_full: the producer approved the D64 research result")
     a = ap.parse_args(argv)
     if a.mode == "batch":
         refusal = batch_authorized(a.authorization, a.scope)
+        need = APPROVAL_REQUIRED.get((a.authorization, a.scope))
+        if not refusal and need and not a.dry_run and not a.producer_approved_d64:
+            refusal = f"APPROVAL_REQUIRED {need}: run only after the producer approved the D64 result"
         if refusal:
             print(json.dumps({"BATCH_RESULT": "NOT_AUTHORIZED", "problems": [refusal]}, indent=1))
             return 3
@@ -545,7 +564,7 @@ def main(argv=None):
         r = batch(a.authorization, a.scope, table, a.clips_root, tuple(a.phase or (1, 2)), a.dry_run,
                   out_dir=a.out_dir)
         print(json.dumps({k: v for k, v in r.items() if k not in ("entries", "kinds")}, indent=1, default=str))
-        return {"PASS": 0, "PASS_FORMULA_ONLY": 0, "DRY_RUN": 0, "NOT_AUTHORIZED": 3,
+        return {"PASS": 0, "PASS_FORMULA_ONLY": 0, "PASS_ORACLE_VERIFIED": 0, "DRY_RUN": 0, "NOT_AUTHORIZED": 3,
                 "REFUSED": 2}.get(r["BATCH_RESULT"], 1)
     table = load_static(a.static)
     if a.mode == "scan":

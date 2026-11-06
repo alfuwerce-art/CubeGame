@@ -98,6 +98,46 @@ SCOPES["s05b2"] = {
 }
 
 
+# D63 / D64: the WHOLE creature catalog in one task (internal phases, resume, per-entry retry). The kind
+# list is not pinned: it is every AUTO_READY kind of the current plan that no earlier scope imported.
+# Kinds that are not AUTO_READY are listed in the summary with their reasons (never silently dropped).
+# Phase 1 = the lowest kind of every motion family (one exemplar per new rig) + regression; phase 2 =
+# the remaining kinds and their variant seeds (coverage B: every model of every slot at least once).
+SCOPES["d63_full"] = {
+    "decision": "D63",
+    "title": "S05B-2 full catalog (D63, method D64): every AUTO_READY creature kind not imported before",
+    "kinds": "ALL_AUTO_READY",
+    "exclude_scopes": ("s05b1", "s05b2"),
+    "coverage": "B",
+    # D64 (no ritual tests): the walk runtime is ONE shared formula already proven frame-rate independent
+    # in S05B-1/S05B-2; the HumanMale regression still runs at 30/60/120 Hz. Per-family re-runs at
+    # 30/120 Hz would add ~200 identical Unity runs without new evidence.
+    "fps_samples": (),
+    "live_frames": "formula_only",
+    "phase_gate": "regression_only",
+    "project": SCRATCH / "universal" / "unity" / "D63Full",
+    "out": SCRATCH / "universal" / "batch" / "d63_full",
+    "regression": SCOPES["s05b1"]["regression"],
+}
+
+
+# D63 / D64: creature-AI actions of every kind with an executed launch profile (D64 trigger evidence),
+# except the kinds S05B-A already imported. Phase 1 = one kind per motion family + regression.
+SCOPES["d63_actions"] = {
+    "decision": "D63",
+    "title": "S05B-2 full catalog: creature-AI actions (unarmed launches) of every kind with a D64 profile",
+    "mode": "actions",
+    "kinds": "ALL_AUTO_READY",
+    "exclude_scopes": ("s05ba",),
+    "coverage": "BASE",
+    "fps_samples": (30, 120),
+    "phase_gate": "regression_only",
+    "project": SCRATCH / "universal" / "unity" / "D63Actions",
+    "out": SCRATCH / "universal" / "batch" / "d63_actions",
+    "regression": SCOPES["s05b1"]["regression"],
+}
+
+
 # --------------------------------------------------------------------------- helpers
 def sha256_file(path):
     h = hashlib.sha256()
@@ -150,6 +190,23 @@ def select_scope(plan_result, scope):
                        and (scope.get("mode") != "actions" or (
                            r["channels"]["actions"]["status"] == "AVAILABLE"
                            and _profile_trigger(r["channels"]["actions"].get("profile")) == "creature_ai")))
+    if scope["kinds"] == "ALL_AUTO_READY":
+        excluded = {k for name in scope.get("exclude_scopes", ()) for k in SCOPES[name]["kinds"]}
+        found = sorted(int(r["kind"], 16) for r in plan_result["entities"]
+                       if r["readiness"] == "AUTO_READY" and int(r["kind"], 16) not in excluded
+                       and (scope.get("mode") != "actions" or (
+                           r["channels"]["actions"]["status"] == "AVAILABLE"
+                           and _profile_trigger(r["channels"]["actions"].get("profile")) == "creature_ai")))
+        if scope.get("mode") == "actions":
+            first = {}
+            for r in plan_result["entities"]:
+                if int(r["kind"], 16) in found:
+                    first.setdefault(r["family_id"], int(r["kind"], 16))
+            scope["phase1_kinds"] = tuple(sorted(first.values()))
+        scope["not_ready"] = {r["kind"]: {"readiness": r["readiness"], "reasons": r.get("reasons") or []}
+                              for r in plan_result["entities"] if r["readiness"] != "AUTO_READY"}
+        rows = {int(r["kind"], 16): r for r in plan_result["entities"]}
+        return [rows[k] for k in found], []
     pinned = sorted(scope["kinds"])
     problems = []
     if found != pinned:
@@ -598,7 +655,8 @@ def execute(scope_name, plan_result, static_table, run_slots, runner, out_root, 
     state = load_state(state_path)
     rows, problems = select_scope(plan_result, scope)
     if not problems and scope.get("mode") == "actions":
-        problems = list(evidence_check(scope["kinds"])) if evidence_check else ["EVIDENCE_CHECK_NOT_RUN"]
+        kinds = scope["kinds"] if not isinstance(scope["kinds"], str) else [int(r["kind"], 16) for r in rows]
+        problems = list(evidence_check(kinds)) if evidence_check else ["EVIDENCE_CHECK_NOT_RUN"]
     if problems:
         return {"BATCH_RESULT": "REFUSED", "problems": problems}
     entries, coverage, cov_problems = build_entries(rows, scope, run_slots, static_table)
@@ -628,6 +686,9 @@ def execute(scope_name, plan_result, static_table, run_slots, runner, out_root, 
                 log(f"  -> {results[key]['verdict']} {results[key]['problems']}")
     phase1_keys = [e["id"] for e in entries if e["phase"] == 1] + (
         [f"regression_0x02_actions_{f}hz" for f in scope["regression"]["expect"]] if scope.get("regression") else [])
+    if scope.get("phase_gate") == "regression_only":
+        # D63: one failing kind must not stop the catalog; only a broken regression stops phase 2
+        phase1_keys = [k for k in phase1_keys if k.startswith("regression_")]
     not_pass = [k for k in phase1_keys if (results.get(k) or state["entries"].get(k) or {}).get("verdict") != "PASS"]
     if not_pass:
         gate.append("PHASE2_BLOCKED phase 1/regression not all PASS: " + ", ".join(not_pass))
@@ -670,16 +731,25 @@ def summarize(scope_name, entries, coverage, state, problems, phases):
         v["models_covered"] = sorted(v["models_covered"])
         v["variant_models"] = f"{got}/{need}"
     formula_only = sum(1 for r in rows if r["verdict"] == "PASS" and r["live_check"] == "NOT_CAPTURED")
+    # D64 / B-4: a formula-only entry whose kind's formula equals Alpha's EXECUTED drawModel on its own
+    # appearance (walk_oracle_evidence ORACLE_VERIFIED) is ALPHA_FORMULA_VERIFIED; live_check stays as is
+    from tools.alpha_models.universal import creature_rig as _cr
+    for r in rows:
+        r["walk_oracle"] = _cr.walk_oracle_status(int(str(r["kind"]), 0))
+    oracle_ok = all(r["walk_oracle"] == "ORACLE_VERIFIED" for r in rows
+                    if r["verdict"] == "PASS" and r["live_check"] == "NOT_CAPTURED")
     all_pass = rows and all(r["verdict"] == "PASS" for r in rows) and all(x["verdict"] == "PASS" for x in reg) \
         and not problems
     # a run of a never-captured family is a technical PASS of the formula path only: it must not be
     # reported as a live-verified PASS (D62: provenance stays RECONSTRUCTED_FROM_EVIDENCE)
-    result = ("PASS_FORMULA_ONLY" if formula_only else "PASS") if all_pass else (
+    result = (("PASS_ORACLE_VERIFIED" if oracle_ok else "PASS_FORMULA_ONLY") if formula_only else "PASS") if all_pass else (
         "INCOMPLETE" if counts.get("NOT_RUN") else "FAIL")
     return {"format": "cubegame.batch_summary/1", "scope": scope_name, "decision": scope["decision"],
             "BATCH_RESULT": result, "phases_requested": list(phases), "counts": dict(counts), "problems": problems,
             "live_check": {"CAPTURED": len(rows) - formula_only - counts.get("NOT_RUN", 0),
                            "NOT_CAPTURED": formula_only},
+            "walk_oracle": {"verified_formula_only": oracle_ok},
+            "not_ready": scope.get("not_ready", {}),
             "kinds": kinds, "regression": reg, "entries": rows}
 
 

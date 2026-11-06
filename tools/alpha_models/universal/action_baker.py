@@ -23,7 +23,11 @@ from tools.alpha_models.universal import weapon_locomotion
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_EXE = ROOT / '.scratch/alphatest2/Cube.exe'
-DEFAULT_SIZES = ROOT / '.scratch/animsys/registry_sizes.json'
+# D64: the catalog file is rebuilt from the fixed registry (adds index 29 dark-troll-eyes and 1300
+# orc-head, both missing before); the old file is the fallback for an un-rebuilt workspace
+DEFAULT_SIZES = next((p for p in (ROOT / '.scratch/catalog/registry_sizes.json',
+                                  ROOT / '.scratch/animsys/registry_sizes.json') if p.exists()),
+                     ROOT / '.scratch/catalog/registry_sizes.json')
 
 
 def local_output(path):
