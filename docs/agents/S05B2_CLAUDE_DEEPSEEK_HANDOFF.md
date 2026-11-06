@@ -4,6 +4,8 @@
 **Рабочая папка:** `D:\Projects\CubeGame` — одна общая, **никогда не одновременно**. Не создавать вторую копию проекта / git worktree. Отдельные Git-ветки и commits.
 **База документов:** `PROJECT_MEMORY.md`, `docs/ACTIVE_STAGE.md`, `AGENTS.md`, `docs/decisions/D61-mass-transfer-visual-approval.md`.
 
+**D62 (2026-11-06), ОБНОВЛЕНИЕ:** шаг Claude полностью завершён, пользователем визуально принят (`31799a90d399bc31a99af89286beeeab86d80e1d`), технический шлюз PASS/ACCEPTED. **Можно начинать шаг DeepSeek**, не запрашивая повторно разрешение. Стартовую ветку создать от `review/d62-s05b2-deepseek-handoff` (включает принятый коммит Claude и решение D62). Сначала одно новое семейство в Unity → `READY_FOR_REVIEW` и проверка продюсера, потом следующие крупные партии по [ТЗ S05B-2](../stages/S05B2_DEEPSEEK_BATCH_SPEC.md). Состояние `AUTHORIZED` касается исполнителя/этапа, не означает ACCEPTED для новых моделей.
+
 ## Шаг 1 — Claude Code: техническая стабилизация, без массового переноса
 
 **Исходная ветка:** `review/d61-scale-transfer-color-fix`. **Рабочая ветка:** `claude/d61-tint-review-fix` (создать от указанной базы после проверки git status).
