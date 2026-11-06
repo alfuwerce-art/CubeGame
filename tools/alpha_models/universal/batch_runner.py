@@ -1,0 +1,477 @@
+"""Authorised batch executor of the universal Alpha -> Unity pipeline (S05B-1, decision D59).
+
+Only a scope registered in ``transfer_planner.BATCH_AUTHORIZATIONS`` runs; the scope pins the decision,
+the kinds and the coverage rules. Nothing here names a creature: the kind list of a scope is a
+producer decision, and the selector (``family walk has a live Alpha capture present locally``) is
+re-computed from the static table and must give exactly that list, otherwise the batch refuses
+(``SCOPE_DRIFT``).
+
+Flow (one isolated Unity project for the whole batch, results copied out after every run):
+
+  entries   phase 1: every kind at seed (0, 0) + per-family 30/120 Hz samples
+            phase 2: extra seed variants until every model of every slot of the kind is covered once
+  gate      phase 2 starts only when every phase-1 entry AND the action regression are PASS
+  resume    ``batch_state.json``: an entry is skipped only when its last verdict is PASS and the job,
+            the input hashes and the copied report files are unchanged (SHA256)
+  summary   ``summary.json`` + ``summary.md``: one row per (kind, seed, fps), model coverage per kind
+
+Alpha-derived outputs (jobs with capture paths, Unity reports, frames, sheets) stay under .scratch (D54).
+"""
+from __future__ import annotations
+
+import collections
+import hashlib
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+SCRATCH = ROOT / ".scratch"
+RUN_TRANSFER = ROOT / "tools" / "alpha_models" / "transfer" / "run_transfer.ps1"
+CONTACT_SHEET = ROOT / "tools" / "alpha_models" / "transfer" / "entity_contact_sheet.ps1"
+
+# Every Unity step a locomotion-only universal job must pass (run_transfer.ps1 prints "<NAME>=PASS exit=0").
+REQUIRED_STEPS = ("SELFTEST_RESULT", "TRANSFER_RESULT", "PLAYMODE_RESULT", "PARAMWALK_RESULT",
+                  "LOCOMOTION_PLAYMODE_RESULT", "ENTITY_CONTRACT_RESULT", "ENTITY_PLAYMODE_RESULT")
+REGRESSION_STEPS = REQUIRED_STEPS[:5] + ("CONTROLLER_PLAYMODE_RESULT", "NATIVE_LIFECYCLE_RESULT",
+                                         "NATIVE_LIFECYCLE_PLAYMODE_RESULT")
+# report files copied out of TransferOutput after every run (text verdicts + entity frames for the sheets)
+KEEP_REPORTS = ("selftest.txt", "transfer_report.txt", "playmode.txt", "paramwalk.txt", "locomotion_playmode.txt",
+                "entity_contract.txt", "entity_playmode.txt", "entity_frames.tsv", "controller_playmode.txt",
+                "native_lifecycle.txt", "native_lifecycle_playmode.txt")
+VARIANT_SLOTS = ("head", "hair", "hand", "foot", "body", "tail")
+
+SCOPES = {
+    "s05b1": {
+        "decision": "D59",
+        "title": "S05B-1: geometry + rig + walk/idle of the families with a live Alpha capture",
+        "kinds": (0x00, 0x01, 0x02, 0x03, 0x07, 0x08, 0x0d, 0x0e, 0x1e, 0x1f, 0x20, 0x3f, 0x40, 0x41, 0x42),
+        "coverage": "B",                      # every model of every slot of the kind at least once
+        "fps_samples": (30, 120),             # one kind per family (lowest kind number) re-run at these rates
+        "project": SCRATCH / "universal" / "unity" / "S05B1",
+        "out": SCRATCH / "universal" / "batch" / "s05b1",
+        "regression": {
+            "job": ROOT / "tools" / "alpha_models" / "universal" / "jobs" / "human_0x02_lifecycle.json",
+            "project": SCRATCH / "s05a2" / "unity" / "AlphaTransfer",
+            # S05A2-CONTINE-02 / UNIVERSAL-CONTINUE-01 numbers (reports in docs/reports): must be equal
+            "expect": {30: {"actions": 98, "frames": 18023, "native_frames": 1484},
+                       60: {"actions": 98, "frames": 35927, "native_frames": 2962},
+                       120: {"actions": 98, "frames": 71585, "native_frames": 5919}},
+        },
+    },
+}
+
+
+# --------------------------------------------------------------------------- helpers
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def sha256_json(obj):
+    return hashlib.sha256(json.dumps(obj, sort_keys=True).encode("utf-8")).hexdigest()
+
+
+def in_scratch(path):
+    p = Path(path).resolve()
+    if not p.is_relative_to(SCRATCH.resolve()):
+        raise ValueError("BATCH_OUTPUT_MUST_BE_IN_SCRATCH")
+    return p
+
+
+def write_json_atomic(path, obj):
+    path = Path(path)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(obj, indent=1), encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def entry_id(kind, seed, fps):
+    return f"0x{kind:02x}_s{seed[0]}-{seed[1]}_{fps}hz"
+
+
+# --------------------------------------------------------------------------- scope selection
+def select_scope(plan_result, scope):
+    """Kinds of the scope recomputed by the selector; refuses when they differ from the pinned list."""
+    found = sorted(int(r["kind"], 16) for r in plan_result["entities"]
+                   if r["readiness"] == "AUTO_READY" and (r.get("job") or {}).get("reference_capture")
+                   and "TRANSFERRED_FROM_ALPHA" in r["channels"]["walk"]["sources"])
+    pinned = sorted(scope["kinds"])
+    problems = []
+    if found != pinned:
+        problems.append("SCOPE_DRIFT selector=" + ",".join(f"0x{k:02x}" for k in found)
+                        + " pinned=" + ",".join(f"0x{k:02x}" for k in pinned))
+    rows = {int(r["kind"], 16): r for r in plan_result["entities"]}
+    return [rows[k] for k in pinned if k in rows], problems
+
+
+# --------------------------------------------------------------------------- variant coverage
+def variant_seeds(kind, run_slots, wanted, sweep=60):
+    """Smallest greedy set of seeds (always starting with (0, 0)) whose resolved models cover every
+    value of ``wanted`` ({slot: [model index, ...]}) at least once.
+
+    ``run_slots(kind, s2, s3) -> {slot: model index}`` is the appearance emulator (or a test stub).
+    Candidates: single-axis sweeps of seed[2] and seed[3], then pairs of their representatives (each
+    pair is emulated, never assumed independent). Returns (seeds with covered values, problems)."""
+    need = {(s, v) for s, vals in wanted.items() for v in vals if len(vals) > 1}
+    cand = {}
+
+    def add(seed):
+        if seed not in cand:
+            sl = run_slots(kind, *seed)
+            cand[seed] = {(s, sl.get(s)) for s in wanted if sl.get(s) is not None}
+
+    add((0, 0))
+    for s in range(1, sweep):
+        add((s, 0))
+        add((0, s))
+    reps2, reps3, seen2, seen3 = [], [], set(), set()
+    for s in range(sweep):
+        k2, k3 = frozenset(cand[(s, 0)]), frozenset(cand[(0, s)])
+        if k2 not in seen2:
+            seen2.add(k2)
+            reps2.append(s)
+        if k3 not in seen3:
+            seen3.add(k3)
+            reps3.append(s)
+    for a in reps2:
+        for b in reps3:
+            add((a, b))
+    chosen = [(0, 0)]
+    covered = set(cand[(0, 0)])
+    while need - covered:
+        best = max(cand, key=lambda sd: (len((cand[sd] & need) - covered), -(sd[0] + sd[1]), -sd[0]))
+        gain = (cand[best] & need) - covered
+        if not gain:
+            break
+        chosen.append(best)
+        covered |= gain
+    missing = sorted(need - covered)
+    problems = [f"VARIANT_NOT_COVERED 0x{kind:02x} {s}={v}" for s, v in missing]
+    return [{"seed": list(sd), "models": {s: v for s, v in sorted(cand[sd])},
+             "new": sorted(f"{s}={v}" for s, v in (cand[sd] & need))} for sd in chosen], problems
+
+
+def emulator_slots(exe):
+    """run_slots backed by the Cube.exe appearance emulator (pinned build, read-only)."""
+    from tools.alpha_models.anim import pe_bytes as pb
+    from tools.alpha_models.universal import alpha_static as st
+    st.verify_exe(exe)
+    emu = st.AppearanceEmulator(pb.load(exe))
+
+    def run_slots(kind, s2, s3):
+        d = st.decode_appearance(emu.run(kind, s2, s3)["raw"])
+        return {n: v for n, v in d["slots"].items() if n in VARIANT_SLOTS and v != -1}
+    return run_slots
+
+
+# --------------------------------------------------------------------------- entries
+def build_entries(rows, scope, run_slots, static_table):
+    """Phase 1: base seed of every kind + fps samples; phase 2: remaining model variants (coverage B)."""
+    entries, problems, coverage = [], [], {}
+    sample_kinds = {}
+    for r in rows:
+        sample_kinds.setdefault(r["family_id"], int(r["kind"], 16))
+    for r in rows:
+        kind = int(r["kind"], 16)
+        wanted = {s: v for s, v in static_table["kinds"][r["kind"]].get("slot_variants", {}).items()
+                  if s in VARIANT_SLOTS}
+        seeds, ps = variant_seeds(kind, run_slots, wanted) if scope["coverage"] == "B" else (
+            [{"seed": [0, 0], "models": {}, "new": []}], [])
+        problems += ps
+        coverage[r["kind"]] = {"wanted": {s: len(v) for s, v in wanted.items()}, "seeds": seeds}
+        for i, sv in enumerate(seeds):
+            fps_list = [60] + (list(scope["fps_samples"]) if i == 0 and sample_kinds[r["family_id"]] == kind else [])
+            for fps in fps_list:
+                entries.append({"id": entry_id(kind, sv["seed"], fps), "kind": r["kind"], "seed": sv["seed"],
+                                "fps": fps, "phase": 1 if i == 0 else 2, "family_id": r["family_id"],
+                                "name_hint": r.get("name_hint"), "models": sv["models"], "covers": sv["new"]})
+    return entries, coverage, problems
+
+
+def job_for_entry(row, entry):
+    """Universal job of the entry: the planner job with this seed; NO action library (S05B-1 is
+    locomotion only, the humanoid's actions are checked by the separate regression run)."""
+    job = {k: v for k, v in row["job"].items()
+           if k not in ("equipment", "action_manifest", "clips", "actions_status")}
+    job.update(seed_variant=list(entry["seed"]), variant=f"s05b1_{entry['id']}",
+               generated_by="batch_runner (D59 S05B-1)", batch_entry=entry["id"])
+    return job
+
+
+# --------------------------------------------------------------------------- unity runs
+def parse_verdicts(stdout):
+    steps = {}
+    for ln in stdout.splitlines():
+        m = re.match(r"^([A-Z_]+_RESULT)=(\w+)(?: exit=(-?\d+))?", ln.strip())
+        if m:
+            steps[m.group(1)] = {"verdict": m.group(2), "exit": None if m.group(3) is None else int(m.group(3))}
+        elif ln.strip().startswith("RESULT="):
+            steps["RESULT"] = {"verdict": ln.strip().split("=", 1)[1], "exit": None}
+    return steps
+
+
+def unity_runner(project, python=sys.executable):
+    """Real runner: run_transfer.ps1 on one job in the batch project; returns (exit, stdout, out_dir)."""
+    def run(job_path, fps, log_path):
+        cmd = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(RUN_TRANSFER),
+               "-Project", str(project), "-UniversalJob", str(job_path), "-Python", python,
+               "-ControllerFps", str(fps)]
+        p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace")
+        Path(log_path).write_text(p.stdout + "\n--- stderr ---\n" + p.stderr, encoding="utf-8")
+        return p.returncode, p.stdout, Path(project) / "TransferOutput"
+    return run
+
+
+def copy_reports(src, dst):
+    dst = Path(dst)
+    if dst.exists():
+        shutil.rmtree(dst)
+    dst.mkdir(parents=True)
+    hashes = {}
+    for name in KEEP_REPORTS:
+        p = Path(src) / name
+        if p.exists():
+            shutil.copy2(p, dst / name)
+            hashes[name] = sha256_file(dst / name)
+    if (Path(src) / "entity_frames").is_dir():
+        shutil.copytree(Path(src) / "entity_frames", dst / "entity_frames")
+    return hashes
+
+
+def judge_entry(steps, exit_code, reports_dir, required=REQUIRED_STEPS, locomotion_only=True):
+    """PASS only when every required step is PASS with exit 0, RESULT=PASS, the run exited 0, the entity
+    is locomotion-only and the formula was compared with a non-zero number of live Alpha frames."""
+    problems = []
+    if exit_code != 0:
+        problems.append(f"RUN_EXIT={exit_code}")
+    for s in required:
+        st = steps.get(s)
+        if not st:
+            problems.append(f"STEP_MISSING {s}")
+        elif st["verdict"] != "PASS" or st["exit"] != 0:
+            problems.append(f"STEP_FAIL {s}={st['verdict']} exit={st['exit']}")
+    if (steps.get("RESULT") or {}).get("verdict") != "PASS":
+        problems.append("RESULT_NOT_PASS")
+    rd = Path(reports_dir)
+    pw = rd / "paramwalk.txt"
+    if "PARAMWALK_RESULT" in required:
+        m = re.search(r"alpha_frames=(\d+)", pw.read_text(encoding="utf-8")) if pw.exists() else None
+        if not m or int(m.group(1)) == 0:
+            problems.append("PARAMWALK_WITHOUT_LIVE_FRAMES")
+    ep = rd / "entity_playmode.txt"
+    if locomotion_only:
+        text = ep.read_text(encoding="utf-8") if ep.exists() else ""
+        if "controller_mode=LOCOMOTION_ONLY" not in text:
+            problems.append("ENTITY_NOT_LOCOMOTION_ONLY")
+        if "locomotion_only_refused=True" not in text:
+            problems.append("ACTIONS_NOT_REFUSED")
+    return problems
+
+
+def regression_numbers(reports_dir):
+    rd = Path(reports_dir)
+    out = {}
+    cp = rd / "controller_playmode.txt"
+    if cp.exists():
+        t = cp.read_text(encoding="utf-8")
+        for key, pat in (("frames", r"frames=(\d+)"), ("actions", r"actions_completed=(\d+)"),
+                         ("required", r"required=(\d+)")):
+            m = re.search(pat, t)
+            if m:
+                out[key] = int(m.group(1))
+    npm = rd / "native_lifecycle_playmode.txt"
+    if npm.exists():
+        m = re.search(r"frames=(\d+)", npm.read_text(encoding="utf-8"))
+        if m:
+            out["native_frames"] = int(m.group(1))
+    return out
+
+
+# --------------------------------------------------------------------------- state / resume
+def load_state(path):
+    if Path(path).exists():
+        return json.loads(Path(path).read_text(encoding="utf-8"))
+    return {"format": "cubegame.batch_state/1", "entries": {}}
+
+
+def can_skip(rec, job_sha, inputs, out_root):
+    """Skip only a PASS whose job, inputs and copied report files are byte-identical."""
+    if not rec or rec.get("verdict") != "PASS" or rec.get("job_sha256") != job_sha or rec.get("inputs") != inputs:
+        return False
+    rdir = Path(out_root) / "runs" / rec["id"]
+    for name, h in rec.get("reports", {}).items():
+        p = rdir / name
+        if not p.exists() or sha256_file(p) != h:
+            return False
+    return bool(rec.get("reports"))
+
+
+def run_one(entry_key, job, fps, out_root, state, state_path, runner, inputs, required=REQUIRED_STEPS,
+            judge_extra=None, locomotion_only=True):
+    out_root = Path(out_root)
+    jobs_dir = out_root / "jobs"
+    jobs_dir.mkdir(parents=True, exist_ok=True)
+    job_path = jobs_dir / f"{entry_key}.json"
+    job_path.write_text(json.dumps(job, indent=1), encoding="utf-8")
+    job_sha = sha256_json(job)
+    rec = state["entries"].get(entry_key)
+    if can_skip(rec, job_sha, inputs, out_root):
+        rec["skipped_on_resume"] = True
+        return rec
+    (out_root / "logs").mkdir(exist_ok=True)
+    t0 = time.time()
+    exit_code, stdout, src = runner(job_path, fps, out_root / "logs" / f"{entry_key}.log")
+    steps = parse_verdicts(stdout)
+    rdir = out_root / "runs" / entry_key
+    reports = copy_reports(src, rdir) if Path(src).exists() else {}
+    problems = judge_entry(steps, exit_code, rdir, required, locomotion_only)
+    if judge_extra:
+        problems += judge_extra(rdir)
+    rec = {"id": entry_key, "verdict": "PASS" if not problems else "FAIL", "exit": exit_code,
+           "steps": steps, "problems": problems, "job_sha256": job_sha, "inputs": inputs, "reports": reports,
+           "seconds": round(time.time() - t0, 1), "finished": time.strftime("%Y-%m-%dT%H:%M:%S")}
+    state["entries"][entry_key] = rec
+    write_json_atomic(state_path, state)
+    return rec
+
+
+# --------------------------------------------------------------------------- batch
+def execute(scope_name, plan_result, static_table, run_slots, runner, out_root, inputs,
+            regression_runner=None, phases=(1, 2), log=print):
+    """Runs the scope; returns the summary dict. ``runner``/``regression_runner`` are injectable."""
+    scope = SCOPES[scope_name]
+    out_root = in_scratch(out_root)
+    out_root.mkdir(parents=True, exist_ok=True)
+    state_path = out_root / "batch_state.json"
+    state = load_state(state_path)
+    rows, problems = select_scope(plan_result, scope)
+    if problems:
+        return {"BATCH_RESULT": "REFUSED", "problems": problems}
+    entries, coverage, cov_problems = build_entries(rows, scope, run_slots, static_table)
+    by_kind = {r["kind"]: r for r in rows}
+    write_json_atomic(out_root / "entries.json", {"entries": entries, "coverage": coverage})
+    results, gate = {}, []
+    # phase 1 + regression
+    if 1 in phases:
+        for e in [x for x in entries if x["phase"] == 1]:
+            log(f"[phase 1] {e['id']} {e['name_hint']}")
+            results[e["id"]] = run_one(e["id"], job_for_entry(by_kind[e["kind"]], e), e["fps"], out_root, state,
+                                       state_path, runner, inputs)
+            log(f"  -> {results[e['id']]['verdict']} {results[e['id']]['problems']}")
+        reg = scope.get("regression")
+        if reg and regression_runner:
+            job = json.loads(Path(reg["job"]).read_text(encoding="utf-8"))
+            for fps, expect in sorted(reg["expect"].items()):
+                key = f"regression_0x02_actions_{fps}hz"
+                log(f"[regression] {key}")
+
+                def extra(rdir, expect=expect):
+                    got = regression_numbers(rdir)
+                    return [f"REGRESSION_NUMBER {k} {got.get(k)} != {v}" for k, v in expect.items() if got.get(k) != v]
+                results[key] = run_one(key, job, fps, out_root, state, state_path, regression_runner, inputs,
+                                       required=REGRESSION_STEPS, judge_extra=extra,
+                                       locomotion_only=False)
+                log(f"  -> {results[key]['verdict']} {results[key]['problems']}")
+    phase1_keys = [e["id"] for e in entries if e["phase"] == 1] + (
+        [f"regression_0x02_actions_{f}hz" for f in scope["regression"]["expect"]] if scope.get("regression") else [])
+    not_pass = [k for k in phase1_keys if (results.get(k) or state["entries"].get(k) or {}).get("verdict") != "PASS"]
+    if not_pass:
+        gate.append("PHASE2_BLOCKED phase 1/regression not all PASS: " + ", ".join(not_pass))
+    if 2 in phases and not gate:
+        for e in [x for x in entries if x["phase"] == 2]:
+            log(f"[phase 2] {e['id']} {e['name_hint']} covers {e['covers']}")
+            results[e["id"]] = run_one(e["id"], job_for_entry(by_kind[e["kind"]], e), e["fps"], out_root, state,
+                                       state_path, runner, inputs)
+            log(f"  -> {results[e['id']]['verdict']} {results[e['id']]['problems']}")
+    summary = summarize(scope_name, entries, coverage, state, cov_problems + gate, phases)
+    write_json_atomic(out_root / "summary.json", summary)
+    (out_root / "summary.md").write_text(summary_markdown(summary), encoding="utf-8")
+    return summary
+
+
+def summarize(scope_name, entries, coverage, state, problems, phases):
+    scope = SCOPES[scope_name]
+    rows = []
+    for e in entries:
+        rec = state["entries"].get(e["id"]) or {}
+        rows.append({**{k: e[k] for k in ("id", "kind", "name_hint", "seed", "fps", "phase", "covers", "models")},
+                     "verdict": rec.get("verdict", "NOT_RUN"), "problems": rec.get("problems", []),
+                     "steps": {k: v["verdict"] for k, v in (rec.get("steps") or {}).items()},
+                     "seconds": rec.get("seconds")})
+    reg = [{"id": k, "verdict": v["verdict"], "problems": v["problems"]}
+           for k, v in sorted(state["entries"].items()) if k.startswith("regression_")]
+    counts = collections.Counter(r["verdict"] for r in rows)
+    kinds = collections.OrderedDict()
+    for r in rows:
+        k = kinds.setdefault(r["kind"], {"name_hint": r["name_hint"], "runs": 0, "pass": 0, "models_covered": set()})
+        k["runs"] += 1
+        if r["verdict"] == "PASS":
+            k["pass"] += 1
+            k["models_covered"].update(f"{s}={v}" for s, v in r["models"].items())
+    for k, v in kinds.items():
+        wanted = coverage[k]["wanted"]
+        need = sum(n for n in wanted.values() if n > 1)
+        got = len([m for m in v["models_covered"] if wanted.get(m.split("=")[0], 0) > 1])
+        v["models_covered"] = sorted(v["models_covered"])
+        v["variant_models"] = f"{got}/{need}"
+    all_pass = rows and all(r["verdict"] == "PASS" for r in rows) and all(x["verdict"] == "PASS" for x in reg) \
+        and not problems
+    return {"format": "cubegame.batch_summary/1", "scope": scope_name, "decision": scope["decision"],
+            "BATCH_RESULT": "PASS" if all_pass else ("INCOMPLETE" if counts.get("NOT_RUN") else "FAIL"),
+            "phases_requested": list(phases), "counts": dict(counts), "problems": problems,
+            "kinds": kinds, "regression": reg, "entries": rows}
+
+
+def summary_markdown(s):
+    out = [f"# Batch {s['scope']} ({s['decision']}) — {s['BATCH_RESULT']}", "",
+           "Generated by `transfer_planner batch`. Technical PASS is not visual approval (producer).", "",
+           f"Counts: {s['counts']}", ""]
+    if s["problems"]:
+        out += ["Problems:", ""] + [f"* {p}" for p in s["problems"]] + [""]
+    out += ["| Kind | Name | Runs | PASS | Variant models covered |", "|---|---|---|---|---|"]
+    out += [f"| {k} | {v['name_hint']} | {v['runs']} | {v['pass']} | {v['variant_models']} |" for k, v in s["kinds"].items()]
+    out += ["", "| Regression | Verdict | Problems |", "|---|---|---|"]
+    out += [f"| {r['id']} | {r['verdict']} | {'; '.join(r['problems'])} |" for r in s["regression"]]
+    out += ["", "| Entry | Phase | Hz | Covers | Verdict | Problems |", "|---|---|---|---|---|---|"]
+    out += [f"| {r['id']} | {r['phase']} | {r['fps']} | {' '.join(r['covers'])} | {r['verdict']} | "
+            f"{'; '.join(r['problems'])[:160]} |" for r in s["entries"]]
+    return "\n".join(out) + "\n"
+
+
+# --------------------------------------------------------------------------- contact sheets
+def contact_sheets(out_root, summary, sheet=CONTACT_SHEET):
+    """One sheet per kind (rows = PASS runs at 60 Hz of every seed, labelled with seed + models)."""
+    out_root = in_scratch(out_root)
+    made = []
+    for kind, info in summary["kinds"].items():
+        runs = [r for r in summary["entries"] if r["kind"] == kind and r["fps"] == 60 and r["verdict"] == "PASS"]
+        if not runs:
+            continue
+        # entity_contact_sheet.ps1 expects <project>/TransferOutput: give it a view folder per run
+        views = []
+        for r in runs:
+            v = out_root / "sheet_views" / r["id"]
+            if v.exists():
+                shutil.rmtree(v)
+            shutil.copytree(out_root / "runs" / r["id"], v / "TransferOutput")
+            views.append(str(v))
+        labels = [f"seed {r['seed'][0]}/{r['seed'][1]} " + " ".join(f"{s}={m}" for s, m in sorted(r["models"].items())
+                                                                    if s in ("head", "hair", "hand"))
+                  for r in runs]
+        name = f"{kind}_{(info['name_hint'] or 'kind').lower()}.png"
+        cmd = ["powershell.exe", "-NoProfile", "-STA", "-ExecutionPolicy", "Bypass", "-File", str(sheet),
+               "-Projects", ",".join(views), "-Out", str(out_root / "visuals"), "-Labels", ",".join(labels),
+               "-Name", name]
+        p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
+        made.append({"kind": kind, "sheet": str(out_root / "visuals" / name), "rows": len(runs), "exit": p.returncode,
+                     "out": (p.stdout + p.stderr).strip()[-400:]})
+    return made

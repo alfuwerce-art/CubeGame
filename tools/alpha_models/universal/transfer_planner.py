@@ -7,7 +7,8 @@ Modes (one code path for every creature; nothing here names a creature or counts
             blocked and why) + generated jobs + coverage matrix (JSON + Markdown)
   VALIDATE  existing data vs the contract: repository jobs, family clips, action manifests
   PILOT     prepare (and optionally run in Unity) ONLY allow-listed reference specimens
-  BATCH     the future mass mode; refuses while S05B is NOT_AUTHORIZED (no decision id accepted)
+  BATCH     authorised scopes only: (decision, scope) must be in BATCH_AUTHORIZATIONS (S05B-1 = D59);
+            execution lives in batch_runner.py (phases, coverage, resume, hashes, summary)
 
 All Alpha-derived outputs stay under .scratch (D54). The static table is built beforehand by
 ``python -m tools.alpha_models.universal.pipeline scan`` (no Alpha run).
@@ -16,7 +17,7 @@ All Alpha-derived outputs stay under .scratch (D54). The static table is built b
     python -m tools.alpha_models.universal.transfer_planner plan --static T --out-dir .scratch/universal/plan
     python -m tools.alpha_models.universal.transfer_planner validate --static T [--manifest M]
     python -m tools.alpha_models.universal.transfer_planner pilot --static T --kinds 0x20,0x3f [--execute]
-    python -m tools.alpha_models.universal.transfer_planner batch --static T     # -> NOT_AUTHORIZED
+    python -m tools.alpha_models.universal.transfer_planner batch --authorization D59 --scope s05b1 [--phase 1] [--dry-run]
 """
 from __future__ import annotations
 
@@ -47,8 +48,9 @@ PILOT_ALLOWLIST = {
     0x1e: "Cat: same family as WhiteCat, never captured (family transfer without Alpha run)",
     0x3f: "PlainRunner: body + two feet, captured walk (universal prototype 2026-11-05)",
 }
-# Decisions that authorise BATCH. Empty while S05B is NOT_AUTHORIZED: no flag can unlock it.
-BATCH_AUTHORIZATIONS: tuple = ()
+# (decision, scope) pairs that authorise BATCH. Only producer decisions go here; every other decision
+# id or scope is refused. D59 (2026-11-06): S05B-1 only; S05B-2 and creature actions stay NOT_AUTHORIZED.
+BATCH_AUTHORIZATIONS: tuple = (("D59", "s05b1"),)
 
 # Unity locomotion inputs the planner may fill in. They are NOT Alpha data: amplitude 0.19 is the
 # steady-walk value seen in captures; speed 3.7 is the median AI walk speed of the captured cat/runner.
@@ -61,6 +63,15 @@ def local_out(path):
     if not p.is_relative_to(SCRATCH.resolve()):
         raise ValueError("PLANNER_OUTPUT_MUST_BE_IN_SCRATCH")
     return p
+
+
+def _file_sha256(path):
+    import hashlib
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def load_static(path):
@@ -214,7 +225,8 @@ def plan(scan_result):
         f["actions"] = sorted(a for a in f["actions"] if a)
     return {"format": "cubegame.transfer_plan/1", "metrics": plan_metrics(rows, fams), "families": fams,
             "entities": rows, "pilot_allowlist": {f"0x{k:02x}": v for k, v in PILOT_ALLOWLIST.items()},
-            "batch": "NOT_AUTHORIZED (S05B)"}
+            "batch": {"authorized": [list(x) for x in BATCH_AUTHORIZATIONS],
+                      "other": "NOT_AUTHORIZED (S05B-2, creature actions)"}}
 
 
 def _channel_summary(name, c):
@@ -432,12 +444,50 @@ def pilot(table, kinds, clips_root, out_dir, execute=False, python=sys.executabl
 
 
 # --------------------------------------------------------------------------- BATCH
-def batch(authorization=None):
-    if authorization and authorization in BATCH_AUTHORIZATIONS:   # unreachable while the tuple is empty
-        raise NotImplementedError("BATCH execution is designed (PLAN rows + PILOT steps) but not enabled")
-    return {"BATCH_RESULT": "NOT_AUTHORIZED",
-            "problems": [f"S05B_NOT_AUTHORIZED (authorization={authorization!r}); use PLAN for the queue "
-                         "and PILOT for allow-listed reference specimens"]}
+def batch_authorized(authorization, scope):
+    """None when (decision, scope) is authorised, else the refusal reason."""
+    from tools.alpha_models.universal import batch_runner as br
+    if (authorization, scope) not in BATCH_AUTHORIZATIONS:
+        return (f"NOT_AUTHORIZED (authorization={authorization!r}, scope={scope!r}); authorised: "
+                f"{list(BATCH_AUTHORIZATIONS)}; other S05B work needs a producer decision")
+    if scope not in br.SCOPES or br.SCOPES[scope]["decision"] != authorization:
+        return f"SCOPE_NOT_DEFINED_FOR_DECISION {scope} {authorization}"
+    return None
+
+
+def batch(authorization=None, scope=None, table=None, clips_root=None, phases=(1, 2), dry_run=False,
+          exe=None, python=sys.executable, out_dir=None):
+    refusal = batch_authorized(authorization, scope)
+    if refusal:
+        return {"BATCH_RESULT": "NOT_AUTHORIZED", "problems": [refusal]}
+    from tools.alpha_models.universal import batch_runner as br
+    from tools.alpha_models.universal import pipeline as pl
+    sc = br.SCOPES[scope]
+    out_root = br.in_scratch(out_dir or sc["out"])
+    p = plan(scan(table, clips_root))
+    run_slots = br.emulator_slots(exe or pl.DEFAULT_EXE)
+    inputs = {"static_sha256": table.get("_sha256"), "exe_sha256": table.get("exe_sha256"),
+              "captures": sorted({(r.get("job") or {}).get("reference_capture", {}).get("sha256", "")
+                                  for r in p["entities"] if int(r["kind"], 16) in sc["kinds"]} - {""})}
+    if dry_run:
+        rows, problems = br.select_scope(p, sc)
+        if problems:
+            return {"BATCH_RESULT": "REFUSED", "problems": problems}
+        entries, coverage, cp = br.build_entries(rows, sc, run_slots, table)
+        out_root.mkdir(parents=True, exist_ok=True)
+        br.write_json_atomic(out_root / "entries.json", {"entries": entries, "coverage": coverage})
+        return {"BATCH_RESULT": "DRY_RUN", "problems": cp, "entries": len(entries),
+                "by_phase": dict(collections.Counter(e["phase"] for e in entries)),
+                "coverage": {k: {"wanted": v["wanted"], "seeds": [s["seed"] for s in v["seeds"]]}
+                             for k, v in coverage.items()}}
+    runner = br.unity_runner(sc["project"], python)
+    reg = sc.get("regression")
+    reg_runner = br.unity_runner(reg["project"], python) if reg else None
+    summary = br.execute(scope, p, table, run_slots, runner, out_root, inputs, reg_runner, phases)
+    if summary.get("BATCH_RESULT") != "REFUSED":
+        summary["contact_sheets"] = br.contact_sheets(out_root, summary)
+        br.write_json_atomic(out_root / "summary.json", summary)
+    return summary
 
 
 # --------------------------------------------------------------------------- CLI
@@ -463,11 +513,22 @@ def main(argv=None):
             s.add_argument("--fps", type=int, choices=(30, 60, 120), default=60)
         if name == "batch":
             s.add_argument("--authorization", default=None)
+            s.add_argument("--scope", default=None)
+            s.add_argument("--phase", type=int, choices=(1, 2), action="append", default=None)
+            s.add_argument("--dry-run", action="store_true")
+            s.add_argument("--out-dir", default=None)
     a = ap.parse_args(argv)
     if a.mode == "batch":
-        r = batch(a.authorization)
-        print(json.dumps(r, indent=1))
-        return 3
+        refusal = batch_authorized(a.authorization, a.scope)
+        if refusal:
+            print(json.dumps({"BATCH_RESULT": "NOT_AUTHORIZED", "problems": [refusal]}, indent=1))
+            return 3
+        table = load_static(a.static)
+        table["_sha256"] = _file_sha256(a.static)
+        r = batch(a.authorization, a.scope, table, a.clips_root, tuple(a.phase or (1, 2)), a.dry_run,
+                  out_dir=a.out_dir)
+        print(json.dumps({k: v for k, v in r.items() if k not in ("entries", "kinds")}, indent=1, default=str))
+        return {"PASS": 0, "DRY_RUN": 0, "NOT_AUTHORIZED": 3, "REFUSED": 2}.get(r["BATCH_RESULT"], 1)
     table = load_static(a.static)
     if a.mode == "scan":
         r = scan(table, a.clips_root)

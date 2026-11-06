@@ -251,18 +251,22 @@ class PlannerTests(unittest.TestCase):
         self.assertNotIn("job", by["0x57"])
         md = tp.plan_markdown(p)
         self.assertIn("| 0x93 |", md)
-        self.assertEqual(p["batch"], "NOT_AUTHORIZED (S05B)")
+        self.assertEqual(p["batch"]["authorized"], [["D59", "s05b1"]])
+        self.assertIn("NOT_AUTHORIZED", p["batch"]["other"])
 
     def test_pilot_refuses_kinds_outside_allowlist(self):
         r = tp.pilot(self.t, [0x93], None, ROOT / ".scratch" / "tmp" / "pilot_refusal")
         self.assertEqual(r["PILOT_RESULT"], "REFUSED")
         self.assertIn("NOT_IN_PILOT_ALLOWLIST", r["problems"][0])
 
-    def test_batch_is_not_authorized_whatever_the_flag(self):
-        self.assertEqual(tp.BATCH_AUTHORIZATIONS, ())
-        for auth in (None, "S05B", "D99"):
-            self.assertEqual(tp.batch(auth)["BATCH_RESULT"], "NOT_AUTHORIZED")
+    def test_batch_only_d59_s05b1_is_authorized(self):
+        self.assertEqual(tp.BATCH_AUTHORIZATIONS, (("D59", "s05b1"),))
+        for auth, scope in ((None, None), ("S05B", None), ("D99", "s05b1"), ("D59", None), ("D59", "s05b2"),
+                            ("D58", "s05b1"), ("d59", "s05b1")):
+            self.assertEqual(tp.batch(auth, scope)["BATCH_RESULT"], "NOT_AUTHORIZED", (auth, scope))
         self.assertEqual(tp.main(["batch", "--authorization", "S05B"]), 3)
+        self.assertEqual(tp.main(["batch", "--authorization", "D59", "--scope", "s05b2"]), 3)
+        self.assertIsNone(tp.batch_authorized("D59", "s05b1"))
 
     def test_outputs_must_stay_in_scratch(self):
         with self.assertRaisesRegex(ValueError, "PLANNER_OUTPUT_MUST_BE_IN_SCRATCH"):

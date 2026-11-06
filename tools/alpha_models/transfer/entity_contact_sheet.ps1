@@ -9,7 +9,10 @@ param(
   [Parameter(Mandatory = $true)][string[]]$Projects,
   [string]$Out = 'D:\Projects\CubeGame\.scratch\universal\visuals',
   [int]$PerRow = 8,
-  [int]$Cell = 180
+  [int]$Cell = 180,
+  # optional: one label per project (e.g. seed + model indices of a variant row) and the sheet file name
+  [string[]]$Labels = @(),
+  [string]$Name = 'entity_contact_sheet.png'
 )
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
@@ -18,7 +21,11 @@ $scratch = [System.IO.Path]::GetFullPath((Join-Path $repo '.scratch')) + [System
 $Out = [System.IO.Path]::GetFullPath($Out)
 if (-not $Out.StartsWith($scratch, [System.StringComparison]::OrdinalIgnoreCase)) { throw 'Output must stay inside repository .scratch' }
 New-Item -ItemType Directory -Force -Path $Out | Out-Null
-$Projects = $Projects | ForEach-Object { $_ -split ',' } | Where-Object { $_ }
+$Projects = @($Projects | ForEach-Object { $_ -split ',' } | Where-Object { $_ })
+$Labels = @($Labels | ForEach-Object { $_ -split ',' } | Where-Object { $_ })
+if ($Labels.Count -and $Labels.Count -ne $Projects.Count) { throw "labels ($($Labels.Count)) must match projects ($($Projects.Count))" }
+if ($Name -notmatch '^[\w.-]+\.png$') { throw 'Name must be a plain .png file name' }
+$rowIndex = 0
 
 $rows = @()
 foreach ($p in $Projects) {
@@ -46,7 +53,9 @@ foreach ($p in $Projects) {
     for ($i = 0; $i -lt [Math]::Min($spare, $g.Count); $i++) { $pick += $g[[int][Math]::Floor(($i + 0.5) * $g.Count / [Math]::Min($spare, $g.Count))] }
   }
   $pick = $pick | Sort-Object { [int]($_.File -replace '\D', '') }
-  $rows += [pscustomobject]@{ Dir = (Join-Path $to 'entity_frames'); Title = "$head | $mode"; Frames = ($pick | Select-Object -First $PerRow) }
+  $prefix = if ($Labels.Count) { "$($Labels[$rowIndex]) | " } else { '' }
+  $rowIndex++
+  $rows += [pscustomobject]@{ Dir = (Join-Path $to 'entity_frames'); Title = "$prefix$head | $mode"; Frames = ($pick | Select-Object -First $PerRow) }
 }
 
 $labelH = 22; $titleH = 20
@@ -68,7 +77,7 @@ foreach ($r in $rows) {
   }
   $y += $Cell + $labelH + $titleH
 }
-$file = Join-Path $Out 'entity_contact_sheet.png'
+$file = Join-Path $Out $Name
 $bmp.Save($file, [System.Drawing.Imaging.ImageFormat]::Png)
 $g.Dispose(); $bmp.Dispose()
 Write-Output "CONTACT_SHEET=$file rows=$($rows.Count)"
