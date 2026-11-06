@@ -14,7 +14,9 @@ pushed from outside the AI, VA 0x42D861) is held at 0 — it is not an AI decisi
 
 Calls the region makes are executed for real (Alpha code) except:
   rand (IAT 0x6FC468)              -> scripted sequence (input)
-  ability_isUsable 0x43E5A0        -> scripted answer (input; depends on skills of the creature)
+  ability_isUsable 0x43E5A0        -> EXECUTED for real (resource +0x170 vs cost, cooldown map +0x139c);
+                                      the cooldown map starts empty (no ability used yet). A scripted
+                                      answer is only used when ``ability`` is passed explicitly.
   libm thunks                      -> exact maths (drawmodel_emu.LIBM_STUBS)
 Anything else that cannot be executed stops the run and is reported (PARTIAL), never guessed.
 
@@ -78,14 +80,15 @@ def _ability_stub(answer, log):
     return stub
 
 
-def run_region(image, creature, *, dist2, resource, rand_seq=(1,) * 8, ability=False, counter=0,
-               prior_action=0, timer=1_000_000, target_size=None, max_steps=400_000):
+def run_region(image, creature, *, dist2, resource, rand_seq=(1,) * 8, ability=None, counter=0,
+               prior_action=0, timer=1_000_000, target_size=None, cooldowns=(), max_steps=400_000):
     """Execute the region once. Returns {"action", "writes": [(va, value)], "abilities", "error"}."""
     rand_target = image.u32(RAND_IAT)
     abilities = []
     stubs = dict(de.LIBM_STUBS)
     stubs[rand_target] = (_rand_stub(rand_seq), 0)
-    stubs[ABILITY_IS_USABLE] = (_ability_stub(ability, abilities), 4)
+    if ability is not None:
+        stubs[ABILITY_IS_USABLE] = (_ability_stub(ability, abilities), 4)
     cpu = de.EmuCPU(image, stubs=stubs, max_steps=max_steps)
     cpu.mem.map(de.STACK_BASE, de.STACK_SIZE)
     cre = cpu.mem.map(de.HEAP_BASE, 0x2000, bytes(creature))
@@ -94,6 +97,27 @@ def run_region(image, creature, *, dist2, resource, rand_seq=(1,) * 8, ability=F
     # empty std::list sentinel for the buff list +0x1178 (chooseAttack walks it)
     struct.pack_into("<II", misc, 0x800, MISC + 0x800, MISC + 0x800)
     struct.pack_into("<I", cre, 0x1178, MISC + 0x800)
+    # std::map<int ability, int remaining_ms> of cooldowns at +0x139c (MSVC tree: node = left,
+    # parent, right, color, isnil, key +0x10, value +0x14). Empty = no ability used yet; a listed
+    # ability is on cooldown (value != 0) — a WORLD input, swept, never inferred.
+    head = MISC + 0x900
+    struct.pack_into("<III", misc, 0x900, head, head, head)
+    misc[0x90C], misc[0x90D] = 1, 1
+    nodes = []
+    for i, ab_id in enumerate(sorted(cooldowns)):
+        n = MISC + 0x940 + 0x20 * i
+        nodes.append(n)
+        struct.pack_into("<IIIBBxxii", misc, n - MISC, head, head, head, 1, 0, ab_id, 1000)
+    if nodes:                               # chain as a right spine: sorted keys, valid BST
+        root = nodes[0]
+        struct.pack_into("<III", misc, 0x900, nodes[0], root, nodes[-1])   # head: leftmost, root, rightmost
+        for i, n in enumerate(nodes):
+            nxt = nodes[i + 1] if i + 1 < len(nodes) else head
+            par = nodes[i - 1] if i else head
+            struct.pack_into("<III", misc, n - MISC, head, par, nxt)
+    struct.pack_into("<II", cre, 0x139C, head, len(nodes))
+    if ability is None:
+        cpu.hooks[ABILITY_IS_USABLE] = lambda c: abilities.append(c.mem.u(c.r["esp"] + 4, 4))
     cre[ACTION] = prior_action & 0xFF
     struct.pack_into("<i", cre, TIMER, timer)
     struct.pack_into("<i", cre, 0x70, counter)
@@ -136,7 +160,10 @@ RAND_CASES = {"rand_even": (2,) * 8, "rand_odd": (1,) * 8, "rand_mod10_zero": (1
               "rand_0..3": (0, 1, 2, 3, 4, 5, 6, 7)}
 
 
-def sweep(image, creature, prior_actions=(0,)):
+COOLDOWN_CASES = {"no_cooldown": (), "cooldown_0x36": (0x36,)}
+
+
+def sweep(image, creature, prior_actions=(0,), ability_cases=(None,), cooldown_cases=COOLDOWN_CASES):
     """All recorded outcomes over the input grid; closure over prior actions it produces."""
     out, seen_prior, queue = [], set(), list(prior_actions)
     while queue:
@@ -144,12 +171,14 @@ def sweep(image, creature, prior_actions=(0,)):
         if prior in seen_prior:
             continue
         seen_prior.add(prior)
-        for (dname, d2), res, (rname, rs), ab, cnt in itertools.product(
-                DIST_CASES.items(), RESOURCE_CASES, RAND_CASES.items(), (False, True), (0, 1)):
+        for (dname, d2), res, (rname, rs), ab, cnt, (cdn, cds) in itertools.product(
+                DIST_CASES.items(), RESOURCE_CASES, RAND_CASES.items(), ability_cases, (0, 1),
+                cooldown_cases.items()):
             r = run_region(image, creature, dist2=d2, resource=res, rand_seq=rs, ability=ab,
-                           counter=cnt, prior_action=prior)
-            cond = {"distance": dname, "resource_170": res, "rand": rname, "ability_usable": ab,
-                    "counter_70": cnt, "prior_action": prior}
+                           counter=cnt, prior_action=prior, cooldowns=cds)
+            cond = {"distance": dname, "resource_170": res, "rand": rname,
+                    "ability_usable": "executed" if ab is None else ab,
+                    "counter_70": cnt, "prior_action": prior, "cooldowns": cdn}
             out.append({"conditions": cond, **r})
             if r["writes"] and not r["error"]:
                 nxt = r["writes"][-1][1]
@@ -199,6 +228,34 @@ def analyse_kind(image, kind, seed=(0, 0)):
             "held_inputs": {"external_order_esp_3c": 0, "stun_128": 0, "timer_6c": 1_000_000,
                             "faction_60": 1, "on_ground_5c_bit0": 1},
             **summarize(res)}
+
+
+# creature fields copied from a live full dump (observed NPC state); pointers are NOT copied
+OBSERVED_FIELDS = ((0x60, 1), (0x140, 2), (0x170, 4), (0x174, 12), (0x418, 0x118 * 7))
+# header-only captures (creature_hdr, 0x180 bytes): no equipment slots
+HEADER_FIELDS = ((0x60, 1), (0x140, 2), (0x170, 4), (0x174, 12))
+
+
+def analyse_observed(image, kind, creature_full, seed=(0, 0), label="observed", fields=OBSERVED_FIELDS):
+    """П1 on a kind's own appearance plus the class/equipment/stat fields of a captured NPC."""
+    app = st.AppearanceEmulator(image).run(kind, *seed)
+    raw = app["raw"]
+    c = bytearray(0x2000)
+    c[0x78:0x78 + len(raw)] = raw
+    struct.pack_into("<I", c, 0x64, kind)
+    for off, fmt, v in ao.RUNTIME_DEFAULTS:
+        struct.pack_into(fmt, c, off, v)
+    for off, n in fields:
+        if off + n > len(creature_full):
+            raise ValueError(f"OBSERVED_FIELD_NOT_CAPTURED +0x{off:x}")
+        c[off:off + n] = creature_full[off:off + n]
+    c[0x5C] |= 1
+    flags = struct.unpack_from("<H", c, 0x7E)[0]
+    res = sweep(image, c)
+    return {"format": "cubegame.ai_trigger/1", "kind": f"0x{kind:02x}", "seed": list(seed), "template": label,
+            "observed": {"faction_60": c[0x60], "class_140": c[0x140], "spec_141": c[0x141],
+                         "weapon_aa8": [c[0xAA8], c[0xAA9]], "offhand_990": [c[0x990], c[0x991]]},
+            "appearance_flags_7e": f"0x{flags:04x}", **summarize(res)}
 
 
 def main(argv=None):

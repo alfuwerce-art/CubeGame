@@ -15,6 +15,8 @@ from tools.alpha_models.universal import contract as ct
 from tools.alpha_models.universal import creature_rig as cr
 
 CAT_PID = "alpha_actions/creature_ai_cat_0x1e"
+HF_PID = "alpha_actions/creature_ai_humanfemale_0x03"
+RUN_PID = "alpha_actions/creature_ai_plainrunner_0x3f"
 CAT_FAMILY = "alpha_creature/ced63e5e96"
 HAVE_EXE = Path(at.DEFAULT_EXE).exists()
 
@@ -45,6 +47,30 @@ class CreatureAiProfileRules(unittest.TestCase):
         pid, status, _ = ct.action_profile_for(0x1E, (0, 0), CAT_FAMILY,
                                                ["body", "tail", "head", "hand_l", "hand_r", "foot_l", "foot_r"])
         self.assertEqual((pid, status), (CAT_PID, "EMULATED_ALPHA_CODE"))
+
+    def test_humanoid_npc_profile_is_its_own_specimen_only(self):
+        parts = ["body", "head", "hair", "hand_l", "hand_r", "foot_l", "foot_r"]
+        fam = "alpha_creature/e66d96be5a"
+        self.assertEqual(ct.action_profile_for(0x03, (0, 0), fam, parts)[0], HF_PID)
+        for kind in (0x00, 0x01, 0x07, 0x08, 0x0D, 0x0E):      # same family, trigger not proven
+            self.assertIsNone(ct.action_profile_for(kind, (0, 0), fam, parts)[0], hex(kind))
+        # the player specimen keeps its own (input) profile
+        self.assertEqual(ct.ACTION_PROFILES[ct.action_profile_for(0x02, (0, 0), fam, parts)[0]]["trigger"],
+                         "player_input")
+
+    def test_runner_profile_is_its_own_specimen_only(self):
+        fam = "alpha_creature/51aeec9280"
+        parts = ["body", "foot_l", "foot_r"]
+        self.assertEqual(ct.action_profile_for(0x3F, (0, 0), fam, parts)[0], RUN_PID)
+        for kind in (0x40, 0x41, 0x42):
+            self.assertIsNone(ct.action_profile_for(kind, (0, 0), fam, parts)[0], hex(kind))
+
+    def test_every_creature_ai_profile_names_launch_vas_for_its_chain(self):
+        for pid, p in ct.ACTION_PROFILES.items():
+            if p["trigger"] != "creature_ai":
+                continue
+            self.assertEqual(sorted(p["launched_actions"]), sorted(p["primary_chain"]), pid)
+            self.assertEqual(p["equipment"], {}, pid)        # no NPC weapon observed so far
 
     def test_other_seed_of_the_specimen_is_not_the_specimen(self):
         pid, _, _ = ct.action_profile_for(0x1E, (1, 0), CAT_FAMILY, ["body"])
@@ -92,8 +118,19 @@ class TriggerFromAlphaBytes(unittest.TestCase):
     def test_runner_and_humanoid_differ_from_the_cat(self):
         runner, _ = self._launched(0x3F)
         self.assertEqual(sorted(runner), [6])
-        human, _ = self._launched(0x02)
+        self.assertEqual({a: int(v[0], 16) for a, v in runner.items()},
+                         ct.ACTION_PROFILES[RUN_PID]["launched_actions"])
+        human, _ = self._launched(0x03)
         self.assertEqual(sorted(human), [3, 4, 6, 54])
+        self.assertEqual({a: int(v[0], 16) for a, v in human.items()},
+                         ct.ACTION_PROFILES[HF_PID]["launched_actions"])
+
+    def test_ability_is_executed_and_cooldown_is_the_condition_of_3_and_4(self):
+        rep = at.analyse_kind(self.image, 0x03)
+        for a in ("3", "4"):
+            self.assertTrue(all(e["cooldowns"] == "cooldown_0x36" for e in rep["actions"][a]["examples"]))
+            self.assertEqual(rep["actions"][a]["examples"][0]["ability_usable"], "executed")
+        self.assertTrue(all(e["cooldowns"] == "no_cooldown" for e in rep["actions"]["54"]["examples"]))
 
 
 if __name__ == "__main__":

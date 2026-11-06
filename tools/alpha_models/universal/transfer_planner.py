@@ -46,6 +46,7 @@ PILOT_ALLOWLIST = {
     0x02: "HumanMale: 8-part humanoid, weapon layer, action controller (S05A-2 specimen)",
     0x20: "WhiteCat: quadruped + tail, captured walk (universal prototype 2026-11-05)",
     0x1e: "Cat: same family as WhiteCat, never captured (family transfer without Alpha run)",
+    0x03: "HumanFemale: humanoid NPC of the creature-AI action pilot (D60, S05B-A step A2)",
     0x3f: "PlainRunner: body + two feet, captured walk (universal prototype 2026-11-05)",
 }
 # (decision, scope) pairs that authorise BATCH. Only producer decisions go here; every other decision

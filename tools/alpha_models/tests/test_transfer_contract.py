@@ -302,14 +302,14 @@ class LocalReferenceTests(unittest.TestCase):
         self.assertEqual(cat["family_id"], cat2["family_id"])
         for e in (cat, cat2, run):
             self.assertEqual(e["readiness"], "AUTO_READY")
-        # D60/A1: only Cat 0x1e has creature-AI trigger evidence; WhiteCat (same family) and the
-        # runner stay blocked until their own trigger is proven
-        self.assertEqual(cat2["channels"]["actions"]["status"], "AVAILABLE")
-        self.assertEqual(cat2["channels"]["actions"]["trigger"], "creature_ai")
-        self.assertEqual(ct.unity_contract(cat2)["controllerMode"], "ACTIONS")
-        for e in (cat, run):
-            self.assertEqual(e["channels"]["actions"]["status"], "BLOCKED")
-            self.assertEqual(ct.unity_contract(e)["controllerMode"], "LOCOMOTION_ONLY")
+        # D60/A1-A3: Cat 0x1e and PlainRunner 0x3f have creature-AI trigger evidence; WhiteCat (same
+        # family as Cat 0x1e) stays blocked until its own trigger is proven
+        for e in (cat2, run):
+            self.assertEqual(e["channels"]["actions"]["status"], "AVAILABLE")
+            self.assertEqual(e["channels"]["actions"]["trigger"], "creature_ai")
+            self.assertEqual(ct.unity_contract(e)["controllerMode"], "ACTIONS")
+        self.assertEqual(cat["channels"]["actions"]["status"], "BLOCKED")
+        self.assertEqual(ct.unity_contract(cat)["controllerMode"], "LOCOMOTION_ONLY")
         # cat and runner families carry a captured walk clip and the verified formula
         for e in (cat, run):
             self.assertEqual({s["provenance"] for s in e["channels"]["walk"]["sources"]},
