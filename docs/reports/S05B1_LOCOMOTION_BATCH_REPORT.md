@@ -82,4 +82,4 @@ python -m unittest discover -s tools/alpha_models/tests -t .
 
 ## 6. Следующий шаг (по D59, не разрешение)
 
-Подготовить отдельный план восстановления и массового переноса анимаций действий NPC (`DRAFT / NOT_AUTHORIZED`).
+План восстановления и переноса анимаций действий NPC подготовлен: [S05B_NPC_ACTIONS_PLAN_DRAFT](../stages/S05B_NPC_ACTIONS_PLAN_DRAFT.md) (`DRAFT / NOT_AUTHORIZED`).
