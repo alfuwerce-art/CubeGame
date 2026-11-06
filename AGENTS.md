@@ -4,7 +4,7 @@
 
 **ЕДИНЫЙ ИСТОЧНИК ПРАВИЛ:** этот файл обязателен для Claude Code, DeepSeek Harness, Codex и ChatGPT. [CLAUDE.md](CLAUDE.md) — только загрузчик-ссылка, а [CLAUDE_ONBOARDING.md](docs/agents/CLAUDE_ONBOARDING.md) и документы настройки пресетов — справочники, **не отдельные источники правил**. [Проект консолидации](docs/agents/UNIFIED_AGENT_RULES_DRAFT.md) **ACCEPTED 2026-11-06**, его правила внесены в канонический AGENTS.md; проект не является вторым регламентом. Роли и текущий исполнитель всегда уточняются по [ACTIVE_STAGE](docs/ACTIVE_STAGE.md) и конкретному утверждённому ТЗ; старые справочники могут быть неактуальными.
 
-**План работы с контекстом:** [SESSION_CONTEXT_PLAN.md](docs/agents/SESSION_CONTEXT_PLAN.md) — принято как детализация правил сессий. Новая самостоятельная функция/механика, этап или подэтап — новый чат; вспомогательные методы одной механики остаются в той же сессии, перед остановкой сохраняется чекпоинт. [PRODUCTION_PIPELINE_DRAFT.md](docs/production/PRODUCTION_PIPELINE_DRAFT.md) и [ART_DIRECTION_DRAFT.md](docs/art/ART_DIRECTION_DRAFT.md) — предложения, **не новая авторизация**.
+**План работы с контекстом:** [SESSION_CONTEXT_PLAN.md](docs/agents/SESSION_CONTEXT_PLAN.md) — принято как детализация правил сессий. Новая самостоятельная функция/механика, этап или подэтап — новый чат; вспомогательные методы одной механики остаются в той же сессии, перед остановкой сохраняется чекпоинт. [PRODUCTION_PIPELINE_DRAFT.md](docs/production/PRODUCTION_PIPELINE_DRAFT.md) — **ACCEPTED 2026-11-06** как производственный регламент, но не авторизация игровых этапов. [ART_DIRECTION_DRAFT.md](docs/art/ART_DIRECTION_DRAFT.md) остаётся на ревью.
 
 
 ## Оперативная память, история и сессии (решение продюсера 2026-11-06)
@@ -31,7 +31,7 @@
 | [GDD](docs/game-design/GDD_DRAFT.md), [план завершения](docs/game-design/GDD_COMPLETION_PLAN.md) | Концепция и правила игрового поведения, OPEN/DRAFT | При геймдизайне или изменении поведения системы |
 | [ROADMAP](docs/planning/ROADMAP_DRAFT.md), [ТЗ этапов](docs/stages/) | Последовательность этапов и конкретный технический объём | При планировании следующего этапа/получении TASK |
 | [ADR-0001](docs/architecture/ADR-0001-modular-monolith.md), [архитектурные материалы](docs/architecture/) | Принятый принцип и специальные проектные схемы | При архитектуре, интеграции и изменении систем |
-| [PRODUCTION_PIPELINE](docs/production/PRODUCTION_PIPELINE_DRAFT.md) | Как выполнять, проверять и сдавать работу | При подготовке производственного задания и закрытии этапа (пока DRAFT) |
+| [PRODUCTION_PIPELINE](docs/production/PRODUCTION_PIPELINE_DRAFT.md) | Принятый производственный процесс, матрица влияния/совместимости и специализированные маршруты | При постановке, интеграции и сдаче задачи — открывать относящиеся к ней разделы |
 | [ART_DIRECTION](docs/art/ART_DIRECTION_DRAFT.md) | Визуальные ориентиры, требования к ассетам и приёмке | При моделях, окружении, эффектах и художественном ревью (пока DRAFT) |
 | [SESSION_CONTEXT_PLAN](docs/agents/SESSION_CONTEXT_PLAN.md), [MULTI_AGENT_WORKFLOW](docs/agents/MULTI_AGENT_WORKFLOW.md) | Утверждённые правила сессий, HANDOFF и последовательной работы агентов | При передаче, конфликтах и организации задач |
 | [UNITY_CLI_PROTOCOL](docs/agents/UNITY_CLI_PROTOCOL.md) | Безопасные тестовые запуски Unity | Перед работой с Unity CLI |

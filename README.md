@@ -18,7 +18,7 @@
 |---|---|---|
 | **Game Design Document** | [GDD](docs/game-design/GDD_DRAFT.md) + [план завершения](docs/game-design/GDD_COMPLETION_PLAN.md) | GDD частично утверждён; редакционный план READY_FOR_REVIEW |
 | **Правила ИИ** | [AGENTS.md](AGENTS.md) + [история консолидации](docs/agents/UNIFIED_AGENT_RULES_DRAFT.md) | **ACCEPTED 2026-11-06**; AGENTS — единый нормативный документ |
-| **Пайплайны производства** | [PRODUCTION_PIPELINE_DRAFT](docs/production/PRODUCTION_PIPELINE_DRAFT.md) | READY_FOR_REVIEW; не авторизует этапы |
+| **Пайплайны производства** | [PRODUCTION_PIPELINE](docs/production/PRODUCTION_PIPELINE_DRAFT.md) | **ACCEPTED 2026-11-06**; не санкционирует игровые этапы |
 | **Art Direction** | [ART_DIRECTION_DRAFT](docs/art/ART_DIRECTION_DRAFT.md) | текст READY_FOR_REVIEW; визуальные эталоны не утверждены |
 | **Управление контекстом** | [SESSION_CONTEXT_PLAN](docs/agents/SESSION_CONTEXT_PLAN.md) | **ACCEPTED** в составе правил ИИ; Git-протокол — MULTI_AGENT_WORKFLOW |
 
@@ -31,4 +31,4 @@
 - **ACCEPTED** — продюсер принял решение/результат; **merge в main** только после прямого разрешения.
 - Изучение исходных ассетов Alpha проводится локально; закрытые материалы не публикуются.
 
-Пакет пяти направлений проходит поэтапную приёмку: правила ИИ и управление контекстом приняты 2026-11-06, остальные направления остаются на ревью в ветке `docs/gdd-first-draft-20261106`, [PR #2](https://github.com/alfuwerce-art/CubeGame/pull/2). PR остаётся DRAFT и не объединён; подготовка документов сама по себе не утверждает новые игровые механики, Art Direction или Unity-этапы.
+Пакет пяти направлений проходит поэтапную приёмку: единые правила ИИ, управление контекстом и Production Pipeline приняты 2026-11-06; Art Direction и оставшиеся разделы GDD ещё на ревью.

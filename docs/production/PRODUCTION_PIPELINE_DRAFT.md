@@ -1,6 +1,6 @@
 # CubeGame — производственные пайплайны (единый проект)
 
-**Дата:** 2026-11-06. **Статус:** READY_FOR_REVIEW как производственный регламент; НЕ разрешает запуск следующих этапов.  
+**Дата:** 2026-11-06. **Статус:** **ACCEPTED 2026-11-06** — утверждённый производственный регламент; его принятие НЕ разрешает новые игровые этапы и не является приёмкой механик/ассетов.  
 **Действующие источники:** [ACTIVE_STAGE](../ACTIVE_STAGE.md), [ROADMAP_DRAFT](../planning/ROADMAP_DRAFT.md), [MULTI_AGENT_WORKFLOW](../agents/MULTI_AGENT_WORKFLOW.md), [ADR-0001](../architecture/ADR-0001-modular-monolith.md), [S05 пайплайн](../architecture/UNIVERSAL_ASSET_ANIMATION_PIPELINE.md), [D46](../decisions/D46-asset-conversion-first.md), [D35](../planning/DECISIONS_001-036.md).
 
 ## 1. Зачем нужен этот документ
