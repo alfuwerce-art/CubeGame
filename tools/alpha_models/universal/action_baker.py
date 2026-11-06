@@ -128,9 +128,14 @@ def _bake_one(payload):
             p['captured_size'] = captured_sizes[p['name']]
         clip['source'].update({'action': action, 'exe_sha256': exe_hash, 'seed_variant': list(seed),
             'runtime_capture': False, 'two_handed_attack': action in profile['grip_checked_actions'],
+            'trigger': profile['trigger'], 'live_check': profile.get('live_check', 'NOT_CAPTURED'),
             'duration_policy': 'native combat_getAttackTiming observation window; gameplay lifetime not inferred'})
         clip['validation'] = check
         dest.write_text(json.dumps(clip), encoding='utf8')
+        launched = profile.get('launched_actions')
+        if launched is not None:
+            entry['trigger'] = {'source': profile['trigger'], 'write_va': f'0x{launched[action]:06X}'}
+        entry['live_check'] = profile.get('live_check', 'NOT_CAPTURED')
         entry.update(status='EMULATED_ALPHA_CODE', file=dest.name, validation=check,
             duration_ms=clip['duration'], action_end_ms=bake['duration_ms'],
             sha256=hashlib.sha256(dest.read_bytes()).hexdigest())
@@ -154,10 +159,18 @@ def bake_job(job, actions, out, exe=DEFAULT_EXE, sizes=DEFAULT_SIZES, dt_ms=16, 
     req = profile.get('equipment', {}).get('weapon')
     if req and (weapon[0] != req['type'] or weapon[1] not in req['subtypes']):
         raise ValueError(f'PROFILE_REQUIRES_VERIFIED_WEAPON {req}')
+    if not req and weapon != (0, 0):
+        # D60 rule 3: equipment a profile has not verified is a blocker, never a stand-in
+        raise ValueError(f'EQUIPMENT_UNVERIFIED weapon={list(weapon)} for profile {profile_id}')
+    launched = profile.get('launched_actions')
+    if launched is not None:
+        unproven = [a for a in actions if a not in launched]
+        if unproven:
+            raise ValueError(f'ACTION_TRIGGER_NOT_PROVEN {unproven} for profile {profile_id}')
     alpha_static.verify_exe(str(exe))
     oracle = alpha_oracle.load(str(exe), str(sizes))
     c, app = oracle.creature(kind, seed)
-    res = cr.resolve(kind, app, equipment=('weapon',))
+    res = cr.resolve(kind, app, equipment=('weapon',) if req else ())
     manifest = {'format': 'cubegame.alpha_actions/1', 'kind': kind, 'rig': res.family_id,
                 'weapon': list(weapon), 'offhand': [0,0], 'seed_variant': list(seed),
                 'exe_sha256': hashlib.sha256(Path(exe).read_bytes()).hexdigest(),
@@ -176,6 +189,13 @@ def bake_job(job, actions, out, exe=DEFAULT_EXE, sizes=DEFAULT_SIZES, dt_ms=16, 
             manifest['actions'].sort(key=lambda e:e['action'])
             (out / 'actions.json').write_text(json.dumps(manifest, indent=1), encoding='utf8')
             print(f"ACTION {entry['action']} state={entry.get('state')} status={entry['status']} {entry.get('reason','')}", flush=True)
+    if not req:
+        # no equipment in this profile: no weapon layer to check
+        manifest['counts'] = dict(collections.Counter(e['status'] for e in manifest['actions']))
+        manifest['BAKE_RESULT'] = 'PASS' if manifest['counts'].get('EMULATED_ALPHA_CODE', 0) else 'FAIL'
+        (out / 'actions.json').write_text(json.dumps(manifest, indent=1), encoding='utf8')
+        if manifest['BAKE_RESULT'] != 'PASS': raise ValueError('NO_SUPPORTED_ACTIONS')
+        return manifest
     # The separate weapon layer is checked against the same oracle on runtime locomotion inputs.
     c[0x5c] |= 1
     states.equip(c, 0xaa8, *weapon)

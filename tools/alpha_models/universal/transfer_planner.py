@@ -126,7 +126,7 @@ def find_capture(name, sha256, dirs=CAPTURE_DIRS):
 
 
 # Local folders searched for an already baked action library (actions.json) of a profile specimen.
-LIBRARY_DIRS = (SCRATCH / "lifecycle", SCRATCH / "animsys")
+LIBRARY_DIRS = (SCRATCH / "lifecycle", SCRATCH / "animsys", SCRATCH / "s05ba")
 
 
 def find_action_library(entity, dirs=LIBRARY_DIRS):
@@ -184,14 +184,18 @@ def job_for(entity, capture_dirs=CAPTURE_DIRS, library_dirs=LIBRARY_DIRS):
     lib = find_action_library(entity, library_dirs)
     if lib is not None:
         prof = ct.ACTION_PROFILES[entity["channels"]["actions"]["profile"]]
-        weq = dict(prof["specimen_equipment"]["weapon"])
-        if lib["manifest"]["weapon"][1] != weq["subtype"]:
+        spec_weapon = (prof.get("specimen_equipment") or {}).get("weapon")
+        weq = dict(spec_weapon) if spec_weapon else None
+        if weq and lib["manifest"]["weapon"][1] != weq["subtype"]:
             weq = None                       # library baked with another weapon: no model evidence here
-        if weq:
-            job["equipment"] = {"weapon": weq}
+        if weq or (not spec_weapon and list(lib["manifest"].get("weapon", [0, 0])) == [0, 0]):
+            if weq:
+                job["equipment"] = {"weapon": weq}
             job["action_manifest"] = str(lib["path"].relative_to(ROOT)).replace("\\", "/")
             job["clips"] = str(lib["path"].parent.relative_to(ROOT)).replace("\\", "/")
             job["actions_status"] = f"profile {entity['channels']['actions']['profile']} (local library)"
+            if prof.get("trigger") == "creature_ai":
+                job["include_family_clips"] = True
     return job
 
 

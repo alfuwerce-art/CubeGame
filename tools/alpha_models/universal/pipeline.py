@@ -204,14 +204,33 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
     if manifest_path:
         manifest = json.loads(Path(manifest_path).read_text(encoding='utf8'))
         if (manifest.get('BAKE_RESULT') != 'PASS' or manifest.get('kind') != kind or manifest.get('rig') != res.family_id
-                or manifest.get('weapon') != [3, subtype] or manifest.get('offhand') != [0, 0]
-                or manifest.get('seed_variant') != list(seed)):
+                or manifest.get('weapon') != ([3, subtype] if weapon else [0, 0]) or manifest.get('offhand') != [0, 0]
+                or manifest.get('seed_variant') != list(seed)
+                # libraries baked before profiles existed carry no 'profile'; creature-AI
+                # libraries must name theirs
+                or (acts.get('profile') and manifest.get('profile', acts['profile']) != acts['profile'])
+                or (ct.ACTION_PROFILES.get(acts.get('profile') or '', {}).get('trigger') == 'creature_ai'
+                    and manifest.get('profile') != acts['profile'])):
             problems.append('ACTION_MANIFEST_CONTEXT_MISMATCH')
         else:
             approved_actions = {e['clip']: e for e in manifest['actions'] if e['status'] == 'EMULATED_ALPHA_CODE'}
+            # creature-AI profiles: only actions whose launch was proven for THIS specimen (D60)
+            prof = ct.ACTION_PROFILES.get(acts.get('profile') or '', {})
+            if prof.get('trigger') == 'creature_ai':
+                launched = prof.get('launched_actions') or {}
+                for n in [n for n, e in approved_actions.items() if e['action'] not in launched]:
+                    problems.append(f'ACTION_TRIGGER_NOT_PROVEN {n}')
+                    del approved_actions[n]
         if not approved_actions:
             problems.append('ACTION_MANIFEST_HAS_NO_SUPPORTED_ACTIONS')
-    for path in sorted(glob.glob(os.path.join(clips_dir, "*.alphaclip.json"))):
+    clip_paths = sorted(glob.glob(os.path.join(clips_dir, "*.alphaclip.json")))
+    if job.get("include_family_clips") and job.get("clips"):
+        # creature-AI action library + the family's captured walk/idle clips (names never overlap)
+        own = {os.path.basename(x) for x in clip_paths}
+        clip_paths += [x for x in sorted(glob.glob(os.path.join(family_dir(clips_root, res.family_id),
+                                                                "*.alphaclip.json")))
+                       if os.path.basename(x) not in own]
+    for path in clip_paths:
         clip = json.load(open(path, encoding="utf-8"))
         if clip.get("rig") != res.family_id:
             skipped.append(f"{os.path.basename(path)} rig={clip.get('rig')}")
@@ -248,7 +267,9 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
         (data_dir / 'actions.json').write_text(json.dumps({'requiredClips': ordered,
             'blockedActions': [e for e in manifest['actions'] if e['status'] == 'BLOCKED']}), encoding='utf8')
         ref=Path(manifest_path).parent/'weapon_reference.json'
-        if not ref.exists() or manifest.get('weapon_reference_sha256')!=hashlib.sha256(ref.read_bytes()).hexdigest():
+        if not weapon:
+            if (data_dir/'weapon_reference.json').exists(): (data_dir/'weapon_reference.json').unlink()
+        elif not ref.exists() or manifest.get('weapon_reference_sha256')!=hashlib.sha256(ref.read_bytes()).hexdigest():
             problems.append('WEAPON_REFERENCE_MISSING_OR_HASH_MISMATCH')
         else:
             (data_dir/'weapon_reference.json').write_bytes(ref.read_bytes())

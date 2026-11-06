@@ -121,6 +121,32 @@ ACTION_PROFILES = {
         "authorization": "D51/D57 (one humanoid, S05A-2)",
         "evidence": "docs/research/alpha2013/ALPHA_ACTION_LIFECYCLE.md",
     },
+    # S05B-A / D60, step A1. Trigger proven by EXECUTING the attack-choice region of the combat AI
+    # tick (ai_trigger.py) on this kind's own appearance; poses by the drawModel oracle. Valid for
+    # this specimen only: kinds of the same family need their own trigger evidence (D60 rule 2).
+    "alpha_actions/creature_ai_cat_0x1e": {
+        "status": "EMULATED_ALPHA_CODE",
+        "specimens": [{"kind": 0x1E, "seed_variant": [0, 0]}],
+        "evidence_families": ["alpha_creature/ced63e5e96"],
+        "trigger": "creature_ai",
+        "trigger_scope": "CombatBehavior::vfunc_0 attack choice 0x42D87F..0x42EAEF executed: appearance "
+                         "flags 0x0031 -> flag-0x10 branch 0x42E288 -> action 75 at 0x42E2BF once the "
+                         "action timer exceeds combat_getAttackTiming; target/world gates PARTIAL",
+        "requires_parts": [],
+        "equipment": {},
+        "specimen_equipment": {},
+        "categories": ["MOTION"],
+        "primary_chain": [75],
+        # action -> VA of the AI instruction that writes it for this specimen (ai_trigger evidence)
+        "launched_actions": {75: 0x42E2BF},
+        "grip_checked_actions": [],
+        "dynamic_part_actions": [],
+        "blocked_examples": {},
+        # live Alpha capture of this specimen's launched actions (D60 rule 1; never a provenance)
+        "live_check": "NOT_CAPTURED",
+        "authorization": "D60 (S05B-A part A, step A1)",
+        "evidence": "docs/research/alpha2013/NPC_ACTION_TRIGGERS.md",
+    },
 }
 # Trigger domains. Only player_input of the specimen above is evidenced. Creature AI launches of
 # non-player kinds are an explicit open domain: they must never default to the humanoid rules.
