@@ -7,7 +7,7 @@
 1. `docs/ACTIVE_STAGE.md` — только здесь указано, что разрешено делать сейчас.
 2. `docs/planning/DECISIONS_001-036.md` + новые решения `docs/decisions/`, особенно **D41** (актуальнее D40).
 3. `docs/architecture/ADR-0001-modular-monolith.md` — утверждён принцип, не вся архитектура.
-4. [GDD — раздел 1 ACCEPTED по D59](docs/game-design/GDD_DRAFT.md) и [D59](docs/decisions/D59-gdd-concept-approved.md): использовать утверждённую концепцию как ориентир; **весь GDD ещё не принят**, черновые разделы не являются разрешением на новые механики.
+4. [GDD: концепция D59 + сюжетный каркас D60](docs/game-design/GDD_DRAFT.md), [D59](docs/decisions/D59-gdd-concept-approved.md), [D60](docs/decisions/D60-overseas-kingdom-campaign.md): учитывать утверждённую свободу игрока, боевой приоритет и четырёхактную кампанию, **но не реализовывать** неподтверждённые осады/флот/рабство/NPC без отдельного этапа. GDD целиком не принят.
 5. ТЗ активного этапа в `docs/stages/`.
 6. `docs/planning/ARCHITECTURE_PROPOSAL.md`, `ROADMAP_DRAFT.md`, `WORKFLOW_PROTOCOL_DRAFT.md` — **черновики**, не самостоятельные разрешения на новые решения.
 7. `docs/agents/MULTI_AGENT_WORKFLOW.md` — протокол совместной работы Claude Code и DeepSeek Harness (единая директория, порядок последовательной передачи, Git/ревью).
