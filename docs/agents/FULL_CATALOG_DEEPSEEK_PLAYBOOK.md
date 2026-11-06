@@ -1,6 +1,6 @@
 # Методичка DeepSeek: массовый перенос ВСЕГО каталога Alpha → Unity (D63 по методу D64)
 
-**Статус:** `READY_FOR_REVIEW` (Claude Code, 2026-11-06). **Запускать только после утверждения продюсером результата D64.**
+**Статус:** результат D64 **утверждён продюсером** — [D65](../decisions/D65-d64-result-approved-deepseek-full-catalog-run.md) (2026-11-06). Запуск разрешён; база `claude/s05b2-full-catalog-research` @ `b3bc102`.
 Отчёт-основание: [S05B2_CLAUDE_FULL_RESEARCH_REPORT](../reports/S05B2_CLAUDE_FULL_RESEARCH_REPORT.md).
 Код: [tools/alpha_models/catalog](../../tools/alpha_models/catalog/README.md) + существующий универсальный конвейер.
 
