@@ -1,6 +1,6 @@
 # S05B-A — восстановление и перенос анимаций действий NPC (план)
 
-**Статус: `DRAFT / NOT_AUTHORIZED`** до утверждения [D60](../decisions/D60-s05ba-npc-actions-authorization.md) (проект, `PROPOSED`). Ред. 2 — внесены 7 уточнений продюсера от 2026-11-06.
+**Статус: `AUTHORIZED` по [D60](../decisions/D60-s05ba-npc-actions-authorization.md)** (утверждено 2026-11-06): часть A — сразу, часть B — после шлюза A→B (§5). Ред. 2 — внесены 7 уточнений продюсера от 2026-11-06.
 **Основание:** [D59](../decisions/D59-s05a2-limited-acceptance-s05b1-authorization.md) (план действий NPC после S05B-1); [отчёт S05B-1](../reports/S05B1_LOCOMOTION_BATCH_REPORT.md) — `READY_FOR_REVIEW`, не принят.
 **Автор:** Claude Code. **Рабочее имя:** S05B-A. Не путать с S05B-2 (ходьба семейств «только по формуле»), который идёт **после** S05B-A.
 
