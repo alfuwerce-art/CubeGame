@@ -7,9 +7,10 @@
 1. `docs/ACTIVE_STAGE.md` — только здесь указано, что разрешено делать сейчас.
 2. `docs/planning/DECISIONS_001-036.md` + новые решения `docs/decisions/`, особенно **D41** (актуальнее D40).
 3. `docs/architecture/ADR-0001-modular-monolith.md` — утверждён принцип, не вся архитектура.
-4. ТЗ активного этапа в `docs/stages/`.
-5. `docs/planning/ARCHITECTURE_PROPOSAL.md`, `ROADMAP_DRAFT.md`, `WORKFLOW_PROTOCOL_DRAFT.md` — **черновики**, не самостоятельные разрешения на новые решения.
-6. `docs/agents/MULTI_AGENT_WORKFLOW.md` — протокол совместной работы Claude Code и DeepSeek Harness (единая директория, порядок последовательной передачи, Git/ревью).
+4. [GDD — раздел 1 ACCEPTED по D59](docs/game-design/GDD_DRAFT.md) и [D59](docs/decisions/D59-gdd-concept-approved.md): использовать утверждённую концепцию как ориентир; **весь GDD ещё не принят**, черновые разделы не являются разрешением на новые механики.
+5. ТЗ активного этапа в `docs/stages/`.
+6. `docs/planning/ARCHITECTURE_PROPOSAL.md`, `ROADMAP_DRAFT.md`, `WORKFLOW_PROTOCOL_DRAFT.md` — **черновики**, не самостоятельные разрешения на новые решения.
+7. `docs/agents/MULTI_AGENT_WORKFLOW.md` — протокол совместной работы Claude Code и DeepSeek Harness (единая директория, порядок последовательной передачи, Git/ревью).
 
 ## Роли
 - Продюсер: утверждает геймплей, визуал, содержание и начало этапа.

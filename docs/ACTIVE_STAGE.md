@@ -1,5 +1,7 @@
 # CubeGame — ACTIVE_STAGE
 
+**Решение по GDD от 2026-11-06:** [D59](decisions/D59-gdd-concept-approved.md) — утверждены концепция и философия, раздел 1 [GDD](game-design/GDD_DRAFT.md), а также направление M0 → M1 → M2 → M3 как стратегическая последовательность. **GDD ещё не утверждён целиком**; следующий раздел на обсуждение — игровой цикл. Это документационное решение **не меняет** `S05A-2 — IN_PROGRESS / REVIEW OPEN` и `S05B — NOT_AUTHORIZED`.
+
 **Актуализация 2026-11-06 — продолжение Claude, Codex: `READY_FOR_REVIEW`.** Ветка `codex/s05a2-claude-continuation` от `3d4a2fb` (включает `43a1ba6`), по прямому поручению продюсера. Автоматический oracle-baking и полный контроллер: 93 action ID (60 drawModel states) `EMULATED_ALPHA_CODE`, 8 `BLOCKED`; Python 178 PASS, EditMode 29/29, PlayMode всех 93 действий при 30/60/120 Гц — PASS (16 975 / 33 837 / 67 420 кадров), ошибки поз и стыков 0. Полный независимый replay 3115 живых кадров — PASS, max_abs 0; исправлен вход камеры, порог не ослаблялся. Слой оружия, реальный хват и конечная рукоять проверены; ядро формулы тела сохранено. Переходы пилота имеют статус `UNITY_TRANSITION`, не извлечённые Alpha-переходы. [Отчёт](reports/S05A2_CLAUDE_CONTINUATION_REPORT.md), [методичка](agents/ANIMATION_SYSTEM_PLAYBOOK.md). **S05A-2 — IN_PROGRESS / REVIEW OPEN, не ACCEPTED; S05B NOT_AUTHORIZED.** История ниже сохраняется.
 
 **Дата решения:** 2026-11-04. **Межчатовая память:** [PROJECT_MEMORY.md](../PROJECT_MEMORY.md). **Рабочее название:** CubeGame (имя игры не утверждено).
