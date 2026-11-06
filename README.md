@@ -1,18 +1,32 @@
 # CubeGame
 
-Рабочее название проекта; финальное название игры не утверждено.
+**Рабочее название** проекта на Unity 6000.3.27f2 LTS. Референс — Cube World Alpha 2013; первый производственный фокус — максимально близкое воспроизведение Alpha, затем расширение до собственной voxel action RPG. **Это не финальное название и не опубликованная игра.**
 
-- [AGENTS.md](AGENTS.md) — правила для AI-исполнителей.
-- [Текущий этап](docs/ACTIVE_STAGE.md) — статус работ и следующий шаг.
-- [36 утверждённых решений](docs/planning/DECISIONS_001-036.md).
-- [DeepSeek Harness — настройка](docs/agents/DEEPSEEK_HARNESS_SETUP.md).
-- [DeepSeek Harness — статус](docs/agents/DEEPSEEK_SETUP_STATUS.md) — локальный пресет установлен; Unity отсутствует, S00-G0 ещё не завершён.
-- [Задача S00-G0](docs/stages/S00_G0_DEEPSEEK_TASK.md).
-- [Архитектурный ADR-0001](docs/architecture/ADR-0001-modular-monolith.md).
+## С чего начинать работу
 
-Сейчас: D40 открыл параллельные S00-R01 (static-first исследование Alpha) и S01-PILOT (минимальный Unity prototype). Для пилота сперва нужна установка Unity; Blender не требуется.
+1. [PROJECT_MEMORY.md](PROJECT_MEMORY.md) — межчатовая память и текущие подтверждённые решения.
+2. [docs/ACTIVE_STAGE.md](docs/ACTIVE_STAGE.md) — **единственный актуальный статус и техническое разрешение**. Последнее документированное направление: S05A-2 IN_PROGRESS / REVIEW OPEN; S05B NOT_AUTHORIZED; проверяйте по самому файлу.
+3. [AGENTS.md](AGENTS.md) — **единые правила для Claude, DeepSeek, Codex и ChatGPT**. [CLAUDE.md](CLAUDE.md) — короткий загрузчик этих правил.
+4. [GDD](docs/game-design/GDD_DRAFT.md) — игровая концепция, принятые D59–D66, открытые механики.
+5. [Решения D01–D36](docs/planning/DECISIONS_001-036.md) и [поздние Dxx](docs/decisions/) — канон по мере приёмки.
 
-- [D40 — начало параллельного исследования и Unity-пилота](docs/decisions/D40-static-first-unity-pilot.md).
-- [S00-R01: статический анализ](docs/stages/S00_STATIC_R01.md).
-- [S01-PILOT: Unity-прототип](docs/stages/S01_UNITY_PILOT.md).
-- [Следующее задание DeepSeek](docs/stages/NEXT_DEEPSEEK_TASK.md).
+## Пять проектных документов
+
+| Направление | Файл | Статус |
+|---|---|---|
+| **Game Design Document** | [GDD](docs/game-design/GDD_DRAFT.md) + [план завершения](docs/game-design/GDD_COMPLETION_PLAN.md) | GDD частично утверждён; план DRAFT |
+| **Правила ИИ** | [AGENTS.md](AGENTS.md) + [проект объединения](docs/agents/UNIFIED_AGENT_RULES_DRAFT.md) | AGENTS действует; объединение DRAFT |
+| **Пайплайны производства** | [PRODUCTION_PIPELINE_DRAFT](docs/production/PRODUCTION_PIPELINE_DRAFT.md) | DRAFT |
+| **Art Direction** | [ART_DIRECTION_DRAFT](docs/art/ART_DIRECTION_DRAFT.md) | DRAFT |
+| **Управление контекстом** | [SESSION_CONTEXT_PLAN](docs/agents/SESSION_CONTEXT_PLAN.md) | DRAFT |
+
+**ROADMAP**: [ROADMAP_DRAFT](docs/planning/ROADMAP_DRAFT.md) — этапы продукта. **MULTI_AGENT_WORKFLOW**: [действующий протокол](docs/agents/MULTI_AGENT_WORKFLOW.md) — последовательная работа ИИ в одной папке `D:\Projects\CubeGame`.
+
+## Правила статуса
+
+- **DRAFT** — обсуждение/предложение; не авторизует реализацию.
+- **READY_FOR_REVIEW** — исполнитель закончил свой объём, ждёт независимой проверки; не значит ACCEPTED.
+- **ACCEPTED** — продюсер принял решение/результат; **merge в main** только после прямого разрешения.
+- Изучение исходных ассетов Alpha проводится локально; закрытые материалы не публикуются.
+
+Последняя документационная работа — ветка `docs/gdd-first-draft-20261106`, [PR #2](https://github.com/alfuwerce-art/CubeGame/pull/2) (DRAFT, не объединён).
