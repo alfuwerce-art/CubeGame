@@ -26,9 +26,17 @@ namespace CubeGame.AlphaCatalog
         public int loadFlag, solid, markers;
         public bool markerTransparent;
         public int[] size;
+        public int faces;                 // expected visible faces under the Alpha marker rule (Python)
     }
 
-    [Serializable] public class CatalogManifest { public string format; public CatalogModel[] models; }
+    [Serializable] public class CatalogManifest
+    {
+        public string format;
+        public CatalogModel[] models;
+        // models Alpha draws nothing for (all non-marker voxels enclosed by markers): verified in Python
+        // (faces = 0), not imported, reported instead of silently dropped
+        public CatalogModel[] empty_visible;
+    }
 
     [Serializable] public class ImportRecord
     {
@@ -80,7 +88,7 @@ namespace CubeGame.AlphaCatalog
                 foreach (var m in man.models)
                 {
                     if (done.TryGetValue(m.name, out var prev) && prev.verdict == "PASS" && prev.sha256 == m.sha256
-                        && prev.markerTransparent == m.markerTransparent && prev.prefab != null
+                        && prev.markerTransparent == m.markerTransparent && prev.faces == m.faces && prev.prefab != null
                         && File.Exists(Path.Combine(Application.dataPath, "..", prev.prefab)))
                     { records.Add(prev); skipped++; pass++; continue; }
                     var rec = ImportOne(m);
@@ -124,6 +132,7 @@ namespace CubeGame.AlphaCatalog
             if (built.size != want) { rec.verdict = "FAIL"; rec.problem = $"SIZE {built.size} != {want}"; return rec; }
             if (built.solidVoxels != m.solid) { rec.verdict = "FAIL"; rec.problem = $"SOLID {built.solidVoxels} != {m.solid}"; return rec; }
             if (built.markerVoxels != m.markers) { rec.verdict = "FAIL"; rec.problem = $"MARKERS {built.markerVoxels} != {m.markers}"; return rec; }
+            if (built.faces != m.faces) { rec.verdict = "FAIL"; rec.problem = $"FACES {built.faces} != {m.faces}"; return rec; }
             rec.vertices = built.mesh.vertexCount;
             if (rec.vertices != 4 * built.faces) { rec.verdict = "FAIL"; rec.problem = $"VERTICES {rec.vertices} != 4*faces"; return rec; }
 

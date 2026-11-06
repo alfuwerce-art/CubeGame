@@ -7,8 +7,11 @@ parts and equipment is the separate creature pipeline (``transfer_planner``), wh
 geometry.
 
 Manifest record (per model): name, file, sha256 of the blob, route, load flag, markerTransparent
-(= Alpha load flag 0, D61), expected grid size, expected solid and marker voxel counts. The Unity
-importer (``AlphaCatalogImport.cs``) must reproduce size, solid and marker counts exactly.
+(= Alpha load flag 0, D61), expected grid size, expected solid and marker voxel counts and the expected
+number of visible faces under the Alpha marker rule. The Unity importer (``AlphaCatalogImport.cs``) must
+reproduce all of them exactly. A model whose expected faces are 0 (every non-marker voxel enclosed by
+markers of a flag-0 model) is Alpha-invisible: it is listed in ``empty_visible`` with its counts and is not
+imported — the same treatment as ``absent`` (ALPHA_EMPTY_MODEL), never a converter failure.
 
 Resume: a model whose blob SHA256 and export record are unchanged is not rewritten; ``--select``
 limits the export (route list, name glob, or ``sample`` = one model per route for the
@@ -37,12 +40,20 @@ FORMAT = "cubegame.alpha_catalog_manifest/1"
 
 
 def counts(dec, marker_transparent):
+    """Expected Unity mesh numbers of one decoded payload under the Alpha rule (D61).
+
+    ``faces`` is the number of faces ``VoxelMesh.Build`` must emit: a face exists only when the
+    neighbour cell is empty (0,0,0) or outside the grid; marker voxels are filled for that test, so a
+    solid voxel enclosed by markers has no face — exactly as in Alpha. ``faces == 0`` means Alpha draws
+    nothing for this model (it is not a converter failure).
+    """
     m = parse_decoded(dec)
     px = m.pixels
     cols = collections.Counter(zip(px[0::3], px[1::3], px[2::3]))
     filled = sum(n for c, n in cols.items() if c != (0, 0, 0))
     markers = sum(cols.get(c, 0) for c in vm.MARKERS) if marker_transparent else 0
-    return [m.width, m.depth, m.height], filled - markers, markers
+    faces = vm.mesh_stats(dec, strict=not marker_transparent)["faces"]
+    return [m.width, m.depth, m.height], filled - markers, markers, faces
 
 
 def select(models, sel):
@@ -73,7 +84,7 @@ def export(project, catalog=DEFAULT_CATALOG, db=DEFAULT_DB, sel=None):
     if man_path.exists():
         old = {r["name"]: r for r in json.loads(man_path.read_text(encoding="utf-8")).get("models", [])}
     con = sqlite3.connect(f"file:{db}?mode=ro&immutable=1", uri=True)
-    recs, written, skipped, absent = [], 0, 0, []
+    recs, written, skipped, absent, empty_visible = [], 0, 0, [], []
     for n in select(cat["models"], sel):
         m = cat["models"][n]
         if not m.get("in_db"):
@@ -83,7 +94,8 @@ def export(project, catalog=DEFAULT_CATALOG, db=DEFAULT_DB, sel=None):
         transparent = flag == 0
         f = data / "models" / (n.replace("/", "_") + "dec")         # x.cub -> x.cubdec
         prev = old.get(n)
-        if prev and prev["sha256"] == m["blob_sha256"] and prev["markerTransparent"] == transparent and f.exists():
+        if prev and prev["sha256"] == m["blob_sha256"] and prev["markerTransparent"] == transparent \
+                and "faces" in prev and f.exists():
             recs.append(prev)
             skipped += 1
             continue
@@ -91,17 +103,26 @@ def export(project, catalog=DEFAULT_CATALOG, db=DEFAULT_DB, sel=None):
         if hashlib.sha256(blob).hexdigest() != m["blob_sha256"]:
             raise SystemExit(f"DB_DRIFT {n}: blob differs from the catalog (rebuild the catalog)")
         dec = deobfuscate(blob)
-        size, solid, markers = counts(dec, transparent)
+        size, solid, markers, faces = counts(dec, transparent)
+        if faces == 0:
+            # verified Alpha-empty geometry: every non-marker voxel is enclosed by marker voxels of a
+            # flag-0 model, so Alpha's mesher emits no face. Nothing to create in Unity — recorded, not
+            # imported, never silently dropped (same treatment as ALPHA_EMPTY_MODEL).
+            empty_visible.append({"name": n, "route": m["route"], "sha256": m["blob_sha256"],
+                                  "loadFlag": -1 if flag is None else flag, "size": size, "solid": solid,
+                                  "markers": markers, "faces": 0,
+                                  "reason": "ALPHA_VISIBLE_EMPTY_BY_MARKER_RULE (Alpha draws 0 faces)"})
+            continue
         f.write_bytes(dec)
         recs.append({"name": n, "file": f"models/{f.name}", "sha256": m["blob_sha256"], "route": m["route"],
                      "loadFlag": -1 if flag is None else flag, "markerTransparent": transparent,
-                     "size": size, "solid": solid, "markers": markers})
+                     "size": size, "solid": solid, "markers": markers, "faces": faces})
         written += 1
     man = {"format": FORMAT, "catalog_db_sha256": cat["db_sha256"], "selection": sel or "all", "models": recs,
-           "absent": absent}
+           "absent": absent, "empty_visible": empty_visible}
     man_path.write_text(json.dumps(man, indent=1), encoding="utf-8")
     return {"STATIC_EXPORT": "DONE", "models": len(recs), "written": written, "unchanged": skipped,
-            "absent_in_db": len(absent), "manifest": str(man_path)}
+            "absent_in_db": len(absent), "empty_visible": len(empty_visible), "manifest": str(man_path)}
 
 
 def main(argv=None):

@@ -158,12 +158,32 @@ class StaticExportTests(unittest.TestCase):
         from tools.alpha_models.universal import voxel_markers as vm
         con = sqlite3.connect(f"file:{DB}?mode=ro&immutable=1", uri=True)
         dec = deobfuscate(con.execute("select value from blobs where key='dark-troll-eyes.cub'").fetchone()[0])
-        size, solid, markers = se.counts(dec, True)
+        size, solid, markers, faces = se.counts(dec, True)
         self.assertGreater(markers, 0)
         ms = vm.mesh_stats(dec, strict=False)
         self.assertEqual(ms["hidden_voxels"], markers)
-        _, solid1, markers1 = se.counts(dec, False)
+        self.assertEqual(faces, ms["faces"])
+        self.assertGreater(faces, 0)
+        _, solid1, markers1, faces1 = se.counts(dec, False)
         self.assertEqual((solid1, markers1), (solid + markers, 0))
+        self.assertNotEqual(faces1, 0)
+
+    def test_alpha_invisible_model_has_zero_expected_faces(self):
+        """D65 mass run: a flag-0 hair model whose non-marker voxels are enclosed by markers draws 0 faces
+        in Alpha (verified here on the original bytes); the exporter must classify it as empty_visible, not
+        as a converter failure — and a normal model must keep expected faces > 0."""
+        import sqlite3
+        from tools.alpha_models.catalog import static_export as se
+        from tools.alpha_models.cub_format import deobfuscate
+        from tools.alpha_models.universal import voxel_markers as vm
+        con = sqlite3.connect(f"file:{DB}?mode=ro&immutable=1", uri=True)
+        dec = deobfuscate(con.execute("select value from blobs where key='undead-hair-m01.cub'").fetchone()[0])
+        size, solid, markers, faces = se.counts(dec, True)
+        self.assertGreater(solid, 0)                    # it has non-marker voxels ...
+        self.assertGreater(markers, 0)                  # ... and markers
+        self.assertEqual(faces, 0)                      # ... but Alpha emits no face
+        self.assertEqual(vm.mesh_stats(dec, strict=False)["faces"], 0)   # second implementation agrees
+        self.assertGreater(se.counts(dec, False)[3], 0)  # without the rule (flag 1) it would be visible
 
 
 if __name__ == "__main__":

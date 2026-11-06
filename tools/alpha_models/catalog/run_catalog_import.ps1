@@ -58,6 +58,11 @@ $p = Start-Process -FilePath $Unity -ArgumentList $ua -Wait -PassThru -WindowSty
 $exit = [int]$p.ExitCode
 
 # 4. verdict: marker AND exit code
+$manPath = Join-Path $Project 'Assets\AlphaCatalog\Data\manifest.json'
+if (Test-Path -LiteralPath $manPath) {
+  $man = Get-Content -Raw -LiteralPath $manPath | ConvertFrom-Json
+  Write-Output ("  MANIFEST models={0} absent_in_db={1} empty_visible={2}" -f @($man.models).Count, @($man.absent).Count, @($man.empty_visible).Count)
+}
 $problems = @()
 if ($exit -ne 0) { $problems += "UNITY_EXIT_CODE=$exit (expected 0)" }
 if (-not (Test-Path -LiteralPath $marker)) { $problems += "MARKER_FILE_MISSING $marker" }
