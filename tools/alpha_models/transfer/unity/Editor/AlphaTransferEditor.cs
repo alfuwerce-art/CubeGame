@@ -76,7 +76,13 @@ namespace CubeGame.AlphaTransfer.Editor
                 var ps = spec.parts[i];
                 var bytes = File.ReadAllBytes(Path.Combine(DataDir, ps.file));
                 var built = VoxelMesh.Build(bytes, ps.name + "_" + Path.GetFileNameWithoutExtension(ps.model), ps.markerTransparent);
-                if (built.problem != null) problems.Add($"MESH {ps.name}: {built.problem}");
+                // D65: a part whose non-marker voxels are all enclosed by marker voxels of a flag-0 model has
+                // 0 visible faces in Alpha itself (expectedVertices == 0, computed independently in Python by
+                // the same rule). It stays in the rig (anchor math unchanged) and is drawn as nothing — that
+                // is the faithful result, reported below, not a mesher failure. Every other empty part is an
+                // error: a part Alpha draws must never come out empty here.
+                bool alphaEmptyPart = built.problem == "NO_VISIBLE_FACES" && ps.expectedVertices == 0;
+                if (built.problem != null && !alphaEmptyPart) problems.Add($"MESH {ps.name}: {built.problem}");
                 if (built.size != new Vector3Int(ps.size[0], ps.size[1], ps.size[2]))
                     problems.Add($"MESH_SIZE {ps.name} {built.size} != spec");
                 if (built.mesh != null)
@@ -148,6 +154,8 @@ namespace CubeGame.AlphaTransfer.Editor
                     vertexCounts.TryGetValue(ps.name, out int v);
                     bool ok = v == ps.expectedVertices;
                     report.AppendLine($"GEOMETRY {ps.name} model={ps.model} size={ps.size[0]}x{ps.size[1]}x{ps.size[2]} vertices={v} expected={ps.expectedVertices} {(ok ? "OK" : "MISMATCH")}");
+                    if (ps.expectedVertices == 0)
+                        report.AppendLine($"  NOTE {ps.name} is Alpha-invisible (0 faces by the marker rule): drawn as nothing, rig slot kept");
                     if (!ok) problems.Add($"GEOMETRY_MISMATCH {ps.name} {v} != {ps.expectedVertices}");
                 }
 

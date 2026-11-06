@@ -186,5 +186,35 @@ class StaticExportTests(unittest.TestCase):
         self.assertGreater(se.counts(dec, False)[3], 0)  # without the rule (flag 1) it would be visible
 
 
+class ReportTablesTests(unittest.TestCase):
+    """D65: the two manifests of the mass run are generated from local artifacts, metadata only."""
+
+    def test_model_manifest_counts_every_route(self):
+        from tools.alpha_models.catalog import report_tables as rt
+        cat = ROOT / ".scratch/catalog/asset_catalog.json"
+        if not cat.exists():
+            self.skipTest("catalog not built")
+        md = rt.model_manifest()
+        self.assertIn("| Маршрут | Моделей |", md)
+        for route in ("CREATURE_PART", "EQUIPMENT_ATTACH", "EQUIPMENT_SWAP", "ITEM_STATIC",
+                      "MISSING_IN_DB"):
+            self.assertIn(f"| {route} |", md)
+        self.assertIn("**Всего**", md)
+
+    def test_animation_manifest_row_per_kind(self):
+        from tools.alpha_models.catalog import report_tables as rt
+        plan = {"entities": [
+            {"kind": "0x90", "name_hint": "Synthetic", "family_id": "alpha_creature/x",
+             "parts": [{"name": "body"}], "channels": {
+                 "walk": {"sources": ["RECONSTRUCTED_FROM_EVIDENCE"]},
+                 "idle": {"sources": ["RECONSTRUCTED_FROM_EVIDENCE"]},
+                 "actions": {"status": "BLOCKED", "reasons": ["NO_VERIFIED_ACTION_TRIGGER: x"]},
+                 "equipment": {"weapon": {"status": "NONE"}}}}]}
+        md = rt.animation_manifest(plan)
+        self.assertIn("| Вид | Имя |", md)
+        self.assertIn("| 0x90 | Synthetic | x | 1 |", md)
+        self.assertIn("BLOCKED", md)
+
+
 if __name__ == "__main__":
     unittest.main()
