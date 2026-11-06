@@ -26,7 +26,7 @@
 ```powershell
 python -m tools.alpha_models.universal.pipeline scan --out .scratch/universal/static/alpha_static.json
 python -m tools.alpha_models.catalog.asset_catalog                       # + alpha_static, item_models, registry_sizes
-python -m tools.alpha_models.catalog.trigger_catalog --out .scratch/catalog/trigger_catalog.json   # ~2 ч, 10 процессов
+python -m tools.alpha_models.catalog.trigger_catalog --out .scratch/catalog/trigger_catalog.json   # ~3–4 ч, 10 процессов
 python -m tools.alpha_models.catalog.trigger_catalog export
 python -m tools.alpha_models.catalog.walk_oracle                          # ~25 мин, 2 процесса
 python -m tools.alpha_models.catalog.anim_catalog --out .scratch/catalog/anim_catalog.json

@@ -58,6 +58,42 @@ KNOWN_KIND_BRANCHES = {              # kind compares inside the region (address 
 }
 
 
+# D64: MSVCR110 ``operator new`` (thunk 0x68D668 -> IAT 0x6FC3EC). Golems, Mammoth, RuneGiant, Saurian and
+# Rockling allocate an object (thrown projectile) in their attack branch. Executed as a real allocation from
+# a dedicated zeroed region (bump allocator, 16-byte aligned); the AI code then fills it itself.
+OPERATOR_NEW_THUNK = 0x68D668
+ALLOC_BASE, ALLOC_SIZE = de.HEAP_BASE + 0x40000, 0x40000
+
+
+OPERATOR_DELETE_THUNK = 0x68D66E      # MSVCR110 operator delete (IAT 0x6FC3F0)
+MEMMOVE_IAT = 0x6FC3F4                # MSVCR110 memmove, called directly through the IAT (vector growth)
+
+
+def _memmove_stub(cpu):
+    """memmove(dst, src, n) — exact semantics (overlap-safe), returns dst."""
+    dst, src, n = (cpu.mem.u(cpu.r["esp"] + 4 * i, 4) for i in (1, 2, 3))
+    if n > 0x100000:
+        raise RegionStop(f"MEMMOVE_SIZE {n}")
+    if n:
+        cpu.mem.write(dst, cpu.mem.read(src, n))
+    cpu.r["eax"] = dst
+
+
+def _new_stub():
+    state = {"next": ALLOC_BASE}
+
+    def stub(cpu):
+        size = cpu.mem.u(cpu.r["esp"] + 4, 4)
+        if not 0 < size <= 0x10000 or state["next"] + size > ALLOC_BASE + ALLOC_SIZE:
+            raise RegionStop(f"OPERATOR_NEW_SIZE {size}")
+        if not getattr(cpu, "_alloc_mapped", False):
+            cpu.mem.map(ALLOC_BASE, ALLOC_SIZE)
+            cpu._alloc_mapped = True
+        cpu.r["eax"] = state["next"]
+        state["next"] = (state["next"] + size + 15) & ~15
+    return stub
+
+
 class RegionStop(Exception):
     pass
 
@@ -81,12 +117,15 @@ def _ability_stub(answer, log):
 
 
 def run_region(image, creature, *, dist2, resource, rand_seq=(1,) * 8, ability=None, counter=0,
-               prior_action=0, timer=1_000_000, target_size=None, cooldowns=(), max_steps=400_000):
+               prior_action=0, timer=1_000_000, target_size=None, cooldowns=(), max_steps=400_000, delta_ms=16):
     """Execute the region once. Returns {"action", "writes": [(va, value)], "abilities", "error"}."""
     rand_target = image.u32(RAND_IAT)
     abilities = []
     stubs = dict(de.LIBM_STUBS)
     stubs[rand_target] = (_rand_stub(rand_seq), 0)
+    stubs[OPERATOR_NEW_THUNK] = (_new_stub(), 0)
+    stubs[image.u32(MEMMOVE_IAT)] = (_memmove_stub, 0)      # `call [IAT]` lands on the unbound IAT value
+    stubs[OPERATOR_DELETE_THUNK] = (lambda cpu: None, 0)     # free: the emulator never reuses memory
     if ability is not None:
         stubs[ABILITY_IS_USABLE] = (_ability_stub(ability, abilities), 4)
     cpu = de.EmuCPU(image, stubs=stubs, max_steps=max_steps)
@@ -132,6 +171,12 @@ def run_region(image, creature, *, dist2, resource, rand_seq=(1,) * 8, ability=N
     cpu.mem.write(esp + F_PTR_2C, struct.pack("<I", MISC + 0x1000))
     cpu.mem.write(esp + F_PTR_30, struct.pack("<I", MISC + 0x1800))
     cpu.r["esp"] = esp
+    # D64: vfunc_0's frame pointer; [ebp+0x10] = 3rd argument (frame time, ms), read after a mage spell
+    # (actions 30..33) is chosen (0x42DDE2). A world input like the others: explicit, default 16 ms.
+    ebp = de.STACK_BASE + 0x90000
+    cpu.r["ebp"] = ebp
+    cpu.mem.write(ebp + 0x10, struct.pack("<i", delta_ms))
+    cpu.mem.write(ebp + 0x08, struct.pack("<I", de.HEAP_BASE))
     cpu.r["edi"] = de.HEAP_BASE
     cpu.r["ecx"] = de.HEAP_BASE          # thiscall callees at the dispatch use ecx = creature
     cpu.r["esi"] = de.HEAP_BASE + 0x10

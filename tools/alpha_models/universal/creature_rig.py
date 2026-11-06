@@ -117,7 +117,10 @@ EQUIPMENT_BLOCKS = {"weapon": ("weapon",), "offhand": ("offhand_a",),
 # item depends on its subtype. Every subtype 0..25 was executed; all are "center" except these.
 EQUIPMENT_ANCHOR_BY_SUBTYPE = {
     "weapon": {12: "tail"},                                     # bracelet: (sx/2, sy, sz/2)
-    "offhand_b": {4: "center", 12: "tail", 20: "pet"},         # fist / bracelet / torch
+    "offhand_b": {4: "center", 12: "tail", 20: "pet",          # fist / bracelet / torch
+                  # empty off-hand: drawModel state 71 (golem throw, action 108) draws the held rock
+                  # (iron-deposit.cub) here; anchor centre by anchor_probe on 0x6f (D64)
+                  0: "center"},
 }
 
 

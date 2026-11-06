@@ -22,7 +22,7 @@ python -m unittest discover -s tools/alpha_models/tests -t .     # ожидан�
 python -m tools.alpha_models.universal.pipeline scan --out .scratch/universal/static/alpha_static.json
 # 2. реестр ассетов (+ alpha_static/item_models/registry_sizes в .scratch/catalog, если их нет)
 python -m tools.alpha_models.catalog.asset_catalog
-# 3. триггеры ИИ всех видов (~2 ч на 10 процессах) и экспорт доказательств
+# 3. триггеры ИИ всех видов (~3–4 ч на 10 процессах) и экспорт доказательств; ожидание: 155 CONDITIONAL + 1 PARTIAL (0x76)
 python -m tools.alpha_models.catalog.trigger_catalog --out .scratch/catalog/trigger_catalog.json
 python -m tools.alpha_models.catalog.trigger_catalog export
 # 4. ходьба против оракула — уже в Git (156/156); пересчитывать только если менялся param_walk/drawmodel_emu

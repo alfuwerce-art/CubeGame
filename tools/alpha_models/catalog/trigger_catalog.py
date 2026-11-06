@@ -283,5 +283,87 @@ def export_main(argv=None):
     return 0
 
 
+
+
+# --------------------------------------------------------------------------- patch one weapon (D64)
+def patch_weapon(catalog, weapon, kinds=None, workers=10, exe=DEFAULT_EXE):
+    """Re-execute only the conditions with ``weapon`` (after an executor fix that affected only them) and
+    merge them into an existing catalog: that weapon is removed from every action block, then the new
+    launches are added. Errors that came only from those conditions are dropped; others are kept."""
+    weapon = tuple(weapon)
+    conds = [c for c in conditions() if c[2] == weapon]
+    keys = kinds or list(catalog["kinds"])
+    chunks = [(str(exe), keys[i::workers], conds) for i in range(workers)]
+    with ProcessPoolExecutor(workers) as ex:
+        res = {}
+        for part in ex.map(_patch_worker, chunks):
+            res.update(part)
+    n_all = len(conditions())
+    for k, (by_cond, errors) in res.items():
+        rec = catalog["kinds"][k]
+        acts = rec.get("actions") or {}
+        for a, e in list(acts.items()):
+            blocks = []
+            for b in e["conditions"]:
+                ws = [list(w) for w in WEAPONS] if b["weapons"] == "all_swept" else b["weapons"]
+                ws = [w for w in ws if tuple(w) != weapon]
+                if ws:
+                    blocks.append({**b, "weapons": ws})
+            e["conditions"] = blocks
+        for cond, launched in by_cond.items():
+            for a, vas in launched.items():
+                e = acts.setdefault(str(a), {"write_vas": [], "unconditional": False, "condition_count": 0, "conditions": []})
+                e["write_vas"] = sorted(set(e["write_vas"]) | {f"0x{v:06X}" for v in vas})
+                e["conditions"].append({"class_spec": [[cond[0], cond[1]]], "weapons": [list(weapon)], "offhands": [list(cond[3])]})
+        for a, e in list(acts.items()):
+            cnt = sum(len(b["class_spec"]) * len(b["weapons"]) * len(b["offhands"]) for b in e["conditions"])
+            e["condition_count"], e["unconditional"] = cnt, cnt == n_all
+            if not e["conditions"]:
+                del acts[a]
+        rec["actions"] = dict(sorted(acts.items(), key=lambda x: int(x[0])))
+        rec["errors"] = sorted(errors)
+        rec["patched_weapon"] = list(weapon)
+        rec["status"] = "PARTIAL" if errors else ("TRIGGER_EMULATED_CONDITIONAL" if acts else "NO_AI_ATTACK")
+    counts = {}
+    for r in catalog["kinds"].values():
+        counts[r["status"]] = counts.get(r["status"], 0) + 1
+    catalog["metrics"] = {"kinds": len(catalog["kinds"]), "by_status": counts}
+    return catalog
+
+
+def _patch_worker(args):
+    exe, kinds, conds = args
+    image = pe_bytes.load(exe)
+    out = {}
+    for k in kinds:
+        c0 = base_creature(image, int(k, 16))
+        by_cond, errors = {}, set()
+        for cls, spec, wpn, off in conds:
+            c = bytearray(c0)
+            c[0x140], c[0x141] = cls, spec
+            an.equip(c, 0xAA8, *wpn)
+            an.equip(c, 0x990, *off)
+            acts, err = launch_set(image, c)
+            errors.update(err)
+            by_cond[(cls, spec, wpn, off)] = acts
+        out[k] = (by_cond, errors)
+    return out
+
+
+def patch_main(argv=None):
+    ap = argparse.ArgumentParser(description="re-execute one weapon's conditions and merge into a catalog")
+    ap.add_argument("--catalog", default=str(ROOT / ".scratch/catalog/trigger_catalog.json"))
+    ap.add_argument("--weapon", default="3,10")
+    ap.add_argument("--workers", type=int, default=10)
+    a = ap.parse_args(argv)
+    cat = json.loads(Path(a.catalog).read_text(encoding="utf-8"))
+    cat = patch_weapon(cat, [int(x) for x in a.weapon.split(",")], workers=a.workers)
+    Path(a.catalog).write_text(json.dumps(cat, indent=1), encoding="utf-8")
+    print(json.dumps({"TRIGGER_CATALOG_PATCH": "DONE", **cat["metrics"]}))
+    return 0
+
+
 if __name__ == "__main__":
-    sys.exit(export_main(sys.argv[2:]) if len(sys.argv) > 1 and sys.argv[1] == "export" else main())
+    _cmd = sys.argv[1] if len(sys.argv) > 1 else ""
+    sys.exit(export_main(sys.argv[2:]) if _cmd == "export" else
+             patch_main(sys.argv[2:]) if _cmd == "patch" else main())

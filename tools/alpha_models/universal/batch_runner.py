@@ -130,7 +130,7 @@ SCOPES["d63_actions"] = {
     "kinds": "ALL_AUTO_READY",
     "exclude_scopes": ("s05ba",),
     "coverage": "BASE",
-    "fps_samples": (30, 120),
+    "fps_samples": (),                        # FPS independence: HumanMale regression 30/60/120 (D64)
     "phase_gate": "regression_only",
     "project": SCRATCH / "universal" / "unity" / "D63Actions",
     "out": SCRATCH / "universal" / "batch" / "d63_actions",

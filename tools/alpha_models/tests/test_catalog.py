@@ -50,8 +50,9 @@ class AnchorRuleTests(unittest.TestCase):
         self.assertEqual(cr.equipment_anchor("weapon", 12), "tail")          # bracelet worn: (sx/2, sy, sz/2)
         self.assertEqual(cr.equipment_anchor("weapon", 15), "weapon")
         self.assertEqual(cr.equipment_anchor("offhand_b", 20), "pet")
+        self.assertEqual(cr.equipment_anchor("offhand_b", 0), "center")    # golem's thrown rock (state 71)
         with self.assertRaises(ValueError):
-            cr.equipment_anchor("offhand_b", 0)
+            cr.equipment_anchor("offhand_b", 13)
 
     def test_unity_runtime_knows_every_python_rule(self):
         cs = (ROOT / "tools/alpha_models/transfer/unity/Runtime/AlphaRig.cs").read_text(encoding="utf-8")

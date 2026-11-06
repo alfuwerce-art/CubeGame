@@ -106,7 +106,8 @@ class BakerGates(unittest.TestCase):
     def test_kind_without_profile_is_refused(self):
         with tempfile.TemporaryDirectory(dir=str(ab.ROOT / ".scratch")) as d:
             with self.assertRaisesRegex(ValueError, "ACTION_PROFILE_REQUIRED"):
-                ab.bake_job({"kind": "0x21", "seed_variant": [0, 0]}, [75], d, exe="missing.exe")
+                # 0x76 RuneGiant: the only kind whose AI launch is not reconstructed (D64 evidence PARTIAL)
+                ab.bake_job({"kind": "0x76", "seed_variant": [0, 0]}, [75], d, exe="missing.exe")
 
 
 @unittest.skipUnless(HAVE_EXE, "local Alpha research copy (.scratch) not present")

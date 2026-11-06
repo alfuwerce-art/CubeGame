@@ -142,15 +142,15 @@ class ActionAndEquipmentTests(unittest.TestCase):
         ct.ACTION_PROFILES.update(self.saved)
 
     def test_only_the_evidenced_specimen_has_actions(self):
-        t = table({self.sk: BIPED, 0x96: BIPED, 0x97: QUAD})
+        t = table({self.sk: BIPED, 0xA6: BIPED, 0xA7: QUAD})
         sf = ct.specimen_families(t)
         e = ct.describe(self.sk, t["kinds"][f"0x{self.sk:02x}"], t, None, spec_families=sf)
         self.assertEqual(e["channels"]["actions"]["status"], "AVAILABLE")
         self.assertEqual(e["channels"]["actions"]["profile"], self.pid)
-        same_family = ct.describe(0x96, t["kinds"]["0x96"], t, None, spec_families=sf)
+        same_family = ct.describe(0xA6, t["kinds"]["0xa6"], t, None, spec_families=sf)
         self.assertEqual(same_family["channels"]["actions"]["status"], "BLOCKED")
         self.assertIn("POSES_FAMILY_COMPATIBLE_TRIGGER_UNPROVEN", same_family["channels"]["actions"]["reasons"][0])
-        quad = ct.describe(0x97, t["kinds"]["0x97"], t, None, spec_families=sf)
+        quad = ct.describe(0xA7, t["kinds"]["0xa7"], t, None, spec_families=sf)
         self.assertEqual(quad["channels"]["actions"]["status"], "BLOCKED")
         self.assertTrue(quad["channels"]["actions"]["reasons"][0].startswith("NO_VERIFIED_ACTION_TRIGGER"))
 
@@ -183,6 +183,9 @@ class ActionAndEquipmentTests(unittest.TestCase):
         from tools.alpha_models.universal import action_baker
         out = ROOT / ".scratch" / "tmp" / "test_baker_refusal"
         with self.assertRaisesRegex(ValueError, "ACTION_PROFILE_REQUIRED"):
+            action_baker.bake_job({"kind": "0x76", "seed_variant": [0, 0]}, [57], out, exe="missing.exe")
+        # D64: a kind WITH a creature-AI profile still cannot bake an action its AI never launches
+        with self.assertRaisesRegex(ValueError, "ACTION_TRIGGER_NOT_PROVEN"):
             action_baker.bake_job({"kind": "0x21", "seed_variant": [0, 0]}, [57], out, exe="missing.exe")
         # a creature-AI kind cannot borrow the humanoid's actions either
         with self.assertRaisesRegex(ValueError, "ACTION_TRIGGER_NOT_PROVEN"):
@@ -365,7 +368,9 @@ class LocalReferenceTests(unittest.TestCase):
             self.assertNotIn("reference_capture", r["job"])       # no live capture is claimed or present
             self.assertEqual(r["channels"]["walk"]["formula"], "FORMULA_VERIFIED")
             self.assertEqual(r["channels"]["walk"]["sources"], ["RECONSTRUCTED_FROM_EVIDENCE"])
-            self.assertEqual(r["channels"]["actions"]["status"], "BLOCKED")
+            # D64: actions come from the executed AI with NPC state as a condition (creature_ai profile)
+            self.assertEqual(r["channels"]["actions"]["status"], "AVAILABLE")
+            self.assertIn("creature_ai_d64", r["channels"]["actions"]["profile"])
             self.assertEqual(len(r["parts"]), 6)                  # body, two hands, two feet, head
         self.assertFalse(set(int(r["kind"], 16) for r in rows) & set(br.SCOPES["s05b1"]["kinds"]))
 
