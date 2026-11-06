@@ -8,9 +8,10 @@
 2. `docs/planning/DECISIONS_001-036.md` + новые решения `docs/decisions/`, особенно **D41** (актуальнее D40).
 3. `docs/architecture/ADR-0001-modular-monolith.md` — утверждён принцип, не вся архитектура.
 4. [GDD: концепция D59 + сюжетный каркас D60](docs/game-design/GDD_DRAFT.md), [D59](docs/decisions/D59-gdd-concept-approved.md), [D60](docs/decisions/D60-overseas-kingdom-campaign.md): учитывать утверждённую свободу игрока, боевой приоритет и четырёхактную кампанию, **но не реализовывать** неподтверждённые осады/флот/рабство/NPC без отдельного этапа. GDD целиком не принят.
-5. ТЗ активного этапа в `docs/stages/`.
-6. `docs/planning/ARCHITECTURE_PROPOSAL.md`, `ROADMAP_DRAFT.md`, `WORKFLOW_PROTOCOL_DRAFT.md` — **черновики**, не самостоятельные разрешения на новые решения.
-7. `docs/agents/MULTI_AGENT_WORKFLOW.md` — протокол совместной работы Claude Code и DeepSeek Harness (единая директория, порядок последовательной передачи, Git/ревью).
+5. **[D63 — расовый состав и характер](docs/decisions/D63-race-identity-and-factions.md):** Frogman исключены из CubeGame (включая редактор/генерацию NPC/контент); документированная Frogman в исходной Alpha — только исторический факт, не разрешение использовать в новом проекте. 7 рас и их поведения — направление ACCEPTED; числа, конкретные фракции, существа-скелеты и механики ещё открыты. Не генерировать лягушколюдов как игровой контент.
+6. ТЗ активного этапа в `docs/stages/`.
+7. `docs/planning/ARCHITECTURE_PROPOSAL.md`, `ROADMAP_DRAFT.md`, `WORKFLOW_PROTOCOL_DRAFT.md` — **черновики**, не самостоятельные разрешения на новые решения.
+8. `docs/agents/MULTI_AGENT_WORKFLOW.md` — протокол совместной работы Claude Code и DeepSeek Harness (единая директория, порядок последовательной передачи, Git/ревью).
 
 ## Роли
 - Продюсер: утверждает геймплей, визуал, содержание и начало этапа.
