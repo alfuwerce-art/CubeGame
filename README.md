@@ -14,11 +14,11 @@
 
 | Направление | Файл | Статус |
 |---|---|---|
-| **Game Design Document** | [GDD](docs/game-design/GDD_DRAFT.md) + [план завершения](docs/game-design/GDD_COMPLETION_PLAN.md) | GDD частично утверждён; план DRAFT |
-| **Правила ИИ** | [AGENTS.md](AGENTS.md) + [проект объединения](docs/agents/UNIFIED_AGENT_RULES_DRAFT.md) | AGENTS действует; объединение DRAFT |
-| **Пайплайны производства** | [PRODUCTION_PIPELINE_DRAFT](docs/production/PRODUCTION_PIPELINE_DRAFT.md) | DRAFT |
-| **Art Direction** | [ART_DIRECTION_DRAFT](docs/art/ART_DIRECTION_DRAFT.md) | DRAFT |
-| **Управление контекстом** | [SESSION_CONTEXT_PLAN](docs/agents/SESSION_CONTEXT_PLAN.md) | DRAFT |
+| **Game Design Document** | [GDD](docs/game-design/GDD_DRAFT.md) + [план завершения](docs/game-design/GDD_COMPLETION_PLAN.md) | GDD частично утверждён; редакционный план READY_FOR_REVIEW |
+| **Правила ИИ** | [AGENTS.md](AGENTS.md) + [проект объединения](docs/agents/UNIFIED_AGENT_RULES_DRAFT.md) | AGENTS действует; единый регламент READY_FOR_REVIEW |
+| **Пайплайны производства** | [PRODUCTION_PIPELINE_DRAFT](docs/production/PRODUCTION_PIPELINE_DRAFT.md) | READY_FOR_REVIEW; не авторизует этапы |
+| **Art Direction** | [ART_DIRECTION_DRAFT](docs/art/ART_DIRECTION_DRAFT.md) | текст READY_FOR_REVIEW; визуальные эталоны не утверждены |
+| **Управление контекстом** | [SESSION_CONTEXT_PLAN](docs/agents/SESSION_CONTEXT_PLAN.md) | READY_FOR_REVIEW; до утверждения действует MULTI_AGENT_WORKFLOW |
 
 **ROADMAP**: [ROADMAP_DRAFT](docs/planning/ROADMAP_DRAFT.md) — этапы продукта. **MULTI_AGENT_WORKFLOW**: [действующий протокол](docs/agents/MULTI_AGENT_WORKFLOW.md) — последовательная работа ИИ в одной папке `D:\Projects\CubeGame`.
 
@@ -29,4 +29,4 @@
 - **ACCEPTED** — продюсер принял решение/результат; **merge в main** только после прямого разрешения.
 - Изучение исходных ассетов Alpha проводится локально; закрытые материалы не публикуются.
 
-Последняя документационная работа — ветка `docs/gdd-first-draft-20261106`, [PR #2](https://github.com/alfuwerce-art/CubeGame/pull/2) (DRAFT, не объединён).
+Пакет пяти направлений подготовлен к поэтапной приёмке в ветке `docs/gdd-first-draft-20261106`, [PR #2](https://github.com/alfuwerce-art/CubeGame/pull/2). PR остаётся DRAFT и не объединён; подготовка документов сама по себе не утверждает новые игровые механики, Art Direction или Unity-этапы.
