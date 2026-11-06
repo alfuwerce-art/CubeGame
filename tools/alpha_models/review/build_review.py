@@ -165,12 +165,16 @@ def build(project: Path, regression_job: Path | None = None, prepare=None) -> di
               + (f"  problems={rec['problems']}" if rec["problems"] else ""))
         recs.append(rec)
     kinds = sorted({r["kind"] for r in recs}, key=KIND_ORDER.index)
+    from tools.alpha_models.universal import voxel_markers as vm
+    hair = vm.load_hair_evidence()
     index = {"format": FORMAT, "kinds": kinds, "specimens": recs,
+             "hairSamples": [{k: s[k] for k in ("kind", "hair_rgb", "capture", "records", "creatures")}
+                             for s in hair["samples"]],
              "notes": ["Alpha-derived data: local review only (D54/D59/D60), never commit or publish.",
                        "Variants are seeds of coverage B: head/hair pairs exactly as Alpha's appearance "
                        "emulation produced them; free head/hair mixing is not part of the verified coverage.",
-                       "Hair tint is NOT applied by the universal pipeline: pure-colour marker voxels are "
-                       "shown raw (known open issue since S05B-1)."]}
+                       "D61: pure R/G/B voxels of flag-0 models (hair) are Alpha markers and are not drawn; "
+                       "hair colour = per-instance hair_rgb (live samples in hairSamples)."]}
     (review / "index.json").write_text(json.dumps(index, indent=1), encoding="utf-8")
     fails = [r["id"] for r in recs if r["prepare"] != "PASS"]
     print(f"REVIEW_DATA_RESULT={'PASS' if not fails else 'FAIL'} specimens={len(recs)} kinds={len(kinds)} "

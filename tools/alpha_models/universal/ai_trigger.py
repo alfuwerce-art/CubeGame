@@ -294,8 +294,87 @@ def kind_evidence(image, kind, seeds, family_id, observed=None):
             "launched_actions": {str(a): v[0] for a, v in sorted(launched.items())},
             "condition_examples": {str(a): [json.loads(c) for c in v] for a, v in conditions.items()},
             "observed_state": observed["source"] if observed else None,
-            "equipment": "unarmed (weapon/off-hand slots empty)" + (" — observed" if observed and
-                         observed["fields"] == OBSERVED_FIELDS else " — NPC equipment of this kind not observed")}
+            "observed_source": observed.get("descriptor") if observed else None,
+            # REVIEW-FIX-01: a typed boolean; equipment counts as observed only when the live record
+            # carried the full equipment block (OBSERVED_FIELDS), never by text matching
+            "equipment_observed": equipment_observed(observed),
+            "equipment": "unarmed (weapon/off-hand slots empty)" + (" — observed" if equipment_observed(observed)
+                         else " — NPC equipment of this kind not observed")}
+
+
+def equipment_observed(observed) -> bool:
+    return bool(observed) and tuple(observed["fields"]) == tuple(OBSERVED_FIELDS)
+
+
+# --------------------------------------------------------------------------- observed live states
+# Declared live sources of П1 (local captures in .scratch, never committed). Each descriptor pins the
+# capture file by SHA256 and a deterministic record selector, so evidence_drift can re-run П1 on
+# exactly the same observed state.
+OBSERVED_SOURCES = {
+    0x03: {"capture": ".scratch/s05ba/cap/humans_full.jsonl", "record_field": "creature_full", "kind": 3,
+           "fields": "OBSERVED_FIELDS",
+           "source": "live full dump, HumanFemale NPC, Arulon 2026-11-06 (humans_full.jsonl)"},
+    0x3f: {"capture": ".scratch/universal/cap/batch1.jsonl", "record_field": "creature_hdr", "kind": 0x3f,
+           "fields": "HEADER_FIELDS", "source": "live capture header, PlainRunner (batch1.jsonl)"},
+}
+
+
+def load_observed(desc, root=ROOT):
+    """Observed state of a descriptor: first record of ``kind`` carrying ``record_field``.
+    Raises ValueError when the capture is missing or its SHA256 differs from a pinned one."""
+    import hashlib
+    path = Path(root) / desc["capture"]
+    if not path.exists():
+        raise ValueError(f"OBSERVED_SOURCE_MISSING {desc['capture']}")
+    data = path.read_bytes()
+    sha = hashlib.sha256(data).hexdigest()
+    if desc.get("sha256") and desc["sha256"] != sha:
+        raise ValueError(f"OBSERVED_SOURCE_SHA256 {desc['capture']} {sha} != {desc['sha256']}")
+    for line in data.decode("utf-8").splitlines():
+        r = json.loads(line)
+        if r.get("kind") == desc["kind"] and r.get(desc["record_field"]):
+            fields = OBSERVED_FIELDS if desc["fields"] == "OBSERVED_FIELDS" else HEADER_FIELDS
+            return {"source": desc["source"], "creature": bytes.fromhex(r[desc["record_field"]]), "fields": fields,
+                    "descriptor": {**{k: v for k, v in desc.items()}, "sha256": sha}}
+    raise ValueError(f"OBSERVED_RECORD_NOT_FOUND {desc['capture']} kind={desc['kind']}")
+
+
+# fields of a kind record that П1 must reproduce exactly (evidence_drift)
+EVIDENCE_COMPARED = ("status", "family_id", "appearance_flags_7e", "seeds_checked", "launched_actions",
+                     "condition_examples", "observed_state", "equipment_observed", "equipment", "reason")
+
+
+def build_evidence(image, coverage, families, root=ROOT):
+    """The whole П1 evidence file (cubegame.npc_action_evidence/1) for the coverage kinds."""
+    out = {"format": EVIDENCE_FORMAT, "decision": "D60", "tool": "tools/alpha_models/universal/ai_trigger.py",
+           "region": "0x42D87F..0x42EAEF (CombatBehavior::vfunc_0)", "kinds": {}}
+    for k in sorted(coverage):
+        kind = int(k, 16)
+        if kind == 0x02:
+            out["kinds"][k] = {"kind": k, "status": "EXCLUDED", "reason": "specimen (0x02, seed 0,0) carries the "
+                               "player_input profile; its actions are covered by the HumanMale regression"}
+            continue
+        obs = load_observed(OBSERVED_SOURCES[kind], root) if kind in OBSERVED_SOURCES else None
+        out["kinds"][k] = kind_evidence(image, kind, [tuple(s) for s in coverage[k]], families[k], obs)
+    return out
+
+
+def evidence_drift_kind(image, key, e, root=ROOT):
+    """Re-run П1 for one evidence record over ALL its declared seeds and its declared observed state."""
+    obs = None
+    if e.get("observed_source"):
+        try:
+            obs = load_observed(e["observed_source"], root)
+        except ValueError as ex:
+            return [f"EVIDENCE_DRIFT {key} {ex}"]
+    elif e.get("observed_state"):
+        return [f"EVIDENCE_DRIFT {key} OBSERVED_STATE_WITHOUT_SOURCE {e['observed_state']}"]
+    if not isinstance(e.get("equipment_observed"), bool):
+        return [f"EVIDENCE_DRIFT {key} EQUIPMENT_OBSERVED_NOT_BOOL {e.get('equipment_observed')!r}"]
+    got = kind_evidence(image, int(key, 16), [tuple(s) for s in e["seeds_checked"]], e["family_id"], obs)
+    got = json.loads(json.dumps(got))
+    return [f"EVIDENCE_DRIFT {key} {f}: {e.get(f)!r} != {got.get(f)!r}"
+            for f in EVIDENCE_COMPARED if e.get(f) != got.get(f)]
 
 
 def main(argv=None):

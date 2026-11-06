@@ -18,12 +18,15 @@ namespace CubeGame.AlphaTransfer.Review
         public AlphaClipPlayer player;
         public AlphaLocomotionDriver driver;
         public AlphaRigPartSpec[] partSpecs = new AlphaRigPartSpec[0];
-        public int[][] markers = new int[0][];
+        public int[][] markers = new int[0][];            // raw pure R/G/B voxel counts per part
+        public bool[] markerTransparent = new bool[0];    // Alpha load flag 0 -> markers not drawn
+        public bool alphaMarkerRule = true;               // false = "before D61" view (markers drawn)
+        public int hairPart = -1;
         public int[] vertexCounts = new int[0];
         public readonly List<string> problems = new List<string>();
         readonly List<Object> _owned = new List<Object>();
 
-        public static ReviewSpecimen Build(ReviewSpecimenInfo info, Material mat, Transform parent)
+        public static ReviewSpecimen Build(ReviewSpecimenInfo info, Material mat, Transform parent, bool alphaMarkerRule = true)
         {
             var dir = Path.Combine(ReviewData.Root, info.id);
             var go = new GameObject($"{info.name} {info.id}");
@@ -31,6 +34,7 @@ namespace CubeGame.AlphaTransfer.Review
             go.transform.localScale = Vector3.one * AlphaTransferConsts.RootScale;
             var s = go.AddComponent<ReviewSpecimen>();
             s.info = info;
+            s.alphaMarkerRule = alphaMarkerRule;
             var rigPath = Path.Combine(dir, "rig.json");
             if (!File.Exists(rigPath)) { s.problems.Add($"RIG_SPEC_MISSING {rigPath}"); return s; }
             var spec = JsonUtility.FromJson<AlphaRigSpec>(File.ReadAllText(rigPath));
@@ -41,20 +45,25 @@ namespace CubeGame.AlphaTransfer.Review
             int n = spec.parts.Length;
             rig.partNames = new string[n]; rig.parts = new Transform[n]; rig.meshes = new Transform[n];
             rig.sizes = new Vector3Int[n]; rig.anchors = new string[n];
-            s.markers = new int[n][]; s.vertexCounts = new int[n];
+            s.markers = new int[n][]; s.vertexCounts = new int[n]; s.markerTransparent = new bool[n];
+            var hairMat = AlphaRig.MakeHairMaterial(mat);           // Alpha draw order head -> hair
+            s._owned.Add(hairMat);
             for (int i = 0; i < n; i++)
             {
                 var ps = spec.parts[i];
                 var bytes = File.ReadAllBytes(Path.Combine(dir, ps.file));
                 s.markers[i] = ReviewData.MarkerCounts(bytes);
-                var built = VoxelMesh.Build(bytes, ps.name + "_" + Path.GetFileNameWithoutExtension(ps.model));
+                s.markerTransparent[i] = ps.markerTransparent;
+                if (ps.name == "hair") s.hairPart = i;
+                var built = VoxelMesh.Build(bytes, ps.name + "_" + Path.GetFileNameWithoutExtension(ps.model),
+                                            ps.markerTransparent && alphaMarkerRule);
                 if (built.problem != null) s.problems.Add($"MESH {ps.name}: {built.problem}");
                 if (built.size != new Vector3Int(ps.size[0], ps.size[1], ps.size[2])) s.problems.Add($"MESH_SIZE {ps.name}");
                 if (built.mesh != null)
                 {
                     s._owned.Add(built.mesh);
                     s.vertexCounts[i] = built.mesh.vertexCount;
-                    if (ps.expectedVertices > 0 && built.mesh.vertexCount != ps.expectedVertices)
+                    if (alphaMarkerRule && ps.expectedVertices > 0 && built.mesh.vertexCount != ps.expectedVertices)
                         s.problems.Add($"GEOMETRY {ps.name} vertices {built.mesh.vertexCount} != {ps.expectedVertices}");
                 }
                 var part = new GameObject("part_" + ps.name).transform;
@@ -62,11 +71,12 @@ namespace CubeGame.AlphaTransfer.Review
                 var meshT = new GameObject("mesh").transform;
                 meshT.SetParent(part, false);
                 meshT.gameObject.AddComponent<MeshFilter>().sharedMesh = built.mesh;
-                meshT.gameObject.AddComponent<MeshRenderer>().sharedMaterial = mat;
+                meshT.gameObject.AddComponent<MeshRenderer>().sharedMaterial = AlphaRig.MaterialFor(ps.name, mat, hairMat);
                 rig.partNames[i] = ps.name; rig.parts[i] = part; rig.meshes[i] = meshT;
                 rig.sizes[i] = built.size; rig.anchors[i] = ps.anchor;
             }
             rig.SetWeaponOnBack(true);
+            for (int i = 0; i < n; i++) rig.SetTint(i, spec.parts[i].HasTint ? spec.parts[i].TintColor : Color.white);
 
             // clips: the players stay disabled; ReviewViewer owns the clock
             var player = s.player = go.AddComponent<AlphaClipPlayer>();
@@ -179,6 +189,13 @@ namespace CubeGame.AlphaTransfer.Review
             }
             return b;
         }
+
+        /// <summary>Hair colour factor (Alpha uniform30 of the hair block = hair_rgb/255).</summary>
+        public void SetHairColour(Color c) { if (hairPart >= 0) rig.SetTint(hairPart, c); }
+        public Color HairColour => hairPart >= 0 ? rig.TintOf(hairPart) : Color.white;
+        /// <summary>HAIR_RANDOM_PER_NPC | HAIR_FIXED_BY_KIND (pipeline voxel_markers.hair_rule).</summary>
+        public string HairRule => hairPart >= 0 ? partSpecs[hairPart].tintMode : "";
+        public bool HairFixedByKind => HairRule == "HAIR_FIXED_BY_KIND";
 
         public string ModelOf(string part) => partSpecs.FirstOrDefault(p => p.name == part)?.model ?? "—";
     }

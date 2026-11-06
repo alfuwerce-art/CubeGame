@@ -20,6 +20,14 @@ namespace CubeGame.AlphaTransfer
         public string anchor;         // "center" | "weapon"
         public bool mirrored;
         public int expectedVertices;
+        // D61 colour rule (pipeline.prepare_unity / voxel_markers.py)
+        public int loadFlag = 1;
+        public bool markerTransparent;
+        public int[] markers = new int[0];
+        public string tintMode;
+        public int[] tint = new int[0];
+        public bool HasTint => tint != null && tint.Length == 3;
+        public Color TintColor => HasTint ? new Color(tint[0] / 255f, tint[1] / 255f, tint[2] / 255f, 1f) : Color.white;
     }
 
     [Serializable]
@@ -84,6 +92,58 @@ namespace CubeGame.AlphaTransfer
             if(_visibility==null||_visibility.Length!=parts.Length){_visibility=new bool[parts.Length];for(int i=0;i<_visibility.Length;i++)_visibility[i]=true;}
             _visibility[part]=visible;var r=meshes[part]?.GetComponent<Renderer>();if(r!=null)r.enabled=visible;
         }
+        static MaterialPropertyBlock _mpb;
+        static readonly int TintId = Shader.PropertyToID("_Tint");
+
+        /// <summary>Per-part colour factor (serialized: property blocks are not saved with a scene).</summary>
+        public Color[] tints = new Color[0];
+
+        /// <summary>Alpha draw order: Creature_drawModel draws the head (0x4206C2) before the hair
+        /// (0x420A38) with D3DRS_ZFUNC = LESSEQUAL (set at 0x4AC364), so on the coincident head/hair
+        /// faces the hair wins. Unity: the hair renders one queue step later (ZTest LEqual).</summary>
+        public const int HairRenderQueue = 2001;
+
+        /// <summary>Material for a part that reproduces the Alpha draw order (hair: queue 2001).</summary>
+        public static Material MaterialFor(string part, Material baseMat, Material hairMat)
+            => part == "hair" && hairMat != null ? hairMat : baseMat;
+
+        public static Material MakeHairMaterial(Material baseMat)
+        {
+            var m = new Material(baseMat) { name = baseMat.name + "_Hair", renderQueue = HairRenderQueue };
+            return m;
+        }
+
+        /// <summary>Alpha's per-draw colour factor (uniform30) for one part's renderer.</summary>
+        public void SetTint(int part, Color c)
+        {
+            if (tints == null || tints.Length != parts.Length)
+            {
+                var t = new Color[parts.Length];
+                for (int i = 0; i < t.Length; i++) t[i] = tints != null && i < tints.Length ? tints[i] : Color.white;
+                tints = t;
+            }
+            tints[part] = c;
+            ApplyTint(part);
+        }
+
+        public Color TintOf(int part) => tints != null && part < tints.Length ? tints[part] : Color.white;
+
+        void ApplyTint(int part)
+        {
+            var r = meshes[part] != null ? meshes[part].GetComponent<Renderer>() : null;
+            if (r == null) return;
+            if (_mpb == null) _mpb = new MaterialPropertyBlock();
+            r.GetPropertyBlock(_mpb);
+            _mpb.SetColor(TintId, TintOf(part));
+            r.SetPropertyBlock(_mpb);
+        }
+
+        void OnEnable()
+        {
+            if (tints == null) return;
+            for (int i = 0; i < Mathf.Min(tints.Length, meshes.Length); i++) ApplyTint(i);
+        }
+
         public void SetAllVisible(bool visible){for(int p=0;p<parts.Length;p++)SetVisible(p,visible);}
 
         public void Apply(PartPose[] poses, int[] clipToRig, bool[] visible=null)

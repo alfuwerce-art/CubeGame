@@ -35,6 +35,7 @@ from tools.alpha_models.universal import alpha_static as st
 from tools.alpha_models.universal import contract as ct
 from tools.alpha_models.universal import creature_rig as cr
 from tools.alpha_models.universal import uclip
+from tools.alpha_models.universal import voxel_markers as vm
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from cub_format import deobfuscate, parse_decoded  # noqa: E402
@@ -113,6 +114,28 @@ def build_clips(capture, kind, clips_root, creature=None):
 
 
 # --------------------------------------------------------------------------- prepare-unity
+_LOAD_FLAGS = {}
+_HAIR_RULES = {}
+
+
+def _hair_rule(exe, kind, seed):
+    """Client rule for the spawn hair colour of this kind (voxel_markers.hair_rule), cached."""
+    key = (exe, kind, tuple(seed))
+    if key not in _HAIR_RULES:
+        _HAIR_RULES[key] = vm.hair_rule(st.AppearanceEmulator(pb.load(exe)), kind, tuple(seed))
+    return _HAIR_RULES[key]
+
+
+def _load_flag(exe, name):
+    """Load flag of a .cub as pushed by Alpha's asset loader (voxel_markers.load_flags), cached per exe."""
+    if exe not in _LOAD_FLAGS:
+        _LOAD_FLAGS[exe] = vm.load_flags(pb.load(exe))["flags"]
+    flags = _LOAD_FLAGS[exe].get(name)
+    if name and name.startswith("equipment:"):
+        return None
+    return next(iter(flags)) if flags and len(flags) == 1 else None
+
+
 def _exposed_faces(model):
     from tools.alpha_models.transfer.prepare_unity import exposed_faces
     return exposed_faces(model)
@@ -180,9 +203,26 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
         rule = cr.BY_NAME[p].anchor
         if rule == "head":
             rule = "center"           # kind 0x65 (the only other head rule) is refused above
+        # D61 COLOR/TINT-FIX: Alpha's own load flag decides whether pure R/G/B voxels are markers
+        flag = _load_flag(exe, name)
+        mstats = vm.mesh_stats(decoded, strict=True)
+        if flag is None:
+            # not loaded by the creature asset loader (e.g. item models): the flag only matters
+            # when the model has pure R/G/B voxels — then it is a blocker, never a guess
+            if any(mstats["markers"]):
+                problems.append(f"MODEL_LOAD_FLAG_UNKNOWN {p} {name} markers={mstats['markers']}")
+            flag_status = "NOT_IN_CREATURE_LOADER (no marker voxels: flag irrelevant)"
+            flag = 1
+        else:
+            flag_status = "VERIFIED_ALPHA_CODE (asset loader call site)"
+            mstats = vm.mesh_stats(decoded, strict=bool(flag))
         parts_out.append({"name": p, "model": name, "file": f"models/{p}.cubdec", "size": list(size),
                           "anchor": rule, "mirrored": cr.BY_NAME[p].mirrored,
-                          "expectedVertices": _exposed_faces(model) * 4})
+                          "expectedVertices": mstats["vertices"],
+                          "loadFlag": flag, "loadFlagStatus": flag_status, "markerTransparent": flag == 0,
+                          "markers": mstats["markers"], "markerStatus": vm.MARKER_STATUS,
+                          **vm.part_colour(p, app, job.get("hair_rgb"),
+                                           _hair_rule(exe, kind, seed) if p == "hair" else None)})
     entity = _entity_contract(exe, kind, seed, app, registry, res, parts_out, job)
     acts = entity["channels"]["actions"]
     if job.get("action_manifest") and acts["status"] != "AVAILABLE":

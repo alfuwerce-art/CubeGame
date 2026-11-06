@@ -1,4 +1,4 @@
-# alpha_enter_world.ps1 — start the LOCAL research copy and walk the menus into the world.
+# alpha_enter_world.ps1 - start the LOCAL research copy and walk the menus into the world.
 # Verified 2026-11-05 on the 784x561 client: START GAME -> character card -> SELECT -> world SELECT.
 # Every step saves a screenshot to -ShotDir so the state can be checked (no blind clicking).
 param([string]$ShotDir = 'D:\Projects\CubeGame\.scratch\s05a2\nav')

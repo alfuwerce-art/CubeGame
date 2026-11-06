@@ -230,20 +230,73 @@ def build_entries(rows, scope, run_slots, static_table):
     return entries, coverage, problems
 
 
-def bake_library(entry, out_root, baker=None):
+# code whose change must invalidate every baked library (П2 = drawModel oracle + the baker itself)
+BAKE_CODE = ("action_baker.py", "alpha_oracle.py", "drawmodel_emu.py", "x86emu.py", "creature_rig.py",
+             "alpha_static.py", "contract.py")
+CACHE_KEY_FILE = "cache_key.json"
+
+
+def bake_cache_key(entry, exe=None):
+    """SHA256 inputs of one baked library (REVIEW-FIX-01): exe, profile record, evidence file, the
+    baking code and the request itself. Any change -> the library is re-baked."""
+    from tools.alpha_models.universal import action_baker as ab
+    from tools.alpha_models.universal import contract as ct
+    here = Path(__file__).resolve().parent
+    prof = ct.ACTION_PROFILES[entry["profile"]]
+    return {"format": "cubegame.bake_cache_key/1",
+            "exe_sha256": sha256_file(exe or ab.DEFAULT_EXE),
+            "profile": entry["profile"],
+            "profile_sha256": sha256_json(prof),
+            "evidence_sha256": sha256_file(ct.NPC_EVIDENCE_PATH),
+            "code_sha256": {n: sha256_file(here / n) for n in BAKE_CODE},
+            "request": {"kind": entry["kind"], "seed": list(entry["seed"]),
+                        "actions": sorted(prof["launched_actions"])}}
+
+
+def library_reusable(lib, key):
+    """(reusable, reason): manifest PASS, the same cache key, and every clip payload's SHA256 equal to
+    the one the manifest recorded when it was baked."""
+    man = Path(lib) / "actions.json"
+    if not man.exists():
+        return False, "NO_MANIFEST"
+    m = json.loads(man.read_text(encoding="utf-8"))
+    if m.get("BAKE_RESULT") != "PASS" or m.get("profile") != key["profile"]:
+        return False, "MANIFEST_NOT_PASS_OR_PROFILE"
+    if sorted(a["action"] for a in m["actions"] if a["status"] == "EMULATED_ALPHA_CODE") != key["request"]["actions"]:
+        return False, "ACTION_SET_CHANGED"
+    kf = Path(lib) / CACHE_KEY_FILE
+    if not kf.exists() or json.loads(kf.read_text(encoding="utf-8")) != key:
+        return False, "CACHE_KEY_CHANGED"
+    for a in m["actions"]:
+        if a["status"] != "EMULATED_ALPHA_CODE":
+            continue
+        if not a.get("file") or not a.get("sha256"):
+            return False, f"PAYLOAD_UNRECORDED action={a.get('action')}"
+        f = Path(lib) / a["file"]
+        if not f.exists() or sha256_file(f) != a["sha256"]:
+            return False, f"PAYLOAD_SHA256 {a['file']}"
+    return True, "REUSED"
+
+
+def bake_library(entry, out_root, baker=None, exe=None):
     """П2 of one action entry: the kind's launched actions through the drawModel oracle. Reused only when
-    the library exists with BAKE_RESULT=PASS for exactly this profile and action set."""
+    library_reusable() holds; otherwise the directory is cleared and the library re-baked."""
     from tools.alpha_models.universal import action_baker as ab
     from tools.alpha_models.universal import contract as ct
     actions = sorted(ct.ACTION_PROFILES[entry["profile"]]["launched_actions"])
     lib = Path(out_root) / "libraries" / entry["kind"]
-    man = lib / "actions.json"
-    if man.exists():
-        m = json.loads(man.read_text(encoding="utf-8"))
-        if (m.get("BAKE_RESULT") == "PASS" and m.get("profile") == entry["profile"]
-                and sorted(a["action"] for a in m["actions"] if a["status"] == "EMULATED_ALPHA_CODE") == actions):
-            return lib
+    key = bake_cache_key(entry, exe)
+    ok, reason = library_reusable(lib, key)
+    entry["library_cache"] = reason
+    if ok:
+        return lib
+    if lib.exists():
+        # only ever clears <out_root>/libraries/<kind> (out_root is checked to be in .scratch by callers)
+        if lib.resolve().parent != (Path(out_root) / "libraries").resolve():
+            raise ValueError(f"REFUSE_CLEAR {lib}")
+        shutil.rmtree(lib)
     (baker or ab.bake_job)({"kind": entry["kind"], "seed_variant": list(entry["seed"])}, actions, str(lib))
+    write_json_atomic(lib / CACHE_KEY_FILE, key)
     return lib
 
 
@@ -300,7 +353,8 @@ def run_entry(e, row, out_root, state, state_path, runner, inputs, scope, baker=
 
 
 def evidence_drift(image, kinds, evidence_path=None):
-    """П1 re-run for the scope kinds (base seed, default state) compared with the committed evidence."""
+    """П1 re-run for the scope kinds over EVERY declared seed and the declared observed state, compared
+    field by field with the committed evidence (REVIEW-FIX-01: no base-seed-only shortcut)."""
     from tools.alpha_models.universal import ai_trigger as at
     from tools.alpha_models.universal import contract as ct
     ev = json.loads(Path(evidence_path or ct.NPC_EVIDENCE_PATH).read_text(encoding="utf-8"))
@@ -311,11 +365,29 @@ def evidence_drift(image, kinds, evidence_path=None):
         if not e or e.get("status") != "TRIGGER_EMULATED":
             problems.append(f"EVIDENCE_MISSING {key}")
             continue
-        rep = at.analyse_kind(image, k)
-        got = {a: v["write_vas"][0] for a, v in rep["actions"].items() if len(v["write_vas"]) == 1}
-        if rep["errors"] or rep["appearance_flags_7e"] != e["appearance_flags_7e"] or got != e["launched_actions"]:
-            problems.append(f"EVIDENCE_DRIFT {key} {e['launched_actions']} vs {got} errors={rep['errors']}")
+        problems += at.evidence_drift_kind(image, key, e)
     return problems
+
+
+def rebuild_npc_evidence(out_path=None, entries_path=None):
+    """Regenerate npc_action_evidence.json from the S05B-1 coverage seeds (reproducible П1 build)."""
+    from tools.alpha_models.anim import pe_bytes
+    from tools.alpha_models.universal import ai_trigger as at
+    from tools.alpha_models.universal import contract as ct
+    from tools.alpha_models.universal import transfer_planner as tp
+    img = pe_bytes.load(str(at.DEFAULT_EXE))
+    cov = json.loads(Path(entries_path or SCRATCH / "universal/batch/s05b1/entries.json").read_text(encoding="utf-8"))["coverage"]
+    table = tp.load_static(str(tp.SCRATCH / "universal/static/alpha_static.json"))
+    plan = {e["kind"]: e for e in tp.scan(table, str(tp.SCRATCH / "universal/clips"))["entities"]}
+    out = at.build_evidence(img, {k: [s["seed"] for s in v["seeds"]] for k, v in cov.items()},
+                            {k: plan[k]["family_id"] for k in cov})
+    for k, e in out["kinds"].items():          # keep the display names of the committed file
+        old = json.loads(Path(ct.NPC_EVIDENCE_PATH).read_text(encoding="utf-8"))["kinds"].get(k, {})
+        for f in ("name_hint", "live_check"):
+            if f in old:
+                e[f] = old[f]
+    Path(out_path or ct.NPC_EVIDENCE_PATH).write_text(json.dumps(out, indent=1), encoding="utf-8")
+    return out
 
 
 def job_for_entry(row, entry):

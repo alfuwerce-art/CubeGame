@@ -180,6 +180,7 @@ namespace CubeGame.AlphaTransfer.Review.Editor
                                      $"statuses={string.Join(",", s.Sources(ReviewMode.Idle).Concat(s.Sources(ReviewMode.Walk)).Concat(s.Sources(ReviewMode.Action)).Select(x => x.status).Distinct())}");
                     UnityEngine.Object.DestroyImmediate(s.gameObject);
                 }
+                problems.AddRange(LayoutProblems());
                 Sheets(idx, mat, problems);
                 exit = problems.Count == 0 ? 0 : 1;
             }
@@ -192,6 +193,61 @@ namespace CubeGame.AlphaTransfer.Review.Editor
             foreach (var m in mirror) sb.AppendLine(m);
             File.WriteAllText(Path.Combine(OutDir, "review_check.txt"), sb.ToString());
             EditorApplication.Exit(exit);
+        }
+
+        // ------------------------------------------------------------------ layout (small Game view)
+        public static readonly Vector2Int[] LayoutSizes =
+        {
+            new Vector2Int(480, 270), new Vector2Int(640, 360), new Vector2Int(800, 450), new Vector2Int(960, 540),
+            new Vector2Int(1024, 600), new Vector2Int(1280, 720), new Vector2Int(1366, 768), new Vector2Int(1600, 900),
+            new Vector2Int(1920, 1080), new Vector2Int(2560, 1440), new Vector2Int(3840, 2160), new Vector2Int(600, 900)
+        };
+
+        public static List<string> LayoutProblems()
+        {
+            var problems = new List<string>();
+            foreach (var sz in LayoutSizes)
+                foreach (var open in new[] { true, false })
+                {
+                    var l = ReviewLayout.Compute(sz.x, sz.y, ReviewLayout.AutoScale(sz.x, sz.y), open);
+                    foreach (var p in l.Problems()) problems.Add($"LAYOUT {sz.x}x{sz.y} panel={(open ? "open" : "closed")}: {p}");
+                    if (open && l.panel.width < 220f) problems.Add($"LAYOUT {sz.x}x{sz.y}: panel too narrow {l.panel.width}");
+                    if (l.timeline.width < 220f) problems.Add($"LAYOUT {sz.x}x{sz.y}: timeline too narrow {l.timeline.width}");
+                }
+            return problems;
+        }
+
+        // ------------------------------------------------------------------ colour before / after (D61)
+        static void BeforeAfter(ReviewIndex idx, Material mat)
+        {
+            var cam = SheetCamera();
+            var root = new GameObject("BeforeAfterRoot").transform;
+            int n = idx.kinds.Length, cell = 300;
+            var sheet = new Texture2D(n * cell, 2 * cell, TextureFormat.RGB24, false);
+            for (int k = 0; k < n; k++)
+            {
+                var info = idx.specimens.First(x => x.kind == idx.kinds[k] && x.IsBaseVariant && x.prepare == "PASS");
+                for (int row = 0; row < 2; row++)
+                {
+                    bool after = row == 1;
+                    var s = ReviewSpecimen.Build(info, mat, root, alphaMarkerRule: after);
+                    if (after) s.SetHairColour(ReviewData.DefaultHairColour(idx, s));
+                    s.Apply(s.Sources(ReviewMode.Idle).LastOrDefault(), 0f);
+                    var b = s.VisibleBounds();
+                    // head close-up: upper 55 % of the creature, 3/4 front
+                    var head = new Bounds(new Vector3(b.center.x, b.max.y - b.size.y * 0.3f, b.center.z),
+                                          new Vector3(b.size.x, b.size.y * 0.6f, b.size.z));
+                    Aim(cam, head, 200f, 8f, 1.0f);
+                    var tex = Render(cam, cell, cell);
+                    sheet.SetPixels(k * cell, (1 - row) * cell, cell, cell, tex.GetPixels());
+                    UnityEngine.Object.DestroyImmediate(tex);
+                    UnityEngine.Object.DestroyImmediate(s.gameObject);
+                }
+            }
+            sheet.Apply();
+            Save(sheet, "colour_before_after.png");
+            UnityEngine.Object.DestroyImmediate(cam.gameObject);
+            UnityEngine.Object.DestroyImmediate(root.gameObject);
         }
 
         // ------------------------------------------------------------------ contact sheets (local only)
@@ -232,8 +288,12 @@ namespace CubeGame.AlphaTransfer.Review.Editor
             UnityEngine.Object.DestroyImmediate(t);
         }
 
+        static ReviewIndex _sheetIndex;
+
         static void Sheets(ReviewIndex idx, Material mat, List<string> problems)
         {
+            _sheetIndex = idx;
+            BeforeAfter(idx, mat);
             var cam = SheetCamera();
             var root = new GameObject("SheetRoot").transform;
             // 1. lineup of the 15 kinds (seed 0-0), idle and walk, front and side
@@ -244,6 +304,7 @@ namespace CubeGame.AlphaTransfer.Review.Editor
                 {
                     var info = idx.specimens.First(s => s.kind == k && s.IsBaseVariant && s.prepare == "PASS");
                     var s = ReviewSpecimen.Build(info, mat, root);
+                    s.SetHairColour(ReviewData.DefaultHairColour(idx, s));
                     var src = s.Sources(mode).LastOrDefault(v => v.formula) ?? s.Sources(mode).FirstOrDefault();
                     s.Apply(src, 1.0f);
                     var b = s.VisibleBounds();
@@ -296,6 +357,8 @@ namespace CubeGame.AlphaTransfer.Review.Editor
             if (cols <= 0) cols = Mathf.Min(cells.Count, 8);
             int rows = (cells.Count + cols - 1) / cols;
             var sheet = new Texture2D(cols * Cell, rows * Cell, TextureFormat.RGB24, false);
+            var bg = Enumerable.Repeat(cam.backgroundColor, sheet.width * sheet.height).ToArray();
+            sheet.SetPixels(bg);                         // empty cells: scene background, not grey
             ReviewSpecimen s = null; string built = null; Bounds frame = default;
             for (int i = 0; i < cells.Count; i++)
             {
@@ -303,6 +366,7 @@ namespace CubeGame.AlphaTransfer.Review.Editor
                 {
                     if (s != null) UnityEngine.Object.DestroyImmediate(s.gameObject);
                     s = ReviewSpecimen.Build(cells[i].info, mat, root); built = cells[i].info.id;
+                    s.SetHairColour(ReviewData.DefaultHairColour(_sheetIndex, s));
                     s.Apply(s.Sources(ReviewMode.Idle).LastOrDefault(), 0f);
                     frame = s.VisibleBounds();
                     frame.Expand(frame.size.magnitude * 0.5f);
@@ -341,16 +405,14 @@ namespace CubeGame.AlphaTransfer.Review.Editor
             EditorApplication.isPlaying = true;
         }
 
-        static readonly List<string> _ignored = new List<string>();
-        static string FirstLine(string s) { s = s ?? ""; int i = s.IndexOf('\n'); return i < 0 ? s : s.Substring(0, i); }
+        static string FirstLine(string s) { s = s ?? ""; int i = s.IndexOf((char)10); return i < 0 ? s : s.Substring(0, i); }
 
+        // every error/exception of the PlayMode session counts (D61: the Unity Search startup exception is
+        // removed at its cause - setup_review.ps1 disables startup indexing - not filtered here)
         static void OnLog(string msg, string stack, LogType type)
         {
-            if (type != LogType.Error && type != LogType.Exception && type != LogType.Assert) return;
-            // Unity's own search indexer (SearchInit.IndexationOnStartup) throws in fresh batch projects;
-            // it is editor-internal, not review code — reported separately, never silently dropped
-            if ((stack ?? "").Contains("UnityEditor.Search.") || (msg ?? "").Contains("UnityEditor.Search.")) { _ignored.Add($"{type}: {msg}"); return; }
-            _errors.Add($"{type}: {msg} | {FirstLine(stack)}");
+            if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert)
+                _errors.Add($"{type}: {msg} | {FirstLine(stack)}");
         }
 
         static void OnState(PlayModeStateChange s)
@@ -359,10 +421,10 @@ namespace CubeGame.AlphaTransfer.Review.Editor
             var log = ReviewViewer.SmokeLog;
             bool pass = ReviewViewer.SmokeDone && log.Count == 0 && _errors.Count == 0 && ReviewViewer.SmokeSpecimens > 0;
             var sb = new StringBuilder($"REVIEW_PLAYMODE_RESULT={(pass ? "PASS" : "FAIL")} specimens={ReviewViewer.SmokeSpecimens} " +
-                                       $"sources={ReviewViewer.SmokeSources} frames={ReviewViewer.SmokeFrames} errors={_errors.Count} tour_problems={log.Count}\n");
+                                       $"sources={ReviewViewer.SmokeSources} frames={ReviewViewer.SmokeFrames} errors={_errors.Count} tour_problems={log.Count} " +
+                                       $"marker_toggle_vertices={ReviewViewer.SmokeMarkerToggle}\n");
             foreach (var l in log) sb.AppendLine("PROBLEM " + l);
             foreach (var e in _errors.Take(50)) sb.AppendLine("ERROR " + e);
-            foreach (var e in _ignored) sb.AppendLine("EDITOR_INTERNAL_NOT_COUNTED " + e);
             File.WriteAllText(Path.Combine(OutDir, "review_playmode.txt"), sb.ToString());
             _exitCode = pass ? 0 : 1;
             _exitScheduled = true;

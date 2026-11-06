@@ -129,6 +129,17 @@ ACTION_PROFILES = {
 NPC_EVIDENCE_PATH = os.path.join(os.path.dirname(__file__), "npc_action_evidence.json")
 
 
+EVIDENCE_PROBLEMS = []   # evidence records refused while building profiles (no profile -> BLOCKED)
+
+
+def _typed_equipment_observed(key, e):
+    """REVIEW-FIX-01: the evidence carries an explicit boolean; text is never parsed."""
+    v = e.get("equipment_observed")
+    if not isinstance(v, bool):
+        raise ValueError(f"npc_action_evidence {key}: equipment_observed must be a boolean, got {v!r}")
+    return v
+
+
 def _creature_ai_profiles(path=NPC_EVIDENCE_PATH):
     if not os.path.exists(path):
         return {}
@@ -139,6 +150,11 @@ def _creature_ai_profiles(path=NPC_EVIDENCE_PATH):
         if e.get("status") != "TRIGGER_EMULATED":
             continue
         launched = {int(a): int(va, 16) for a, va in e["launched_actions"].items()}
+        try:
+            eq_observed = _typed_equipment_observed(k, e)
+        except ValueError as ex:
+            EVIDENCE_PROBLEMS.append(str(ex))
+            continue
         out[f"alpha_actions/creature_ai_{e['name_hint'].lower()}_{k}"] = {
             "status": "EMULATED_ALPHA_CODE",
             "specimens": [{"kind": int(k, 16), "seed_variant": [0, 0]}],
@@ -152,7 +168,7 @@ def _creature_ai_profiles(path=NPC_EVIDENCE_PATH):
             "requires_parts": [],
             "equipment": {},
             "specimen_equipment": {},
-            "equipment_observed": "observed" in e["equipment"],
+            "equipment_observed": eq_observed,
             "categories": ["MOTION"],
             "primary_chain": sorted(launched),
             "launched_actions": launched,

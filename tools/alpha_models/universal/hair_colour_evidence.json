@@ -1,0 +1,222 @@
+{
+ "format": "cubegame.hair_colour_evidence/1",
+ "rule": "creature+0x7A..0x7C (appearance hair_rgb) read from live Alpha captures; per-instance spawn data (seed+0x10 -> creature_generateAppearance), not a property of the kind",
+ "samples": [
+  {
+   "kind": "0x02",
+   "hair_rgb": [
+    255,
+    200,
+    50
+   ],
+   "records": 632,
+   "creatures": 1,
+   "capture": "attack1.jsonl",
+   "capture_sha256": "0e38a533dfd42c95582fb631bceeaea662577fddd67173987b8ba47aeee1af5d"
+  },
+  {
+   "kind": "0x02",
+   "hair_rgb": [
+    255,
+    200,
+    50
+   ],
+   "records": 60,
+   "creatures": 1,
+   "capture": "idle1.jsonl",
+   "capture_sha256": "f80743cd5b42b8809ebbb7a9ad0a9df8c0321d5720c3f6c015ada851701faea0"
+  },
+  {
+   "kind": "0x20",
+   "hair_rgb": [
+    255,
+    255,
+    255
+   ],
+   "records": 991,
+   "creatures": 1,
+   "capture": "session1.jsonl",
+   "capture_sha256": "d4c9c0561702413b616e6b59a219571f04a0164cf773faab14833f33be825e67"
+  },
+  {
+   "kind": "0x02",
+   "hair_rgb": [
+    255,
+    200,
+    50
+   ],
+   "records": 983,
+   "creatures": 1,
+   "capture": "session2.jsonl",
+   "capture_sha256": "96ecb464884ea86b6e76f1dea57cad2dfabe4cb6e6d4edd9197a055e3706acdb"
+  },
+  {
+   "kind": "0x02",
+   "hair_rgb": [
+    255,
+    200,
+    50
+   ],
+   "records": 1449,
+   "creatures": 1,
+   "capture": "session3.jsonl",
+   "capture_sha256": "e594517ff6dbca56f46066b02a8abe975ba6d601f44eb3340a5d064ad85d13b4"
+  },
+  {
+   "kind": "0x02",
+   "hair_rgb": [
+    255,
+    200,
+    50
+   ],
+   "records": 596,
+   "creatures": 1,
+   "capture": "visual_attack.jsonl",
+   "capture_sha256": "5b71cec2a2a0f8762e2745bbfa829d0cee5c647a3e45babbb22af22c616458b1"
+  },
+  {
+   "kind": "0x02",
+   "hair_rgb": [
+    255,
+    200,
+    50
+   ],
+   "records": 641,
+   "creatures": 1,
+   "capture": "walk1.jsonl",
+   "capture_sha256": "a69675c329a114c4208cb1b69eaa7e0aa7416f5a70f9f1400ab6da7920fbbfc4"
+  },
+  {
+   "kind": "0x02",
+   "hair_rgb": [
+    36,
+    172,
+    22
+   ],
+   "records": 43,
+   "creatures": 1,
+   "capture": "humans_full.jsonl",
+   "capture_sha256": "643aeefdcbe74a81268f7bba5e35b0e9f13697874884d3141c55d6ea12eff041"
+  },
+  {
+   "kind": "0x02",
+   "hair_rgb": [
+    122,
+    50,
+    246
+   ],
+   "records": 43,
+   "creatures": 1,
+   "capture": "humans_full.jsonl",
+   "capture_sha256": "643aeefdcbe74a81268f7bba5e35b0e9f13697874884d3141c55d6ea12eff041"
+  },
+  {
+   "kind": "0x02",
+   "hair_rgb": [
+    148,
+    255,
+    104
+   ],
+   "records": 43,
+   "creatures": 1,
+   "capture": "humans_full.jsonl",
+   "capture_sha256": "643aeefdcbe74a81268f7bba5e35b0e9f13697874884d3141c55d6ea12eff041"
+  },
+  {
+   "kind": "0x02",
+   "hair_rgb": [
+    220,
+    95,
+    203
+   ],
+   "records": 43,
+   "creatures": 1,
+   "capture": "humans_full.jsonl",
+   "capture_sha256": "643aeefdcbe74a81268f7bba5e35b0e9f13697874884d3141c55d6ea12eff041"
+  },
+  {
+   "kind": "0x03",
+   "hair_rgb": [
+    13,
+    195,
+    20
+   ],
+   "records": 43,
+   "creatures": 1,
+   "capture": "humans_full.jsonl",
+   "capture_sha256": "643aeefdcbe74a81268f7bba5e35b0e9f13697874884d3141c55d6ea12eff041"
+  },
+  {
+   "kind": "0x03",
+   "hair_rgb": [
+    185,
+    190,
+    209
+   ],
+   "records": 43,
+   "creatures": 1,
+   "capture": "humans_full.jsonl",
+   "capture_sha256": "643aeefdcbe74a81268f7bba5e35b0e9f13697874884d3141c55d6ea12eff041"
+  },
+  {
+   "kind": "0x1e",
+   "hair_rgb": [
+    255,
+    255,
+    255
+   ],
+   "records": 79,
+   "creatures": 1,
+   "capture": "scout_leg5.jsonl",
+   "capture_sha256": "3de6cd993939543242956acbf67a6f6a2a21b2c6894526e95597392bd2bd85b6"
+  },
+  {
+   "kind": "0x02",
+   "hair_rgb": [
+    255,
+    200,
+    50
+   ],
+   "records": 1025,
+   "creatures": 1,
+   "capture": "batch1.jsonl",
+   "capture_sha256": "d8e20297553d59343646d60aad79381c0c7766713833a9e8ebdbd7f75c6ea4be"
+  },
+  {
+   "kind": "0x20",
+   "hair_rgb": [
+    255,
+    255,
+    255
+   ],
+   "records": 1025,
+   "creatures": 1,
+   "capture": "batch1.jsonl",
+   "capture_sha256": "d8e20297553d59343646d60aad79381c0c7766713833a9e8ebdbd7f75c6ea4be"
+  },
+  {
+   "kind": "0x3f",
+   "hair_rgb": [
+    255,
+    255,
+    255
+   ],
+   "records": 1025,
+   "creatures": 1,
+   "capture": "batch1.jsonl",
+   "capture_sha256": "d8e20297553d59343646d60aad79381c0c7766713833a9e8ebdbd7f75c6ea4be"
+  },
+  {
+   "kind": "0x20",
+   "hair_rgb": [
+    255,
+    255,
+    255
+   ],
+   "records": 440,
+   "creatures": 1,
+   "capture": "survey1.jsonl",
+   "capture_sha256": "45c85c222b7ed6f24082f1e51d1aaf36b404f5ddfd951a41b099011b393f3615"
+  }
+ ]
+}

@@ -77,15 +77,21 @@ class ActionStub:
         return 0, "\n".join(lines), out
 
 
-def stub_baker(fail=()):
+def stub_baker(fail=(), calls=None):
     def bake(job, actions, out):
         kind = int(job["kind"], 16)
+        if calls is not None:
+            calls.append(kind)
         if kind in fail:
             raise ValueError("ACTION_TRIGGER_NOT_PROVEN (stub)")
         Path(out).mkdir(parents=True, exist_ok=True)
+        entries = []
+        for a in actions:
+            f = Path(out, f"action_{a:03d}.alphaclip.json")
+            f.write_text(json.dumps({"name": f"action_{a:03d}", "stub": True}), encoding="utf-8")
+            entries.append({"action": a, "status": "EMULATED_ALPHA_CODE", "file": f.name, "sha256": br.sha256_file(f)})
         Path(out, "actions.json").write_text(json.dumps({
-            "BAKE_RESULT": "PASS", "profile": PROFILES[kind][0],
-            "actions": [{"action": a, "status": "EMULATED_ALPHA_CODE"} for a in actions]}), encoding="utf-8")
+            "BAKE_RESULT": "PASS", "profile": PROFILES[kind][0], "actions": entries}), encoding="utf-8")
     return bake
 
 
@@ -163,6 +169,52 @@ class ActionScope(unittest.TestCase):
         rows = {e["id"]: e for e in s["entries"]}
         self.assertEqual(rows["0x95_s0-0_60hz"]["verdict"], "FAIL")
         self.assertTrue(rows["0x95_s0-0_60hz"]["problems"][0].startswith("BAKE_FAILED"))
+
+
+    # ---- REVIEW-FIX-01: SHA256 cache of baked libraries
+    def entry(self, kind=0x92):
+        return {"kind": f"0x{kind:02x}", "seed": [0, 0], "profile": PROFILES[kind][0]}
+
+    def test_library_is_reused_only_with_the_same_key_and_intact_payloads(self):
+        calls = []
+        out = TMP / "out"
+        br.bake_library(self.entry(), out, stub_baker(calls=calls))
+        e = self.entry()
+        br.bake_library(e, out, stub_baker(calls=calls))
+        self.assertEqual(calls, [0x92])
+        self.assertEqual(e["library_cache"], "REUSED")
+        # a changed payload (clip file) invalidates the cache
+        clip = out / "libraries" / "0x92" / "action_075.alphaclip.json"
+        clip.write_text('{"tampered": true}', encoding="utf-8")
+        e = self.entry()
+        br.bake_library(e, out, stub_baker(calls=calls))
+        self.assertTrue(e["library_cache"].startswith("PAYLOAD_SHA256"))
+        self.assertEqual(calls, [0x92, 0x92])
+
+    def test_changed_profile_or_code_invalidates_the_cache(self):
+        calls = []
+        out = TMP / "out"
+        br.bake_library(self.entry(), out, stub_baker(calls=calls))
+        ct.ACTION_PROFILES[PROFILES[0x92][0]]["note"] = "changed evidence record"
+        e = self.entry()
+        br.bake_library(e, out, stub_baker(calls=calls))
+        self.assertEqual(e["library_cache"], "CACHE_KEY_CHANGED")
+        key = br.bake_cache_key(self.entry())
+        self.assertEqual(set(key["code_sha256"]), set(br.BAKE_CODE))
+        self.assertEqual(len(key["exe_sha256"]), 64)
+        self.assertEqual(len(key["evidence_sha256"]), 64)
+
+    def test_library_without_recorded_payload_hashes_is_rebaked(self):
+        out = TMP / "out"
+        br.bake_library(self.entry(), out, stub_baker())
+        man = out / "libraries" / "0x92" / "actions.json"
+        m = json.loads(man.read_text(encoding="utf-8"))
+        for a in m["actions"]:
+            a.pop("sha256")
+        man.write_text(json.dumps(m), encoding="utf-8")
+        e = self.entry()
+        br.bake_library(e, out, stub_baker())
+        self.assertTrue(e["library_cache"].startswith("PAYLOAD_UNRECORDED"))
 
 
 if __name__ == "__main__":

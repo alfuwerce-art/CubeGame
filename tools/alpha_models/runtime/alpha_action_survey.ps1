@@ -1,4 +1,4 @@
-# alpha_action_survey.ps1 — one research session that drives MANY player actions in the LOCAL
+# alpha_action_survey.ps1 - one research session that drives MANY player actions in the LOCAL
 # copy while pose_capture.py --full records every drawModel input (creature struct, this, dt).
 # Purpose: reference frames for the offline drawModel emulator (drawmodel_emu.py) across states,
 # not clips. Sequence (each step logged to <Out>.events.json):

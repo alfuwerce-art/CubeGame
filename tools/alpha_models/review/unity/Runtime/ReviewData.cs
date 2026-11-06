@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace CubeGame.AlphaTransfer.Review
@@ -16,6 +17,7 @@ namespace CubeGame.AlphaTransfer.Review
         public string id, kind, name, source, job, prepare, family, controllerMode, actionProfile,
             actionsStatus, actionsReason, trigger, liveCheck, authorization;
         public int[] seed;
+        public bool equipmentObserved;
         public string[] problems = new string[0], skippedClips = new string[0], blockedExamples = new string[0];
         public ReviewClipInfo[] clips = new ReviewClipInfo[0];
         public string SeedLabel => seed != null && seed.Length == 2 ? $"s{seed[0]}-{seed[1]}" : "s?";
@@ -33,6 +35,70 @@ namespace CubeGame.AlphaTransfer.Review
         public string[] kinds = new string[0];
         public ReviewSpecimenInfo[] specimens = new ReviewSpecimenInfo[0];
         public string[] notes = new string[0];
+        public ReviewHairSample[] hairSamples = new ReviewHairSample[0];
+    }
+
+    /// <summary>A live Alpha hair colour (creature+0x7A, hair_colour_evidence.json).</summary>
+    [Serializable]
+    public class ReviewHairSample
+    {
+        public string kind, capture;
+        public int[] hair_rgb = new int[0];
+        public int records, creatures;
+        public Color Colour => hair_rgb.Length == 3 ? new Color(hair_rgb[0] / 255f, hair_rgb[1] / 255f, hair_rgb[2] / 255f, 1f) : Color.white;
+        public string Label => $"({hair_rgb[0]},{hair_rgb[1]},{hair_rgb[2]}) {kind} · {capture}";
+    }
+
+    /// <summary>Responsive layout of the viewer: one side panel (tabs) + timeline, never overlapping,
+    /// always inside the screen (checked for many sizes by ReviewSceneBuilder.Check).</summary>
+    public struct ReviewLayout
+    {
+        public float scale, width, height;
+        public Rect panel, timeline, status;
+        public bool timelineBelow;
+
+        public static float AutoScale(int screenW, int screenH) =>
+            Mathf.Clamp(Mathf.Min(screenW / 1100f, screenH / 680f), 0.6f, 2f);
+
+        public static ReviewLayout Compute(int screenW, int screenH, float scale, bool panelOpen)
+        {
+            var l = new ReviewLayout { scale = scale, width = screenW / scale, height = screenH / scale };
+            const float m = 6f, th = 84f;
+            float W = l.width, H = l.height;
+            float pw = panelOpen ? Mathf.Clamp(W * 0.42f, 230f, 380f) : 120f;
+            if (pw > W - 2 * m) pw = W - 2 * m;
+            float rest = W - pw - 3 * m;
+            l.timelineBelow = rest < 380f;
+            if (l.timelineBelow)
+            {
+                l.timeline = new Rect(m, H - th - m, W - 2 * m, th);
+                l.panel = new Rect(m, m, pw, Mathf.Max(60f, H - th - 3 * m));
+                l.status = new Rect(pw + 2 * m, m, Mathf.Max(0f, W - pw - 3 * m), 44f);
+            }
+            else
+            {
+                l.panel = new Rect(m, m, pw, panelOpen ? H - 2 * m : 34f);
+                l.timeline = new Rect(pw + 2 * m, H - th - m, rest, th);
+                l.status = new Rect(pw + 2 * m, m, rest, 44f);
+            }
+            if (!panelOpen) l.panel.height = 34f;
+            if (l.status.width < 160f) l.status.width = 0f;
+            return l;
+        }
+
+        public IEnumerable<string> Problems()
+        {
+            var r = new List<(string, Rect)> { ("panel", panel), ("timeline", timeline) };
+            if (status.width > 0) r.Add(("status", status));
+            for (int i = 0; i < r.Count; i++)
+            {
+                var a = r[i].Item2;
+                if (a.xMin < 0 || a.yMin < 0 || a.xMax > width + 0.01f || a.yMax > height + 0.01f || a.width <= 0 || a.height <= 0)
+                    yield return $"{r[i].Item1} outside screen {a} in {width}x{height}";
+                for (int j = i + 1; j < r.Count; j++)
+                    if (a.Overlaps(r[j].Item2)) yield return $"{r[i].Item1} overlaps {r[j].Item1}";
+            }
+        }
     }
 
     [Serializable] public class ReviewContractPart { public string name, role, mirrorOf, anchor; public bool mirrored; }
@@ -102,6 +168,16 @@ namespace CubeGame.AlphaTransfer.Review
                 else if (r == 0 && g == 0 && bl == 255) c[2]++;
             }
             return c;
+        }
+
+        /// <summary>Default hair colour of a specimen: fixed-by-kind value, else the first live sample of
+        /// the kind, else identity (x1). Never invented.</summary>
+        public static Color DefaultHairColour(ReviewIndex idx, ReviewSpecimen spec)
+        {
+            if (spec == null || spec.hairPart < 0) return Color.white;
+            if (spec.HairFixedByKind) return spec.partSpecs[spec.hairPart].TintColor;
+            var h = idx?.hairSamples?.FirstOrDefault(x => x.kind == spec.info.kind && x.hair_rgb != null && x.hair_rgb.Length == 3);
+            return h != null ? h.Colour : Color.white;
         }
 
         public static Color StatusColor(string status)

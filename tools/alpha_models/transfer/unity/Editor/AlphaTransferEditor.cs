@@ -58,6 +58,8 @@ namespace CubeGame.AlphaTransfer.Editor
             if (shader == null) { problems.Add("SHADER_MISSING AlphaTransfer/VoxelShaded"); shader = Shader.Find("Unlit/Color"); }
             var mat = new Material(shader) { name = "AlphaVoxel" };
             AssetDatabase.CreateAsset(mat, GenDir + "/AlphaVoxel.mat");
+            var hairMat = AlphaRig.MakeHairMaterial(mat);            // Alpha draw order head -> hair
+            AssetDatabase.CreateAsset(hairMat, GenDir + "/AlphaVoxelHair.mat");
 
             var go = new GameObject(spec.rig == AlphaRig.RigId ? "AlphaHumanoid" : "AlphaCreature");
             go.transform.localScale = Vector3.one * RootScale;
@@ -73,7 +75,7 @@ namespace CubeGame.AlphaTransfer.Editor
             {
                 var ps = spec.parts[i];
                 var bytes = File.ReadAllBytes(Path.Combine(DataDir, ps.file));
-                var built = VoxelMesh.Build(bytes, ps.name + "_" + Path.GetFileNameWithoutExtension(ps.model));
+                var built = VoxelMesh.Build(bytes, ps.name + "_" + Path.GetFileNameWithoutExtension(ps.model), ps.markerTransparent);
                 if (built.problem != null) problems.Add($"MESH {ps.name}: {built.problem}");
                 if (built.size != new Vector3Int(ps.size[0], ps.size[1], ps.size[2]))
                     problems.Add($"MESH_SIZE {ps.name} {built.size} != spec");
@@ -87,11 +89,12 @@ namespace CubeGame.AlphaTransfer.Editor
                 var meshT = new GameObject("mesh").transform;
                 meshT.SetParent(part, false);
                 meshT.gameObject.AddComponent<MeshFilter>().sharedMesh = built.mesh;
-                meshT.gameObject.AddComponent<MeshRenderer>().sharedMaterial = mat;
+                meshT.gameObject.AddComponent<MeshRenderer>().sharedMaterial = AlphaRig.MaterialFor(ps.name, mat, hairMat);
                 rig.partNames[i] = ps.name; rig.parts[i] = part; rig.meshes[i] = meshT;
                 rig.sizes[i] = built.size; rig.anchors[i] = ps.anchor;
             }
             rig.SetWeaponOnBack(true);
+            for (int i = 0; i < n; i++) if (spec.parts[i].HasTint) rig.SetTint(i, spec.parts[i].TintColor);
             var player = go.AddComponent<AlphaClipPlayer>();
             var clipFiles = Directory.Exists(DataDir + "/clips")
                 ? Directory.GetFiles(DataDir + "/clips", "*.json").OrderBy(f => f).ToArray() : new string[0];

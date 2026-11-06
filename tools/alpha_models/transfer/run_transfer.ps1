@@ -1,4 +1,4 @@
-# run_transfer.ps1 — one command for the Alpha -> Unity animation transfer pilot (S05A-2).
+# run_transfer.ps1 - one command for the Alpha -> Unity animation transfer pilot (S05A-2).
 # Creates/updates an ISOLATED Unity 6000.3.27f2 project under .scratch, copies the transfer code,
 # prepares models + clips, then runs self-tests, the transfer verifier and PlayMode.
 #

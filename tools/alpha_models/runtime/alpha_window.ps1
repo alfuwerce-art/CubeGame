@@ -1,4 +1,4 @@
-# alpha_window.ps1 — window control for the LOCAL research copy of Alpha (.scratch only).
+# alpha_window.ps1 - window control for the LOCAL research copy of Alpha (.scratch only).
 # Dot-source:  . tools/alpha_models/runtime/alpha_window.ps1
 # Functions:   Start-Alpha, Get-AlphaWindow, Focus-Alpha, Save-AlphaShot, Click-Alpha, Key-Alpha,
 #              Hold-Alpha, Mouse-Alpha

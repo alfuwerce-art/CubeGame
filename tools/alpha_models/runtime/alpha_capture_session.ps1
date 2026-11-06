@@ -1,4 +1,4 @@
-# alpha_capture_session.ps1 — drive one idle / walk / attack sequence in the LOCAL research copy
+# alpha_capture_session.ps1 - drive one idle / walk / attack sequence in the LOCAL research copy
 # while pose_capture.py records the real part matrices.
 #   1. starts pose_capture.py in the background (it attaches as a debugger, read-only + INT3)
 #   2. idle 2 s -> hold W (-WalkMs) -> idle 2.5 s -> -Clicks left clicks every -ClickGapMs -> wait

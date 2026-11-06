@@ -1,4 +1,4 @@
-# setup_review.ps1 — builds the S05B visual review project (isolated Unity 6000.3.27f2 project in .scratch).
+# setup_review.ps1 - builds the S05B visual review project (isolated Unity 6000.3.27f2 project in .scratch).
 #   1. project skeleton + copy of the transfer runtime (tools/alpha_models/transfer/unity/Runtime) and the
 #      review code (tools/alpha_models/review/unity)
 #   2. review data: build_review.py -> Assets/StreamingAssets/Review (existing pipeline, existing batch jobs)
@@ -33,6 +33,18 @@ New-Item -ItemType Directory -Force -Path "$scripts\Transfer", "$scripts\Runtime
 if (-not (Test-Path -LiteralPath "$Project\ProjectSettings\ProjectVersion.txt")) {
   "m_EditorVersion: 6000.3.27f2" | Set-Content -Encoding ascii "$Project\ProjectSettings\ProjectVersion.txt"
 }
+# Unity Search indexes the project on editor startup; in this fresh isolated project its default-database
+# lookup throws ArgumentOutOfRangeException (SearchDatabase.EnumerateAll <- SearchInit.IndexationOnStartup).
+# The review never uses Search, so startup indexing is switched off for THIS project only.
+New-Item -ItemType Directory -Force -Path "$Project\UserSettings" | Out-Null
+$searchSettings = "$Project\UserSettings\Search.settings"
+$ss = @{}
+if (Test-Path -LiteralPath $searchSettings) {
+  try { $o = Get-Content -Raw -LiteralPath $searchSettings | ConvertFrom-Json; if ($o) { foreach ($p in $o.PSObject.Properties) { $ss[$p.Name] = $p.Value } } } catch { $ss = @{} }
+}
+$ss['indexOnEditorStartup'] = $false
+$ss['onBoardingDoNotAskAgain'] = $true
+($ss | ConvertTo-Json -Depth 8) | Set-Content -Encoding ascii -LiteralPath $searchSettings
 Copy-Item -Force "$repo\tools\alpha_models\transfer\unity\Runtime\*" "$scripts\Transfer\"
 Copy-Item -Force "$PSScriptRoot\unity\Runtime\*" "$scripts\Runtime\"
 Copy-Item -Force "$PSScriptRoot\unity\Editor\*" "$scripts\Editor\"
@@ -66,9 +78,14 @@ function Verdict([string]$file, [string]$marker, [int]$exit) {
   return [bool]$ok
 }
 
+# Windows PowerShell 5.1 parse/encoding check of every tools\alpha_models script
+$ps51 = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+& $ps51 -NoProfile -ExecutionPolicy Bypass -File "$PSScriptRoot\check_ps51.ps1" | Set-Content -Encoding ascii "$out\ps51_check.txt"
+$ok51 = Verdict "$out\ps51_check.txt" 'PS51_CHECK_RESULT' $LASTEXITCODE
+
 $ns = 'CubeGame.AlphaTransfer.Review.Editor.ReviewSceneBuilder'
 $e1 = Invoke-Unity "$ns.Build" "$out\build.log"
-$ok = Verdict "$out\build.txt" 'REVIEW_BUILD_RESULT' $e1
+$ok = (Verdict "$out\build.txt" 'REVIEW_BUILD_RESULT' $e1) -and $ok51
 if ($ok) {
   $e2 = Invoke-Unity "$ns.Check" "$out\check.log" -Graphics
   $ok = (Verdict "$out\review_check.txt" 'REVIEW_CHECK_RESULT' $e2) -and $ok

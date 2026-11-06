@@ -1,4 +1,4 @@
-# entity_contact_sheet.ps1 — local contact sheet of REAL Unity PlayMode frames written by
+# entity_contact_sheet.ps1 - local contact sheet of REAL Unity PlayMode frames written by
 # AlphaEntityProbe (TransferOutput/entity_frames + entity_frames.tsv) for several pilot projects.
 # One row per project: frames sampled evenly per scenario stage (walk/stop/idle/action/after),
 # labelled with kind, category, controller mode, stage and phase. Built-in System.Drawing only.

@@ -7,7 +7,9 @@
 //   mouse: LMB/RMB drag = orbit, MMB drag (or Shift+drag) = pan, wheel = zoom, F = frame
 //   Up/Down = kind, Left/Right = variant, 1/2/3 = Idle/Walk/Action, Q/E = prev/next clip or action
 //   Space = pause, R = restart, , and . = previous/next frame, - and = = speed, L = lineup of 15,
-//   P = pivots, B = bounds, G = grid, H = hide UI, F1 = help
+//   P = pivots, B = bounds, G = grid, M = Alpha marker rule on/off (before/after D61),
+//   C = next hair colour (live samples), Tab = collapse panel, H = hide UI, F1 = help
+// Layout: ReviewLayout (one tabbed side panel + status + timeline, never overlapping, any Game view size).
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -50,6 +52,16 @@ namespace CubeGame.AlphaTransfer.Review
         Material _lineMat;
 
         class LineupMember { public ReviewSpecimen spec; public ReviewSource src; public float cursor; }
+
+        // D61 colour review: Alpha marker rule on/off (before/after) and the per-instance hair colour
+        bool _alphaMarkerRule = true;
+        public class HairOption { public string label; public Color colour; public bool observedSameKind, identity; }
+        List<HairOption> _hairOptions = new List<HairOption>();
+        int _hairChoice; string _hairChoiceKind;
+        public enum Tab { Kind, Animation, Parts, Checks, Help }
+        Tab _tab = Tab.Kind;
+        bool _panelOpen = true;
+        ReviewLayout _layout;
 
         public ReviewSpecimen Current => _cur;
         public ReviewMode Mode => _mode;
@@ -94,8 +106,11 @@ namespace CubeGame.AlphaTransfer.Review
             var list = _byKind[_kinds[_kindIdx]];
             _varIdx = (varIdx % list.Count + list.Count) % list.Count;
             if (_cur != null) Destroy(_cur.gameObject);
-            _cur = ReviewSpecimen.Build(list[_varIdx], voxelMaterial, _stage);
+            _cur = ReviewSpecimen.Build(list[_varIdx], voxelMaterial, _stage, _alphaMarkerRule);
             _userHidden = new bool[_cur.rig != null ? _cur.rig.partNames.Length : 0];
+            _hairOptions = HairOptions(_cur);
+            if (_hairChoiceKind != _cur.info.kind) { _hairChoice = 0; _hairChoiceKind = _cur.info.kind; }
+            ApplyHairChoice(_cur);
             var keepMode = _mode;
             SetMode(ReviewMode.Idle);
             _groundY = _cur.VisibleBounds().min.y;
@@ -227,7 +242,9 @@ namespace CubeGame.AlphaTransfer.Review
             foreach (var k in _kinds)
             {
                 var info = _byKind[k].FirstOrDefault(s => s.IsBaseVariant) ?? _byKind[k][0];
-                var spec = ReviewSpecimen.Build(info, voxelMaterial, _stage);
+                var spec = ReviewSpecimen.Build(info, voxelMaterial, _stage, _alphaMarkerRule);
+                var opts = HairOptions(spec);
+                if (opts.Count > 0) spec.SetHairColour(opts[0].colour);
                 var src = spec.Sources(_mode).LastOrDefault(s => s.formula) ?? spec.Sources(_mode).FirstOrDefault();
                 var m = new LineupMember { spec = spec, src = src };
                 ApplySource(spec, src, 0f);
@@ -352,6 +369,74 @@ namespace CubeGame.AlphaTransfer.Review
             return lines;
         }
 
+        // ---- hair colour (D61) -------------------------------------------------------------------
+        /// <summary>Hair colour choices: live samples of this kind first, then live samples of other
+        /// kinds, then identity (x1, "not set"). Never an invented colour.</summary>
+        /// <summary>Hair colour choices by the Alpha rule of the kind (pipeline voxel_markers.hair_rule):
+        /// FIXED_BY_KIND -> only the fixed colour; RANDOM_PER_NPC -> live samples of this kind, NPCs drawn
+        /// by the server rule (MSVC rand stream, Server.exe 0x40A840), live samples of other kinds and x1.
+        /// Never an invented colour.</summary>
+        public List<HairOption> HairOptions(ReviewSpecimen spec)
+        {
+            var list = new List<HairOption>();
+            if (spec == null || spec.hairPart < 0) return list;
+            if (spec.HairFixedByKind)
+            {
+                var c = spec.partSpecs[spec.hairPart].TintColor;
+                list.Add(new HairOption { label = $"фиксирован видом ({c.r * 255:0},{c.g * 255:0},{c.b * 255:0}): клиент не берёт цвет спавна", colour = c, observedSameKind = true });
+                return list;
+            }
+            var kind = spec.info.kind;
+            var samples = _index?.hairSamples ?? new ReviewHairSample[0];
+            var keys = new HashSet<string>();
+            foreach (var h in samples.Where(h => h.kind == kind && h.hair_rgb.Length == 3))
+                if (keys.Add(string.Join(",", h.hair_rgb)))
+                    list.Add(new HairOption { label = "живой NPC этого вида: " + h.Label, colour = h.Colour, observedSameKind = true });
+            // server rule: consecutive NPC spawns from the MSVC rand stream (state 1 = CRT default seed)
+            uint state = 1;
+            for (int n = 1; n <= 8; n++)
+            {
+                var r = new int[5];
+                for (int k = 0; k < 5; k++) { state = unchecked(state * 214013u + 2531011u); r[k] = (int)((state >> 16) & 0x7fff); }
+                int R = r[2] & 255, G = r[1] & 255, B = r[0] & 255;
+                list.Add(new HairOption
+                {
+                    label = $"правило сервера, NPC #{n} (rand с srand(1)): ({R},{G},{B}), вариант s{r[3] % 100}-{r[4] % 100}",
+                    colour = new Color(R / 255f, G / 255f, B / 255f, 1f)
+                });
+            }
+            foreach (var h in samples.Where(h => h.kind != kind && h.hair_rgb.Length == 3))
+                if (keys.Add(string.Join(",", h.hair_rgb)))
+                    list.Add(new HairOption { label = "живой NPC другого вида: " + h.Label, colour = h.Colour });
+            list.Add(new HairOption { label = "×1 — цвет не задан (исходные цвета модели)", colour = Color.white, identity = true });
+            return list;
+        }
+
+        void ApplyHairChoice(ReviewSpecimen s)
+        {
+            if (s == null || s.hairPart < 0 || _hairOptions.Count == 0) return;
+            _hairChoice = Mathf.Clamp(_hairChoice, 0, _hairOptions.Count - 1);
+            s.SetHairColour(_hairOptions[_hairChoice].colour);
+        }
+
+        public void SetHairChoice(int i) { _hairChoice = i; ApplyHairChoice(_cur); }
+        public int HairOptionCount => _hairOptions.Count;
+
+        public bool AlphaMarkerRule
+        {
+            get => _alphaMarkerRule;
+            set
+            {
+                if (_alphaMarkerRule == value) return;
+                _alphaMarkerRule = value;
+                if (_lineup) { SetLineup(true); return; }
+                var keepSrc = _srcIdx; var keepMode = _mode;
+                Select(_kindIdx, _varIdx);
+                if (keepMode != _mode) SetMode(keepMode);
+                SelectSource(keepSrc);
+            }
+        }
+
         // ---- smoke tour ---------------------------------------------------------------------------
         IEnumerator Tour()
         {
@@ -363,6 +448,7 @@ namespace CubeGame.AlphaTransfer.Review
                     Select(k, v);
                     SmokeSpecimens++;
                     if (_cur.problems.Count > 0) SmokeLog.Add($"PROBLEMS {_cur.info.id}: {string.Join("; ", _cur.problems)}");
+                    foreach (Tab t in Enum.GetValues(typeof(Tab))) { _tab = t; yield return null; SmokeFrames++; }
                     foreach (ReviewMode mode in Enum.GetValues(typeof(ReviewMode)))
                     {
                         SetMode(mode);
@@ -377,7 +463,25 @@ namespace CubeGame.AlphaTransfer.Review
                                 { SmokeLog.Add($"NON_FINITE_POSE {_cur.info.id} {mode} {CurrentSource.label} {t.name}"); break; }
                         }
                     }
+                    if (_cur.hairPart >= 0)
+                    {
+                        for (int h = 0; h < HairOptionCount; h++)
+                        {
+                            SetHairChoice(h);
+                            yield return null; SmokeFrames++;
+                            if (_cur.HairColour != _hairOptions[h].colour) SmokeLog.Add($"HAIR_TINT_NOT_APPLIED {_cur.info.id} {h}");
+                        }
+                        SetHairChoice(0);
+                    }
                 }
+            // before/after toggle on a specimen with hair markers
+            Select(0, 0);
+            int after = _cur.rig.meshes.Sum(m => m.GetComponent<MeshFilter>().sharedMesh.vertexCount);
+            AlphaMarkerRule = false; yield return null; SmokeFrames++;
+            int before = _cur.rig.meshes.Sum(m => m.GetComponent<MeshFilter>().sharedMesh.vertexCount);
+            AlphaMarkerRule = true; yield return null; SmokeFrames++;
+            if (_cur.hairPart >= 0 && before == after) SmokeLog.Add("MARKER_RULE_TOGGLE_HAS_NO_EFFECT");
+            SmokeMarkerToggle = $"{before}->{after}";
             SetLineup(true);
             for (int f = 0; f < 5; f++) { yield return null; SmokeFrames++; }
             if (_lineupMembers.Count != KindCount) SmokeLog.Add($"LINEUP_COUNT {_lineupMembers.Count} != {KindCount}");
@@ -385,11 +489,13 @@ namespace CubeGame.AlphaTransfer.Review
             SmokeDone = true;
         }
 
+        public static string SmokeMarkerToggle = "";
+
         static bool IsFinite(Vector3 v) => !(float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z) ||
                                              float.IsInfinity(v.x) || float.IsInfinity(v.y) || float.IsInfinity(v.z));
 
         // ---- UI -----------------------------------------------------------------------------------
-        GUIStyle _wrap, _bold, _small, _status;
+        GUIStyle _wrap, _bold, _small, _tabStyle;
 
         void Styles()
         {
@@ -397,7 +503,7 @@ namespace CubeGame.AlphaTransfer.Review
             _wrap = new GUIStyle(GUI.skin.label) { wordWrap = true, richText = true };
             _bold = new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold, richText = true, wordWrap = true };
             _small = new GUIStyle(GUI.skin.label) { fontSize = 11, wordWrap = true, richText = true };
-            _status = new GUIStyle(GUI.skin.label) { fontStyle = FontStyle.Bold, wordWrap = true };
+            _tabStyle = new GUIStyle(GUI.skin.button) { fontSize = 11, padding = new RectOffset(3, 3, 3, 3) };
         }
 
         static string Hex(Color c) => ColorUtility.ToHtmlStringRGB(c);
@@ -406,26 +512,24 @@ namespace CubeGame.AlphaTransfer.Review
         void OnGUI()
         {
             Styles();
-            float scale = uiScale > 0 ? uiScale : Mathf.Clamp(Screen.height / 1000f, 1f, 2f);
+            float scale = uiScale > 0 ? uiScale : ReviewLayout.AutoScale(Screen.width, Screen.height);
             GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
-            float W = Screen.width / scale, H = Screen.height / scale;
+            _layout = ReviewLayout.Compute(Screen.width, Screen.height, scale, _panelOpen);
             HandleInput(Event.current);
             _panels.Clear();
-            if (_hideUI) { GUI.Label(new Rect(8, H - 24, 400, 22), "H — показать интерфейс"); return; }
+            if (_hideUI) { GUI.Label(new Rect(8, _layout.height - 24, 400, 22), "H — показать интерфейс"); return; }
             if (_kinds.Count == 0)
             {
-                var r = new Rect(20, 20, Mathf.Min(700, W - 40), 300); _panels.Add(r);
+                var r = new Rect(10, 10, Mathf.Min(640, _layout.width - 20), Mathf.Min(300, _layout.height - 20)); _panels.Add(r);
                 GUILayout.BeginArea(r, GUI.skin.box);
                 GUILayout.Label("<b>Нет данных просмотра.</b> Запустите tools/alpha_models/review/setup_review.ps1.", _wrap);
                 foreach (var p in _loadProblems) GUILayout.Label(p, _wrap);
                 GUILayout.EndArea();
                 return;
             }
-            LeftPanel(new Rect(6, 6, 320, H - 12));
-            RightPanel(new Rect(W - 386, 6, 380, H - 12));
-            if (!_lineup) Timeline(new Rect(332, H - 92, W - 332 - 392, 86));
-            else LineupBar(new Rect(332, H - 60, W - 332 - 392, 54));
-            if (_help) Help(new Rect(W * 0.5f - 260, 40, 520, 420));
+            Panel(_layout.panel);
+            if (_layout.status.width > 0) StatusBar(_layout.status);
+            if (_lineup) LineupBar(_layout.timeline); else Timeline(_layout.timeline);
         }
 
         void HandleInput(Event e)
@@ -447,12 +551,12 @@ namespace CubeGame.AlphaTransfer.Review
                     if (overUI || orbit == null) return;
                     orbit.Zoom(e.delta.y > 0 ? 1 : -1); e.Use(); break;
                 case EventType.KeyDown:
-                    if (Key(e.keyCode, e.shift)) e.Use();
+                    if (Key(e.keyCode)) e.Use();
                     break;
             }
         }
 
-        bool Key(KeyCode k, bool shift)
+        bool Key(KeyCode k)
         {
             switch (k)
             {
@@ -476,8 +580,11 @@ namespace CubeGame.AlphaTransfer.Review
                 case KeyCode.P: _showPivots = !_showPivots; return true;
                 case KeyCode.B: _showBounds = !_showBounds; return true;
                 case KeyCode.G: _showGrid = !_showGrid; return true;
+                case KeyCode.M: AlphaMarkerRule = !AlphaMarkerRule; return true;
+                case KeyCode.C: if (_cur != null && _cur.hairPart >= 0) SetHairChoice((_hairChoice + 1) % Mathf.Max(1, HairOptionCount)); return true;
+                case KeyCode.Tab: _panelOpen = !_panelOpen; return true;
                 case KeyCode.H: _hideUI = !_hideUI; return true;
-                case KeyCode.F1: _help = !_help; return true;
+                case KeyCode.F1: _panelOpen = true; _tab = Tab.Help; return true;
             }
             return false;
         }
@@ -499,37 +606,36 @@ namespace CubeGame.AlphaTransfer.Review
             SetMode(m);
         }
 
-        void LeftPanel(Rect r)
+        static readonly string[] TabNames = { "Вид", "Анимация", "Части/цвет", "Проверки", "Справка" };
+
+        void Panel(Rect r)
         {
             _panels.Add(r);
             GUILayout.BeginArea(r, GUI.skin.box);
-            GUILayout.Label("<b>S05B — визуальная проверка</b>  (F1 — справка)", _wrap);
             GUILayout.BeginHorizontal();
-            if (GUILayout.Toggle(_lineup, "Все 15 в ряд (L)", GUI.skin.button) != _lineup) SetLineup(!_lineup);
+            if (GUILayout.Button(_panelOpen ? "◀" : "▶ панель", _tabStyle, GUILayout.Width(_panelOpen ? 24 : 100))) _panelOpen = !_panelOpen;
+            if (_panelOpen)
+                for (int t = 0; t < TabNames.Length; t++)
+                    if (GUILayout.Toggle(_tab == (Tab)t, TabNames[t], _tabStyle) && _tab != (Tab)t) _tab = (Tab)t;
             GUILayout.EndHorizontal();
-            GUILayout.Label($"Виды ({_kinds.Count}):", _bold);
-            _scrollKinds = GUILayout.BeginScrollView(_scrollKinds, GUILayout.Height(r.height * 0.36f));
-            for (int k = 0; k < _kinds.Count; k++)
+            if (_panelOpen)
             {
-                var first = _byKind[_kinds[k]][0];
-                bool sel = k == _kindIdx && !_lineup;
-                string acts = _byKind[_kinds[k]].Any(s => s.actionsStatus == "AVAILABLE" && s.controllerMode == "ACTIONS") ? " · действия" : "";
-                if (GUILayout.Toggle(sel, $"{first.kind} {first.name}  ({_byKind[_kinds[k]].Count} вар.){acts}", GUI.skin.button) && !sel)
-                    Select(k, 0);
+                _scrollInfo = GUILayout.BeginScrollView(_scrollInfo);
+                switch (_tab)
+                {
+                    case Tab.Kind: KindTab(); break;
+                    case Tab.Animation: AnimationTab(); break;
+                    case Tab.Parts: PartsTab(); break;
+                    case Tab.Checks: ChecksTab(); break;
+                    default: HelpTab(); break;
+                }
+                GUILayout.EndScrollView();
             }
-            GUILayout.EndScrollView();
-            if (!_lineup && _cur != null)
-            {
-                var vars = _byKind[_kinds[_kindIdx]];
-                GUILayout.Label($"Вариант (←/→): {_varIdx + 1}/{vars.Count}", _bold);
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("◀", GUILayout.Width(40))) Select(_kindIdx, _varIdx - 1);
-                GUILayout.Label(vars[_varIdx].VariantLabel, _wrap);
-                if (GUILayout.Button("▶", GUILayout.Width(40))) Select(_kindIdx, _varIdx + 1);
-                GUILayout.EndHorizontal();
-                GUILayout.Label($"голова: {_cur.ModelOf("head")}\nволосы: {_cur.ModelOf("hair")}", _small);
-            }
-            GUILayout.Space(4);
+            GUILayout.EndArea();
+        }
+
+        void ModeButtons()
+        {
             GUILayout.BeginHorizontal();
             foreach (ReviewMode m in Enum.GetValues(typeof(ReviewMode)))
             {
@@ -539,14 +645,40 @@ namespace CubeGame.AlphaTransfer.Review
                 GUI.enabled = true;
             }
             GUILayout.EndHorizontal();
-            if (!_lineup) SourceList(r);
-            GUILayout.EndArea();
         }
 
-        void SourceList(Rect r)
+        void KindTab()
         {
-            GUILayout.Label(_mode == ReviewMode.Action ? $"Действия по ID ({_sources.Count}), Q/E:" : $"Источник ({_sources.Count}), Q/E:", _bold);
-            _scrollSources = GUILayout.BeginScrollView(_scrollSources);
+            if (GUILayout.Toggle(_lineup, "Все 15 видов в ряд (L)", GUI.skin.button) != _lineup) SetLineup(!_lineup);
+            ModeButtons();
+            if (!_lineup && _cur != null)
+            {
+                var vars = _byKind[_kinds[_kindIdx]];
+                GUILayout.Label($"<b>Вариант (←/→): {_varIdx + 1}/{vars.Count}</b>", _wrap);
+                GUILayout.BeginHorizontal();
+                if (GUILayout.Button("◀", GUILayout.Width(32))) Select(_kindIdx, _varIdx - 1);
+                GUILayout.Label(vars[_varIdx].VariantLabel, _small);
+                if (GUILayout.Button("▶", GUILayout.Width(32))) Select(_kindIdx, _varIdx + 1);
+                GUILayout.EndHorizontal();
+                GUILayout.Label($"голова: {_cur.ModelOf("head")} · волосы: {_cur.ModelOf("hair")}", _small);
+            }
+            GUILayout.Label($"<b>Виды (↑/↓), {_kinds.Count}:</b>", _wrap);
+            for (int k = 0; k < _kinds.Count; k++)
+            {
+                var first = _byKind[_kinds[k]][0];
+                bool sel = k == _kindIdx && !_lineup;
+                string acts = _byKind[_kinds[k]].Any(s => s.actionsStatus == "AVAILABLE" && s.controllerMode == "ACTIONS") ? " · действия" : "";
+                if (GUILayout.Toggle(sel, $"{first.kind} {first.name} ({_byKind[_kinds[k]].Count} вар.){acts}", GUI.skin.button) && !sel)
+                    Select(k, 0);
+            }
+            if (_lineup) LineupInfo();
+        }
+
+        void AnimationTab()
+        {
+            ModeButtons();
+            if (_lineup) { GUILayout.Label("В режиме ряда — только Idle/Walk всех видов. Выйдите из ряда (L) для действий.", _wrap); return; }
+            GUILayout.Label(_mode == ReviewMode.Action ? $"<b>Действия по ID ({_sources.Count}), Q/E:</b>" : $"<b>Источник ({_sources.Count}), Q/E:</b>", _wrap);
             if (_sources.Count == 0)
             {
                 if (_mode == ReviewMode.Action) ActionsMissingNote();
@@ -566,7 +698,7 @@ namespace CubeGame.AlphaTransfer.Review
                 foreach (var b in _cur.actions.blockedActions)
                     GUILayout.Label($"<color=#ff7777>ID {b.action:000}</color> — {b.reason}", _small);
             }
-            GUILayout.EndScrollView();
+            ClipInfo();
         }
 
         void ActionsMissingNote()
@@ -575,59 +707,69 @@ namespace CubeGame.AlphaTransfer.Review
             bool kindHasActions = _byKind[_kinds[_kindIdx]].Any(s => s.controllerMode == "ACTIONS" && s.actionsStatus == "AVAILABLE");
             if (kindHasActions)
                 GUILayout.Label("<color=#ffb347>Для этого варианта библиотека действий не импортирована.</color> Действия доказаны и запечены только " +
-                                "на образце своего вида (seed 0-0, D60); у HumanMale — на варианте «s0-0 + библиотека игрока». " +
-                                "Перенос на другой вариант внешности не проверен и здесь не показывается.", _wrap);
+                                "на образце своего вида (seed 0-0, D60); у HumanMale — на варианте «s0-0 + библиотека игрока».", _wrap);
             else
                 GUILayout.Label($"<color=#ff6666>Действий нет:</color> {i.actionsStatus} {i.actionsReason}", _wrap);
         }
 
-        void RightPanel(Rect r)
+        void ClipInfo()
         {
-            _panels.Add(r);
-            GUILayout.BeginArea(r, GUI.skin.box);
-            _scrollInfo = GUILayout.BeginScrollView(_scrollInfo);
-            if (_lineup) { LineupInfo(); GUILayout.EndScrollView(); GUILayout.EndArea(); return; }
-            var i = _cur.info; var s = CurrentSource;
-            GUILayout.Label($"<b>{i.name} {i.kind}</b> · {i.VariantLabel}", _wrap);
-            GUILayout.Label($"семейство: {i.family}\nисточник: {i.source}\nзадание: {i.job}", _small);
-            if (_cur.contract != null)
-                GUILayout.Label($"категория: {_cur.contract.category} · план тела: {_cur.contract.bodyPlan}\nконтроллер: {_cur.contract.controllerMode} · переходы: {_cur.contract.transitions}", _small);
-            if (!string.IsNullOrEmpty(i.actionProfile))
-                GUILayout.Label($"профиль действий: {i.actionProfile}\nзапуск: {i.trigger} · live_check: <color=#ffb347>{(string.IsNullOrEmpty(i.liveCheck) ? "—" : i.liveCheck)}</color> · {i.authorization}", _small);
-
+            var s = CurrentSource;
             GUILayout.Space(4);
             GUILayout.Label("<b>Клип / происхождение</b>", _wrap);
-            if (s != null)
+            if (s == null) { GUILayout.Label("<color=#ff6666>нет источника</color>", _wrap); return; }
+            GUILayout.Label(Tag(s.status) + (string.IsNullOrEmpty(s.category) ? "" : $" · {s.category}"), _bold);
+            if (s.formula)
             {
-                GUILayout.Label(s.label, _wrap);
-                GUILayout.Label(Tag(s.status) + (string.IsNullOrEmpty(s.category) ? "" : $"  · {s.category}"), _bold);
-                if (s.formula)
-                    GUILayout.Label($"Формула drawModel (ходьба) из параметров внешности вида; скорость {_cur.driver.speedXY} — PLACEHOLDER_NOT_ALPHA.", _small);
-                else if (CurClip != null)
+                GUILayout.Label($"Формула drawModel (ходьба) из параметров внешности; скорость {_cur.driver.speedXY} — PLACEHOLDER_NOT_ALPHA.", _small);
+                return;
+            }
+            if (CurClip == null) return;
+            var d = CurClip.Data;
+            GUILayout.Label($"{d.param}, длительность {d.duration:0.###}, ключей {d.keys.Length}, loop {d.loop}" +
+                            (d.actionCode >= 0 ? $"\nдействие ID {d.actionCode}, конец {d.actionEndMs} мс, восстановление с {d.recoveryStartMs} мс" : "") +
+                            (d.visibilityMode != "STATIC_ALL" ? $"\nвидимость частей: {d.visibilityMode}" : ""), _small);
+            if (d.status == "TRANSFERRED_FROM_ALPHA" && !string.IsNullOrEmpty(d.provenance))
+            {
+                ReviewCaptureInfo cap = null;
+                try { cap = JsonUtility.FromJson<ReviewCaptureInfo>(d.provenance); } catch (Exception) { }
+                if (cap != null && !string.IsNullOrEmpty(cap.kind))
                 {
-                    var d = CurClip.Data;
-                    GUILayout.Label($"{d.param}, длительность {d.duration:0.###}, ключей {d.keys.Length}, loop {d.loop}" +
-                                    (d.actionCode >= 0 ? $"\nдействие ID {d.actionCode}, конец действия {d.actionEndMs} мс, восстановление с {d.recoveryStartMs} мс" : "") +
-                                    (d.visibilityMode != "STATIC_ALL" ? $"\nвидимость частей: {d.visibilityMode}" : ""), _small);
-                    if (d.status == "TRANSFERRED_FROM_ALPHA" && !string.IsNullOrEmpty(d.provenance))
-                    {
-                        ReviewCaptureInfo cap = null;
-                        try { cap = JsonUtility.FromJson<ReviewCaptureInfo>(d.provenance); } catch (Exception) { }
-                        if (cap != null && !string.IsNullOrEmpty(cap.kind))
-                        {
-                            bool other = !string.Equals(cap.kind, i.kind, StringComparison.OrdinalIgnoreCase);
-                            GUILayout.Label($"живой захват Alpha: вид {cap.kind}, {cap.capture}, кадров {cap.frames_used}" +
-                                            (other ? $"\n<color=#ffb347>захвачен на другом виде того же семейства движения ({cap.kind} → {i.kind})</color>" : ""), _wrap);
-                        }
-                    }
-                    if (!string.IsNullOrEmpty(d.provenance))
-                        GUILayout.Label("provenance: " + (d.provenance.Length > 360 ? d.provenance.Substring(0, 360) + "…" : d.provenance), _small);
+                    bool other = !string.Equals(cap.kind, _cur.info.kind, StringComparison.OrdinalIgnoreCase);
+                    GUILayout.Label($"живой захват Alpha: вид {cap.kind}, {cap.capture}, кадров {cap.frames_used}" +
+                                    (other ? $"\n<color=#ffb347>захвачен на другом виде того же семейства ({cap.kind} → {_cur.info.kind})</color>" : ""), _small);
                 }
             }
-            else GUILayout.Label("<color=#ff6666>нет источника</color>", _wrap);
+            if (!string.IsNullOrEmpty(d.provenance))
+                GUILayout.Label("provenance: " + (d.provenance.Length > 300 ? d.provenance.Substring(0, 300) + "…" : d.provenance), _small);
+        }
+
+        void PartsTab()
+        {
+            if (_lineup || _cur == null) { GUILayout.Label("Выберите один вид (выйдите из ряда).", _wrap); return; }
+            GUILayout.Label("<b>Цвет (D61)</b>", _wrap);
+            bool rule = GUILayout.Toggle(_alphaMarkerRule, " правило маркеров Alpha (M); выкл = как до исправления");
+            if (rule != _alphaMarkerRule) AlphaMarkerRule = rule;
+            if (_cur.hairPart >= 0)
+            {
+                GUILayout.Label(_cur.HairFixedByKind
+                    ? "Цвет волос этого вида фиксирован (клиент не копирует цвет спавна) — доказано исполнением кода."
+                    : "Цвет волос — случайный для каждого NPC: сервер берёт 3 значения rand() (Server.exe 0x40A840). Варианты (C):", _small);
+                for (int h = 0; h < _hairOptions.Count; h++)
+                {
+                    var o = _hairOptions[h];
+                    GUILayout.BeginHorizontal();
+                    var prev = GUI.color; GUI.color = o.colour;
+                    GUILayout.Box("", GUILayout.Width(16), GUILayout.Height(16));
+                    GUI.color = prev;
+                    if (GUILayout.Toggle(h == _hairChoice, o.label, GUI.skin.button) && h != _hairChoice) SetHairChoice(h);
+                    GUILayout.EndHorizontal();
+                }
+            }
+            else GUILayout.Label("У вида нет блока волос: статичного tint нет, цвета моделей настоящие.", _small);
 
             GUILayout.Space(4);
-            GUILayout.Label("<b>Части</b> (галочка — показать; R/G/B — чистые маркерные цвета)", _wrap);
+            GUILayout.Label("<b>Части</b> (галочка — показать)", _wrap);
             for (int p = 0; p < _cur.rig.partNames.Length; p++)
             {
                 var spec = _cur.partSpecs[p];
@@ -636,33 +778,39 @@ namespace CubeGame.AlphaTransfer.Review
                 GUILayout.BeginHorizontal();
                 bool show = GUILayout.Toggle(!_userHidden[p], "", GUILayout.Width(18));
                 if (show == _userHidden[p]) { _userHidden[p] = !show; ApplyCurrent(); }
-                string mk = m[0] + m[1] + m[2] > 0 ? $" <color=#ff8080>R{m[0]} G{m[1]} B{m[2]}</color>" : "";
+                string mk = m[0] + m[1] + m[2] == 0 ? "" : _cur.markerTransparent[p]
+                    ? $" маркеры R{m[0]} G{m[1]} B{m[2]} " + (_alphaMarkerRule ? "<color=#80ff80>скрыты (флаг 0)</color>" : "<color=#ff8080>показаны (до исправления)</color>")
+                    : $" чистые R{m[0]} G{m[1]} B{m[2]}: <color=#80ff80>настоящие цвета (флаг 1)</color>";
                 string hid = clipVisible ? "" : " <color=#aaaaaa>(скрыта клипом)</color>";
-                GUILayout.Label($"<b>{spec.name}</b> {spec.model} {spec.size[0]}×{spec.size[1]}×{spec.size[2]} · {spec.anchor}{(spec.mirrored ? " · mirrored" : "")}{mk}{hid}", _small);
+                var hc = _cur.HairColour;
+                string tint = spec.name == "hair" ? $" ×({hc.r * 255:0},{hc.g * 255:0},{hc.b * 255:0})" : "";
+                GUILayout.Label($"<b>{spec.name}</b> {spec.model} {spec.size[0]}×{spec.size[1]}×{spec.size[2]} · {spec.anchor}{(spec.mirrored ? " · mirrored" : "")}{tint}{mk}{hid}", _small);
                 GUILayout.EndHorizontal();
             }
+        }
 
-            GUILayout.Space(4);
-            GUILayout.Label("<b>Проверки</b>", _wrap);
+        void ChecksTab()
+        {
+            if (_lineup || _cur == null) { LineupInfo(); return; }
+            var i = _cur.info;
+            GUILayout.Label($"<b>{i.name} {i.kind}</b> · {i.VariantLabel}", _wrap);
+            GUILayout.Label($"семейство: {i.family}\nисточник: {i.source}", _small);
+            if (_cur.contract != null)
+                GUILayout.Label($"категория: {_cur.contract.category} · контроллер: {_cur.contract.controllerMode} · переходы: {_cur.contract.transitions}", _small);
+            if (!string.IsNullOrEmpty(i.actionProfile))
+                GUILayout.Label($"профиль: {i.actionProfile}\nзапуск: {i.trigger} · live_check: <color=#ffb347>{(string.IsNullOrEmpty(i.liveCheck) ? "—" : i.liveCheck)}</color> · экипировка NPC наблюдалась: {(i.equipmentObserved ? "да" : "нет")}", _small);
             GUILayout.BeginHorizontal();
-            _showPivots = GUILayout.Toggle(_showPivots, "оси частей (P)");
+            _showPivots = GUILayout.Toggle(_showPivots, "оси (P)");
             _showBounds = GUILayout.Toggle(_showBounds, "габарит (B)");
             _showGrid = GUILayout.Toggle(_showGrid, "сетка (G)");
             GUILayout.EndHorizontal();
             var bb = _cur.VisibleBounds();
-            GUILayout.Label($"габарит (вокс.): ширина {bb.size.x / AlphaTransferConsts.RootScale:0.0}, высота {bb.size.y / AlphaTransferConsts.RootScale:0.0}, глубина {bb.size.z / AlphaTransferConsts.RootScale:0.0}" +
-                            "\nсетка: тонкая линия = 1 воксель, толстая = 10", _small);
+            GUILayout.Label($"габарит (вокс.): {bb.size.x / AlphaTransferConsts.RootScale:0.0} × {bb.size.y / AlphaTransferConsts.RootScale:0.0} × {bb.size.z / AlphaTransferConsts.RootScale:0.0}; сетка: тонкая = 1 вокс., толстая = 10", _small);
             var mirror = MirrorReport();
             if (mirror.Count > 0)
             {
                 GUILayout.Label("Зеркальные пары (текущий кадр; в стойке Δ≈0):", _small);
                 foreach (var l in mirror) GUILayout.Label("  " + l, _small);
-            }
-            var tint = TintReport();
-            if (tint.Count > 0)
-            {
-                GUILayout.Label("<color=#ff6666><b>TINT НЕ ПРИМЕНЁН</b></color> — маркерные цвета показаны как есть (известный дефект универсального конвейера, не маскируется):", _wrap);
-                foreach (var l in tint) GUILayout.Label("  " + l, _small);
             }
             if (_cur.problems.Count > 0 || i.problems.Length > 0)
             {
@@ -674,35 +822,53 @@ namespace CubeGame.AlphaTransfer.Review
                 GUILayout.Label("Не импортированы конвейером:", _small);
                 foreach (var p in i.skippedClips) GUILayout.Label("  " + p, _small);
             }
-
-            GUILayout.Space(4);
-            GUILayout.Label("<b>Камера</b>  (ЛКМ/ПКМ — вращение, СКМ/Shift — сдвиг, колесо — зум)", _wrap);
+            GUILayout.Label("<b>Камера</b>", _wrap);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Спереди")) orbit.SetView(180f, 5f);
             if (GUILayout.Button("Сбоку")) orbit.SetView(90f, 5f);
             if (GUILayout.Button("Сзади")) orbit.SetView(0f, 5f);
             if (GUILayout.Button("Сверху")) orbit.SetView(180f, 89f);
-            if (GUILayout.Button("F")) orbit.Frame(_cur.VisibleBounds());
             GUILayout.EndHorizontal();
-            GUILayout.EndScrollView();
-            GUILayout.EndArea();
+        }
+
+        void HelpTab()
+        {
+            GUILayout.Label(
+                "<b>Управление</b> (щёлкните по Game view для фокуса)\n" +
+                "↑/↓ — вид · ←/→ — вариант · 1/2/3 — Idle/Walk/Action · Q/E — клип/действие\n" +
+                "Space — пауза · R — сначала · , и . — кадр · − и = — скорость\n" +
+                "L — 15 видов в ряд · F — показать целиком · P/B/G — оси/габарит/сетка\n" +
+                "M — правило маркеров Alpha вкл/выкл (до/после) · C — следующий цвет волос\n" +
+                "Tab — свернуть панель · H — скрыть интерфейс\n" +
+                "Мышь: ЛКМ/ПКМ — вращение, СКМ или Shift+ЛКМ — сдвиг, колесо — зум.\n\n" +
+                "<b>Статусы:</b> " + Tag("TRANSFERRED_FROM_ALPHA") + " — живой захват; " + Tag("EMULATED_ALPHA_CODE") +
+                " — исполнение кода Alpha, без живой проверки; " + Tag("RECONSTRUCTED_FROM_EVIDENCE") + " — формула ходьбы.\n" +
+                "Смена источника — жёсткая смена позы (переходы не показываются).", _wrap);
         }
 
         void LineupInfo()
         {
-            GUILayout.Label($"<b>Все {_lineupMembers.Count} видов (seed 0-0)</b>, режим {_mode}", _wrap);
-            GUILayout.Label("Сравнение пропорций: один масштаб, общая сетка (толстая линия = 10 вокселей). Действия — только в одиночном режиме.", _small);
+            GUILayout.Label($"<b>Ряд: {_lineupMembers.Count} видов (seed 0-0)</b>, режим {_mode}", _wrap);
             foreach (var m in _lineupMembers)
             {
                 var b = m.spec.VisibleBounds();
                 GUILayout.Label($"{m.spec.info.kind} {m.spec.info.name}: высота {b.size.y / AlphaTransferConsts.RootScale:0.0} вокс · " +
                                 (m.src != null ? Tag(m.src.status) : "<color=#ff6666>нет источника</color>"), _small);
             }
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Спереди")) orbit.SetView(180f, 8f);
-            if (GUILayout.Button("Сбоку")) orbit.SetView(90f, 8f);
-            if (GUILayout.Button("F")) orbit.Frame(LineupBounds());
-            GUILayout.EndHorizontal();
+        }
+
+        void StatusBar(Rect r)
+        {
+            _panels.Add(r);
+            GUILayout.BeginArea(r, GUI.skin.box);
+            string rule = _alphaMarkerRule ? "" : " · <color=#ff8080>маркеры показаны (до исправления)</color>";
+            if (_lineup) GUILayout.Label($"<b>Ряд из {_lineupMembers.Count} видов</b> · {_mode}{rule}", _small);
+            else if (_cur != null)
+            {
+                var s = CurrentSource;
+                GUILayout.Label($"<b>{_cur.info.name} {_cur.info.kind}</b> {_cur.info.VariantLabel} · {_mode} · {(s != null ? s.label + " " + Tag(s.status) : "—")}{rule}", _small);
+            }
+            GUILayout.EndArea();
         }
 
         void Timeline(Rect r)
@@ -712,13 +878,13 @@ namespace CubeGame.AlphaTransfer.Review
             var s = CurrentSource;
             float dur = Duration;
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button(_paused ? "▶ Пуск (Space)" : "❚❚ Пауза (Space)", GUILayout.Width(130))) _paused = !_paused;
-            if (GUILayout.Button("⟲ Сначала (R)", GUILayout.Width(110))) Restart();
-            if (GUILayout.Button("◀ кадр (,)", GUILayout.Width(80))) StepFrame(-1);
-            if (GUILayout.Button("кадр ▶ (.)", GUILayout.Width(80))) StepFrame(1);
-            _repeat = GUILayout.Toggle(_repeat, "повтор", GUILayout.Width(70));
-            GUILayout.Label($"скорость ×{_speed:0.00}", GUILayout.Width(100));
-            float sp = GUILayout.HorizontalSlider(_speed, 0.05f, 2f, GUILayout.MinWidth(80));
+            if (GUILayout.Button(_paused ? "▶" : "❚❚", GUILayout.Width(32))) _paused = !_paused;
+            if (GUILayout.Button("⟲", GUILayout.Width(32))) Restart();
+            if (GUILayout.Button("◀|", GUILayout.Width(32))) StepFrame(-1);
+            if (GUILayout.Button("|▶", GUILayout.Width(32))) StepFrame(1);
+            _repeat = GUILayout.Toggle(_repeat, "повтор", GUILayout.Width(66));
+            GUILayout.Label($"×{_speed:0.00}", GUILayout.Width(44));
+            float sp = GUILayout.HorizontalSlider(_speed, 0.05f, 2f, GUILayout.MinWidth(40));
             if (Mathf.Abs(sp - _speed) > 1e-4f) _speed = sp;
             GUILayout.EndHorizontal();
             if (s != null && dur > 0f)
@@ -729,10 +895,10 @@ namespace CubeGame.AlphaTransfer.Review
             string pos;
             if (s == null) pos = "—";
             else if (s.formula) pos = $"фаза {_cursor:0.000} / 2π рад";
-            else if (CurClip != null && CurClip.Data.param == "walk_phase") pos = $"фаза {_cursor:0.000} / {dur:0.000} рад · ключ {KeyIndex() + 1}/{CurClip.Data.keys.Length}";
+            else if (CurClip != null && CurClip.Data.param == "walk_phase") pos = $"фаза {_cursor:0.000} / {dur:0.000} · ключ {KeyIndex() + 1}/{CurClip.Data.keys.Length}";
             else if (CurClip != null) pos = $"{_cursor:0} / {dur:0} мс · ключ {KeyIndex() + 1}/{CurClip.Data.keys.Length}";
             else pos = "—";
-            GUILayout.Label($"{pos}   {(s != null ? Tag(s.status) : "")}", _wrap);
+            GUILayout.Label(pos, _small);
             GUILayout.EndArea();
         }
 
@@ -741,31 +907,11 @@ namespace CubeGame.AlphaTransfer.Review
             _panels.Add(r);
             GUILayout.BeginArea(r, GUI.skin.box);
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button(_paused ? "▶ Пуск" : "❚❚ Пауза", GUILayout.Width(100))) _paused = !_paused;
-            GUILayout.Label($"скорость ×{_speed:0.00}", GUILayout.Width(100));
+            if (GUILayout.Button(_paused ? "▶" : "❚❚", GUILayout.Width(32))) _paused = !_paused;
+            GUILayout.Label($"×{_speed:0.00}", GUILayout.Width(44));
             _speed = GUILayout.HorizontalSlider(_speed, 0.05f, 2f);
-            if (GUILayout.Button("Выйти из ряда (L)", GUILayout.Width(150))) SetLineup(false);
+            if (GUILayout.Button("Выйти из ряда (L)", GUILayout.Width(130))) SetLineup(false);
             GUILayout.EndHorizontal();
-            GUILayout.EndArea();
-        }
-
-        void Help(Rect r)
-        {
-            _panels.Add(r);
-            GUILayout.BeginArea(r, GUI.skin.window);
-            GUILayout.Label("<b>Управление</b> (Game view должен иметь фокус — щёлкните по нему)", _wrap);
-            GUILayout.Label(
-                "↑/↓ — вид · ←/→ — вариант внешности\n" +
-                "1 / 2 / 3 — Idle / Walk / Action · Q/E — предыдущий/следующий клип или действие\n" +
-                "Space — пауза · R — сначала · , и . — кадр назад/вперёд · − и = — скорость ×0.5 / ×2\n" +
-                "L — все 15 видов в ряд · F — показать целиком · P — оси частей · B — габарит · G — сетка\n" +
-                "H — скрыть интерфейс · F1 — эта справка\n\n" +
-                "Мышь: ЛКМ/ПКМ — вращение, СКМ или Shift+ЛКМ — сдвиг, колесо — приближение.\n\n" +
-                "<b>Цвет статуса:</b> " + Tag("TRANSFERRED_FROM_ALPHA") + " — захват живых кадров Alpha; " +
-                Tag("EMULATED_ALPHA_CODE") + " — позы исполнением кода Alpha (оракул drawModel), без живой проверки; " +
-                Tag("RECONSTRUCTED_FROM_EVIDENCE") + " — формула ходьбы, восстановленная по коду и сверенная с захватами.\n" +
-                "Переключение источников — жёсткая смена позы (переходы не показываются).", _wrap);
-            if (GUILayout.Button("Закрыть (F1)")) _help = false;
             GUILayout.EndArea();
         }
     }
