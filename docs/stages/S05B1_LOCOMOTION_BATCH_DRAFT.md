@@ -2,6 +2,7 @@
 
 **Статус: `DRAFT / NOT_AUTHORIZED`.** Проект ТЗ для решения продюсера. Не является разрешением: до отдельного решения продюсера `S05B — NOT_AUTHORIZED`, `transfer_planner batch` отказывает, `BATCH_AUTHORIZATIONS` пуст.
 **Дата:** 2026-11-06. **Автор:** Claude Code (архитектор). **Основание:** [S05A2_UNIVERSAL_CONTINUATION_REPORT §7](../reports/S05A2_UNIVERSAL_CONTINUATION_REPORT.md), [UNIVERSAL_ENTITY_CONTRACT](../architecture/UNIVERSAL_ENTITY_CONTRACT.md), [матрица покрытия](../research/alpha2013/UNIVERSAL_TRANSFER_COVERAGE.csv).
+**Проект решения:** [D59](../decisions/D59-s05a2-limited-acceptance-s05b1-authorization.md) — `PROPOSED / NOT_AUTHORIZED` (отвечает на В1–В4; действует только после утверждения продюсером).
 **Предпосылка:** S05A-2 сейчас `IN_PROGRESS / REVIEW OPEN`. Продюсер решает, открывать ли S05B-1 до приёмки S05A-2 или после неё (вопрос В1).
 
 ---
