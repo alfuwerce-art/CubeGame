@@ -51,7 +51,7 @@ PILOT_ALLOWLIST = {
 }
 # (decision, scope) pairs that authorise BATCH. Only producer decisions go here; every other decision
 # id or scope is refused. D59 (2026-11-06): S05B-1 only; S05B-2 and creature actions stay NOT_AUTHORIZED.
-BATCH_AUTHORIZATIONS: tuple = (("D59", "s05b1"),)
+BATCH_AUTHORIZATIONS: tuple = (("D59", "s05b1"), ("D60", "s05ba"))
 
 # Unity locomotion inputs the planner may fill in. They are NOT Alpha data: amplitude 0.19 is the
 # steady-walk value seen in captures; speed 3.7 is the median AI walk speed of the captured cat/runner.
@@ -488,7 +488,14 @@ def batch(authorization=None, scope=None, table=None, clips_root=None, phases=(1
     runner = br.unity_runner(sc["project"], python)
     reg = sc.get("regression")
     reg_runner = br.unity_runner(reg["project"], python) if reg else None
-    summary = br.execute(scope, p, table, run_slots, runner, out_root, inputs, reg_runner, phases)
+    evidence_check = None
+    if sc.get("mode") == "actions":
+        from tools.alpha_models.anim import pe_bytes as pb
+        inputs["npc_evidence_sha256"] = _file_sha256(ct.NPC_EVIDENCE_PATH)
+        image = pb.load(str(exe or pl.DEFAULT_EXE))
+        evidence_check = lambda kinds: br.evidence_drift(image, kinds)
+    summary = br.execute(scope, p, table, run_slots, runner, out_root, inputs, reg_runner, phases,
+                         evidence_check=evidence_check)
     if summary.get("BATCH_RESULT") != "REFUSED":
         summary["contact_sheets"] = br.contact_sheets(out_root, summary)
         br.write_json_atomic(out_root / "summary.json", summary)

@@ -258,6 +258,46 @@ def analyse_observed(image, kind, creature_full, seed=(0, 0), label="observed", 
             "appearance_flags_7e": f"0x{flags:04x}", **summarize(res)}
 
 
+# --------------------------------------------------------------------------- evidence file
+EVIDENCE_FORMAT = "cubegame.npc_action_evidence/1"
+
+
+def kind_evidence(image, kind, seeds, family_id, observed=None):
+    """П1 of one kind over all its appearance variants; the launch set must not depend on the seed.
+
+    ``observed`` = {"source": str, "creature": bytes, "fields": tuple} — live NPC state to run on
+    (class/equipment/stats). Without it the creature is the kind's own default (class 0, unarmed)."""
+    per_seed, flags = {}, set()
+    for seed in seeds:
+        if observed and tuple(seed) == (0, 0):
+            rep = analyse_observed(image, kind, observed["creature"], seed=tuple(seed),
+                                   label=observed["source"], fields=observed["fields"])
+        else:
+            rep = analyse_kind(image, kind, tuple(seed))
+        if rep["errors"]:
+            return {"kind": f"0x{kind:02x}", "status": "PARTIAL", "reason": f"EXECUTION_ERRORS {rep['errors']}"}
+        flags.add(rep["appearance_flags_7e"])
+        per_seed[tuple(seed)] = {int(a): v["write_vas"] for a, v in rep["actions"].items()}
+        if tuple(seed) == (0, 0):
+            base = rep
+    sets = {json.dumps(sorted((a, v) for a, v in x.items())) for x in per_seed.values()}
+    if len(sets) != 1 or len(flags) != 1:
+        return {"kind": f"0x{kind:02x}", "status": "PARTIAL", "reason": "LAUNCH_SET_DEPENDS_ON_SEED"}
+    launched = per_seed[(0, 0)]
+    if any(len(v) != 1 for v in launched.values()):
+        return {"kind": f"0x{kind:02x}", "status": "PARTIAL", "reason": "ACTION_WRITTEN_AT_SEVERAL_VAS"}
+    conditions = {a: sorted({json.dumps({k: e[k] for k in ("resource_170", "cooldowns", "counter_70")},
+                                        sort_keys=True) for e in base["actions"][str(a)]["examples"]})
+                  for a in launched}
+    return {"kind": f"0x{kind:02x}", "status": "TRIGGER_EMULATED", "family_id": family_id,
+            "appearance_flags_7e": flags.pop(), "seeds_checked": [list(x) for x in seeds],
+            "launched_actions": {str(a): v[0] for a, v in sorted(launched.items())},
+            "condition_examples": {str(a): [json.loads(c) for c in v] for a, v in conditions.items()},
+            "observed_state": observed["source"] if observed else None,
+            "equipment": "unarmed (weapon/off-hand slots empty)" + (" — observed" if observed and
+                         observed["fields"] == OBSERVED_FIELDS else " — NPC equipment of this kind not observed")}
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--kind", required=True, type=lambda s: int(s, 0))

@@ -176,6 +176,9 @@ class ActionAndEquipmentTests(unittest.TestCase):
         from tools.alpha_models.universal import action_baker
         out = ROOT / ".scratch" / "tmp" / "test_baker_refusal"
         with self.assertRaisesRegex(ValueError, "ACTION_PROFILE_REQUIRED"):
+            action_baker.bake_job({"kind": "0x21", "seed_variant": [0, 0]}, [57], out, exe="missing.exe")
+        # a creature-AI kind cannot borrow the humanoid's actions either
+        with self.assertRaisesRegex(ValueError, "ACTION_TRIGGER_NOT_PROVEN"):
             action_baker.bake_job({"kind": "0x20", "seed_variant": [0, 0]}, [57], out, exe="missing.exe")
         with self.assertRaisesRegex(ValueError, "PROFILE_REQUIRES_VERIFIED_WEAPON"):
             action_baker.bake_job({"kind": f"0x{self.sk:02x}", "seed_variant": self.spec["seed_variant"],
@@ -251,7 +254,7 @@ class PlannerTests(unittest.TestCase):
         self.assertNotIn("job", by["0x57"])
         md = tp.plan_markdown(p)
         self.assertIn("| 0x93 |", md)
-        self.assertEqual(p["batch"]["authorized"], [["D59", "s05b1"]])
+        self.assertEqual(p["batch"]["authorized"], [["D59", "s05b1"], ["D60", "s05ba"]])
         self.assertIn("NOT_AUTHORIZED", p["batch"]["other"])
 
     def test_pilot_refuses_kinds_outside_allowlist(self):
@@ -259,14 +262,16 @@ class PlannerTests(unittest.TestCase):
         self.assertEqual(r["PILOT_RESULT"], "REFUSED")
         self.assertIn("NOT_IN_PILOT_ALLOWLIST", r["problems"][0])
 
-    def test_batch_only_d59_s05b1_is_authorized(self):
-        self.assertEqual(tp.BATCH_AUTHORIZATIONS, (("D59", "s05b1"),))
+    def test_batch_only_producer_scopes_are_authorized(self):
+        self.assertEqual(tp.BATCH_AUTHORIZATIONS, (("D59", "s05b1"), ("D60", "s05ba")))
         for auth, scope in ((None, None), ("S05B", None), ("D99", "s05b1"), ("D59", None), ("D59", "s05b2"),
-                            ("D58", "s05b1"), ("d59", "s05b1")):
+                            ("D58", "s05b1"), ("d59", "s05b1"), ("D60", "s05b1"), ("D59", "s05ba"),
+                            ("D60", "s05b2")):
             self.assertEqual(tp.batch(auth, scope)["BATCH_RESULT"], "NOT_AUTHORIZED", (auth, scope))
         self.assertEqual(tp.main(["batch", "--authorization", "S05B"]), 3)
         self.assertEqual(tp.main(["batch", "--authorization", "D59", "--scope", "s05b2"]), 3)
         self.assertIsNone(tp.batch_authorized("D59", "s05b1"))
+        self.assertIsNone(tp.batch_authorized("D60", "s05ba"))
 
     def test_outputs_must_stay_in_scratch(self):
         with self.assertRaisesRegex(ValueError, "PLANNER_OUTPUT_MUST_BE_IN_SCRATCH"):
@@ -302,14 +307,11 @@ class LocalReferenceTests(unittest.TestCase):
         self.assertEqual(cat["family_id"], cat2["family_id"])
         for e in (cat, cat2, run):
             self.assertEqual(e["readiness"], "AUTO_READY")
-        # D60/A1-A3: Cat 0x1e and PlainRunner 0x3f have creature-AI trigger evidence; WhiteCat (same
-        # family as Cat 0x1e) stays blocked until its own trigger is proven
-        for e in (cat2, run):
+        # D60 (S05B-A): every kind with П1 evidence has its own creature-AI profile
+        for e in (cat, cat2, run):
             self.assertEqual(e["channels"]["actions"]["status"], "AVAILABLE")
             self.assertEqual(e["channels"]["actions"]["trigger"], "creature_ai")
             self.assertEqual(ct.unity_contract(e)["controllerMode"], "ACTIONS")
-        self.assertEqual(cat["channels"]["actions"]["status"], "BLOCKED")
-        self.assertEqual(ct.unity_contract(cat)["controllerMode"], "LOCOMOTION_ONLY")
         # cat and runner families carry a captured walk clip and the verified formula
         for e in (cat, run):
             self.assertEqual({s["provenance"] for s in e["channels"]["walk"]["sources"]},

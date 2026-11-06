@@ -1,0 +1,1039 @@
+{
+ "format": "cubegame.npc_action_evidence/1",
+ "decision": "D60",
+ "tool": "tools/alpha_models/universal/ai_trigger.py",
+ "region": "0x42D87F..0x42EAEF (CombatBehavior::vfunc_0)",
+ "kinds": {
+  "0x00": {
+   "kind": "0x00",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/e66d96be5a",
+   "appearance_flags_7e": "0x0000",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     2,
+     2
+    ],
+    [
+     3,
+     3
+    ],
+    [
+     0,
+     4
+    ],
+    [
+     0,
+     5
+    ],
+    [
+     0,
+     6
+    ],
+    [
+     0,
+     7
+    ],
+    [
+     0,
+     8
+    ],
+    [
+     0,
+     9
+    ]
+   ],
+   "launched_actions": {
+    "3": "0x4458A0",
+    "4": "0x4458A0",
+    "6": "0x4455D7",
+    "54": "0x42E627"
+   },
+   "condition_examples": {
+    "3": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 1.0
+     }
+    ],
+    "4": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 1.0
+     }
+    ],
+    "6": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ],
+    "54": [
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.81
+     }
+    ]
+   },
+   "observed_state": null,
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 NPC equipment of this kind not observed",
+   "name_hint": "ElfMale"
+  },
+  "0x01": {
+   "kind": "0x01",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/e66d96be5a",
+   "appearance_flags_7e": "0x0000",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     2,
+     2
+    ],
+    [
+     3,
+     3
+    ],
+    [
+     4,
+     4
+    ],
+    [
+     5,
+     5
+    ],
+    [
+     0,
+     6
+    ],
+    [
+     0,
+     7
+    ],
+    [
+     0,
+     8
+    ],
+    [
+     0,
+     9
+    ]
+   ],
+   "launched_actions": {
+    "3": "0x4458A0",
+    "4": "0x4458A0",
+    "6": "0x4455D7",
+    "54": "0x42E627"
+   },
+   "condition_examples": {
+    "3": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 1.0
+     }
+    ],
+    "4": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 1.0
+     }
+    ],
+    "6": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ],
+    "54": [
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.81
+     }
+    ]
+   },
+   "observed_state": null,
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 NPC equipment of this kind not observed",
+   "name_hint": "ElfFemale"
+  },
+  "0x02": {
+   "kind": "0x02",
+   "status": "EXCLUDED",
+   "reason": "specimen (0x02, seed 0,0) carries the player_input profile; its actions are covered by the HumanMale regression",
+   "name_hint": "HumanMale"
+  },
+  "0x03": {
+   "kind": "0x03",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/e66d96be5a",
+   "appearance_flags_7e": "0x0000",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ],
+    [
+     3,
+     1
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     4,
+     4
+    ],
+    [
+     5,
+     5
+    ],
+    [
+     0,
+     6
+    ]
+   ],
+   "launched_actions": {
+    "3": "0x4458A0",
+    "4": "0x4458A0",
+    "6": "0x4455D7",
+    "54": "0x42E627"
+   },
+   "condition_examples": {
+    "3": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 1.0
+     }
+    ],
+    "4": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 1.0
+     }
+    ],
+    "6": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ],
+    "54": [
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.81
+     }
+    ]
+   },
+   "observed_state": "live full dump, HumanFemale NPC, Arulon 2026-11-06 (humans_full.jsonl)",
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 observed",
+   "name_hint": "HumanFemale"
+  },
+  "0x07": {
+   "kind": "0x07",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/e66d96be5a",
+   "appearance_flags_7e": "0x0000",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     0,
+     2
+    ],
+    [
+     0,
+     3
+    ],
+    [
+     0,
+     4
+    ],
+    [
+     0,
+     5
+    ]
+   ],
+   "launched_actions": {
+    "3": "0x4458A0",
+    "4": "0x4458A0",
+    "6": "0x4455D7",
+    "54": "0x42E627"
+   },
+   "condition_examples": {
+    "3": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 1.0
+     }
+    ],
+    "4": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 1.0
+     }
+    ],
+    "6": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ],
+    "54": [
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.81
+     }
+    ]
+   },
+   "observed_state": null,
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 NPC equipment of this kind not observed",
+   "name_hint": "LizardmanMale"
+  },
+  "0x08": {
+   "kind": "0x08",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/e66d96be5a",
+   "appearance_flags_7e": "0x0000",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     2,
+     2
+    ],
+    [
+     3,
+     3
+    ],
+    [
+     4,
+     4
+    ],
+    [
+     0,
+     5
+    ]
+   ],
+   "launched_actions": {
+    "3": "0x4458A0",
+    "4": "0x4458A0",
+    "6": "0x4455D7",
+    "54": "0x42E627"
+   },
+   "condition_examples": {
+    "3": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 1.0
+     }
+    ],
+    "4": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 1.0
+     }
+    ],
+    "6": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ],
+    "54": [
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.81
+     }
+    ]
+   },
+   "observed_state": null,
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 NPC equipment of this kind not observed",
+   "name_hint": "LizardmanFemale"
+  },
+  "0x0d": {
+   "kind": "0x0d",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/e66d96be5a",
+   "appearance_flags_7e": "0x0000",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     2,
+     2
+    ],
+    [
+     3,
+     3
+    ],
+    [
+     4,
+     4
+    ]
+   ],
+   "launched_actions": {
+    "3": "0x4458A0",
+    "4": "0x4458A0",
+    "6": "0x4455D7",
+    "54": "0x42E627"
+   },
+   "condition_examples": {
+    "3": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 1.0
+     }
+    ],
+    "4": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 1.0
+     }
+    ],
+    "6": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ],
+    "54": [
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.81
+     }
+    ]
+   },
+   "observed_state": null,
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 NPC equipment of this kind not observed",
+   "name_hint": "FrogmanMale"
+  },
+  "0x0e": {
+   "kind": "0x0e",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/e66d96be5a",
+   "appearance_flags_7e": "0x0000",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     2,
+     2
+    ],
+    [
+     3,
+     3
+    ]
+   ],
+   "launched_actions": {
+    "3": "0x4458A0",
+    "4": "0x4458A0",
+    "6": "0x4455D7",
+    "54": "0x42E627"
+   },
+   "condition_examples": {
+    "3": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 1.0
+     }
+    ],
+    "4": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 1.0
+     }
+    ],
+    "6": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ],
+    "54": [
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.81
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.81
+     }
+    ]
+   },
+   "observed_state": null,
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 NPC equipment of this kind not observed",
+   "name_hint": "FrogmanFemale"
+  },
+  "0x1e": {
+   "kind": "0x1e",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/ced63e5e96",
+   "appearance_flags_7e": "0x0031",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ]
+   ],
+   "launched_actions": {
+    "75": "0x42E2BF"
+   },
+   "condition_examples": {
+    "75": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ]
+   },
+   "observed_state": null,
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 NPC equipment of this kind not observed",
+   "name_hint": "Cat"
+  },
+  "0x1f": {
+   "kind": "0x1f",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/ced63e5e96",
+   "appearance_flags_7e": "0x0031",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ]
+   ],
+   "launched_actions": {
+    "75": "0x42E2BF"
+   },
+   "condition_examples": {
+    "75": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ]
+   },
+   "observed_state": null,
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 NPC equipment of this kind not observed",
+   "name_hint": "BrownCat"
+  },
+  "0x20": {
+   "kind": "0x20",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/ced63e5e96",
+   "appearance_flags_7e": "0x0031",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ]
+   ],
+   "launched_actions": {
+    "75": "0x42E2BF"
+   },
+   "condition_examples": {
+    "75": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ]
+   },
+   "observed_state": null,
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 NPC equipment of this kind not observed",
+   "name_hint": "WhiteCat"
+  },
+  "0x3f": {
+   "kind": "0x3f",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/51aeec9280",
+   "appearance_flags_7e": "0x0028",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ]
+   ],
+   "launched_actions": {
+    "6": "0x4455D7"
+   },
+   "condition_examples": {
+    "6": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ]
+   },
+   "observed_state": "live capture header, PlainRunner (batch1.jsonl)",
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 NPC equipment of this kind not observed",
+   "name_hint": "PlainRunner"
+  },
+  "0x40": {
+   "kind": "0x40",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/51aeec9280",
+   "appearance_flags_7e": "0x0028",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ]
+   ],
+   "launched_actions": {
+    "6": "0x4455D7"
+   },
+   "condition_examples": {
+    "6": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ]
+   },
+   "observed_state": null,
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 NPC equipment of this kind not observed",
+   "name_hint": "LeafRunner"
+  },
+  "0x41": {
+   "kind": "0x41",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/51aeec9280",
+   "appearance_flags_7e": "0x0028",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ]
+   ],
+   "launched_actions": {
+    "6": "0x4455D7"
+   },
+   "condition_examples": {
+    "6": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ]
+   },
+   "observed_state": null,
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 NPC equipment of this kind not observed",
+   "name_hint": "SnowRunner"
+  },
+  "0x42": {
+   "kind": "0x42",
+   "status": "TRIGGER_EMULATED",
+   "family_id": "alpha_creature/51aeec9280",
+   "appearance_flags_7e": "0x0028",
+   "seeds_checked": [
+    [
+     0,
+     0
+    ]
+   ],
+   "launched_actions": {
+    "6": "0x4455D7"
+   },
+   "condition_examples": {
+    "6": [
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "cooldown_0x36",
+      "counter_70": 1,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 0,
+      "resource_170": 0.0
+     },
+     {
+      "cooldowns": "no_cooldown",
+      "counter_70": 1,
+      "resource_170": 0.0
+     }
+    ]
+   },
+   "observed_state": null,
+   "equipment": "unarmed (weapon/off-hand slots empty) \u2014 NPC equipment of this kind not observed",
+   "name_hint": "DesertRunner"
+  }
+ }
+}

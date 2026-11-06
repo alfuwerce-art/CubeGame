@@ -35,42 +35,54 @@ class CreatureAiProfileRules(unittest.TestCase):
             self.assertNotEqual(p["status"], "TRANSFERRED_FROM_ALPHA", pid)
 
     def test_profile_does_not_spread_to_other_kinds_of_the_family(self):
-        # D60 rule 2: BrownCat/WhiteCat share the drawModel family but not the trigger evidence
-        for kind in (0x1F, 0x20):
-            pid, status, reasons = ct.action_profile_for(kind, (0, 0), CAT_FAMILY,
-                                                         ["body", "tail", "head", "hand_l", "hand_r", "foot_l", "foot_r"])
-            self.assertIsNone(pid)
-            self.assertEqual(status, "BLOCKED")
-            self.assertTrue(reasons[0].startswith("POSES_FAMILY_COMPATIBLE_TRIGGER_UNPROVEN"), reasons)
+        # D60 rule 2: a kind of the same drawModel family WITHOUT its own trigger evidence stays blocked
+        saved = copy.deepcopy(ct.ACTION_PROFILES)
+        try:
+            for pid in [p for p in ct.ACTION_PROFILES if p.endswith(("_0x1f", "_0x20"))]:
+                del ct.ACTION_PROFILES[pid]
+            for kind in (0x1F, 0x20):
+                pid, status, reasons = ct.action_profile_for(kind, (0, 0), CAT_FAMILY,
+                                                             ["body", "tail", "head", "hand_l", "hand_r", "foot_l", "foot_r"])
+                self.assertIsNone(pid)
+                self.assertEqual(status, "BLOCKED")
+                self.assertTrue(reasons[0].startswith("POSES_FAMILY_COMPATIBLE_TRIGGER_UNPROVEN"), reasons)
+        finally:
+            ct.ACTION_PROFILES.clear()
+            ct.ACTION_PROFILES.update(saved)
+
+    def test_every_kind_gets_only_its_own_profile(self):
+        for pid, p in ct.ACTION_PROFILES.items():
+            if p["trigger"] != "creature_ai":
+                continue
+            kind = p["specimens"][0]["kind"]
+            got, _, _ = ct.action_profile_for(kind, (0, 0), p["evidence_families"][0], ["body"])
+            self.assertEqual(got, pid)
+            self.assertTrue(pid.endswith(f"_0x{kind:02x}"))
+            self.assertEqual(len(p["specimens"]), 1)
 
     def test_specimen_kind_gets_the_profile(self):
         pid, status, _ = ct.action_profile_for(0x1E, (0, 0), CAT_FAMILY,
                                                ["body", "tail", "head", "hand_l", "hand_r", "foot_l", "foot_r"])
         self.assertEqual((pid, status), (CAT_PID, "EMULATED_ALPHA_CODE"))
 
-    def test_humanoid_npc_profile_is_its_own_specimen_only(self):
+    def test_player_specimen_keeps_its_input_profile(self):
         parts = ["body", "head", "hair", "hand_l", "hand_r", "foot_l", "foot_r"]
-        fam = "alpha_creature/e66d96be5a"
-        self.assertEqual(ct.action_profile_for(0x03, (0, 0), fam, parts)[0], HF_PID)
-        for kind in (0x00, 0x01, 0x07, 0x08, 0x0D, 0x0E):      # same family, trigger not proven
-            self.assertIsNone(ct.action_profile_for(kind, (0, 0), fam, parts)[0], hex(kind))
-        # the player specimen keeps its own (input) profile
-        self.assertEqual(ct.ACTION_PROFILES[ct.action_profile_for(0x02, (0, 0), fam, parts)[0]]["trigger"],
-                         "player_input")
-
-    def test_runner_profile_is_its_own_specimen_only(self):
-        fam = "alpha_creature/51aeec9280"
-        parts = ["body", "foot_l", "foot_r"]
-        self.assertEqual(ct.action_profile_for(0x3F, (0, 0), fam, parts)[0], RUN_PID)
-        for kind in (0x40, 0x41, 0x42):
-            self.assertIsNone(ct.action_profile_for(kind, (0, 0), fam, parts)[0], hex(kind))
+        pid = ct.action_profile_for(0x02, (0, 0), "alpha_creature/e66d96be5a", parts)[0]
+        self.assertEqual(ct.ACTION_PROFILES[pid]["trigger"], "player_input")
+        self.assertEqual(ct.action_profile_for(0x03, (0, 0), "alpha_creature/e66d96be5a", parts)[0], HF_PID)
 
     def test_every_creature_ai_profile_names_launch_vas_for_its_chain(self):
         for pid, p in ct.ACTION_PROFILES.items():
             if p["trigger"] != "creature_ai":
                 continue
             self.assertEqual(sorted(p["launched_actions"]), sorted(p["primary_chain"]), pid)
-            self.assertEqual(p["equipment"], {}, pid)        # no NPC weapon observed so far
+            self.assertEqual(p["equipment"], {}, pid)        # no NPC weapon verified
+            self.assertTrue(p["seeds_checked"], pid)
+
+    def test_evidence_file_excludes_the_player_specimen(self):
+        ev = json.loads(Path(ct.NPC_EVIDENCE_PATH).read_text(encoding="utf-8"))
+        self.assertEqual(ev["kinds"]["0x02"]["status"], "EXCLUDED")
+        self.assertEqual(sum(e["status"] == "TRIGGER_EMULATED" for e in ev["kinds"].values()), 14)
 
     def test_other_seed_of_the_specimen_is_not_the_specimen(self):
         pid, _, _ = ct.action_profile_for(0x1E, (1, 0), CAT_FAMILY, ["body"])
@@ -94,7 +106,7 @@ class BakerGates(unittest.TestCase):
     def test_kind_without_profile_is_refused(self):
         with tempfile.TemporaryDirectory(dir=str(ab.ROOT / ".scratch")) as d:
             with self.assertRaisesRegex(ValueError, "ACTION_PROFILE_REQUIRED"):
-                ab.bake_job({"kind": "0x20", "seed_variant": [0, 0]}, [75], d, exe="missing.exe")
+                ab.bake_job({"kind": "0x21", "seed_variant": [0, 0]}, [75], d, exe="missing.exe")
 
 
 @unittest.skipUnless(HAVE_EXE, "local Alpha research copy (.scratch) not present")

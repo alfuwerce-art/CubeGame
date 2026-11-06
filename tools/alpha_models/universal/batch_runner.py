@@ -45,6 +45,7 @@ KEEP_REPORTS = ("selftest.txt", "transfer_report.txt", "playmode.txt", "paramwal
                 "entity_contract.txt", "entity_playmode.txt", "entity_frames.tsv", "controller_playmode.txt",
                 "native_lifecycle.txt", "native_lifecycle_playmode.txt")
 VARIANT_SLOTS = ("head", "hair", "hand", "foot", "body", "tail")
+ACTION_STEPS = REQUIRED_STEPS + ("CONTROLLER_PLAYMODE_RESULT",)
 
 SCOPES = {
     "s05b1": {
@@ -64,6 +65,20 @@ SCOPES = {
                        120: {"actions": 98, "frames": 71585, "native_frames": 5919}},
         },
     },
+}
+# S05B-A part B (D60): creature-AI actions of the S05B-1 kinds. HumanMale 0x02 is not in the list: its
+# specimen carries the player profile and its actions are covered by the same regression.
+SCOPES["s05ba"] = {
+    "decision": "D60",
+    "title": "S05B-A part B: original NPC actions (creature AI) of the S05B-1 kinds",
+    "mode": "actions",
+    "kinds": (0x00, 0x01, 0x03, 0x07, 0x08, 0x0d, 0x0e, 0x1e, 0x1f, 0x20, 0x3f, 0x40, 0x41, 0x42),
+    "phase1_kinds": (0x03, 0x1e, 0x3f),       # the part-A pilot specimens, one per family
+    "coverage": "BASE",
+    "fps_samples": (30, 120),                 # phase-1 kinds re-run at these rates
+    "project": SCRATCH / "universal" / "unity" / "S05BA",
+    "out": SCRATCH / "universal" / "batch" / "s05ba",
+    "regression": SCOPES["s05b1"]["regression"],
 }
 
 
@@ -99,11 +114,19 @@ def entry_id(kind, seed, fps):
 
 
 # --------------------------------------------------------------------------- scope selection
+def _profile_trigger(pid):
+    from tools.alpha_models.universal import contract as ct
+    return (ct.ACTION_PROFILES.get(pid or "") or {}).get("trigger")
+
+
 def select_scope(plan_result, scope):
     """Kinds of the scope recomputed by the selector; refuses when they differ from the pinned list."""
     found = sorted(int(r["kind"], 16) for r in plan_result["entities"]
                    if r["readiness"] == "AUTO_READY" and (r.get("job") or {}).get("reference_capture")
-                   and "TRANSFERRED_FROM_ALPHA" in r["channels"]["walk"]["sources"])
+                   and "TRANSFERRED_FROM_ALPHA" in r["channels"]["walk"]["sources"]
+                   and (scope.get("mode") != "actions" or (
+                       r["channels"]["actions"]["status"] == "AVAILABLE"
+                       and _profile_trigger(r["channels"]["actions"].get("profile")) == "creature_ai")))
     pinned = sorted(scope["kinds"])
     problems = []
     if found != pinned:
@@ -180,6 +203,16 @@ def build_entries(rows, scope, run_slots, static_table):
     sample_kinds = {}
     for r in rows:
         sample_kinds.setdefault(r["family_id"], int(r["kind"], 16))
+    if scope.get("mode") == "actions":
+        for r in rows:
+            kind = int(r["kind"], 16)
+            ph = 1 if kind in scope["phase1_kinds"] else 2
+            coverage[r["kind"]] = {"wanted": {}, "seeds": [{"seed": [0, 0], "models": {}, "new": []}]}
+            for fps in [60] + (list(scope["fps_samples"]) if ph == 1 else []):
+                entries.append({"id": entry_id(kind, (0, 0), fps), "kind": r["kind"], "seed": [0, 0], "fps": fps,
+                                "phase": ph, "family_id": r["family_id"], "name_hint": r.get("name_hint"),
+                                "models": {}, "covers": [], "profile": r["channels"]["actions"]["profile"]})
+        return entries, coverage, problems
     for r in rows:
         kind = int(r["kind"], 16)
         wanted = {s: v for s, v in static_table["kinds"][r["kind"]].get("slot_variants", {}).items()
@@ -195,6 +228,94 @@ def build_entries(rows, scope, run_slots, static_table):
                                 "fps": fps, "phase": 1 if i == 0 else 2, "family_id": r["family_id"],
                                 "name_hint": r.get("name_hint"), "models": sv["models"], "covers": sv["new"]})
     return entries, coverage, problems
+
+
+def bake_library(entry, out_root, baker=None):
+    """П2 of one action entry: the kind's launched actions through the drawModel oracle. Reused only when
+    the library exists with BAKE_RESULT=PASS for exactly this profile and action set."""
+    from tools.alpha_models.universal import action_baker as ab
+    from tools.alpha_models.universal import contract as ct
+    actions = sorted(ct.ACTION_PROFILES[entry["profile"]]["launched_actions"])
+    lib = Path(out_root) / "libraries" / entry["kind"]
+    man = lib / "actions.json"
+    if man.exists():
+        m = json.loads(man.read_text(encoding="utf-8"))
+        if (m.get("BAKE_RESULT") == "PASS" and m.get("profile") == entry["profile"]
+                and sorted(a["action"] for a in m["actions"] if a["status"] == "EMULATED_ALPHA_CODE") == actions):
+            return lib
+    (baker or ab.bake_job)({"kind": entry["kind"], "seed_variant": list(entry["seed"])}, actions, str(lib))
+    return lib
+
+
+def _rel(p):
+    return Path(p).resolve().relative_to(ROOT).as_posix()
+
+
+def action_job(row, entry, lib):
+    """Universal job of an action entry: planner job + this kind's batch-baked action library."""
+    job = {k: v for k, v in row["job"].items()
+           if k not in ("equipment", "action_manifest", "clips", "actions_status", "include_family_clips")}
+    job.update(seed_variant=list(entry["seed"]), variant=f"s05ba_{entry['id']}",
+               generated_by="batch_runner (D60 S05B-A part B)", batch_entry=entry["id"],
+               action_manifest=_rel(Path(lib) / "actions.json"), clips=_rel(lib), include_family_clips=True,
+               actions_status=f"profile {entry['profile']} (batch library)",
+               library_sha256=sha256_file(Path(lib) / "actions.json"))
+    return job
+
+
+def action_judge(entry):
+    """Extra checks of an action entry: ACTIONS mode with the kind's OWN profile and every launched
+    action completed by the controller probe."""
+    from tools.alpha_models.universal import contract as ct
+    n = len(ct.ACTION_PROFILES[entry["profile"]]["launched_actions"])
+
+    def extra(rdir):
+        problems = []
+        ep = Path(rdir) / "entity_playmode.txt"
+        t = ep.read_text(encoding="utf-8") if ep.exists() else ""
+        if "controller_mode=ACTIONS" not in t:
+            problems.append("ENTITY_NOT_ACTIONS")
+        if f"action_profile={entry['profile']} " not in t:
+            problems.append("ENTITY_PROFILE_MISMATCH")
+        got = regression_numbers(rdir)
+        if got.get("actions") != n or got.get("required") != n:
+            problems.append(f"ACTIONS_COMPLETED {got.get('actions')}/{got.get('required')} != {n}")
+        return problems
+    return extra
+
+
+def run_entry(e, row, out_root, state, state_path, runner, inputs, scope, baker=None):
+    if scope.get("mode") != "actions":
+        return run_one(e["id"], job_for_entry(row, e), e["fps"], out_root, state, state_path, runner, inputs)
+    try:
+        lib = bake_library(e, out_root, baker)
+    except Exception as ex:          # a refused/failed bake is a FAIL of the entry, never a skip
+        rec = {"id": e["id"], "verdict": "FAIL", "exit": None, "steps": {}, "problems": [f"BAKE_FAILED {ex}"],
+               "inputs": inputs, "reports": {}}
+        state["entries"][e["id"]] = rec
+        write_json_atomic(state_path, state)
+        return rec
+    return run_one(e["id"], action_job(row, e, lib), e["fps"], out_root, state, state_path, runner, inputs,
+                   required=ACTION_STEPS, judge_extra=action_judge(e), locomotion_only=False)
+
+
+def evidence_drift(image, kinds, evidence_path=None):
+    """П1 re-run for the scope kinds (base seed, default state) compared with the committed evidence."""
+    from tools.alpha_models.universal import ai_trigger as at
+    from tools.alpha_models.universal import contract as ct
+    ev = json.loads(Path(evidence_path or ct.NPC_EVIDENCE_PATH).read_text(encoding="utf-8"))
+    problems = []
+    for k in kinds:
+        key = f"0x{k:02x}"
+        e = ev["kinds"].get(key)
+        if not e or e.get("status") != "TRIGGER_EMULATED":
+            problems.append(f"EVIDENCE_MISSING {key}")
+            continue
+        rep = at.analyse_kind(image, k)
+        got = {a: v["write_vas"][0] for a, v in rep["actions"].items() if len(v["write_vas"]) == 1}
+        if rep["errors"] or rep["appearance_flags_7e"] != e["appearance_flags_7e"] or got != e["launched_actions"]:
+            problems.append(f"EVIDENCE_DRIFT {key} {e['launched_actions']} vs {got} errors={rep['errors']}")
+    return problems
 
 
 def job_for_entry(row, entry):
@@ -346,7 +467,7 @@ def run_one(entry_key, job, fps, out_root, state, state_path, runner, inputs, re
 
 # --------------------------------------------------------------------------- batch
 def execute(scope_name, plan_result, static_table, run_slots, runner, out_root, inputs,
-            regression_runner=None, phases=(1, 2), log=print):
+            regression_runner=None, phases=(1, 2), log=print, evidence_check=None, baker=None):
     """Runs the scope; returns the summary dict. ``runner``/``regression_runner`` are injectable."""
     scope = SCOPES[scope_name]
     out_root = in_scratch(out_root)
@@ -354,6 +475,8 @@ def execute(scope_name, plan_result, static_table, run_slots, runner, out_root, 
     state_path = out_root / "batch_state.json"
     state = load_state(state_path)
     rows, problems = select_scope(plan_result, scope)
+    if not problems and scope.get("mode") == "actions":
+        problems = list(evidence_check(scope["kinds"])) if evidence_check else ["EVIDENCE_CHECK_NOT_RUN"]
     if problems:
         return {"BATCH_RESULT": "REFUSED", "problems": problems}
     entries, coverage, cov_problems = build_entries(rows, scope, run_slots, static_table)
@@ -364,8 +487,8 @@ def execute(scope_name, plan_result, static_table, run_slots, runner, out_root, 
     if 1 in phases:
         for e in [x for x in entries if x["phase"] == 1]:
             log(f"[phase 1] {e['id']} {e['name_hint']}")
-            results[e["id"]] = run_one(e["id"], job_for_entry(by_kind[e["kind"]], e), e["fps"], out_root, state,
-                                       state_path, runner, inputs)
+            results[e["id"]] = run_entry(e, by_kind[e["kind"]], out_root, state, state_path, runner, inputs,
+                                         scope, baker)
             log(f"  -> {results[e['id']]['verdict']} {results[e['id']]['problems']}")
         reg = scope.get("regression")
         if reg and regression_runner:
@@ -389,8 +512,8 @@ def execute(scope_name, plan_result, static_table, run_slots, runner, out_root, 
     if 2 in phases and not gate:
         for e in [x for x in entries if x["phase"] == 2]:
             log(f"[phase 2] {e['id']} {e['name_hint']} covers {e['covers']}")
-            results[e["id"]] = run_one(e["id"], job_for_entry(by_kind[e["kind"]], e), e["fps"], out_root, state,
-                                       state_path, runner, inputs)
+            results[e["id"]] = run_entry(e, by_kind[e["kind"]], out_root, state, state_path, runner, inputs,
+                                         scope, baker)
             log(f"  -> {results[e['id']]['verdict']} {results[e['id']]['problems']}")
     summary = summarize(scope_name, entries, coverage, state, cov_problems + gate, phases)
     write_json_atomic(out_root / "summary.json", summary)

@@ -121,82 +121,53 @@ ACTION_PROFILES = {
         "authorization": "D51/D57 (one humanoid, S05A-2)",
         "evidence": "docs/research/alpha2013/ALPHA_ACTION_LIFECYCLE.md",
     },
-    # S05B-A / D60, step A1. Trigger proven by EXECUTING the attack-choice region of the combat AI
-    # tick (ai_trigger.py) on this kind's own appearance; poses by the drawModel oracle. Valid for
-    # this specimen only: kinds of the same family need their own trigger evidence (D60 rule 2).
-    "alpha_actions/creature_ai_cat_0x1e": {
-        "status": "EMULATED_ALPHA_CODE",
-        "specimens": [{"kind": 0x1E, "seed_variant": [0, 0]}],
-        "evidence_families": ["alpha_creature/ced63e5e96"],
-        "trigger": "creature_ai",
-        "trigger_scope": "CombatBehavior::vfunc_0 attack choice 0x42D87F..0x42EAEF executed: appearance "
-                         "flags 0x0031 -> flag-0x10 branch 0x42E288 -> action 75 at 0x42E2BF once the "
-                         "action timer exceeds combat_getAttackTiming; target/world gates PARTIAL",
-        "requires_parts": [],
-        "equipment": {},
-        "specimen_equipment": {},
-        "categories": ["MOTION"],
-        "primary_chain": [75],
-        # action -> VA of the AI instruction that writes it for this specimen (ai_trigger evidence)
-        "launched_actions": {75: 0x42E2BF},
-        "grip_checked_actions": [],
-        "dynamic_part_actions": [],
-        "blocked_examples": {},
-        # live Alpha capture of this specimen's launched actions (D60 rule 1; never a provenance)
-        "live_check": "NOT_CAPTURED",
-        "authorization": "D60 (S05B-A part A, step A1)",
-        "evidence": "docs/research/alpha2013/NPC_ACTION_TRIGGERS.md",
-    },
-    # S05B-A / D60, step A2: humanoid NPC. Live full dumps of HumanFemale 0x03 townsfolk (2026-11-06)
-    # gave the NPC's class/equipment (unarmed: weapon and off-hand slots empty); the AI region was
-    # executed on that state with ability_isUsable executed for real and its cooldown map swept.
-    "alpha_actions/creature_ai_humanfemale_0x03": {
-        "status": "EMULATED_ALPHA_CODE",
-        "specimens": [{"kind": 0x03, "seed_variant": [0, 0]}],
-        "evidence_families": ["alpha_creature/e66d96be5a"],
-        "trigger": "creature_ai",
-        "trigger_scope": "CombatBehavior::vfunc_0 attack choice 0x42D87F..0x42EAEF executed, appearance "
-                         "flags 0x0000, unarmed (observed): 54 when ability 0x36 is off cooldown and "
-                         "resource >= 0.8 (0x42E627); 3/4 by combo parity while 0x36 cools down "
-                         "(chooseAttack 0x4458A0); 6 when resource < 0.8 (advanceAttackTimer 0x4455D7); "
-                         "target/world gates PARTIAL",
-        "requires_parts": ["hand_l", "hand_r"],
-        "equipment": {},
-        "specimen_equipment": {},
-        "categories": ["MOTION"],
-        "primary_chain": [54, 3, 4, 6],
-        "launched_actions": {3: 0x4458A0, 4: 0x4458A0, 6: 0x4455D7, 54: 0x42E627},
-        "grip_checked_actions": [],
-        "dynamic_part_actions": [],
-        "blocked_examples": {"weapons": "NPC weapons not observed for this kind: EQUIPMENT_UNVERIFIED"},
-        "live_check": "NOT_CAPTURED",
-        "authorization": "D60 (S05B-A part A, step A2)",
-        "evidence": "docs/research/alpha2013/NPC_ACTION_TRIGGERS.md",
-    },
-    # S05B-A / D60, step A3. Appearance flags 0x0028 (bit 0x08) -> combat_advanceAttackTimer, which
-    # selects action 6; observed live state (batch1 capture header): faction 1, class 0.
-    "alpha_actions/creature_ai_plainrunner_0x3f": {
-        "status": "EMULATED_ALPHA_CODE",
-        "specimens": [{"kind": 0x3F, "seed_variant": [0, 0]}],
-        "evidence_families": ["alpha_creature/51aeec9280"],
-        "trigger": "creature_ai",
-        "trigger_scope": "CombatBehavior::vfunc_0 attack choice 0x42D87F..0x42EAEF executed: appearance "
-                         "flags 0x0028 -> flag-0x08 branch 0x42E2CF -> combat_advanceAttackTimer "
-                         "0x445410 writes action 6 at 0x4455D7; target/world gates PARTIAL",
-        "requires_parts": [],
-        "equipment": {},
-        "specimen_equipment": {},
-        "categories": ["MOTION"],
-        "primary_chain": [6],
-        "launched_actions": {6: 0x4455D7},
-        "grip_checked_actions": [],
-        "dynamic_part_actions": [],
-        "blocked_examples": {},
-        "live_check": "NOT_CAPTURED",
-        "authorization": "D60 (S05B-A part A, step A3)",
-        "evidence": "docs/research/alpha2013/NPC_ACTION_TRIGGERS.md",
-    },
 }
+# S05B-A / D60: creature-AI profiles come from the П1 evidence file (ai_trigger.py executes the
+# attack-choice region of Alpha's AI tick for every appearance variant of each kind). One profile per
+# kind, specimen = that kind only (D60 rule 2); clips stay EMULATED_ALPHA_CODE (rule 1); the live
+# capture result is a separate field (live_check). Equipment: none verified (rule 3).
+NPC_EVIDENCE_PATH = os.path.join(os.path.dirname(__file__), "npc_action_evidence.json")
+
+
+def _creature_ai_profiles(path=NPC_EVIDENCE_PATH):
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as fh:
+        ev = json.load(fh)
+    out = {}
+    for k, e in ev.get("kinds", {}).items():
+        if e.get("status") != "TRIGGER_EMULATED":
+            continue
+        launched = {int(a): int(va, 16) for a, va in e["launched_actions"].items()}
+        out[f"alpha_actions/creature_ai_{e['name_hint'].lower()}_{k}"] = {
+            "status": "EMULATED_ALPHA_CODE",
+            "specimens": [{"kind": int(k, 16), "seed_variant": [0, 0]}],
+            "seeds_checked": e["seeds_checked"],
+            "evidence_families": [e["family_id"]],
+            "trigger": "creature_ai",
+            "trigger_scope": (f"CombatBehavior::vfunc_0 attack choice {ev['region']} executed; appearance "
+                              f"flags {e['appearance_flags_7e']}; {e['equipment']}; "
+                              f"state: {e['observed_state'] or 'default creature of the kind'}; "
+                              "target/world gates PARTIAL"),
+            "requires_parts": [],
+            "equipment": {},
+            "specimen_equipment": {},
+            "equipment_observed": "observed" in e["equipment"],
+            "categories": ["MOTION"],
+            "primary_chain": sorted(launched),
+            "launched_actions": launched,
+            "grip_checked_actions": [],
+            "dynamic_part_actions": [],
+            "blocked_examples": {},
+            "live_check": e.get("live_check", "NOT_CAPTURED"),
+            "authorization": "D60 (S05B-A)",
+            "evidence": "docs/research/alpha2013/NPC_ACTION_TRIGGERS.md; " + os.path.basename(path),
+        }
+    return out
+
+
+ACTION_PROFILES.update(_creature_ai_profiles())
+
 # Trigger domains. Only player_input of the specimen above is evidenced. Creature AI launches of
 # non-player kinds are an explicit open domain: they must never default to the humanoid rules.
 TRIGGER_DOMAINS = {
