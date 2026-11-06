@@ -4,7 +4,7 @@
 
 ## С чего начинать работу
 
-1. [PROJECT_MEMORY.md](PROJECT_MEMORY.md) — межчатовая память и текущие подтверждённые решения.
+1. [AGENTS.md](AGENTS.md) — правила и **карта документов с пояснением, что агент читает самостоятельно по задаче**; [PROJECT_MEMORY.md](PROJECT_MEMORY.md) — оперативный контекст.
 2. [docs/ACTIVE_STAGE.md](docs/ACTIVE_STAGE.md) — **единственный актуальный статус и техническое разрешение**. Последнее документированное направление: S05A-2 IN_PROGRESS / REVIEW OPEN; S05B NOT_AUTHORIZED; проверяйте по самому файлу.
 3. [AGENTS.md](AGENTS.md) — **единые правила для Claude, DeepSeek, Codex и ChatGPT**. [CLAUDE.md](CLAUDE.md) — короткий загрузчик этих правил.
 4. [GDD](docs/game-design/GDD_DRAFT.md) — игровая концепция, принятые D59–D66, открытые механики.
