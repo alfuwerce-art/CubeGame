@@ -443,18 +443,34 @@ def run_entry(e, row, out_root, state, state_path, runner, inputs, scope, baker=
 
 def evidence_drift(image, kinds, evidence_path=None):
     """П1 re-run for the scope kinds over EVERY declared seed and the declared observed state, compared
-    field by field with the committed evidence (REVIEW-FIX-01: no base-seed-only shortcut)."""
+    field by field with the committed evidence (REVIEW-FIX-01: no base-seed-only shortcut).
+
+    Two evidence sources exist: the D60 records (``npc_action_evidence.json``, live-NPC state, re-executed
+    per kind) and the D64 records (``catalog/npc_trigger_evidence.json``, 280 NPC states emulated from the
+    bytes; drift is the pinned SHA256 of the code that produced them). A kind present in a source is checked
+    by that source; a kind absent from both is reported, never skipped."""
     from tools.alpha_models.universal import ai_trigger as at
     from tools.alpha_models.universal import contract as ct
-    ev = json.loads(Path(evidence_path or ct.NPC_EVIDENCE_PATH).read_text(encoding="utf-8"))
-    problems = []
+    from tools.alpha_models.catalog import trigger_catalog as tc
+    ev60 = json.loads(Path(evidence_path or ct.NPC_EVIDENCE_PATH).read_text(encoding="utf-8"))
+    ev64 = json.loads(Path(ct.TRIGGER_EVIDENCE_PATH).read_text(encoding="utf-8")) \
+        if Path(ct.TRIGGER_EVIDENCE_PATH).exists() else {"kinds": {}}
+    problems, used64 = [], False
     for k in kinds:
         key = f"0x{k:02x}"
-        e = ev["kinds"].get(key)
-        if not e or e.get("status") != "TRIGGER_EMULATED":
+        e60 = ev60["kinds"].get(key)
+        if e60 and e60.get("status") == "TRIGGER_EMULATED":
+            problems += at.evidence_drift_kind(image, key, e60)
+        e64 = ev64["kinds"].get(key)
+        if e64 is not None:
+            used64 = True
+            status = e64.get("status")
+            if status not in ("TRIGGER_EMULATED_CONDITIONAL", "PARTIAL"):
+                problems.append(f"EVIDENCE_STATUS {key} {status}")
+        elif not (e60 and e60.get("status") == "TRIGGER_EMULATED"):
             problems.append(f"EVIDENCE_MISSING {key}")
-            continue
-        problems += at.evidence_drift_kind(image, key, e)
+    if used64:
+        problems += tc.evidence_drift()          # pinned code hashes of the D64 trigger evidence
     return problems
 
 

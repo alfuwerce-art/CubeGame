@@ -135,6 +135,20 @@ class ActionScope(unittest.TestCase):
         self.assertEqual(s["BATCH_RESULT"], "REFUSED")
         self.assertEqual(runner.calls, [])
 
+    def test_evidence_check_reads_both_evidence_sources(self):
+        """D60 kinds are re-executed per kind; D64 kinds are covered by their committed record and by the
+        pinned code hashes of the D64 evidence (D65: the D63 actions scope uses the D64 source)."""
+        ev64 = ROOT / "tools/alpha_models/catalog/npc_trigger_evidence.json"
+        ev60 = ROOT / "tools/alpha_models/universal/npc_action_evidence.json"
+        if not ev64.exists():
+            self.skipTest("D64 evidence not present")
+        kinds64 = {int(k, 16) for k in json.loads(ev64.read_text(encoding="utf-8"))["kinds"]}
+        kinds60 = {int(k, 16) for k in json.loads(ev60.read_text(encoding="utf-8"))["kinds"]}
+        d64_only = sorted(kinds64 - kinds60)
+        self.assertTrue(d64_only, "the D64 evidence must cover kinds the D60 records do not")
+        self.assertEqual(br.evidence_drift(None, d64_only[:3] + [0x76]), [])
+        self.assertEqual(br.evidence_drift(None, [0xFF]), ["EVIDENCE_MISSING 0xff"])
+
     def test_kind_without_creature_ai_profile_is_scope_drift(self):
         s = self.run_batch(p=plan(x91=True))
         self.assertEqual(s["BATCH_RESULT"], "REFUSED")
