@@ -2,7 +2,7 @@
 
 **Статус: `READY_FOR_REVIEW`** (не ACCEPTED). **Решение:** [D60](../decisions/D60-s05ba-npc-actions-authorization.md). **План:** [S05B_NPC_ACTIONS_PLAN_DRAFT](../stages/S05B_NPC_ACTIONS_PLAN_DRAFT.md). **Исследование:** [NPC_ACTION_TRIGGERS](../research/alpha2013/NPC_ACTION_TRIGGERS.md).
 **Дата:** 2026-11-06. **Исполнитель:** Claude Code. **Ветка:** `claude/s05ba-npc-actions`.
-**Итог:** три профиля действий `creature_ai` (Cat 0x1e, HumanFemale 0x03, PlainRunner 0x3f), запуск каждого действия доказан исполнением байтов ИИ Alpha, позы — оракулом `drawModel`; Unity-пилоты 3/3 PASS (по 8/8 шагов, 60 Гц); живой захват — `NOT_CAPTURED` (решение продюсера: «к A2 без захвата»). **Шлюз A→B: условия выполнены — ждёт рассмотрения продюсером.** Часть B не начата.
+**Итог:** три профиля действий `creature_ai` (Cat 0x1e, HumanFemale 0x03, PlainRunner 0x3f), запуск каждого действия доказан исполнением байтов ИИ Alpha, позы — оракулом `drawModel`; Unity-пилоты 3/3 PASS (по 8/8 шагов, 60 Гц); живой захват — `NOT_CAPTURED` (решение продюсера: «к A2 без захвата»). **Шлюз A→B: условия выполнены — ждёт рассмотрения продюсером.** Часть B выполнена: [S05BA_PART_B_REPORT](S05BA_PART_B_REPORT.md).
 
 ## 1. Что сделано
 
