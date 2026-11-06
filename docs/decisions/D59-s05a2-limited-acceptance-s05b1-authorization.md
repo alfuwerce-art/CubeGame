@@ -1,6 +1,6 @@
-# D59 — ограниченная техническая приёмка S05A-2 и авторизация S05B-1 (ПРОЕКТ)
+# D59 — ограниченная техническая приёмка S05A-2 и авторизация S05B-1
 
-**Статус: `PROPOSED / NOT_AUTHORIZED`.** Текст подготовлен для решения продюсера. До явного утверждения продюсером в чате ничего из ниже перечисленного не действует: `S05A-2 — IN_PROGRESS / REVIEW OPEN`, `S05B — NOT_AUTHORIZED`, `BATCH_AUTHORIZATIONS` в `transfer_planner.py` остаётся пустым.
+**Статус: `ACCEPTED`** — утверждено продюсером 2026-11-06 в чате («Утверждаю D59»), вместе с техническими замечаниями §3. Исторический статус проекта до утверждения: `PROPOSED / NOT_AUTHORIZED`. Итог: `S05A-2 — ACCEPTED (LIMITED, D59)`, `S05B-1 — AUTHORIZED`, прочий S05B (S05B-2 и далее) — `NOT_AUTHORIZED`.
 **Дата проекта:** 2026-11-06. **Оформил:** Claude Code (архитектор / технический ревьюер). **Основание:** [S05B1_LOCOMOTION_BATCH_DRAFT](../stages/S05B1_LOCOMOTION_BATCH_DRAFT.md), [S05A2_UNIVERSAL_CONTINUATION_REPORT](../reports/S05A2_UNIVERSAL_CONTINUATION_REPORT.md), [S05A2_ACTION_LIFECYCLE_REPORT](../reports/S05A2_ACTION_LIFECYCLE_REPORT.md), [D51](D51-s05a2-authorized-evidence-first.md)–[D58](D58-animation-research-autonomy.md).
 
 ---
