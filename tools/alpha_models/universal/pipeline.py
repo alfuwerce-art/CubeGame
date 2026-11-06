@@ -179,6 +179,7 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
         os.remove(old)    # a stale clip/model of another family must never be picked up
     con = sqlite3.connect(f"file:{db}?mode=ro&immutable=1", uri=True)
     parts_out = []
+    empty_parts = []
     handle = None
     for p in res.parts:
         idx = res.models[p]
@@ -190,7 +191,11 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
             continue
         row = con.execute("select value from blobs where key=?", (name,)).fetchone()
         if row is None:
-            problems.append(f"MODEL_NOT_IN_DB {p} {name}")
+            # D65: the Alpha appearance picks a model the database does not contain (e.g. orc-hair-m08..10);
+            # the loader leaves the model empty, so Alpha draws nothing for this part. That is the faithful
+            # result — the part is recorded and not created (same rule as ALPHA_EMPTY_MODEL), not a failure.
+            empty_parts.append({"part": p, "model": name,
+                                "reason": "ALPHA_EMPTY_MODEL (no blob; Alpha draws nothing for this part)"})
             continue
         decoded = deobfuscate(row[0])
         model = parse_decoded(decoded)
@@ -353,7 +358,7 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
     result = "PASS" if not problems else "FAIL"
     out = {"PREPARE_RESULT": result, "problems": problems, "kind": f"0x{kind:02x}",
            "family_id": res.family_id, "parts": res.parts, "models": [p["model"] for p in parts_out],
-           "clips": written, "skipped_clips": skipped, "locomotion": loco}
+           "clips": written, "skipped_clips": skipped, "locomotion": loco, "empty_parts": empty_parts}
     print(json.dumps(out, indent=1))
     return out
 
@@ -393,7 +398,8 @@ def _prepare_locomotion(job, kind, app, res, parts_out, data_dir, have_captured_
     from tools.alpha_models.universal import param_walk as pw
     from tools.alpha_models.universal import weapon_locomotion
     weapon = job.get('equipment', {}).get('weapon')
-    body_parts = [p for p in res.parts if p != 'weapon']
+    modelled = {p["name"] for p in parts_out}
+    body_parts = [p for p in res.parts if p != 'weapon' and p in modelled]
     if any(p not in pw.MODELLED_PARTS for p in body_parts) or ('weapon' in res.parts and not weapon):
         problems.append(f"LOCOMOTION_PARTS_NOT_MODELLED {[p for p in res.parts if p not in pw.MODELLED_PARTS]}")
         return None, None
@@ -431,7 +437,8 @@ def _prepare_locomotion(job, kind, app, res, parts_out, data_dir, have_captured_
     for p in clip["parts"]:
         p["captured_size"] = sizes[p["name"]]
     clip["name"] = "walk_formula" if have_captured_walk else "walk"
-    uc = _unity_clip(clip, res.parts)
+    # the rig order of the parts that really have geometry (an Alpha-empty part is not in the rig)
+    uc = _unity_clip(clip, [p["name"] for p in parts_out if p["name"] != "weapon"] + (["weapon"] if weapon else []))
     (data_dir / "clips" / f"{clip['name']}.json").write_text(json.dumps(uc), encoding="utf-8")
     spec["clip"] = clip["name"]
     return spec, clip["name"]

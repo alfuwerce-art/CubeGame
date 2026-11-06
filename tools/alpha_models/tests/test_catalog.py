@@ -216,5 +216,30 @@ class ReportTablesTests(unittest.TestCase):
         self.assertIn("BLOCKED", md)
 
 
+class AlphaEmptyPartTests(unittest.TestCase):
+    """D65: an appearance that picks a model the database does not contain (orc-hair-m08..10) must prepare
+    as an Alpha-empty part (nothing drawn) instead of crashing or failing the whole job."""
+
+    def test_missing_model_part_is_empty_not_a_failure(self):
+        if not HAVE_ALPHA:
+            self.skipTest("local research copy of Alpha (.scratch) not present")
+        import shutil
+        tmp = ROOT / ".scratch/tmp/test_empty_part"
+        if tmp.exists():
+            shutil.rmtree(tmp)
+        try:
+            from tools.alpha_models.universal import pipeline as pl
+            job = {"kind": "0x0b", "seed_variant": [0, 7], "variant": "test_0x0b_s0-7",
+                   "locomotion": "formula", "amp": 0.19, "speed_xy": 3.7}
+            r = pl.prepare_unity(job, str(tmp), clips_root=str(ROOT / ".scratch/universal/clips"))
+            self.assertEqual(r["PREPARE_RESULT"], "PASS", r["problems"])
+            self.assertEqual([e["part"] for e in r["empty_parts"]], ["hair"])
+            self.assertIn("orc-hair-m08", r["empty_parts"][0]["model"])
+            self.assertNotIn("hair", r["models"])                 # no geometry created for it
+            self.assertNotIn("hair", r["locomotion"]["parts"])     # the walk spec covers the real parts
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
 if __name__ == "__main__":
     unittest.main()
