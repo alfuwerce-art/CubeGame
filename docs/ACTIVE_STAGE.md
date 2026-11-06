@@ -1,3 +1,5 @@
+**GDD — combat combo after miss (2026-11-07, DRAFT):** комбо не сбрасывается от промаха; продолжение по повторному вводу в разрешённом окне, без штрафа и без фиктивного урона. Окна/удержание OPEN. [Черновик](reviews/COMBAT_COMBOS_ANIMATION_DESIGN_DRAFT.md). S05A-2 REVIEW OPEN; S05B NOT_AUTHORIZED.
+
 **GDD — combat turning B (2026-11-07, DRAFT):** продюсер предварительно выбрал ограниченный разворот: замах управляем, активная фаза допускает лишь небольшую коррекцию, тяжёлое оружие сильнее ограничено; углы и assist OPEN. [Черновик](reviews/COMBAT_COMBOS_ANIMATION_DESIGN_DRAFT.md). Финальной приёмки нет; S05A-2 REVIEW OPEN; S05B NOT_AUTHORIZED.
 
 **GDD — combat movement B (2026-11-07, DRAFT):** выбран вариант движения во время атаки B: перемещение при замахе, короткий выпад при ударе, ограничения по весу оружия. Контакт реальный, стены не проходятся; наведение, разворот, величины OPEN. Не финальная приёмка и не авторизация Unity. [Черновик](reviews/COMBAT_COMBOS_ANIMATION_DESIGN_DRAFT.md). S05A-2 REVIEW OPEN; S05B NOT_AUTHORIZED.
