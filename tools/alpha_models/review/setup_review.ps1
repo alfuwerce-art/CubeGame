@@ -9,8 +9,9 @@ param(
   [string]$Project = 'D:\Projects\CubeGame\.scratch\review\unity\S05B_VisualReview',
   [string]$Unity   = 'D:\Unity\Hub\Editor\6000.3.27f2\Editor\Unity.exe',
   [string]$Python  = 'python',
-  # review ONE authorised batch scope (e.g. .scratch/universal/batch/s05b2) instead of the 15 S05B-1 kinds
-  [string]$BatchDir = '',
+  # review one authorised batch scope (e.g. .scratch/universal/batch/s05b2) instead of the 15 S05B-1 kinds;
+  # comma-separated scopes build ONE combined scene (specimen ids get the scope prefix)
+  [string[]]$BatchDir = @(),
   [switch]$SkipData,
   [switch]$SkipPlayMode
 )
@@ -55,7 +56,11 @@ Copy-Item -Force "$PSScriptRoot\unity\Editor\*" "$scripts\Editor\"
 if (-not $SkipData) {
   Push-Location $repo
   try {
-    if ($BatchDir) { & $Python -m tools.alpha_models.review.build_review --project $Project --batch-dir $BatchDir }
+    if ($BatchDir.Count -gt 0) {
+      $bdArgs = @()
+      foreach ($d in $BatchDir) { $bdArgs += @('--batch-dir', $d) }
+      & $Python -m tools.alpha_models.review.build_review --project $Project @bdArgs
+    }
     else { & $Python -m tools.alpha_models.review.build_review --project $Project }
     if ($LASTEXITCODE -ne 0) { throw "REVIEW_DATA_RESULT=FAIL (python exit $LASTEXITCODE)" }
   } finally { Pop-Location }

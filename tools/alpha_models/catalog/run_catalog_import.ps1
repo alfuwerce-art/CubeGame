@@ -4,7 +4,7 @@
 # Alpha data stays in .scratch (git-ignored). Resume: re-running skips models already imported with the
 # same blob SHA256 (Python export and the Unity importer both keep per-model records).
 #
-#   -Select sample   one model per (route, marker rule)  — representative check
+#   -Select sample   one model per (route, marker rule)  - representative check
 #   -Select all      the whole catalog (DeepSeek mass run)
 #   -Select ROUTE,.. e.g. EQUIPMENT_ATTACH,ITEM_STATIC  or name globs (iron-*)
 param(
