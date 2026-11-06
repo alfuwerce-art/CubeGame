@@ -191,7 +191,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools\alpha_models\revie
 ## 9. Git
 
 * Ветка: `stage/s05b2-deepseek-batch` (от `review/d62-s05b2-deepseek-handoff` @ `64b2b92`).
-* Коммит пакета: см. `git log -1 --format=%H` в ветке (обновляется последним коммитом документации).
+* Коммит пакета: **`5b8b473af0ca457c472904159e8d90a6efd9c425`** (код, тесты, задание, отчёт и обновления
+  `ACTIVE_STAGE`/`PROJECT_MEMORY`/методички); запись SHA в отчёте — отдельный docs-коммит.
 * Публикация: `git push origin stage/s05b2-deepseek-batch` (постоянное разрешение продюсера). Push ≠ `ACCEPTED`.
 * В Git попали только код, тесты, задания (метаданные) и документы; `.cub`/`.cubdec`, кадры и сцены Alpha
   остались в игнорируемом `.scratch`.
