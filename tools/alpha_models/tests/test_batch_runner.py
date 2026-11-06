@@ -49,11 +49,15 @@ def stub_slots(kind, s2, s3):
 
 
 class StubRunner:
-    """Writes TransferOutput like run_transfer.ps1; ``fail`` = entry keys (job variant suffix) that FAIL."""
+    """Writes TransferOutput like run_transfer.ps1; ``fail`` = entry keys (job variant suffix) that FAIL.
 
-    def __init__(self, project, fail=(), regression=False, numbers=None):
+    ``alpha_frames`` > 0 emulates a live capture of the motion family; 0 emulates a never-captured family
+    (the paramwalk report then carries the formula-only note, as AlphaParamWalkCheck.cs writes it)."""
+
+    def __init__(self, project, fail=(), regression=False, numbers=None, alpha_frames=484):
         self.project, self.fail, self.calls = Path(project), set(fail), []
         self.regression, self.numbers = regression, numbers or {"actions": 3, "frames": 100, "native_frames": 10}
+        self.alpha_frames = alpha_frames
 
     def __call__(self, job_path, fps, log_path):
         key = Path(job_path).stem
@@ -66,7 +70,9 @@ class StubRunner:
         steps = br.REGRESSION_STEPS if self.regression else br.REQUIRED_STEPS
         lines = [f"{s}={'FAIL' if bad and s == 'PARAMWALK_RESULT' else 'PASS'} exit={1 if bad and s == 'PARAMWALK_RESULT' else 0}"
                  for s in steps] + [f"RESULT={'FAIL' if bad else 'PASS'}"]
-        (out / "paramwalk.txt").write_text("PARAMWALK_RESULT=PASS golden=900 alpha_frames=484\n", encoding="utf-8")
+        note = "" if self.alpha_frames else "\nALPHA not_available (no capture of this motion family in the job: formula-only kind)"
+        (out / "paramwalk.txt").write_text(
+            f"PARAMWALK_RESULT=PASS golden=900 alpha_frames={self.alpha_frames}{note}\n", encoding="utf-8")
         (out / "entity_playmode.txt").write_text(
             "ENTITY_PLAYMODE_RESULT=PASS\ncontroller_mode=LOCOMOTION_ONLY\naction=- locomotion_only_refused=True\n",
             encoding="utf-8")
@@ -205,6 +211,98 @@ class BatchRunnerTests(unittest.TestCase):
     def test_outputs_must_stay_in_scratch(self):
         with self.assertRaisesRegex(ValueError, "BATCH_OUTPUT_MUST_BE_IN_SCRATCH"):
             br.in_scratch(ROOT / "docs")
+
+
+def famrow(kind, family, readiness="AUTO_READY", formula="FORMULA_VERIFIED"):
+    """Planner row of a never-captured motion family (no reference_capture, formula walk)."""
+    return {"kind": f"0x{kind:02x}", "name_hint": f"New{kind:02x}", "family_id": family,
+            "readiness": readiness, "reasons": [],
+            "channels": {"walk": {"status": "AVAILABLE", "sources": ["RECONSTRUCTED_FROM_EVIDENCE"],
+                                  "formula": formula, "reasons": []},
+                         "actions": {"status": "BLOCKED", "profile": None, "reasons": ["NO_VERIFIED_ACTION_TRIGGER"]}},
+            "job": {"kind": f"0x{kind:02x}", "seed_variant": [0, 0], "locomotion": "formula"}}
+
+
+FAM_PLAN = {"entities": [famrow(0xa0, "fam/new"), famrow(0xa1, "fam/new"),
+                         famrow(0xa2, "fam/other"), famrow(0xa4, "fam/solo")]}
+FAM_STATIC = {"kinds": {f"0x{k:02x}": {"slot_variants": {"body": [k]}} for k in (0xa0, 0xa1, 0xa4)}}
+
+
+class FormulaOnlyScopeTests(unittest.TestCase):
+    """D62/S05B-2: a never-captured motion family is formula-only — classified, never a live-verified PASS."""
+
+    def setUp(self):
+        if TMP.exists():
+            shutil.rmtree(TMP)
+        TMP.mkdir(parents=True)
+        self.live_name, self.formula_name = "test_live", "test_formula"
+        base = {"decision": "DTEST", "coverage": "BASE", "fps_samples": (30,),
+                "regression": {"job": TMP / "reg_job.json", "project": None,
+                               "expect": {60: {"actions": 3, "frames": 100, "native_frames": 10}}}}
+        (TMP / "reg_job.json").write_text(json.dumps({"kind": "0xa0", "variant": "reg"}), encoding="utf-8")
+        br.SCOPES[self.live_name] = dict(base, kinds=(0xa4,), families=("fam/solo",), live_frames="required")
+        br.SCOPES[self.formula_name] = dict(base, kinds=(0xa0, 0xa1), families=("fam/new",),
+                                            live_frames="formula_only")
+        self.inputs = {"static_sha256": "s1", "captures": []}
+
+    def tearDown(self):
+        br.SCOPES.pop(self.live_name, None)
+        br.SCOPES.pop(self.formula_name, None)
+
+    def run_batch(self, name, runner, reg):
+        return br.execute(name, FAM_PLAN, FAM_STATIC, stub_slots, runner, TMP / "out", self.inputs,
+                          reg, (1, 2), log=lambda *_: None)
+
+    def test_family_selector_takes_every_ready_kind_of_the_pinned_family(self):
+        rows, problems = br.select_scope(FAM_PLAN, br.SCOPES[self.formula_name])
+        self.assertEqual(problems, [])
+        self.assertEqual([r["kind"] for r in rows], ["0xa0", "0xa1"])   # both kinds of fam/new only
+
+    def test_family_selector_drift_when_a_kind_stops_being_ready(self):
+        plan = copy.deepcopy(FAM_PLAN)
+        plan["entities"][1] = famrow(0xa1, "fam/new", readiness="NEEDS_RESEARCH")
+        rows, problems = br.select_scope(plan, br.SCOPES[self.formula_name])
+        self.assertEqual(len(problems), 1)
+        self.assertIn("SCOPE_DRIFT", problems[0])
+        self.assertIn("0xa1=NEEDS_RESEARCH", problems[0])
+
+    def test_family_selector_drift_on_unverified_formula(self):
+        plan = copy.deepcopy(FAM_PLAN)
+        plan["entities"][0]["channels"]["walk"]["formula"] = "NEEDS_RESEARCH"
+        _, problems = br.select_scope(plan, br.SCOPES[self.formula_name])
+        self.assertIn("SCOPE_DRIFT", problems[0])
+
+    def test_live_scope_still_requires_live_alpha_frames(self):
+        r = self.run_batch(self.live_name, StubRunner(TMP / "p", alpha_frames=0),
+                           StubRunner(TMP / "r", regression=True))
+        self.assertEqual(r["entries"][0]["verdict"], "FAIL")
+        self.assertIn("PARAMWALK_WITHOUT_LIVE_FRAMES", r["entries"][0]["problems"])
+        self.assertNotEqual(r["BATCH_RESULT"], "PASS")
+
+    def test_formula_scope_passes_but_is_reported_formula_only(self):
+        r = self.run_batch(self.formula_name, StubRunner(TMP / "p", alpha_frames=0),
+                           StubRunner(TMP / "r", regression=True))
+        self.assertEqual(r["BATCH_RESULT"], "PASS_FORMULA_ONLY", r["problems"])
+        self.assertEqual([e["live_check"] for e in r["entries"]], ["NOT_CAPTURED"] * len(r["entries"]))
+        self.assertEqual(r["live_check"], {"CAPTURED": 0, "NOT_CAPTURED": len(r["entries"])})
+        md = (TMP / "out" / "summary.md").read_text(encoding="utf-8")
+        self.assertIn("PASS_FORMULA_ONLY", md)
+        self.assertIn("NOT_CAPTURED", md)
+
+    def test_formula_scope_does_not_accept_an_unexplained_zero_frame_check(self):
+        d = TMP / "note"
+        d.mkdir()
+        (d / "paramwalk.txt").write_text("PARAMWALK_RESULT=PASS golden=900 alpha_frames=0\n", encoding="utf-8")
+        (d / "entity_playmode.txt").write_text(
+            "ENTITY_PLAYMODE_RESULT=PASS\ncontroller_mode=LOCOMOTION_ONLY\nlocomotion_only_refused=True\n",
+            encoding="utf-8")
+        steps = {s: {"verdict": "PASS", "exit": 0} for s in br.REQUIRED_STEPS}
+        steps["RESULT"] = {"verdict": "PASS", "exit": None}
+        p = br.judge_entry(steps, 0, d, live_required=False)
+        self.assertIn("PARAMWALK_NO_LIVE_AND_NO_REASON", p)
+        (d / "paramwalk.txt").write_text(
+            "PARAMWALK_RESULT=PASS golden=900 alpha_frames=0\nALPHA not_available (no capture)\n", encoding="utf-8")
+        self.assertEqual(br.judge_entry(steps, 0, d, live_required=False), [])
 
 
 if __name__ == "__main__":

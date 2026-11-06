@@ -649,7 +649,7 @@ namespace CubeGame.AlphaTransfer.Review
 
         void KindTab()
         {
-            if (GUILayout.Toggle(_lineup, "Все 15 видов в ряд (L)", GUI.skin.button) != _lineup) SetLineup(!_lineup);
+            if (GUILayout.Toggle(_lineup, $"Все виды в ряд ({_kinds.Count}) (L)", GUI.skin.button) != _lineup) SetLineup(!_lineup);
             ModeButtons();
             if (!_lineup && _cur != null)
             {
@@ -837,7 +837,7 @@ namespace CubeGame.AlphaTransfer.Review
                 "<b>Управление</b> (щёлкните по Game view для фокуса)\n" +
                 "↑/↓ — вид · ←/→ — вариант · 1/2/3 — Idle/Walk/Action · Q/E — клип/действие\n" +
                 "Space — пауза · R — сначала · , и . — кадр · − и = — скорость\n" +
-                "L — 15 видов в ряд · F — показать целиком · P/B/G — оси/габарит/сетка\n" +
+                "L — все виды в ряд · F — показать целиком · P/B/G — оси/габарит/сетка\n" +
                 "M — правило маркеров Alpha вкл/выкл (до/после) · C — следующий цвет волос\n" +
                 "Tab — свернуть панель · H — скрыть интерфейс\n" +
                 "Мышь: ЛКМ/ПКМ — вращение, СКМ или Shift+ЛКМ — сдвиг, колесо — зум.\n\n" +

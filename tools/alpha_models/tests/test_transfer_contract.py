@@ -254,7 +254,7 @@ class PlannerTests(unittest.TestCase):
         self.assertNotIn("job", by["0x57"])
         md = tp.plan_markdown(p)
         self.assertIn("| 0x93 |", md)
-        self.assertEqual(p["batch"]["authorized"], [["D59", "s05b1"], ["D60", "s05ba"]])
+        self.assertEqual(p["batch"]["authorized"], [["D59", "s05b1"], ["D60", "s05ba"], ["D62", "s05b2"]])
         self.assertIn("NOT_AUTHORIZED", p["batch"]["other"])
 
     def test_pilot_refuses_kinds_outside_allowlist(self):
@@ -263,15 +263,18 @@ class PlannerTests(unittest.TestCase):
         self.assertIn("NOT_IN_PILOT_ALLOWLIST", r["problems"][0])
 
     def test_batch_only_producer_scopes_are_authorized(self):
-        self.assertEqual(tp.BATCH_AUTHORIZATIONS, (("D59", "s05b1"), ("D60", "s05ba")))
+        self.assertEqual(tp.BATCH_AUTHORIZATIONS, (("D59", "s05b1"), ("D60", "s05ba"), ("D62", "s05b2")))
         for auth, scope in ((None, None), ("S05B", None), ("D99", "s05b1"), ("D59", None), ("D59", "s05b2"),
                             ("D58", "s05b1"), ("d59", "s05b1"), ("D60", "s05b1"), ("D59", "s05ba"),
-                            ("D60", "s05b2")):
+                            ("D60", "s05b2"), ("D62", "s05b1"), ("D62", "s05ba"), ("D61", "s05b2"),
+                            ("d62", "s05b2"), ("D62", "s05b3"), ("D62", None)):
             self.assertEqual(tp.batch(auth, scope)["BATCH_RESULT"], "NOT_AUTHORIZED", (auth, scope))
         self.assertEqual(tp.main(["batch", "--authorization", "S05B"]), 3)
         self.assertEqual(tp.main(["batch", "--authorization", "D59", "--scope", "s05b2"]), 3)
+        self.assertEqual(tp.main(["batch", "--authorization", "D62", "--scope", "s05b1"]), 3)
         self.assertIsNone(tp.batch_authorized("D59", "s05b1"))
         self.assertIsNone(tp.batch_authorized("D60", "s05ba"))
+        self.assertIsNone(tp.batch_authorized("D62", "s05b2"))
 
     def test_outputs_must_stay_in_scratch(self):
         with self.assertRaisesRegex(ValueError, "PLANNER_OUTPUT_MUST_BE_IN_SCRATCH"):
@@ -333,6 +336,24 @@ class LocalReferenceTests(unittest.TestCase):
     def test_pilot_allowlist_are_ready(self):
         for k in tp.PILOT_ALLOWLIST:
             self.assertEqual(self.scan[f"0x{k:02x}"]["readiness"], "AUTO_READY")
+
+    def test_s05b2_scope_is_one_never_captured_motion_family(self):
+        from tools.alpha_models.universal import batch_runner as br
+        sc = br.SCOPES["s05b2"]
+        self.assertEqual(sc["decision"], "D62")
+        self.assertEqual(sc["live_frames"], "formula_only")
+        plan = tp.plan(tp.scan(self.t, str(CLIPS)))
+        rows, problems = br.select_scope(plan, sc)
+        self.assertEqual(problems, [], problems)
+        self.assertEqual([r["kind"] for r in rows], ["0x4c", "0x4d", "0x4e", "0x4f"])
+        for r in rows:
+            self.assertEqual(r["family_id"], sc["families"][0])
+            self.assertNotIn("reference_capture", r["job"])       # no live capture is claimed or present
+            self.assertEqual(r["channels"]["walk"]["formula"], "FORMULA_VERIFIED")
+            self.assertEqual(r["channels"]["walk"]["sources"], ["RECONSTRUCTED_FROM_EVIDENCE"])
+            self.assertEqual(r["channels"]["actions"]["status"], "BLOCKED")
+            self.assertEqual(len(r["parts"]), 6)                  # body, two hands, two feet, head
+        self.assertFalse(set(int(r["kind"], 16) for r in rows) & set(br.SCOPES["s05b1"]["kinds"]))
 
 
 if __name__ == "__main__":

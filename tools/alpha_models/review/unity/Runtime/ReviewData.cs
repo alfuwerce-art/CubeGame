@@ -33,6 +33,7 @@ namespace CubeGame.AlphaTransfer.Review
     {
         public string format;
         public string[] kinds = new string[0];
+        public int expectedKinds;          // 15 for the S05B-1 review, the batch scope's kinds for a scope review
         public ReviewSpecimenInfo[] specimens = new ReviewSpecimenInfo[0];
         public string[] notes = new string[0];
         public ReviewHairSample[] hairSamples = new ReviewHairSample[0];

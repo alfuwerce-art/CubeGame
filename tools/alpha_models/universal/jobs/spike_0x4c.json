@@ -1,0 +1,14 @@
+{
+ "kind": "0x4c",
+ "seed_variant": [
+  0,
+  0
+ ],
+ "variant": "spikecreature_0x4c_formula",
+ "generated_by": "D62 S05B-2 first new motion family (formula walk, no live capture of the family)",
+ "contract": "cubegame.entity_contract/1",
+ "locomotion": "formula",
+ "amp": 0.19,
+ "speed_xy": 3.7,
+ "speed_status": "PLACEHOLDER_NOT_ALPHA (median captured AI walk speed)"
+}

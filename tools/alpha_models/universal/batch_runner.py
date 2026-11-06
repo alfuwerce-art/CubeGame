@@ -80,6 +80,22 @@ SCOPES["s05ba"] = {
     "out": SCRATCH / "universal" / "batch" / "s05ba",
     "regression": SCOPES["s05b1"]["regression"],
 }
+# S05B-2 (D62): the FIRST new motion family — no kind of it was imported by S05B-1 and no live capture of
+# it exists locally, so the walk is the Alpha parametric formula (RECONSTRUCTED_FROM_EVIDENCE) and every
+# entry is classified FORMULA_ONLY / live_check=NOT_CAPTURED instead of a live-verified PASS. Actions of
+# this family have no proven AI trigger: they stay BLOCKED (no profile is invented).
+SCOPES["s05b2"] = {
+    "decision": "D62",
+    "title": "S05B-2 pilot: first never-imported motion family (biped with fore limbs, head, no hair slot)",
+    "families": ("alpha_creature/773a44f932",),
+    "kinds": (0x4c, 0x4d, 0x4e, 0x4f),
+    "coverage": "BASE",                       # one model per slot: seed (0, 0) is the full model coverage
+    "fps_samples": (30, 120),
+    "live_frames": "formula_only",            # no capture of this family: classified, never claimed as live
+    "project": SCRATCH / "universal" / "unity" / "S05B2",
+    "out": SCRATCH / "universal" / "batch" / "s05b2",
+    "regression": SCOPES["s05b1"]["regression"],
+}
 
 
 # --------------------------------------------------------------------------- helpers
@@ -121,17 +137,30 @@ def _profile_trigger(pid):
 
 def select_scope(plan_result, scope):
     """Kinds of the scope recomputed by the selector; refuses when they differ from the pinned list."""
-    found = sorted(int(r["kind"], 16) for r in plan_result["entities"]
-                   if r["readiness"] == "AUTO_READY" and (r.get("job") or {}).get("reference_capture")
-                   and "TRANSFERRED_FROM_ALPHA" in r["channels"]["walk"]["sources"]
-                   and (scope.get("mode") != "actions" or (
-                       r["channels"]["actions"]["status"] == "AVAILABLE"
-                       and _profile_trigger(r["channels"]["actions"].get("profile")) == "creature_ai")))
+    if scope.get("families"):
+        # a never-captured motion family: the selector is "every kind of the pinned families is AUTO_READY
+        # with a verified walk formula" (no live capture exists, so no capture selector can apply)
+        found = sorted(int(r["kind"], 16) for r in plan_result["entities"]
+                       if r.get("family_id") in set(scope["families"]) and r["readiness"] == "AUTO_READY"
+                       and r["channels"]["walk"].get("formula") == "FORMULA_VERIFIED")
+    else:
+        found = sorted(int(r["kind"], 16) for r in plan_result["entities"]
+                       if r["readiness"] == "AUTO_READY" and (r.get("job") or {}).get("reference_capture")
+                       and "TRANSFERRED_FROM_ALPHA" in r["channels"]["walk"]["sources"]
+                       and (scope.get("mode") != "actions" or (
+                           r["channels"]["actions"]["status"] == "AVAILABLE"
+                           and _profile_trigger(r["channels"]["actions"].get("profile")) == "creature_ai")))
     pinned = sorted(scope["kinds"])
     problems = []
     if found != pinned:
+        reasons = []
+        if scope.get("families"):
+            for r in plan_result["entities"]:
+                if r.get("family_id") in set(scope["families"]) and r["readiness"] != "AUTO_READY":
+                    reasons.append(f"{r['kind']}={r['readiness']} {'; '.join(r.get('reasons') or [])}")
         problems.append("SCOPE_DRIFT selector=" + ",".join(f"0x{k:02x}" for k in found)
-                        + " pinned=" + ",".join(f"0x{k:02x}" for k in pinned))
+                        + " pinned=" + ",".join(f"0x{k:02x}" for k in pinned)
+                        + ((" not_ready=[" + "; ".join(reasons) + "]") if reasons else ""))
     rows = {int(r["kind"], 16): r for r in plan_result["entities"]}
     return [rows[k] for k in pinned if k in rows], problems
 
@@ -338,8 +367,10 @@ def action_judge(entry):
 
 
 def run_entry(e, row, out_root, state, state_path, runner, inputs, scope, baker=None):
+    live_required = scope.get("live_frames", "required") == "required"
     if scope.get("mode") != "actions":
-        return run_one(e["id"], job_for_entry(row, e), e["fps"], out_root, state, state_path, runner, inputs)
+        return run_one(e["id"], job_for_entry(row, e), e["fps"], out_root, state, state_path, runner, inputs,
+                       live_required=live_required)
     try:
         lib = bake_library(e, out_root, baker)
     except Exception as ex:          # a refused/failed bake is a FAIL of the entry, never a skip
@@ -349,7 +380,8 @@ def run_entry(e, row, out_root, state, state_path, runner, inputs, scope, baker=
         write_json_atomic(state_path, state)
         return rec
     return run_one(e["id"], action_job(row, e, lib), e["fps"], out_root, state, state_path, runner, inputs,
-                   required=ACTION_STEPS, judge_extra=action_judge(e), locomotion_only=False)
+                   required=ACTION_STEPS, judge_extra=action_judge(e), locomotion_only=False,
+                   live_required=live_required)
 
 
 def evidence_drift(image, kinds, evidence_path=None):
@@ -440,9 +472,14 @@ def copy_reports(src, dst):
     return hashes
 
 
-def judge_entry(steps, exit_code, reports_dir, required=REQUIRED_STEPS, locomotion_only=True):
+def judge_entry(steps, exit_code, reports_dir, required=REQUIRED_STEPS, locomotion_only=True,
+                live_required=True):
     """PASS only when every required step is PASS with exit 0, RESULT=PASS, the run exited 0, the entity
-    is locomotion-only and the formula was compared with a non-zero number of live Alpha frames."""
+    is locomotion-only and the formula was compared with a non-zero number of live Alpha frames.
+
+    ``live_required=False`` is only for a scope whose motion family was never captured (D62/S05B-2): the
+    formula-vs-Alpha comparison cannot exist, so the report must say so explicitly and the entry is
+    classified FORMULA_ONLY (``live_check=NOT_CAPTURED``) — it is never counted as a live-verified PASS."""
     problems = []
     if exit_code != 0:
         problems.append(f"RUN_EXIT={exit_code}")
@@ -457,9 +494,13 @@ def judge_entry(steps, exit_code, reports_dir, required=REQUIRED_STEPS, locomoti
     rd = Path(reports_dir)
     pw = rd / "paramwalk.txt"
     if "PARAMWALK_RESULT" in required:
-        m = re.search(r"alpha_frames=(\d+)", pw.read_text(encoding="utf-8")) if pw.exists() else None
+        text = pw.read_text(encoding="utf-8") if pw.exists() else ""
+        m = re.search(r"alpha_frames=(\d+)", text)
         if not m or int(m.group(1)) == 0:
-            problems.append("PARAMWALK_WITHOUT_LIVE_FRAMES")
+            if live_required:
+                problems.append("PARAMWALK_WITHOUT_LIVE_FRAMES")
+            elif "not_available" not in text:
+                problems.append("PARAMWALK_NO_LIVE_AND_NO_REASON")
     ep = rd / "entity_playmode.txt"
     if locomotion_only:
         text = ep.read_text(encoding="utf-8") if ep.exists() else ""
@@ -508,8 +549,15 @@ def can_skip(rec, job_sha, inputs, out_root):
     return bool(rec.get("reports"))
 
 
+def paramwalk_alpha_frames(reports_dir):
+    """Live Alpha frames the walk formula was compared with (0 when the family was never captured)."""
+    p = Path(reports_dir) / "paramwalk.txt"
+    m = re.search(r"alpha_frames=(\d+)", p.read_text(encoding="utf-8")) if p.exists() else None
+    return int(m.group(1)) if m else 0
+
+
 def run_one(entry_key, job, fps, out_root, state, state_path, runner, inputs, required=REQUIRED_STEPS,
-            judge_extra=None, locomotion_only=True):
+            judge_extra=None, locomotion_only=True, live_required=True):
     out_root = Path(out_root)
     jobs_dir = out_root / "jobs"
     jobs_dir.mkdir(parents=True, exist_ok=True)
@@ -526,11 +574,13 @@ def run_one(entry_key, job, fps, out_root, state, state_path, runner, inputs, re
     steps = parse_verdicts(stdout)
     rdir = out_root / "runs" / entry_key
     reports = copy_reports(src, rdir) if Path(src).exists() else {}
-    problems = judge_entry(steps, exit_code, rdir, required, locomotion_only)
+    problems = judge_entry(steps, exit_code, rdir, required, locomotion_only, live_required)
     if judge_extra:
         problems += judge_extra(rdir)
+    frames = paramwalk_alpha_frames(rdir)
     rec = {"id": entry_key, "verdict": "PASS" if not problems else "FAIL", "exit": exit_code,
            "steps": steps, "problems": problems, "job_sha256": job_sha, "inputs": inputs, "reports": reports,
+           "alpha_frames": frames, "live_check": "CAPTURED" if frames else "NOT_CAPTURED",
            "seconds": round(time.time() - t0, 1), "finished": time.strftime("%Y-%m-%dT%H:%M:%S")}
     state["entries"][entry_key] = rec
     write_json_atomic(state_path, state)
@@ -601,6 +651,7 @@ def summarize(scope_name, entries, coverage, state, problems, phases):
         rows.append({**{k: e[k] for k in ("id", "kind", "name_hint", "seed", "fps", "phase", "covers", "models")},
                      "verdict": rec.get("verdict", "NOT_RUN"), "problems": rec.get("problems", []),
                      "steps": {k: v["verdict"] for k, v in (rec.get("steps") or {}).items()},
+                     "live_check": rec.get("live_check"), "alpha_frames": rec.get("alpha_frames"),
                      "seconds": rec.get("seconds")})
     reg = [{"id": k, "verdict": v["verdict"], "problems": v["problems"]}
            for k, v in sorted(state["entries"].items()) if k.startswith("regression_")]
@@ -618,27 +669,35 @@ def summarize(scope_name, entries, coverage, state, problems, phases):
         got = len([m for m in v["models_covered"] if wanted.get(m.split("=")[0], 0) > 1])
         v["models_covered"] = sorted(v["models_covered"])
         v["variant_models"] = f"{got}/{need}"
+    formula_only = sum(1 for r in rows if r["verdict"] == "PASS" and r["live_check"] == "NOT_CAPTURED")
     all_pass = rows and all(r["verdict"] == "PASS" for r in rows) and all(x["verdict"] == "PASS" for x in reg) \
         and not problems
+    # a run of a never-captured family is a technical PASS of the formula path only: it must not be
+    # reported as a live-verified PASS (D62: provenance stays RECONSTRUCTED_FROM_EVIDENCE)
+    result = ("PASS_FORMULA_ONLY" if formula_only else "PASS") if all_pass else (
+        "INCOMPLETE" if counts.get("NOT_RUN") else "FAIL")
     return {"format": "cubegame.batch_summary/1", "scope": scope_name, "decision": scope["decision"],
-            "BATCH_RESULT": "PASS" if all_pass else ("INCOMPLETE" if counts.get("NOT_RUN") else "FAIL"),
-            "phases_requested": list(phases), "counts": dict(counts), "problems": problems,
+            "BATCH_RESULT": result, "phases_requested": list(phases), "counts": dict(counts), "problems": problems,
+            "live_check": {"CAPTURED": len(rows) - formula_only - counts.get("NOT_RUN", 0),
+                           "NOT_CAPTURED": formula_only},
             "kinds": kinds, "regression": reg, "entries": rows}
 
 
 def summary_markdown(s):
     out = [f"# Batch {s['scope']} ({s['decision']}) — {s['BATCH_RESULT']}", "",
-           "Generated by `transfer_planner batch`. Technical PASS is not visual approval (producer).", "",
-           f"Counts: {s['counts']}", ""]
+           "Generated by `transfer_planner batch`. Technical PASS is not visual approval (producer). "
+           "`NOT_CAPTURED` entries are the parametric walk formula only (no live Alpha frames of this "
+           "motion family): RECONSTRUCTED_FROM_EVIDENCE, never TRANSFERRED_FROM_ALPHA.", "",
+           f"Counts: {s['counts']}; live frames of the walk formula: {s['live_check']}", ""]
     if s["problems"]:
         out += ["Problems:", ""] + [f"* {p}" for p in s["problems"]] + [""]
     out += ["| Kind | Name | Runs | PASS | Variant models covered |", "|---|---|---|---|---|"]
     out += [f"| {k} | {v['name_hint']} | {v['runs']} | {v['pass']} | {v['variant_models']} |" for k, v in s["kinds"].items()]
     out += ["", "| Regression | Verdict | Problems |", "|---|---|---|"]
     out += [f"| {r['id']} | {r['verdict']} | {'; '.join(r['problems'])} |" for r in s["regression"]]
-    out += ["", "| Entry | Phase | Hz | Covers | Verdict | Problems |", "|---|---|---|---|---|---|"]
-    out += [f"| {r['id']} | {r['phase']} | {r['fps']} | {' '.join(r['covers'])} | {r['verdict']} | "
-            f"{'; '.join(r['problems'])[:160]} |" for r in s["entries"]]
+    out += ["", "| Entry | Phase | Hz | Live check | Covers | Verdict | Problems |", "|---|---|---|---|---|---|---|"]
+    out += [f"| {r['id']} | {r['phase']} | {r['fps']} | {r['live_check']} | {' '.join(r['covers'])} | "
+            f"{r['verdict']} | {'; '.join(r['problems'])[:160]} |" for r in s["entries"]]
     return "\n".join(out) + "\n"
 
 

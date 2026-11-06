@@ -127,7 +127,8 @@ namespace CubeGame.AlphaTransfer.Review.Editor
                 var mat = EnsureMaterial(problems);
                 var idx = ReviewData.LoadIndex(problems);
                 if (idx == null) throw new Exception("index not loaded");
-                if (idx.kinds.Length != 15) problems.Add($"KINDS {idx.kinds.Length} != 15");
+                if (idx.kinds.Length != (idx.expectedKinds > 0 ? idx.expectedKinds : 15))
+                    problems.Add($"KINDS {idx.kinds.Length} != {(idx.expectedKinds > 0 ? idx.expectedKinds : 15)}");
                 var root = new GameObject("CheckRoot").transform;
                 foreach (var info in idx.specimens.Where(x => x.prepare == "PASS"))
                 {

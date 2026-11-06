@@ -136,3 +136,22 @@ python -m tools.alpha_models.universal.transfer_planner pilot --kinds 0x20,0x1e,
 * `batch` всегда `NOT_AUTHORIZED` (exit 3), пока S05B не разрешён.
 * В Unity обязательны `ENTITY_CONTRACT_RESULT=PASS` и (при формуле ходьбы) `ENTITY_PLAYMODE_RESULT=PASS`; смотреть `entity_contract.txt`, `entity_playmode.txt`, `entity_frames/`.
 * Действия появляются у вида только через запись в `contract.ACTION_PROFILES` (образец + закреплённое семейство + триггер) после исследования **его** запуска. Правила ввода гуманоида на других существ не переносить; `POSES_FAMILY_COMPATIBLE_TRIGGER_UNPROVEN` — не повод импортировать позы.
+
+### 7.1 Новое семейство без живого захвата (S05B-2, D62)
+
+Если семейства нет среди захваченных (нет клипов `TRANSFERRED_FROM_ALPHA`), работает scope пакета с
+`live_frames: "formula_only"`: селектор берёт **все виды закреплённых семейств** (`"families": (...)`),
+готовые по геометрии и с проверенной формулой ходьбы, и отказывает при дрейфе (`SCOPE_DRIFT`, причина —
+вид выпал из `AUTO_READY`/`FORMULA_VERIFIED`).
+
+```powershell
+python -m tools.alpha_models.universal.transfer_planner batch --authorization D62 --scope s05b2 --dry-run
+python -m tools.alpha_models.universal.transfer_planner batch --authorization D62 --scope s05b2
+```
+
+* Итог такого пакета — **`PASS_FORMULA_ONLY`**, а не `PASS`: каждая запись получает `live_check=NOT_CAPTURED`
+  (в `summary.json`/`summary.md`). Порог «нет живых кадров → FAIL» для обычных scope не ослаблен.
+* Ходьба/idle остаются `RECONSTRUCTED_FROM_EVIDENCE`; `TRANSFERRED_FROM_ALPHA` не присваивать.
+* Действия такого семейства — `BLOCKED`: триггер ИИ доказывается на наблюдаемом состоянии NPC (§ B-1 отчёта S05B-2).
+* Просмотр в Unity: `setup_review.ps1 -Project .scratch/review/unity/<Имя> -BatchDir .scratch/universal/batch/<scope>`
+  (сцена читает `index.json` пакета; `expectedKinds` берётся из пакета).

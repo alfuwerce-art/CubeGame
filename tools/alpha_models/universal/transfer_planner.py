@@ -7,8 +7,10 @@ Modes (one code path for every creature; nothing here names a creature or counts
             blocked and why) + generated jobs + coverage matrix (JSON + Markdown)
   VALIDATE  existing data vs the contract: repository jobs, family clips, action manifests
   PILOT     prepare (and optionally run in Unity) ONLY allow-listed reference specimens
-  BATCH     authorised scopes only: (decision, scope) must be in BATCH_AUTHORIZATIONS (S05B-1 = D59);
-            execution lives in batch_runner.py (phases, coverage, resume, hashes, summary)
+  BATCH     authorised scopes only: (decision, scope) must be in BATCH_AUTHORIZATIONS (S05B-1 = D59,
+            S05B-A = D60, S05B-2 = D62); execution lives in batch_runner.py (phases, coverage, resume, hashes,
+            summary). A scope of a never-captured motion family is formula-only: its entries are reported as
+            FORMULA_ONLY with live_check=NOT_CAPTURED, never as a live-verified PASS.
 
 All Alpha-derived outputs stay under .scratch (D54). The static table is built beforehand by
 ``python -m tools.alpha_models.universal.pipeline scan`` (no Alpha run).
@@ -50,8 +52,10 @@ PILOT_ALLOWLIST = {
     0x3f: "PlainRunner: body + two feet, captured walk (universal prototype 2026-11-05)",
 }
 # (decision, scope) pairs that authorise BATCH. Only producer decisions go here; every other decision
-# id or scope is refused. D59 (2026-11-06): S05B-1 only; S05B-2 and creature actions stay NOT_AUTHORIZED.
-BATCH_AUTHORIZATIONS: tuple = (("D59", "s05b1"), ("D60", "s05ba"))
+# id or scope is refused. D59 (2026-11-06): S05B-1 locomotion. D60 (2026-11-06): S05B-A creature actions.
+# D62 (2026-11-06): S05B-2 new motion family of a never-imported kind set (one family per batch until the
+# producer approves the first one); every other decision/scope pair stays refused.
+BATCH_AUTHORIZATIONS: tuple = (("D59", "s05b1"), ("D60", "s05ba"), ("D62", "s05b2"))
 
 # Unity locomotion inputs the planner may fill in. They are NOT Alpha data: amplitude 0.19 is the
 # steady-walk value seen in captures; speed 3.7 is the median AI walk speed of the captured cat/runner.
@@ -231,7 +235,8 @@ def plan(scan_result):
     return {"format": "cubegame.transfer_plan/1", "metrics": plan_metrics(rows, fams), "families": fams,
             "entities": rows, "pilot_allowlist": {f"0x{k:02x}": v for k, v in PILOT_ALLOWLIST.items()},
             "batch": {"authorized": [list(x) for x in BATCH_AUTHORIZATIONS],
-                      "other": "NOT_AUTHORIZED (S05B-2, creature actions)"}}
+                      "other": "NOT_AUTHORIZED (further S05B-2 families need the producer's review of the "
+                               "first one; creature actions need their own trigger evidence)"}}
 
 
 def _channel_summary(name, c):
@@ -540,7 +545,8 @@ def main(argv=None):
         r = batch(a.authorization, a.scope, table, a.clips_root, tuple(a.phase or (1, 2)), a.dry_run,
                   out_dir=a.out_dir)
         print(json.dumps({k: v for k, v in r.items() if k not in ("entries", "kinds")}, indent=1, default=str))
-        return {"PASS": 0, "DRY_RUN": 0, "NOT_AUTHORIZED": 3, "REFUSED": 2}.get(r["BATCH_RESULT"], 1)
+        return {"PASS": 0, "PASS_FORMULA_ONLY": 0, "DRY_RUN": 0, "NOT_AUTHORIZED": 3,
+                "REFUSED": 2}.get(r["BATCH_RESULT"], 1)
     table = load_static(a.static)
     if a.mode == "scan":
         r = scan(table, a.clips_root)
