@@ -90,6 +90,14 @@ def unity_results():
             for a in m.get("actions", []):
                 out[k]["actions"][a["action"]] = {"status": a["status"], "reason": a.get("reason"),
                                                   "library": scope}
+    # D69 merged libraries (D60 + D64 conditional launches): actions new versus the earlier library
+    for lib in glob.glob(str(SCR / "d69" / "verify" / "libraries" / "*" / "actions.json")):
+        m = _load(lib)
+        k = f"0x{m['kind']:02x}"
+        for a in m.get("actions", []):
+            if a["action"] not in out[k]["actions"]:
+                out[k]["actions"][a["action"]] = {"status": a["status"], "reason": a.get("reason"),
+                                                  "library": "d69_merged", "added_d69": True}
     st = _load(D69_VERIFY, {"entries": {}})
     for key, rec in st.get("entries", {}).items():
         if key.startswith("0x"):
@@ -201,6 +209,11 @@ def disposition(original, unity):
                 row(f"action {a}", alpha + "; NOT used by the Alpha game (passive)", st, "DISABLE_IN_GAME",
                     "DISABLED_IN_GAME" if d69.get("static") == "PASS" else "DISABLE_NOT_VERIFIED", "HIGH",
                     "decorative/passive object never acts; research clip kept in .scratch library")
+            elif st == "EMULATED_ALPHA_CODE" and ua.get("added_d69"):
+                row(f"action {a}", alpha, "D69: baked with the merged profile, played by the Unity controller",
+                    "ADD_MISSING", "TRANSFERRED" if d69.get("merged") == "PASS" else "ADD_NOT_VERIFIED", "MEDIUM",
+                    "launch proven by the executed AI region in other NPC class/spec states (D64); was missing "
+                    "from the D60 single-state profile; game trigger DEFERRED_TO_M0", "Claude (D69)")
             elif st == "EMULATED_ALPHA_CODE":
                 row(f"action {a}", alpha, "EMULATED_ALPHA_CODE clip, played by the Unity controller", "KEEP",
                     ("FIXED" if kind == 0x65 else "TRANSFERRED"), "-",
@@ -212,6 +225,12 @@ def disposition(original, unity):
             elif ua and "PART_SET_CHANGED" in (ua.get("reason") or ""):
                 row(f"action {a}", alpha + "; needs a dynamic part", "BLOCKED ACTION_PART_SET_CHANGED", "ADD_MISSING",
                     "BLOCKED", "MEDIUM", "thrown/held object model is not in the kind's rig (R-8)", "next S05 task")
+            elif kind == 0x02 and st == "NOT_BAKED":
+                row(f"action {a}", alpha, "not in the Unity library (0x02 carries the player-input profile)",
+                    "ADD_MISSING", "DEFERRED_TO_M0", "MEDIUM",
+                    "NPC HumanMale (city NPCs are 0x02) needs a creature-AI profile next to the player profile of "
+                    "the same kind: a controller decision for M0-06 (poses: same family as the other humanoids)",
+                    "M0-06 (DeepSeek)")
             else:
                 row(f"action {a}", alpha, st, "UNKNOWN_NEEDS_RESEARCH", "BLOCKED", "LOW", str(ua and ua.get("reason")))
         if o["weapon_only_actions"] and not static:
