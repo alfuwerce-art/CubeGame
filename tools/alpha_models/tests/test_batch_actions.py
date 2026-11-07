@@ -178,6 +178,35 @@ class ActionScope(unittest.TestCase):
         s = self.run_batch(runner=ActionStub(TMP / "proj", completed=0), phases=(1,))
         self.assertTrue(any("ACTIONS_COMPLETED 0/" in p for e in s["entries"] for p in e["problems"]))
 
+    def test_blocked_action_is_documented_and_not_required(self):
+        """D65: a launch that the baker refuses (its pose needs a dynamic part, R-8) is BLOCKED in the
+        library with a reason; the controller must play the EMULATED ones only, and the batch must not
+        demand the profile size."""
+        pid = "alpha_actions/creature_ai_test_0x95"
+        lib = TMP / "lib" / "actions.json"
+        lib.parent.mkdir(parents=True, exist_ok=True)
+        lib.write_text(json.dumps({"actions": [
+            {"clip": "action_003", "status": "EMULATED_ALPHA_CODE"},
+            {"clip": "action_006", "status": "EMULATED_ALPHA_CODE"},
+            {"clip": "action_072", "status": "BLOCKED", "reason": "ACTION_PART_SET_CHANGED t=208"},
+        ]}), encoding="utf-8")
+        rdir = TMP / "rdir"
+        rdir.mkdir()
+        (rdir / "controller_playmode.txt").write_text(
+            "CONTROLLER_PLAYMODE_RESULT=PASS\nactions_completed=2 required=2\n", encoding="utf-8")
+        (rdir / "entity_playmode.txt").write_text(
+            "controller_mode=ACTIONS\naction_profile=" + pid + " trigger=creature_ai\n", encoding="utf-8")
+        judge = br.action_judge({"profile": pid, "id": "0x95_s0-0_60hz"}, lib)
+        self.assertEqual(judge(rdir), [])
+        lib.write_text(json.dumps({"actions": [
+            {"clip": "action_003", "status": "EMULATED_ALPHA_CODE"},
+            {"clip": "action_072", "status": "BLOCKED"},
+        ]}), encoding="utf-8")
+        (rdir / "controller_playmode.txt").write_text(
+            "CONTROLLER_PLAYMODE_RESULT=PASS\nactions_completed=1 required=1\n", encoding="utf-8")
+        self.assertIn("BLOCKED_WITHOUT_REASON action_072",
+                      br.action_judge({"profile": pid, "id": "0x95_s0-0_60hz"}, lib)(rdir))
+
     def test_refused_bake_is_a_fail_not_a_skip(self):
         s = self.run_batch(baker=stub_baker(fail={0x95}), phases=(1,))
         rows = {e["id"]: e for e in s["entries"]}

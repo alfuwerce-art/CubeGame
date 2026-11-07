@@ -406,11 +406,26 @@ def action_job(row, entry, lib):
     return job
 
 
-def action_judge(entry):
-    """Extra checks of an action entry: ACTIONS mode with the kind's OWN profile and every launched
-    action completed by the controller probe."""
+def action_judge(entry, manifest_path=None):
+    """Extra checks of an action entry: ACTIONS mode with the kind's OWN profile and every action the baked
+    library really contains completed by the controller probe.
+
+    D65: the profile lists the launches proven by the AI bytes; a launch can still be refused at bake time
+    with a reason (e.g. ACTION_PART_SET_CHANGED when the pose needs a dynamic part the rig does not have,
+    R-8). Such an action is BLOCKED in the library — it must carry its reason and must not be played, so the
+    expected completion count is the number of EMULATED_ALPHA_CODE clips, not the profile size."""
     from tools.alpha_models.universal import contract as ct
-    n = len(ct.ACTION_PROFILES[entry["profile"]]["launched_actions"])
+    expected = len(ct.ACTION_PROFILES[entry["profile"]]["launched_actions"])
+    blocked = []
+    if manifest_path:
+        try:
+            man = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+            emulated = [a for a in man.get("actions", []) if a.get("status") == "EMULATED_ALPHA_CODE"]
+            blocked = [a for a in man.get("actions", []) if a.get("status") == "BLOCKED"]
+            if emulated:
+                expected = len(emulated)
+        except (OSError, ValueError):
+            pass
 
     def extra(rdir):
         problems = []
@@ -421,8 +436,11 @@ def action_judge(entry):
         if f"action_profile={entry['profile']} " not in t:
             problems.append("ENTITY_PROFILE_MISMATCH")
         got = regression_numbers(rdir)
-        if got.get("actions") != n or got.get("required") != n:
-            problems.append(f"ACTIONS_COMPLETED {got.get('actions')}/{got.get('required')} != {n}")
+        if got.get("actions") != expected or got.get("required") != expected:
+            problems.append(f"ACTIONS_COMPLETED {got.get('actions')}/{got.get('required')} != {expected}")
+        for a in blocked:
+            if not a.get("reason"):
+                problems.append(f"BLOCKED_WITHOUT_REASON {a.get('clip')}")
         return problems
     return extra
 
@@ -441,7 +459,8 @@ def run_entry(e, row, out_root, state, state_path, runner, inputs, scope, baker=
         write_json_atomic(state_path, state)
         return rec
     return run_one(e["id"], action_job(row, e, lib), e["fps"], out_root, state, state_path, runner, inputs,
-                   required=ACTION_STEPS, judge_extra=action_judge(e), locomotion_only=False,
+                   required=ACTION_STEPS, judge_extra=action_judge(e, Path(lib) / "actions.json"),
+                   locomotion_only=False,
                    live_required=live_required)
 
 
