@@ -117,6 +117,27 @@ namespace CubeGame.AlphaTransfer
             }
         }
 
+        /// <summary>D65: motion the clip itself promises (max part displacement in voxels, rotation in
+        /// degrees over its keys) — sampled from the clip, so it holds for TRANSFERRED clips as well.</summary>
+        static void ClipMotion(AlphaClip clip, out float maxRotDeg, out float maxMoveVox)
+        {
+            maxRotDeg = 0f; maxMoveVox = 0f;
+            int n = 32, parts = clip.PartCount;
+            if (parts == 0 || !(clip.Data.duration > 0f)) return;
+            var poses = new PartPose[parts];
+            var firstPos = new Vector3[parts]; var firstRot = new Quaternion[parts];
+            for (int i = 0; i <= n; i++)
+            {
+                clip.Sample(clip.Data.duration * i / n, poses);
+                for (int p = 0; p < parts; p++)
+                {
+                    if (i == 0) { firstPos[p] = poses[p].position; firstRot[p] = poses[p].rotation; continue; }
+                    maxMoveVox = Mathf.Max(maxMoveVox, (poses[p].position - firstPos[p]).magnitude);
+                    maxRotDeg = Mathf.Max(maxRotDeg, Quaternion.Angle(firstRot[p], poses[p].rotation));
+                }
+            }
+        }
+
         void CheckPose(AlphaClip clip)
         {
             var expect = new PartPose[clip.PartCount];
@@ -153,7 +174,19 @@ namespace CubeGame.AlphaTransfer
                     bestMove = Mathf.Max(bestMove, mv);
                 }
             if (_humanoid) { if (footSwing < 4f) _problems.Add($"WALK_FEET_STATIC swing={footSwing:0.00}vox"); }
-            else if (bestRot < 10f && bestMove < 1f) _problems.Add($"WALK_STATIC max_part_rot={bestRot:0.0}deg max_part_move={bestMove:0.00}vox");
+            else
+            {
+                // D65: the frozen-walk rule compares the RUNTIME with what the played clip itself promises.
+                // A clip whose own poses barely move (Alpha's walk of head-only creatures: 0.6 voxel) is a
+                // faithful transfer, reported as WALK_STATIC_BY_CLIP instead of failing; a clip that moves
+                // while the rig does not stays a failure.
+                var own = _player.Get(walkClip);
+                float clipRot = 0f, clipMove = 0f;
+                if (own != null) ClipMotion(own, out clipRot, out clipMove);
+                bool clipStatic = clipRot < 10f && clipMove < 1f;
+                if (clipStatic) _log.AppendLine($"WALK_STATIC_BY_CLIP clip_rot_deg={clipRot:0.0} clip_move_vox={clipMove:0.00} (Alpha's own walk is nearly static)");
+                else if (bestRot < 10f && bestMove < 1f) _problems.Add($"WALK_STATIC max_part_rot={bestRot:0.0}deg max_part_move={bestMove:0.00}vox clip_rot={clipRot:0.0} clip_move={clipMove:0.00}");
+            }
             if (attack != null && _attackCursorEnd < attack.Data.duration) _problems.Add($"ATTACK_NOT_COMPLETED cursor={_attackCursorEnd:0} < {attack.Data.duration:0}");
             if (attackClip != null && _tipTravel < 30f) _problems.Add($"ATTACK_BLADE_STATIC tipTravel={_tipTravel:0.0}vox");
             if (_maxPosErr > 1e-3f || _maxRotErr > 0.05f) _problems.Add($"RUNTIME_POSE_MISMATCH pos={_maxPosErr} rot={_maxRotErr}");

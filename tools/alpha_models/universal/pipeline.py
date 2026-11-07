@@ -339,6 +339,13 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
     if not written:
         problems.append(f"NO_FAMILY_CLIPS {res.family_id} in {clips_dir}")
     uc_contract = ct.unity_contract(entity)
+    # D65: a part whose model is absent from the database is Alpha-empty (nothing drawn) and has no rig
+    # part; the Unity contract lists the parts the rig really has and names the empty ones explicitly.
+    empty_names = {e["part"] for e in empty_parts}
+    keep = [p for p in uc_contract["parts"] if p["name"] not in empty_names]
+    if len(keep) != len(uc_contract["parts"]):
+        uc_contract["parts"] = keep
+    uc_contract["emptyParts"] = sorted(empty_names)
     if uc_contract["controllerMode"] == "ACTIONS" and not manifest_path:
         # profile exists, but this job imports no action library: the Unity entity is honestly
         # locomotion-only (the controller must not expect actions it does not have)

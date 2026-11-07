@@ -187,7 +187,16 @@ namespace CubeGame.AlphaTransfer
             if (Finished) return;
             if (_contract != null && _stage < 4 && !_problems.Any()) _problems.Add("SCENARIO_INCOMPLETE stage=" + _stage);
             if (_maxPos > 1e-3f || _maxRot > .05f) _problems.Add($"RUNTIME_POSE_MISMATCH pos={_maxPos} rot={_maxRot}");
-            if (_contract != null && _stage >= 1 && _walkRot < 10f && _walkMove < 1f) _problems.Add($"WALK_STATIC rot={_walkRot} move={_walkMove}");
+            // D65: compare the runtime with what the data promises (head-only creatures barely move in Alpha
+            // itself); a motionless rig while the formula moves stays a failure.
+            float expRot = 0f, expMove = 0f;
+            if (_d != null && _d.Spec != null)
+                // the amplitude of the WALK stage (at Finish the driver's amplitude is already ramped to 0)
+                AlphaParamWalk.ExpectedMotion(_d.Spec.@params, walkAmplitude,
+                    new List<string>(_d.PartNames).ToArray(), out expRot, out expMove);
+            bool formulaStatic = expRot < 10f && expMove < 1f;
+            if (_contract != null && _stage >= 1 && !formulaStatic && _walkRot < 10f && _walkMove < 1f)
+                _problems.Add($"WALK_STATIC rot={_walkRot} move={_walkMove} formula_rot={expRot:0.0} formula_move={expMove:0.00}");
             if (_idleDrift > 1e-4f) _problems.Add($"IDLE_NOT_STABLE {_idleDrift}");
             Verdict = _problems.Count == 0 ? "PASS" : "FAIL";
             var s = new StringBuilder();
@@ -201,6 +210,8 @@ namespace CubeGame.AlphaTransfer
             }
             s.AppendLine($"frames={_frame} simulated_fps={fps} phase_travel_rad={(_d != null ? _d.phase - _phaseStart : 0):0.000}");
             s.AppendLine($"walk_max_part_rot_deg={_walkRot:0.00} walk_max_part_move_vox={_walkMove:0.00} idle_drift={_idleDrift:0.000000}");
+            if (formulaStatic && _stage >= 1)
+                s.AppendLine($"WALK_STATIC_BY_FORMULA formula_rot_deg={expRot:0.0} formula_move_vox={expMove:0.00} (Alpha's own walk is nearly static)");
             s.AppendLine($"runtime_formula_pose_max_pos_err_vox={_maxPos:0.000000} rot_err_deg={_maxRot:0.000000}");
             s.AppendLine($"action={_action ?? "-"} action_seconds={_actionSeconds:0.000} locomotion_only_refused={_refused}");
             s.AppendLine("events=" + (_c == null ? "" : string.Join(",", _c.Events)));

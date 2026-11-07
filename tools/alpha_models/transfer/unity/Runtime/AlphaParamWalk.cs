@@ -223,5 +223,36 @@ namespace CubeGame.AlphaTransfer
         }
 
         public static bool IsModelled(string part) => Array.IndexOf(ModelledParts, part) >= 0;
+
+        /// <summary>D65: the motion the walk FORMULA itself promises for these parts at this amplitude
+        /// (max part displacement in voxels and max part rotation in degrees over one cycle). Probes use it
+        /// to tell "the clip/formula is nearly static in Alpha" (e.g. head-only creatures: 0.6 voxel) from
+        /// "the runtime is frozen while the data moves" — the latter stays a failure.</summary>
+        public static void ExpectedMotion(AlphaLocomotionParams p, float amp, string[] parts,
+                                          out float maxRotDeg, out float maxMoveVox)
+        {
+            maxRotDeg = 0f; maxMoveVox = 0f;
+            if (parts == null || parts.Length == 0) return;
+            const int samples = 64;
+            var firstPos = new Vector3[parts.Length]; var firstRot = new Quaternion[parts.Length];
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (!IsModelled(parts[i])) continue;
+                var u = AlphaSpace.ToUnity(Joint(p, new AlphaWalkInput { phase = 0f, amp = amp, onGround = true }, parts[i]));
+                AlphaSpace.Decompose(u, out firstPos[i], out firstRot[i], out _);
+            }
+            for (int s = 1; s <= samples; s++)
+            {
+                float phase = 2f * Mathf.PI * s / samples;
+                for (int i = 0; i < parts.Length; i++)
+                {
+                    if (!IsModelled(parts[i])) continue;
+                    var u = AlphaSpace.ToUnity(Joint(p, new AlphaWalkInput { phase = phase, amp = amp, onGround = true }, parts[i]));
+                    AlphaSpace.Decompose(u, out var pos, out var rot, out _);
+                    maxMoveVox = Mathf.Max(maxMoveVox, (pos - firstPos[i]).magnitude);
+                    maxRotDeg = Mathf.Max(maxRotDeg, Quaternion.Angle(firstRot[i], rot));
+                }
+            }
+        }
     }
 }

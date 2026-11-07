@@ -20,7 +20,7 @@ namespace CubeGame.AlphaTransfer
 
         AlphaLocomotionDriver _driver; AlphaRig _rig;
         int _frame;
-        float _maxPosErr, _maxRotErr, _phaseStart, _leanEnd, _leanExpectedEnd;
+        float _maxPosErr, _maxRotErr, _phaseStart, _leanEnd, _leanExpectedEnd, amplitude0;
         readonly List<string> _problems = new List<string>();
         Vector3[] _min, _max; Quaternion[] _rot0; float[] _rotRange;
         bool _leanApplies;
@@ -35,6 +35,7 @@ namespace CubeGame.AlphaTransfer
             _problems.AddRange(_driver.Problems);
             if (_problems.Count > 0) { Finish(); return; }
             _driver.followAmplitude = false;
+            amplitude0 = _driver.amplitude;
             _driver.boost = false; _driver.accelerating = false; _driver.headLeanDeg = 0f;
             _phaseStart = _driver.phase;
             _leanApplies = (_driver.Spec.@params.flags & 1) == 0 && (_rig.IndexOf("head") >= 0 || _rig.IndexOf("hair") >= 0);
@@ -90,7 +91,19 @@ namespace CubeGame.AlphaTransfer
                     bestMove = Mathf.Max(bestMove, (_max[i] - _min[i]).magnitude);
                 }
             if (_frame < walkFrames + sweepFrames + boostFrames && _problems.Count == 0) _problems.Add($"FRAMES {_frame}");
-            if (bestRot < 10f && bestMove < 1f) _problems.Add($"WALK_STATIC max_part_rot={bestRot:0.0} max_part_move={bestMove:0.00}");
+            // D65: the frozen-walk rule compares the runtime with what the measured data promises. The
+            // formula of a head-only creature barely moves in Alpha itself (0.6 voxel): that is a faithful
+            // result and is reported, not failed; a formula that moves but a rig that does not stays a FAIL.
+            float expRot = 0f, expMove = 0f;
+            if (_driver != null && _driver.Spec != null)
+                // the steady-walk amplitude (the sweep ends at 0.19, the boost stage does not change it)
+                AlphaParamWalk.ExpectedMotion(_driver.Spec.@params, amplitude0,
+                    new List<string>(_driver.PartNames).ToArray(), out expRot, out expMove);
+            bool formulaStatic = expRot < 10f && expMove < 1f;
+            if (formulaStatic)
+                log.AppendLine($"WALK_STATIC_BY_FORMULA formula_rot_deg={expRot:0.0} formula_move_vox={expMove:0.00} (Alpha's own walk is nearly static)");
+            else if (bestRot < 10f && bestMove < 1f)
+                _problems.Add($"WALK_STATIC max_part_rot={bestRot:0.0} max_part_move={bestMove:0.00} formula_rot={expRot:0.0} formula_move={expMove:0.00}");
             if (_maxPosErr > 1e-3f || _maxRotErr > 0.05f) _problems.Add($"RUNTIME_POSE_MISMATCH pos={_maxPosErr} rot={_maxRotErr}");
             float travel = _driver != null ? _driver.phase - _phaseStart : 0f;
             if (travel <= 0f) _problems.Add("PHASE_NOT_ADVANCING");
