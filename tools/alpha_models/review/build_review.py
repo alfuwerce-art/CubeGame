@@ -121,8 +121,9 @@ def select_batch_specimens(batch_dir: Path, entries=None, prefix: str = ""):
         src = "models + rig + walk/idle (formula)"
         if "action_manifest" in json.loads(job.read_text(encoding="utf-8")):
             src = "models + rig + walk/idle + creature-AI action library"
-        out.append(dict(id=f"{prefix}{e['id']}", kind=e["kind"], seed=list(e["seed"]), name=e.get("name_hint"),
-                        job=job, source=f"batch {batch_dir.name} job: {src}"))
+        out.append(dict(id=f"{prefix}{e['id']}", kind=e["kind"], seed=list(e["seed"]),
+                        name=e.get("name_hint") or f"kind {e['kind']}", job=job,
+                        source=f"batch {batch_dir.name} job: {src}"))
     return out
 
 
