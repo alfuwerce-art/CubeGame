@@ -131,6 +131,10 @@ SCOPES["d63_actions"] = {
     "exclude_scopes": ("s05ba",),
     "coverage": "BASE",
     "fps_samples": (),                        # FPS independence: HumanMale regression 30/60/120 (D64)
+    # D65: the walk of every D63 kind is the parametric formula verified against the executed drawModel
+    # (walk_oracle ORACLE_VERIFIED); there is no live capture of it, so the frozen-walk/paramwalk rule is
+    # judged on the formula and the entry is classified FORMULA_ONLY (live_check=NOT_CAPTURED).
+    "live_frames": "formula_only",
     "phase_gate": "regression_only",
     "project": SCRATCH / "universal" / "unity" / "D63Actions",
     "out": SCRATCH / "universal" / "batch" / "d63_actions",
