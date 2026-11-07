@@ -304,26 +304,31 @@ namespace CubeGame.AlphaTransfer.Review.Editor
             BeforeAfter(idx, mat);
             var cam = SheetCamera();
             var root = new GameObject("SheetRoot").transform;
-            // 1. lineup of the 15 kinds (seed 0-0), idle and walk, front and side
+            // 1. lineup of every kind (seed 0-0), idle and walk, front and side.
+            // D65: a single row is unreadable for 141 kinds (each becomes a few pixels), so the lineup is a grid
+            // of at most 20 per row; the texture grows with the number of rows (still far below 16384 px).
+            int cols = Mathf.Max(1, Mathf.Min(idx.kinds.Length, 20));
+            int rows = Mathf.Max(1, Mathf.CeilToInt(idx.kinds.Length / (float)cols));
+            int sheetH = Mathf.Clamp(700 * rows / Mathf.Max(1, Mathf.Min(rows, 4)), 700, 4800);
             foreach (var mode in new[] { ReviewMode.Idle, ReviewMode.Walk })
             {
-                var specs = new List<ReviewSpecimen>(); float x = 0f; var all = new Bounds(); bool first = true;
-                foreach (var k in idx.kinds)
+                var specs = new List<ReviewSpecimen>(); var all = new Bounds(); bool first = true;
+                for (int k = 0; k < idx.kinds.Length; k++)
                 {
-                    var info = idx.specimens.First(s => s.kind == k && s.IsBaseVariant && s.prepare == "PASS");
+                    var info = idx.specimens.First(s => s.kind == idx.kinds[k] && s.IsBaseVariant && s.prepare == "PASS");
                     var s = ReviewSpecimen.Build(info, mat, root);
                     s.SetHairColour(ReviewData.DefaultHairColour(idx, s));
                     var src = s.Sources(mode).LastOrDefault(v => v.formula) ?? s.Sources(mode).FirstOrDefault();
                     s.Apply(src, 1.0f);
                     var b = s.VisibleBounds();
-                    s.transform.position += new Vector3(x - b.min.x, 0, 0);
-                    x += b.size.x + 0.5f;
+                    int col = k % cols, row = k / cols;
+                    s.transform.position += new Vector3(col * 2.2f - b.center.x, -row * 2.8f, 0);
                     b = s.VisibleBounds();
                     if (first) { all = b; first = false; } else all.Encapsulate(b);
                     specs.Add(s);
                 }
-                Aim(cam, all, 180f, 6f, 0.62f); Save(Render(cam, 2400, 700), $"lineup_{mode.ToString().ToLower()}_front.png");
-                Aim(cam, all, 150f, 14f, 0.62f); Save(Render(cam, 2400, 900), $"lineup_{mode.ToString().ToLower()}_34.png");
+                Aim(cam, all, 180f, 6f, 0.62f); Save(Render(cam, 2400, sheetH), $"lineup_{mode.ToString().ToLower()}_front.png");
+                Aim(cam, all, 150f, 14f, 0.62f); Save(Render(cam, 2400, Mathf.Max(900, sheetH)), $"lineup_{mode.ToString().ToLower()}_34.png");
                 foreach (var s in specs) UnityEngine.Object.DestroyImmediate(s.gameObject);
             }
             // 2. per kind: every variant (idle, 3/4 front), then every action of the action specimens

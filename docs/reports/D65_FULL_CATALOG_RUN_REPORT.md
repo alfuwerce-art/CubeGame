@@ -350,9 +350,9 @@ HumanMale не менялась ни разу (98/98 при 30/60/120 Гц, ка
   `REVIEW_BUILD_RESULT=PASS`, `REVIEW_CHECK_RESULT=PASS specimens=322 sources=1817 samples=210335 problems=0`,
   `REVIEW_PLAYMODE_RESULT=PASS specimens=322 sources=1817 frames=6317 errors=0 tour_problems=0`;
   переключатель правила маркеров: вершин 11 136 → 7 724 (маркеры скрываются там, где они есть);
-* локальные листы: `ReviewOutput/lineup_idle_*.png` (все виды в ряд), `variants_<kind>.png`,
-  `actions_<specimen>.png` (3 кадра на каждое действие), `colour_before_after_*.png` (по 50 видов на файл —
-  больше 16 384 px текстура не позволяет).
+* локальные листы: `ReviewOutput/lineup_idle_*.png` (все 141 вид сеткой по 20 в ряд — одиночный ряд из
+  141 вида не читался), `variants_<kind>.png`, `actions_<specimen>.png` (3 кадра на каждое действие),
+  `colour_before_after_*.png` (по 50 видов на файл — больше 16 384 px текстура не позволяет).
 
 Открыть:
 
