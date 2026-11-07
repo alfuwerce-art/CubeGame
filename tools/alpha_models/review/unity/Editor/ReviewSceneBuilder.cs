@@ -219,34 +219,41 @@ namespace CubeGame.AlphaTransfer.Review.Editor
         }
 
         // ------------------------------------------------------------------ colour before / after (D61)
+        // D65: the full catalog has more kinds than one texture allows (16384 px), so the sheet is split
+        // into chunks of at most 50 kinds; each chunk is a separate PNG, the content is unchanged.
         static void BeforeAfter(ReviewIndex idx, Material mat)
         {
             var cam = SheetCamera();
             var root = new GameObject("BeforeAfterRoot").transform;
-            int n = idx.kinds.Length, cell = 300;
-            var sheet = new Texture2D(n * cell, 2 * cell, TextureFormat.RGB24, false);
-            for (int k = 0; k < n; k++)
+            int n = idx.kinds.Length, cell = 300, chunk = Mathf.Max(1, Mathf.Min(50, 16000 / cell));
+            for (int start = 0; start < n; start += chunk)
             {
-                var info = idx.specimens.First(x => x.kind == idx.kinds[k] && x.IsBaseVariant && x.prepare == "PASS");
-                for (int row = 0; row < 2; row++)
+                int count = Mathf.Min(chunk, n - start);
+                var sheet = new Texture2D(count * cell, 2 * cell, TextureFormat.RGB24, false);
+                for (int k = 0; k < count; k++)
                 {
-                    bool after = row == 1;
-                    var s = ReviewSpecimen.Build(info, mat, root, alphaMarkerRule: after);
-                    if (after) s.SetHairColour(ReviewData.DefaultHairColour(idx, s));
-                    s.Apply(s.Sources(ReviewMode.Idle).LastOrDefault(), 0f);
-                    var b = s.VisibleBounds();
-                    // head close-up: upper 55 % of the creature, 3/4 front
-                    var head = new Bounds(new Vector3(b.center.x, b.max.y - b.size.y * 0.3f, b.center.z),
-                                          new Vector3(b.size.x, b.size.y * 0.6f, b.size.z));
-                    Aim(cam, head, 200f, 8f, 1.0f);
-                    var tex = Render(cam, cell, cell);
-                    sheet.SetPixels(k * cell, (1 - row) * cell, cell, cell, tex.GetPixels());
-                    UnityEngine.Object.DestroyImmediate(tex);
-                    UnityEngine.Object.DestroyImmediate(s.gameObject);
+                    var info = idx.specimens.First(x => x.kind == idx.kinds[start + k] && x.IsBaseVariant && x.prepare == "PASS");
+                    for (int row = 0; row < 2; row++)
+                    {
+                        bool after = row == 1;
+                        var s = ReviewSpecimen.Build(info, mat, root, alphaMarkerRule: after);
+                        if (after) s.SetHairColour(ReviewData.DefaultHairColour(idx, s));
+                        s.Apply(s.Sources(ReviewMode.Idle).LastOrDefault(), 0f);
+                        var b = s.VisibleBounds();
+                        // head close-up: upper 55 % of the creature, 3/4 front
+                        var head = new Bounds(new Vector3(b.center.x, b.max.y - b.size.y * 0.3f, b.center.z),
+                                              new Vector3(b.size.x, b.size.y * 0.6f, b.size.z));
+                        Aim(cam, head, 200f, 8f, 1.0f);
+                        var tex = Render(cam, cell, cell);
+                        sheet.SetPixels(k * cell, (1 - row) * cell, cell, cell, tex.GetPixels());
+                        UnityEngine.Object.DestroyImmediate(tex);
+                        UnityEngine.Object.DestroyImmediate(s.gameObject);
+                    }
                 }
+                sheet.Apply();
+                Save(sheet, n <= chunk ? "colour_before_after.png"
+                                       : $"colour_before_after_{start / chunk + 1}.png");
             }
-            sheet.Apply();
-            Save(sheet, "colour_before_after.png");
             UnityEngine.Object.DestroyImmediate(cam.gameObject);
             UnityEngine.Object.DestroyImmediate(root.gameObject);
         }

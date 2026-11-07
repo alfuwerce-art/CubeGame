@@ -62,9 +62,26 @@ def _actions_by_kind(plan):
     return out
 
 
-def animation_manifest(plan, full_summary=None, actions_summary=None):
+def _equipment_by_kind(static_path=None, seed=(0, 0)):
+    """Kind -> weapon-layer status of the rig (SUPPORTED / NONE / BLOCKED) from the entity contract."""
+    from tools.alpha_models.universal import contract as ct
+    table = _load(static_path or SCRATCH / "universal/static/alpha_static.json", None)
+    if not table:
+        return {}
+    out = {}
+    for key in table.get("kinds", {}):
+        try:
+            e = ct.describe(int(key, 16), table["kinds"][key], table, None, seed_variant=seed)
+            out[key] = e["channels"]["equipment"]["weapon"]["status"]
+        except Exception:
+            out[key] = "UNKNOWN"
+    return out
+
+
+def animation_manifest(plan, full_summary=None, actions_summary=None, static_path=None):
     """One row per creature kind: geometry/rig/walk/idle/actions/equipment and the Unity verdict."""
     acts = _actions_by_kind(plan)
+    equip = _equipment_by_kind(static_path)
     ent = {r["kind"]: r for r in plan.get("entities", [])}
     full = {r["kind"]: r for r in ((full_summary or {}).get("entries") or [])}
     action_rows = {}
@@ -94,7 +111,7 @@ def animation_manifest(plan, full_summary=None, actions_summary=None):
             unity = "PASS" if f.get("verdict") == "PASS" else f.get("verdict")
             if f.get("verdict") == "PASS" and f.get("live_check") == "NOT_CAPTURED":
                 unity += " (formula)"
-        equip = ch.get("equipment", {}).get("weapon", {}).get("status", "—")
+        equip_status = equip.get(kind, "—") or "—"
         reasons = []
         if ch.get("actions", {}).get("reasons"):
             reasons += ch["actions"]["reasons"]
@@ -103,7 +120,7 @@ def animation_manifest(plan, full_summary=None, actions_summary=None):
         if f and f.get("problems"):
             reasons += f["problems"]
         out.append(f"| {kind} | {e.get('name_hint') or ''} | {(e.get('family_id') or '').split('/')[-1]} | "
-                   f"{len(e.get('parts') or [])} | {walk} | {idle} | {act} | {equip} | {unity} | "
+                   f"{len(e.get('parts') or [])} | {walk} | {idle} | {act} | {equip_status} | {unity} | "
                    f"{'; '.join(reasons)[:180]} |")
     return "\n".join(out)
 
@@ -113,13 +130,14 @@ def main(argv=None):
     ap.add_argument("--plan", default=str(SCRATCH / "universal/plan_d65/plan.json"))
     ap.add_argument("--full-summary", default=str(SCRATCH / "universal/batch/d63_full/summary.json"))
     ap.add_argument("--actions-summary", default=str(SCRATCH / "universal/batch/d63_actions/summary.json"))
+    ap.add_argument("--static", default=str(SCRATCH / "universal/static/alpha_static.json"))
     ap.add_argument("--out", default=str(SCRATCH / "catalog/report_tables.md"))
     a = ap.parse_args(argv)
     plan = _load(a.plan, {"entities": []})
     full = _load(a.full_summary, None)
     actions = _load(a.actions_summary, None)
     text = "\n\n".join(["## Модельный манифест", model_manifest(),
-                        "## Анимационный манифест", animation_manifest(plan, full, actions)])
+                        "## Анимационный манифест", animation_manifest(plan, full, actions, a.static)])
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(text + "\n", encoding="utf-8")

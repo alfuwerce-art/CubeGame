@@ -57,7 +57,10 @@ namespace CubeGame.AlphaTransfer.Review
                 if (ps.name == "hair") s.hairPart = i;
                 var built = VoxelMesh.Build(bytes, ps.name + "_" + Path.GetFileNameWithoutExtension(ps.model),
                                             ps.markerTransparent && alphaMarkerRule);
-                if (built.problem != null) s.problems.Add($"MESH {ps.name}: {built.problem}");
+                // D65: a part Alpha itself draws as nothing (0 visible faces with the marker rule, verified in
+                // Python through expectedVertices == 0) is legitimate; every other empty part is a problem.
+                bool alphaEmptyPart = built.problem == "NO_VISIBLE_FACES" && ps.expectedVertices == 0;
+                if (built.problem != null && !alphaEmptyPart) s.problems.Add($"MESH {ps.name}: {built.problem}");
                 if (built.size != new Vector3Int(ps.size[0], ps.size[1], ps.size[2])) s.problems.Add($"MESH_SIZE {ps.name}");
                 if (built.mesh != null)
                 {
