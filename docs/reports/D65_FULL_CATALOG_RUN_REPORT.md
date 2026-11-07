@@ -17,7 +17,7 @@
 | 3. Действия ИИ `d63_actions` | **`BATCH_RESULT=PASS_ORACLE_VERIFIED`**, **140/140 PASS**, **851** клип действия `EMULATED_ALPHA_CODE`, 25 отказов с точной причиной, 140 контактных листов |
 | Видов покрыто | **156 / 156** (все `AUTO_READY`; геометрия+риг+ходьба/покой у всех, действия — у 154 + профиль игрока 0x02) |
 | Unity | 322 прогона существ/действий + 2856 моделей, все с маркером PASS и exit 0; регрессия HumanMale **98/98** при 30/60/120 Гц в каждом потоке, числа как в D59/D61 |
-| Python | **317/317 OK**, `validate` PASS, PS 5.1 11/11 |
+| Python | **318/318 OK** (312 D64 + 6 D65), `validate` PASS, PS 5.1 11/11 |
 | Сцена просмотра | `.scratch/review/unity/FullCatalogReview` (322 образца, 141 вид) |
 | Не перенесено | действия только с оружием (23 кода), эффекты/снаряды, динамические части, `RuneGiant 0x76`, запуски вне региона атаки — §4, §5, §8 |
 
@@ -37,7 +37,7 @@
 Подготовка (все шаги выполнены, числа совпали с D64):
 
 ```powershell
-python -m unittest discover -s tools/alpha_models/tests -t .          # 313/313 OK (312 D64 + 1 D65)
+python -m unittest discover -s tools/alpha_models/tests -t .          # 318/318 OK (312 D64 + 6 D65)
 python -m tools.alpha_models.universal.pipeline scan --out .scratch/universal/static/alpha_static.json
 python -m tools.alpha_models.catalog.asset_catalog
 python -m tools.alpha_models.catalog.anim_catalog --out .scratch/catalog/anim_catalog.json
