@@ -22,6 +22,9 @@ namespace CubeGame.AlphaTransfer
         // controller owns walk/stop/idle only and refuses every action request (no humanoid fallback).
         public bool locomotionOnly;
         public string actionsBlockedReason;
+        // D69 STATIC_OBJECT: passive object (no walk, no actions in the game). The controller keeps the
+        // standing pose (amplitude 0, phase frozen) and refuses movement; implies locomotionOnly.
+        public bool staticObject;
         public string CurrentAction { get; private set; }
         public bool InAction => CurrentAction != null;
         public bool Initialized { get; private set; }
@@ -54,6 +57,7 @@ namespace CubeGame.AlphaTransfer
             locomotion.Load(); Problems.AddRange(locomotion.Problems);
             actions.LoadClips(); Problems.AddRange(actions.Problems);
             var names = requiredClips.Length > 0 ? requiredClips : actions.ClipNames.Where(n => n.StartsWith("action_")).ToArray();
+            if (staticObject && !locomotionOnly) Problems.Add("CONTROLLER_STATIC_OBJECT_NOT_ACTION_FREE");
             if (locomotionOnly)
             {
                 if (string.IsNullOrEmpty(actionsBlockedReason)) Problems.Add("CONTROLLER_LOCOMOTION_ONLY_WITHOUT_REASON");
@@ -84,6 +88,7 @@ namespace CubeGame.AlphaTransfer
             Initialized = true;
             Phase = AlphaControllerPhase.Locomotion;
             _rig.SetWeaponOnBack(true);
+            if (staticObject) FreezeStanding();   // the first applied pose is already the standing pose
             locomotion.Apply(); Events.Add("idle");
             return true;
         }
@@ -162,6 +167,15 @@ namespace CubeGame.AlphaTransfer
             switch (Phase)
             {
                 case AlphaControllerPhase.Locomotion:
+                    if (staticObject)
+                    {
+                        bool requested = locomotion.amplitude != 0f || locomotion.followAmplitude || locomotion.accelerating || locomotion.boost;
+                        if (requested && (Events.Count == 0 || Events[Events.Count - 1] != "move_refused:STATIC_OBJECT"))
+                            Events.Add("move_refused:STATIC_OBJECT");
+                        FreezeStanding();
+                        locomotion.Apply();   // standing pose; the phase is not advanced
+                        break;
+                    }
                     locomotion.Step(dt); locomotion.Apply();
                     break;
                 case AlphaControllerPhase.Stopping:
@@ -206,6 +220,12 @@ namespace CubeGame.AlphaTransfer
                     }
                     break;
             }
+        }
+
+        void FreezeStanding()
+        {
+            locomotion.amplitude = 0f; locomotion.followAmplitude = false;
+            locomotion.accelerating = false; locomotion.boost = false; locomotion.headLeanDeg = 0f;
         }
 
         void Start() { Init(); }

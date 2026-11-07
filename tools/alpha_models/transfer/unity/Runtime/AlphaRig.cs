@@ -73,6 +73,8 @@ namespace CubeGame.AlphaTransfer
             if (rule == "neck") return new Vector3(size.x * 0.5f, 0f, size.z);
             if (rule == "lamp") return new Vector3(size.x * 0.5f, size.y * 0.5f, size.z);
             if (rule == "pet") return new Vector3(size.x * 0.5f, size.y * 0.5f, 0f);
+            // D69: Dragon 0x65 head block, drawModel translate(-sx/2, -sy*0.2, -sz/2) (creature_rig.anchor)
+            if (rule == "head_0x65") return new Vector3(size.x * 0.5f, size.y * 0.2f, size.z * 0.5f);
             if (rule == "weapon") return weaponOnBack ? centre : new Vector3(size.x * 0.5f, size.y * 0.5f, 4f);
             throw new ArgumentException($"unknown anchor rule {rule}");
         }

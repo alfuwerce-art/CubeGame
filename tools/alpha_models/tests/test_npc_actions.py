@@ -21,6 +21,29 @@ CAT_FAMILY = "alpha_creature/ced63e5e96"
 HAVE_EXE = Path(at.DEFAULT_EXE).exists()
 
 
+
+def _d60_part(pid):
+    """D69: a D60 profile = the default-state launches (this executor) + the D64 conditional launches
+    merged by contract._merge_d64_into_d60 (listed in d69_added_actions); the D60 part must be unchanged."""
+    prof = ct.ACTION_PROFILES[pid]
+    return {a: va for a, va in prof["launched_actions"].items() if a not in prof.get("d69_added_actions", [])}
+
+
+class D69MergedLaunches(unittest.TestCase):
+    def test_merged_launches_come_from_d64_evidence_of_the_same_family(self):
+        import json, os
+        ev = json.load(open(ct.TRIGGER_EVIDENCE_PATH, encoding="utf-8"))["kinds"]
+        self.assertEqual(len(ct.D69_MERGED_LAUNCHES), 14)
+        for pid, added in ct.D69_MERGED_LAUNCHES.items():
+            prof = ct.ACTION_PROFILES[pid]
+            e = ev[f"0x{prof['specimens'][0]['kind']:02x}"]
+            self.assertIn(e["family_id"], prof["evidence_families"])
+            self.assertEqual(sorted(added), sorted(int(a) for a in e["unarmed_actions"] if int(a) not in _d60_part(pid)))
+            for a in added:
+                self.assertEqual(prof["launched_actions"][a], int(e["unarmed_actions"][str(a)]["write_vas"][0], 16))
+                self.assertTrue(prof["launch_conditions"][a])     # class/spec condition recorded, never dropped
+            self.assertEqual(prof["primary_chain"][:len(_d60_part(pid))], sorted(_d60_part(pid)))
+
 class CreatureAiProfileRules(unittest.TestCase):
     def test_cat_profile_is_emulated_creature_ai_without_equipment(self):
         p = ct.ACTION_PROFILES[CAT_PID]
@@ -126,17 +149,15 @@ class TriggerFromAlphaBytes(unittest.TestCase):
         acts, rep = self._launched(0x1E)
         self.assertEqual(rep["appearance_flags_7e"], "0x0031")
         self.assertEqual(acts, {75: ["0x42E2BF"]})
-        self.assertEqual(ct.ACTION_PROFILES[CAT_PID]["launched_actions"], {75: 0x42E2BF})
+        self.assertEqual(_d60_part(CAT_PID), {75: 0x42E2BF})
 
     def test_runner_and_humanoid_differ_from_the_cat(self):
         runner, _ = self._launched(0x3F)
         self.assertEqual(sorted(runner), [6])
-        self.assertEqual({a: int(v[0], 16) for a, v in runner.items()},
-                         ct.ACTION_PROFILES[RUN_PID]["launched_actions"])
+        self.assertEqual({a: int(v[0], 16) for a, v in runner.items()}, _d60_part(RUN_PID))
         human, _ = self._launched(0x03)
         self.assertEqual(sorted(human), [3, 4, 6, 54])
-        self.assertEqual({a: int(v[0], 16) for a, v in human.items()},
-                         ct.ACTION_PROFILES[HF_PID]["launched_actions"])
+        self.assertEqual({a: int(v[0], 16) for a, v in human.items()}, _d60_part(HF_PID))
 
     def test_ability_is_executed_and_cooldown_is_the_condition_of_3_and_4(self):
         rep = at.analyse_kind(self.image, 0x03)

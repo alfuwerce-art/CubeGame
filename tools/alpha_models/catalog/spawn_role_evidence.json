@@ -1,0 +1,347 @@
+{
+ "format": "cubegame.spawn_role_evidence/1",
+ "decision": "D69",
+ "server_sha256": "1ffbcbce251e1506a63c9ce18ab0009d5553fcbb9e6202be2bc3a7d870d34fb1",
+ "cube_sha256": "84a7a132a84d4282338e7ea45a1940d32066d64e39cbafed8f2418d5a6dc30bf",
+ "meaning": {
+  "faction_6": "passive: no RandomWalkBehavior (0x5360AE), no action timer (0x53E2A8)"
+ },
+ "checks": {
+  "spawn_copy": [
+   {
+    "va": "0x535DEB",
+    "bytes": "8a4728",
+    "ok": true,
+    "meaning": "mov al,[edi+0x28]  (record faction)"
+   },
+   {
+    "va": "0x535DEE",
+    "bytes": "884660",
+    "ok": true,
+    "meaning": "mov [esi+0x60],al  (creature faction)"
+   },
+   {
+    "va": "0x535DF1",
+    "bytes": "8b472c",
+    "ok": true,
+    "meaning": "mov eax,[edi+0x2c] (record kind)"
+   },
+   {
+    "va": "0x535DF4",
+    "bytes": "894664",
+    "ok": true,
+    "meaning": "mov [esi+0x64],eax (creature kind)"
+   }
+  ],
+  "passive_consumers": [
+   {
+    "va": "0x5360AE",
+    "bytes": "807e6006",
+    "ok": true,
+    "meaning": "cmp byte [esi+0x60],6 -> skip RandomWalkBehavior (0x41CB90)"
+   },
+   {
+    "va": "0x53E2A8",
+    "bytes": "807e6006",
+    "ok": true,
+    "meaning": "cmp byte [esi+0x60],6 -> skip action timer +0x68/+0x6c update"
+   }
+  ],
+  "cube_role_check": [
+   {
+    "va": "0x43E310",
+    "bytes": "8a4160",
+    "ok": true,
+    "meaning": "mov al,[ecx+0x60]"
+   },
+   {
+    "va": "0x43E32A",
+    "bytes": "3d8c000000",
+    "ok": true,
+    "meaning": "cmp eax,0x8c"
+   },
+   {
+    "va": "0x43E331",
+    "bytes": "3d8e000000",
+    "ok": true,
+    "meaning": "cmp eax,0x8e"
+   },
+   {
+    "va": "0x43E338",
+    "bytes": "3d8d000000",
+    "ok": true,
+    "meaning": "cmp eax,0x8d"
+   }
+  ]
+ },
+ "passive_kinds": {
+  "0x18": {
+   "faction": null,
+   "basis": "PRODUCER_RULE_D67",
+   "note": "Egg (egg1.cub): producer rule \u2014 the egg never walks or attacks",
+   "sites": []
+  },
+  "0x78": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "plants_b (0x51F4B6)",
+     "faction_write": "0x51F4B6",
+     "kind_write": "0x51F47E"
+    }
+   ]
+  },
+  "0x79": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "plants_a (all branches jump to 0x51F2A0)",
+     "faction_write": "0x51F2A0",
+     "kind_write": "0x51F325"
+    }
+   ]
+  },
+  "0x7a": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "plants_a (all branches jump to 0x51F2A0)",
+     "faction_write": "0x51F2A0",
+     "kind_write": "0x51F33B"
+    }
+   ]
+  },
+  "0x7b": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "plants_a (all branches jump to 0x51F2A0)",
+     "faction_write": "0x51F2A0",
+     "kind_write": "0x51F367"
+    },
+    {
+     "group": "plants_b (0x51F4B6)",
+     "faction_write": "0x51F4B6",
+     "kind_write": "0x51F4A5"
+    }
+   ]
+  },
+  "0x7c": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "plants_a (all branches jump to 0x51F2A0)",
+     "faction_write": "0x51F2A0",
+     "kind_write": "0x51F3DB"
+    }
+   ]
+  },
+  "0x7d": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "plants_a (all branches jump to 0x51F2A0)",
+     "faction_write": "0x51F2A0",
+     "kind_write": "0x51F351"
+    },
+    {
+     "group": "plants_b (0x51F4B6)",
+     "faction_write": "0x51F4B6",
+     "kind_write": "0x51F487"
+    }
+   ]
+  },
+  "0x7e": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "plants_a (all branches jump to 0x51F2A0)",
+     "faction_write": "0x51F2A0",
+     "kind_write": "0x51F295"
+    }
+   ]
+  },
+  "0x7f": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "plants_b (0x51F4B6)",
+     "faction_write": "0x51F4B6",
+     "kind_write": "0x51F496"
+    }
+   ]
+  },
+  "0x80": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "plants_a (all branches jump to 0x51F2A0)",
+     "faction_write": "0x51F2A0",
+     "kind_write": "0x51F3CF"
+    }
+   ]
+  },
+  "0x81": {
+   "faction": null,
+   "basis": "PRODUCER_RULE_D67",
+   "note": "FirTree (fir-tree.cub): ordinary plant",
+   "sites": []
+  },
+  "0x82": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "plants_a (all branches jump to 0x51F2A0)",
+     "faction_write": "0x51F2A0",
+     "kind_write": "0x51F298"
+    }
+   ]
+  },
+  "0x83": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "ore_deposits (0x51A4DB; rand%10 selector 0x51A4EF)",
+     "faction_write": "0x51A4DB",
+     "kind_write": "0x51A556"
+    }
+   ]
+  },
+  "0x84": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "ore_deposits (0x51A4DB; rand%10 selector 0x51A4EF)",
+     "faction_write": "0x51A4DB",
+     "kind_write": "0x51A503"
+    }
+   ]
+  },
+  "0x85": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "ore_deposits (0x51A4DB; rand%10 selector 0x51A4EF)",
+     "faction_write": "0x51A4DB",
+     "kind_write": "0x51A54D"
+    }
+   ]
+  },
+  "0x86": {
+   "faction": null,
+   "basis": "SAME_OBJECT_CLASS",
+   "note": "SandstoneDeposit: ore deposit family (0x83..0x8a proven passive)",
+   "sites": []
+  },
+  "0x87": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "ore_deposits (0x51A4DB; rand%10 selector 0x51A4EF)",
+     "faction_write": "0x51A4DB",
+     "kind_write": "0x51A544"
+    }
+   ]
+  },
+  "0x88": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "ore_deposits (0x51A4DB; rand%10 selector 0x51A4EF)",
+     "faction_write": "0x51A4DB",
+     "kind_write": "0x51A53B"
+    }
+   ]
+  },
+  "0x89": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "ore_deposits (0x51A4DB; rand%10 selector 0x51A4EF)",
+     "faction_write": "0x51A4DB",
+     "kind_write": "0x51A532"
+    }
+   ]
+  },
+  "0x8a": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "ore_deposits (0x51A4DB; rand%10 selector 0x51A4EF)",
+     "faction_write": "0x51A4DB",
+     "kind_write": "0x51A529"
+    }
+   ]
+  },
+  "0x8b": {
+   "faction": null,
+   "basis": "SAME_OBJECT_CLASS",
+   "note": "IceCrystalDeposit: ore deposit family (0x83..0x8a proven passive)",
+   "sites": []
+  },
+  "0x8c": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "scarecrow (0x4E53B2)",
+     "faction_write": "0x4E53B2",
+     "kind_write": "0x4E53C5"
+    }
+   ]
+  },
+  "0x8d": {
+   "faction": null,
+   "basis": "SAME_OBJECT_CLASS",
+   "note": "Aim (aim.cub): training target, grouped with Scarecrow 0x8c by Cube.exe 0x43E310",
+   "sites": []
+  },
+  "0x8e": {
+   "faction": null,
+   "basis": "SAME_OBJECT_CLASS",
+   "note": "Dummy (dummy.cub): training target, grouped with Scarecrow 0x8c by Cube.exe 0x43E310",
+   "sites": []
+  },
+  "0x8f": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "vase (0x506390)",
+     "faction_write": "0x506390",
+     "kind_write": "0x506397"
+    }
+   ]
+  },
+  "0x90": {
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "bomb (0x536FBA kind, 0x536FC1 faction on the creature itself)",
+     "faction_write": "0x536FC1",
+     "kind_write": "0x536FBA"
+    }
+   ]
+  }
+ },
+ "problems": [],
+ "RESULT": "PASS"
+}

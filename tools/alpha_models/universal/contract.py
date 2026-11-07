@@ -69,12 +69,16 @@ MIRROR_PAIRS = {"hand_l": "hand_r", "hand_r": "hand_l", "foot_l": "foot_r", "foo
                 "slot98_a": "slot98_b", "slot98_b": "slot98_a", "slot9a_a": "slot9a_b", "slot9a_b": "slot9a_a",
                 }   # D64: offhand_b is NOT a mirror of offhand_a (separate block for subtypes 4/12/20)
 # Anchor rules the Unity rig implements (AlphaRig.Anchor). "head" is "center" for every kind except
-# the kind-specific 0x65 branch, which is refused by the rig resolver.
-UNITY_ANCHOR_RULES = ("center", "tail", "wing", "weapon", "neck", "lamp", "pet")   # + by_subtype -> equipment_anchor()
+# Dragon 0x65, whose head block is translated by (-sx/2, -sy*0.2, -sz/2) (drawModel, GameController.cpp
+# 6256-6270; creature_rig.anchor). D69: the Unity mesh MUST use the same anchor the clip joints were
+# decomposed with (alpha_oracle.joints uses creature_rig.anchor(kind=...)), otherwise the head is shifted.
+UNITY_ANCHOR_RULES = ("center", "tail", "wing", "weapon", "neck", "lamp", "pet", "head_0x65")  # + by_subtype
 
 
-def unity_anchor(rule):
-    return "center" if rule == "head" else rule
+def unity_anchor(rule, kind=None):
+    if rule == "head":
+        return "head_0x65" if kind == 0x65 else "center"
+    return rule
 
 
 # --------------------------------------------------------------------------- equipment layers
@@ -237,6 +241,39 @@ def _d64_ai_profiles(path=TRIGGER_EVIDENCE_PATH):
 
 ACTION_PROFILES.update(_d64_ai_profiles())
 
+
+def _merge_d64_into_d60(path=TRIGGER_EVIDENCE_PATH):
+    """D69 ADD_MISSING: a D60 profile was built from ONE observed NPC state (the default creature), so
+    it lacks the unarmed launches the executed AI region produces in the other NPC states (class/spec
+    conditions, D64 evidence). They are added to the D60 profile (which keeps its specimen, chain and
+    precedence) only when the D64 record is for the same motion family. Returns {profile: added}."""
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as fh:
+        ev = json.load(fh)["kinds"]
+    added = {}
+    for pid, prof in ACTION_PROFILES.items():
+        if prof.get("trigger") != "creature_ai" or not prof.get("authorization", "").startswith("D60"):
+            continue
+        e = ev.get(f"0x{prof['specimens'][0]['kind']:02x}") or {}
+        if e.get("status") != "TRIGGER_EMULATED_CONDITIONAL" or e.get("family_id") not in prof["evidence_families"]:
+            continue
+        extra = {int(a): int(v["write_vas"][0], 16) for a, v in (e.get("unarmed_actions") or {}).items()
+                 if int(a) not in prof["launched_actions"]}
+        if not extra:
+            continue
+        prof["launched_actions"] = {**prof["launched_actions"], **extra}
+        prof["primary_chain"] = list(prof["primary_chain"]) + sorted(extra)
+        prof["launch_conditions"] = {int(a): v["class_spec"] for a, v in e["unarmed_actions"].items()
+                                     if int(a) in extra}
+        prof["d69_added_actions"] = sorted(extra)
+        prof["authorization"] = prof["authorization"] + "; D69 + D64 conditional unarmed launches"
+        added[pid] = sorted(extra)
+    return added
+
+
+D69_MERGED_LAUNCHES = _merge_d64_into_d60()
+
 # Trigger domains. Only player_input of the specimen above is evidenced. Creature AI launches of
 # non-player kinds are an explicit open domain: they must never default to the humanoid rules.
 TRIGGER_DOMAINS = {
@@ -269,7 +306,10 @@ def unity_contract(entity):
         "bodyPlan": entity["body_plan"], "rig": entity["family_id"],
         "parts": [{"name": p["name"], "role": p["role"], "mirrorOf": p["mirror_of"] or "",
                    "anchor": p["unity_anchor"], "mirrored": p["mirrored"]} for p in entity["parts"]],
-        "controllerMode": "ACTIONS" if acts["status"] == "AVAILABLE" else "LOCOMOTION_ONLY",
+        "controllerMode": controller_mode(entity),
+        "gameUsage": ch.get("game_usage", {}).get("policy", "CREATURE"),
+        "gameUsageBasis": ch.get("game_usage", {}).get("basis") or "",
+        "gameUsageReason": ch.get("game_usage", {}).get("reason") or "",
         "actionProfile": acts.get("profile") or "", "actionTrigger": acts.get("trigger") or "",
         "actionsStatus": acts["status"], "actionsReason": "; ".join(acts["reasons"]),
         "walkSources": [s["provenance"] for s in ch["walk"]["sources"]],
@@ -280,6 +320,26 @@ def unity_contract(entity):
                              + ["LOOP_LOCOMOTION", "STATIC_POSE"],
         "transitions": "UNITY_TRANSITION", "readiness": entity["readiness"],
     }
+
+
+def controller_mode(entity):
+    """ACTIONS | LOCOMOTION_ONLY | STATIC_OBJECT (D69: passive objects never walk or act in the game)."""
+    ch = entity["channels"]
+    if ch.get("game_usage", {}).get("policy") == "STATIC_OBJECT":
+        return "STATIC_OBJECT"
+    return "ACTIONS" if ch["actions"]["status"] == "AVAILABLE" else "LOCOMOTION_ONLY"
+
+
+def game_usage(kind):
+    """GAME USAGE channel (D69). Research data of the kind (walk formula, baked actions) is NOT
+    changed; only what the GAME controller may use."""
+    from tools.alpha_models.catalog import spawn_roles
+    policy, basis, reason = spawn_roles.game_policy(kind)
+    if policy == "STATIC_OBJECT":
+        return {"policy": policy, "basis": basis, "reason": reason,
+                "walk": "DISABLED_IN_GAME", "actions": "DISABLED_IN_GAME",
+                "research_data": "KEPT (walk formula / baked action clips stay in the research library)"}
+    return {"policy": "CREATURE", "basis": None, "reason": None, "walk": "ALLOWED", "actions": "BY_PROFILE"}
 
 
 def action_profile_for(kind, seed_variant, family_id, parts, specimen_families=None):
@@ -362,7 +422,7 @@ def part_records(res, sizes=None):
         idx = res.models[p]
         out.append({"name": p, "role": BLOCK_ROLES.get(p, "unknown"), "mirror_of": MIRROR_PAIRS.get(p),
                     "mirrored": b.mirrored, "slot": f"0x{b.slot:02X}", "draw_site": f"0x{b.draw_site:06X}",
-                    "anchor": b.anchor, "unity_anchor": unity_anchor(b.anchor), "block_status": b.status,
+                    "anchor": b.anchor, "unity_anchor": unity_anchor(b.anchor, res.kind), "block_status": b.status,
                     "anchor_evidence": b.evidence, "model_index": idx,
                     "size": (sizes or {}).get(p)})
     return out
@@ -500,6 +560,7 @@ def describe(kind, entry, static_table, clips_root=None, seed_variant=(0, 0), eq
     # visibility / lifecycle ----------------------------------------------------------------
     channels["visibility"] = {"modes": list(VISIBILITY_MODES),
                               "dynamic_parts": "per clip: EXPLICIT_NATIVE_DRAW masks; unknown draw site -> FAIL"}
+    channels["game_usage"] = game_usage(kind)
     channels["lifecycle"] = {"status": "AVAILABLE" if pid else "NOT_APPLICABLE",
                              "input_profile": pid and ACTION_PROFILES[pid]["trigger_scope"],
                              "transitions": "UNITY_TRANSITION"}

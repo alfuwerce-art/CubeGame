@@ -600,7 +600,11 @@ def judge_entry(steps, exit_code, reports_dir, required=REQUIRED_STEPS, locomoti
     ep = rd / "entity_playmode.txt"
     if locomotion_only:
         text = ep.read_text(encoding="utf-8") if ep.exists() else ""
-        if "controller_mode=LOCOMOTION_ONLY" not in text:
+        if "controller_mode=STATIC_OBJECT" in text:
+            # D69: a passive object is action-free AND must have refused the walk request
+            if "static_object=True move_refused=True" not in text:
+                problems.append("STATIC_OBJECT_MOVE_NOT_REFUSED")
+        elif "controller_mode=LOCOMOTION_ONLY" not in text:
             problems.append("ENTITY_NOT_LOCOMOTION_ONLY")
         if "locomotion_only_refused=True" not in text:
             problems.append("ACTIONS_NOT_REFUSED")

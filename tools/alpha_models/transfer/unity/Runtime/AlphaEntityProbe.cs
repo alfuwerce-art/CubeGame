@@ -33,7 +33,7 @@ namespace CubeGame.AlphaTransfer
         int _frame, _stage, _stageFrames;
         float _phaseStart, _maxPos, _maxRot, _idleDrift, _walkRot, _walkMove, _actionSeconds;
         Vector3[] _min, _max, _idlePos; Quaternion[] _rot0, _idleRot;
-        string _action; bool _actionStarted, _refused;
+        string _action; bool _actionStarted, _refused, _staticRefused;
         string[] _stageNames = { "walk", "stop", "idle", "action", "after" };
 
         void Start()
@@ -48,6 +48,7 @@ namespace CubeGame.AlphaTransfer
             if (_problems.Count > 0) { Finish(); return; }
             _c.externalClock = true;
             _c.locomotionOnly = _contract.LocomotionOnly;
+            _c.staticObject = _contract.StaticObject;
             _c.actionsBlockedReason = _contract.actionsReason;
             if (!_c.Init()) { _problems.AddRange(_c.Problems.Select(p => "CONTROLLER " + p)); Finish(); return; }
             _problems.AddRange(_contract.Validate(_r, _c.actions.ClipNames.Select(n => _c.actions.Get(n)),
@@ -71,7 +72,15 @@ namespace CubeGame.AlphaTransfer
             if (_frame > fps * 120) { _problems.Add("SCENARIO_TIMEOUT stage=" + _stageNames[Mathf.Min(_stage, 4)]); Finish(); return; }
             switch (_stage)
             {
-                case 0: // walk
+                case 0: // walk (STATIC_OBJECT: the walk request must be refused and the pose must not move)
+                    if (_contract.StaticObject)
+                    {
+                        _d.amplitude = walkAmplitude;              // request a walk every frame
+                        _c.Step(dt); CheckFormula(); Track();
+                        if (_d.amplitude != 0f || _d.phase != _phaseStart) _problems.Add("STATIC_OBJECT_MOVED");
+                        if (_stageFrames >= fps) { _staticRefused = _c.Events.Contains("move_refused:STATIC_OBJECT"); Next(); }
+                        break;
+                    }
                     _c.Step(dt); CheckFormula(); Track();
                     if (_d.phase - _phaseStart >= 2f * Mathf.PI) Next();
                     break;
@@ -195,6 +204,13 @@ namespace CubeGame.AlphaTransfer
                 AlphaParamWalk.ExpectedMotion(_d.Spec.@params, walkAmplitude,
                     new List<string>(_d.PartNames).ToArray(), out expRot, out expMove);
             bool formulaStatic = expRot < 10f && expMove < 1f;
+            if (_contract != null && _contract.StaticObject)
+            {
+                // D69: a static object must NOT move although a walk was requested
+                if (!_staticRefused) _problems.Add("STATIC_OBJECT_MOVE_NOT_REFUSED");
+                if (_walkRot > 1e-3f || _walkMove > 1e-3f) _problems.Add($"STATIC_OBJECT_POSE_MOVED rot={_walkRot} move={_walkMove}");
+                formulaStatic = true;   // the WALK_STATIC check below does not apply
+            }
             if (_contract != null && _stage >= 1 && !formulaStatic && _walkRot < 10f && _walkMove < 1f)
                 _problems.Add($"WALK_STATIC rot={_walkRot} move={_walkMove} formula_rot={expRot:0.0} formula_move={expMove:0.00}");
             if (_idleDrift > 1e-4f) _problems.Add($"IDLE_NOT_STABLE {_idleDrift}");
@@ -214,6 +230,8 @@ namespace CubeGame.AlphaTransfer
                 s.AppendLine($"WALK_STATIC_BY_FORMULA formula_rot_deg={expRot:0.0} formula_move_vox={expMove:0.00} (Alpha's own walk is nearly static)");
             s.AppendLine($"runtime_formula_pose_max_pos_err_vox={_maxPos:0.000000} rot_err_deg={_maxRot:0.000000}");
             s.AppendLine($"action={_action ?? "-"} action_seconds={_actionSeconds:0.000} locomotion_only_refused={_refused}");
+            if (_contract != null && _contract.StaticObject)
+                s.AppendLine($"static_object=True move_refused={_staticRefused} game_usage_basis={_contract.gameUsageBasis}");
             s.AppendLine("events=" + (_c == null ? "" : string.Join(",", _c.Events)));
             s.AppendLine("frames_captured=" + _shots.Count);
             s.AppendLine("problems=" + _problems.Count); foreach (var p in _problems) s.AppendLine("  - " + p);

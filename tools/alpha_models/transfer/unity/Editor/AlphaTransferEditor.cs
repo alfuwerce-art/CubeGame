@@ -46,7 +46,7 @@ namespace CubeGame.AlphaTransfer.Editor
             if ((spec.rig == AlphaRig.RigId || hasWeapon) && Array.IndexOf(AlphaRig.TwoHandedSubtypes, spec.weaponSubtype) < 0)
                 problems.Add($"WEAPON_SUBTYPE_NOT_VERIFIED {spec.weaponSubtype} (verified: 15,16,17)");
             foreach (var p in spec.parts)
-                if (Array.IndexOf(new[] { "center", "weapon", "tail", "wing", "neck", "lamp", "pet" }, p.anchor) < 0)
+                if (Array.IndexOf(new[] { "center", "weapon", "tail", "wing", "neck", "lamp", "pet", "head_0x65" }, p.anchor) < 0)
                     problems.Add($"ANCHOR_RULE_NOT_ESTABLISHED {p.name} {p.anchor}");
             return spec;
         }

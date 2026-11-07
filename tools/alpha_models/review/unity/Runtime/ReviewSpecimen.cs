@@ -176,6 +176,10 @@ namespace CubeGame.AlphaTransfer.Review
                     });
                 }
             }
+            // D69: a STATIC_OBJECT (passive in Alpha / producer rule) keeps its research walk/action data, but
+            // the game controller never plays it: the viewer labels it instead of hiding it.
+            if (contract != null && contract.controllerMode == "STATIC_OBJECT" && mode != ReviewMode.Idle)
+                foreach (var src in list) src.label = "[ОТКЛЮЧЕНО В ИГРЕ · только исследование] " + src.label;
             return list;
         }
 

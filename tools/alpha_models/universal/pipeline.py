@@ -205,9 +205,9 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
             except ValueError as e: problems.append(str(e))
         size = (model.width, model.depth, model.height)
         (data_dir / "models" / f"{p}.cubdec").write_bytes(decoded)
-        rule = cr.BY_NAME[p].anchor
-        if rule == "head":
-            rule = "center"           # kind 0x65 (the only other head rule) is refused above
+        # D69: the mesh anchor must be the one the clip joints were decomposed with (alpha_oracle.joints
+        # uses creature_rig.anchor(kind=...)): Dragon 0x65 head = (sx/2, sy*0.2, sz/2), not the centre
+        rule = ct.unity_anchor(cr.BY_NAME[p].anchor, kind)
         # D61 COLOR/TINT-FIX: Alpha's own load flag decides whether pure R/G/B voxels are markers
         flag = _load_flag(exe, name)
         mstats = vm.mesh_stats(decoded, strict=True)
@@ -245,6 +245,12 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
     (data_dir / "rig.json").write_text(json.dumps(rig_json, indent=1), encoding="utf-8")
     written, skipped = [], []
     manifest_path = job.get('action_manifest')
+    game_disabled = []
+    if entity["channels"]["game_usage"]["policy"] == "STATIC_OBJECT" and manifest_path:
+        # D69: passive object (Alpha spawns it with faction 6, or producer rule): the game entity gets no
+        # action library. The baked research clips stay where they are; nothing is deleted.
+        game_disabled.append(f"ACTION_LIBRARY_DISABLED_IN_GAME {manifest_path}")
+        manifest_path = None
     approved_actions = {}
     if manifest_path:
         manifest = json.loads(Path(manifest_path).read_text(encoding='utf8'))
@@ -282,6 +288,9 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
             continue
         emulated = clip.get('status') == 'EMULATED_ALPHA_CODE'
         approved = approved_actions.get(clip.get('name'))
+        if emulated and game_disabled:
+            skipped.append(f"{os.path.basename(path)} DISABLED_IN_GAME (STATIC_OBJECT)")
+            continue
         if emulated and (not approved or approved.get('sha256') != hashlib.sha256(Path(path).read_bytes()).hexdigest()):
             problems.append(f"ACTION_NOT_APPROVED_OR_HASH_MISMATCH {clip.get('name')}")
             continue
@@ -353,6 +362,10 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
                            actionTrigger="", actionsReason=f"ACTION_LIBRARY_NOT_IMPORTED (profile {acts['profile']} "
                                                            "exists; job has no action_manifest)",
                            allowedCategories=["LOOP_LOCOMOTION", "STATIC_POSE"])
+    if uc_contract["controllerMode"] == "STATIC_OBJECT":
+        uc_contract.update(actionsStatus="BLOCKED", actionProfile="", actionTrigger="",
+                           actionsReason="DISABLED_IN_GAME STATIC_OBJECT: " + uc_contract["gameUsageReason"],
+                           allowedCategories=["LOOP_LOCOMOTION", "STATIC_POSE"])
     # the Unity contract lists what was really imported; walk/idle sources follow the imported clips
     uc_contract["importedClips"] = imported
     uc_contract["walkSources"] = sorted({c["status"] for c in imported if c["category"] == "LOOP_LOCOMOTION"})
@@ -365,7 +378,8 @@ def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None)
     result = "PASS" if not problems else "FAIL"
     out = {"PREPARE_RESULT": result, "problems": problems, "kind": f"0x{kind:02x}",
            "family_id": res.family_id, "parts": res.parts, "models": [p["model"] for p in parts_out],
-           "clips": written, "skipped_clips": skipped, "locomotion": loco, "empty_parts": empty_parts}
+           "clips": written, "skipped_clips": skipped, "locomotion": loco, "empty_parts": empty_parts,
+           "controller_mode": uc_contract["controllerMode"], "game_disabled": game_disabled}
     print(json.dumps(out, indent=1))
     return out
 

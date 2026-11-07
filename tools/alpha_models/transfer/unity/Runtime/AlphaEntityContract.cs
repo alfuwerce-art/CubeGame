@@ -32,6 +32,8 @@ namespace CubeGame.AlphaTransfer
     {
         public const string Format = "cubegame.entity_contract/1";
         public const string ModeActions = "ACTIONS", ModeLocomotionOnly = "LOCOMOTION_ONLY";
+        // D69: passive object (Alpha spawns it with faction 6 / producer rule): no walk, no actions in the game
+        public const string ModeStaticObject = "STATIC_OBJECT";
         public static readonly string[] Provenance =
             { "TRANSFERRED_FROM_ALPHA", "EMULATED_ALPHA_CODE", "RECONSTRUCTED_FROM_EVIDENCE", "UNITY_TRANSITION", "BLOCKED" };
         public static readonly string[] ClipProvenance =
@@ -44,11 +46,14 @@ namespace CubeGame.AlphaTransfer
         public string format, kind, category, bodyPlan, rig, controllerMode;
         public string actionProfile, actionTrigger, actionsStatus, actionsReason;
         public string weaponLayer, transitions, readiness;
+        public string gameUsage, gameUsageBasis, gameUsageReason;
         public AlphaEntityPart[] parts;
         public string[] walkSources, idleSources, allowedClipProvenance, allowedCategories;
         public AlphaImportedClip[] importedClips;
 
-        public bool LocomotionOnly => controllerMode == ModeLocomotionOnly;
+        // every non-ACTIONS mode refuses actions; STATIC_OBJECT additionally refuses movement
+        public bool LocomotionOnly => controllerMode == ModeLocomotionOnly || controllerMode == ModeStaticObject;
+        public bool StaticObject => controllerMode == ModeStaticObject;
 
         public static AlphaEntityContract Parse(string json, List<string> problems)
         {
@@ -58,12 +63,14 @@ namespace CubeGame.AlphaTransfer
             if (c == null) { problems.Add("CONTRACT_JSON_EMPTY"); return null; }
             if (c.format != Format) problems.Add($"CONTRACT_FORMAT {c.format}");
             if (c.parts == null || c.parts.Length == 0) problems.Add("CONTRACT_NO_PARTS");
-            if (c.controllerMode != ModeActions && c.controllerMode != ModeLocomotionOnly)
+            if (c.controllerMode != ModeActions && c.controllerMode != ModeLocomotionOnly && c.controllerMode != ModeStaticObject)
                 problems.Add($"CONTRACT_CONTROLLER_MODE_UNKNOWN {c.controllerMode}");
             if (c.controllerMode == ModeActions && (string.IsNullOrEmpty(c.actionProfile) || c.actionsStatus != "AVAILABLE"
                 || string.IsNullOrEmpty(c.actionTrigger)))
                 problems.Add("CONTRACT_ACTIONS_WITHOUT_EVIDENCED_PROFILE");
-            if (c.controllerMode == ModeLocomotionOnly && (c.actionsStatus != "BLOCKED" || string.IsNullOrEmpty(c.actionsReason)
+            if (c.StaticObject && (c.gameUsage != "STATIC_OBJECT" || string.IsNullOrEmpty(c.gameUsageReason)))
+                problems.Add("CONTRACT_STATIC_OBJECT_WITHOUT_EVIDENCE");
+            if (c.LocomotionOnly && (c.actionsStatus != "BLOCKED" || string.IsNullOrEmpty(c.actionsReason)
                 || !string.IsNullOrEmpty(c.actionProfile)))
                 problems.Add("CONTRACT_BLOCKED_ACTIONS_NEED_REASON");
             foreach (var s in (c.walkSources ?? new string[0]).Concat(c.idleSources ?? new string[0]))
