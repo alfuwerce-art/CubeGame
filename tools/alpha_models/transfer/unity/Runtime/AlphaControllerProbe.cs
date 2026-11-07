@@ -24,6 +24,8 @@ namespace CubeGame.AlphaTransfer
         string[] _names;
         int _frame, _stage, _n, _stageFrames, _done;
         float _maxPos, _maxRot, _maxScale, _jump, _jumpRot, _motion, _motionRot, _phaseStart, _phaseTravel;
+        float _locoSeconds;                        // seconds the formula-driven locomotion ran (D65)
+        float _prevPhase; bool _phaseInit;         // wrapped-phase accumulation (D65)
         float _mainGrip,_secondRadial,_outsideHandle,_bladeTravel;
         Vector3 _lastTip;bool _hasTip;
         bool _entered, _acted, _recovered, _exited, _busyChecked;
@@ -83,6 +85,18 @@ namespace CubeGame.AlphaTransfer
             var visible=new bool[_rig.parts.Length];
             bool formula = _c.Phase == AlphaControllerPhase.Locomotion || _c.Phase == AlphaControllerPhase.Stopping
                 || _c.Phase == AlphaControllerPhase.ExitingAction;
+            if (formula)
+            {
+                // D65: the phase is wrapped into [0, 2pi) by the driver, so the travelled angle must be
+                // accumulated frame by frame (the old "phase - phaseStart" stopped at one wrap and made a
+                // long-stride kind look as if the locomotion never repeated).
+                _locoSeconds += Time.deltaTime;
+                float ph = _c.locomotion.phase;
+                if (!_phaseInit) { _prevPhase = ph; _phaseInit = true; }
+                float d = Mathf.Repeat(ph - _prevPhase + Mathf.PI, 2f * Mathf.PI) - Mathf.PI;
+                if (d > 0f) _phaseTravel += d;
+                _prevPhase = ph;
+            }
             if (formula)
             {
                 foreach (var name in _c.locomotion.PartNames)
@@ -159,7 +173,6 @@ namespace CubeGame.AlphaTransfer
                     _c.locomotion.amplitude = Mathf.Min(.19f, _c.locomotion.amplitude + .01f);
                     if (_stageFrames >= moveFrames)
                     {
-                        _phaseTravel = Mathf.Max(_phaseTravel,_c.locomotion.phase-_phaseStart);
                         var before = Snapshot();
                         if (!_c.PlayAction(_names[_n])) { _problems.Add("ACTION_REQUEST_REFUSED "+_names[_n]); Finish(); return; }
                         // The request is from moving locomotion. It must queue a stop, without a pose write.
@@ -248,11 +261,20 @@ namespace CubeGame.AlphaTransfer
             if (_names == null || _done != _names.Length || _done == 0) _problems.Add("SEQUENCE_INCOMPLETE");
             if (_maxPos > 1e-3f || _maxRot > .05f || _maxScale > 1e-4f) _problems.Add($"RUNTIME_POSE_MISMATCH pos={_maxPos} rot={_maxRot} scale={_maxScale}");
             if (_jump > maxHandoverJumpVox || _jumpRot > .05f) _problems.Add($"HANDOVER_JUMP pos={_jump} rot={_jumpRot}");
-            if (_phaseTravel < 2f*Mathf.PI) _problems.Add("LOCOMOTION_DID_NOT_REPEAT");
+            // D65: the locomotion must advance as much as the kind's own phase rate implies within the walk
+            // time the scenario gave it. Kinds with long strides cover < 2pi in the same scenario (0x15:
+            // 5.4 rad); a locomotion that does not advance at all still fails.
+            float rate = 0f;
+            try { rate = AlphaParamWalk.PhaseRate(_c.locomotion.Spec.@params, _c.locomotion.speedXY); } catch { }
+            float expected = rate > 0f ? rate * _locoSeconds : 2f * Mathf.PI;
+            float need = Mathf.Min(2f * Mathf.PI, Mathf.Max(0.5f, 0.5f * expected));
+            if (_phaseTravel < need)
+                _problems.Add($"LOCOMOTION_DID_NOT_REPEAT travel={_phaseTravel:0.00} need={need:0.00} rate={rate:0.000} loco_s={_locoSeconds:0.00}");
             Verdict = _problems.Count == 0 ? "PASS" : "FAIL";
             var s = new StringBuilder();
             s.AppendLine($"CONTROLLER_PLAYMODE_RESULT={Verdict}"); s.AppendLine("session="+session);
             s.AppendLine($"frames={_frame} simulated_fps={fps} actions_completed={_done} required={_names?.Length ?? 0} phase_travel_rad={_phaseTravel}");
+            s.AppendLine($"loco_seconds={_locoSeconds:0.00} phase_rate_rad_s={rate:0.000} phase_travel_need_rad={need:0.00}");
             s.AppendLine($"runtime_pose_max_pos_err={_maxPos:0.000000} runtime_pose_max_rot_err_deg={_maxRot:0.000000} scale_err={_maxScale:0.000000}");
             s.AppendLine($"recovery_boundary_jump_vox={_jump:0.000000} rotation_deg={_jumpRot:0.000000} limit={maxHandoverJumpVox}");
             s.AppendLine("transition_status=UNITY_TRANSITION (raw clips are unmodified)");
