@@ -1,23 +1,23 @@
-# S05B-2 / D69 вЂ” РєР°С‚Р°Р»РѕРі РћР РР“РРќРђР›Р¬РќРћР™ Alpha 2013: РјРѕРґРµР»Рё, СЃСѓС‰РµСЃС‚РІР°, РѕР±СЉРµРєС‚С‹ Рё РёС… Р°РЅРёРјР°С†РёРё
+# S05B-2 / D69 — каталог ОРИГИНАЛЬНОЙ Alpha 2013: модели, существа, объекты и их анимации
 
-**Р­С‚Р°Р»РѕРЅ вЂ” РѕСЂРёРіРёРЅР°Р»СЊРЅР°СЏ Alpha**, РЅРµ Unity Рё РЅРµ D65. РЎРіРµРЅРµСЂРёСЂРѕРІР°РЅРѕ `python -m tools.alpha_models.catalog.d69_catalogs` РёР· РґРѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІ: РёСЃРїРѕР»РЅРµРЅРЅС‹Р№ РєРѕРґ `Cube.exe`/`Server.exe` (`ALPHA_CODE`), РґР°РЅРЅС‹Рµ `.cub` (`ALPHA_ASSET`), РѕРґРЅР° Р¶РёРІР°СЏ РїРµСЂРµРїРёСЃСЊ СЃСѓС‰РµСЃС‚РІ РІ Р·Р°РїСѓС‰РµРЅРЅРѕР№ РёРіСЂРµ (`LIVE_ALPHA_OBSERVED`, 2026-11-08, РіРѕСЂРѕРґ РђСЂСѓР»РѕРЅ) Рё РїСЂРµР¶РЅРёРµ Р¶РёРІС‹Рµ Р·Р°С…РІР°С‚С‹ РїРѕР·. **Р—Р°РїСѓСЃРє РёРіСЂС‹ РѕСЃС‚Р°РЅРѕРІР»РµРЅ РїРѕ СѓРєР°Р·Р°РЅРёСЋ РїСЂРѕРґСЋСЃРµСЂР° (2026-11-08)** вЂ” РїРѕСЌС‚РѕРјСѓ РїРѕС‡С‚Рё РІСЃРµ РІРёРґС‹ `LIVE_UNOBSERVED`; СЌС‚Рѕ РќР• РѕР·РЅР°С‡Р°РµС‚ РѕС‚СЃСѓС‚СЃС‚РІРёСЏ РїРѕРІРµРґРµРЅРёСЏ.
+**Эталон — оригинальная Alpha**, не Unity и не D65. Сгенерировано `python -m tools.alpha_models.catalog.d69_catalogs` из доказательств: исполненный код `Cube.exe`/`Server.exe` (`ALPHA_CODE`), данные `.cub` (`ALPHA_ASSET`), одна живая перепись существ в запущенной игре (`LIVE_ALPHA_OBSERVED`, 2026-11-08, город Арулон) и прежние живые захваты поз. **Запуск игры остановлен по указанию продюсера (2026-11-08)** — поэтому почти все виды `LIVE_UNOBSERVED`; это НЕ означает отсутствия поведения.
 
-## РЎРІРѕРґРєР°
+## Сводка
 
-* Р’РёРґРѕРІ СЃСѓС‰РµСЃС‚РІ/РѕР±СЉРµРєС‚РѕРІ (`creature+0x64`): **156**; СЂРѕР»СЊ РІ Alpha: CREATURE 130, PASSIVE_OBJECT 26.
-* РљР»Р°СЃСЃС‹: biped with fore limbs 54, bomb (object) 1, boss 10, decorative plant 11, egg 1, fore limbs only 3, legs only 12, limbless 13, ore deposit (resource) 9, plant monster 5, quadruped 20, training target 3, vase (breakable object) 1, winged 13.
-* Р–РёРІРѕРµ РЅР°Р±Р»СЋРґРµРЅРёРµ РІ РѕСЂРёРіРёРЅР°Р»СЊРЅРѕР№ РёРіСЂРµ: **8** РІРёРґРѕРІ (РїРµСЂРµРїРёСЃСЊ + РїСЂРµР¶РЅРёРµ Р·Р°С…РІР°С‚С‹), РѕСЃС‚Р°Р»СЊРЅС‹Рµ `LIVE_UNOBSERVED`.
-* РњРѕРґРµР»РµР№ `.cub` (РІСЃРµ РјР°СЂС€СЂСѓС‚С‹, D64 `asset_catalog`): CREATURE_PART 607, DB_ONLY 328, EQUIPMENT_ATTACH 1068, EQUIPMENT_SWAP 330, FILE_LOADER_ABSENT 10, ITEM_STATIC 149, MISSING_IN_DB 21, REGISTRY_OVERWRITTEN 1, REGISTRY_STATIC 364.
+* Видов существ/объектов (`creature+0x64`): **156**; роль в Alpha: CREATURE 130, PASSIVE_OBJECT 26.
+* Классы: biped with fore limbs 54, bomb (object) 1, boss 10, decorative plant 11, egg 1, fore limbs only 3, legs only 12, limbless 13, ore deposit (resource) 9, plant monster 5, quadruped 20, training target 3, vase (breakable object) 1, winged 13.
+* Живое наблюдение в оригинальной игре: **8** видов (перепись + прежние захваты), остальные `LIVE_UNOBSERVED`.
+* Моделей `.cub` (все маршруты, D64 `asset_catalog`): CREATURE_PART 607, DB_ONLY 328, EQUIPMENT_ATTACH 1068, EQUIPMENT_SWAP 330, FILE_LOADER_ABSENT 10, ITEM_STATIC 149, MISSING_IN_DB 21, REGISTRY_OVERWRITTEN 1, REGISTRY_STATIC 364.
 
-## РљР»СЋС‡РµРІС‹Рµ РѕСЂРёРіРёРЅР°Р»СЊРЅС‹Рµ С„Р°РєС‚С‹, РЅР°Р№РґРµРЅРЅС‹Рµ РІ D69 (ALPHA_CODE)
+## Ключевые оригинальные факты, найденные в D69 (ALPHA_CODE)
 
-1. **РџР°СЃСЃРёРІРЅС‹Рµ РѕР±СЉРµРєС‚С‹ РЅРµ С…РѕРґСЏС‚ Рё РЅРµ РґРµР№СЃС‚РІСѓСЋС‚ РІ СЃР°РјРѕР№ Alpha.** Р“РµРЅРµСЂР°С‚РѕСЂ РјРёСЂР° `Server.exe` РїРёС€РµС‚ РІ Р·Р°РїРёСЃСЊ СЃРїР°РІРЅР° С„СЂР°РєС†РёСЋ 6 (РїР°СЃСЃРёРІРЅС‹Р№) РґР»СЏ РІСЃРµС… СЂР°СЃС‚РµРЅРёР№, СЂСѓРґ, С‡СѓС‡РµР»Р°, РІР°Р·С‹ Рё Р±РѕРјР±С‹; РїСЂРё СЃРїР°РІРЅРµ С„СЂР°РєС†РёСЏ 6 РїСЂРѕРїСѓСЃРєР°РµС‚ СЃРѕР·РґР°РЅРёРµ `cube::RandomWalkBehavior` (`0x5360AE`, RTTI РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂР° `0x41CB90`), Р° РІ С‚РёРєРµ СЃСѓС‰РµСЃС‚РІР° вЂ” РѕР±РЅРѕРІР»РµРЅРёРµ С‚Р°Р№РјРµСЂР° РґРµР№СЃС‚РІРёСЏ (`0x53E2A8`). Р”РѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІР°: `tools/alpha_models/catalog/spawn_role_evidence.json` (Р±Р°Р№С‚С‹ РїРѕ Р°РґСЂРµСЃР°Рј).
-2. **Р”СЂР°РєРѕРЅ 0x65 Р±РµСЃРєСЂС‹Р»С‹Р№ РІ РѕСЂРёРіРёРЅР°Р»Рµ**: `dragon-wing.cub` (РёРЅРґРµРєСЃ 428) Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ (`0x4F7869`), РЅРѕ РЅРё РѕРґРЅР° РёРЅСЃС‚СЂСѓРєС†РёСЏ РІРЅРµ Р·Р°РіСЂСѓР·С‡РёРєР° РµРіРѕ РЅРµ СЂРёСЃСѓРµС‚. Р“РѕР»РѕРІР° вЂ” СЃРѕР±СЃС‚РІРµРЅРЅС‹Р№ СЏРєРѕСЂСЊ `(sx/2, syВ·0.2, sz/2)`.
-3. **Р Р°СЃС‚РёС‚РµР»СЊРЅС‹Рµ РјРѕРЅСЃС‚СЂС‹** (PlantCreature 0x45, RadishCreature 0x46, Onionling 0x47/0x48, Devourer 0x49) вЂ” РѕР±С‹С‡РЅС‹Рµ СЃСѓС‰РµСЃС‚РІР° (РЅРµ С„СЂР°РєС†РёСЏ 6): С…РѕРґСЊР±Р° Рё Р°С‚Р°РєРё Сѓ РЅРёС… РѕСЂРёРіРёРЅР°Р»СЊРЅС‹Рµ.
+1. **Пассивные объекты не ходят и не действуют в самой Alpha.** Генератор мира `Server.exe` пишет в запись спавна фракцию 6 (пассивный) для всех растений, руд, чучела, вазы и бомбы; при спавне фракция 6 пропускает создание `cube::RandomWalkBehavior` (`0x5360AE`, RTTI конструктора `0x41CB90`), а в тике существа — обновление таймера действия (`0x53E2A8`). Доказательства: `tools/alpha_models/catalog/spawn_role_evidence.json` (байты по адресам).
+2. **Дракон 0x65 бескрылый в оригинале**: `dragon-wing.cub` (индекс 428) загружается (`0x4F7869`), но ни одна инструкция вне загрузчика его не рисует. Голова — собственный якорь `(sx/2, sy·0.2, sz/2)`.
+3. **Растительные монстры** (PlantCreature 0x45, RadishCreature 0x46, Onionling 0x47/0x48, Devourer 0x49) — обычные существа (не фракция 6): ходьба и атаки у них оригинальные.
 
-## Р–РёРІР°СЏ РїРµСЂРµРїРёСЃСЊ (Р·Р°РїСѓС‰РµРЅРЅР°СЏ РѕСЂРёРіРёРЅР°Р»СЊРЅР°СЏ РёРіСЂР°)
+## Живая перепись (запущенная оригинальная игра)
 
-| kind | РѕС‚СЂРёСЃРѕРІР°РЅРѕ | Р±Р°Р№С‚С‹ РґРµР№СЃС‚РІРёСЏ | Р·Р°С…РІР°С‚ |
+| kind | отрисовано | байты действия | захват |
 |---|---|---|---|
 | 0x02 | 3 | [0] | Arulon city start |
 | 0x03 | 1 | [0] | Arulon city start |
@@ -26,9 +26,9 @@
 | 0x21 | 1 | [0] | Arulon city start |
 | 0x33 | 1 | [0] | Arulon city start |
 
-## РљР°С‚Р°Р»РѕРі РїРѕ РІРёРґР°Рј
+## Каталог по видам
 
-| kind | РёРјСЏ | СЂРѕР»СЊ Alpha | РєР»Р°СЃСЃ | РјРѕРґРµР»Рё | С…РѕРґСЊР±Р°/РїРѕРєРѕР№ (РѕСЂРёРіРёРЅР°Р») | РґРµР№СЃС‚РІРёСЏ (РѕСЂРёРіРёРЅР°Р») | С‚РѕР»СЊРєРѕ СЃ РѕСЂСѓР¶РёРµРј | РѕСЃРѕР±РѕРµ | Р¶РёРІРѕРµ |
+| kind | имя | роль Alpha | класс | модели | ходьба/покой (оригинал) | действия (оригинал) | только с оружием | особое | живое |
 |---|---|---|---|---|---|---|---|---|---|
 | 0x00 | ElfMale | CREATURE | biped with fore limbs | body4.cub, elf-hair-m01.cub, elf-head-m01.cub, foot.cub, hand2.cub | drawModel walk/idle (ALPHA_CODE, oracle ORACLE_VERIFIED) | AI launches [3, 4, 6, 37, 40, 42, 43, 54] (ALPHA_CODE, TRIGGER_EMULATED_CONDITIONAL) | [1, 5, 14, 19, 22, 23, 24, 25, 26, 27, 30, 31, 32, 33, 38, 44, 45, 46, 55, 57, 59, 60, 61] | - | LIVE_UNOBSERVED |
 | 0x01 | ElfFemale | CREATURE | biped with fore limbs | body2.cub, elf-hair-f01.cub, elf-head-f01.cub, foot.cub, hand2.cub | drawModel walk/idle (ALPHA_CODE, oracle ORACLE_VERIFIED) | AI launches [3, 4, 6, 37, 40, 42, 43, 54] (ALPHA_CODE, TRIGGER_EMULATED_CONDITIONAL) | [1, 5, 14, 19, 22, 23, 24, 25, 26, 27, 30, 31, 32, 33, 38, 44, 45, 46, 55, 57, 59, 60, 61] | - | LIVE_UNOBSERVED |
@@ -131,7 +131,7 @@
 | 0x62 | Horse | CREATURE | quadruped | pony-body.cub, pony-foot.cub, pony-head.cub, pony-tail.cub | drawModel walk/idle (ALPHA_CODE, oracle ORACLE_VERIFIED) | AI launches [37, 40, 42, 43, 75] (ALPHA_CODE, TRIGGER_EMULATED_CONDITIONAL) | [22, 23, 24, 25, 26, 27, 30, 31, 32, 33, 38, 44, 45, 46, 55] | - | LIVE_UNOBSERVED |
 | 0x63 | Camel | CREATURE | quadruped | camel-body.cub, camel-foot.cub, camel-head.cub | drawModel walk/idle (ALPHA_CODE, oracle ORACLE_VERIFIED) | AI launches [37, 40, 42, 43, 75] (ALPHA_CODE, TRIGGER_EMULATED_CONDITIONAL) | [22, 23, 24, 25, 26, 27, 30, 31, 32, 33, 38, 44, 45, 46, 55] | - | LIVE_UNOBSERVED |
 | 0x64 | Cow | CREATURE | quadruped | cow-body.cub, cow-foot.cub, cow-head.cub | drawModel walk/idle (ALPHA_CODE, oracle ORACLE_VERIFIED) | AI launches [37, 40, 42, 43, 75] (ALPHA_CODE, TRIGGER_EMULATED_CONDITIONAL) | [22, 23, 24, 25, 26, 27, 30, 31, 32, 33, 38, 44, 45, 46, 55] | - | LIVE_UNOBSERVED |
-| 0x65 | Dragon | CREATURE | boss | dragon-body.cub, dragon-foot.cub, dragon-head.cub, dragon-tail.cub | drawModel walk/idle (ALPHA_CODE, oracle ORACLE_VERIFIED) | AI launches [37, 40, 42, 43, 51] (ALPHA_CODE, TRIGGER_EMULATED_CONDITIONAL) | [23, 30, 31, 32, 33, 38, 44, 45, 46] | head anchor (sx/2, sy*0.2, sz/2) вЂ” drawModel kind branch (ALPHA_CODE); dragon-wing.cub (registry 428) is LOADED but never drawn (no reference outside the loader 0x4F7869; ALPHA_CODE) -> the Alpha dragon is wingless; action 51 (state 70): static pose; the visible part is an effect (R-3) | LIVE_UNOBSERVED |
+| 0x65 | Dragon | CREATURE | boss | dragon-body.cub, dragon-foot.cub, dragon-head.cub, dragon-tail.cub | drawModel walk/idle (ALPHA_CODE, oracle ORACLE_VERIFIED) | AI launches [37, 40, 42, 43, 51] (ALPHA_CODE, TRIGGER_EMULATED_CONDITIONAL) | [23, 30, 31, 32, 33, 38, 44, 45, 46] | head anchor (sx/2, sy*0.2, sz/2) — drawModel kind branch (ALPHA_CODE); dragon-wing.cub (registry 428) is LOADED but never drawn (no reference outside the loader 0x4F7869; ALPHA_CODE) -> the Alpha dragon is wingless; action 51 (state 70): static pose; the visible part is an effect (R-3) | LIVE_UNOBSERVED |
 | 0x66 | BarkBeetle | CREATURE | legs only | barkbeetle-foot.cub, barkbeetle-head.cub | drawModel walk/idle (ALPHA_CODE, oracle ORACLE_VERIFIED) | AI launches [37, 40, 42, 43, 75] (ALPHA_CODE, TRIGGER_EMULATED_CONDITIONAL) | [22, 23, 24, 25, 26, 27, 30, 31, 32, 33, 38, 44, 45, 46, 55] | - | LIVE_UNOBSERVED |
 | 0x67 | FireBeetle | CREATURE | legs only | firebeetle-foot.cub, firebeetle-head.cub | drawModel walk/idle (ALPHA_CODE, oracle ORACLE_VERIFIED) | AI launches [37, 40, 42, 43, 75] (ALPHA_CODE, TRIGGER_EMULATED_CONDITIONAL) | [22, 23, 24, 25, 26, 27, 30, 31, 32, 33, 38, 44, 45, 46, 55] | - | LIVE_UNOBSERVED |
 | 0x68 | SnoutBeetle | CREATURE | legs only | snoutbeetle-foot.cub, snoutbeetle-head.cub | drawModel walk/idle (ALPHA_CODE, oracle ORACLE_VERIFIED) | AI launches [22, 25, 37, 40, 42, 43, 55] (ALPHA_CODE, TRIGGER_EMULATED_CONDITIONAL) | [23, 24, 26, 27, 30, 31, 32, 33, 38, 44, 45, 46] | - | LIVE_UNOBSERVED |
@@ -187,4 +187,4 @@
 | 0x9a | Piranha | CREATURE | limbless | piranha.cub | drawModel walk/idle (ALPHA_CODE, oracle ORACLE_VERIFIED) | AI launches [37, 40, 42, 43, 75] (ALPHA_CODE, TRIGGER_EMULATED_CONDITIONAL) | [22, 23, 24, 25, 26, 27, 30, 31, 32, 33, 38, 44, 45, 46, 55] | - | LIVE_UNOBSERVED |
 | 0x9b | Blowfish | CREATURE | limbless | blowfish.cub | drawModel walk/idle (ALPHA_CODE, oracle ORACLE_VERIFIED) | AI launches [37, 40, 42, 43, 75] (ALPHA_CODE, TRIGGER_EMULATED_CONDITIONAL) | [22, 23, 24, 25, 26, 27, 30, 31, 32, 33, 38, 44, 45, 46, 55] | - | LIVE_UNOBSERVED |
 
-РќРµР¶РёРІС‹Рµ РјРѕРґРµР»Рё (РѕСЂСѓР¶РёРµ, Р±СЂРѕРЅСЏ, РїСЂРµРґРјРµС‚С‹, РїРѕСЃС‚СЂРѕР№РєРё, РјРµР±РµР»СЊ) вЂ” СЃС‚Р°С‚РёС‡РЅС‹Рµ РјРѕРґРµР»Рё Р±РµР· Р°РЅРёРјР°С†РёРё РјРѕРґРµР»Рё (РёС… РґРІРёР¶РµРЅРёРµ вЂ” РёРіСЂРѕРІР°СЏ СЃРёРјСѓР»СЏС†РёСЏ: РїРѕРґР±РѕСЂ, СЃРЅР°СЂСЏРґС‹, СЌС„С„РµРєС‚С‹); РјР°СЂС€СЂСѓС‚С‹ Рё СЃС‚Р°С‚СѓСЃС‹ РєР°Р¶РґРѕР№ РёР· 2878 РјРѕРґРµР»РµР№ вЂ” D64 `asset_catalog` (`.scratch/catalog/asset_catalog.json`, Р»РѕРєР°Р»СЊРЅРѕ).
+Неживые модели (оружие, броня, предметы, постройки, мебель) — статичные модели без анимации модели (их движение — игровая симуляция: подбор, снаряды, эффекты); маршруты и статусы каждой из 2878 моделей — D64 `asset_catalog` (`.scratch/catalog/asset_catalog.json`, локально).

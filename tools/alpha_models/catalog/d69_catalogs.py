@@ -1,6 +1,6 @@
 """S05B-2 / D69: the two registries the task requires, generated from evidence (never hand-typed).
 
-1. ALPHA_ORIGINAL_MODEL_ANIMATION_CATALOG вЂ” what the ORIGINAL Alpha 2013 has, per creature kind:
+1. ALPHA_ORIGINAL_MODEL_ANIMATION_CATALOG — what the ORIGINAL Alpha 2013 has, per creature kind:
    models (executed creature_generateAppearance), Alpha role (Server.exe spawn faction, spawn_roles),
    animations (executed drawModel walk/idle; AI action launches executed in CombatBehavior; weapon-only
    launches; kind-specific branches), live evidence. Provenance columns are separate:
@@ -9,7 +9,7 @@
      ALPHA_ASSET          original data only (.cub / database)
      LIVE_UNOBSERVED      not seen in the running game (never "absent")
    The original facts do not depend on our Unity result.
-2. UNITY_TRANSFER_DISPOSITION_MATRIX вЂ” our Unity transfer (D65 + D69 fixes) against (1): one verdict per
+2. UNITY_TRANSFER_DISPOSITION_MATRIX — our Unity transfer (D65 + D69 fixes) against (1): one verdict per
    model / walk / idle / action: KEEP | DISABLE_IN_GAME | FIX | ADD_MISSING | UNKNOWN_NEEDS_RESEARCH, and the
    D69 outcome FIXED | TRANSFERRED | DISABLED_IN_GAME | DEFERRED_TO_M0 | BLOCKED | KEPT.
 
@@ -152,7 +152,7 @@ def original_catalog():
             live_txt += f"; earlier capture: {LIVE_WALK_CAPTURED[kind]}"
         special = []
         if kind == 0x65:
-            special += ["head anchor (sx/2, sy*0.2, sz/2) вЂ” drawModel kind branch (ALPHA_CODE)",
+            special += ["head anchor (sx/2, sy*0.2, sz/2) — drawModel kind branch (ALPHA_CODE)",
                         "dragon-wing.cub (registry 428) is LOADED but never drawn (no reference outside the loader 0x4F7869; ALPHA_CODE) -> the Alpha dragon is wingless",
                         "action 51 (state 70): static pose; the visible part is an effect (R-3)"]
         if kind in (0x57, 0x60):
@@ -204,7 +204,7 @@ def disposition(original, unity):
         for a in sorted(set(o["unarmed_actions"]) | set(u["actions"])):
             ua = u["actions"].get(a)
             st = ua["status"] if ua else "NOT_BAKED"
-            alpha = f"{ACTION_NAMES.get(a, 'action')} вЂ” {'AI launch (ALPHA_CODE)' if a in o['unarmed_actions'] else 'library'}"
+            alpha = f"{ACTION_NAMES.get(a, 'action')} — {'AI launch (ALPHA_CODE)' if a in o['unarmed_actions'] else 'library'}"
             if static:
                 row(f"action {a}", alpha + "; NOT used by the Alpha game (passive)", st, "DISABLE_IN_GAME",
                     "DISABLED_IN_GAME" if d69.get("static") == "PASS" else "DISABLE_NOT_VERIFIED", "HIGH",
@@ -259,75 +259,75 @@ def write_docs(orig, disp):
     by_role = collections.Counter(r["alpha_role"] for r in kinds)
     by_class = collections.Counter(r["class"] for r in kinds)
     live_n = sum(1 for r in kinds if r["live"].startswith("LIVE_ALPHA_OBSERVED") or "earlier capture" in r["live"])
-    a = ["# S05B-2 / D69 вЂ” РєР°С‚Р°Р»РѕРі РћР РР“РРќРђР›Р¬РќРћР™ Alpha 2013: РјРѕРґРµР»Рё, СЃСѓС‰РµСЃС‚РІР°, РѕР±СЉРµРєС‚С‹ Рё РёС… Р°РЅРёРјР°С†РёРё",
+    a = ["# S05B-2 / D69 — каталог ОРИГИНАЛЬНОЙ Alpha 2013: модели, существа, объекты и их анимации",
          "",
-         "**Р­С‚Р°Р»РѕРЅ вЂ” РѕСЂРёРіРёРЅР°Р»СЊРЅР°СЏ Alpha**, РЅРµ Unity Рё РЅРµ D65. РЎРіРµРЅРµСЂРёСЂРѕРІР°РЅРѕ `python -m tools.alpha_models.catalog.d69_catalogs` "
-         "РёР· РґРѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІ: РёСЃРїРѕР»РЅРµРЅРЅС‹Р№ РєРѕРґ `Cube.exe`/`Server.exe` (`ALPHA_CODE`), РґР°РЅРЅС‹Рµ `.cub` (`ALPHA_ASSET`), "
-         "РѕРґРЅР° Р¶РёРІР°СЏ РїРµСЂРµРїРёСЃСЊ СЃСѓС‰РµСЃС‚РІ РІ Р·Р°РїСѓС‰РµРЅРЅРѕР№ РёРіСЂРµ (`LIVE_ALPHA_OBSERVED`, 2026-11-08, РіРѕСЂРѕРґ РђСЂСѓР»РѕРЅ) Рё РїСЂРµР¶РЅРёРµ "
-         "Р¶РёРІС‹Рµ Р·Р°С…РІР°С‚С‹ РїРѕР·. **Р—Р°РїСѓСЃРє РёРіСЂС‹ РѕСЃС‚Р°РЅРѕРІР»РµРЅ РїРѕ СѓРєР°Р·Р°РЅРёСЋ РїСЂРѕРґСЋСЃРµСЂР° (2026-11-08)** вЂ” РїРѕСЌС‚РѕРјСѓ РїРѕС‡С‚Рё РІСЃРµ РІРёРґС‹ "
-         "`LIVE_UNOBSERVED`; СЌС‚Рѕ РќР• РѕР·РЅР°С‡Р°РµС‚ РѕС‚СЃСѓС‚СЃС‚РІРёСЏ РїРѕРІРµРґРµРЅРёСЏ.",
+         "**Эталон — оригинальная Alpha**, не Unity и не D65. Сгенерировано `python -m tools.alpha_models.catalog.d69_catalogs` "
+         "из доказательств: исполненный код `Cube.exe`/`Server.exe` (`ALPHA_CODE`), данные `.cub` (`ALPHA_ASSET`), "
+         "одна живая перепись существ в запущенной игре (`LIVE_ALPHA_OBSERVED`, 2026-11-08, город Арулон) и прежние "
+         "живые захваты поз. **Запуск игры остановлен по указанию продюсера (2026-11-08)** — поэтому почти все виды "
+         "`LIVE_UNOBSERVED`; это НЕ означает отсутствия поведения.",
          "",
-         "## РЎРІРѕРґРєР°",
+         "## Сводка",
          "",
-         f"* Р’РёРґРѕРІ СЃСѓС‰РµСЃС‚РІ/РѕР±СЉРµРєС‚РѕРІ (`creature+0x64`): **{len(kinds)}**; СЂРѕР»СЊ РІ Alpha: " +
+         f"* Видов существ/объектов (`creature+0x64`): **{len(kinds)}**; роль в Alpha: " +
          ", ".join(f"{k} {v}" for k, v in by_role.items()) + ".",
-         f"* РљР»Р°СЃСЃС‹: " + ", ".join(f"{k} {v}" for k, v in sorted(by_class.items())) + ".",
-         f"* Р–РёРІРѕРµ РЅР°Р±Р»СЋРґРµРЅРёРµ РІ РѕСЂРёРіРёРЅР°Р»СЊРЅРѕР№ РёРіСЂРµ: **{live_n}** РІРёРґРѕРІ (РїРµСЂРµРїРёСЃСЊ + РїСЂРµР¶РЅРёРµ Р·Р°С…РІР°С‚С‹), РѕСЃС‚Р°Р»СЊРЅС‹Рµ `LIVE_UNOBSERVED`.",
-         "* РњРѕРґРµР»РµР№ `.cub` (РІСЃРµ РјР°СЂС€СЂСѓС‚С‹, D64 `asset_catalog`): " +
+         f"* Классы: " + ", ".join(f"{k} {v}" for k, v in sorted(by_class.items())) + ".",
+         f"* Живое наблюдение в оригинальной игре: **{live_n}** видов (перепись + прежние захваты), остальные `LIVE_UNOBSERVED`.",
+         "* Моделей `.cub` (все маршруты, D64 `asset_catalog`): " +
          ", ".join(f"{k} {v}" for k, v in orig["asset_routes"].items()) + ".",
          "",
-         "## РљР»СЋС‡РµРІС‹Рµ РѕСЂРёРіРёРЅР°Р»СЊРЅС‹Рµ С„Р°РєС‚С‹, РЅР°Р№РґРµРЅРЅС‹Рµ РІ D69 (ALPHA_CODE)",
+         "## Ключевые оригинальные факты, найденные в D69 (ALPHA_CODE)",
          "",
-         "1. **РџР°СЃСЃРёРІРЅС‹Рµ РѕР±СЉРµРєС‚С‹ РЅРµ С…РѕРґСЏС‚ Рё РЅРµ РґРµР№СЃС‚РІСѓСЋС‚ РІ СЃР°РјРѕР№ Alpha.** Р“РµРЅРµСЂР°С‚РѕСЂ РјРёСЂР° `Server.exe` РїРёС€РµС‚ РІ Р·Р°РїРёСЃСЊ "
-         "СЃРїР°РІРЅР° С„СЂР°РєС†РёСЋ 6 (РїР°СЃСЃРёРІРЅС‹Р№) РґР»СЏ РІСЃРµС… СЂР°СЃС‚РµРЅРёР№, СЂСѓРґ, С‡СѓС‡РµР»Р°, РІР°Р·С‹ Рё Р±РѕРјР±С‹; РїСЂРё СЃРїР°РІРЅРµ С„СЂР°РєС†РёСЏ 6 РїСЂРѕРїСѓСЃРєР°РµС‚ "
-         "СЃРѕР·РґР°РЅРёРµ `cube::RandomWalkBehavior` (`0x5360AE`, RTTI РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂР° `0x41CB90`), Р° РІ С‚РёРєРµ СЃСѓС‰РµСЃС‚РІР° вЂ” РѕР±РЅРѕРІР»РµРЅРёРµ "
-         "С‚Р°Р№РјРµСЂР° РґРµР№СЃС‚РІРёСЏ (`0x53E2A8`). Р”РѕРєР°Р·Р°С‚РµР»СЊСЃС‚РІР°: `tools/alpha_models/catalog/spawn_role_evidence.json` (Р±Р°Р№С‚С‹ РїРѕ Р°РґСЂРµСЃР°Рј).",
-         "2. **Р”СЂР°РєРѕРЅ 0x65 Р±РµСЃРєСЂС‹Р»С‹Р№ РІ РѕСЂРёРіРёРЅР°Р»Рµ**: `dragon-wing.cub` (РёРЅРґРµРєСЃ 428) Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ (`0x4F7869`), РЅРѕ РЅРё РѕРґРЅР° "
-         "РёРЅСЃС‚СЂСѓРєС†РёСЏ РІРЅРµ Р·Р°РіСЂСѓР·С‡РёРєР° РµРіРѕ РЅРµ СЂРёСЃСѓРµС‚. Р“РѕР»РѕРІР° вЂ” СЃРѕР±СЃС‚РІРµРЅРЅС‹Р№ СЏРєРѕСЂСЊ `(sx/2, syВ·0.2, sz/2)`.",
-         "3. **Р Р°СЃС‚РёС‚РµР»СЊРЅС‹Рµ РјРѕРЅСЃС‚СЂС‹** (PlantCreature 0x45, RadishCreature 0x46, Onionling 0x47/0x48, Devourer 0x49) вЂ” "
-         "РѕР±С‹С‡РЅС‹Рµ СЃСѓС‰РµСЃС‚РІР° (РЅРµ С„СЂР°РєС†РёСЏ 6): С…РѕРґСЊР±Р° Рё Р°С‚Р°РєРё Сѓ РЅРёС… РѕСЂРёРіРёРЅР°Р»СЊРЅС‹Рµ.",
+         "1. **Пассивные объекты не ходят и не действуют в самой Alpha.** Генератор мира `Server.exe` пишет в запись "
+         "спавна фракцию 6 (пассивный) для всех растений, руд, чучела, вазы и бомбы; при спавне фракция 6 пропускает "
+         "создание `cube::RandomWalkBehavior` (`0x5360AE`, RTTI конструктора `0x41CB90`), а в тике существа — обновление "
+         "таймера действия (`0x53E2A8`). Доказательства: `tools/alpha_models/catalog/spawn_role_evidence.json` (байты по адресам).",
+         "2. **Дракон 0x65 бескрылый в оригинале**: `dragon-wing.cub` (индекс 428) загружается (`0x4F7869`), но ни одна "
+         "инструкция вне загрузчика его не рисует. Голова — собственный якорь `(sx/2, sy·0.2, sz/2)`.",
+         "3. **Растительные монстры** (PlantCreature 0x45, RadishCreature 0x46, Onionling 0x47/0x48, Devourer 0x49) — "
+         "обычные существа (не фракция 6): ходьба и атаки у них оригинальные.",
          "",
-         "## Р–РёРІР°СЏ РїРµСЂРµРїРёСЃСЊ (Р·Р°РїСѓС‰РµРЅРЅР°СЏ РѕСЂРёРіРёРЅР°Р»СЊРЅР°СЏ РёРіСЂР°)",
+         "## Живая перепись (запущенная оригинальная игра)",
          "",
-         _md_table(["kind", "РѕС‚СЂРёСЃРѕРІР°РЅРѕ", "Р±Р°Р№С‚С‹ РґРµР№СЃС‚РІРёСЏ", "Р·Р°С…РІР°С‚"],
+         _md_table(["kind", "отрисовано", "байты действия", "захват"],
                    [(k, v["count"], v["actions_seen"], ", ".join(v["captures"])) for k, v in sorted(orig["live_census"].items())]),
          "",
-         "## РљР°С‚Р°Р»РѕРі РїРѕ РІРёРґР°Рј",
+         "## Каталог по видам",
          "",
-         _md_table(["kind", "РёРјСЏ", "СЂРѕР»СЊ Alpha", "РєР»Р°СЃСЃ", "РјРѕРґРµР»Рё", "С…РѕРґСЊР±Р°/РїРѕРєРѕР№ (РѕСЂРёРіРёРЅР°Р»)", "РґРµР№СЃС‚РІРёСЏ (РѕСЂРёРіРёРЅР°Р»)",
-                    "С‚РѕР»СЊРєРѕ СЃ РѕСЂСѓР¶РёРµРј", "РѕСЃРѕР±РѕРµ", "Р¶РёРІРѕРµ"],
+         _md_table(["kind", "имя", "роль Alpha", "класс", "модели", "ходьба/покой (оригинал)", "действия (оригинал)",
+                    "только с оружием", "особое", "живое"],
                    [(r["kind"], r["name"], r["alpha_role"] + (f" ({r['spawn_basis']})" if r["spawn_basis"] else ""),
-                     r["class"] + (" В· boss" if r["boss"] and r["class"] != "boss" else ""), ", ".join(r["models"]),
+                     r["class"] + (" · boss" if r["boss"] and r["class"] != "boss" else ""), ", ".join(r["models"]),
                      r["walk_idle"], r["actions"], r["weapon_only_actions"] or "-", "; ".join(r["special"]) or "-",
                      r["live"]) for r in kinds]),
          "",
-         "РќРµР¶РёРІС‹Рµ РјРѕРґРµР»Рё (РѕСЂСѓР¶РёРµ, Р±СЂРѕРЅСЏ, РїСЂРµРґРјРµС‚С‹, РїРѕСЃС‚СЂРѕР№РєРё, РјРµР±РµР»СЊ) вЂ” СЃС‚Р°С‚РёС‡РЅС‹Рµ РјРѕРґРµР»Рё Р±РµР· Р°РЅРёРјР°С†РёРё РјРѕРґРµР»Рё "
-         "(РёС… РґРІРёР¶РµРЅРёРµ вЂ” РёРіСЂРѕРІР°СЏ СЃРёРјСѓР»СЏС†РёСЏ: РїРѕРґР±РѕСЂ, СЃРЅР°СЂСЏРґС‹, СЌС„С„РµРєС‚С‹); РјР°СЂС€СЂСѓС‚С‹ Рё СЃС‚Р°С‚СѓСЃС‹ РєР°Р¶РґРѕР№ РёР· 2878 РјРѕРґРµР»РµР№ вЂ” "
-         "D64 `asset_catalog` (`.scratch/catalog/asset_catalog.json`, Р»РѕРєР°Р»СЊРЅРѕ).",
+         "Неживые модели (оружие, броня, предметы, постройки, мебель) — статичные модели без анимации модели "
+         "(их движение — игровая симуляция: подбор, снаряды, эффекты); маршруты и статусы каждой из 2878 моделей — "
+         "D64 `asset_catalog` (`.scratch/catalog/asset_catalog.json`, локально).",
          ""]
     DOC_A.write_text("\n".join(a), encoding="utf-8")
     rows = disp["rows"]
-    b = ["# S05B-2 / D69 вЂ” РјР°С‚СЂРёС†Р° РїРµСЂРµРЅРѕСЃР° Alpha в†’ Unity (KEEP / DISABLE_IN_GAME / FIX / ADD_MISSING / UNKNOWN)",
+    b = ["# S05B-2 / D69 — матрица переноса Alpha → Unity (KEEP / DISABLE_IN_GAME / FIX / ADD_MISSING / UNKNOWN)",
          "",
-         "РЎСЂР°РІРЅРµРЅРёРµ **РЅР°С€РµРіРѕ** Unity-РїРµСЂРµРЅРѕСЃР° (D65 + РёСЃРїСЂР°РІР»РµРЅРёСЏ D69) СЃ [РєР°С‚Р°Р»РѕРіРѕРј РѕСЂРёРіРёРЅР°Р»Р°]"
-         "(S05B2_ALPHA_ORIGINAL_MODEL_ANIMATION_CATALOG.md). РЎРіРµРЅРµСЂРёСЂРѕРІР°РЅРѕ `d69_catalogs`; СЂРµР·СѓР»СЊС‚Р°С‚С‹ Unity вЂ” РёР· "
-         "СЃРІРѕРґРѕРє РїР°РєРµС‚РѕРІ D59вЂ“D65 Рё РїСЂРѕРІРµСЂРєРё D69 (`.scratch/d69/verify`).",
+         "Сравнение **нашего** Unity-переноса (D65 + исправления D69) с [каталогом оригинала]"
+         "(S05B2_ALPHA_ORIGINAL_MODEL_ANIMATION_CATALOG.md). Сгенерировано `d69_catalogs`; результаты Unity — из "
+         "сводок пакетов D59–D65 и проверки D69 (`.scratch/d69/verify`).",
          "",
-         "## РЎРІРѕРґРєР°",
+         "## Сводка",
          "",
-         "Р’РµСЂРґРёРєС‚С‹: " + ", ".join(f"`{k}` {v}" for k, v in sorted(disp["verdicts"].items())) + ".",
+         "Вердикты: " + ", ".join(f"`{k}` {v}" for k, v in sorted(disp["verdicts"].items())) + ".",
          "",
-         "РС‚РѕРі D69: " + ", ".join(f"`{k}` {v}" for k, v in sorted(disp["outcomes"].items())) + ".",
+         "Итог D69: " + ", ".join(f"`{k}` {v}" for k, v in sorted(disp["outcomes"].items())) + ".",
          "",
-         "## РќРµ KEEP (РІСЃС‘, С‡С‚Рѕ С‚СЂРµР±СѓРµС‚ РґРµР№СЃС‚РІРёСЏ)",
+         "## Не KEEP (всё, что требует действия)",
          "",
-         _md_table(["kind", "РёРјСЏ", "С‡С‚Рѕ", "РѕСЂРёРіРёРЅР°Р»", "Unity", "РІРµСЂРґРёРєС‚", "РёС‚РѕРі D69", "СЃРµСЂСЊС‘Р·РЅРѕСЃС‚СЊ", "РїСЂРёС‡РёРЅР°/РёСЃРїСЂР°РІР»РµРЅРёРµ", "РёСЃРїРѕР»РЅРёС‚РµР»СЊ"],
+         _md_table(["kind", "имя", "что", "оригинал", "Unity", "вердикт", "итог D69", "серьёзность", "причина/исправление", "исполнитель"],
                    [(r["kind"], r["name"], r["item"], r["alpha"], r["unity"], r["verdict"], r["outcome"], r["severity"],
                      r["reason"], r["owner"]) for r in rows if r["verdict"] != "KEEP"]),
          "",
-         "## KEEP (РїРµСЂРµРЅРµСЃРµРЅРѕ РІРµСЂРЅРѕ)",
+         "## KEEP (перенесено верно)",
          "",
-         _md_table(["kind", "РёРјСЏ", "С‡С‚Рѕ", "Unity", "РёС‚РѕРі"],
+         _md_table(["kind", "имя", "что", "Unity", "итог"],
                    [(r["kind"], r["name"], r["item"], r["unity"], r["outcome"]) for r in rows if r["verdict"] == "KEEP"]),
          ""]
     DOC_B.write_text("\n".join(b), encoding="utf-8")
