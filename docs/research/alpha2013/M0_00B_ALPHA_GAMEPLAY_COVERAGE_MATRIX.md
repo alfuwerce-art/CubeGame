@@ -8,9 +8,16 @@ M0-01 и **не** приёмка S05B-2. Черновик ТЗ M0-00 (`docs/stag
 (база результата S05B-2/D69 — `claude/s05b2-d69-alpha-transfer-implementation` @ `721d222`).
 **Ревизия 2 (2026-11-08, issue #8):** ветка `deepseek/m0-00b-gameplay-research` @ `e5e959a` + изолированный
 worktree `D:\Projects\CubeGame-deepseek` (D71); добавлен §9 (16 строк, 3 правки), прямое чтение
-декомпилированного кода клиента в собственной копии `.scratch` (SHA256 сверены). Сопутствующие документы:
+декомпилированного кода клиента в собственной копии `.scratch` (SHA256 сверены).
+**Ревизия 3 (2026-11-09, issue #10):** ветка `deepseek/m0-00b-p0-mechanics`; §A — типы/подтипы оружия и
+Gloves/Boots доказаны по моделям (34 проверки, `RESULT=PASS`); §B — расходники, стартовое оружие по
+классам, множители навыков движения; §C — возрождение, персистентность сущностей, формула региона.
+Исправлены `I-09`, `C-24`, `P-24…P-26`, `W-05`, `AI-08`, `AI-10`; подробности —
+[M0_00B_P0_MECHANICS_EVIDENCE](M0_00B_P0_MECHANICS_EVIDENCE.md) (в этой же папке).
+Сопутствующие документы:
 [M0_00B_ACTIONS_ITEMS_INTERACTIONS_ADDENDUM](../../reports/M0_00B_ACTIONS_ITEMS_INTERACTIONS_ADDENDUM.md),
-[ALPHA_STATIC_TABLES_ITEM_SKILL](ALPHA_STATIC_TABLES_ITEM_SKILL.md).
+[ALPHA_STATIC_TABLES_ITEM_SKILL](ALPHA_STATIC_TABLES_ITEM_SKILL.md),
+[M0_00B_P0_MECHANICS_RESOLUTION_REPORT](../../reports/M0_00B_P0_MECHANICS_RESOLUTION_REPORT.md).
 **Дата:** 2026-11-08. **Исполнитель:** DeepSeek Harness. **Метод:** чтение документов, кода и данных
 (включая декомпилированный клиент); Unity, Python-прогоны и оригинальная Alpha не запускались;
 `.scratch` основной (чужой) папки не изменялся.
@@ -76,7 +83,7 @@ worktree `D:\Projects\CubeGame-deepseek` (D71); добавлен §9 (16 стр�
 | W-02 | три независимых RNG-потока: `gc:87971`, `WorldInfo.cpp:1531`, `gc:87676` | DIRECT | NONE | MISSING | — | M0-02A | `GEN-DET-01` | порядок вызовов в кадре не доказан; **B_world §B12: бит-в-бит не требуется** |
 | W-03 | шум `perlinNoise2D_cosInterp` `004c0ef0` (value-noise + косинусная интерполяция) | DIRECT | `Core/Generation/PilotHeightField.cs` (4 октавы, `PLACEHOLDER_NOT_ALPHA`) | PARTIAL | — | M0-02A | `GEN-NOISE-01`: порт функции на эталонных узлах | C#-порт бит-совместимости не проверялся |
 | W-04 | форма рельефа `generateBiomeContent` `005e4850` (`WorldInfo.cpp:1639-1729`), константы 432/4234/423432/54352/34432/8992/985/98584/234/60/8/0.4/1.25 | PARTIAL (порядок потерян) | `Core/Generation/PilotHeightField.cs` (4 октавы — **другая** формула) | IMPLEMENTED_PILOT | — | M0-02A | `GEN-SIL-01`: силуэт против кадров Alpha | порядок операций деградирован (потеряны `ftol`/float) |
-| W-05 | биомы: `biome = FUN_005a4710(rx,rz)`; `variant = rand()%5` при `biome>4`; `orientation = rand()%4` | UNKNOWN (таблица) | NONE | MISSING | — | M0-02A | `GEN-BIOME-01`: набор биомов и правила перехода | **функция классификации биома не расшифрована; перечисления биомов нет ни в одном документе** |
+| W-05 | регион: детерминированный сид `srand(masterSeed + z·0x400 + x)`, тип = `FUN_005a4710(x,z)` = `1` при `(512,512)`, иначе `2 + trunc(0.75·dist((x,z),(512,512)))`; вариант `rand()%5` только при типе > 4; ориентация `rand()&3`; имена типов `(тип, вариант)` в `World::ctor_1`: 1 Village, 2 Mountain, 3 Forest, 4 Lake, 6 Canyon, 7 Valley, 8 Crater, 0xb Rock, 0xc Tree, 0xd Peak, 0xf Island | DIRECT (формула) / PARTIAL (семантика `Region+0xc`) | NONE | MISSING | — | M0-02A | `GEN-BIOME-01` | **r1-запись «функция биома не расшифрована» уточнена**: формула прочитана; спорно, биом это или полоса удалённости (диапазон до ~545 против имён 1…0xf) — см. [P0-EVIDENCE §C.3](M0_00B_P0_MECHANICS_EVIDENCE.md) |
 | W-06 | климат-клетка `0x1C` (`+4` температура, `+8` влажность, `+0xC` высота, `+0x10` поверхность, плотность растительности 0.3…0.7, каменистость 0.4…1.0) | PARTIAL | NONE | MISSING | — | M0-02A | `GEN-CLIMATE-01` | семантика полей плотности/каменистости |
 | W-07 | вода: per-256-клетка (`cell+0x10` поверхность, `+0x1C` мощность, `+0x18` материалы), `y<+0x10` → вода | PARTIAL (запись `+0x10` — UNKNOWN) | NONE | MISSING | — | M0-02C | `GEN-WATER-01` | **где вычисляется уровень — U3/OQ-14; глобального sea level нет → нужно решение продюсера (§B12.3)** |
 | W-08 | пещеры: `roof = base+(noise(x*0.01+435,z*0.01+847)+1)*20`, маска `1−abs(n)⁴`, материал 6 при крутизне `>0.5` | PARTIAL | NONE | MISSING | — | M0-02C | `GEN-CAVE-01` | точные границы вырезания |
@@ -122,9 +129,9 @@ worktree `D:\Projects\CubeGame-deepseek` (D71); добавлен §9 (16 стр�
 | P-21 | шкала скоростей: база 6.0 → босс 8.0 → роль 5: 12.0 → игрок 20.0 → спринт ×2, кламп | DIRECT (константы) / UNKNOWN (масштаб) | `PlayerMotor` 5/8 (`PLACEHOLDER_NOT_ALPHA`) | IMPLEMENTED_PILOT | — | M0-03B | `MOVE-SPEED-01` | **OQ-23 OPEN: 1 ед. ≠ доказанные блоки/с** |
 | P-22 | гравитация 30.0, планирование 3.0 | DIRECT | `PlayerMotor.Gravity = -24f` | IMPLEMENTED_PILOT | — | M0-03B | `MOVE-GRAV-01` | — |
 | P-23 | коллизия: воксельная swept, шаг ≤1 ед., твёрдость `(blockType&0x1F)!=0 && !=2` | DIRECT (структура) | `CharacterController` (пилот) | PARTIAL | — | M0-03B | `MOVE-COLL-01` | step-up/slide/высота капсулы в Alpha не найдены; модель CubeGame — отдельное решение |
-| P-24 | плавание: `SkillSwimming`=4, `@swimmingspeed`, `curve_diminishingHalf`, подъёмная сила 30·погружение | PARTIAL | NONE | MISSING | — | M0-03B | `MOVE-SWIM-01` | вход/выход из воды, дыхание не исследованы |
-| P-25 | лазание: `SkillClimbing`=2, `@climbingpower`, расход стамины | PARTIAL | NONE | MISSING | — | M0-03B | `MOVE-CLIMB-01` | срыв/поверхности не исследованы |
-| P-26 | дельтаплан: `SkillHangGliding`=3, предмет `HangGlider` (0x17/0), гравитация 3.0 | PARTIAL | NONE | MISSING | — | M0-03B | `MOVE-GLIDE-01` | числа кривой |
+| P-24 | плавание: `SkillSwimming`=4, `@swimmingspeed = 100·curve_diminishingHalf(rank)` (`0x4476a0`), подъёмная сила 30·погружение | DIRECT (формула) / PARTIAL (физика) | NONE | MISSING | — | M0-03B | `MOVE-SWIM-01` | вход/выход из воды, дыхание не исследованы; применение множителя в физике не доказано |
+| P-25 | лазание: `SkillClimbing`=2, `@climbingpower = 100·curve_diminishingN1(rank)` (`0x43e660`), расход стамины | DIRECT (формула) / PARTIAL | NONE | MISSING | — | M0-03B | `MOVE-CLIMB-01` | срыв/поверхности не исследованы |
+| P-26 | дельтаплан: `SkillHangGliding`=3, предмет `HangGlider` (0x17/0), `@flyingspeed = 100·curve_diminishingx3p15(rank)` (`0x43f770`), гравитация 3.0 | DIRECT (формула) / PARTIAL | NONE | MISSING | — | M0-03B | `MOVE-GLIDE-01` | «гравитация 3.0» в r3 не перепроверена |
 | P-27 | лодка (`SkillBoatDriving`=5, `Boat` 0x17/1) и езда (`SkillPetRiding`=1) | UNKNOWN | NONE | MISSING | — | M0-03B / M0-06E | `MOVE-BOAT-01` | механика не найдена (U7/OQ-08) |
 
 ---
@@ -156,7 +163,7 @@ worktree `D:\Projects\CubeGame-deepseek` (D71); добавлен §9 (16 стр�
 | C-21 | серия/финишер `+0x70` (<5 замах, ≥5 финишер тип 8 / 20 000 мс), таймер `+0x74`, сброс >4000 мс | PARTIAL (OQ-24) | NONE | MISSING | — | M0-05B | `COMBO-01` | **OQ-24: то же поле делится на `blockDuration` — единая семантика не установлена** |
 | C-22 | стан/равновесие: `+0x128`, `+0x130`, poise `+0x1190` (`damage·0.25 / 2^((L−1+star)·0.25)`), `0x68=='T'` → 3000 мс | PARTIAL | NONE | MISSING | — | M0-05B | `STUN-01` | флаги `0x7e`, роль `0x2000/0x4000` |
 | C-23 | threat-map `+0x13a4` («атакующий, цель» → счётчик) + `0x11d0/0x11d4` | DIRECT (модель) | NONE | MISSING | — | M0-06C | `AI-AGGRO-01` | — |
-| C-24 | ИИ-зелье при `HP < 0.25·MaxHP`, `state='P'`, прыжок в сторону | DIRECT | NONE | MISSING | — | M0-06C | `AI-POTION-01` | таблица расходников |
+| C-24 | ИИ-зелье: `CombatBehavior.cpp:280-288` — при `HP(+0x16c) < stat_calcAttackDamage()·0.5` **и** фракция `+0x60 == 3` ставит action `0x50`, таймер `+0x6c = 0`, встроенный предмет `+0x1e8 = 0x0401` (`type 1, subtype 4`), уровень `+0x1f8`, обнуляет скорость | DIRECT (r3) | NONE | MISSING | — | M0-06C | `AI-POTION-01` | **r2-формулировка «HP < 0.25·MaxHP» неверна**; таблицы расходников по видам нет |
 | C-25 | смерть/возрождение игрока: `Player_resetFull` `00446330`, `Player_resetState` `004465c0` | UNKNOWN | NONE | MISSING | — | M0-05D | `GS-06` | **правило возрождения (штраф, точка, таймер) не восстановлено → GS-06 в текущей формулировке невыполним** |
 | C-26 | haste `combat_getEffectiveHaste` `00447700` (+`stat_calcHasteBonus` `004478b0`, бафф `0x0c`) | DIRECT / PARTIAL | `AlphaMath.FormHaste` (вызывается только из EditMode-теста) | PARTIAL | — | M0-05B | `HASTE-01` | `+0x70` внутри haste — OQ-24 |
 | C-27 | фазы `base_ms/(haste·speed(+0x17c))`: `combat_getAttackWindup` `0x43caa0`, `Timing` `0043d1a0`, `ReloadFrames` `00447310` | DIRECT (формула) / PARTIAL (таблицы, `speed`) | S05: тайминги `RECONSTRUCTED_FROM_EVIDENCE` (`tools/alpha_models/universal/*`) | PARTIAL | PIPE | M0-05C | `TIMING-01` | `speed(+0x17c)` неизвестен → абсолютные мс не «игровые» |
@@ -302,7 +309,7 @@ worktree `D:\Projects\CubeGame-deepseek` (D71); добавлен §9 (16 стр�
 | AI-05 | 13 слотов экипировки, шаг `0x118`; `getEquipmentSlotPtr @ 0x47b1b0` перебирает 12 смещений `0x418…0x1020` | DIRECT | `Core/Equipment/EquipmentSlot.cs` (6 слотов) | PARTIAL | — | M0-04B | `GS-07` | назначение слота `+0x300` |
 | AI-06 | слот → тип: `Equipment_sum_slot_values @ 0x446150` | DIRECT | `EquipmentLoadout` | PARTIAL | — | M0-04B | `GS-07` | 5/6 Gloves/Boots `AMBIGUOUS` |
 | AI-07 | кольца (`0xbc0`,`0xcd8`) и `+0x300` **не рисуются**; базовая пасса — 7 слотов (`drawModel` 2111-2123) | DIRECT | NONE | MISSING | — | M0-04B | `GS-07` | — |
-| AI-08 | предмет «впереди» (`+0xf08`, бит `+0x124 & 0x10`, action `0x6b`) и «за спиной» (`+0xdf0`, бит `0x200`) | PARTIAL | NONE | MISSING | — | M0-03B | `GS-24` | какой тип предмета попадает в эти слоты |
+| AI-08 | предмет «впереди» (`+0xf08`, бит `+0x124 & 0x10`, action `0x6b`) и «за спиной» (`+0xdf0`, бит `0x200`); **`+0xdf0` = лампа (тип `0x18`)** — доказано стартовым снаряжением (`start_game_mode`, строки 28105-28108) | DIRECT (лампа) / PARTIAL (остальное) | NONE | MISSING | — | M0-03B | `GS-24` | какой тип предмета попадает в `+0xf08` |
 | AI-09 | подтип оружия меняет меш/позу внутри действия: `drawModel` 2466 (`0x0e`), 2634 (`0x0d`), 3582 (`0x07`), 3588/3649/3677/3710 (модель `0x348`), 6461/6494 (модель `0x347`) | PARTIAL | S05 `AlphaWeaponLocomotion` (вне `Assets/`) | PARTIAL | RUNTIME | M0-04B | `GS-25` | полная таблица «подтип → оверлей» |
 | AI-10 | слово флагов **существа** `creature+0x7e` (16 бит): `0x8/0x10` добавляют урон оружия (`stat_calcWeaponDamage @ 0x43dc60`), `0x1a00` — гейт канала (`0x444680`), `0x200` — отрисовка слота `+0xdf0`, `0x4` — ветка точки вылета снаряда (`projectile_getMuzzlePosition @ 0x446bb0`), `0x1` — поворот при отрисовке; прочие биты (`0x2,0x18,0x40,0x80,0x100,0x400,0x2000`) не разобраны | DIRECT (потребители) / UNKNOWN (семантика бит) | NONE | MISSING | — | M0-04A | `GS-26` | **r2-формулировка «маска свойств предмета» неверна** — поле принадлежит существу, не предмету (см. [P0-EVIDENCE §A.5](M0_00B_P0_MECHANICS_EVIDENCE.md)) |
 | AI-11 | кулдаун способности по id: `Ability_get_cooldown @ 0x444860` (2…10 с, часть делится на haste; роли 3/5 не считаются) | DIRECT | NONE | MISSING | — | M0-05B | `ABILITY-02` | — |
