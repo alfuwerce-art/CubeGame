@@ -130,7 +130,8 @@ ITEM_LAYER=PASS
 ## 6. Git
 
 * Ветка результата: `deepseek/m0-00b-item-layer` (база `0b62ccc`), публикуется в GitHub.
-* Первый коммит: `<PENDING>`.
+* Первый коммит: `03a416757c6e0b120f01d3ede9f850741d167cf0` (опубликован в
+  `origin/deepseek/m0-00b-item-layer`; коммит этого отчёта — потомок, SHA в конце строки ветки).
 * Исходное имя `deepseek/m0-00b-item-animation-transfer` **случайно совпало** с веткой другой
   параллельной сессии M0-00 в том же worktree: в 02:41–02:42 в неё попали чужие коммиты
   `43be87a`, `2b85561`, `15bd989` (они же — `deepseek/m0-00-full-systems-preparation`,
