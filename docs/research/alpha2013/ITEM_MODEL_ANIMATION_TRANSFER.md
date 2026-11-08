@@ -5,7 +5,7 @@
 production-`Assets/`. Продюсер визуально ничего не принимал.
 
 **Дата:** 2026-11-09. **Worktree:** `D:\Projects\CubeGame-deepseek`, ветка
-`deepseek/m0-00b-item-animation-transfer`. **Источник:** `D:\Games\Cube world` — только чтение;
+`deepseek/m0-00b-item-layer` (база `0b62ccc`; почему имя отличается от исходного — §9 отчёта). **Источник:** `D:\Games\Cube world` — только чтение;
 исполнялись байты `Cube.exe` в собственном эмуляторе проекта (`x86emu`/`drawmodel_emu`), игра не
 запускалась, Unity не запускалась, `D:\Projects\CubeGame` не изменялся.
 
