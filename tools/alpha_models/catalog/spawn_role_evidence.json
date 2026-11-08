@@ -308,16 +308,26 @@
    ]
   },
   "0x8d": {
-   "faction": null,
-   "basis": "SAME_OBJECT_CLASS",
-   "note": "Aim (aim.cub): training target, grouped with Scarecrow 0x8c by Cube.exe 0x43E310",
-   "sites": []
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "training_targets (0x5270B4; kind 0x8d + (arg != 10) at 0x5270E9)",
+     "faction_write": "0x5270B4",
+     "kind_write": "0x5270E4"
+    }
+   ]
   },
   "0x8e": {
-   "faction": null,
-   "basis": "SAME_OBJECT_CLASS",
-   "note": "Dummy (dummy.cub): training target, grouped with Scarecrow 0x8c by Cube.exe 0x43E310",
-   "sites": []
+   "faction": 6,
+   "basis": "ALPHA_CODE_SPAWN",
+   "sites": [
+    {
+     "group": "training_targets (0x5270B4; kind 0x8d + (arg != 10) at 0x5270E9)",
+     "faction_write": "0x5270B4",
+     "kind_write": "0x5270BB"
+    }
+   ]
   },
   "0x8f": {
    "faction": 6,
@@ -327,6 +337,21 @@
      "group": "vase (0x506390)",
      "faction_write": "0x506390",
      "kind_write": "0x506397"
+    },
+    {
+     "group": "vase (0x5066F5)",
+     "faction_write": "0x5066F5",
+     "kind_write": "0x5066FC"
+    },
+    {
+     "group": "vase (0x506A5A)",
+     "faction_write": "0x506A5A",
+     "kind_write": "0x506A61"
+    },
+    {
+     "group": "vase (0x506DC6)",
+     "faction_write": "0x506DC6",
+     "kind_write": "0x506DCD"
     }
    ]
   },

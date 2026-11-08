@@ -67,6 +67,15 @@ PASSIVE_SPAWNS = {
          (0x51F496, "c7402c7f000000", 0x7F), (0x51F4A5, "c7402c7b000000", 0x7B)]),
     "scarecrow (0x4E53B2)": ((0x4E53B2, "c7402806000000"), [(0x4E53C5, "c7402c8c000000", 0x8C)]),
     "vase (0x506390)": ((0x506390, "c7402806000000"), [(0x506397, "c7402c8f000000", 0x8F)]),
+    # review #4: three more vase spawn sites of the same shape (found by a faction-6 sweep of .text)
+    "vase (0x5066F5)": ((0x5066F5, "c7402806000000"), [(0x5066FC, "c7402c8f000000", 0x8F)]),
+    "vase (0x506A5A)": ((0x506A5A, "c7402806000000"), [(0x506A61, "c7402c8f000000", 0x8F)]),
+    "vase (0x506DC6)": ((0x506DC6, "c7402806000000"), [(0x506DCD, "c7402c8f000000", 0x8F)]),
+    # review #4: training targets. 0x5270B0 cmp [ebp+0x18],0xa / 0x5270BB setne al / 0x5270E4 add eax,0x8d /
+    # 0x5270E9 mov [edx+0x2c],eax -> kind = 0x8d (arg == 10) or 0x8e (otherwise), faction 6 at 0x5270B4
+    "training_targets (0x5270B4; kind 0x8d + (arg != 10) at 0x5270E9)": (
+        (0x5270B4, "c7422806000000"),
+        [(0x5270E4, "058d000000", 0x8D), (0x5270BB, "0f95c0", 0x8E)]),
     "bomb (0x536FBA kind, 0x536FC1 faction on the creature itself)": (
         (0x536FC1, "c6466006"), [(0x536FBA, "c70190000000", 0x90)]),
 }
@@ -82,8 +91,7 @@ POLICY_WITHOUT_SPAWN_SITE = {
     0x81: ("PRODUCER_RULE_D67", "FirTree (fir-tree.cub): ordinary plant"),
     0x86: ("SAME_OBJECT_CLASS", "SandstoneDeposit: ore deposit family (0x83..0x8a proven passive)"),
     0x8B: ("SAME_OBJECT_CLASS", "IceCrystalDeposit: ore deposit family (0x83..0x8a proven passive)"),
-    0x8D: ("SAME_OBJECT_CLASS", "Aim (aim.cub): training target, grouped with Scarecrow 0x8c by Cube.exe 0x43E310"),
-    0x8E: ("SAME_OBJECT_CLASS", "Dummy (dummy.cub): training target, grouped with Scarecrow 0x8c by Cube.exe 0x43E310"),
+    # 0x8D Aim / 0x8E Dummy: proven by the spawn site 0x5270B4 (review #4), no longer policy-only
 }
 
 
