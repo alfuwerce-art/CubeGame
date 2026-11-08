@@ -232,7 +232,7 @@ namespace CubeGame.AlphaTransfer.Review.Editor
                 var sheet = new Texture2D(count * cell, 2 * cell, TextureFormat.RGB24, false);
                 for (int k = 0; k < count; k++)
                 {
-                    var info = idx.specimens.First(x => x.kind == idx.kinds[start + k] && x.IsBaseVariant && x.prepare == "PASS");
+                    var info = BaseSpecimen(idx, idx.kinds[start + k]);
                     for (int row = 0; row < 2; row++)
                     {
                         bool after = row == 1;
@@ -296,6 +296,12 @@ namespace CubeGame.AlphaTransfer.Review.Editor
             UnityEngine.Object.DestroyImmediate(t);
         }
 
+        // A review scope may hold a kind only as the player action library (issue #4: HumanMale 0x02 via the
+        // regression job); then the sheet uses that specimen instead of failing on a missing base variant.
+        static ReviewSpecimenInfo BaseSpecimen(ReviewIndex idx, string kind) =>
+            idx.specimens.FirstOrDefault(x => x.kind == kind && x.IsBaseVariant && x.prepare == "PASS")
+            ?? idx.specimens.First(x => x.kind == kind && x.prepare == "PASS");
+
         static ReviewIndex _sheetIndex;
 
         static void Sheets(ReviewIndex idx, Material mat, List<string> problems)
@@ -315,11 +321,13 @@ namespace CubeGame.AlphaTransfer.Review.Editor
                 var specs = new List<ReviewSpecimen>(); var all = new Bounds(); bool first = true;
                 for (int k = 0; k < idx.kinds.Length; k++)
                 {
-                    var info = idx.specimens.First(s => s.kind == idx.kinds[k] && s.IsBaseVariant && s.prepare == "PASS");
+                    var info = BaseSpecimen(idx, idx.kinds[k]);
                     var s = ReviewSpecimen.Build(info, mat, root);
                     s.SetHairColour(ReviewData.DefaultHairColour(idx, s));
-                    var src = s.Sources(mode).LastOrDefault(v => v.formula) ?? s.Sources(mode).FirstOrDefault();
-                    s.Apply(src, 1.0f);
+                    // D69: a STATIC_OBJECT stands still in the walk lineup too (the game never walks it)
+                    var m = s.contract != null && s.contract.controllerMode == "STATIC_OBJECT" ? ReviewMode.Idle : mode;
+                    var src = s.Sources(m).LastOrDefault(v => v.formula) ?? s.Sources(m).FirstOrDefault();
+                    s.Apply(src, m == ReviewMode.Idle ? 0f : 1.0f);
                     var b = s.VisibleBounds();
                     int col = k % cols, row = k / cols;
                     s.transform.position += new Vector3(col * 2.2f - b.center.x, -row * 2.8f, 0);
@@ -335,6 +343,9 @@ namespace CubeGame.AlphaTransfer.Review.Editor
             foreach (var k in idx.kinds)
             {
                 var vars = idx.specimens.Where(s => s.kind == k && s.prepare == "PASS").ToList();
+                // review #4: base specimen from four sides (front, right, back, left), idle and walk rows
+                var bse = vars.FirstOrDefault(v => v.IsBaseVariant) ?? vars.FirstOrDefault();
+                if (bse != null) FourSides(cam, root, mat, bse, $"sides_{bse.id}.png");
                 Grid(cam, root, mat, vars.Select(v => (v, (Func<ReviewSpecimen, (ReviewSource, float)>)(s =>
                     (s.Sources(ReviewMode.Idle).LastOrDefault(), 0f)))).ToList(), $"variants_{k}.png", 200f, 10f);
                 foreach (var v in vars)
@@ -361,6 +372,40 @@ namespace CubeGame.AlphaTransfer.Review.Editor
             }
             UnityEngine.Object.DestroyImmediate(cam.gameObject);
             UnityEngine.Object.DestroyImmediate(root.gameObject);
+        }
+
+        // One sheet: columns = yaw 180 (front), 90 (right), 0 (back), 270 (left); rows = idle, walk (two phases).
+        // The frame is fixed per specimen (idle bounds), so a part that drifts between views is visible.
+        static void FourSides(Camera cam, Transform root, Material mat, ReviewSpecimenInfo info, string name)
+        {
+            var s = ReviewSpecimen.Build(info, mat, root);
+            s.SetHairColour(ReviewData.DefaultHairColour(_sheetIndex, s));
+            var idle = s.Sources(ReviewMode.Idle).LastOrDefault();
+            var walk = s.Sources(ReviewMode.Walk).LastOrDefault(v => v.formula) ?? s.Sources(ReviewMode.Walk).FirstOrDefault();
+            s.Apply(idle, 0f);
+            var frame = s.VisibleBounds();
+            frame.Expand(frame.size.magnitude * 0.5f);
+            var rowsSrc = new List<(ReviewSource src, float x)> { (idle, 0f) };
+            // A STATIC_OBJECT never walks in the game (D69); the PNG has no labels, so its research walk data is
+            // not drawn here (the interactive viewer still shows it, labelled "disabled in game").
+            bool isStatic = s.contract != null && s.contract.controllerMode == "STATIC_OBJECT";
+            if (walk != null && !isStatic) { rowsSrc.Add((walk, 1.0f)); rowsSrc.Add((walk, 2.6f)); }
+            float[] yaws = { 180f, 90f, 0f, 270f };
+            int rows = rowsSrc.Count;
+            var sheet = new Texture2D(yaws.Length * Cell, rows * Cell, TextureFormat.RGB24, false);
+            for (int r = 0; r < rows; r++)
+                for (int c = 0; c < yaws.Length; c++)
+                {
+                    if (rowsSrc[r].src == null) continue;
+                    s.Apply(rowsSrc[r].src, rowsSrc[r].x);
+                    Aim(cam, frame, yaws[c], 8f, 0.8f);
+                    var tex = Render(cam, Cell, Cell);
+                    sheet.SetPixels(c * Cell, (rows - 1 - r) * Cell, Cell, Cell, tex.GetPixels());
+                    UnityEngine.Object.DestroyImmediate(tex);
+                }
+            UnityEngine.Object.DestroyImmediate(s.gameObject);
+            sheet.Apply();
+            Save(sheet, name);
         }
 
         static void Grid(Camera cam, Transform root, Material mat, List<(ReviewSpecimenInfo info, Func<ReviewSpecimen, (ReviewSource, float)> pose)> cells,
