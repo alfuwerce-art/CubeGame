@@ -1,0 +1,269 @@
+{
+  "schemaVersion": 1,
+  "status": "RESEARCH_DRAFT_NOT_APPROVED",
+  "note": "Confirmed Alpha 2013 tables distilled from docs/research/alpha2013. This file is evidence data for the M0-00 pilot lab; it is not an approved game design and not a license to redistribute Alpha assets.",
+  "sources": {
+    "itemsAndWeapons": "docs/research/alpha2013/M0_00B_P0_MECHANICS_EVIDENCE.md §A.1-A.3; docs/research/alpha2013/ALPHA_STATIC_TABLES_ITEM_SKILL.md §1",
+    "equipmentSlots": "docs/research/alpha2013/M0_00B_P0_MECHANICS_EVIDENCE.md §A.6; M0_00B_ALPHA_GAMEPLAY_COVERAGE_MATRIX.md I-09/AI-05/AI-07",
+    "abilities": "docs/research/alpha2013/ALPHA_STATIC_TABLES_ITEM_SKILL.md §3-4",
+    "starterKits": "docs/research/alpha2013/M0_00B_P0_MECHANICS_EVIDENCE.md §B.2",
+    "regions": "docs/research/alpha2013/M0_00B_P0_MECHANICS_EVIDENCE.md §C.3",
+    "movement": "docs/research/alpha2013/BEHAVIOR_SPECS/I_movement.md; docs/research/alpha2013/M0_00B_P0_MECHANICS_EVIDENCE.md §B.3-B.4",
+    "npc": "docs/research/alpha2013/BEHAVIOR_SPECS/G_H_ai_npc_pets.md; docs/research/alpha2013/M0_00B_P0_MECHANICS_EVIDENCE.md §C.2",
+    "quests": "docs/research/alpha2013/BEHAVIOR_SPECS/J_quests_dungeons.md §J4-J5",
+    "saves": "docs/research/alpha2013/DATA_AND_SAVE_SCHEMAS.md §L3-L4"
+  },
+  "itemTypes": [
+    { "id": 1, "name": "Consumable", "confidence": "DIRECT", "note": "Potions/food/bomb; subtype names are item names." },
+    { "id": 2, "name": "Formula", "confidence": "DIRECT" },
+    { "id": 3, "name": "Weapon", "confidence": "DIRECT" },
+    { "id": 4, "name": "ChestArmor", "confidence": "DIRECT", "model": "iron-chest1.cub" },
+    { "id": 5, "name": "Gloves", "confidence": "DIRECT", "model": "iron-hand1.cub", "note": "Corrected in r3; older docs had Gloves=6." },
+    { "id": 6, "name": "Boots", "confidence": "DIRECT", "model": "iron-foot1.cub", "note": "Corrected in r3; older docs had Boots=5." },
+    { "id": 7, "name": "ShoulderArmor", "confidence": "DIRECT", "model": "iron-shoulder1.cub" },
+    { "id": 8, "name": "Amulet", "confidence": "DIRECT", "model": "gold-amulet1-random1.cub" },
+    { "id": 9, "name": "Ring", "confidence": "DIRECT", "model": "gold-ring1-random1.cub" },
+    { "id": 11, "name": "Material", "confidence": "DIRECT", "note": "Includes Flask (0x0c) and WaterFlask (0x1a) subtypes." },
+    { "id": 12, "name": "Coin", "confidence": "DIRECT" },
+    { "id": 13, "name": "PlatinumCoin", "confidence": "DIRECT" },
+    { "id": 14, "name": "Leftovers", "confidence": "DIRECT" },
+    { "id": 15, "name": "Beak", "confidence": "DIRECT" },
+    { "id": 16, "name": "Painting", "confidence": "DIRECT" },
+    { "id": 17, "name": "Vase", "confidence": "DIRECT" },
+    { "id": 18, "name": "Candle", "confidence": "DIRECT" },
+    { "id": 19, "name": "UnnamedType0x13", "confidence": "PARTIAL", "note": "Table entry exists; name is a string-pool pointer and was not recovered." },
+    { "id": 20, "name": "FoodAndBait", "confidence": "DIRECT", "note": "Bait loop plus 47 named food subtypes." },
+    { "id": 21, "name": "QuestItem", "confidence": "DIRECT", "model": "quest-item-amulet01.cub" },
+    { "id": 22, "name": "UnknownType0x16", "confidence": "UNKNOWN", "note": "Type id exists in the 24-type space; no name/model evidence in the reviewed sources." },
+    { "id": 23, "name": "HangGliderAndBoat", "confidence": "DIRECT", "note": "Subtype 0 HangGlider, subtype 1 Boat." },
+    { "id": 24, "name": "Lamp", "confidence": "DIRECT", "note": "Starter item in slot +0xdf0." },
+    { "id": 25, "name": "ManaCube", "confidence": "DIRECT" }
+  ],
+  "weaponSubtypes": [
+    { "id": 0, "name": "Unknown0x00", "confidence": "UNKNOWN", "note": "S1 called it Sword, but item_name_string_id case 0 has no model block." },
+    { "id": 1, "name": "Axe", "confidence": "DIRECT", "model": "iron-axe1.cub" },
+    { "id": 2, "name": "Mace", "confidence": "DIRECT", "model": "iron-mace1.cub" },
+    { "id": 3, "name": "Dagger", "confidence": "DIRECT", "model": "iron-dagger1.cub" },
+    { "id": 4, "name": "Fist", "confidence": "DIRECT", "model": "iron-fist1.cub" },
+    { "id": 5, "name": "Longsword", "confidence": "DIRECT", "model": "iron-longsword1.cub" },
+    { "id": 6, "name": "Bow", "confidence": "DIRECT", "model": "bow.cub" },
+    { "id": 7, "name": "Crossbow", "confidence": "DIRECT", "model": "wood-crossbow1.cub" },
+    { "id": 8, "name": "Boomerang", "confidence": "DIRECT", "model": "wood-boomerang1.cub" },
+    { "id": 9, "name": "Arrow", "confidence": "DIRECT", "model": "arrow.cub" },
+    { "id": 10, "name": "Staff", "confidence": "DIRECT", "model": "wood-staff1.cub" },
+    { "id": 11, "name": "Wand", "confidence": "DIRECT", "model": "wood-wand1.cub" },
+    { "id": 12, "name": "Bracelet", "confidence": "DIRECT", "model": "silver-bracelet1.cub" },
+    { "id": 13, "name": "Shield", "confidence": "DIRECT", "model": "iron-shield01.cub" },
+    { "id": 14, "name": "Quiver", "confidence": "DIRECT", "model": "quiver.cub" },
+    { "id": 15, "name": "Greatsword", "confidence": "DIRECT", "model": "obsidian-greatsword.cub" },
+    { "id": 16, "name": "Greataxe", "confidence": "PARTIAL", "note": "Only S1 name; no model block in the r3 table." },
+    { "id": 17, "name": "Greatmace", "confidence": "PARTIAL", "note": "Only S1 name; no model block in the r3 table." },
+    { "id": 18, "name": "Unknown0x12", "confidence": "UNKNOWN", "note": "Only referenced by weapon_isSpecialRunePtr." },
+    { "id": 20, "name": "Torch", "confidence": "PARTIAL", "note": "Only S1 name; subtype 0x14 in item table." }
+  ],
+  "equipmentStorage": {
+    "slots": 13,
+    "step": 280,
+    "stepHex": "0x118",
+    "entries": [
+      { "index": 0, "offset": "0x300", "itemType": null, "rendered": false, "note": "Purpose UNKNOWN; no consumer found." },
+      { "index": 1, "offset": "0x418", "itemType": 8, "rendered": true, "note": "Amulet." },
+      { "index": 2, "offset": "0x530", "itemType": 4, "rendered": true, "note": "Chest." },
+      { "index": 3, "offset": "0x648", "itemType": 6, "rendered": true, "note": "Boots (r3-corrected id)." },
+      { "index": 4, "offset": "0x760", "itemType": 5, "rendered": true, "note": "Gloves (r3-corrected id)." },
+      { "index": 5, "offset": "0x878", "itemType": 7, "rendered": true, "note": "Shoulders." },
+      { "index": 6, "offset": "0x990", "itemType": 3, "rendered": true, "note": "Main hand." },
+      { "index": 7, "offset": "0xaa8", "itemType": 3, "rendered": true, "note": "Second hand; dual wield uses both type-3 slots." },
+      { "index": 8, "offset": "0xbc0", "itemType": 9, "rendered": false, "note": "Ring; not drawn." },
+      { "index": 9, "offset": "0xcd8", "itemType": 9, "rendered": false, "note": "Ring; not drawn." },
+      { "index": 10, "offset": "0xdf0", "itemType": 24, "rendered": "conditional", "note": "Lamp; drawn when creature flag 0x7e bit 0x200 is set." },
+      { "index": 11, "offset": "0xf08", "itemType": null, "rendered": "conditional", "note": "Front item; flag 0x124 bit 0x10 or action 0x6b. Item type not proven." },
+      { "index": 12, "offset": "0x1020", "itemType": null, "rendered": "conditional", "note": "Mounted/riding item; action 0x52. Item type not proven." }
+    ]
+  },
+  "inventory": { "containers": 4, "slotsPerContainer": 50, "stackLimit": 49, "confidence": "DIRECT" },
+  "consumables": {
+    "actions": [80, 81],
+    "confidence": "DIRECT",
+    "cooldownsMs": [
+      { "condition": "type != 1", "value": 0 },
+      { "condition": "type == 1 && subtype == 1", "value": 3000 },
+      { "condition": "type == 1 && subtype != 1", "value": 10000 }
+    ],
+    "note": "Where the stack is decremented and healing is applied is UNKNOWN (B-U1)."
+  },
+  "abilities": [
+    { "id": 21, "name": "AbilityRangerKick" },
+    { "id": 34, "name": "AbilityHealingStream" },
+    { "id": 48, "name": "AbilityIntercept" },
+    { "id": 49, "name": "AbilityTeleport" },
+    { "id": 50, "name": "AbilityRetreat" },
+    { "id": 54, "name": "AbilitySmash" },
+    { "id": 79, "name": "AbilitySneak" },
+    { "id": 86, "name": "AbilityCyclone" },
+    { "id": 88, "name": "AbilityFireExplosion" },
+    { "id": 96, "name": "AbilityShuriken" },
+    { "id": 97, "name": "AbilityCamouflage" },
+    { "id": 99, "name": "AbilityAim" },
+    { "id": 100, "name": "AbilitySwiftness" },
+    { "id": 101, "name": "AbilityBulwark" },
+    { "id": 102, "name": "AbilityWarFrenzy" },
+    { "id": 103, "name": "AbilityManaShield" }
+  ],
+  "abilityCosts": {
+    "mana": [
+      { "id": 21, "base": 8000, "scale": 8000 },
+      { "id": 48, "base": 20000, "scale": 12000 },
+      { "id": 49, "base": 16000, "scale": 10000 },
+      { "id": 50, "base": 16000, "scale": 10000 },
+      { "id": 54, "base": 20000, "scale": 14000 },
+      { "id": 72, "base": 15000, "scale": 0 },
+      { "id": 86, "base": 60000, "scale": 40000 },
+      { "id": 88, "base": 8000, "scale": 8000 },
+      { "id": 96, "base": 20000, "scale": 14000 },
+      { "id": 97, "base": 60000, "scale": 30000 },
+      { "id": 99, "base": 12000, "scale": 10000 },
+      { "id": 100, "base": 60000, "scale": 30000 },
+      { "id": 101, "base": 60000, "scale": 30000 },
+      { "id": 102, "base": 60000, "scale": 30000 },
+      { "id": 103, "base": 20000, "scale": 10000 }
+    ],
+    "stamina": [
+      { "ids": [0, 50, 96], "value": 100 },
+      { "ids": [3, 4, 5, 62], "value": 300 },
+      { "ids": [7, 14, 18], "value": 200 },
+      { "ids": [11, 60, 61, 104], "value": 100 },
+      { "ids": [15], "value": 400 },
+      { "ids": [16], "value": 600 },
+      { "ids": [], "value": 500, "note": "Default." }
+    ],
+    "channeled": [92, 74, 34, 25, 55, 53, 87, 68, 67, 93, 106, 107, 35, 58, 57, 147, 145, 146, 22, 23, 98, 56, 30, 31, 32, 19, 26, 27, 33, 100, 20, 89],
+    "meleeRanges": [
+      { "from": 19, "to": 40 },
+      { "from": 63, "to": 67 },
+      { "ids": [74, 75, 98, 99, 100, 102, 103, 104, 105, 151] }
+    ],
+    "note": "Ability cooldown table is an ordered rule list in the Alpha code; the C# pilot implements the documented cases and keeps the default 2/haste. Units for stamina costs versus the 0..1 resource scale are PARTIAL."
+  },
+  "starterKits": [
+    {
+      "classId": 1, "className": "Warrior",
+      "offHand": { "type": 3, "subtype": 17, "modifier": 2, "level": 1 },
+      "mainHand": null,
+      "inventory": [ { "type": 3, "subtype": 1, "count": 2 }, { "type": 3, "subtype": 13, "count": 1 } ],
+      "note": "Greatmace in +0xaa8; axes and shield in inventory."
+    },
+    {
+      "classId": 2, "className": "Ranger",
+      "offHand": { "type": 3, "subtype": 6, "modifier": 0, "level": 1 },
+      "mainHand": null,
+      "inventory": [ { "type": 3, "subtype": 2, "count": 1, "confidence": "PARTIAL" }, { "type": 3, "subtype": 7, "count": 1 } ],
+      "note": "Bow in +0xaa8; mace subtype read through CONCAT11 hack = PARTIAL."
+    },
+    {
+      "classId": 3, "className": "Mage",
+      "offHand": { "type": 3, "subtype": 10, "modifier": 0, "level": 1 },
+      "mainHand": null,
+      "inventory": [ { "type": 3, "subtype": 12, "count": 1 }, { "type": 3, "subtype": 11, "count": 1 } ],
+      "note": "Staff in +0xaa8; bracelet and wand in inventory."
+    },
+    {
+      "classId": 4, "className": "Rogue",
+      "offHand": { "type": 3, "subtype": 3, "modifier": 0, "level": 1 },
+      "mainHand": { "type": 3, "subtype": 3, "modifier": 0, "level": 1 },
+      "inventory": [ { "type": 3, "subtype": 4, "count": 2, "confidence": "PARTIAL" }, { "type": 3, "subtype": 5, "count": 1 } ],
+      "note": "Dual wield: daggers in +0x990 and +0xaa8; fists subtype = PARTIAL."
+    }
+  ],
+  "starterCommon": {
+    "rings": [ { "type": 9, "modifier": 12 }, { "type": 9, "modifier": 11 } ],
+    "lamp": { "type": 24, "subtype": 0, "level": 1 },
+    "lifePotions": { "type": 1, "subtype": 1, "count": 5 }
+  },
+  "regions": {
+    "grid": 1024,
+    "regionBlocks": 64,
+    "worldBlocks": 65536,
+    "cellsPerRegion": 8,
+    "nameTable": [
+      { "type": 1, "name": "Village" },
+      { "type": 2, "name": "Mountain" },
+      { "type": 3, "name": "Forest" },
+      { "type": 4, "name": "Lake" },
+      { "type": 6, "name": "Canyon" },
+      { "type": 7, "name": "Valley" },
+      { "type": 8, "name": "Crater" },
+      { "type": 11, "name": "Rock" },
+      { "type": 12, "name": "Tree" },
+      { "type": 13, "name": "Peak" },
+      { "type": 15, "name": "Island" }
+    ],
+    "ruins": { "type": 0, "variant": 5, "name": "Ruins" },
+    "note": "Region+0xc semantics (biome versus distance band) remains PARTIAL; names are only known for the listed keys."
+  },
+  "factions": [
+    { "id": 0, "name": "Player" },
+    { "id": 1, "name": "Monster" },
+    { "id": 3, "name": "Ally" },
+    { "id": 5, "name": "Npc" },
+    { "id": 6, "name": "Passive" }
+  ],
+  "movement": {
+    "gravity": 30.0,
+    "glideGravity": 3.0,
+    "playerBase": 20.0,
+    "base": 6.0,
+    "boss": 8.0,
+    "role5": 12.0,
+    "sprintMultiplier": 2.0,
+    "dashImpulse": 40.0,
+    "dashUpImpulse": 5.0,
+    "dashDurationMs": 600,
+    "dashStaminaCost": 0.25,
+    "staminaDrainPerMs": 0.0002,
+    "staminaRegenPerMs": 0.0001,
+    "contactFlags": { "solid": 1, "water": 2, "push": 4, "airAbove": 16 },
+    "actionFlags": { "climbing": 1, "airOrGlider": 16, "sprint": 64, "torch": 512, "aim": 1024 },
+    "jump": { "status": "UNKNOWN", "note": "No jump function or constant was found; do not substitute PlayerMotor.JumpSpeed." },
+    "speedScale": { "status": "UNKNOWN", "note": "OQ-23: Alpha speed units to blocks/second is not proven." }
+  },
+  "spawn": {
+    "levelRows": 30,
+    "recordBytes": 280,
+    "starChances": [0.01, 0.001, 0.0001],
+    "starClamp": 4,
+    "note": "Record 0x118 bytes; row level from curve_inverse20p1. Population limit and off-screen despawn were not found."
+  },
+  "quests": {
+    "states": { "sleeping": 0, "active": 1, "completed": 2 },
+    "types": [
+      { "id": 1, "name": "monster", "completion": "immediate" },
+      { "id": 2, "name": "rareboss", "completion": "immediate" },
+      { "id": 3, "name": "villagemonster", "completion": "immediate" },
+      { "id": 4, "name": "villagerareboss", "completion": "immediate" },
+      { "id": 5, "name": "dungeon", "completion": "immediate" },
+      { "id": 6, "name": "none", "completion": "none" },
+      { "id": 7, "name": "invasion", "completion": "counter" },
+      { "id": 8, "name": "sceneryinvasion", "completion": "counter" },
+      { "id": 9, "name": "villageinvasion", "completion": "counter" },
+      { "id": 10, "name": "caveinvasion", "completion": "counter" },
+      { "id": 11, "name": "riverinvasion", "completion": "counter" },
+      { "id": 12, "name": "gang", "completion": "counter" },
+      { "id": 13, "name": "gangboss", "completion": "immediate" }
+    ],
+    "levelGate": 2,
+    "recordBytes": 104,
+    "cellGrid": 8
+  },
+  "combat": {
+    "maxRoll": 32767,
+    "blockRollMax": 100,
+    "varianceMin": 0.75,
+    "varianceMax": 1.25,
+    "blockThreshold": "int((1 - 1/((L-1)*0.05+1))*100 + 1)",
+    "killXpBossMultiplier": 20,
+    "killXpFlag0x200Multiplier": 10,
+    "killXpFlag0x800Multiplier": 0,
+    "note": "Hit chance base (OQ-01), block fraction (OQ-24), weapon-to-action mapping and status effects remain PARTIAL/UNKNOWN."
+  }
+}
