@@ -6,8 +6,14 @@ M0-01 и **не** приёмка S05B-2. Черновик ТЗ M0-00 (`docs/stag
 
 **Входной SHA (фиксировано):** ветка `review/s05b2-d69-acceptance-check` @ `27a0184`
 (база результата S05B-2/D69 — `claude/s05b2-d69-alpha-transfer-implementation` @ `721d222`).
-**Дата:** 2026-11-08. **Исполнитель:** DeepSeek Harness. **Метод:** только чтение документов, кода и данных;
-Unity, Python-прогоны и оригинальная Alpha не запускались; `.scratch` не изменялся.
+**Ревизия 2 (2026-11-08, issue #8):** ветка `deepseek/m0-00b-gameplay-research` @ `e5e959a` + изолированный
+worktree `D:\Projects\CubeGame-deepseek` (D71); добавлен §9 (16 строк, 3 правки), прямое чтение
+декомпилированного кода клиента в собственной копии `.scratch` (SHA256 сверены). Сопутствующие документы:
+[M0_00B_ACTIONS_ITEMS_INTERACTIONS_ADDENDUM](../../reports/M0_00B_ACTIONS_ITEMS_INTERACTIONS_ADDENDUM.md),
+[ALPHA_STATIC_TABLES_ITEM_SKILL](ALPHA_STATIC_TABLES_ITEM_SKILL.md).
+**Дата:** 2026-11-08. **Исполнитель:** DeepSeek Harness. **Метод:** чтение документов, кода и данных
+(включая декомпилированный клиент); Unity, Python-прогоны и оригинальная Alpha не запускались;
+`.scratch` основной (чужой) папки не изменялся.
 
 ---
 
@@ -45,12 +51,16 @@ Unity, Python-прогоны и оригинальная Alpha не запуск
 | Домен | Строк | `IMPLEMENTED_CORE` | `IMPLEMENTED_PILOT` | `TEST_ONLY` | `PARTIAL` | `MISSING` | `N/A` |
 |---|---|---|---|---|---|---|---|
 | 1. Мир и генерация | 20 | 0 | 2 | 0 | 2 | 16 | 0 |
-| 2. Герой и перемещение | 27 | 3 | 6 | 0 | 4 | 14 | 0 |
-| 3. Бой | 37 | 9 | 0 | 0 | 13 | 14 | 1 |
+| 2. Герой и перемещение | 28 | 3 | 6 | 0 | 4 | 15 | 0 |
+| 3. Бой | 42 | 9 | 0 | 0 | 13 | 19 | 1 |
 | 4. Существа, NPC, AI | 30 | 0 | 0 | 0 | 6 | 23 | 1 |
-| 5. Предметы и экономика | 18 | 2 | 0 | 0 | 7 | 9 | 0 |
-| 6. Контент, UI, сохранения | 27 | 1 | 1 | 1 | 1 | 21 | 2 |
-| **Итого** | 159 | 15 | 9 | 1 | 33 | 97 | 4 |
+| 5. Предметы и экономика | 28 | 2 | 0 | 0 | 11 | 15 | 0 |
+| 6. Контент, UI, сохранения | 28 | 1 | 1 | 1 | 1 | 22 | 2 |
+| **Итого (ревизия 2)** | 176 | 15 | 9 | 1 | 37 | 110 | 4 |
+| *Итого (ревизия 1, входной SHA)* | *159* | *15* | *9* | *1* | *33* | *97* | *4* |
+
+Прирост ревизии 2 (+17 строк) — §9: 13 `MISSING`, 4 `PARTIAL`; ни одна новая строка не является
+`IMPLEMENTED_CORE`: доказанные механики действий/предметов/способностей в Unity отсутствуют.
 
 **Ключевой вывод по сводке:** весь существующий C# — библиотека расчётов и демонстрационный пилот. Ни одна строка с
 `IMPLEMENTED_CORE` не вызывается из игрового цикла; строки `IMPLEMENTED_PILOT` относятся к сцене `Pilot.unity`
@@ -103,7 +113,7 @@ Unity, Python-прогоны и оригинальная Alpha не запуск
 | P-12 | специализации: Berserker/Guardian/Sniper/Scout/Fire/Water/Assassin/Ninja | DIRECT | `CharacterClass`/`CharacterSheet` (поле спец.), эффектов спец. нет | PARTIAL | — | M0-03D | `GS-11` | чем спец. меняет игру, кроме `specMult 1.25`, не восстановлено |
 | P-13 | ранги навыков `i32[11] @0x1138` (Taming, Riding, Climbing, HangGliding, Swimming, Boat, Ability1…5) | DIRECT | NONE | MISSING | — | M0-03D | `SKILL-01` | — |
 | P-14 | покупка/респек рангов за деньги: `computeQuestScore` `004df9c0`, `GC+0x160`, поле `+0x1304` | PARTIAL | NONE | MISSING | — | M0-03D | `SKILL-02` | источник права на прокачку — OQ-04 OPEN |
-| P-15 | способности: 16 известных id (0x15,0x22,0x30,0x31,0x32,0x36,0x4f,0x56,0x58,0x60,0x61,0x63,0x64,0x65,0x66,0x67) | PARTIAL | NONE | MISSING | — | M0-05B | `ABILITY-01` | полная таблица id — OQ-03 / D-U3 |
+| P-15 | способности: **16 узлов с именами** из `World::ctor_1` (`0x15 RangerKick`, `0x22 HealingStream`, `0x30 Intercept`, `0x31 Teleport`, `0x32 Retreat`, `0x36 Smash`, `0x4f Sneak`, `0x56 Cyclone`, `0x58 FireExplosion`, `0x60 Shuriken`, `0x61 Camouflage`, `0x63 Aim`, `0x64 Swiftness`, `0x65 Bulwark`, `0x66 WarFrenzy`, `0x67 ManaShield`); кулдаун `Ability_get_cooldown @ 0x444860`, мана `ability_getManaCost @ 0x43e6a0` | DIRECT | NONE | MISSING | — | M0-05B | `ABILITY-01` | классовая принадлежность — `ГИПОТЕЗА`; см. [ALPHA_STATIC_TABLES_ITEM_SKILL](ALPHA_STATIC_TABLES_ITEM_SKILL.md) §3–4 |
 | P-16 | ввод: 4 цифровых направления `GC+0x0b…0x0e`, две оси `+0x124/+0x128` (15.16, ÷32768), масштаб добавки 80 (8 при жёстком приземлении) | DIRECT (адреса) / UNKNOWN (клавиши) | `Presentation/Player/PlayerMotor.cs` (legacy `Input.GetKey`, WASD) | IMPLEMENTED_PILOT | — | M0-03B | `GS-01` | клавиши по умолчанию — U6; Input System не подключён |
 | P-17 | камера: FOV 50°/30°, near/far 0.1/2000, pitch 0…180, yaw старт 180°, мышь `cameraSpeed·0.005·dt`, зум 0…14 (дефолт 5.0), сглаживание `1−0.99^dt_ms` | DIRECT | `Presentation/Camera/OrbitCameraController.cs` (Orbit, параметры не сверены) | IMPLEMENTED_PILOT | — | M0-03B | `CAM-01` | дистанция камеры от зума — U3/OQ-21 |
 | P-18 | спринт ×2.0 (`+0x124&0x40`), стамина `+0x1194` (−0.0002/мс, реген +0.0001/мс), вторая шкала `+0x1190` | DIRECT | NONE | MISSING | — | M0-03B | `MOVE-STAM-01` | смысл второй шкалы (равновесие) |
@@ -155,7 +165,7 @@ Unity, Python-прогоны и оригинальная Alpha не запуск
 | C-30 | сглаживание позы (коэффициенты 0.01/0.04, первые ~50 мс зависят от предыдущей позы) | PARTIAL | S05 (`AlphaAnimationController`, вне `Assets/`) | PARTIAL | RUNTIME | M0-03C | `ANIM-SMOOTH-01` | в игре статус `UNITY_TRANSITION`, не Alpha |
 | C-31 | lifecycle действия игрока: 57→67→58, `+0x128!=0` блокирует primary, idle-таймаут 10 000 мс, strike window ≠ конец (1382/492 мс) | DIRECT (helper/input-tail) | S05A-2 (`TEST_ADAPTER_ACTIVATION`), вне `Assets/` | PARTIAL | RUNTIME | M0-05B | `COMBO-02` | полный lifecycle 101 ID — PARTIAL |
 | C-32 | dynamic parts: 22@271 мс, 23@53 мс, 26 hide/return 296/1579, 71 200/3200, 72 200/5200 | DIRECT (для входов) | S05: тайминги, но часть рига отсутствует | PARTIAL | RUNTIME | M0-06E | `DYN-01` | R-8 |
-| C-33 | действия 51 (эффект дракона), 79 (`HELD_STATE`), 80 (consumable, cooldown 3000/10000) | 51 `BLOCKED` / 79 `HELD_STATE` / 80 `BLOCKED_CONTEXT` | S05: 51/80 не перенесены, 79 — статичная поза | PARTIAL | RUNTIME | M0-06E | `ACT-51-80` | R-3 / R-8 |
+| C-33 | действия 51 (эффект дракона), 79 (`HELD_STATE`), 80/81 (**расходник**: триггер `GameController_handleObjectAction @ 0x4a2780` ставит `+0x68 = 0x50` при подтипе события 1/2 иначе `0x51`; `drawModel` 6408-6436 рисует модель предмета из `+0x1e8`, пока `+0x6c < itemCooldown`; кулдаун 3000 мс для `type 1 subtype 1`, иначе 10 000 мс), 82 (`'R'`, модель из слота `+0x1020`) | 51 `BLOCKED` / 79 `HELD_STATE` / 80–82 DIRECT (триггер) | S05: 51/80 не перенесены, 79 — статичная поза | PARTIAL | RUNTIME | M0-06E / M0-04B | `ACT-51-80`, `GS-22` | R-3 / R-8; анимация тела при 80/81 не доказана (доказана только модель предмета) |
 | C-34 | эффекты и снаряды (огонь 51, стрелы, камни, снаряды магов) — R-3 | UNKNOWN (отдельные рендереры `spawnEffectMesh`, `render_build_projectile_mesh`) | NONE | MISSING | — | M0-05C | `GS-05` | **BLOCKED: нет адаптера эффектов; в ТЗ M0-05C планируются заглушки** |
 | C-35 | динамическая часть рига (камень 108 у големов/рокилинга, черепаха 72) — R-8 | BLOCKED | NONE | MISSING | RUNTIME | M0-06E | `DYN-02` | нужна скрытая часть рига + проигрыватель |
 | C-36 | `RuneGiant 0x76` — ветка атаки управляет другим существом — R-9 | BLOCKED | NONE | MISSING | RUNTIME | M0-06E | `ACT-0x76` | нужен вход «список существ мира» |
@@ -212,7 +222,7 @@ Unity, Python-прогоны и оригинальная Alpha не запуск
 | I-06 | инвентарь: 4 контейнера × 50 слотов (шаг `0x11c`) | DIRECT | NONE | MISSING | — | M0-04B | `GS-07` | — |
 | I-07 | стаки: лимит стака ≤49 (`quest_checkItemThreshold`) | PARTIAL | `ItemInstance.StackCount` (без лимита/правил) | PARTIAL | — | M0-04B | `ITEM-06` | правила Special/приманки |
 | I-08 | экипировка: 13 слотов по `0x118` (`0x300…0x1020`) | DIRECT (слоты) / PARTIAL (UI↔смещение) | `Core/Equipment/EquipmentSlot.cs` — 6 слотов (MainHand, OffHand, Chest, Gloves, Boots, Shoulders) | PARTIAL | — | M0-04B | `GS-07` | **13 слотов Alpha против 6 в коде; кольца/амулет/лампа/Special отсутствуют (S04 это прямо исключил)** |
-| I-09 | тип предмета → слот (8→амулет, 4→нагрудник, 6→перчатки, 5→обувь, 7→наплечники, 3→оружие/вторая рука, 9→кольца, `0x18`→лампа, `0x13`→Special) | DIRECT | `EquipmentLoadout` (6 типов) | PARTIAL | — | M0-04B | `ITEM-07` | слоты 0 и 11 не идентифицированы (D-U5) |
+| I-09 | тип предмета → слот: **доказано кодом** `Equipment_sum_slot_values @ 0x446150` — `+0x990`/`+0xaa8`←тип 3, `+0x530`←тип 4, `+0x648`←тип 6, `+0x760`←тип 5, `+0x878`←тип 7, `+0x418`←тип 8, `+0xbc0`/`+0xcd8`←тип 9; имена типов — из `World::ctor_1`: 4 ChestArmor, 7 ShoulderArmor, 8 Amulet, 9 Ring, `0x17` HangGlider/Boat, `0x18` Lamp | DIRECT | `EquipmentLoadout` (6 типов) | PARTIAL | — | M0-04B | `ITEM-07` | **5 / 6 = Gloves / Boots помечены `AMBIGUOUS`** (альтернативное чтение декомпиляции даёт обратное — см. [ALPHA_STATIC_TABLES_ITEM_SKILL](ALPHA_STATIC_TABLES_ITEM_SKILL.md) §0/§5); слот `+0x300` не идентифицирован (D-U5); кольца и `+0x300` в отрисовке не участвуют |
 | I-10 | модель оружия/брони в руке: законы якорей всех 10 слотов `drawModel` (D64), слой оружия гуманоида реализован | DIRECT | S05: `AlphaRig`, `AlphaWeaponLocomotion` (вне `Assets/`) | PARTIAL | RUNTIME | M0-04B | `ITEM-08` | NPC-оружие — R-1/R-2 |
 | I-11 | экипировка в сохранении: 13 слотов в блобе v11 | DIRECT | `Core/Persistence/SaveGame.cs` — **поля экипировки отсутствуют** (v1: персонаж + список предметов) | MISSING | — | M0-04D | `GS-13` | **прямое расхождение с M0-04D и GS-07** |
 | I-12 | лут-таблицы `loot_generateItemTable` `005c8390`, `drop_getCountRange1` `00443f40`, `spawnItemAffixDrops` `0047fae0` | PARTIAL (OQ-11 OPEN) | NONE | MISSING | — | M0-04C | `GS-05` | **полных таблиц и шансов по мобам нет** |
@@ -277,7 +287,40 @@ Unity, Python-прогоны и оригинальная Alpha не запуск
 
 ---
 
-## 9. Источники (точные)
+## 9. Дополнение второго прохода (issue #8): действия, предметы в руках, оружие, способности
+
+Полный разбор с адресами и строками — [M0_00B_ACTIONS_ITEMS_INTERACTIONS_ADDENDUM](../../reports/M0_00B_ACTIONS_ITEMS_INTERACTIONS_ADDENDUM.md);
+восстановленные словари — [ALPHA_STATIC_TABLES_ITEM_SKILL](ALPHA_STATIC_TABLES_ITEM_SKILL.md).
+Ниже — строки, которые добавляются к матрице и **не** дублируют §2–§7.
+
+| mechanic_id | Alpha source | conf | CubeGame implementation | status | S05 dep | M0 substage | verification scenario | открытый вопрос / блокер |
+|---|---|---|---|---|---|---|---|---|
+| AI-01 | предмет-расходник рисуется **в руке**: `Creature_drawModel @ 0x4128f0`, строки 6408-6436 (`GameController.cpp`), модель `item_icon_id(creature+0x1e8)` | DIRECT | NONE | MISSING | RUNTIME | M0-04B | `GS-22` | что различает action 0x50 и 0x51 |
+| AI-02 | триггер использования: `GameController_handleObjectAction @ 0x4a2780` — подтип 1/2 → `+0x68=0x50`, иначе `0x51`; вход при `creature+0x12c < 1` | DIRECT | NONE | MISSING | — | M0-04B | `GS-22` | кто и когда помещает действие в очередь `pEvent` |
+| AI-03 | кулдаун предмета: `GameController_itemCooldown @ 0x4c6b80` — 0 при `type != 1`, 3000 при `type 1 subtype 1`, иначе 10 000 мс | DIRECT | NONE | MISSING | — | M0-04B | `GS-22` | полная карта «предмет → кулдаун» |
+| AI-04 | бомба: `handleObjectAction` подтип 7 (копия предмета в список) + `combat_updateBombFuse @ 0x43cf20` | PARTIAL | NONE | MISSING | — | M0-05C | `GS-23` | задержка, радиус, урон |
+| AI-05 | 13 слотов экипировки, шаг `0x118`; `getEquipmentSlotPtr @ 0x47b1b0` перебирает 12 смещений `0x418…0x1020` | DIRECT | `Core/Equipment/EquipmentSlot.cs` (6 слотов) | PARTIAL | — | M0-04B | `GS-07` | назначение слота `+0x300` |
+| AI-06 | слот → тип: `Equipment_sum_slot_values @ 0x446150` | DIRECT | `EquipmentLoadout` | PARTIAL | — | M0-04B | `GS-07` | 5/6 Gloves/Boots `AMBIGUOUS` |
+| AI-07 | кольца (`0xbc0`,`0xcd8`) и `+0x300` **не рисуются**; базовая пасса — 7 слотов (`drawModel` 2111-2123) | DIRECT | NONE | MISSING | — | M0-04B | `GS-07` | — |
+| AI-08 | предмет «впереди» (`+0xf08`, бит `+0x124 & 0x10`, action `0x6b`) и «за спиной» (`+0xdf0`, бит `0x200`) | PARTIAL | NONE | MISSING | — | M0-03B | `GS-24` | какой тип предмета попадает в эти слоты |
+| AI-09 | подтип оружия меняет меш/позу внутри действия: `drawModel` 2466 (`0x0e`), 2634 (`0x0d`), 3582 (`0x07`), 3588/3649/3677/3710 (модель `0x348`), 6461/6494 (модель `0x347`) | PARTIAL | S05 `AlphaWeaponLocomotion` (вне `Assets/`) | PARTIAL | RUNTIME | M0-04B | `GS-25` | полная таблица «подтип → оверлей» |
+| AI-10 | маска свойств предмета `creature+0x7e`: `0x8/0x10` урон (`0x43dc60`), `0x1a00` канал (`0x444680`), `0x4` точка вылета снаряда (`0x446bb0`), `0x1` поворот отрисовки (`drawModel` 7150) | DIRECT | NONE | MISSING | — | M0-04A | `GS-26` | смысл остальных бит |
+| AI-11 | кулдаун способности по id: `Ability_get_cooldown @ 0x444860` (2…10 с, часть делится на haste; роли 3/5 не считаются) | DIRECT | NONE | MISSING | — | M0-05B | `ABILITY-02` | — |
+| AI-12 | мана: `ability_getManaCost @ 0x43e6a0` (`base − powerFactor·scale`, 15 наборов констант) | DIRECT | NONE | MISSING | — | M0-05B | `RES-01` | единицы (1/100000?) |
+| AI-13 | стамина: `combat_getStaminaCost @ 0x444270` (100…600, делится на haste) | DIRECT | NONE | MISSING | — | M0-05B | `RES-01` | — |
+| AI-14 | канал: `ability_isChanneled @ 0x444680` — 32 id + гейт `+0x7e & 0x1a00`; встречаются id `0x91…0x93` | DIRECT | NONE | MISSING | — | M0-05B | `ABILITY-03` | пространство action id шире `0x77` |
+| AI-15 | снаряды/эффекты: `projectile_getMuzzlePosition @ 0x446bb0`, `CombatBehavior_spawnProjectileHit @ 0x596d30`, `CombatBehavior_spawnHitParticles @ 0x59a800`, `Creature_spawnDeathEffects @ 0x59b180`, `render_build_projectile_mesh @ 0x4c04c0`, `GameController_spawnEffectMesh @ 0x4bd160` | UNKNOWN (что рисуют) | NONE | MISSING | RUNTIME | M0-05C | `GS-05` | соответствие «способность → эффект» (R-3) |
+| AI-16 | словарь предметов `(type,subtype)` → имя, 133 записи (`World::ctor_1`): зелья `0x01/*`, оружие `0x03/*`, фляга `0x0b/0x0c`, вода `0x0b/0x1a`, дельтаплан `0x17/0`, лодка `0x17/1`, лампа `0x18/0`, мана-куб `0x19/0`, свеча `0x12/0…1`, еда `0x14/*` | DIRECT (типы) / `AMBIGUOUS` (подтипы оружия 0…8) | `Core/Items/ItemEnums.cs` (8 типов) | PARTIAL | PIPE | M0-04A | `ITEM-04` | подтипы оружия — P0-1 |
+| AI-17 | словарь объектов домов/города, 68 записей (`World::ctor_1` строки 3670-3944): Door, Gate, FireTrap, SpikeTrap, StompTrap, Lever, Chest, MarketStand1-3, Furnace, Anvil, SpinningWheel, Loom, SawBench, Workbench, CustomizationBench, BedTable, SleepingMat, RuneStone, Artifact, StreetLight | DIRECT | NONE | MISSING | — | M0-07A | `CITY-01` | правила расстановки — W-16 |
+
+**Правки к ранее записанным строкам (внесены в этой же ревизии):** I-09, C-33, P-15 — уточнены по
+прямым адресам. Новых ошибок в остальных строках второго прохода не обнаружено; строки, где
+доказательств не прибавилось (торговля, биомы, смерть игрока, прыжок, вне-экранное поведение),
+оставлены без изменений и вынесены в P0/P1 backlog отчёта о пробелах.
+
+---
+
+## 10. Источники (точные)
 
 **Alpha-спецификации:** `docs/research/alpha2013/BEHAVIOR_SPECS/{B_world,C_streaming,D_character,E_combat,F_items,G_H_ai_npc_pets,I_movement,J_quests_dungeons,K_assets}.md`;
 `docs/research/alpha2013/{OPEN_QUESTIONS,RESEARCH_COVERAGE,REFERENCE_ATLAS,DATA_AND_SAVE_SCHEMAS,NPC_ACTION_TRIGGERS,ALPHA_ACTION_LIFECYCLE,ANIMATION_EXTRACTION_RESEARCH}.md`.
