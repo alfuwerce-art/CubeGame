@@ -35,13 +35,18 @@ u16string_assignPtrLen(L"Name", n);    →  значение ЭТОГО ключ
    совпадающих с независимо известным списком способностей в `M0_00B_ALPHA_GAMEPLAY_COVERAGE_MATRIX`
    (P-15: `0x15,0x22,0x30,0x31,0x32,0x36,0x4f,0x56,0x58,0x60,0x61,0x63,0x64,0x65,0x66,0x67`).
 
-**Остаточная неоднозначность (не скрывается).** В двух блоках декомпилятор печатает значение без
-переменной-посредника (`assignPtrLen(L"...",n)`): это блок экипировки (строки 2815…2847) и «голова»
-блока оружия (строки 2847…2879). Альтернативное чтение «значение относится к СЛЕДУЮЩЕМУ ключу»
-воспроизводит прежние опубликованные списки (`F_items.md`: 1 mace, 2 fist, 3 sword, 4 dagger;
-`M0-00B` I-09: 5 обувь, 6 перчатки), но противоречит фактам (2,0)/(8,0)/(9,0) в том же блоке.
-Оба чтения одновременно верными быть не могут. Такие строки помечены `AMBIGUOUS` и **не считаются
-доказанными**; решающий тест указан в §5.
+**Остаточная неоднозначность — УСТРАНЕНА в r3 (issue #10).** В r2 два блока (экипировка, строки
+2815…2847, и «голова» блока оружия, 2847…2879) были помечены `AMBIGUOUS`, потому что декомпилятор
+печатает там значение без переменной-посредника. Независимое разрешение получено через **имена моделей**:
+`GameController_item_icon_id @ 0x4ec400` → базовый индекс модельного блока → имя `.cub` из загрузчика
+ассетов. Результат: тип 5 = `iron-hand1.cub` (**Gloves**), тип 6 = `iron-foot1.cub` (**Boots**), то есть
+верно чтение «значение принадлежит своей вставке». Подтипы оружия разрешены тем же способом
+(`1 axe, 2 mace, 3 dagger, 4 fist, 5 longsword, 6 bow, 7 crossbow, 8 boomerang, 9 arrow, 0xe quiver`).
+Машинная проверка — 34 утверждения, `RESULT=PASS`:
+[tools/alpha_research/verify_item_type_model_consistency.py](../../../tools/alpha_research/verify_item_type_model_consistency.py).
+Подробные трассы — [M0_00B_P0_MECHANICS_EVIDENCE §A](M0_00B_P0_MECHANICS_EVIDENCE.md).
+Следствие: список оружия в `F_items.md` («1 mace, 2 fist, 3 sword, 4 dagger, 8 crossbow, 0xe boomerang»)
+и строка `I-09` матрицы («5 обувь, 6 перчатки») были **сдвинуты на один подтип** и исправлены в r3.
 
 ---
 
@@ -54,10 +59,10 @@ u16string_assignPtrLen(L"Name", n);    →  значение ЭТОГО ключ
 |---|---|---|
 | `0x01` | 9 | 1 LifePotion, 2 CactusPotion, 3 ManaPotion, 4 GinsengSoup, 5 SnowBerryMash, 6 MushroomSpit, 7 **Bomb**, 8 PineappleSlice, 9 PumpkinMuffin |
 | `0x02` | 1 | 0 Formula (рецепт) |
-| `0x03` | 19 | 0 Sword⁰, 1 `DAT_0071b3d0`(3 симв.), 2 Mace⁰, 3 Dagger⁰, 4 Fist⁰, 5 Longsword, 6 `DAT_0071b3d8`(3 симв.), 7 Crossbow⁰, 8 Boomerang⁰, 9 Arrow, 0xa Staff, 0xb Wand, 0xc Bracelet, 0xd Shield, 0xe Arrows, 0xf Greatsword, 0x10 Greataxe, 0x11 Greatmace, 0x14 **Torch** |
+| `0x03` | 19 | 0 Sword⁰, 1 Axe, 2 Mace, 3 Dagger, 4 Fist, 5 Longsword, 6 Bow, 7 Crossbow, 8 Boomerang, 9 Arrow, 0xa Staff, 0xb Wand, 0xc Bracelet, 0xd Shield, 0xe Quiver (в таблице `Arrows`), 0xf Greatsword, 0x10 Greataxe, 0x11 Greatmace, 0x14 **Torch** |
 | `0x04` | 1 | 0 ChestArmor |
-| `0x05` | 1 | 0 Gloves⁰ |
-| `0x06` | 1 | 0 Boots⁰ |
+| `0x05` | 1 | 0 Gloves |
+| `0x06` | 1 | 0 Boots |
 | `0x07` | 1 | 0 ShoulderArmor |
 | `0x08` | 1 | 0 Amulet |
 | `0x09` | 1 | 0 Ring |
@@ -70,7 +75,7 @@ u16string_assignPtrLen(L"Name", n);    →  значение ЭТОГО ключ
 | `0x12` | 2 | 0 **Candle**, 1 **Candle** (два варианта модели/предмета под одним именем) |
 | `0x13` | 1 | 0 `DAT_00700a30`(3 симв.) — имя не восстановлено (надпись из пула строк, не литерал) |
 | `0x14` | 47 | 0 **Bait** (заполняется циклом для подтипов 0…0x9b), далее еда: 0x13 BubbleGum, 0x16 VanillaCupcake, 0x17 ChocolateCupcake, 0x19 CinnamonRole, 0x1a Waffle, 0x1b Croissant, 0x1e Candy, 0x21 PumpkinMash, 0x22 CottonCandy, 0x23 Carrot, 0x24 BlackberryMarmelade, 0x25 GreenJelly, 0x26 PinkJelly, 0x27 YellowJelly, 0x28 BlueJelly, 0x32 BananaSplit, 0x35 Popcorn, 0x37 LicoriceCandy, 0x38 CerealBar, 0x39 SaltedCaramel, 0x3a GingerTartlet, 0x3b MangoJuice, 0x3c FruitBasket, 0x3d MelonIceCream, 0x3e BloodOrangeJuice, 0x3f MilkChocolateBar, 0x40 MintChocolateBar, 0x41 WhiteChocolateBar, 0x42 CaramelChocolateBar, 0x4a SugarCandy, 0x4b AppleRing, 0x56 WaterIce, 0x57 ChocolateDonut, 0x58 Pancakes, 0x5a StrawberryCake, 0x5b ChocolateCake, 0x5c Lollipop, 0x5d Softice, 0x62 CandiedApple, 0x63 DateCookie, 0x66 Bread, 0x67 Curry, 0x68 Lolly, 0x69 ChocolateCookie, 0x6a StrawberryCocktail, 0x97 BiscuitRole |
-| `0x15` | 10 | 0 Amulet1, 1 Amulet2, 2 JewelCase, 3 `DAT_0071bcf8`, 4 Medicine, 5 Antivenom, 6 BandAid, 7 Crutch, 8 Bandage, 9 Salve |
+| `0x15` | 10 | 0 Amulet1, 1 Amulet2, 2 JewelCase, 3 `DAT_0071bcf8`, 4 Medicine, 5 Antivenom, 6 BandAid, 7 Crutch, 8 Bandage, 9 Salve — **квестовые предметы** (модель `quest-item-amulet01.cub`) |
 | `0x17` | 2 | 0 **HangGlider**, 1 **Boat** |
 | `0x18` | 1 | 0 **Lamp** |
 | `0x19` | 1 | 0 **ManaCube** |
@@ -189,13 +194,13 @@ action-id шире, чем «73 состояния/101 id», зафиксиро�
 
 ## 5. Что осталось недоказанным и как это закрыть
 
-| # | Вопрос | Почему не закрыт | Решающий тест |
-|---|---|---|---|
-| A-1 | Подтипы оружия 0,1,2,3,4,6,7,8 (`AMBIGUOUS`) | Два чтения одного блока декомпиляции | Исполнить `GameController_item_icon_id @ 0x4ec400` для (3,0)/(3,3) и сравнить модель с моделью живого меча (метод уже применялся в D64), либо снять в игре имя предмета первого оружия Warrior |
-| A-2 | Типы `5`/`6` = Gloves/Boots или наоборот | Тот же блок; альтернативное чтение воспроизводит I-09 | Тот же приём: модель перчаток/сапог через `item_icon_id` + сверка с `.cub`-именем |
-| A-3 | Имена `DAT_0071b3d0`, `DAT_0071b3d8`, `DAT_0071bad8`, `DAT_0071bb5c`, `DAT_0071bcf8`, `DAT_00700a30`, `DAT_0071be5c` | В пуле строк лежат не литералы, а указатели длиной 3 символа | Чтение wide-строки по адресу из `Cube.exe` (только чтение), либо поиск тех же 3-символьных строк в `data1.db` |
-| A-4 | Класс → набор способностей | В таблице имён класса нет | Найти switch по `Creature+0x140` в UI дерева навыков (`AdaptionWidget`) и выписать список узлов по классу |
-| A-5 | Тип `0x15` (Amulet1/Amulet2/JewelCase/Medicine/…) | Семантика типа не определена | Проверить, участвует ли тип в слотах/луте: поиск проверок `== 0x15` по коду |
+| # | Вопрос | Статус r3 |
+|---|---|---|
+| A-1 | Подтипы оружия 0…8 | **ЗАКРЫТ**: `1 axe, 2 mace, 3 dagger, 4 fist, 5 longsword, 6 bow, 7 crossbow, 8 boomerang, 9 arrow, 0xe quiver` — по модельным блокам (`iron-axe1`, `iron-mace1`, `iron-dagger1`, `iron-fist1`, `iron-longsword1`, `bow`, `wood-crossbow1`, `wood-boomerang1`, `arrow`, `quiver`). Остаётся `UNKNOWN` только подтип `0x00` (в `item_name_string_id` `case 0` пуст) и подтип `0x12` |
+| A-2 | Типы `5`/`6` = Gloves/Boots | **ЗАКРЫТ**: `0x496 = iron-hand1.cub` (Gloves), `0x4af = iron-foot1.cub` (Boots) |
+| A-3 | Имена `DAT_*` | **ЧАСТИЧНО**: `DAT_0071b3d0` = `Axe` и `DAT_0071b3d8` = `Bow` доказаны косвенно (3 символа + модельный блок); остальные 4 указателя не прочитаны |
+| A-4 | Класс → набор способностей | **ОТКРЫТ**: switch по `Creature+0x140` в `AdaptionWidget` не выписан |
+| A-5 | Тип `0x15` | **ЗАКРЫТ**: квестовые предметы (`quest-item-amulet01.cub`) |
 
 ---
 
