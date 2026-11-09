@@ -235,6 +235,45 @@ namespace CubeGame.Tests.Creatures.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator GroundHeightHookPlacesSpawnedCreatures()
+        {
+            if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");
+            var root = new GameObject("GroundTestRoot");
+            try
+            {
+                CreatureSpawner spawner = null;
+                for (uint seed = 1; seed <= 12 && spawner == null; seed++)
+                {
+                    var go = new GameObject("GroundSpawner" + seed);
+                    go.transform.SetParent(root.transform, false);
+                    var candidate = go.AddComponent<CreatureSpawner>();
+                    candidate.SpawnOnStart = false;
+                    candidate.Seed = seed;
+                    candidate.MaxPerCell = 4;
+                    candidate.DecorPerCell = 2;
+                    candidate.GroundHeight = (x, z) => 5f;
+                    candidate.AiFactory = () => new CreatureAi();
+                    if (candidate.Spawn().Count > 0) spawner = candidate;
+                    else Object.Destroy(go);
+                }
+                if (spawner == null) Assert.Ignore("no seed produced a spawn plan");
+                var request = new List<CreatureSpawnRequest>();
+                foreach (var pair in spawner.Spawned)
+                {
+                    var agent = pair.Value;
+                    Assert.AreEqual(5f, agent.transform.position.y, 1e-3f, "the world's ground height is used");
+                    Assert.AreEqual(5.0, agent.State.Y, 1e-6);
+                    break;
+                }
+                yield return null;
+            }
+            finally
+            {
+                Object.Destroy(root);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator PassiveObjectStaysStill()
         {
             if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");

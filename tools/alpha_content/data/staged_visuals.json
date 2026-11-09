@@ -218,12 +218,28 @@
    "rig": "alpha_creature/ba9d6d5db7"
   },
   {
+   "kind": 27,
+   "variant": "d86_kind_0x1b_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 7,
+   "clips": 1,
+   "rig": "alpha_creature/33e2246436"
+  },
+  {
    "kind": 28,
    "variant": "wolf_0x1c_formula_only",
    "mode": "LOCOMOTION_ONLY",
    "parts": 7,
    "clips": 1,
    "rig": "alpha_creature/96e1a8db48"
+  },
+  {
+   "kind": 29,
+   "variant": "d86_kind_0x1d_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 7,
+   "clips": 1,
+   "rig": "alpha_creature/a5f18ec6d3"
   },
   {
    "kind": 30,
@@ -248,6 +264,230 @@
    "parts": 7,
    "clips": 2,
    "rig": "alpha_creature/ced63e5e96"
+  },
+  {
+   "kind": 33,
+   "variant": "d86_kind_0x21_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/fdeca213a5"
+  },
+  {
+   "kind": 34,
+   "variant": "d86_kind_0x22_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/235b3653f7"
+  },
+  {
+   "kind": 35,
+   "variant": "d86_kind_0x23_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 3,
+   "clips": 1,
+   "rig": "alpha_creature/9bcb3536a9"
+  },
+  {
+   "kind": 36,
+   "variant": "d86_kind_0x24_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 3,
+   "clips": 1,
+   "rig": "alpha_creature/9bcb3536a9"
+  },
+  {
+   "kind": 37,
+   "variant": "d86_kind_0x25_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 1,
+   "clips": 1,
+   "rig": "alpha_creature/f4a1d5e1b4"
+  },
+  {
+   "kind": 38,
+   "variant": "d86_kind_0x26_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 1,
+   "clips": 1,
+   "rig": "alpha_creature/f4a1d5e1b4"
+  },
+  {
+   "kind": 39,
+   "variant": "d86_kind_0x27_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 1,
+   "clips": 1,
+   "rig": "alpha_creature/f4a1d5e1b4"
+  },
+  {
+   "kind": 40,
+   "variant": "d86_kind_0x28_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 1,
+   "clips": 1,
+   "rig": "alpha_creature/f4a1d5e1b4"
+  },
+  {
+   "kind": 41,
+   "variant": "d86_kind_0x29_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 2,
+   "clips": 1,
+   "rig": "alpha_creature/5927089500"
+  },
+  {
+   "kind": 42,
+   "variant": "d86_kind_0x2a_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 3,
+   "clips": 1,
+   "rig": "alpha_creature/c3753fd789"
+  },
+  {
+   "kind": 43,
+   "variant": "d86_kind_0x2b_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/aec77fd311"
+  },
+  {
+   "kind": 44,
+   "variant": "d86_kind_0x2c_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/d94d2033d9"
+  },
+  {
+   "kind": 45,
+   "variant": "d86_kind_0x2d_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/4ca7cad58c"
+  },
+  {
+   "kind": 46,
+   "variant": "d86_kind_0x2e_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/699aef71f9"
+  },
+  {
+   "kind": 47,
+   "variant": "d86_kind_0x2f_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 5,
+   "clips": 1,
+   "rig": "alpha_creature/8fbe117e64"
+  },
+  {
+   "kind": 48,
+   "variant": "d86_kind_0x30_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/ecd256e24c"
+  },
+  {
+   "kind": 49,
+   "variant": "d86_kind_0x31_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/73fdb643f6"
+  },
+  {
+   "kind": 50,
+   "variant": "d86_kind_0x32_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/ddb5e5a509"
+  },
+  {
+   "kind": 51,
+   "variant": "d86_kind_0x33_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/aec77fd311"
+  },
+  {
+   "kind": 52,
+   "variant": "d86_kind_0x34_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/ae2737e858"
+  },
+  {
+   "kind": 53,
+   "variant": "d86_kind_0x35_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/430a8f5d2d"
+  },
+  {
+   "kind": 54,
+   "variant": "d86_kind_0x36_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 8,
+   "clips": 1,
+   "rig": "alpha_creature/d53b24b8ec"
+  },
+  {
+   "kind": 55,
+   "variant": "d86_kind_0x37_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/e02c8fe740"
+  },
+  {
+   "kind": 56,
+   "variant": "d86_kind_0x38_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/2d41879af8"
+  },
+  {
+   "kind": 57,
+   "variant": "d86_kind_0x39_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/0ef04db654"
+  },
+  {
+   "kind": 58,
+   "variant": "d86_kind_0x3a_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/e02c8fe740"
+  },
+  {
+   "kind": 59,
+   "variant": "d86_kind_0x3b_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/e05b4c963a"
+  },
+  {
+   "kind": 60,
+   "variant": "d86_kind_0x3c_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/de4df061e6"
   },
   {
    "kind": 63,

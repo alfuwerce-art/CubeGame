@@ -131,6 +131,8 @@ namespace CubeGame.Features.Creatures
         /// <summary>The game injects its AI factory (Features.AI) — no compile-time dependency in this module.</summary>
         public Func<ICreatureAi> AiFactory;
         public AlphaActorLibrary ActorLibrary;
+        /// <summary>Optional ground query (x, z) → y from the world generator; null keeps the planned Y.</summary>
+        public Func<int, int, float> GroundHeight;
 
         public readonly CreatureStateStore Store = new CreatureStateStore();
         public readonly Dictionary<string, CreatureAgent> Spawned = new Dictionary<string, CreatureAgent>(StringComparer.Ordinal);
@@ -168,7 +170,8 @@ namespace CubeGame.Features.Creatures
         {
             var go = new GameObject("Creature_" + request.StableId);
             go.transform.SetParent(transform, false);
-            go.transform.position = new Vector3((float)request.X, (float)request.Y, (float)request.Z);
+            double spawnY = GroundHeight != null ? GroundHeight((int)request.X, (int)request.Z) : request.Y;
+            go.transform.position = new Vector3((float)request.X, (float)spawnY, (float)request.Z);
             var agent = go.AddComponent<CreatureAgent>();
             var state = new CreatureState
             {
@@ -179,7 +182,7 @@ namespace CubeGame.Features.Creatures
                 Stars = request.Stars,
                 MaxHealth = CharacterStats.CalcCreatureMaxHealth(CharacterStats.DefaultBaseHealth, request.Level, request.Stars),
                 X = request.X,
-                Y = request.Y,
+                Y = spawnY,
                 Z = request.Z,
             };
             state.Health = state.MaxHealth;
