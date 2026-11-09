@@ -1,0 +1,591 @@
+using System;
+using System.Globalization;
+using CubeGame.Core.Characters;
+using CubeGame.Core.Generation;
+using CubeGame.Core.Persistence;
+using CubeGame.Features.Contracts;
+using CubeGame.Features.Persistence;
+using CubeGame.Features.Session;
+using CubeGame.Persistence;
+using CubeGame.Presentation.CameraRig;
+using CubeGame.Presentation.Player;
+using CubeGame.Presentation.Rendering;
+using UnityEngine;
+
+namespace CubeGame.Gameplay
+{
+    /// <summary>
+    /// M0-01 entry point of the single CubeGame scene: owns one <see cref="GameSession"/> and presents its
+    /// states (main menu → loading → in game ⇄ pause → save → exit to menu / quit). This is the only place
+    /// that turns real frame time into simulation time (GameClock). World/player views are built when a
+    /// world is entered and destroyed on exit, so "menu → world → menu → world" leaves no leftovers.
+    ///
+    /// Command line (automation): -cubeSaveDir &lt;dir&gt;, -cubeAutoNew &lt;slot&gt;, -cubeAutoLoad &lt;slot&gt;,
+    /// -cubeSeed &lt;uint&gt;, -cubeScreenshot &lt;png&gt; (+ -cubeFrames &lt;n&gt;): capture then quit.
+    /// </summary>
+    public sealed class GameBootstrap : MonoBehaviour
+    {
+        /// <summary>
+        /// World generator in use. PLACEHOLDER_NOT_ALPHA: the S01 pilot height field stands in until the
+        /// M0-02 Alpha world generator replaces it (saves record the id; mismatching saves are refused).
+        /// </summary>
+        public const string PilotGeneratorId = "cubegame.pilot_heightfield/1";
+
+        public const uint DefaultSeed = 666666u;
+
+        public static readonly string[] SlotKeys = { "slot0", "slot1", "slot2" };
+
+        [SerializeField] private Material terrainMaterial;
+        [SerializeField] private int chunksPerAxis = PilotWorldLayout.ViewChunks;
+
+        private GameSession _session;
+        private GameSlotStore _slots;
+        private string _saveDirectory;
+
+        private GameObject _worldRoot;
+        private PilotWorldView _worldView;
+        private GameObject _player;
+        private PlayerMotor _motor;
+        private OrbitCameraController _orbitCamera;
+        private Camera _camera;
+
+        private string _status = string.Empty;
+        private int _frames;
+        private string _screenshotPath;
+        private int _screenshotFrame = -1;
+        private string _autoNewSlot;
+        private string _autoLoadSlot;
+        private uint _commandLineSeed = DefaultSeed;
+
+        // Main menu form state.
+        private string _formWorldName = "New World";
+        private string _formSeed = DefaultSeed.ToString(CultureInfo.InvariantCulture);
+        private string _formHeroName = "Hero";
+        private int _formClass;
+        private int _formSlot;
+
+        public GameSession Session => _session;
+
+        public PilotWorldView WorldView => _worldView;
+
+        public Transform PlayerTransform => _player != null ? _player.transform : null;
+
+        public string Status => _status;
+
+        public string SaveDirectory
+        {
+            get => _saveDirectory;
+            set
+            {
+                _saveDirectory = value;
+                _slots = CreateSlots(value);
+            }
+        }
+
+        public GameSlotStore Slots => _slots;
+
+        private void Awake()
+        {
+            ParseArguments();
+            if (_slots == null)
+            {
+                _slots = CreateSlots(_saveDirectory);
+            }
+
+            _session = new GameSession();
+            _session.EnterMainMenu();
+            EnsureCameraAndLight();
+            _formSeed = _commandLineSeed.ToString(CultureInfo.InvariantCulture);
+            Debug.Log($"[Game] boot -> {_session.State}; saves={DescribeSaveDirectory()}");
+        }
+
+        private void Start()
+        {
+            if (!string.IsNullOrEmpty(_autoLoadSlot) && LoadWorld(_autoLoadSlot))
+            {
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(_autoNewSlot))
+            {
+                StartNewWorld(_autoNewSlot, "Auto World", _commandLineSeed, "Hero", CharacterClass.Warrior);
+            }
+        }
+
+        private void Update()
+        {
+            _frames++;
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                TogglePause();
+            }
+
+            if (_session.State == SessionState.InGame)
+            {
+                _session.AdvanceFrame(Time.deltaTime);
+                SyncHeroFromView();
+            }
+
+            if (_screenshotFrame >= 0 && _frames >= _screenshotFrame)
+            {
+                _screenshotFrame = -1;
+                ScreenCapture.CaptureScreenshot(_screenshotPath);
+                Debug.Log($"[Game] screenshot -> {_screenshotPath} state={_session.State} tick={_session.Clock?.Tick}");
+                StartCoroutine(QuitAfterFrames(3));
+            }
+        }
+
+        // ----- Public game API (UI, automation, PlayMode tests) -----
+
+        public bool StartNewWorld(string slotKey, string worldName, uint seed, string heroName, CharacterClass heroClass)
+        {
+            var request = new NewWorldRequest
+            {
+                WorldName = worldName,
+                Seed = seed,
+                GeneratorId = PilotGeneratorId,
+                HeroName = heroName,
+                Class = heroClass,
+                Specialization = CharacterSpecialization.Primary,
+            };
+
+            if (!_session.BeginNewWorld(slotKey, request, DateTime.UtcNow.Ticks))
+            {
+                return Report(false, $"new world refused: {_session.LastRejection}");
+            }
+
+            return EnterLoadedWorld($"new world '{worldName}' seed={seed} in {slotKey}");
+        }
+
+        public bool LoadWorld(string slotKey)
+        {
+            SlotLoadResult result = _slots.Load(slotKey, PilotGeneratorId);
+            if (!result.IsSuccess)
+            {
+                return Report(false, $"load {slotKey} failed: {result}");
+            }
+
+            if (!_session.BeginLoadedWorld(slotKey, result.World, result.Hero, result.ClockTick))
+            {
+                return Report(false, $"load refused: {_session.LastRejection}");
+            }
+
+            return EnterLoadedWorld($"loaded {slotKey}: '{result.World.Name}' tick={result.ClockTick}");
+        }
+
+        public bool SaveCheckpoint()
+        {
+            SyncHeroFromView();
+            if (!_session.BeginSave())
+            {
+                return Report(false, $"save refused: {_session.LastRejection}");
+            }
+
+            SaveResult result = _slots.Save(_session, DateTime.UtcNow.Ticks);
+            _session.EndSave();
+            return Report(result.IsSuccess, result.IsSuccess
+                ? $"saved {_session.SlotKey} tick={_session.Clock.Tick}"
+                : $"save failed: {result}");
+        }
+
+        public bool ExitToMenu(bool saveFirst)
+        {
+            if (saveFirst && !SaveCheckpoint())
+            {
+                return false;
+            }
+
+            if (!_session.ExitToMenu())
+            {
+                return Report(false, $"exit refused: {_session.LastRejection}");
+            }
+
+            DestroyWorldViews();
+            return Report(true, "returned to main menu");
+        }
+
+        public void TogglePause()
+        {
+            if (_session.State == SessionState.InGame)
+            {
+                _session.Pause();
+                SetGameplayInput(false);
+            }
+            else if (_session.State == SessionState.Paused)
+            {
+                _session.Resume();
+                SetGameplayInput(true);
+            }
+        }
+
+        public void QuitGame()
+        {
+            _session.Quit();
+            DestroyWorldViews();
+            Debug.Log("[Game] quit");
+#if UNITY_EDITOR
+            if (!Application.isBatchMode && UnityEditor.EditorApplication.isPlaying)
+            {
+                UnityEditor.EditorApplication.isPlaying = false;
+                return;
+            }
+#endif
+            Application.Quit(0);
+        }
+
+        // ----- World / view lifecycle -----
+
+        private bool EnterLoadedWorld(string description)
+        {
+            try
+            {
+                BuildWorldViews();
+            }
+            catch (Exception exception)
+            {
+                DestroyWorldViews();
+                _session.AbortLoading(exception.Message);
+                return Report(false, $"world build failed: {exception.Message}");
+            }
+
+            if (!_session.CompleteLoading())
+            {
+                return Report(false, $"loading not completed: {_session.LastRejection}");
+            }
+
+            SetGameplayInput(true);
+            PublishHeroSpawn();
+            return Report(true, description);
+        }
+
+        private void BuildWorldViews()
+        {
+            DestroyWorldViews();
+            WorldInfo world = _session.World;
+            HeroState hero = _session.Hero;
+
+            _worldRoot = new GameObject("WorldRoot");
+            _worldView = _worldRoot.AddComponent<PilotWorldView>();
+            _worldView.TerrainMaterial = terrainMaterial;
+            _worldView.Build(world.Seed.Value, chunksPerAxis, 0, 0);
+
+            if (hero.NeedsGroundPlacement)
+            {
+                int spawnX = chunksPerAxis * PilotWorldLayout.ChunkSize / 2;
+                int spawnZ = chunksPerAxis * PilotWorldLayout.ChunkSize / 2;
+                int ground = new PilotHeightField(world.Seed.Value).HeightAt(spawnX, spawnZ);
+                hero.Position = new WorldPosition(spawnX + 0.5, ground + 1.2, spawnZ + 0.5);
+                hero.NeedsGroundPlacement = false;
+            }
+
+            _player = new GameObject("Player");
+            var controller = _player.AddComponent<CharacterController>();
+            controller.height = 1.8f;
+            controller.radius = 0.4f;
+            controller.center = new Vector3(0f, 0.9f, 0f);
+            controller.stepOffset = 0.35f;
+            controller.slopeLimit = 50f;
+            _player.transform.SetPositionAndRotation(
+                new Vector3((float)hero.Position.X, (float)hero.Position.Y, (float)hero.Position.Z),
+                Quaternion.Euler(0f, hero.Yaw, 0f));
+            Physics.SyncTransforms();
+
+            // Placeholder body until the S05 visual runtime (DeepSeek, issue #13) is attached via IEntityVisualSink.
+            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            body.name = "PlayerBody_PLACEHOLDER";
+            body.transform.SetParent(_player.transform, false);
+            body.transform.localScale = new Vector3(0.8f, 0.9f, 0.8f);
+            body.transform.localPosition = new Vector3(0f, 0.9f, 0f);
+            Destroy(body.GetComponent<Collider>());
+            body.GetComponent<Renderer>().sharedMaterial = PilotMaterials.Terrain(null);
+
+            _motor = _player.AddComponent<PlayerMotor>();
+            _motor.SetCamera(_camera.transform);
+            _orbitCamera.Target = _player.transform;
+            _orbitCamera.Distance = OrbitCameraController.DefaultDistance;
+
+            Debug.Log($"[Game] world built seed={world.Seed} gen={world.GeneratorId} chunks={_worldView.ChunkCount} " +
+                      $"vertices={_worldView.LastVertexCount} {_worldView.LastBuildMilliseconds:F1}ms hero={hero.Position}");
+        }
+
+        private void DestroyWorldViews()
+        {
+            if (_orbitCamera != null)
+            {
+                _orbitCamera.Target = null;
+            }
+
+            if (_worldView != null)
+            {
+                _worldView.Clear();
+            }
+
+            if (_worldRoot != null)
+            {
+                Destroy(_worldRoot);
+            }
+
+            if (_player != null)
+            {
+                Destroy(_player);
+            }
+
+            _worldRoot = null;
+            _worldView = null;
+            _player = null;
+            _motor = null;
+            SetCursorLocked(false);
+        }
+
+        private void SyncHeroFromView()
+        {
+            if (_player == null || _session.Hero == null)
+            {
+                return;
+            }
+
+            Vector3 p = _player.transform.position;
+            _session.Hero.Position = new WorldPosition(p.x, p.y, p.z);
+            _session.Hero.Yaw = _orbitCamera != null ? _orbitCamera.Yaw : _player.transform.eulerAngles.y;
+        }
+
+        private void PublishHeroSpawn()
+        {
+            HeroState hero = _session.Hero;
+            _session.Events.Publish(new EntitySpawned
+            {
+                TimeMs = _session.Clock.TimeMs,
+                Entity = hero.Id,
+                Kind = new KindId(-1),
+                Position = hero.Position,
+                Yaw = hero.Yaw,
+            });
+        }
+
+        private void SetGameplayInput(bool enabled)
+        {
+            if (_motor != null)
+            {
+                _motor.enabled = enabled;
+            }
+
+            SetCursorLocked(false);
+        }
+
+        private static void SetCursorLocked(bool locked)
+        {
+            Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+            Cursor.visible = !locked;
+        }
+
+        private void EnsureCameraAndLight()
+        {
+            _camera = Camera.main;
+            if (_camera == null)
+            {
+                var cameraObject = new GameObject("Main Camera") { tag = "MainCamera" };
+                _camera = cameraObject.AddComponent<Camera>();
+                cameraObject.AddComponent<AudioListener>();
+                _camera.clearFlags = CameraClearFlags.SolidColor;
+                _camera.backgroundColor = new Color(0.45f, 0.62f, 0.82f);
+                _camera.farClipPlane = 600f;
+            }
+
+            _orbitCamera = _camera.GetComponent<OrbitCameraController>();
+            if (_orbitCamera == null)
+            {
+                _orbitCamera = _camera.gameObject.AddComponent<OrbitCameraController>();
+            }
+
+            if (FindFirstObjectByType<Light>() == null)
+            {
+                var lightObject = new GameObject("Sun");
+                var light = lightObject.AddComponent<Light>();
+                light.type = LightType.Directional;
+                light.intensity = 1.1f;
+                lightObject.transform.rotation = Quaternion.Euler(50f, -35f, 0f);
+            }
+        }
+
+        private GameSlotStore CreateSlots(string directory)
+        {
+            return new GameSlotStore(new FileSaveStore(directory), new JsonSaveSerializer(), new JsonSessionSerializer());
+        }
+
+        private string DescribeSaveDirectory()
+        {
+            return string.IsNullOrEmpty(_saveDirectory) ? "persistentDataPath/CubeGame/saves" : _saveDirectory;
+        }
+
+        private bool Report(bool success, string message)
+        {
+            _status = message;
+            if (success)
+            {
+                Debug.Log($"[Game] {message}");
+            }
+            else
+            {
+                Debug.LogWarning($"[Game] {message}");
+            }
+
+            return success;
+        }
+
+        private void ParseArguments()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length - 1; i++)
+            {
+                string value = args[i + 1];
+                switch (args[i])
+                {
+                    case "-cubeSaveDir":
+                        _saveDirectory = value;
+                        break;
+                    case "-cubeAutoNew":
+                        _autoNewSlot = value;
+                        break;
+                    case "-cubeAutoLoad":
+                        _autoLoadSlot = value;
+                        break;
+                    case "-cubeSeed":
+                        uint.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out _commandLineSeed);
+                        break;
+                    case "-cubeScreenshot":
+                        _screenshotPath = value;
+                        _screenshotFrame = 120;
+                        break;
+                    case "-cubeFrames":
+                        if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int frames) && frames > 0)
+                        {
+                            _screenshotFrame = frames;
+                        }
+
+                        break;
+                }
+            }
+        }
+
+        private System.Collections.IEnumerator QuitAfterFrames(int frames)
+        {
+            for (int i = 0; i < frames; i++)
+            {
+                yield return null;
+            }
+
+            QuitGame();
+        }
+
+        // ----- Temporary IMGUI menus (M0-08 replaces them with the final UI; the game API above stays) -----
+
+        private void OnGUI()
+        {
+            switch (_session.State)
+            {
+                case SessionState.MainMenu:
+                    DrawMainMenu();
+                    break;
+                case SessionState.Paused:
+                    DrawPauseMenu();
+                    break;
+                case SessionState.InGame:
+                    DrawHud();
+                    break;
+            }
+        }
+
+        private void DrawMainMenu()
+        {
+            GUILayout.BeginArea(new Rect(Screen.width / 2f - 220f, 60f, 440f, Screen.height - 120f), GUI.skin.box);
+            GUILayout.Label("CubeGame — main menu (M0-01)");
+            GUILayout.Space(8f);
+            GUILayout.Label("New world");
+            _formWorldName = LabeledField("World name", _formWorldName);
+            _formSeed = LabeledField("Seed", _formSeed);
+            _formHeroName = LabeledField("Hero name", _formHeroName);
+            _formClass = GUILayout.Toolbar(_formClass, new[] { "Warrior", "Ranger", "Mage", "Rogue" });
+            _formSlot = GUILayout.Toolbar(_formSlot, SlotKeys);
+            if (GUILayout.Button("Create world"))
+            {
+                uint seed = uint.TryParse(_formSeed, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint parsed) ? parsed : DefaultSeed;
+                StartNewWorld(SlotKeys[_formSlot], _formWorldName, seed, _formHeroName, CharacterClasses.FromId(_formClass));
+            }
+
+            GUILayout.Space(12f);
+            GUILayout.Label("Load");
+            foreach (string slot in SlotKeys)
+            {
+                GUI.enabled = _slots.Exists(slot);
+                if (GUILayout.Button(_slots.Exists(slot) ? $"Load {slot}" : $"{slot} (empty)"))
+                {
+                    LoadWorld(slot);
+                }
+            }
+
+            GUI.enabled = true;
+            GUILayout.Space(12f);
+            if (GUILayout.Button("Quit"))
+            {
+                QuitGame();
+            }
+
+            if (!string.IsNullOrEmpty(_status))
+            {
+                GUILayout.Label(_status);
+            }
+
+            GUILayout.EndArea();
+        }
+
+        private void DrawPauseMenu()
+        {
+            GUILayout.BeginArea(new Rect(Screen.width / 2f - 160f, Screen.height / 2f - 140f, 320f, 280f), GUI.skin.box);
+            GUILayout.Label($"Paused — {_session.World?.Name}");
+            if (GUILayout.Button("Resume"))
+            {
+                TogglePause();
+            }
+
+            if (GUILayout.Button("Save"))
+            {
+                SaveCheckpoint();
+            }
+
+            if (GUILayout.Button("Save and exit to menu"))
+            {
+                ExitToMenu(true);
+            }
+
+            if (GUILayout.Button("Exit to menu without saving"))
+            {
+                ExitToMenu(false);
+            }
+
+            if (GUILayout.Button("Quit game"))
+            {
+                QuitGame();
+            }
+
+            GUILayout.Label(_status);
+            GUILayout.EndArea();
+        }
+
+        private void DrawHud()
+        {
+            HeroState hero = _session.Hero;
+            GUI.Label(new Rect(10f, 10f, 700f, 22f),
+                $"{_session.World.Name}  seed {_session.World.Seed}  time {_session.Clock.TimeMs / 1000.0:F1}s  " +
+                $"{hero.Name} {hero.Sheet.Class} L{hero.Sheet.Progression.Level}  pos {hero.Position}  [Esc] menu");
+        }
+
+        private static string LabeledField(string label, string value)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(label, GUILayout.Width(100f));
+            string result = GUILayout.TextField(value ?? string.Empty);
+            GUILayout.EndHorizontal();
+            return result;
+        }
+    }
+}

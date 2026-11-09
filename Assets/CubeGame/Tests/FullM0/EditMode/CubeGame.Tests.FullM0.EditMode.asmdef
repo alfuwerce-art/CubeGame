@@ -1,0 +1,27 @@
+{
+    "name": "CubeGame.Tests.FullM0.EditMode",
+    "rootNamespace": "CubeGame.Tests.FullM0.EditMode",
+    "references": [
+        "CubeGame.Core",
+        "CubeGame.Persistence",
+        "CubeGame.Features",
+        "CubeGame.Gameplay",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
