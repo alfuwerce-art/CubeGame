@@ -257,25 +257,30 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         }
 
         [Test]
-        public void ScatterSelectorResolvesOnlyTheProvenBranches()
+        public void ScatterSelectorUsesTheTranslatedAlphaTree()
         {
             Assert.IsEmpty(AlphaScatterSelector.Validate(), string.Join("\n", AlphaScatterSelector.Validate()));
+            StringAssert.Contains("TRANSLATED_FROM_CODE", AlphaScatterTree.Status);
+            StringAssert.Contains("0x005f56c0", AlphaScatterTree.Symbol);
 
-            var underground = AlphaScatterSelector.Select(0.5, 0.5, -1, 0.0);
-            Assert.AreEqual(ScatterResolution.Resolved, underground.Resolution);
+            var underground = AlphaScatterSelector.Select(0.5, 0.5, 0.5, 0.0, -1, 0);
+            Assert.AreEqual(ScatterResolution.TranslatedFromCode, underground.Resolution);
             CollectionAssert.AreEquivalent(new[] { 0x91, 0x92, 0x93, 0x96, 0x98, 0x99, 0x9b, 0x9a }, underground.ObjectKinds);
 
-            var dry = AlphaScatterSelector.Select(0.05, 0.5, 5, 0.1);
-            Assert.AreEqual(ScatterResolution.Resolved, dry.Resolution);
-            CollectionAssert.AreEquivalent(new[] { 0x15, 0x2e }, dry.ObjectKinds);
-            var drySpaced = AlphaScatterSelector.Select(0.05, 0.5, 5, 0.5);
-            CollectionAssert.AreEquivalent(new[] { 0x15, 0x2e, 0x2f }, drySpaced.ObjectKinds);
+            var dry = AlphaScatterSelector.Select(0.5, 0.5, 0.0, 0.0, 6, 0);
+            CollectionAssert.Contains(dry.ObjectKinds, 0x15);
+            CollectionAssert.Contains(dry.ObjectKinds, 0x2e);
+            var drySpaced = AlphaScatterSelector.Select(0.5, 0.5, 0.0, 0.5, 6, 0);
+            CollectionAssert.Contains(drySpaced.ObjectKinds, 0x2f);
 
-            var unknown = AlphaScatterSelector.Select(0.5, 0.5, 5, 0.0);
-            Assert.AreEqual(ScatterResolution.Unresolved, unknown.Resolution, "goto branches are not guessed");
-            Assert.IsEmpty(unknown.ObjectKinds, "UNRESOLVED must not invent vegetation");
-            StringAssert.Contains("AlphaScatterEvidence", unknown.Rule);
-            StringAssert.Contains("resolvedCases=", AlphaScatterSelector.Summary());
+            var flagged = AlphaScatterSelector.Select(0.5, 0.5, 0.5, 0.0, 6, 1);
+            Assert.IsNotEmpty(flagged.ObjectKinds, "the (char)param_4 != 0 branch returns its own objects");
+
+            var climate = AlphaScatterSelector.Select(0.5, 0.5, 0.5, 0.0, 6, 0);
+            Assert.AreEqual(ScatterResolution.TranslatedFromCode, climate.Resolution);
+            Assert.IsNotNull(climate.ObjectKinds);
+            StringAssert.Contains("TRANSLATED_FROM_CODE", climate.Rule);
+            StringAssert.Contains("scatter dry=", AlphaScatterSelector.Summary());
         }
 
         [Test]

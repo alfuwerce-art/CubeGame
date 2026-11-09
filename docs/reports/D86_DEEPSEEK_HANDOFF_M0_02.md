@@ -41,17 +41,15 @@ AlphaDungeonRules.EntranceNames;    // overground-dungeon01 / underground-dungeo
 ```
 Порядок вырезания коридоров, содержимое комнат, свет/факелы и таблицы встреч — `UNKNOWN`; планировщик даёт связный скелет, а не «Alpha-данж».
 
-### Климат → объекты (W-18, PARTIAL)
+### Климат → объекты (W-18, TRANSLATED_FROM_CODE)
 
 ```csharp
-var selection = AlphaScatterSelector.Select(humidity, temperature, level, spacing);
-if (selection.Resolution == ScatterResolution.Resolved)
-    PlaceObjects(selection.Rule, selection.ObjectKinds);   // underground(level<0) и dry(humidity<=0.1)
-else
-    SkipVegetation(selection.Rule);                         // UNRESOLVED: goto-ветки не портированы
-AlphaScatterEvidence.Groups;                                // сырые 6 групп/64 id с условиями декомпилятора
+// humidity = GameController_sampleHumidityGrid, temperature = sampleTemperatureGrid,
+// cell = World_getRegionCellPtr, spacing = World_placeObjectWithSpacing, level = уровень, mode = (char)param_4
+var selection = AlphaScatterSelector.Select(humidity, temperature, cell, spacing, level, mode);
+PlaceObjects(selection.Rule, selection.ObjectKinds);   // status: TRANSLATED_FROM_CODE, не VERIFIED_ALPHA
 ```
-`UNRESOLVED` нельзя трактовать как «здесь ничего не растёт» — это «мы ещё не знаем»; полная таблица лежит в `AlphaScatterEvidence` для следующего порта.
+Внутри — механический транслят `WorldInfo_scatterObjectsInArea @ 0x005f56c0` (`AlphaScatterTree`, 77 id, goto сохранён). Подземная (`level<0`) и сухая (`cell<=0.1`) ветки совпали с ранее доказанными списками; живого сравнения с Alpha ещё не было, поэтому не выдавайте результат за проверенный паритет. Сырые 6 групп — `AlphaScatterEvidence`.
 
 ## 3. Сервисы и взаимодействия (M0-07C, данные)
 
@@ -71,4 +69,4 @@ AlphaNpcServices.Status;                                     // явно: кат
 
 ## 5. Проверки
 
-`AlphaOutput/editmode.xml` — 342/342 (+тест сервисных категорий); `AlphaOutput/playmode.xml` — 33/33 (включая сквозной контент-сценарий `WorldContentPlayModeTests`). Таблицы воспроизводимы: `python -m tools.alpha_content.build_world_evidence --check`, `build_content_tables --check`, `build_staged_visuals --check`.
+`AlphaOutput/editmode.xml` — 345/345 (+тест сервисов и трансляции W-18); `AlphaOutput/playmode.xml` — 36/36 (включая сквозной контент-сценарий `WorldContentPlayModeTests`). Таблицы воспроизводимы: `python -m tools.alpha_content.build_world_evidence --check`, `build_content_tables --check`, `build_staged_visuals --check`, `scatter_tree_translate2 --check`.

@@ -17,7 +17,7 @@
 | Постройки | в реестре как «MISSING» | `AlphaStructureTemplates`: дом 3×3×4 (стили 1…5), комната данжа 3×3×3 (шаг 7); габариты `DIRECT`, интерьер `UNKNOWN` |
 | Размещение | алгоритм W-16 только описан | `AlphaStructurePlacementPlanner`: детерминированные кандидаты на клетку, 4 попытки, 4 поворота, проверка свободного футпринта через предикат мира; без свободного места — явная проблема, не принудительная постройка |
 | Данжи (M0-07B) | только размеры комнат в evidence | `AlphaDungeonRules` (комната 3×3×3, шаг 7, сундук ровно 10 предметов, имена входов) + `AlphaDungeonLayoutPlanner`: детерминированный связный скелет на решётке 5×5 с L-коридорами; статус `PARTIAL` (порядок вырезания коридоров/содержимое комнат неизвестны) |
-| **W-18 климат→объекты** | `UNKNOWN`, таблица не выгружена | **`PARTIAL`**: из декомпилированной `WorldInfo_scatterObjectsInArea @ 0x005f56c0` извлечены ветки (условия по humidity `local_80`, temperature `local_84`, spacing `fVar6`, `level`) и 64 различных id объектов (`AlphaScatterEvidence`). `AlphaScatterSelector` реализует только однозначные ветки: `level<0` (8 объектов) и сухая ветка `humidity<=0.1` (2–3 объекта); остальные климатические ветки возвращают `UNRESOLVED` (goto-ветвление не портировано) и **не выдумывают** растительность |
+| **W-18 климат→объекты** | `UNKNOWN`, таблица не выгружена | **`TRANSLATED_FROM_CODE`**: дерево `WorldInfo_scatterObjectsInArea @ 0x005f56c0` механически транслировано в C# (`AlphaScatterTree`, 77 id, условия декомпилятора сохранены, goto→`goto End`), `AlphaScatterSelector` вызывается с `humidity/temperature/cell/spacing/level/mode`. Подземная и «сухая» ветки совпали с ранее доказанными списками; **живой Alpha-проверки нет** — статус не `VERIFIED_ALPHA` |
 | Тесты | — | +4 EditMode (344/344 всего); PlayMode без регрессий (34/34) |
 
 ---
@@ -35,7 +35,9 @@
 | `Assets/CubeGame/Content/AlphaDungeons.cs` | `AlphaDungeonRules` (размер комнаты, шаг, 10 предметов в сундуке, входы), `AlphaDungeonLayoutPlanner` (связный скелет с L-коридорами, детерминизм по seed), статус `PARTIAL` |
 | `Assets/CubeGame/Content/AlphaNpcServices.cs` | `AlphaServiceKind` (Trade/Craft/Customize/Rest/Smelt) и `AlphaNpcServices`: сервисная мебель Alpha → категория взаимодействия; `Status` явно помечает `CUBEGAME_CONTRACT`, торговые правила F-U5 `UNKNOWN` |
 | `Assets/CubeGame/Tests/World/PlayMode/WorldContentPlayModeTests.cs` | сквозной контент-сценарий: размещение дома, план данжа, сервисы, спавн существ+декора с Alpha-визуалами, тик, despawn/respawn со стабильным id |
-| `tools/alpha_content/extract_scatter_table.py` + `data/scatter_evidence.json` + `Content/Generated/AlphaScatterEvidence.g.cs` | извлечение W-18: 6 веток, 64 id, условия декомпилятора дословно, статус `PARTIAL` |
+| `tools/alpha_content/extract_scatter_table.py` + `data/scatter_evidence.json` + `Content/Generated/AlphaScatterEvidence.g.cs` | извлечение W-18: 6 веток, 64 id, условия декомпилятора дословно |
+| `tools/alpha_content/scatter_tree_translate2.py` + `Content/Generated/AlphaScatterTree.g.cs` | механическая трансляция всего дерева `scatterObjectsInArea` в C# (77 id, goto→`goto End`) |
+| `Assets/CubeGame/Content/AlphaScatterSelector.cs` | фасад выбора W-18: `Select(humidity, temperature, cell, spacing, level, mode)`, статус `TRANSLATED_FROM_CODE` |
 | `Assets/CubeGame/Content/AlphaScatterEvidenceValidation.cs` | проверка извлечённых данных (известные виды, непустые ветки, статус PARTIAL) |
 | `Assets/CubeGame/Tests/AlphaModels/EditMode/AlphaModelsEditModeTests.cs` | `AlphaWorldContentTests`: имена Door/Chest/Workbench/FireTrap, LifePotion (1,1), HangGlider (0x17/0), SkillClimbing, сервисы ≥8, шаблоны и размещение (детерминизм, отказ при занятом футпринте, неизвестный шаблон) |
 | `Assets/CubeGame/AlphaModels.Import/Editor/AlphaModelsImport.cs` | в проверку кэша добавлены отчёты мира/структур |
@@ -72,7 +74,7 @@
 - **W-18**: таблица «климат → объекты» (~660 строк) не выгружена — растительность/биомный спавн по-прежнему `UNKNOWN`, не выдумывается.
 - **Интерьер дома, разложение 12-байтной клетки (U4), мебель `0x88d…0x8ef`** — `UNKNOWN`.
 - **Данжи**: только габарит комнаты и шаг; свет/факелы (J-U8), входы, сундуки — `PARTIAL`.
-- **W-18**: goto-структура исследована — в функции 4 перехода на единый `LAB_005f6ce4` (строка 7977), т.е. ветки являются цепочкой if/else с ранним выходом. Полный порт требует транскрипции вложенного дерева условий (следующая адресная партия); до этого селектор отвечает только за доказанные ветки и возвращает `UNRESOLVED` для остальных.
+- **W-18**: дерево транслировано механически (`TRANSLATED_FROM_CODE`): условия и списки id взяты из декомпилированной функции, `goto LAB_005f6ce4` сохранён как `goto End`. Подземная и сухая ветки совпали с ранее доказанными списками, но **живой проверки нет** — нельзя маркировать `VERIFIED_ALPHA`. Проверка на живом мире/эталоне — следующий шаг.
 - **Сервисы NPC (торговцы/кузнецы)**: объекты-рабочие места известны (Workbench/Anvil/Furnace/MarketStand…), но правила сервиса/ассортимент — `UNKNOWN` (F-U5).
 - **Категории объектов** — CubeGame-контракт по именам (Alpha хранит только имена), явно помечено.
 
