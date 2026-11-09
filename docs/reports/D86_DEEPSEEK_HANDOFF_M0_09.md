@@ -43,3 +43,7 @@ showcase.SpawnOnStart = true;    // Build() в Start; в тестах можно
 
 `AlphaOutput/playmode.xml` — 46/46 (витрина: игрок + 4 существа + 2 дома + 4 комнаты данжа + 2 сундука, 60 кадров без ошибок);
 `AlphaOutput/editmode.xml` — 351/351.
+
+## 5. Машинный манифест
+
+`AlphaContentManifest.BuildJson()` (и `RunBuildContentManifest` → `AlphaOutput/content_manifest.json`) отдаёт один JSON с количеством видов, действий/клипов, предметов, якорей, слотов, объектов мира, структур, групп W-18 и правил сундуков. Значения берутся только из коммит-таблиц — манифест одинаков на любой машине.

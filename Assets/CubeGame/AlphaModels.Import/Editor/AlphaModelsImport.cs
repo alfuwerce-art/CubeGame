@@ -160,6 +160,7 @@ namespace CubeGame.AlphaModels.Import
             text.AppendLine(CubeGame.Content.AlphaItemSlotRules.Summary());
             foreach (var p in CubeGame.Content.AlphaConsumableRules.Validate()) text.AppendLine("CONSUMABLE_PROBLEM " + p);
             text.AppendLine(CubeGame.Content.AlphaConsumableRules.Summary());
+            text.AppendLine("ALPHA_CONTENT_MANIFEST " + CubeGame.Content.AlphaContentManifest.Summary());
             var stagedKinds = new int[CubeGame.Content.AlphaStagedVisuals.All.Length];
             for (int i = 0; i < stagedKinds.Length; i++) stagedKinds[i] = CubeGame.Content.AlphaStagedVisuals.All[i].Kind;
             foreach (var p in CubeGame.Content.AlphaScatterField.Validate(new EditorClimateProbe(0.5, 0.5, 0.0), 0.5, stagedKinds))

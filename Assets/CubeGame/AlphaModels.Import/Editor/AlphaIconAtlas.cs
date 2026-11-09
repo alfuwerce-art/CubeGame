@@ -75,5 +75,20 @@ namespace CubeGame.AlphaModels.Import
             catch (Exception e) { Write("icons_atlas.txt", "ICON_ATLAS_RESULT=FAIL exception=" + e); }
             EditorApplication.Exit(exit);
         }
+
+        [MenuItem("CubeGame/Alpha Models/Build Content Manifest")]
+        public static void BuildContentManifest()
+        {
+            var path = Path.Combine(OutDir, "content_manifest.json");
+            File.WriteAllText(path, CubeGame.Content.AlphaContentManifest.BuildJson());
+            Write("content_manifest.txt", "CONTENT_MANIFEST=OK path=" + path + " " +
+                  CubeGame.Content.AlphaContentManifest.Summary());
+        }
+
+        public static void RunBuildContentManifest()
+        {
+            BuildContentManifest();
+            EditorApplication.Exit(0);
+        }
     }
 }

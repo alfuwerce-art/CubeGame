@@ -477,6 +477,19 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         }
 
         [Test]
+        public void ContentManifestListsTheTransferredContent()
+        {
+            var json = AlphaContentManifest.BuildJson();
+            foreach (var token in new[] { "\"kinds\":156", "\"actionsKinds\":129", "\"itemTypes\":24",
+                         "\"weaponAnchors\":26", "\"offhandAnchors\":10", "\"heldItems\":14",
+                         "\"equipmentItems\":32", "\"itemSlots\":11", "\"worldObjects\":67",
+                         "\"skills\":27", "\"dungeonChestItems\":10" })
+                StringAssert.Contains(token, json);
+            StringAssert.Contains("cubegame.alpha_content_manifest/1", json);
+            Assert.Greater(json.Length, 200);
+        }
+
+        [Test]
         public void NpcServiceFurnitureMapsToContractKinds()
         {
             Assert.IsEmpty(AlphaNpcServices.Validate(), string.Join("\n", AlphaNpcServices.Validate()));
