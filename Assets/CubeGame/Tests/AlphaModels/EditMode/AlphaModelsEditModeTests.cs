@@ -323,6 +323,20 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         }
 
         [Test]
+        public void HeldItemModelsComeFromTheItemIconSweep()
+        {
+            Assert.IsEmpty(AlphaHeldItemCatalog.Validate(), string.Join("\n", AlphaHeldItemCatalog.Validate()));
+            Assert.AreEqual(14, AlphaHeldItemCatalog.Items.Count);
+            Assert.AreEqual("life-potion.cub", AlphaHeldItemCatalog.ModelOf(1, 1));
+            Assert.AreEqual("cactus-potion.cub", AlphaHeldItemCatalog.ModelOf(1, 2));
+            Assert.AreEqual("glider.cub", AlphaHeldItemCatalog.ModelOf(23, 0));
+            Assert.AreEqual("boat2.cub", AlphaHeldItemCatalog.ModelOf(23, 1));
+            Assert.AreEqual("lantern02.cub", AlphaHeldItemCatalog.ModelOf(24, 7), "lantern is a wildcard subtype");
+            Assert.IsNull(AlphaHeldItemCatalog.ModelOf(5, 0), "gloves are worn, not held");
+            StringAssert.Contains("heldItems=14", AlphaHeldItemCatalog.Summary());
+        }
+
+        [Test]
         public void NpcServiceFurnitureMapsToContractKinds()
         {
             Assert.IsEmpty(AlphaNpcServices.Validate(), string.Join("\n", AlphaNpcServices.Validate()));

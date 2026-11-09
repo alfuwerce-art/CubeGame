@@ -61,6 +61,45 @@ namespace CubeGame.AlphaModels.Tests.PlayMode
             }
         }
         [UnityTest]
+        public IEnumerator HeldItemsAttachToTheRightHand()
+        {
+            var source = AlphaContentSource.Resolve();
+            if (source.State != AlphaContentState.Ready) Assert.Ignore(source.Diagnosis);
+            var items = Path.Combine(source.Root, "items");
+            foreach (var name in new[] { "life-potion.cubdec", "lantern02.cubdec", "glider.cubdec" })
+                if (!File.Exists(Path.Combine(items, name))) Assert.Ignore("held item payload is not staged: " + name);
+            var library = new AlphaActorLibrary(source);
+            if (!library.TryGet("d86_human_0x02_greatsword", out var def)) Assert.Ignore("human variant is not staged");
+            var view = AlphaActorView.Spawn(def, null, new List<string>());
+            try
+            {
+                Assert.IsTrue(view.Ready, string.Join("\n", view.Problems));
+                Assert.IsFalse(AlphaHeldItemLayer.HasHeldItem(view.Rig));
+                Assert.IsTrue(AlphaHeldItemLayer.TryEquipFromItem(view.Rig, items, 1, 1, out var reason), reason);
+                Assert.IsTrue(AlphaHeldItemLayer.HasHeldItem(view.Rig));
+                int hand = view.Rig.IndexOf("hand_r");
+                var child = view.Rig.parts[hand].Find(AlphaHeldItemLayer.MeshChildName);
+                Assert.IsNotNull(child, "the held model is a child of the posed right hand");
+                var mesh = child.GetComponent<MeshFilter>().sharedMesh;
+                Assert.AreEqual(AlphaHeldItemLayer.CenterOffset(AlphaHeldItemLayer.LastEquippedSize), child.localPosition,
+                    "held block uses the center anchor of the model grid");
+                Assert.Greater(mesh.vertexCount, 0);
+
+                Assert.IsTrue(AlphaHeldItemLayer.TryEquipFromItem(view.Rig, items, 24, 7, out var lampReason), lampReason);
+                Assert.IsTrue(AlphaHeldItemLayer.TryEquipFromItem(view.Rig, items, 23, 0, out var gliderReason), gliderReason);
+                Assert.IsFalse(AlphaHeldItemLayer.TryEquipFromItem(view.Rig, items, 5, 0, out var bad));
+                StringAssert.Contains("HELD_ITEM_NO_MODEL", bad);
+                AlphaHeldItemLayer.Clear(view.Rig);
+                Assert.IsFalse(AlphaHeldItemLayer.HasHeldItem(view.Rig));
+                yield return null;
+            }
+            finally
+            {
+                Object.Destroy(view.gameObject);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator OffhandModelFollowsTheLeftHandWithMeasuredAnchor()
         {
             var source = AlphaContentSource.Resolve();
