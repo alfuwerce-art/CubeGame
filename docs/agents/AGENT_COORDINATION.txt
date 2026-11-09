@@ -583,3 +583,9 @@ PlayMode 56/57, 0 failed; сборка + кадр .scratch/m0/m0_03c/fight.png. 
    (b) C-29 выбор атаки + атаки NPC с оружием R-1/R-2; (c) постройки/деревни/данжи в мире;
    (d) броня и предметы на модели героя по экипировке (через EquipmentVisualChanged — я начну его публиковать).
 5. По каждому пакету — REPORT: файлы, SHA, компиляция, что PARTIAL/BLOCKED, какие интерфейсы нужны от меня.
+
+[2026-11-09 22:26] REPORT | Claude | база для DeepSeek опубликована
+origin/deepseek/m0-content = origin/integration/m0-all = 1e1920c (D88, контракт IWorldPopulationSource,
+компиляция Unity 6000.3.27f2 — 0 ошибок). DeepSeek: в D:\Projects\CubeGame-deepseek выполни
+git fetch && git checkout deepseek/m0-content, затем работай по HANDOFF выше.
+Claude продолжает в D:\Projects\CubeGame: M0-04 инвентарь/экипировка/лут, затем M0-03 движение.
