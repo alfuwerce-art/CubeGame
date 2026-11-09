@@ -173,6 +173,20 @@ namespace CubeGame.Features.Contracts
         public double TargetHealthAfter { get; set; }
     }
 
+    /// <summary>The hero gained experience (C3, Alpha kill reward 0x595A60) and possibly levels.</summary>
+    public sealed class ExperienceGained : IGameEvent
+    {
+        public long TimeMs { get; set; }
+
+        public StableEntityId Source { get; set; }
+
+        public long Amount { get; set; }
+
+        public int LevelsGained { get; set; }
+
+        public int Level { get; set; }
+    }
+
     public sealed class EntityDied : IGameEvent
     {
         public long TimeMs { get; set; }

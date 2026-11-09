@@ -505,17 +505,71 @@ namespace CubeGame.Features.Session
             }
 
             Combat.Update(clock.TimeMs);
+            if (_levelUpHealPending)
+            {
+                _levelUpHealPending = false;
+                if (!Hero.Health.IsDead)
+                {
+                    Hero.Revive();
+                    Combat.Unregister(Hero.Id);
+                    Combat.Register(new Combatant(Hero.Id, HeroKind, Hero.Name, Hero.Sheet, Hero.Loadout, Hero.Health)
+                    {
+                        Position = Hero.Position,
+                        Yaw = Hero.Yaw,
+                    });
+                }
+            }
             if (!Hero.Health.IsDead && WorldItems != null && WorldItems.Count > 0)
             {
                 WorldItems.PickupNear(Hero, clock.TimeMs);
             }
         }
 
-        /// <summary>Loot of a killed creature falls where it died (hero deaths drop nothing).</summary>
+        /// <summary>
+        /// Kill experience of Alpha (applyMeleeHit 0x595A60, C3, DIRECT): <c>max(1, curve_level05(level + stars)·20)</c>,
+        /// ×20 for a boss species, converted to int; given to the killing player for a hostile creature (role 1).
+        /// The ×10 (flag +0x7E&amp;0x200) and 0 (flag 0x800) cases are not mapped (flags unknown in CubeGame).
+        /// </summary>
+        public static long KillExperience(int level, int stars, bool boss)
+        {
+            double xp = CubeGame.Core.Progression.AlphaMath.KillExperience(level, stars);
+            if (boss)
+            {
+                xp *= 20.0;
+            }
+
+            return (long)xp;
+        }
+
+        private bool _levelUpHealPending;
+
+        /// <summary>Loot of a killed creature falls where it died (hero deaths drop nothing); the hero gets kill experience.</summary>
         private void OnEntityDied(EntityDied died)
         {
-            if (died.Entity.Equals(StableEntityId.Hero) || Combat == null || WorldItems == null
+            if (died.Entity.Equals(StableEntityId.Hero) || Combat == null
                 || !Combat.TryGet(died.Entity, out Combatant dead))
+            {
+                return;
+            }
+
+            if (Hero != null && died.Killer.Equals(Hero.Id) && dead.Hostile && !Hero.Health.IsDead)
+            {
+                long xp = KillExperience(dead.Sheet.Progression.Level, dead.Stars, dead.IsBoss);
+                int levels = Hero.Sheet.AddExperience(xp);
+                // xp_applyLevelUps 0x447B00: every level-up sets HP to the new maximum; the pool is rebuilt after the
+                // combat update (the death arrives from inside it).
+                _levelUpHealPending |= levels > 0;
+                Events.Publish(new ExperienceGained
+                {
+                    TimeMs = died.TimeMs,
+                    Source = died.Entity,
+                    Amount = xp,
+                    LevelsGained = levels,
+                    Level = Hero.Sheet.Progression.Level,
+                });
+            }
+
+            if (WorldItems == null)
             {
                 return;
             }

@@ -630,6 +630,7 @@ namespace CubeGame.Gameplay
             creature.Position = def.Position;
             creature.Yaw = def.Yaw;
             creature.Hostile = def.Faction == (int)CreatureFaction.Monster;
+            creature.IsBoss = CreatureKinds.IsBoss(def.Kind.Value);
             _session.Combat.Register(creature);
             _creatures?.Add(creature, def.Level, 0, def.Faction, def.ClassId, def.SpecializationId);
             _session.Events.Publish(new EntitySpawned

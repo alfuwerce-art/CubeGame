@@ -49,6 +49,12 @@ namespace CubeGame.Features.Combat
         /// <summary>Hostile combatants can be hit by the hero; the hero can be hit by hostile ones.</summary>
         public bool Hostile { get; set; }
 
+        /// <summary>Alpha star count of a creature (+0x1A8); 0 for the hero.</summary>
+        public int Stars { get; set; }
+
+        /// <summary>Alpha boss species (creature_isBossType): kill experience ×20 (C3).</summary>
+        public bool IsBoss { get; set; }
+
         public bool IsDead => Health.IsDead;
 
         /// <summary>Creates a combatant with a fresh Core sheet at the given level (used for training targets and spawned enemies).</summary>
