@@ -48,6 +48,16 @@ def dump_region(o, rx, rz):
             "words": list(words[7:26]),
             "floats": list(struct.unpack("<19f", raw[28:104])),
         })
+    # 16-byte zone grid at region+0x18, index lx*64 + lz: +0 type, +1 sub, +4 id, +8 level, +0xC class (non-zero only)
+    out["zones"] = []
+    raw = o.cpu.mem.read(r + 0x18, 4096 * 16)
+    for idx in range(4096):
+        rec = raw[idx * 16:(idx + 1) * 16]
+        if any(rec):
+            ztype, zsub = rec[0], rec[1]
+            zid, zlevel, zcls = struct.unpack("<iii", rec[4:16])
+            out["zones"].append({"lx": idx >> 6, "lz": idx & 63, "type": ztype, "sub": zsub, "b2": rec[2], "b3": rec[3],
+                                 "id": zid, "level": zlevel, "cls": zcls})
     return out
 
 

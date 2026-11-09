@@ -242,6 +242,18 @@ namespace CubeGame.Gameplay
                 || Report(false, $"terrain edit refused at ({blockX},{blockZ})");
         }
 
+        /// <summary>Sets one voxel (packed Alpha voxel, 0 = air) through the world delta store (persistent, saved with the slot).</summary>
+        public bool EditVoxel(int blockX, int blockY, int blockZ, uint voxel)
+        {
+            if (_session.State != SessionState.InGame || _session.WorldDeltas == null)
+            {
+                return Report(false, "voxel edit refused: no running world");
+            }
+
+            return _session.WorldDeltas.SetVoxel(blockX, blockY, blockZ, voxel, _session.Clock.TimeMs)
+                || Report(false, $"voxel edit refused at ({blockX},{blockY},{blockZ})");
+        }
+
         /// <summary>Automation/debug: places the hero above column (x, z) and loads the surroundings.</summary>
         public void TeleportHero(int x, int z)
         {

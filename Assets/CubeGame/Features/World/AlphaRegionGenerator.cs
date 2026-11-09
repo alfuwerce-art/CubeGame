@@ -53,6 +53,36 @@ namespace CubeGame.Features.World
         public int LevelClass { get; internal set; }
     }
 
+    /// <summary>
+    /// 16-byte zone record of a region (generateRegion, region+0x18, index lx·64 + lz): +0 type, +1 sub, +4 id,
+    /// +8 level, +0xC class. Verified against the executed function (36864 records of the 3×3 centre regions).
+    /// </summary>
+    public sealed class AlphaZoneRecord
+    {
+        /// <summary>Plain zone.</summary>
+        public const int Plain = 0;
+
+        /// <summary>One of the four town zones nearest a Village centre (Sub = 1…4).</summary>
+        public const int Town = 1;
+
+        /// <summary>Settlement zone of a 0xE column (Sub = zone subtype, Id/LevelClass set).</summary>
+        public const int Settlement = 3;
+
+        /// <summary>Zone of a type-10 column (Id = the column id).</summary>
+        public const int Special10 = 4;
+
+        public int Type { get; internal set; }
+
+        public int Sub { get; internal set; }
+
+        public int Id { get; internal set; }
+
+        /// <summary>Level of the landmark column centred in this zone; 1 elsewhere.</summary>
+        public int Level { get; internal set; } = 1;
+
+        public int LevelClass { get; internal set; }
+    }
+
     /// <summary>Region record: level, variant, orientation, creature level range and 64 landmark columns.</summary>
     public sealed class AlphaRegion
     {
@@ -73,6 +103,11 @@ namespace CubeGame.Features.World
 
         public LandmarkColumn[] Columns { get; } = new LandmarkColumn[64];
 
+        /// <summary>Zone grid, index lx·64 + lz (zone coordinates inside the region, 0…63).</summary>
+        public AlphaZoneRecord[] Zones { get; } = new AlphaZoneRecord[64 * 64];
+
+        public AlphaZoneRecord Zone(int lx, int lz) => Zones[lx * 64 + lz];
+
         /// <summary>Column (cx, cz) inside the region, each 0…7.</summary>
         public LandmarkColumn Column(int cx, int cz) => Columns[cx * 8 + cz];
     }
@@ -84,8 +119,8 @@ namespace CubeGame.Features.World
     /// CubeGame rule: every region is generated in isolation — the terrain samples taken while placing landmarks
     /// do not see landmarks of other regions. Alpha generates regions in streaming order, so its later regions see
     /// earlier ones (order-dependent); the isolated variant keeps "one seed → one world" (deviation, M0-02 report).
-    /// Not ported (content stages M0-06/07): the 16-byte zone grid (zone ids/levels/classes), village roads and
-    /// stored-region loading.
+    /// The 16-byte zone grid is ported (<see cref="AlphaZoneRecord"/>). Not ported: stored-region loading (Alpha
+    /// reads saved region blobs from its world database; CubeGame stores deltas instead).
     /// </summary>
     public static class AlphaRegionGenerator
     {
@@ -98,6 +133,11 @@ namespace CubeGame.Features.World
             for (int i = 0; i < 64; i++)
             {
                 region.Columns[i] = new LandmarkColumn();
+            }
+
+            for (int i = 0; i < region.Zones.Length; i++)
+            {
+                region.Zones[i] = new AlphaZoneRecord();
             }
 
             region.Variant = region.Level > 4 ? rng.Next() % 5 : 0;
@@ -215,11 +255,14 @@ namespace CubeGame.Features.World
                         zoneSub = (terrain.ClimateAverage(zoneCenterX, zoneCenterZ, useField4: false) <= 0.8f ? 1 : 0) + 4;
                     }
 
-                    rng.Next(); // zone record id rand()%10000000+1 (zone grid not ported)
+                    AlphaZoneRecord zone = region.Zone((zx >> 8) & 63, (zz >> 8) & 63);
+                    zone.Type = AlphaZoneRecord.Settlement;
+                    zone.Sub = zoneSub;
+                    zone.Id = rng.Next() % 10000000 + 1;
                     col.Id = nextId;
                     nextId += 1 + rng.Next() % 0x32;
                     col.Sub = zoneSub;
-                    LevelClass(rng, col.Level); // stored in the zone record, consumes rand()
+                    zone.LevelClass = LevelClass(rng, col.Level); // the class goes to the zone record, not the column
                     j++;
                     continue;
                 }
@@ -273,9 +316,60 @@ namespace CubeGame.Features.World
                 LandmarkColumn col = region.Column(cx, cz);
                 col.Type = LandmarkType.Unnamed10;
                 col.Id = rng.Next() % 10000000 + 1;
+                AlphaZoneRecord zone = region.Zone(((int)col.X >> 8) & 63, ((int)col.Z >> 8) & 63);
+                zone.Type = AlphaZoneRecord.Special10;
+                zone.Id = col.Id;
             }
 
+            foreach (LandmarkColumn col in region.Columns)
+            {
+                region.Zone(((int)col.X >> 8) & 63, ((int)col.Z >> 8) & 63).Level = col.Level;
+            }
+
+            MarkTownZones(terrain, region);
             return region;
+        }
+
+        /// <summary>The four zones (of the column's 8×8) with the highest village weight (1 − d²)² become town zones 1…4.</summary>
+        private static void MarkTownZones(AlphaTerrainGenerator terrain, AlphaRegion region)
+        {
+            var entries = new List<(float w, int lx, int lz)>(64);
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    LandmarkColumn col = region.Column(i, j);
+                    if (col.Type != LandmarkType.Village)
+                    {
+                        continue;
+                    }
+
+                    entries.Clear();
+                    for (int dx = 0; dx < 8; dx++)
+                    {
+                        for (int dz = 0; dz < 8; dz++)
+                        {
+                            int x = (i + region.Rx * 8) * 0x800 + 0x80 + dx * 0x100;
+                            int z = (j + region.Rz * 8) * 0x800 + 0x80 + dz * 0x100;
+                            float w = AlphaTerrainGenerator.Falloff(terrain.LandmarkDistance2(col, x, z));
+                            int at = entries.Count;
+                            while (at > 0 && entries[at - 1].w < w)
+                            {
+                                at--; // stable descending insertion
+                            }
+
+                            entries.Insert(at, (w, i * 8 + dx, j * 8 + dz));
+                        }
+                    }
+
+                    for (int sub = 1; sub <= 4; sub++)
+                    {
+                        AlphaZoneRecord zone = region.Zone(entries[sub - 1].lx, entries[sub - 1].lz);
+                        zone.Type = AlphaZoneRecord.Town;
+                        zone.Sub = sub;
+                    }
+                }
+            }
         }
 
         /// <summary>assign_two_dwords (0x5EE4B0).</summary>

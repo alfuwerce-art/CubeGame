@@ -57,6 +57,37 @@ class LandmarkPort(Port):
                 flagged = f32(flagged + w)
         return f32(flagged / total) if total > 0.0 else 0.0
 
+    def _climate_avg(self, x, z, field):
+        keys = [(rx, rz) for rx in range((x - 0x4000) >> 14, ((x + 0x4000) >> 14) + 1)
+                for rz in range((z - 0x4000) >> 14, ((z + 0x4000) >> 14) + 1)]
+        cells = [self.cell(*k) for k in keys]
+        if any(c is None for c in cells):
+            return 0.0
+        n1 = noise(z * 0.0005, 3423.0)
+        n2 = noise(x * 0.0005, 23421.0)
+        px = int(f32(f32(float(x)) + f32(f32(n1 * 3.0) * 256.0)))
+        pz = int(f32(f32(float(z)) + f32(f32(n2 * 3.0) * 256.0)))
+        ds = [int(f32(f32(float(c["anchor_z"] - pz)) ** 2 + f32(float(c["anchor_x"] - px)) ** 2)) for c in cells]
+        best = min(ds)
+        tw = tv = 0.0
+        for c, d in zip(cells, ds):
+            w = f32(1.0 - min(1.0, f32(float(d - best) * 5e-07)))
+            tw = f32(tw + w)
+            tv = f32(tv + f32(c[field] * w))
+        return f32(tv / tw)
+
+    def humidity(self, x, z):
+        """0x5C4DD0: weighted climate field 4."""
+        return self._climate_avg(x, z, "f4")
+
+    def temperature(self, x, z):
+        """0x5C4800: weighted climate field 3, raised inside cold Forest landmarks."""
+        t = self._climate_avg(x, z, "f3")
+        col = self.column_at(x, z)
+        if t < 0.2 and col is not None and col["type"] == 3:
+            t = min(f32(self.falloff(self.dist(col, x, z)) * 0.3 + t), 1.0)
+        return t
+
     def height_at_xy(self, x, z):
         col = self.column_at(x, z)
         if col is not None and col["type"] == 1:

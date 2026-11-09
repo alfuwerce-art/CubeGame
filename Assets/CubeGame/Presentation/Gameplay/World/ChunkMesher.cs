@@ -1,48 +1,39 @@
-using CubeGame.Core.Generation;
 using CubeGame.Core.Rendering;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.World;
 
 namespace CubeGame.Gameplay.Streaming
 {
-    /// <summary>Generated heights of one chunk plus a one-column border (thread-safe to compute: generator only).</summary>
-    public sealed class ChunkHeights
+    /// <summary>
+    /// Voxel columns of one 32×32 chunk plus a one-column border (the border decides which side faces are exposed).
+    /// <see cref="Sample"/> touches the generator only and is safe on worker threads; <see cref="ApplyDeltas"/> runs on
+    /// the main thread (the delta store is not shared with workers). Generated columns are shared and never mutated:
+    /// edited columns are replaced by edited copies.
+    /// </summary>
+    public sealed class ChunkVoxels
     {
         public const int Size = WorldLayout.ChunkSize;
         public const int Span = Size + 2;
 
         public ChunkKey Key;
-        public int[] Surface = new int[Span * Span];
-        public bool[] Rock = new bool[Span * Span];
+        public VoxelColumn[] Columns = new VoxelColumn[Span * Span];
 
-        public static ChunkHeights Sample(IWorldGenerator generator, ChunkKey key)
+        public static ChunkVoxels Sample(IWorldGenerator generator, ChunkKey key)
         {
-            var result = new ChunkHeights { Key = key };
+            var result = new ChunkVoxels { Key = key };
             int originX = key.X * Size;
             int originZ = key.Z * Size;
             for (int lz = -1; lz <= Size; lz++)
             {
                 for (int lx = -1; lx <= Size; lx++)
                 {
-                    int i = (lz + 1) * Span + lx + 1;
-                    int wx = originX + lx;
-                    int wz = originZ + lz;
-                    if (!WorldLayout.IsInsideVoxels(wx, wz))
-                    {
-                        result.Surface[i] = int.MinValue / 2;
-                        continue;
-                    }
-
-                    TerrainColumn column = generator.Column(wx, wz);
-                    result.Surface[i] = column.Surface;
-                    result.Rock[i] = column.Rock;
+                    result.Columns[(lz + 1) * Span + lx + 1] = generator.Voxels(originX + lx, originZ + lz);
                 }
             }
 
             return result;
         }
 
-        /// <summary>Overlays persistent column edits (main thread: the delta store is not shared with workers).</summary>
         public void ApplyDeltas(WorldDeltaStore deltas)
         {
             int originX = Key.X * Size;
@@ -51,73 +42,126 @@ namespace CubeGame.Gameplay.Streaming
             {
                 for (int lx = -1; lx <= Size; lx++)
                 {
-                    if (deltas.TryGetColumnSurface(originX + lx, originZ + lz, out int edited))
-                    {
-                        Surface[(lz + 1) * Span + lx + 1] = edited;
-                    }
+                    int i = (lz + 1) * Span + lx + 1;
+                    Columns[i] = WorldState.Apply(Columns[i], deltas, originX + lx, originZ + lz);
                 }
             }
         }
 
-        public int At(int lx, int lz) => Surface[(lz + 1) * Span + lx + 1];
+        /// <summary>Column at chunk-local (lx, lz), −1…32; null outside the world.</summary>
+        public VoxelColumn At(int lx, int lz) => Columns[(lz + 1) * Span + lx + 1];
 
-        public ChunkHeights Copy()
+        public ChunkVoxels Copy()
         {
-            return new ChunkHeights { Key = Key, Surface = (int[])Surface.Clone(), Rock = (bool[])Rock.Clone() };
+            return new ChunkVoxels { Key = Key, Columns = (VoxelColumn[])Columns.Clone() };
         }
     }
 
     /// <summary>
-    /// Builds the render/collision mesh of one 32×32-voxel chunk in chunk-local coordinates: column tops and exposed
-    /// sides, water quads below the water level. Surface colours are PLACEHOLDER_NOT_ALPHA (Alpha colour blend in
-    /// 0x5E4850 not ported).
+    /// Builds the render/collision mesh of one chunk from Alpha voxels (chunk-local coordinates): one quad per exposed
+    /// face of every solid voxel (tops, sides, cave ceilings), coloured with the voxel's own RGB (Alpha colour functions,
+    /// <see cref="AlphaColors"/>); a separate water mesh for water voxels facing air. Faces are not merged.
+    /// Water colour/transparency is PLACEHOLDER_NOT_ALPHA (Alpha draws water voxels with its own water shader).
     /// </summary>
     public static class ChunkMesher
     {
+        private const float WaterR = 0.20f;
+        private const float WaterG = 0.42f;
+        private const float WaterB = 0.75f;
+        private const float WaterA = 0.7f;
+
+        /// <summary>Water surface sits slightly below the voxel top so shores stay visible.</summary>
+        public const float WaterSurfaceDrop = 0.1f;
+
         public sealed class Result
         {
             public MeshData Terrain;
             public MeshData Water;
         }
 
-        public static Result Build(ChunkHeights heights, int waterLevel)
+        public static Result Build(ChunkVoxels chunk)
         {
-            int size = ChunkHeights.Size;
-            int originX = heights.Key.X * size;
-            int originZ = heights.Key.Z * size;
+            int size = ChunkVoxels.Size;
             var terrain = new MeshData();
             var water = new MeshData();
+            var neighbours = new VoxelColumn[4];
             for (int lz = 0; lz < size; lz++)
             {
                 for (int lx = 0; lx < size; lx++)
                 {
-                    int h = heights.At(lx, lz);
-                    bool rock = heights.Rock[(lz + 1) * ChunkHeights.Span + lx + 1];
-                    float variation = (DeterministicHash.Combine(originX + lx, originZ + lz, 17) & 0xFFFF) / 65535f;
-                    TopColor(h, waterLevel, rock, variation, out float r, out float g, out float b);
-                    float top = h + 1;
-                    int s = terrain.VertexCount;
-                    terrain.AddVertex(lx, top, lz, 0f, 1f, 0f, r, g, b, 1f);
-                    terrain.AddVertex(lx, top, lz + 1, 0f, 1f, 0f, r, g, b, 1f);
-                    terrain.AddVertex(lx + 1, top, lz + 1, 0f, 1f, 0f, r, g, b, 1f);
-                    terrain.AddVertex(lx + 1, top, lz, 0f, 1f, 0f, r, g, b, 1f);
-                    terrain.AddQuad(s, s + 1, s + 2, s + 3);
-
-                    SideColor(variation, rock, out float sr, out float sg, out float sb);
-                    Side(terrain, h, heights.At(lx - 1, lz), lx, lz, lx, lz + 1, -1f, 0f, sr, sg, sb);
-                    Side(terrain, h, heights.At(lx + 1, lz), lx + 1, lz + 1, lx + 1, lz, 1f, 0f, sr, sg, sb);
-                    Side(terrain, h, heights.At(lx, lz - 1), lx + 1, lz, lx, lz, 0f, -1f, sr, sg, sb);
-                    Side(terrain, h, heights.At(lx, lz + 1), lx, lz + 1, lx + 1, lz + 1, 0f, 1f, sr, sg, sb);
-
-                    if (h < waterLevel)
+                    VoxelColumn c = chunk.At(lx, lz);
+                    if (c == null)
                     {
-                        float wy = waterLevel + 0.9f;
-                        int w = water.VertexCount;
-                        water.AddVertex(lx, wy, lz, 0f, 1f, 0f, 0.20f, 0.42f, 0.75f, 0.7f);
-                        water.AddVertex(lx, wy, lz + 1, 0f, 1f, 0f, 0.20f, 0.42f, 0.75f, 0.7f);
-                        water.AddVertex(lx + 1, wy, lz + 1, 0f, 1f, 0f, 0.20f, 0.42f, 0.75f, 0.7f);
-                        water.AddVertex(lx + 1, wy, lz, 0f, 1f, 0f, 0.20f, 0.42f, 0.75f, 0.7f);
-                        water.AddQuad(w, w + 1, w + 2, w + 3);
+                        continue;
+                    }
+
+                    neighbours[0] = chunk.At(lx - 1, lz);
+                    neighbours[1] = chunk.At(lx + 1, lz);
+                    neighbours[2] = chunk.At(lx, lz - 1);
+                    neighbours[3] = chunk.At(lx, lz + 1);
+                    // Start one below the lowest stored voxel: the implicit solid just below Bottom can have an exposed top.
+                    int yMin = c.Bottom - 1;
+                    foreach (VoxelColumn n in neighbours)
+                    {
+                        if (n != null && n.Bottom - 1 < yMin)
+                        {
+                            yMin = n.Bottom - 1;
+                        }
+                    }
+
+                    int yMax = c.TopStored > 0 ? c.TopStored : 0;
+                    for (int y = yMin; y <= yMax; y++)
+                    {
+                        uint v = c.Read(y);
+                        if (Voxel.IsSolid(v))
+                        {
+                            float r = Voxel.R(v) / 255f;
+                            float g = Voxel.G(v) / 255f;
+                            float b = Voxel.B(v) / 255f;
+                            if (!Voxel.IsSolid(c.Read(y + 1)))
+                            {
+                                Top(terrain, lx, y + 1, lz, r, g, b, 1f);
+                            }
+
+                            if (y >= c.Bottom && !Voxel.IsSolid(c.Read(y - 1)))
+                            {
+                                Bottom(terrain, lx, y, lz, r, g, b);
+                            }
+
+                            for (int side = 0; side < 4; side++)
+                            {
+                                VoxelColumn n = neighbours[side];
+                                if (n != null && !Voxel.IsSolid(n.Read(y)))
+                                {
+                                    Side(terrain, side, lx, lz, y, y + 1, r, g, b, 1f);
+                                }
+                            }
+                        }
+                        else if (Voxel.IsWater(v))
+                        {
+                            uint above = c.Read(y + 1);
+                            bool surface = !Voxel.IsSolid(above) && !Voxel.IsWater(above);
+                            float topY = surface ? y + 1 - WaterSurfaceDrop : y + 1;
+                            if (surface)
+                            {
+                                Top(water, lx, topY, lz, WaterR, WaterG, WaterB, WaterA);
+                            }
+
+                            for (int side = 0; side < 4; side++)
+                            {
+                                VoxelColumn n = neighbours[side];
+                                if (n == null)
+                                {
+                                    continue;
+                                }
+
+                                uint nv = n.Read(y);
+                                if (!Voxel.IsSolid(nv) && !Voxel.IsWater(nv))
+                                {
+                                    Side(water, side, lx, lz, y, topY, WaterR, WaterG, WaterB, WaterA);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -125,59 +169,44 @@ namespace CubeGame.Gameplay.Streaming
             return new Result { Terrain = terrain, Water = water };
         }
 
-        /// <summary>Wall from the neighbour's top up to this column's top; (ax,az) is the right-hand edge seen from outside.</summary>
-        private static void Side(MeshData mesh, int own, int neighbour, float ax, float az, float bx, float bz, float nx, float nz, float r, float g, float b)
+        private static void Top(MeshData mesh, float x, float y, float z, float r, float g, float b, float a)
         {
-            if (neighbour >= own)
-            {
-                return;
-            }
-
-            float top = own + 1;
-            float bottom = neighbour + 1;
             int s = mesh.VertexCount;
-            mesh.AddVertex(ax, bottom, az, nx, 0f, nz, r, g, b, 1f);
-            mesh.AddVertex(bx, bottom, bz, nx, 0f, nz, r, g, b, 1f);
-            mesh.AddVertex(bx, top, bz, nx, 0f, nz, r, g, b, 1f);
-            mesh.AddVertex(ax, top, az, nx, 0f, nz, r, g, b, 1f);
+            mesh.AddVertex(x, y, z, 0f, 1f, 0f, r, g, b, a);
+            mesh.AddVertex(x, y, z + 1, 0f, 1f, 0f, r, g, b, a);
+            mesh.AddVertex(x + 1, y, z + 1, 0f, 1f, 0f, r, g, b, a);
+            mesh.AddVertex(x + 1, y, z, 0f, 1f, 0f, r, g, b, a);
             mesh.AddQuad(s, s + 1, s + 2, s + 3);
         }
 
-        private static void TopColor(int h, int water, bool rock, float variation, out float r, out float g, out float b)
+        private static void Bottom(MeshData mesh, float x, float y, float z, float r, float g, float b)
         {
-            float shade = 1f - variation * 0.08f;
-            if (h < water + 1)
-            {
-                r = 0.80f; g = 0.74f; b = 0.52f;
-            }
-            else if (rock)
-            {
-                r = 0.52f; g = 0.50f; b = 0.47f;
-            }
-            else if (h > water + 160)
-            {
-                r = 0.93f; g = 0.95f; b = 0.97f;
-            }
-            else if (h > water + 90)
-            {
-                r = 0.34f; g = 0.47f; b = 0.29f;
-            }
-            else
-            {
-                r = 0.38f; g = 0.64f; b = 0.31f;
-            }
-
-            r *= shade;
-            g *= shade;
-            b *= shade;
+            int s = mesh.VertexCount;
+            mesh.AddVertex(x, y, z, 0f, -1f, 0f, r, g, b, 1f);
+            mesh.AddVertex(x + 1, y, z, 0f, -1f, 0f, r, g, b, 1f);
+            mesh.AddVertex(x + 1, y, z + 1, 0f, -1f, 0f, r, g, b, 1f);
+            mesh.AddVertex(x, y, z + 1, 0f, -1f, 0f, r, g, b, 1f);
+            mesh.AddQuad(s, s + 1, s + 2, s + 3);
         }
 
-        private static void SideColor(float variation, bool rock, out float r, out float g, out float b)
+        /// <summary>Side 0: −X, 1: +X, 2: −Z, 3: +Z; (a, b) is the bottom edge seen from outside, left to right.</summary>
+        private static void Side(MeshData mesh, int side, int x, int z, float y0, float y1, float r, float g, float b, float a)
         {
-            float shade = 1f - variation * 0.06f;
-            r = (rock ? 0.46f : 0.42f) * shade;
-            g = (rock ? 0.44f : 0.36f) * shade;
-            b = (rock ? 0.41f : 0.30f) * shade;
+            float ax, az, bx, bz, nx = 0f, nz = 0f;
+            switch (side)
+            {
+                case 0: ax = x; az = z; bx = x; bz = z + 1; nx = -1f; break;
+                case 1: ax = x + 1; az = z + 1; bx = x + 1; bz = z; nx = 1f; break;
+                case 2: ax = x + 1; az = z; bx = x; bz = z; nz = -1f; break;
+                default: ax = x; az = z + 1; bx = x + 1; bz = z + 1; nz = 1f; break;
+            }
+
+            int s = mesh.VertexCount;
+            mesh.AddVertex(ax, y0, az, nx, 0f, nz, r, g, b, a);
+            mesh.AddVertex(bx, y0, bz, nx, 0f, nz, r, g, b, a);
+            mesh.AddVertex(bx, y1, bz, nx, 0f, nz, r, g, b, a);
+            mesh.AddVertex(ax, y1, az, nx, 0f, nz, r, g, b, a);
+            mesh.AddQuad(s, s + 1, s + 2, s + 3);
         }
     }
 }

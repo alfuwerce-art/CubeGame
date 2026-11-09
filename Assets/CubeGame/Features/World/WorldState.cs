@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CubeGame.Features.Contracts;
 
 namespace CubeGame.Features.World
@@ -16,19 +17,56 @@ namespace CubeGame.Features.World
 
         public WorldDeltaStore Deltas { get; }
 
+        /// <summary>Voxel column with every persistent edit applied (the generated column itself when unedited).</summary>
+        public VoxelColumn EffectiveColumn(int x, int z)
+        {
+            return Apply(Generator.Voxels(x, z), Deltas, x, z);
+        }
+
+        /// <summary>Applies column/block edits of (x, z) to a copy of <paramref name="generated"/>; returns it unchanged when unedited.</summary>
+        public static VoxelColumn Apply(VoxelColumn generated, WorldDeltaStore deltas, int x, int z)
+        {
+            if (generated == null || deltas == null || !deltas.HasColumnEdits(x, z))
+            {
+                return generated;
+            }
+
+            VoxelColumn column = generated.Clone();
+            if (deltas.TryGetColumnSurface(x, z, out int surface))
+            {
+                column.SetSurface(surface);
+            }
+
+            foreach (System.Collections.Generic.KeyValuePair<int, uint> block in deltas.BlocksOf(x, z))
+            {
+                column.Overwrite(block.Key, block.Value);
+            }
+
+            return column;
+        }
+
+        public uint VoxelAt(int x, int y, int z)
+        {
+            if (Deltas.TryGetVoxel(x, y, z, out uint edited))
+            {
+                return edited;
+            }
+
+            VoxelColumn column = EffectiveColumn(x, z);
+            return column?.Read(y) ?? Voxel.Air;
+        }
+
+        /// <summary>Top solid voxel Y of column (x, z) — where things stand.</summary>
         public int SurfaceAt(int x, int z)
         {
-            return Deltas.TryGetColumnSurface(x, z, out int edited)
-                ? edited
-                : Generator.Column(x, z).Surface;
+            VoxelColumn column = EffectiveColumn(x, z);
+            return column?.TopSolid() ?? int.MinValue / 2;
         }
 
         public TerrainColumn ColumnAt(int x, int z)
         {
             TerrainColumn generated = Generator.Column(x, z);
-            return Deltas.TryGetColumnSurface(x, z, out int edited)
-                ? new TerrainColumn(edited, generated.Rock, generated.Mountain, generated.BaseHeight)
-                : generated;
+            return new TerrainColumn(SurfaceAt(x, z), generated.Rock, generated.Mountain, generated.BaseHeight);
         }
 
         /// <summary>Creates the generator recorded in a world's id. Unknown ids are refused, never substituted.</summary>
@@ -36,7 +74,7 @@ namespace CubeGame.Features.World
         {
             if (generatorId == AlphaTerrainGenerator.Id)
             {
-                generator = new AlphaTerrainGenerator(seed);
+                generator = new AlphaTerrainGenerator(seed, ZoneContentRegistry.Providers);
                 return true;
             }
 
@@ -48,9 +86,54 @@ namespace CubeGame.Features.World
         {
             int x = WorldLayout.StartVoxel;
             int z = WorldLayout.StartVoxel;
-            int surface = deltas != null && deltas.TryGetColumnSurface(x, z, out int edited) ? edited : generator.Column(x, z).Surface;
+            int surface = Apply(generator.Voxels(x, z), deltas, x, z).TopSolid();
             int top = Math.Max(surface, generator.WaterLevel);
             return new WorldPosition(x + 0.5, top + 1.2, z + 0.5);
+        }
+    }
+
+    /// <summary>
+    /// Content providers used by every generator the game creates (registered once at startup by the content
+    /// modules, DeepSeek #13). Empty in M0-02: the world is terrain only.
+    /// </summary>
+    public static class ZoneContentRegistry
+    {
+        private static readonly List<IZoneContentProvider> _providers = new List<IZoneContentProvider>();
+
+        public static IReadOnlyList<IZoneContentProvider> Providers
+        {
+            get
+            {
+                lock (_providers)
+                {
+                    return _providers.ToArray();
+                }
+            }
+        }
+
+        public static void Register(IZoneContentProvider provider)
+        {
+            if (provider == null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
+            lock (_providers)
+            {
+                if (!_providers.Contains(provider))
+                {
+                    _providers.Add(provider);
+                }
+            }
+        }
+
+        /// <summary>Tests only.</summary>
+        public static void Clear()
+        {
+            lock (_providers)
+            {
+                _providers.Clear();
+            }
         }
     }
 }

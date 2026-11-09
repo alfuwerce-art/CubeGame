@@ -8,15 +8,20 @@ namespace CubeGame.Features.World
     /// Persistent world changes (voxel coordinates) relative to generator output (M0-00C §8), owned by the running session.
     /// Alpha marks player-changed voxels with byte-3 flag 0x80 (W-13) and writes the "discovered" blob when a
     /// zone unloads (W-12); CubeGame keeps both here and saves them with the slot.
-    /// The terrain is still a height field in this package, so the only block edit is
-    /// <see cref="WorldDeltaKind.ColumnSurfaceSet"/> (new top-block Y of one column); volumetric edits come with caves.
+    /// Terrain edits: <see cref="WorldDeltaKind.BlockSet"/> (one voxel, Value = packed Alpha voxel uint) and
+    /// <see cref="WorldDeltaKind.ColumnSurfaceSet"/> (new top solid Y of one column). Block edits are applied after the
+    /// column edit of the same column.
     /// </summary>
     public sealed class WorldDeltaStore
     {
         public const int MaxSurface = 1024;
         public const int MinSurface = -256;
 
-        private readonly Dictionary<RegionKey, Dictionary<long, WorldDelta>> _byRegion = new Dictionary<RegionKey, Dictionary<long, WorldDelta>>();
+        private readonly Dictionary<RegionKey, Dictionary<(WorldDeltaKind, int, int, int), WorldDelta>> _byRegion =
+            new Dictionary<RegionKey, Dictionary<(WorldDeltaKind, int, int, int), WorldDelta>>();
+
+        /// <summary>Block edits per column (x, z) → (y → delta), for building effective voxel columns.</summary>
+        private readonly Dictionary<(int, int), Dictionary<int, WorldDelta>> _blocksByColumn = new Dictionary<(int, int), Dictionary<int, WorldDelta>>();
         private readonly HashSet<ZoneKey> _discovered = new HashSet<ZoneKey>();
 
         /// <summary>Raised after a change was recorded (presentation rebuilds the region view).</summary>
@@ -27,7 +32,7 @@ namespace CubeGame.Features.World
             get
             {
                 int n = 0;
-                foreach (Dictionary<long, WorldDelta> region in _byRegion.Values)
+                foreach (Dictionary<(WorldDeltaKind, int, int, int), WorldDelta> region in _byRegion.Values)
                 {
                     n += region.Count;
                 }
@@ -60,6 +65,59 @@ namespace CubeGame.Features.World
             return true;
         }
 
+        /// <summary>Sets one voxel (packed Alpha voxel: RGB + flags; 0 = air).</summary>
+        public bool SetVoxel(int x, int y, int z, uint voxel, long timeMs)
+        {
+            if (!WorldLayout.IsInsideVoxels(x, z) || y < MinSurface || y > MaxSurface)
+            {
+                return false;
+            }
+
+            Record(new WorldDelta
+            {
+                Region = WorldLayout.RegionOf(x, z),
+                Kind = WorldDeltaKind.BlockSet,
+                X = x,
+                Y = y,
+                Z = z,
+                Value = unchecked((int)voxel),
+                TimeMs = timeMs,
+            });
+            return true;
+        }
+
+        public bool TryGetVoxel(int x, int y, int z, out uint voxel)
+        {
+            if (_blocksByColumn.TryGetValue((x, z), out Dictionary<int, WorldDelta> column) && column.TryGetValue(y, out WorldDelta delta))
+            {
+                voxel = unchecked((uint)delta.Value);
+                return true;
+            }
+
+            voxel = 0u;
+            return false;
+        }
+
+        /// <summary>True when column (x, z) has any terrain edit (surface or block).</summary>
+        public bool HasColumnEdits(int x, int z)
+        {
+            return _blocksByColumn.ContainsKey((x, z)) || TryGetColumnSurface(x, z, out _);
+        }
+
+        /// <summary>Block edits of column (x, z) (y → packed voxel); empty when none.</summary>
+        public IEnumerable<KeyValuePair<int, uint>> BlocksOf(int x, int z)
+        {
+            if (!_blocksByColumn.TryGetValue((x, z), out Dictionary<int, WorldDelta> column))
+            {
+                yield break;
+            }
+
+            foreach (KeyValuePair<int, WorldDelta> pair in column)
+            {
+                yield return new KeyValuePair<int, uint>(pair.Key, unchecked((uint)pair.Value.Value));
+            }
+        }
+
         /// <summary>Adds a delta; a later delta for the same (kind, x, y, z) key replaces the earlier one.</summary>
         public void Record(WorldDelta delta)
         {
@@ -68,21 +126,31 @@ namespace CubeGame.Features.World
                 throw new ArgumentNullException(nameof(delta));
             }
 
-            if (!_byRegion.TryGetValue(delta.Region, out Dictionary<long, WorldDelta> map))
+            if (!_byRegion.TryGetValue(delta.Region, out Dictionary<(WorldDeltaKind, int, int, int), WorldDelta> map))
             {
-                map = new Dictionary<long, WorldDelta>();
+                map = new Dictionary<(WorldDeltaKind, int, int, int), WorldDelta>();
                 _byRegion.Add(delta.Region, map);
             }
 
             map[KeyOf(delta)] = delta;
+            if (delta.Kind == WorldDeltaKind.BlockSet)
+            {
+                if (!_blocksByColumn.TryGetValue((delta.X, delta.Z), out Dictionary<int, WorldDelta> column))
+                {
+                    column = new Dictionary<int, WorldDelta>();
+                    _blocksByColumn.Add((delta.X, delta.Z), column);
+                }
+
+                column[delta.Y] = delta;
+            }
             RegionChanged?.Invoke(delta.Region);
         }
 
         public bool TryGetColumnSurface(int x, int z, out int surface)
         {
             RegionKey region = WorldLayout.RegionOf(x, z);
-            if (_byRegion.TryGetValue(region, out Dictionary<long, WorldDelta> map)
-                && map.TryGetValue(ColumnKey(x, z), out WorldDelta delta))
+            if (_byRegion.TryGetValue(region, out Dictionary<(WorldDeltaKind, int, int, int), WorldDelta> map)
+                && map.TryGetValue((WorldDeltaKind.ColumnSurfaceSet, x, 0, z), out WorldDelta delta))
             {
                 surface = delta.Value;
                 return true;
@@ -94,14 +162,14 @@ namespace CubeGame.Features.World
 
         public IReadOnlyCollection<WorldDelta> DeltasOf(RegionKey region)
         {
-            return _byRegion.TryGetValue(region, out Dictionary<long, WorldDelta> map)
+            return _byRegion.TryGetValue(region, out Dictionary<(WorldDeltaKind, int, int, int), WorldDelta> map)
                 ? (IReadOnlyCollection<WorldDelta>)map.Values
                 : Array.Empty<WorldDelta>();
         }
 
         public IEnumerable<WorldDelta> All()
         {
-            foreach (Dictionary<long, WorldDelta> map in _byRegion.Values)
+            foreach (Dictionary<(WorldDeltaKind, int, int, int), WorldDelta> map in _byRegion.Values)
             {
                 foreach (WorldDelta delta in map.Values)
                 {
@@ -119,22 +187,12 @@ namespace CubeGame.Features.World
 
         public bool IsDiscovered(ZoneKey zone) => _discovered.Contains(zone);
 
-        private static long KeyOf(WorldDelta delta)
+        /// <summary>Delta identity: a column edit is keyed by its column only (its Y is the new surface).</summary>
+        private static (WorldDeltaKind, int, int, int) KeyOf(WorldDelta delta)
         {
-            if (delta.Kind == WorldDeltaKind.ColumnSurfaceSet)
-            {
-                return ColumnKey(delta.X, delta.Z);
-            }
-
-            unchecked
-            {
-                return ((long)(int)delta.Kind << 56) ^ ((long)(delta.X & 0xFFFFF) << 36) ^ ((long)(delta.Y & 0xFFF) << 24) ^ (delta.Z & 0xFFFFFF);
-            }
-        }
-
-        private static long ColumnKey(int x, int z)
-        {
-            return ((long)WorldDeltaKind.ColumnSurfaceSet << 56) | ((long)(x & 0xFFFFFF) << 24) | (long)(z & 0xFFFFFF);
+            return delta.Kind == WorldDeltaKind.ColumnSurfaceSet
+                ? (delta.Kind, delta.X, 0, delta.Z)
+                : (delta.Kind, delta.X, delta.Y, delta.Z);
         }
     }
 

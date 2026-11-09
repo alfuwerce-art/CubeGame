@@ -240,3 +240,45 @@ class RegionPort:
             col["type"] = 10
             col["id"] = crt.rand() % 10000000 + 1
         return {"rx": rx, "rz": rz, "level": level, "variant": variant, "orientation": orientation, "columns": cols}
+
+
+def zone_grid(region):
+    """16-byte zone records of generateRegion (region+0x18, index lx*64 + lz): +0 type, +1 sub, +4 id, +8 level, +0xC class.
+
+    Types: 0 plain, 1 town zone of a Village (sub 1..4 = the four zones nearest the village centre), 3 settlement zone
+    of a 0xE column, 4 zone of a 0xA column. Every zone holding a column centre gets that column's level; others 1.
+    """
+    from tools.alpha_models.world.landmark_port import LandmarkPort
+
+    rx, rz = region["rx"], region["rz"]
+    grid = {(lx, lz): dict(type=0, sub=0, id=0, level=1, cls=0) for lx in range(64) for lz in range(64)}
+
+    def zone_of(col):
+        return (int(col["x"]) >> 8) & 63, (int(col["z"]) >> 8) & 63
+
+    cols = region["columns"]
+    for col in cols:
+        if col["type"] == 0xE:
+            rec = grid[zone_of(col)]
+            rec.update(type=3, sub=col["sub"], id=col["zone_id"], cls=col["zone_cls"])
+    for col in cols:
+        if col["type"] == 10:
+            rec = grid[zone_of(col)]
+            rec.update(type=4, id=col["id"])
+    for col in cols:
+        grid[zone_of(col)]["level"] = col["level"]
+    for i in range(8):
+        for j in range(8):
+            col = cols[i * 8 + j]
+            if col["type"] != 1:
+                continue
+            entries = []
+            for dx in range(8):
+                for dz in range(8):
+                    x = (i + rx * 8) * 0x800 + 0x80 + dx * 0x100
+                    z = (j + rz * 8) * 0x800 + 0x80 + dz * 0x100
+                    entries.append((LandmarkPort.falloff(LandmarkPort.dist(col, x, z)), i * 8 + dx, j * 8 + dz))
+            entries.sort(key=lambda e: -e[0])
+            for sub, (_, lx, lz) in enumerate(entries[:4], start=1):
+                grid[(lx, lz)].update(type=1, sub=sub)
+    return grid

@@ -39,8 +39,25 @@ class WorldCPU(EmuCPU):
     """EmuCPU + SHLD/SHRD (Alpha 16.16 world coordinates) + FS segment over a synthetic TEB (SEH frames)."""
 
     fs_active = False
+    raw_import_targets = {}   # raw IAT cell value (hint/name RVA) -> IAT slot, for `mov reg, [IAT]; call reg`
+
+    def _do_call(self, target, ret):
+        slot = self.raw_import_targets.get(target)
+        if slot is not None and slot in self.iat:
+            self.r["eax"] = self.iat[slot](self) & MASK
+            self.eip = ret
+            return
+        return super()._do_call(target, ret)
 
     def step(self):
+        if self.eip in self.stubs:
+            # A stub entered by `jmp` (tail call / wrapper): the return address is already on the stack.
+            fn, cleanup = self.stubs[self.eip]
+            self.steps += 1
+            fn(self)
+            self.eip = self.pop()
+            self.r["esp"] = (self.r["esp"] + cleanup) & MASK
+            return
         if self.mem.read(self.eip, 1)[0] == 0x64:
             self.eip += 1
             op = self.mem.read(self.eip, 1)[0]
@@ -182,7 +199,18 @@ class Oracle:
         def delete(cpu, skip):
             return 0   # freeing synthetic heap memory does not influence results
 
-        known = {"srand": srand, "rand": rand, "??2@YAPAXI@Z": new, "??3@YAXPAX@Z": delete}
+        def memset(cpu, skip):
+            dst, val, n = (cpu.mem.u(cpu.r["esp"] + skip + 4 * i, 4) for i in range(3))
+            cpu.mem.write(dst, bytes([val & 0xFF]) * n)
+            return dst
+
+        def memcpy(cpu, skip):
+            dst, src, n = (cpu.mem.u(cpu.r["esp"] + skip + 4 * i, 4) for i in range(3))
+            cpu.mem.write(dst, cpu.mem.read(src, n))
+            return dst
+
+        known = {"srand": srand, "rand": rand, "??2@YAPAXI@Z": new, "??3@YAXPAX@Z": delete, "??_V@YAXPAX@Z": delete,
+                 "memset": memset, "memcpy": memcpy, "memmove": memcpy}
 
         def noop(cpu, skip):
             return cpu.r["eax"]
@@ -191,6 +219,9 @@ class Oracle:
             name = self.imports[slot].split("!")[1]
             if name in known:
                 return known[name]
+            if "CriticalSection" in name:
+                # single-threaded interpreter: locks are no-ops (stdcall pop handled by stdcall_bytes)
+                return lambda cpu, skip: 1
             if "_Container_base0" in name:
                 # std::_Container_base0 members are empty in the release STL (no iterator debugging).
                 return noop
@@ -199,8 +230,19 @@ class Oracle:
                 raise EmuError(f"unstubbed import {self.imports[slot]} (slot 0x{slot:08X})")
             return fail
 
-        def via_iat(fn):
-            return lambda cpu: fn(cpu, 0)
+        def stdcall_bytes(slot):
+            """Bytes a stdcall (WinAPI) import pops itself; CRT imports are cdecl (0)."""
+            name = self.imports[slot]
+            if "InitializeCriticalSectionAndSpinCount" in name:
+                return 8
+            return 4 if "CriticalSection" in name else 0
+
+        def via_iat(fn, pop):
+            def call(cpu):
+                result = fn(cpu, 0)
+                cpu.r["esp"] = (cpu.r["esp"] + pop) & MASK
+                return result
+            return call
 
         def via_thunk(fn):
             def stub(cpu):
@@ -208,7 +250,8 @@ class Oracle:
             return stub
 
         for slot in self.imports:
-            self.cpu.iat[slot] = via_iat(resolve(slot))
+            self.cpu.iat[slot] = via_iat(resolve(slot), stdcall_bytes(slot))
+        self.cpu.raw_import_targets = {self.image.u32(slot): slot for slot in self.imports}
 
         lo, hi = 0x68D000, 0x68E000
         blob = self.image.read(lo, hi - lo)
@@ -216,7 +259,7 @@ class Oracle:
             if blob[i] == 0xFF and blob[i + 1] == 0x25:
                 slot = int.from_bytes(blob[i + 2:i + 6], "little")
                 if slot in self.imports and (lo + i) not in self.cpu.stubs:
-                    self.cpu.stubs[lo + i] = (via_thunk(resolve(slot)), 0)
+                    self.cpu.stubs[lo + i] = (via_thunk(resolve(slot)), stdcall_bytes(slot))
 
     def seed_world(self, master):
         """World seed table exactly as crt_stl.cpp 11431-11459 (srand(master); rand()%100000 ...)."""
@@ -236,6 +279,13 @@ class Oracle:
         # Spawn point (world+0x8000F0/F4, floats in voxels) = CubeGame start: centre of zone 32800 (saved Alpha hero
         # zone 32800.5, OQ-22 PARTIAL). Selects the "start region" branch of the climate cell (0x5D7A70).
         self.cpu.mem.write(WORLD + 0x8000F0, struct.pack("<2f", START_VOXEL, START_VOXEL))
+        # Voxel constants filled by CRT static initializers at game start (not executed here): water 0x76DDF4,
+        # 0x76B010, 0x76DE0C = (255,255,255, 2|0x80) (lib_fn_6fae90 / 6f99c0 / …), air 0x76DDF8 = (255,255,255,0),
+        # default solid 0x76DDFC = (200,200,200,1) (other.cpp 212322-212396).
+        for va, value in ((0x76DDF4, bytes([255, 255, 255, 0x82])), (0x76B010, bytes([255, 255, 255, 0x82])),
+                          (0x76DE0C, bytes([255, 255, 255, 0x82])), (0x76DDF8, bytes([255, 255, 255, 0])),
+                          (0x76DDFC, bytes([200, 200, 200, 1]))):
+            self.cpu.mem.write(va, value)
 
     def alloc(self, size):
         va = self.heap_top

@@ -165,5 +165,39 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.AreEqual(edited + 1, hit.point.y, 0.01f);
             Assert.IsTrue(game.ExitToMenu(false));
         }
+
+        [UnityTest]
+        public IEnumerator VoxelEditBuildsColliderAndSurvivesSaveLoad()
+        {
+            GameBootstrap game = NewGame();
+            yield return null;
+
+            Assert.IsTrue(game.StartNewWorld("slot0", "Voxel", 99u, "Builder", CharacterClass.Warrior), game.Status);
+            int x = WorldLayout.StartVoxel + 7;
+            int z = WorldLayout.StartVoxel - 4;
+            int ground = game.WorldState.SurfaceAt(x, z);
+            uint stone = Voxel.Pack(90, 90, 90, 6);
+
+            // A floating block two voxels above the ground: the mesher must give it a top face (collider) of its own.
+            Assert.IsTrue(game.EditVoxel(x, ground + 3, z, stone), game.Status);
+            Assert.AreEqual(ground + 3, game.WorldState.SurfaceAt(x, z));
+            yield return Frames(10);
+
+            Vector3 above = game.WorldView.ToScene(x + 0.5, ground + 30, z + 0.5);
+            Assert.IsTrue(Physics.Raycast(above, Vector3.down, out RaycastHit hit, 200f));
+            Assert.AreEqual(ground + 4, hit.point.y, 0.01f, "collider on the placed voxel");
+
+            Assert.IsTrue(game.SaveCheckpoint(), game.Status);
+            Assert.IsTrue(game.ExitToMenu(false));
+            yield return Frames(2);
+            Assert.IsTrue(game.LoadWorld("slot0"), game.Status);
+            Assert.AreEqual(stone, game.WorldState.VoxelAt(x, ground + 3, z), "voxel restored from the world file");
+            Assert.AreEqual(Voxel.Air, game.WorldState.VoxelAt(x, ground + 2, z));
+            yield return Frames(2);
+            above = game.WorldView.ToScene(x + 0.5, ground + 30, z + 0.5);
+            Assert.IsTrue(Physics.Raycast(above, Vector3.down, out hit, 200f));
+            Assert.AreEqual(ground + 4, hit.point.y, 0.01f);
+            Assert.IsTrue(game.ExitToMenu(false));
+        }
     }
 }

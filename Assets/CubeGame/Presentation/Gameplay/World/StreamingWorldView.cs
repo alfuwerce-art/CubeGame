@@ -12,7 +12,7 @@ namespace CubeGame.Gameplay.Streaming
 {
     /// <summary>
     /// Presentation of the streamed world: one GameObject (mesh + collider, water) per 32×32-voxel chunk around a
-    /// focus point. Generator heights are sampled on worker threads (the generator is pure; its climate cache is
+    /// focus point. Generator voxel columns are sampled on worker threads (the generator is pure; its climate cache is
     /// locked); deltas, meshes and colliders are applied on the main thread with a per-frame budget.
     ///
     /// Floating origin: Alpha coordinates reach 2^24 voxels, beyond float precision, so chunk objects are placed at
@@ -24,10 +24,10 @@ namespace CubeGame.Gameplay.Streaming
     {
         private readonly Dictionary<ChunkKey, ChunkView> _loaded = new Dictionary<ChunkKey, ChunkView>();
         private readonly HashSet<ChunkKey> _inFlight = new HashSet<ChunkKey>();
-        private readonly ConcurrentQueue<ChunkHeights> _ready = new ConcurrentQueue<ChunkHeights>();
+        private readonly ConcurrentQueue<ChunkVoxels> _ready = new ConcurrentQueue<ChunkVoxels>();
         private readonly List<ChunkKey> _wanted = new List<ChunkKey>();
         private readonly HashSet<ChunkKey> _dirty = new HashSet<ChunkKey>();
-        private readonly Dictionary<ChunkKey, ChunkHeights> _heights = new Dictionary<ChunkKey, ChunkHeights>();
+        private readonly Dictionary<ChunkKey, ChunkVoxels> _heights = new Dictionary<ChunkKey, ChunkVoxels>();
 
         private WorldState _world;
         private WorldStreamingPolicy _policy;
@@ -131,7 +131,7 @@ namespace CubeGame.Gameplay.Streaming
                     var key = new ChunkKey(center.X + dx, center.Z + dz);
                     if (WorldLayout.IsInside(key) && !_loaded.ContainsKey(key))
                     {
-                        Install(ChunkHeights.Sample(_world.Generator, key));
+                        Install(ChunkVoxels.Sample(_world.Generator, key));
                     }
                 }
             }
@@ -252,7 +252,7 @@ namespace CubeGame.Gameplay.Streaming
                 IWorldGenerator generator = _world.Generator;
                 Task.Run(() =>
                 {
-                    ChunkHeights heights = ChunkHeights.Sample(generator, key);
+                    ChunkVoxels heights = ChunkVoxels.Sample(generator, key);
                     if (generation == _generation)
                     {
                         _ready.Enqueue(heights);
@@ -261,7 +261,7 @@ namespace CubeGame.Gameplay.Streaming
             }
 
             int budget = BuildsPerFrame;
-            while (budget > 0 && _ready.TryDequeue(out ChunkHeights heights))
+            while (budget > 0 && _ready.TryDequeue(out ChunkVoxels heights))
             {
                 _inFlight.Remove(heights.Key);
                 if (_policy.ShouldRelease(heights.Key, _center) || _loaded.ContainsKey(heights.Key))
@@ -281,7 +281,7 @@ namespace CubeGame.Gameplay.Streaming
                 }
 
                 _dirty.Remove(dirty);
-                if (_heights.TryGetValue(dirty, out ChunkHeights generated))
+                if (_heights.TryGetValue(dirty, out ChunkVoxels generated))
                 {
                     Release(dirty, false);
                     Install(generated);
@@ -295,7 +295,7 @@ namespace CubeGame.Gameplay.Streaming
             // Deltas carry their own column; rebuild every loaded chunk whose 1-column border touches an edited column.
             foreach (WorldDelta delta in _world.Deltas.DeltasOf(region))
             {
-                if (delta.Kind != WorldDeltaKind.ColumnSurfaceSet)
+                if (delta.Kind != WorldDeltaKind.ColumnSurfaceSet && delta.Kind != WorldDeltaKind.BlockSet)
                 {
                     continue;
                 }
@@ -319,12 +319,12 @@ namespace CubeGame.Gameplay.Streaming
             return new Vector3(key.X * WorldLayout.ChunkSize - Origin.x, 0f, key.Z * WorldLayout.ChunkSize - Origin.y);
         }
 
-        private void Install(ChunkHeights generated)
+        private void Install(ChunkVoxels generated)
         {
             // Keep the generator output untouched for later rebuilds; deltas go onto a copy.
-            ChunkHeights heights = generated.Copy();
+            ChunkVoxels heights = generated.Copy();
             heights.ApplyDeltas(_world.Deltas);
-            ChunkMesher.Result data = ChunkMesher.Build(heights, _world.Generator.WaterLevel);
+            ChunkMesher.Result data = ChunkMesher.Build(heights);
             ChunkKey key = heights.Key;
 
             var root = new GameObject($"Chunk_{key.X}_{key.Z}");
@@ -341,7 +341,7 @@ namespace CubeGame.Gameplay.Streaming
             if (data.Water.VertexCount > 0)
             {
                 water = UnityMeshFactory.Create(data.Water, $"WaterMesh_{key.X}_{key.Z}");
-                var waterObject = new GameObject("Water_PLACEHOLDER");
+                var waterObject = new GameObject("Water");
                 waterObject.transform.SetParent(root.transform, false);
                 waterObject.AddComponent<MeshFilter>().sharedMesh = water;
                 waterObject.AddComponent<MeshRenderer>().sharedMaterial = renderer.sharedMaterial;
