@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.World;
 using CubeGame.Presentation.Rendering;
@@ -7,24 +11,33 @@ using UnityEngine;
 namespace CubeGame.Gameplay.Streaming
 {
     /// <summary>
-    /// Presentation of the streamed world: one GameObject (mesh + collider, water mesh) per 64×64 region around a focus
-    /// point. Builds at most <see cref="BuildsPerFrame"/> regions per frame (nearest first), releases regions beyond the
-    /// keep radius and marks them discovered (Alpha writes "discovered" on zone unload, W-12). Rebuilds a loaded region
-    /// when a world delta touches it. Owns no game state: everything comes from <see cref="WorldState"/>.
+    /// Presentation of the streamed world: one GameObject (mesh + collider, water) per 32×32-voxel chunk around a
+    /// focus point. Generator heights are sampled on worker threads (the generator is pure; its climate cache is
+    /// locked); deltas, meshes and colliders are applied on the main thread with a per-frame budget.
+    ///
+    /// Floating origin: Alpha coordinates reach 2^24 voxels, beyond float precision, so chunk objects are placed at
+    /// (chunk origin − <see cref="Origin"/>). <see cref="Rebase"/> moves the origin and every chunk; the caller moves
+    /// the remaining scene objects (player, camera) by the same offset.
+    /// Releasing a chunk beyond the keep radius records its zone as discovered (Alpha W-12).
     /// </summary>
     public sealed class StreamingWorldView : MonoBehaviour
     {
-        private readonly Dictionary<RegionKey, RegionView> _loaded = new Dictionary<RegionKey, RegionView>();
-        private readonly List<RegionKey> _queue = new List<RegionKey>();
-        private readonly HashSet<RegionKey> _dirty = new HashSet<RegionKey>();
+        private readonly Dictionary<ChunkKey, ChunkView> _loaded = new Dictionary<ChunkKey, ChunkView>();
+        private readonly HashSet<ChunkKey> _inFlight = new HashSet<ChunkKey>();
+        private readonly ConcurrentQueue<ChunkHeights> _ready = new ConcurrentQueue<ChunkHeights>();
+        private readonly List<ChunkKey> _wanted = new List<ChunkKey>();
+        private readonly HashSet<ChunkKey> _dirty = new HashSet<ChunkKey>();
+        private readonly Dictionary<ChunkKey, ChunkHeights> _heights = new Dictionary<ChunkKey, ChunkHeights>();
 
         private WorldState _world;
         private WorldStreamingPolicy _policy;
         private Material _terrainMaterial;
-        private RegionKey _center;
+        private ChunkKey _center;
         private bool _hasCenter;
+        private int _generation;
+        private int _maxWorkers;
 
-        private sealed class RegionView
+        private sealed class ChunkView
         {
             public GameObject Root;
             public Mesh Terrain;
@@ -32,19 +45,20 @@ namespace CubeGame.Gameplay.Streaming
             public int Vertices;
         }
 
-        public int BuildsPerFrame { get; set; } = 2;
+        /// <summary>Scene position (0,0,0) corresponds to this voxel (x, z); y is not shifted.</summary>
+        public Vector2Int Origin { get; private set; }
+
+        public int BuildsPerFrame { get; set; } = 4;
 
         public int LoadedCount => _loaded.Count;
 
-        public int PendingCount => _queue.Count;
+        public int PendingCount => _wanted.Count + _inFlight.Count + _ready.Count;
 
         public long TotalBuilt { get; private set; }
 
         public long TotalReleased { get; private set; }
 
-        public double LastBuildMilliseconds { get; private set; }
-
-        public RegionKey Center => _center;
+        public ChunkKey Center => _center;
 
         public WorldState World => _world;
 
@@ -53,7 +67,7 @@ namespace CubeGame.Gameplay.Streaming
             get
             {
                 int n = 0;
-                foreach (RegionView view in _loaded.Values)
+                foreach (ChunkView view in _loaded.Values)
                 {
                     n += view.Vertices;
                 }
@@ -62,85 +76,113 @@ namespace CubeGame.Gameplay.Streaming
             }
         }
 
-        public bool IsLoaded(RegionKey region) => _loaded.ContainsKey(region);
+        public bool IsLoaded(ChunkKey chunk) => _loaded.ContainsKey(chunk);
 
-        public IEnumerable<RegionKey> LoadedRegions => _loaded.Keys;
-
-        public void Initialise(WorldState world, WorldStreamingPolicy policy, Material terrainMaterial)
+        public void Initialise(WorldState world, WorldStreamingPolicy policy, Material terrainMaterial, Vector2Int origin)
         {
             Clear();
             _world = world;
             _policy = policy;
             _terrainMaterial = terrainMaterial;
+            Origin = origin;
+            _maxWorkers = Math.Max(1, Environment.ProcessorCount - 1);
             _world.Deltas.RegionChanged += OnRegionChanged;
         }
 
-        /// <summary>Builds every region within <paramref name="radius"/> of the focus synchronously (spawn, load).</summary>
-        public void LoadAround(Vector3 focus, int radius)
+        public static Vector2Int OriginFor(double worldX, double worldZ)
         {
-            RegionKey center = RegionAt(focus);
+            int size = WorldLayout.ChunkSize;
+            return new Vector2Int(WorldLayout.FloorDiv((int)Math.Floor(worldX), size) * size, WorldLayout.FloorDiv((int)Math.Floor(worldZ), size) * size);
+        }
+
+        public Vector3 ToScene(double worldX, double worldY, double worldZ)
+        {
+            return new Vector3((float)(worldX - Origin.x), (float)worldY, (float)(worldZ - Origin.y));
+        }
+
+        public void ToWorld(Vector3 scene, out double x, out double y, out double z)
+        {
+            x = scene.x + (double)Origin.x;
+            y = scene.y;
+            z = scene.z + (double)Origin.y;
+        }
+
+        /// <summary>Moves the origin to <paramref name="newOrigin"/>; returns the scene offset to apply to other objects.</summary>
+        public Vector3 Rebase(Vector2Int newOrigin)
+        {
+            var shift = new Vector3(Origin.x - newOrigin.x, 0f, Origin.y - newOrigin.y);
+            Origin = newOrigin;
+            foreach (KeyValuePair<ChunkKey, ChunkView> pair in _loaded)
+            {
+                pair.Value.Root.transform.localPosition = ChunkScenePosition(pair.Key);
+            }
+
+            return shift;
+        }
+
+        /// <summary>Builds every chunk within <paramref name="radius"/> chunks synchronously (spawn, load).</summary>
+        public void LoadAround(Vector3 sceneFocus, int radius)
+        {
+            ChunkKey center = ChunkAt(sceneFocus);
             for (int dx = -radius; dx <= radius; dx++)
             {
                 for (int dz = -radius; dz <= radius; dz++)
                 {
-                    var key = new RegionKey(center.X + dx, center.Z + dz);
+                    var key = new ChunkKey(center.X + dx, center.Z + dz);
                     if (WorldLayout.IsInside(key) && !_loaded.ContainsKey(key))
                     {
-                        Build(key);
+                        Install(ChunkHeights.Sample(_world.Generator, key));
                     }
                 }
             }
 
-            SetFocus(focus);
+            SetFocus(sceneFocus);
         }
 
-        /// <summary>Per-frame streaming step for the given focus point.</summary>
-        public void SetFocus(Vector3 focus)
+        /// <summary>Waits (blocking) until no chunk is pending — tests and loading screens only.</summary>
+        public void CompletePending(int timeoutMs = 60000)
+        {
+            var timer = System.Diagnostics.Stopwatch.StartNew();
+            int budget = BuildsPerFrame;
+            BuildsPerFrame = int.MaxValue;
+            try
+            {
+                while (PendingCount > 0 && timer.ElapsedMilliseconds < timeoutMs)
+                {
+                    Pump();
+                    Thread.Sleep(1);
+                }
+            }
+            finally
+            {
+                BuildsPerFrame = budget;
+            }
+        }
+
+        public ChunkKey ChunkAt(Vector3 scene)
+        {
+            ToWorld(scene, out double x, out _, out double z);
+            return WorldLayout.ChunkOf((int)Math.Floor(x), (int)Math.Floor(z));
+        }
+
+        /// <summary>Per-frame streaming step for the focus (scene position).</summary>
+        public void SetFocus(Vector3 sceneFocus)
         {
             if (_world == null)
             {
                 return;
             }
 
-            RegionKey center = RegionAt(focus);
+            ChunkKey center = ChunkAt(sceneFocus);
             if (!_hasCenter || !center.Equals(_center))
             {
                 _center = center;
                 _hasCenter = true;
-                _world.Deltas.MarkDiscovered(center);
+                _world.Deltas.MarkDiscovered(new ZoneKey((center.X * WorldLayout.ChunkSize) >> 8, (center.Z * WorldLayout.ChunkSize) >> 8));
                 Replan();
             }
 
-            int budget = BuildsPerFrame;
-            foreach (RegionKey dirty in new List<RegionKey>(_dirty))
-            {
-                if (!_loaded.ContainsKey(dirty))
-                {
-                    _dirty.Remove(dirty);
-                    continue;
-                }
-
-                if (budget <= 0)
-                {
-                    break;
-                }
-
-                _dirty.Remove(dirty);
-                Release(dirty, false);
-                Build(dirty);
-                budget--;
-            }
-
-            while (budget > 0 && _queue.Count > 0)
-            {
-                RegionKey next = _queue[0];
-                _queue.RemoveAt(0);
-                if (!_loaded.ContainsKey(next))
-                {
-                    Build(next);
-                    budget--;
-                }
-            }
+            Pump();
         }
 
         public void Clear()
@@ -150,13 +192,20 @@ namespace CubeGame.Gameplay.Streaming
                 _world.Deltas.RegionChanged -= OnRegionChanged;
             }
 
-            foreach (RegionKey key in new List<RegionKey>(_loaded.Keys))
+            _generation++;
+            foreach (ChunkKey key in new List<ChunkKey>(_loaded.Keys))
             {
                 Release(key, false);
             }
 
-            _queue.Clear();
+            while (_ready.TryDequeue(out _))
+            {
+            }
+
+            _inFlight.Clear();
+            _wanted.Clear();
             _dirty.Clear();
+            _heights.Clear();
             _hasCenter = false;
             _world = null;
         }
@@ -166,14 +215,9 @@ namespace CubeGame.Gameplay.Streaming
             Clear();
         }
 
-        public static RegionKey RegionAt(Vector3 position)
-        {
-            return WorldLayout.RegionOf(Mathf.FloorToInt(position.x), Mathf.FloorToInt(position.z));
-        }
-
         private void Replan()
         {
-            foreach (RegionKey key in new List<RegionKey>(_loaded.Keys))
+            foreach (ChunkKey key in new List<ChunkKey>(_loaded.Keys))
             {
                 if (_policy.ShouldRelease(key, _center))
                 {
@@ -181,40 +225,113 @@ namespace CubeGame.Gameplay.Streaming
                 }
             }
 
-            _queue.Clear();
-            foreach (RegionKey key in _policy.Wanted(_center))
+            _wanted.Clear();
+            foreach (ChunkKey key in _policy.Wanted(_center))
             {
-                if (!_loaded.ContainsKey(key))
+                if (!_loaded.ContainsKey(key) && !_inFlight.Contains(key))
                 {
-                    _queue.Add(key);
+                    _wanted.Add(key);
+                }
+            }
+        }
+
+        private void Pump()
+        {
+            // Start workers, nearest first.
+            while (_inFlight.Count < _maxWorkers && _wanted.Count > 0)
+            {
+                ChunkKey key = _wanted[0];
+                _wanted.RemoveAt(0);
+                if (_loaded.ContainsKey(key))
+                {
+                    continue;
+                }
+
+                _inFlight.Add(key);
+                int generation = _generation;
+                IWorldGenerator generator = _world.Generator;
+                Task.Run(() =>
+                {
+                    ChunkHeights heights = ChunkHeights.Sample(generator, key);
+                    if (generation == _generation)
+                    {
+                        _ready.Enqueue(heights);
+                    }
+                });
+            }
+
+            int budget = BuildsPerFrame;
+            while (budget > 0 && _ready.TryDequeue(out ChunkHeights heights))
+            {
+                _inFlight.Remove(heights.Key);
+                if (_policy.ShouldRelease(heights.Key, _center) || _loaded.ContainsKey(heights.Key))
+                {
+                    continue;
+                }
+
+                Install(heights);
+                budget--;
+            }
+
+            foreach (ChunkKey dirty in new List<ChunkKey>(_dirty))
+            {
+                if (budget <= 0)
+                {
+                    break;
+                }
+
+                _dirty.Remove(dirty);
+                if (_heights.TryGetValue(dirty, out ChunkHeights generated))
+                {
+                    Release(dirty, false);
+                    Install(generated);
+                    budget--;
                 }
             }
         }
 
         private void OnRegionChanged(RegionKey region)
         {
-            _dirty.Add(region);
-
-            // A column edit on a region border changes the neighbour's side walls too.
-            for (int dx = -1; dx <= 1; dx++)
+            // Deltas carry their own column; rebuild every loaded chunk whose 1-column border touches an edited column.
+            foreach (WorldDelta delta in _world.Deltas.DeltasOf(region))
             {
-                for (int dz = -1; dz <= 1; dz++)
+                if (delta.Kind != WorldDeltaKind.ColumnSurfaceSet)
                 {
-                    _dirty.Add(new RegionKey(region.X + dx, region.Z + dz));
+                    continue;
+                }
+
+                for (int dx = -1; dx <= 1; dx++)
+                {
+                    for (int dz = -1; dz <= 1; dz++)
+                    {
+                        ChunkKey key = WorldLayout.ChunkOf(delta.X + dx, delta.Z + dz);
+                        if (_loaded.ContainsKey(key))
+                        {
+                            _dirty.Add(key);
+                        }
+                    }
                 }
             }
         }
 
-        private void Build(RegionKey key)
+        private Vector3 ChunkScenePosition(ChunkKey key)
         {
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            RegionMesher.Result data = RegionMesher.Build(_world, key);
+            return new Vector3(key.X * WorldLayout.ChunkSize - Origin.x, 0f, key.Z * WorldLayout.ChunkSize - Origin.y);
+        }
 
-            var root = new GameObject($"Region_{key.X}_{key.Z}");
+        private void Install(ChunkHeights generated)
+        {
+            // Keep the generator output untouched for later rebuilds; deltas go onto a copy.
+            ChunkHeights heights = generated.Copy();
+            heights.ApplyDeltas(_world.Deltas);
+            ChunkMesher.Result data = ChunkMesher.Build(heights, _world.Generator.WaterLevel);
+            ChunkKey key = heights.Key;
+
+            var root = new GameObject($"Chunk_{key.X}_{key.Z}");
             root.transform.SetParent(transform, false);
-            root.transform.localPosition = new Vector3(key.X * WorldLayout.RegionSize, 0f, key.Z * WorldLayout.RegionSize);
+            root.transform.localPosition = ChunkScenePosition(key);
 
-            Mesh terrain = UnityMeshFactory.Create(data.Terrain, $"RegionMesh_{key.X}_{key.Z}");
+            Mesh terrain = UnityMeshFactory.Create(data.Terrain, $"ChunkMesh_{key.X}_{key.Z}");
             root.AddComponent<MeshFilter>().sharedMesh = terrain;
             var renderer = root.AddComponent<MeshRenderer>();
             renderer.sharedMaterial = PilotMaterials.Terrain(_terrainMaterial);
@@ -230,30 +347,30 @@ namespace CubeGame.Gameplay.Streaming
                 waterObject.AddComponent<MeshRenderer>().sharedMaterial = renderer.sharedMaterial;
             }
 
-            _loaded[key] = new RegionView
+            _loaded[key] = new ChunkView
             {
                 Root = root,
                 Terrain = terrain,
                 Water = water,
                 Vertices = data.Terrain.VertexCount + data.Water.VertexCount,
             };
+            _heights[key] = generated;
             TotalBuilt++;
-            stopwatch.Stop();
-            LastBuildMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
         }
 
-        private void Release(RegionKey key, bool countAsUnload)
+        private void Release(ChunkKey key, bool countAsUnload)
         {
-            if (!_loaded.TryGetValue(key, out RegionView view))
+            if (!_loaded.TryGetValue(key, out ChunkView view))
             {
                 return;
             }
 
             _loaded.Remove(key);
+            _heights.Remove(key);
             if (countAsUnload)
             {
                 TotalReleased++;
-                _world?.Deltas.MarkDiscovered(key);
+                _world?.Deltas.MarkDiscovered(new ZoneKey((key.X * WorldLayout.ChunkSize) >> 8, (key.Z * WorldLayout.ChunkSize) >> 8));
             }
 
             if (view.Root != null)

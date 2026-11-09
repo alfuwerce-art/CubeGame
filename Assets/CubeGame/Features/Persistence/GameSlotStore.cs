@@ -377,7 +377,7 @@ namespace CubeGame.Features.Persistence
 
             for (int i = 0; i < world.discovered.Count; i += 2)
             {
-                deltas.MarkDiscovered(new RegionKey(world.discovered[i], world.discovered[i + 1]));
+                deltas.MarkDiscovered(new ZoneKey(world.discovered[i], world.discovered[i + 1]));
             }
 
             return null;
@@ -406,10 +406,10 @@ namespace CubeGame.Features.Persistence
                 });
             }
 
-            foreach (RegionKey region in session.WorldDeltas.Discovered)
+            foreach (ZoneKey zone in session.WorldDeltas.Discovered)
             {
-                data.discovered.Add(region.X);
-                data.discovered.Add(region.Z);
+                data.discovered.Add(zone.X);
+                data.discovered.Add(zone.Z);
             }
 
             return data;

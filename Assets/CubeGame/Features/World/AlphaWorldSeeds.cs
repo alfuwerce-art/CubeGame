@@ -3,22 +3,27 @@ using System;
 namespace CubeGame.Features.World
 {
     /// <summary>
-    /// Per-world seed table derived from the master seed exactly like Alpha (crt_stl.cpp 11431-11459, DIRECT):
-    /// <c>srand(master)</c>; world seed (+0x800188) = rand()%100000; 4 noise offsets (+0x800168); 20 table values
-    /// (+0x80018C…+0x8001D8); 2 values (+0x8001DC, +0x8001E0); 2 values (+0x8001E4…). rand() ≤ 0x7FFF, so the
-    /// modulo never changes the value but is kept for fidelity.
+    /// Per-world seed table derived from the master seed exactly like Alpha (crt_stl.cpp 11431-11560, DIRECT):
+    /// <c>srand(master)</c>; then <c>rand()%100000</c> into, in this order: +0x800188 (world seed), +0x800168 (4),
+    /// +0x80018C…+0x800288 (64 contiguous values written by loops of 20,2,2,2,2,8,6,6,10,4,2), +0x800178 (4),
+    /// +0x80028C (2), +0x800294 (2). Values are addressed by their Alpha struct offset.
     /// </summary>
     public sealed class AlphaWorldSeeds
     {
+        private const int First = 0x800168;
+        private const int Last = 0x800298;
+
+        private readonly int[] _fields = new int[(Last - First) / 4 + 1];
+
         public AlphaWorldSeeds(uint masterSeed)
         {
             MasterSeed = masterSeed;
             var rng = new AlphaCrtRandom(unchecked((int)masterSeed));
             WorldSeed = rng.Next() % 100000;
-            NoiseOffsets = Fill(rng, 4);
-            Tables = Fill(rng, 20);
-            MountainOffsets = Fill(rng, 2);
-            ExtraOffsets = Fill(rng, 2);
+            Fill(rng, 0x800168, 4);
+            Fill(rng, 0x80018C, 64);
+            Fill(rng, 0x800178, 4);
+            Fill(rng, 0x80028C, 4);
         }
 
         public uint MasterSeed { get; }
@@ -26,39 +31,29 @@ namespace CubeGame.Features.World
         /// <summary>Alpha <c>world+0x800188</c>: the seed every region/zone/climate stream is derived from.</summary>
         public int WorldSeed { get; }
 
-        /// <summary>+0x800168…+0x800174.</summary>
-        public int[] NoiseOffsets { get; }
-
-        /// <summary>+0x80018C…+0x8001D8 (index = (offset − 0x80018C) / 4).</summary>
-        public int[] Tables { get; }
-
-        /// <summary>+0x8001DC, +0x8001E0 (used by the mountain-mask function 0x5EFFA0).</summary>
-        public int[] MountainOffsets { get; }
-
-        /// <summary>+0x8001E4, +0x8001E8.</summary>
-        public int[] ExtraOffsets { get; }
-
-        /// <summary>Reads a table value by its Alpha struct offset (0x80018C…0x8001D8).</summary>
-        public int TableAt(int alphaOffset)
+        /// <summary>Value at Alpha struct offset (0x800168…0x800298, 4-byte aligned).</summary>
+        public int At(int alphaOffset)
         {
-            int index = (alphaOffset - 0x80018C) / 4;
-            if (index < 0 || index >= Tables.Length || (alphaOffset - 0x80018C) % 4 != 0)
+            int delta = alphaOffset - First;
+            if (delta < 0 || delta % 4 != 0 || delta / 4 >= _fields.Length || alphaOffset == 0x800188)
             {
+                if (alphaOffset == 0x800188)
+                {
+                    return WorldSeed;
+                }
+
                 throw new ArgumentOutOfRangeException(nameof(alphaOffset));
             }
 
-            return Tables[index];
+            return _fields[delta / 4];
         }
 
-        private static int[] Fill(AlphaCrtRandom rng, int count)
+        private void Fill(AlphaCrtRandom rng, int offset, int count)
         {
-            var values = new int[count];
             for (int i = 0; i < count; i++)
             {
-                values[i] = rng.Next() % 100000;
+                _fields[(offset - First) / 4 + i] = rng.Next() % 100000;
             }
-
-            return values;
         }
     }
 }

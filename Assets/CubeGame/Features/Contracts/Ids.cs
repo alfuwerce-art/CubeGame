@@ -69,6 +69,28 @@ namespace CubeGame.Features.Contracts
         public override string ToString() => $"region({X},{Z})";
     }
 
+    /// <summary>Alpha zone (256×256 terrain voxels); unit of Alpha generation streams and of the "discovered" map.</summary>
+    public readonly struct ZoneKey : IEquatable<ZoneKey>
+    {
+        public ZoneKey(int x, int z)
+        {
+            X = x;
+            Z = z;
+        }
+
+        public int X { get; }
+
+        public int Z { get; }
+
+        public bool Equals(ZoneKey other) => X == other.X && Z == other.Z;
+
+        public override bool Equals(object obj) => obj is ZoneKey other && Equals(other);
+
+        public override int GetHashCode() => unchecked((X * 486187739) ^ Z);
+
+        public override string ToString() => $"zone({X},{Z})";
+    }
+
     /// <summary>
     /// Persistent entity identity. Spawned world entities derive it from (region, spawn index, generation),
     /// so unloading and reloading a region never creates duplicates (M0-00C §8). The hero uses

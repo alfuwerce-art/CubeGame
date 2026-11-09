@@ -16,17 +16,17 @@ namespace CubeGame.Features.World
 
         public WorldDeltaStore Deltas { get; }
 
-        public int SurfaceAt(int blockX, int blockZ)
+        public int SurfaceAt(int x, int z)
         {
-            return Deltas.TryGetColumnSurface(blockX, blockZ, out int edited)
+            return Deltas.TryGetColumnSurface(x, z, out int edited)
                 ? edited
-                : Generator.Column(blockX, blockZ).Surface;
+                : Generator.Column(x, z).Surface;
         }
 
-        public TerrainColumn ColumnAt(int blockX, int blockZ)
+        public TerrainColumn ColumnAt(int x, int z)
         {
-            TerrainColumn generated = Generator.Column(blockX, blockZ);
-            return Deltas.TryGetColumnSurface(blockX, blockZ, out int edited)
+            TerrainColumn generated = Generator.Column(x, z);
+            return Deltas.TryGetColumnSurface(x, z, out int edited)
                 ? new TerrainColumn(edited, generated.Rock, generated.Mountain, generated.BaseHeight)
                 : generated;
         }
@@ -46,8 +46,8 @@ namespace CubeGame.Features.World
 
         public static WorldPosition StartPosition(IWorldGenerator generator, WorldDeltaStore deltas)
         {
-            int x = WorldLayout.StartBlock;
-            int z = WorldLayout.StartBlock;
+            int x = WorldLayout.StartVoxel;
+            int z = WorldLayout.StartVoxel;
             int surface = deltas != null && deltas.TryGetColumnSurface(x, z, out int edited) ? edited : generator.Column(x, z).Surface;
             int top = Math.Max(surface, generator.WaterLevel);
             return new WorldPosition(x + 0.5, top + 1.2, z + 0.5);

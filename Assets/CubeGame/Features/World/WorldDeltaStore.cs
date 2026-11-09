@@ -5,7 +5,7 @@ using CubeGame.Features.Contracts;
 namespace CubeGame.Features.World
 {
     /// <summary>
-    /// Persistent world changes relative to generator output (M0-00C §8), owned by the running session.
+    /// Persistent world changes (voxel coordinates) relative to generator output (M0-00C §8), owned by the running session.
     /// Alpha marks player-changed voxels with byte-3 flag 0x80 (W-13) and writes the "discovered" blob when a
     /// zone unloads (W-12); CubeGame keeps both here and saves them with the slot.
     /// The terrain is still a height field in this package, so the only block edit is
@@ -17,7 +17,7 @@ namespace CubeGame.Features.World
         public const int MinSurface = -256;
 
         private readonly Dictionary<RegionKey, Dictionary<long, WorldDelta>> _byRegion = new Dictionary<RegionKey, Dictionary<long, WorldDelta>>();
-        private readonly HashSet<RegionKey> _discovered = new HashSet<RegionKey>();
+        private readonly HashSet<ZoneKey> _discovered = new HashSet<ZoneKey>();
 
         /// <summary>Raised after a change was recorded (presentation rebuilds the region view).</summary>
         public event Action<RegionKey> RegionChanged;
@@ -36,23 +36,24 @@ namespace CubeGame.Features.World
             }
         }
 
-        public IReadOnlyCollection<RegionKey> Discovered => _discovered;
+        /// <summary>Explored Alpha zones (256×256 voxels).</summary>
+        public IReadOnlyCollection<ZoneKey> Discovered => _discovered;
 
-        public bool SetColumnSurface(int blockX, int blockZ, int surface, long timeMs)
+        public bool SetColumnSurface(int x, int z, int surface, long timeMs)
         {
-            if (!WorldLayout.IsInsideBlocks(blockX, blockZ) || surface < MinSurface || surface > MaxSurface)
+            if (!WorldLayout.IsInsideVoxels(x, z) || surface < MinSurface || surface > MaxSurface)
             {
                 return false;
             }
 
-            RegionKey region = WorldLayout.RegionOf(blockX, blockZ);
+            RegionKey region = WorldLayout.RegionOf(x, z);
             Record(new WorldDelta
             {
                 Region = region,
                 Kind = WorldDeltaKind.ColumnSurfaceSet,
-                X = blockX,
+                X = x,
                 Y = surface,
-                Z = blockZ,
+                Z = z,
                 Value = surface,
                 TimeMs = timeMs,
             });
@@ -77,11 +78,11 @@ namespace CubeGame.Features.World
             RegionChanged?.Invoke(delta.Region);
         }
 
-        public bool TryGetColumnSurface(int blockX, int blockZ, out int surface)
+        public bool TryGetColumnSurface(int x, int z, out int surface)
         {
-            RegionKey region = WorldLayout.RegionOf(blockX, blockZ);
+            RegionKey region = WorldLayout.RegionOf(x, z);
             if (_byRegion.TryGetValue(region, out Dictionary<long, WorldDelta> map)
-                && map.TryGetValue(ColumnKey(blockX, blockZ), out WorldDelta delta))
+                && map.TryGetValue(ColumnKey(x, z), out WorldDelta delta))
             {
                 surface = delta.Value;
                 return true;
@@ -109,13 +110,14 @@ namespace CubeGame.Features.World
             }
         }
 
-        /// <summary>Marks a region as explored (called when it unloads and when the hero enters it).</summary>
-        public bool MarkDiscovered(RegionKey region)
+        /// <summary>Marks a zone as explored (Alpha writes "discovered" when a zone unloads; CubeGame also on entry).</summary>
+        public bool MarkDiscovered(ZoneKey zone)
         {
-            return WorldLayout.IsInside(region) && _discovered.Add(region);
+            const int zones = WorldLayout.RegionGrid * WorldLayout.ZonesPerRegion;
+            return zone.X >= 0 && zone.Z >= 0 && zone.X < zones && zone.Z < zones && _discovered.Add(zone);
         }
 
-        public bool IsDiscovered(RegionKey region) => _discovered.Contains(region);
+        public bool IsDiscovered(ZoneKey zone) => _discovered.Contains(zone);
 
         private static long KeyOf(WorldDelta delta)
         {
@@ -140,11 +142,11 @@ namespace CubeGame.Features.World
     /// Pure streaming decision (C_streaming §C2: Alpha keeps zone data within 8 zones and frees view tiles past 10).
     /// CubeGame separates the same two levels: <see cref="ViewRadius"/> (meshes/colliders) and a larger
     /// <see cref="KeepRadius"/> before a view is released (hysteresis). Radii are CubeGame decisions
-    /// (PLACEHOLDER until profiling, C6.4), measured in regions (Chebyshev distance).
+    /// (PLACEHOLDER until profiling, C6.4), measured in 32-voxel chunks (Chebyshev distance).
     /// </summary>
     public sealed class WorldStreamingPolicy
     {
-        public WorldStreamingPolicy(int viewRadius = 2, int keepRadius = 3)
+        public WorldStreamingPolicy(int viewRadius = 6, int keepRadius = 8)
         {
             if (viewRadius < 0 || keepRadius < viewRadius)
             {
@@ -159,10 +161,10 @@ namespace CubeGame.Features.World
 
         public int KeepRadius { get; }
 
-        /// <summary>Regions that must be shown around <paramref name="center"/>, nearest first.</summary>
-        public List<RegionKey> Wanted(RegionKey center)
+        /// <summary>Chunks that must be shown around <paramref name="center"/>, nearest first.</summary>
+        public List<ChunkKey> Wanted(ChunkKey center)
         {
-            var result = new List<RegionKey>();
+            var result = new List<ChunkKey>();
             for (int ring = 0; ring <= ViewRadius; ring++)
             {
                 for (int dx = -ring; dx <= ring; dx++)
@@ -174,7 +176,7 @@ namespace CubeGame.Features.World
                             continue;
                         }
 
-                        var key = new RegionKey(center.X + dx, center.Z + dz);
+                        var key = new ChunkKey(center.X + dx, center.Z + dz);
                         if (WorldLayout.IsInside(key))
                         {
                             result.Add(key);
@@ -186,7 +188,7 @@ namespace CubeGame.Features.World
             return result;
         }
 
-        public bool ShouldRelease(RegionKey loaded, RegionKey center)
+        public bool ShouldRelease(ChunkKey loaded, ChunkKey center)
         {
             return WorldLayout.Chebyshev(loaded, center) > KeepRadius;
         }

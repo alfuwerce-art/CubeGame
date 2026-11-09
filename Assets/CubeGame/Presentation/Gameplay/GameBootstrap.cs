@@ -38,9 +38,12 @@ namespace CubeGame.Gameplay
 
         [SerializeField] private Material terrainMaterial;
 
-        /// <summary>Regions shown around the hero / kept before release (CubeGame decision, PLACEHOLDER until profiling).</summary>
-        [SerializeField] private int viewRadius = 2;
-        [SerializeField] private int keepRadius = 3;
+        /// <summary>32-voxel chunks shown around the hero / kept before release (CubeGame decision, PLACEHOLDER until profiling).</summary>
+        [SerializeField] private int viewRadius = 6;
+        [SerializeField] private int keepRadius = 8;
+
+        /// <summary>Scene distance from the origin that triggers a floating-origin rebase (voxels).</summary>
+        public const float RebaseDistance = 512f;
 
         private GameSession _session;
         private GameSlotStore _slots;
@@ -130,6 +133,7 @@ namespace CubeGame.Gameplay
             if (_session.State == SessionState.InGame)
             {
                 _session.AdvanceFrame(Time.deltaTime);
+                RebaseIfFar();
                 SyncHeroFromView();
                 if (_worldView != null && _player != null)
                 {
@@ -304,10 +308,11 @@ namespace CubeGame.Gameplay
 
             _worldRoot = new GameObject("WorldRoot");
             _worldView = _worldRoot.AddComponent<StreamingWorldView>();
-            _worldView.Initialise(_worldState, new WorldStreamingPolicy(viewRadius, keepRadius), terrainMaterial);
-            var heroPoint = new Vector3((float)hero.Position.X, (float)hero.Position.Y, (float)hero.Position.Z);
+            _worldView.Initialise(_worldState, new WorldStreamingPolicy(viewRadius, keepRadius), terrainMaterial,
+                StreamingWorldView.OriginFor(hero.Position.X, hero.Position.Z));
+            Vector3 heroPoint = _worldView.ToScene(hero.Position.X, hero.Position.Y, hero.Position.Z);
             var loadTimer = System.Diagnostics.Stopwatch.StartNew();
-            _worldView.LoadAround(heroPoint, 1);
+            _worldView.LoadAround(heroPoint, 2);
             loadTimer.Stop();
 
             _player = new GameObject("Player");
@@ -317,9 +322,7 @@ namespace CubeGame.Gameplay
             controller.center = new Vector3(0f, 0.9f, 0f);
             controller.stepOffset = 0.35f;
             controller.slopeLimit = 50f;
-            _player.transform.SetPositionAndRotation(
-                new Vector3((float)hero.Position.X, (float)hero.Position.Y, (float)hero.Position.Z),
-                Quaternion.Euler(0f, hero.Yaw, 0f));
+            _player.transform.SetPositionAndRotation(heroPoint, Quaternion.Euler(0f, hero.Yaw, 0f));
             Physics.SyncTransforms();
 
             // Placeholder body until the S05 visual runtime (DeepSeek, issue #13) is attached via IEntityVisualSink.
@@ -336,8 +339,8 @@ namespace CubeGame.Gameplay
             _orbitCamera.Target = _player.transform;
             _orbitCamera.Distance = OrbitCameraController.DefaultDistance;
 
-            var region = generator.Region(StreamingWorldView.RegionAt(heroPoint));
-            Debug.Log($"[Game] world built seed={world.Seed} gen={world.GeneratorId} regions={_worldView.LoadedCount} " +
+            var region = generator.Region(WorldLayout.RegionOf((int)Math.Floor(hero.Position.X), (int)Math.Floor(hero.Position.Z)));
+            Debug.Log($"[Game] world built seed={world.Seed} gen={world.GeneratorId} chunks={_worldView.LoadedCount} origin={_worldView.Origin} " +
                       $"vertices={_worldView.LoadedVertices} {loadTimer.Elapsed.TotalMilliseconds:F1}ms hero={hero.Position} " +
                       $"region={region.Key} level={region.Level} base={region.Climate?.BaseHeight}");
         }
@@ -379,9 +382,38 @@ namespace CubeGame.Gameplay
                 return;
             }
 
-            Vector3 p = _player.transform.position;
-            _session.Hero.Position = new WorldPosition(p.x, p.y, p.z);
+            if (_worldView != null)
+            {
+                _worldView.ToWorld(_player.transform.position, out double x, out double y, out double z);
+                _session.Hero.Position = new WorldPosition(x, y, z);
+            }
             _session.Hero.Yaw = _orbitCamera != null ? _orbitCamera.Yaw : _player.transform.eulerAngles.y;
+        }
+
+        /// <summary>Floating origin: keeps scene coordinates small although Alpha positions reach 2^24 voxels.</summary>
+        private void RebaseIfFar()
+        {
+            if (_worldView == null || _player == null)
+            {
+                return;
+            }
+
+            Vector3 p = _player.transform.position;
+            if (Mathf.Abs(p.x) < RebaseDistance && Mathf.Abs(p.z) < RebaseDistance)
+            {
+                return;
+            }
+
+            _worldView.ToWorld(p, out double x, out _, out double z);
+            Vector3 shift = _worldView.Rebase(StreamingWorldView.OriginFor(x, z));
+            _player.transform.position = p + shift;
+            if (_camera != null)
+            {
+                _camera.transform.position += shift;
+            }
+
+            Physics.SyncTransforms();
+            Debug.Log($"[Game] floating origin -> {_worldView.Origin}");
         }
 
         private void PublishHeroSpawn()
@@ -612,7 +644,7 @@ namespace CubeGame.Gameplay
             GUI.Label(new Rect(10f, 10f, 700f, 22f),
                 $"{_session.World.Name}  seed {_session.World.Seed}  time {_session.Clock.TimeMs / 1000.0:F1}s  " +
                 $"{hero.Name} {hero.Sheet.Class} L{hero.Sheet.Progression.Level}  pos {hero.Position}  " +
-                $"region {(_worldView != null ? _worldView.Center.ToString() : "-")} loaded {(_worldView != null ? _worldView.LoadedCount : 0)}  [Esc] menu");
+                $"{(_worldView != null ? _worldView.Center.ToString() : "-")} loaded {(_worldView != null ? _worldView.LoadedCount : 0)}  [Esc] menu");
         }
 
         private static string LabeledField(string label, string value)

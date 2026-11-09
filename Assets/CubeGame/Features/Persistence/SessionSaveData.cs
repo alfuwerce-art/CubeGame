@@ -92,7 +92,7 @@ namespace CubeGame.Features.Persistence
 
         public List<WorldDeltaRecord> deltas = new List<WorldDeltaRecord>();
 
-        /// <summary>Explored regions as flat pairs (x0, z0, x1, z1, …) — Alpha "discovered" blob, own format.</summary>
+        /// <summary>Explored zones (256×256 voxels) as flat pairs (x0, z0, x1, z1, …) — Alpha "discovered" blob, own format.</summary>
         public List<int> discovered = new List<int>();
     }
 

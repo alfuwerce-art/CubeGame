@@ -4,7 +4,6 @@ using CubeGame.Core.Characters;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.World;
 using CubeGame.Gameplay;
-using CubeGame.Gameplay.Streaming;
 using CubeGame.Presentation.Player;
 using NUnit.Framework;
 using UnityEngine;
@@ -13,8 +12,9 @@ using UnityEngine.TestTools;
 namespace CubeGame.Tests.FullM0.PlayMode
 {
     /// <summary>
-    /// M0-02 in the running game: Alpha-structured world at the centre of the 1024×1024 region grid, hero on the
-    /// generated ground, regions stream in/out while travelling, a terrain change survives save → menu → load.
+    /// M0-02 in the running game: Alpha terrain (voxel scale) at the centre of the 2^24-voxel world, hero on the
+    /// generated ground, chunks streaming in/out while travelling, floating origin keeping scene coordinates small,
+    /// a terrain change surviving save → menu → load.
     /// </summary>
     public sealed class FullM0WorldStreamingPlayModeTests
     {
@@ -58,25 +58,27 @@ namespace CubeGame.Tests.FullM0.PlayMode
             }
         }
 
-        private static void Teleport(Transform player, Vector3 position)
-        {
-            player.position = position;
-            Physics.SyncTransforms();
-        }
-
-        [UnityTest]
-        public IEnumerator HeroStartsOnAlphaTerrainAndRegionsStreamWhileTravelling()
+        private GameBootstrap NewGame()
         {
             _host = new GameObject("GameBootstrap");
             GameBootstrap game = _host.AddComponent<GameBootstrap>();
             game.SaveDirectory = _saveDir;
+            return game;
+        }
+
+        [UnityTest]
+        public IEnumerator HeroStartsOnAlphaTerrainAndChunksStreamWithFloatingOrigin()
+        {
+            GameBootstrap game = NewGame();
             yield return null;
 
             Assert.IsTrue(game.StartNewWorld("slot0", "Stream", 20131234u, "Walker", CharacterClass.Ranger), game.Status);
             Assert.AreEqual(AlphaTerrainGenerator.Id, game.Session.World.GeneratorId);
+            Assert.AreEqual(WorldLayout.StartVoxel + 0.5, game.Session.Hero.Position.X, 1e-6);
+            Assert.AreEqual(1, game.WorldState.Generator.Region(new RegionKey(512, 512)).Level, "start = centre region (Alpha level 1)");
+
             Transform player = game.PlayerTransform;
-            Assert.AreEqual(new RegionKey(512, 512), StreamingWorldView.RegionAt(player.position), "start = centre region (Alpha level 1)");
-            Assert.AreEqual(1, game.WorldState.Generator.Region(new RegionKey(512, 512)).Level);
+            Assert.Less(player.position.magnitude, 600f, "scene coordinates stay small (floating origin)");
 
             PlayerMotor motor = player.GetComponent<PlayerMotor>();
             float deadline = Time.realtimeSinceStartup + 8f;
@@ -86,68 +88,59 @@ namespace CubeGame.Tests.FullM0.PlayMode
             }
 
             Assert.IsTrue(motor.IsGrounded, "hero stands on generated Alpha terrain");
-            int ground = game.WorldState.SurfaceAt(Mathf.FloorToInt(player.position.x), Mathf.FloorToInt(player.position.z));
+            int ground = game.WorldState.SurfaceAt(WorldLayout.StartVoxel, WorldLayout.StartVoxel);
             Assert.Less(Mathf.Abs(player.position.y - (ground + 1)), 1.6f, $"hero y {player.position.y} vs column top {ground + 1}");
 
-            // Let the 5×5 view fill in.
-            deadline = Time.realtimeSinceStartup + 10f;
-            while (game.WorldView.PendingCount > 0 && Time.realtimeSinceStartup < deadline)
-            {
-                yield return null;
-            }
+            game.WorldView.CompletePending();
+            int full = (2 * 6 + 1) * (2 * 6 + 1);
+            Assert.AreEqual(full, game.WorldView.LoadedCount);
 
-            Assert.AreEqual(25, game.WorldView.LoadedCount);
+            // Travel 40 chunks (1280 voxels) east: the origin rebases, far chunks are released and zones recorded.
+            Vector2Int originBefore = game.WorldView.Origin;
+            ChunkKey startChunk = game.WorldView.Center;
+            int targetX = WorldLayout.StartVoxel + 40 * WorldLayout.ChunkSize;
+            int targetGround = Mathf.Max(game.WorldState.SurfaceAt(targetX, WorldLayout.StartVoxel), 0);
+            player.position = game.WorldView.ToScene(targetX + 0.5, targetGround + 3.0, WorldLayout.StartVoxel + 0.5);
+            Physics.SyncTransforms();
+            yield return Frames(2);
+            game.WorldView.CompletePending();
+            yield return Frames(2);
 
-            // Travel 6 regions east: old regions beyond the keep radius are released and recorded as discovered.
-            Vector3 east = player.position + new Vector3(6 * WorldLayout.RegionSize, 0f, 0f);
-            int eastGround = game.WorldState.SurfaceAt(Mathf.FloorToInt(east.x), Mathf.FloorToInt(east.z));
-            Teleport(player, new Vector3(east.x, Mathf.Max(eastGround, game.WorldState.Generator.WaterLevel) + 3f, east.z));
-            deadline = Time.realtimeSinceStartup + 15f;
-            while ((game.WorldView.PendingCount > 0 || !game.WorldView.IsLoaded(new RegionKey(518, 512))) && Time.realtimeSinceStartup < deadline)
-            {
-                yield return null;
-            }
-
-            Assert.IsTrue(game.WorldView.IsLoaded(new RegionKey(518, 512)));
-            Assert.IsFalse(game.WorldView.IsLoaded(new RegionKey(512, 512)), "start region released beyond keep radius");
-            Assert.LessOrEqual(game.WorldView.LoadedCount, 49);
+            Assert.AreNotEqual(originBefore, game.WorldView.Origin, "floating origin moved");
+            Assert.Less(player.position.magnitude, 600f);
+            Assert.AreEqual(targetX + 0.5, game.Session.Hero.Position.X, 0.6, "world position preserved across rebase");
+            Assert.IsTrue(game.WorldView.IsLoaded(WorldLayout.ChunkOf(targetX, WorldLayout.StartVoxel)));
+            Assert.IsFalse(game.WorldView.IsLoaded(startChunk), "start chunk released beyond keep radius");
+            Assert.LessOrEqual(game.WorldView.LoadedCount, 17 * 17);
             Assert.Greater(game.WorldView.TotalReleased, 0);
-            Assert.IsTrue(game.Session.WorldDeltas.IsDiscovered(new RegionKey(512, 512)));
-            Assert.IsTrue(game.Session.WorldDeltas.IsDiscovered(new RegionKey(518, 512)));
-            yield return null;
-            int regionObjects = 0;
-            foreach (Transform child in game.WorldView.transform)
-            {
-                if (child.name.StartsWith("Region_"))
-                {
-                    regionObjects++;
-                }
-            }
+            Assert.IsTrue(game.Session.WorldDeltas.IsDiscovered(new ZoneKey(32800, 32800)));
+            Assert.IsTrue(game.Session.WorldDeltas.IsDiscovered(new ZoneKey(targetX >> 8, 32800)));
 
-            Assert.LessOrEqual(regionObjects, game.WorldView.LoadedCount + 2 * game.WorldView.BuildsPerFrame, "released regions are destroyed");
+            // Ground under the hero exists in the rebased scene.
+            Vector3 down = player.position + Vector3.up * 50f;
+            Assert.IsTrue(Physics.Raycast(down, Vector3.down, out RaycastHit hit, 400f));
+            Assert.AreEqual(game.WorldState.SurfaceAt(targetX, WorldLayout.StartVoxel) + 1, hit.point.y, 0.01f);
             Assert.IsTrue(game.ExitToMenu(false));
         }
 
         [UnityTest]
         public IEnumerator TerrainEditSurvivesSaveExitAndLoad()
         {
-            _host = new GameObject("GameBootstrap");
-            GameBootstrap game = _host.AddComponent<GameBootstrap>();
-            game.SaveDirectory = _saveDir;
+            GameBootstrap game = NewGame();
             yield return null;
 
             Assert.IsTrue(game.StartNewWorld("slot2", "Edit", 99u, "Digger", CharacterClass.Warrior), game.Status);
-            int x = WorldLayout.StartBlock + 5;
-            int z = WorldLayout.StartBlock + 5;
+            int x = WorldLayout.StartVoxel + 5;
+            int z = WorldLayout.StartVoxel + 5;
             int original = game.WorldState.SurfaceAt(x, z);
             int edited = original - 6;
 
             Assert.IsTrue(game.EditColumn(x, z, edited), game.Status);
             Assert.AreEqual(edited, game.WorldState.SurfaceAt(x, z));
-            yield return Frames(8);
+            yield return Frames(10);
 
-            // The rebuilt region collider has the pit: a ray straight down hits 6 blocks lower.
-            Assert.IsTrue(Physics.Raycast(new Vector3(x + 0.5f, original + 30f, z + 0.5f), Vector3.down, out RaycastHit hit, 200f));
+            Vector3 above = game.WorldView.ToScene(x + 0.5, original + 30, z + 0.5);
+            Assert.IsTrue(Physics.Raycast(above, Vector3.down, out RaycastHit hit, 200f));
             Assert.AreEqual(edited + 1, hit.point.y, 0.01f, "collider follows the world delta");
 
             Assert.IsTrue(game.SaveCheckpoint(), game.Status);
@@ -158,7 +151,8 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.IsTrue(game.LoadWorld("slot2"), game.Status);
             Assert.AreEqual(edited, game.WorldState.SurfaceAt(x, z), "edit restored from the world file");
             yield return Frames(2);
-            Assert.IsTrue(Physics.Raycast(new Vector3(x + 0.5f, original + 30f, z + 0.5f), Vector3.down, out hit, 200f));
+            above = game.WorldView.ToScene(x + 0.5, original + 30, z + 0.5);
+            Assert.IsTrue(Physics.Raycast(above, Vector3.down, out hit, 200f));
             Assert.AreEqual(edited + 1, hit.point.y, 0.01f);
             Assert.IsTrue(game.ExitToMenu(false));
         }
