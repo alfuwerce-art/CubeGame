@@ -59,6 +59,15 @@ var placements = AlphaVegetationPlanner.Plan(seed, regionX, regionZ, cellX, cell
 // placements[i].StableId / Kind / X / Z — для инстанса и сохранения дельт
 ```
 
+Если климат у вас уже в сетках (humidity/temperature/region cell), не считайте его заново:
+
+```csharp
+var field = new AlphaScatterField(myClimateGrid, spacing);   // IAlphaClimateGrid: Humidity/Temperature/RegionCell
+var selection = field.SelectAt(x, z, level);                  // → AlphaScatterSelection (TRANSLATED_FROM_CODE)
+var placements = field.PlaceCell(seed, regionX, regionZ, cellX, cellZ, level, stagedKinds, problems);
+// AlphaScatterField(null, ...) бросает ArgumentNullException: отсутствие климата — ошибка, не «по умолчанию»
+```
+
 ## 3. Сервисы и взаимодействия (M0-07C, данные)
 
 ```csharp

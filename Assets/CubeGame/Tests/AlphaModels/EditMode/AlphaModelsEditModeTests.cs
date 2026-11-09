@@ -386,6 +386,41 @@ namespace CubeGame.AlphaModels.Tests.EditMode
             StringAssert.Contains("equipmentItems=32", AlphaEquipmentCatalog.Summary());
         }
 
+        sealed class FakeClimate : IAlphaClimateGrid
+        {
+            readonly double _h, _t, _c;
+            public FakeClimate(double h, double t, double c) { _h = h; _t = t; _c = c; }
+            public double Humidity(double x, double z) => _h;
+            public double Temperature(double x, double z) => _t;
+            public double RegionCell(double x, double z) => _c;
+        }
+
+        [Test]
+        public void ClimateFieldSelectsAndPlacesFromTheWorldGrids()
+        {
+            var dry = new AlphaScatterField(new FakeClimate(0.5, 0.5, 0.0), 0.5);
+            var selection = dry.SelectAt(100, 200, 6);
+            CollectionAssert.Contains(selection.ObjectKinds, 0x15);
+            CollectionAssert.Contains(selection.ObjectKinds, 0x2e);
+            StringAssert.Contains("TRANSLATED_FROM_CODE", selection.Rule);
+
+            var staged = new List<int> { 0x15, 0x2e, 0x2f };
+            Assert.IsEmpty(AlphaScatterField.Validate(new FakeClimate(0.5, 0.5, 0.0), 0.5, staged),
+                string.Join("\n", AlphaScatterField.Validate(new FakeClimate(0.5, 0.5, 0.0), 0.5, staged)));
+            var placements = dry.PlaceCell(9u, 0, 0, 1, 1, 6, staged);
+            Assert.IsNotEmpty(placements);
+            var again = dry.PlaceCell(9u, 0, 0, 1, 1, 6, staged);
+            Assert.AreEqual(placements.Count, again.Count);
+            for (int i = 0; i < placements.Count; i++)
+            {
+                Assert.AreEqual(placements[i].StableId, again[i].StableId);
+                Assert.That(staged, Has.Member(placements[i].Kind));
+            }
+            var wet = new AlphaScatterField(new FakeClimate(0.5, 0.5, 0.9), 0.5);
+            Assert.AreEqual(ScatterResolution.TranslatedFromCode, wet.SelectAt(0, 0, 6).Resolution);
+            Assert.Throws<ArgumentNullException>(() => new AlphaScatterField(null, 0.5));
+        }
+
         [Test]
         public void NpcServiceFurnitureMapsToContractKinds()
         {
