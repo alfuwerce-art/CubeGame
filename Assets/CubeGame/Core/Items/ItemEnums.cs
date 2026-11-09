@@ -33,25 +33,21 @@ namespace CubeGame.Core.Items
     }
 
     /// <summary>
-    /// Подтипы оружия Alpha (поле <c>+0x01</c>, DIRECT — имена из таблицы данных).
-    /// Подтипы 6 и 7 присутствуют в данных и участвуют в «спецоружии», но их имена не установлены (UNKNOWN).
+    /// Подтипы оружия Alpha (поле <c>+0x01</c>). Числа — номера Alpha (на них построены формулы урона и сейвы);
+    /// имена приведены к таблице Alpha r3 (M0_00B_P0_MECHANICS_EVIDENCE §A, решение продюсера 2026-11-09):
+    /// прежние имена S04 были сдвинуты (1 «Mace» = топор, 3 «Sword» = кинжал и т.д.), значения не менялись.
     /// </summary>
     public enum WeaponSubtype : byte
     {
-        None = 0,
-        Mace = 1,
-        Fist = 2,
-        Sword = 3,
-        Dagger = 4,
+        Sword = 0,
+        Axe = 1,
+        Mace = 2,
+        Dagger = 3,
+        Fist = 4,
         Longsword = 5,
-
-        /// <summary>Подтип 6: имя в данных не восстановлено (UNKNOWN), входит в группу «спецоружия».</summary>
-        Reserved06 = 6,
-
-        /// <summary>Подтип 7: имя в данных не восстановлено (UNKNOWN), входит в группу «спецоружия».</summary>
-        Reserved07 = 7,
-
-        Crossbow = 8,
+        Bow = 6,
+        Crossbow = 7,
+        Boomerang = 8,
 
         /// <summary>Стрела (Alpha 9).</summary>
         Arrow = 9,
@@ -59,10 +55,12 @@ namespace CubeGame.Core.Items
         Wand = 0x0B,
         Bracelet = 0x0C,
         Shield = 0x0D,
-        Boomerang = 0x0E,
+        Quiver = 0x0E,
         Greatsword = 0x0F,
         Greataxe = 0x10,
         Greatmace = 0x11,
+        Pitchfork = 0x12,
+        Pickaxe = 0x13,
         Torch = 0x14,
     }
 

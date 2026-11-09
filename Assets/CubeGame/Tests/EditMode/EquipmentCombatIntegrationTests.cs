@@ -168,7 +168,7 @@ namespace CubeGame.Tests.EditMode
         {
             CharacterSheet sheet = CreateSheetAtLevel(1);
             var loadout = new EquipmentLoadout();
-            loadout.Equip(EquipmentSlot.MainHand, new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Crossbow, 1, 0, seed: 1));
+            loadout.Equip(EquipmentSlot.MainHand, new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Boomerang, 1, 0, seed: 1));
 
             CombatAttack off = new EquipmentCombatAdapter().BuildAttack(sheet, loadout, 0.5, 0.0, 0.0);
             Assert.AreEqual(0, off.EquippedItemType, "по умолчанию подтип не передаётся");
@@ -177,7 +177,7 @@ namespace CubeGame.Tests.EditMode
             CombatAttack on = new EquipmentCombatAdapter(enableWeaponSubtypeHitModifier: true)
                 .BuildAttack(sheet, loadout, 0.5, 0.0, 0.0);
             Assert.AreEqual((int)ItemType.Weapon, on.EquippedItemType);
-            Assert.AreEqual((int)WeaponSubtype.Crossbow, on.WeaponSubtype);
+            Assert.AreEqual((int)WeaponSubtype.Boomerang, on.WeaponSubtype);
 
             // Включённый модификатор даёт ×0.3 для подтипа 8 → эффективный шанс 0.15.
             CombatOutcome miss = new DamageResolver(new FixedCombatRandom(30000)).Resolve(on, new HealthPool(100.0));
@@ -248,7 +248,7 @@ namespace CubeGame.Tests.EditMode
 
         private static ItemInstance CreateSword(int level, int rarity, int seed = 1)
         {
-            return new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Sword, level, rarity, seed);
+            return new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Dagger, level, rarity, seed);
         }
 
         private static ItemInstance CreateGreatmace(int level, int rarity, int seed = 2)

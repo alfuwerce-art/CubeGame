@@ -73,7 +73,7 @@ namespace CubeGame.Tests.EditMode
 
             EquipmentStatSummary summary = EquipmentStats.Compute(loadout);
 
-            Assert.That(summary.WeaponDamageBonus, Is.EqualTo(ItemStatsCalculator.WeaponDamage(10, 2, WeaponSubtype.Sword)).Within(1e-9));
+            Assert.That(summary.WeaponDamageBonus, Is.EqualTo(ItemStatsCalculator.WeaponDamage(10, 2, WeaponSubtype.Dagger)).Within(1e-9));
             Assert.That(summary.TotalArmor, Is.EqualTo(ItemStatsCalculator.Armor(10, 2, ItemType.Chest, ItemModifier.None, 0, 0)).Within(1e-9));
             Assert.That(summary.TotalBlockValue, Is.EqualTo(ItemStatsCalculator.BlockValue(10, 2, ItemType.Chest)).Within(1e-9));
             Assert.AreNotEqual(summary.TotalArmor, summary.TotalBlockValue, "Armor и BlockValue — разные величины");
@@ -103,7 +103,7 @@ namespace CubeGame.Tests.EditMode
             double highDamage = EquipmentStats.Compute(high).MainHandDamage;
 
             Assert.Greater(highDamage, lowDamage, "уровень и редкость должны повышать стат");
-            Assert.That(highDamage, Is.EqualTo(ItemStatsCalculator.WeaponDamage(10, 4, WeaponSubtype.Sword)).Within(1e-9));
+            Assert.That(highDamage, Is.EqualTo(ItemStatsCalculator.WeaponDamage(10, 4, WeaponSubtype.Dagger)).Within(1e-9));
         }
 
         [Test]
@@ -227,7 +227,7 @@ namespace CubeGame.Tests.EditMode
 
         private static ItemInstance CreateSword(int level, int rarity, int seed = 1)
         {
-            return new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Sword, level, rarity, seed);
+            return new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Dagger, level, rarity, seed);
         }
 
         private static ItemInstance CreateGreatmace(int level, int rarity, int seed = 2)

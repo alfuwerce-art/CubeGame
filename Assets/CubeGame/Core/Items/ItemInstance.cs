@@ -128,7 +128,7 @@ namespace CubeGame.Core.Items
         /// Границы проверок разделены на два вида (см. S02_REPORT, REVIEW-FIX-01):
         /// достоверные ограничения Alpha (редкость 0…4, уровень с 1, подтип только у оружия)
         /// и ограничения текущей модели CubeGame (известный набор типов/модификаторов, подтип
-        /// оружия 1…0x14 — вне этой таблицы имена в Alpha отсутствуют, OQ-09).
+        /// оружия 0…0x14 — вне этой таблицы имена в Alpha отсутствуют, OQ-09).
         /// </summary>
         public static bool TryCreateFromIdentifiers(
             int typeId,
@@ -241,10 +241,10 @@ namespace CubeGame.Core.Items
 
             if (type == ItemType.Weapon)
             {
-                // Границы взяты из таблицы подтипов Alpha (1…0x14); имена вне неё не восстановлены.
-                if (subtype < (byte)WeaponSubtype.Mace || subtype > (byte)WeaponSubtype.Torch)
+                // Таблица подтипов Alpha 0…0x14 (r3, все 21 имя известны; 0 = меч — реальное оружие Alpha).
+                if (subtype > (byte)WeaponSubtype.Torch)
                 {
-                    error = $"подтип оружия {subtype} вне известного диапазона 1…0x14";
+                    error = $"подтип оружия {subtype} вне известного диапазона 0…0x14";
                     return false;
                 }
             }

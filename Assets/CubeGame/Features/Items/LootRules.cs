@@ -21,8 +21,7 @@ namespace CubeGame.Features.Items
 
         private static readonly (ItemType Type, byte Subtype)[] Equipment =
         {
-            // Alpha weapon subtype 0 (sword) is refused by Core validation (CORE-ENUM-MISMATCH, decision pending).
-            (ItemType.Weapon, 1), (ItemType.Weapon, 2), (ItemType.Weapon, 5),
+            (ItemType.Weapon, 0), (ItemType.Weapon, 1), (ItemType.Weapon, 2), (ItemType.Weapon, 5),
             (ItemType.Weapon, 15), (ItemType.Weapon, 16), (ItemType.Weapon, 17),
             (ItemType.Chest, 0), (ItemType.Boots, 0), (ItemType.Gloves, 0), (ItemType.Shoulders, 0),
         };

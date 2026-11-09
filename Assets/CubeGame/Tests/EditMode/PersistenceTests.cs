@@ -490,7 +490,7 @@ namespace CubeGame.Tests.EditMode
                     new ItemSaveData
                     {
                         type = (int)ItemType.Weapon,
-                        subtype = (int)WeaponSubtype.Sword,
+                        subtype = (int)WeaponSubtype.Dagger,
                         level = 1,
                         rarity = 0,
                         seed = 12345,

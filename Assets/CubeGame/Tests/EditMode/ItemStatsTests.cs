@@ -14,16 +14,16 @@ namespace CubeGame.Tests.EditMode
     {
         private const double Tolerance = 5e-3;
 
-        [TestCase(1, 0, WeaponSubtype.Sword, 2.00)]
-        [TestCase(1, 4, WeaponSubtype.Sword, 4.00)]
+        [TestCase(1, 0, WeaponSubtype.Dagger, 2.00)]
+        [TestCase(1, 4, WeaponSubtype.Dagger, 4.00)]
         [TestCase(1, 0, WeaponSubtype.Greatmace, 8.00)]
         [TestCase(1, 4, WeaponSubtype.Greatmace, 16.00)]
-        [TestCase(10, 0, WeaponSubtype.Sword, 3.81)]
-        [TestCase(10, 4, WeaponSubtype.Sword, 7.63)]
+        [TestCase(10, 0, WeaponSubtype.Dagger, 3.81)]
+        [TestCase(10, 4, WeaponSubtype.Dagger, 7.63)]
         [TestCase(10, 0, WeaponSubtype.Greatmace, 15.25)]
         [TestCase(10, 4, WeaponSubtype.Greatmace, 30.51)]
-        [TestCase(50, 0, WeaponSubtype.Sword, 8.76)]
-        [TestCase(50, 4, WeaponSubtype.Sword, 17.51)]
+        [TestCase(50, 0, WeaponSubtype.Dagger, 8.76)]
+        [TestCase(50, 4, WeaponSubtype.Dagger, 17.51)]
         [TestCase(50, 0, WeaponSubtype.Greatmace, 35.03)]
         [TestCase(50, 4, WeaponSubtype.Greatmace, 70.06)]
         public void WeaponDamageMatchesAlphaReference(int level, int rarity, WeaponSubtype subtype, double expected)
@@ -208,8 +208,8 @@ namespace CubeGame.Tests.EditMode
         public void PowerBonusRaisesEffectiveLevel()
         {
             Assert.AreEqual(10.5, ItemStatsCalculator.EffectiveLevel(10, 5), 1e-9);
-            double withoutBonus = ItemStatsCalculator.WeaponDamage(10, 0, WeaponSubtype.Sword);
-            double withBonus = ItemStatsCalculator.WeaponDamage(10, 0, WeaponSubtype.Sword, powerBonus: 5);
+            double withoutBonus = ItemStatsCalculator.WeaponDamage(10, 0, WeaponSubtype.Dagger);
+            double withBonus = ItemStatsCalculator.WeaponDamage(10, 0, WeaponSubtype.Dagger, powerBonus: 5);
             Assert.Greater(withBonus, withoutBonus, "powerBonus должен повышать статы");
         }
 
@@ -242,7 +242,9 @@ namespace CubeGame.Tests.EditMode
             Assert.Throws<ArgumentOutOfRangeException>(() => new ItemInstance(ItemType.Chest, 0, 0, 0, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => new ItemInstance(ItemType.Chest, 0, 1, 5, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => new ItemInstance(ItemType.Chest, 1, 1, 0, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new ItemInstance(ItemType.Weapon, 0, 1, 0, 0));
+            // 2026-11-09 (решение продюсера): подтип 0 — меч Alpha, принимается; вне таблицы Alpha — 0x15.
+            Assert.DoesNotThrow(() => new ItemInstance(ItemType.Weapon, 0, 1, 0, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ItemInstance(ItemType.Weapon, 0x15, 1, 0, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => new ItemInstance(ItemType.Weapon, 3, 1, 0, 0, stackCount: 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => new ItemInstance((ItemType)77, 0, 1, 0, 0));
         }
@@ -288,9 +290,9 @@ namespace CubeGame.Tests.EditMode
         [Test]
         public void ItemExposesEffectiveLevel()
         {
-            var item = new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Sword, 10, 0, 1, powerBonus: 5);
+            var item = new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Dagger, 10, 0, 1, powerBonus: 5);
             Assert.AreEqual(10.5, item.EffectiveLevel, 1e-9);
-            Assert.AreEqual(3.81, ItemStatsCalculator.WeaponDamage(item.Level, item.Rarity, WeaponSubtype.Sword), Tolerance);
+            Assert.AreEqual(3.81, ItemStatsCalculator.WeaponDamage(item.Level, item.Rarity, WeaponSubtype.Dagger), Tolerance);
         }
 
         [Test]
@@ -298,9 +300,9 @@ namespace CubeGame.Tests.EditMode
         {
             Assert.IsTrue(ItemStatsCalculator.IsSpecialWeapon(WeaponSubtype.Greatsword));
             Assert.IsTrue(ItemStatsCalculator.IsSpecialWeapon(WeaponSubtype.Staff));
-            Assert.IsTrue(ItemStatsCalculator.IsSpecialWeapon(WeaponSubtype.Crossbow));
-            Assert.IsTrue(ItemStatsCalculator.IsSpecialWeapon(WeaponSubtype.Reserved06));
-            Assert.IsFalse(ItemStatsCalculator.IsSpecialWeapon(WeaponSubtype.Sword));
+            Assert.IsTrue(ItemStatsCalculator.IsSpecialWeapon(WeaponSubtype.Boomerang));
+            Assert.IsTrue(ItemStatsCalculator.IsSpecialWeapon(WeaponSubtype.Bow));
+            Assert.IsFalse(ItemStatsCalculator.IsSpecialWeapon(WeaponSubtype.Dagger));
             Assert.IsFalse(ItemStatsCalculator.IsSpecialWeapon(WeaponSubtype.Shield));
         }
     }

@@ -340,13 +340,14 @@ namespace CubeGame.Gameplay
             switch (subtype)
             {
                 case WeaponSubtype.Sword: return "iron-sword1.cubdec";
-                case WeaponSubtype.Greatsword: return "iron-greatsword1.cubdec";
-                case WeaponSubtype.Greataxe: return "iron-greataxe1.cubdec";
-                case WeaponSubtype.Greatmace: return "iron-greatmace1.cubdec";
-                case WeaponSubtype.Longsword: return "iron-longsword1.cubdec";
+                case WeaponSubtype.Axe: return "iron-axe1.cubdec";
                 case WeaponSubtype.Mace: return "iron-mace1.cubdec";
                 case WeaponSubtype.Dagger: return "iron-dagger1.cubdec";
                 case WeaponSubtype.Fist: return "iron-fist1.cubdec";
+                case WeaponSubtype.Longsword: return "iron-longsword1.cubdec";
+                case WeaponSubtype.Greatsword: return "iron-greatsword1.cubdec";
+                case WeaponSubtype.Greataxe: return "iron-greataxe1.cubdec";
+                case WeaponSubtype.Greatmace: return "iron-greatmace1.cubdec";
                 default: return string.Empty;
             }
         }

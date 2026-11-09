@@ -221,7 +221,7 @@ namespace CubeGame.Tests.EditMode
 
         private static ItemInstance CreateSword(int level, int seed = 1)
         {
-            return new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Sword, level, 0, seed);
+            return new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Dagger, level, 0, seed);
         }
 
         private static ItemInstance CreateChest()

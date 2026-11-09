@@ -63,10 +63,13 @@ namespace CubeGame.Presentation.Equipment
             EnsureInitialized();
         }
 
-        /// <summary>Тестовое оружие «меч» заданного уровня/редкости (создаётся через ItemInstance).</summary>
+        /// <summary>
+        /// Тестовое лёгкое оружие S04 (подтип 3 — по таблице Alpha это кинжал; до 2026-11-09 Core называл его «Sword»).
+        /// Числа и проверки S04 не менялись.
+        /// </summary>
         public static ItemInstance CreateSword(int level, int rarity, int seed = 1, ItemModifier modifier = ItemModifier.None)
         {
-            return new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Sword, level, rarity, seed, modifier);
+            return new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Dagger, level, rarity, seed, modifier);
         }
 
         /// <summary>Тестовое оружие «двуручная булава» — другие подтверждённые характеристики.</summary>

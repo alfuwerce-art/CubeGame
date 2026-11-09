@@ -52,7 +52,7 @@ namespace CubeGame.Core.Items
 
         /// <summary>
         /// Урон оружия (Alpha <c>item_weaponDamage</c> <c>004c7f60</c>):
-        /// subtype 3/4/0x0D → ×2; 5 → ×4; «спецоружие» → ×8; иначе ×4.
+        /// subtype 3/4/0x0D (кинжал/кастет/щит) → ×2; 5 → ×4; «спецоружие» → ×8; иначе ×4.
         /// </summary>
         public static double WeaponDamage(int level, int rarity, WeaponSubtype subtype, int powerBonus = 0)
         {
@@ -60,8 +60,8 @@ namespace CubeGame.Core.Items
 
             switch (subtype)
             {
-                case WeaponSubtype.Sword:
                 case WeaponSubtype.Dagger:
+                case WeaponSubtype.Fist:
                 case WeaponSubtype.Shield:
                     return baseValue * WeaponDamageMultiplierSmall;
                 case WeaponSubtype.Longsword:
@@ -224,20 +224,20 @@ namespace CubeGame.Core.Items
 
         /// <summary>
         /// «Спецоружие» Alpha (<c>weapon_isSpecialRune</c>): двуручное и дальнобойное.
-        /// Подтипы 6 и 7 входят в группу, но их имена не восстановлены (UNKNOWN).
+        /// Группа задана номерами Alpha: 5, 6 (лук), 7 (арбалет), 8 (бумеранг), 10–12, 14 (колчан), 15–17.
         /// </summary>
         public static bool IsSpecialWeapon(WeaponSubtype subtype)
         {
             switch (subtype)
             {
                 case WeaponSubtype.Longsword:
-                case WeaponSubtype.Reserved06:
-                case WeaponSubtype.Reserved07:
+                case WeaponSubtype.Bow:
                 case WeaponSubtype.Crossbow:
+                case WeaponSubtype.Boomerang:
                 case WeaponSubtype.Staff:
                 case WeaponSubtype.Wand:
                 case WeaponSubtype.Bracelet:
-                case WeaponSubtype.Boomerang:
+                case WeaponSubtype.Quiver:
                 case WeaponSubtype.Greatsword:
                 case WeaponSubtype.Greataxe:
                 case WeaponSubtype.Greatmace:

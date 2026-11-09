@@ -415,7 +415,9 @@ namespace CubeGame.M0Pilots.Items
         private static void CoreCompatibility()
         {
             List<string> mismatches = CoreEnumAudit.FindMismatches();
-            Check.Equal("ten enum mismatches (8 weapon + 2 item labels) between Core and the r3 table", 10, mismatches.Count);
+            // 2026-11-09: weapon subtype names in Core were aligned with the r3 table (producer decision);
+            // only the two item type labels (5/6) remain.
+            Check.Equal("two enum mismatches (item labels 5/6) between Core and the r3 table", 2, mismatches.Count);
             Check.True("Core ItemType remains Boots=5, Gloves=6 (accepted S04, not modified)",
                 CoreEnumAudit.CoreCanRepresentAlphaType(5));
             Check.True("Core cannot represent Alpha consumables (type 1)",
@@ -428,10 +430,9 @@ namespace CubeGame.M0Pilots.Items
                 !CoreEnumAudit.CoreCanRepresentAlphaType(24));
             Check.True("Core can represent Alpha weapon type 3", CoreEnumAudit.CoreCanRepresentAlphaType(3));
             Check.True("Core can represent Alpha chest type 4", CoreEnumAudit.CoreCanRepresentAlphaType(4));
-            Check.True("Core cannot represent Bow subtype 6 semantically (Reserved06)",
-                CoreEnumAudit.CoreCanRepresentWeaponSubtype(6));
-            Check.True("Core enum has no Axe name for subtype 1",
-                Enum.GetName(typeof(WeaponSubtype), 1) == "Mace");
+            Check.True("Core represents Bow subtype 6", CoreEnumAudit.CoreCanRepresentWeaponSubtype(6));
+            Check.True("Core names subtype 1 Axe (r3)", Enum.GetName(typeof(WeaponSubtype), 1) == "Axe");
+            Check.True("Core names subtype 0 Sword (r3)", Enum.GetName(typeof(WeaponSubtype), 0) == "Sword");
             Check.True("the mismatch list mentions Gloves/Boots",
                 mismatches[0].Contains("Gloves") || mismatches[1].Contains("Gloves"));
         }

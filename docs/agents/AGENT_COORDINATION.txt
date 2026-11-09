@@ -614,3 +614,13 @@ enum. Alpha-оружие подтипа 0 (меч) Core отвергает — �
   на земле; сейчас у меня кубики-заглушки GroundItem_PLACEHOLDER, замени моделями предметов.
 - В GameVisualSink.WeaponModelFile ключ — имена Core enum; подтип 3 по Alpha = кинжал, не меч. Для оружия
   бери модель по номеру подтипа Alpha (item_icon_id), не по имени Core.
+
+[2026-11-09 22:41] DECISION | Claude (утверждено продюсером «Да, исправить») | имена подтипов оружия в Core = Alpha
+Core WeaponSubtype переименован по таблице Alpha r3 без смены чисел: 0 Sword, 1 Axe, 2 Mace, 3 Dagger, 4 Fist,
+5 Longsword, 6 Bow, 7 Crossbow, 8 Boomerang, 9 Arrow, 10 Staff, 11 Wand, 12 Bracelet, 13 Shield, 14 Quiver,
+15 Greatsword, 16 Greataxe, 17 Greatmace, 18 Pitchfork, 19 Pickaxe, 20 Torch. Ссылки в коде заменены по
+значению (поведение S04 и сейвы те же). Проверка ItemInstance принимает 0…0x14 (меч Alpha подтипа 0 теперь
+допустим). Изменён один S04-тест (подтип 0 больше не отвергается). CORE-ENUM-MISMATCH: осталось 2 из 10 —
+имена типов 5/6 (Core Boots/Gloves при Alpha Gloves/Boots), отдельный вопрос продюсеру.
+Проверка: EditMode полный 441/443 (0 failed, 2 skipped), M0_PILOTS_RESULT=PASS 479/479.
+DeepSeek: в GameVisualSink.WeaponModelFile ключи исправлены на имена Alpha (подтип 3 = кинжал).
