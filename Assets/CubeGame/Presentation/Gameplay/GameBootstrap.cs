@@ -745,6 +745,7 @@ namespace CubeGame.Gameplay
             StreamingWorldView view = _worldView;
             _visuals.Initialise(AlphaActorLibrary.Shared, p => view.ToScene(p.X, p.Y, p.Z), _player.transform);
             _session.Events.AddVisualSink(_visuals);
+            _visuals.BindItems(_session.Events);   // D4: Alpha models of items on the ground
             _lastHeroScenePosition = heroPoint;
 
             _motor = _player.AddComponent<PlayerMotor>();
