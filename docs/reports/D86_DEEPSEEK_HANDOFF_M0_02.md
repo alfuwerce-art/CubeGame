@@ -56,7 +56,9 @@ PlaceObjects(selection.Rule, selection.ObjectKinds);   // status: TRANSLATED_FRO
 var placements = AlphaVegetationPlanner.Plan(seed, regionX, regionZ, cellX, cellZ,
     humidity, temperature, cellValue, spacing, level, mode,
     stagedKinds, problems);   // ставит только подготовленные виды; иначе SCATTER_KIND_NOT_STAGED
-// placements[i].StableId / Kind / X / Z — для инстанса и сохранения дельт
+// Альтернативно: точки сундуков данжа (правило «10 предметов» доказано, позиции — CUBEGAME_CONTRACT)
+var chests = AlphaDungeonChests.Plan(layout, chestsPerDungeon, seed, regionX, regionZ, problems);
+// chests[i].StableId / RoomIndex / X / Y / Z
 ```
 
 Если климат у вас уже в сетках (humidity/temperature/region cell), не считайте его заново:

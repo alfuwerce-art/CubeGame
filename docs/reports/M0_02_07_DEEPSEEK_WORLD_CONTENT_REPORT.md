@@ -20,6 +20,7 @@
 | **W-18 климат→объекты** | `UNKNOWN`, таблица не выгружена | **`TRANSLATED_FROM_CODE`**: дерево `WorldInfo_scatterObjectsInArea @ 0x005f56c0` механически транслировано в C# (`AlphaScatterTree`, 77 id, условия декомпилятора сохранены, goto→`goto End`), `AlphaScatterSelector` вызывается с `humidity/temperature/cell/spacing/level/mode`. Подземная и «сухая» ветки совпали с ранее доказанными списками; **живой Alpha-проверки нет** — статус не `VERIFIED_ALPHA` |
 | **Размещение растительности** | не было | `AlphaVegetationPlanner`: селектор W-18 → детерминированные позиции в клетке; ставятся только подготовленные виды, отсутствующий вид даёт `SCATTER_KIND_NOT_STAGED` (без подмены); позиции — `CUBEGAME_CONTRACT` (`World_placeObjectWithSpacing` не портирован) |
 | **Шов с климатом мира** | не было | `IAlphaClimateGrid` (humidity/temperature/region-cell) + `AlphaScatterField`: выбор и размещение прямо из климатических сеток игры; отсутствие сетки — ошибка, а не климат по умолчанию |
+| **Сундуки данжа** | не было | `AlphaDungeonChests.Plan`: точки сундуков по комнатам сцены данжа, якорь — `CUBEGAME_CONTRACT` (позиции Alpha не восстановлены); правило «ровно 10 предметов» (`AlphaDungeonRules.ChestItemCount`) сохраняется |
 | Тесты | — | +4 EditMode (344/344 всего); PlayMode без регрессий (34/34) |
 
 ---
@@ -51,7 +52,7 @@
 
 | Прогон | Результат |
 |---|---|
-| EditMode | `total=351 passed=351 failed=0` (`AlphaOutput/editmode.xml`) |
+| EditMode | `total=352 passed=352 failed=0` (`AlphaOutput/editmode.xml`) |
 | PlayMode | `total=36 passed=36 failed=0` (`AlphaOutput/playmode.xml`) |
 | Кадр мира | `RunPreview` → `world_content.png`: дом 3×3×4, 4 комнаты данжа + 3 коридорных набора, 6 объектов растительности по W-18; `ALPHA_PREVIEW_RESULT=PASS actors=156 images=290 problems=0` |
 | Выгрузка таблиц мира | `WORLD_CTOR_EVIDENCE=PASS objects=67 items=133 skills=27` |

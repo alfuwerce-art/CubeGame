@@ -422,6 +422,27 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         }
 
         [Test]
+        public void DungeonChestsFollowTheTenItemRuleAndRoomAnchors()
+        {
+            Assert.IsEmpty(AlphaDungeonChests.Validate(), string.Join("\n", AlphaDungeonChests.Validate()));
+            Assert.AreEqual(10, AlphaDungeonRules.ChestItemCount, "evidence: a chest holds exactly 10 items");
+            var layout = AlphaDungeonLayoutPlanner.Plan(3u, 5, 0, 0);
+            var chests = AlphaDungeonChests.Plan(layout, 3, 3u, 1, 0);
+            Assert.AreEqual(3, chests.Count);
+            var ids = new HashSet<string>();
+            double size = AlphaDungeonRules.RoomSize;
+            foreach (var chest in chests)
+            {
+                Assert.IsTrue(ids.Add(chest.StableId), "chest ids are stable and unique");
+                var room = layout.Rooms[chest.RoomIndex];
+                Assert.That(chest.X, Is.InRange(room.X, room.X + size));
+                Assert.That(chest.Z, Is.InRange(room.Z, room.Z + size));
+            }
+            StringAssert.Contains("itemsPerChest=10", AlphaDungeonChests.Summary());
+            StringAssert.Contains("CUBEGAME_CONTRACT", AlphaDungeonChests.AnchorStatus);
+        }
+
+        [Test]
         public void NpcServiceFurnitureMapsToContractKinds()
         {
             Assert.IsEmpty(AlphaNpcServices.Validate(), string.Join("\n", AlphaNpcServices.Validate()));
