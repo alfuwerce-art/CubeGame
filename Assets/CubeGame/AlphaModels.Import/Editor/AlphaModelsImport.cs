@@ -113,6 +113,17 @@ namespace CubeGame.AlphaModels.Import
             EditorApplication.Exit(exit);
         }
 
+
+        /// <summary>Editor-only constant climate used to validate the AlphaScatterField adapter.</summary>
+        sealed class EditorClimateProbe : CubeGame.Content.IAlphaClimateGrid
+        {
+            readonly double _h, _t, _c;
+            public EditorClimateProbe(double h, double t, double c) { _h = h; _t = t; _c = c; }
+            public double Humidity(double x, double z) => _h;
+            public double Temperature(double x, double z) => _t;
+            public double RegionCell(double x, double z) => _c;
+        }
+
         // ---------------------------------------------------------------- validation
         [MenuItem("CubeGame/Alpha Models/Validate Local Content Cache")]
         public static void ValidateContent()
@@ -145,6 +156,11 @@ namespace CubeGame.AlphaModels.Import
             text.AppendLine(CubeGame.Content.AlphaHeldItemCatalog.Summary());
             foreach (var p in CubeGame.Content.AlphaEquipmentCatalog.Validate()) text.AppendLine("EQUIPMENT_PROBLEM " + p);
             text.AppendLine(CubeGame.Content.AlphaEquipmentCatalog.Summary());
+            var stagedKinds = new int[CubeGame.Content.AlphaStagedVisuals.All.Length];
+            for (int i = 0; i < stagedKinds.Length; i++) stagedKinds[i] = CubeGame.Content.AlphaStagedVisuals.All[i].Kind;
+            foreach (var p in CubeGame.Content.AlphaScatterField.Validate(new EditorClimateProbe(0.5, 0.5, 0.0), 0.5, stagedKinds))
+                text.AppendLine("CLIMATE_PROBLEM " + p);
+            text.AppendLine($"ALPHA_CLIMATE_FIELD selected={CubeGame.Content.AlphaScatterSelector.Select(0.5, 0.5, 0.0, 0.5, 6, 0).ObjectKinds.Length} kinds");
             text.AppendLine(CubeGame.Content.AlphaNpcServices.Describe());
             text.AppendLine(CubeGame.Content.AlphaWorldContent.Describe());
             Write("content_status.txt", text.ToString());

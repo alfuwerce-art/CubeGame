@@ -41,7 +41,8 @@
 | 29 | M0-05C: `AlphaActionTiming` (actionEnd/recovery/windup) из клипа, API для боя; семейный перенос действий проверен и отклонён конвейером | `dd159ef` | 350/350 | 44/44 |
 | 30 | M0-05C/06: **S05B-библиотеки подключены к последним 14 видам** — действия у **129 из 130 боевых**, единственный без действий RuneGiant 0x76 (R-9) | `a180a51` | 350/350 | 44/44 |
 | 31 | M0-02C: шов с климатом мира — `IAlphaClimateGrid` + `AlphaScatterField` (выбор и размещение из сеток игры) | `161fa4b` | 351/351 | 44/44 |
-| 32 | M0-09C: runtime-витрина `AlphaContentShowcase` (игрок + существа + дома) для приёмки в Play mode | эта партия | 351/351 | 45/45 |
+| 32 | M0-09C: runtime-витрина `AlphaContentShowcase` (игрок + существа + дома) для приёмки в Play mode | `b29dd09` | 351/351 | 45/45 |
+| 33 | M0-02C/M0-09: климат-адаптер проверяется в `RunValidateContent`; сводный индекс handoff'ов; все генераторы `--check` PASS | эта партия | 351/351 | 45/45 |
 
 Все прогоны — Unity 6000.3.27f2, `-batchmode -runTests`, артефакты в `AlphaOutput/editmode.xml` и `AlphaOutput/playmode.xml` (локально, не в Git).
 
