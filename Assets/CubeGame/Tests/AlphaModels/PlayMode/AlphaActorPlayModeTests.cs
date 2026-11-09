@@ -164,5 +164,30 @@ namespace CubeGame.AlphaModels.Tests.PlayMode
                 Object.Destroy(view.gameObject);
             }
         }
+        [UnityTest]
+        public IEnumerator CreatureWithActionLibraryPlaysItsFirstAction()
+        {
+            var source = AlphaContentSource.Resolve();
+            if (source.State != AlphaContentState.Ready) Assert.Ignore(source.Diagnosis);
+            var library = new AlphaActorLibrary(source);
+            if (!library.TryGet("wolf_0x1c_formula_only", out var def)) Assert.Ignore("wolf variant is not staged");
+            Assert.AreEqual("ACTIONS", def.ControllerMode, "the D65 action library is attached");
+            Assert.IsNotEmpty(def.RequiredActions);
+            var view = AlphaActorView.Spawn(def, null, new System.Collections.Generic.List<string>());
+            try
+            {
+                Assert.IsTrue(view.Ready, string.Join("\n", view.Problems));
+                int code = AlphaActorView.ActionCodeOf(def.RequiredActions[0]);
+                Assert.GreaterOrEqual(code, 0);
+                Assert.IsTrue(view.TryPlayAction(code, out var reason), reason);
+                for (int i = 0; i < 120 && view.Controller.CurrentAction == null; i++) view.Tick(1f / 60f);
+                Assert.AreEqual(def.RequiredActions[0], view.Controller.CurrentAction);
+                yield return null;
+            }
+            finally
+            {
+                Object.Destroy(view.gameObject);
+            }
+        }
     }
 }
