@@ -166,6 +166,7 @@ namespace CubeGame.Tests.World.PlayMode
 
                 int baselineChildren = root.transform.childCount;
                 int baselineStates = streamer.NpcStates.Count;
+                int baselineProblems = streamer.Problems.Count;
 
                 for (int cycle = 0; cycle < 10; cycle++)
                 {
@@ -181,6 +182,8 @@ namespace CubeGame.Tests.World.PlayMode
 
                 Assert.AreEqual(baselineChildren, root.transform.childCount, "no leftover GameObjects");
                 Assert.AreEqual(baselineStates, streamer.NpcStates.Count, "the state store does not grow");
+                Assert.AreEqual(baselineProblems, streamer.Problems.Count, "diagnostics do not grow per cycle");
+                Assert.LessOrEqual(streamer.Problems.Count, WorldContentStreamer.MaxProblems);
                 yield return null;
             }
             finally

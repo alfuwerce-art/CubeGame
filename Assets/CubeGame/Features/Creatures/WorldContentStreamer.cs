@@ -88,6 +88,18 @@ namespace CubeGame.Features.Creatures
 
         public readonly List<string> Problems = new List<string>();
 
+        /// <summary>Diagnostics are bounded: streaming for hours must not grow this list without limit.</summary>
+        public const int MaxProblems = 512;
+
+        void AddProblems(IEnumerable<string> problems)
+        {
+            foreach (var problem in problems)
+            {
+                if (Problems.Count >= MaxProblems) return;
+                if (!Problems.Contains(problem)) Problems.Add(problem);
+            }
+        }
+
         sealed class ZoneInstance
         {
             public ContentPlan Plan;
@@ -146,7 +158,7 @@ namespace CubeGame.Features.Creatures
         {
             if (Source == null) throw new InvalidOperationException("CONTENT_SOURCE_MISSING");
             var plan = ZoneContentPlanner.Plan(zone, Source, EffectiveSettings());
-            Problems.AddRange(plan.Problems);
+            AddProblems(plan.Problems);
             return plan;
         }
 
@@ -161,7 +173,7 @@ namespace CubeGame.Features.Creatures
             {
                 if (Removed.Contains(item.StableId) || (Source != null && Source.IsRemoved(item.StableId)))
                 {
-                    Problems.Add($"CONTENT_SKIPPED_REMOVED {item.StableId}");
+                    AddProblems(new[] { $"CONTENT_SKIPPED_REMOVED {item.StableId}" });
                     continue;
                 }
                 switch (item.Kind)
