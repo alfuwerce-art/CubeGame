@@ -19,10 +19,12 @@ import re
 import sys
 from pathlib import Path
 
-SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(
-    r"D:\Projects\CubeGame-deepseek\.scratch\CubeWorld-Reversal\cube\control\GameController.cpp")
-OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else Path(
-    r"D:\Projects\CubeGame-deepseek\.scratch\research\model_load_table.json")
+# Defaults resolve inside THIS checkout (were hard-coded to the DeepSeek worktree; Claude prebatch P5).
+_ROOT = Path(__file__).resolve().parents[2]
+SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else (
+    _ROOT / ".scratch" / "CubeWorld-Reversal" / "cube" / "control" / "GameController.cpp")
+OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else (
+    _ROOT / ".scratch" / "research" / "model_load_table.json")
 
 lines = SRC.read_text(encoding="utf-8", errors="replace").splitlines()
 

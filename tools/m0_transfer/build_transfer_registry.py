@@ -148,6 +148,15 @@ def parse() -> list[dict]:
     return entries
 
 
+def source_sha256() -> str:
+    """SHA-256 of the matrix with LF line endings.
+
+    Hashing the raw bytes made ``--check`` depend on the checkout: with ``core.autocrlf=true``
+    (Windows) the working copy has CRLF and the committed registry (LF) was always reported stale.
+    """
+    return hashlib.sha256(MATRIX.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
 def build() -> dict:
     entries = parse()
     by_domain = Counter(entry["domain"] for entry in entries)
@@ -157,7 +166,7 @@ def build() -> dict:
     return {
         "schemaVersion": 1,
         "source": "docs/research/alpha2013/M0_00B_ALPHA_GAMEPLAY_COVERAGE_MATRIX.md",
-        "sourceSha256": hashlib.sha256(MATRIX.read_bytes()).hexdigest(),
+        "sourceSha256": source_sha256(),
         "entriesHash": hashlib.sha256(canonical.encode("utf-8")).hexdigest(),
         "count": len(entries),
         "domains": SYSTEMS,

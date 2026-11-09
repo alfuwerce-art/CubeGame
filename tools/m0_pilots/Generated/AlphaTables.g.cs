@@ -9,7 +9,7 @@ namespace CubeGame.M0Pilots.Generated
     /// <summary>Content hash of the source evidence JSON (canonical form).</summary>
     public static class AlphaTables
     {
-        public const string ContentHash = "7a65ea7650497cf599b79e0d6becc92246e10c70b279436d4599640d76c192b0";
+        public const string ContentHash = "b2cafaad5e6c8c021b6f728dbdceb17d17e8308bc8a0bea5c01f84e66393bdb1";
     }
 
     /// <summary>Alpha item type ids (field +0x00), r3-corrected where models proved the mapping.</summary>
@@ -76,7 +76,7 @@ namespace CubeGame.M0Pilots.Generated
     /// <summary>Alpha weapon subtype ids (item type 3, field +0x01).</summary>
     public static class AlphaWeaponSubtype
     {
-        public const int Unknown0x00 = 0;
+        public const int Sword = 0;
         public const int Axe = 1;
         public const int Mace = 2;
         public const int Dagger = 3;
@@ -101,7 +101,7 @@ namespace CubeGame.M0Pilots.Generated
         {
             switch (id)
             {
-                case 0: return "Unknown0x00";
+                case 0: return "Sword";
                 case 1: return "Axe";
                 case 2: return "Mace";
                 case 3: return "Dagger";

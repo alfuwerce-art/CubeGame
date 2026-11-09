@@ -40,7 +40,7 @@
     { "id": 25, "name": "ManaCube", "confidence": "DIRECT" }
   ],
   "weaponSubtypes": [
-    { "id": 0, "name": "Unknown0x00", "confidence": "UNKNOWN", "note": "S1 called it Sword, but item_name_string_id case 0 has no model block." },
+    { "id": 0, "name": "Sword", "confidence": "DIRECT", "model": "iron-sword1.cub", "note": "M0-00B FINAL (d07564c), re-verified by Claude M0-00 prebatch: NPC stock generator 0x5ca0a0 emits type 3 subtype rand()%3; item_weaponDamage 0x4c7f60 default x4; combat_selectAttackVariant 0x4452a0 attack 3/4; item-layer draw model index 899 (VERIFIED_EMULATION). Player purchase path PARTIAL." },
     { "id": 1, "name": "Axe", "confidence": "DIRECT", "model": "iron-axe1.cub" },
     { "id": 2, "name": "Mace", "confidence": "DIRECT", "model": "iron-mace1.cub" },
     { "id": 3, "name": "Dagger", "confidence": "DIRECT", "model": "iron-dagger1.cub" },

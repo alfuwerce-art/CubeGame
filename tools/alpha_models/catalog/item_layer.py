@@ -29,7 +29,8 @@ Additional results this module produces (all EMULATED_ALPHA_CODE, no hand-transc
 Usage (all writes stay inside ``.scratch``):
 
     python -m tools.alpha_models.catalog.item_layer --out .scratch/catalog/item_layer.json
-    python -m tools.alpha_models.catalog.item_layer --verify          # re-check the committed evidence
+    python -m tools.alpha_models.catalog.item_layer --verify          # re-run and compare with the committed evidence
+    python -m tools.alpha_models.catalog.item_layer --check-pins      # fast: SHA-256 pins only
     python -m tools.alpha_models.catalog.item_layer --export-evidence # refresh committed numbers
 
 Alpha is opened READ-ONLY; nothing is launched. The committed evidence (``item_layer_evidence.json``)
@@ -748,14 +749,17 @@ def main(argv=None):
     ap.add_argument("--db", default=str(DEFAULT_DB))
     ap.add_argument("--sizes", default=str(DEFAULT_SIZES))
     ap.add_argument("--out", default=None)
-    ap.add_argument("--verify", action="store_true", help="re-run and compare with the committed evidence")
+    ap.add_argument("--verify", action="store_true",
+                    help="re-run the emulation and compare verification + contract with the committed evidence")
+    ap.add_argument("--check-pins", action="store_true",
+                    help="fast: only compare the exe/code SHA-256 pins of the committed evidence (no re-run)")
     ap.add_argument("--export-evidence", action="store_true")
     ap.add_argument("--workers", type=int, default=1, help="parallel verification processes")
     a = ap.parse_args(argv)
 
     drift = evidence_drift()
-    if a.verify and not a.export_evidence:
-        print(json.dumps({"ITEM_LAYER_EVIDENCE": "DRIFT" if drift else "OK", "problems": drift}))
+    if a.check_pins:
+        print(json.dumps({"ITEM_LAYER_EVIDENCE_PINS": "DRIFT" if drift else "OK", "problems": drift}))
         return 1 if drift else 0
 
     if not Path(a.exe).exists() or not Path(a.db).exists():
@@ -773,6 +777,14 @@ def main(argv=None):
           and verification["consumable"]["ok"] and verification["conditionalSlots"]["ok"]
           and all(d["status"] == "PART_IDENTIFIED" for d in verification["dynamicParts"] if d["kind"] == "0x6f"))
     contract = build_contract(layer)
+    if a.verify:
+        # Claude prebatch P6: --verify used to compare only the hash pins and never re-ran anything.
+        committed = json.loads(EVIDENCE_PATH.read_text(encoding="utf-8")) if EVIDENCE_PATH.exists() else {}
+        fresh = json.loads(json.dumps({"verification": verification, "contract": contract}))
+        mismatched = [k for k in ("verification", "contract") if committed.get(k) != fresh[k]]
+        print(json.dumps({"ITEM_LAYER_EVIDENCE_DATA": "MISMATCH" if mismatched else "MATCH",
+                          "mismatched": mismatched, "pin_drift": drift}))
+        ok = ok and not mismatched and not drift
     if a.out:
         out = Path(a.out).resolve()
         if not out.is_relative_to(ROOT / ".scratch"):

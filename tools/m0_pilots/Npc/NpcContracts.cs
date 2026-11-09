@@ -206,28 +206,80 @@ namespace CubeGame.M0Pilots.Npc
         }
     }
 
+    public enum PotionDecision
+    {
+        None,
+        TickBlocked,
+        InventoryPotion,
+        AllyAutoPotion
+    }
+
     public static class NpcRules
     {
+        /// <summary>Re-entry guard of the potion action (0x42cbb9): 3000 ms.</summary>
+        public const int PotionReentryMs = 3000;
+
         /// <summary>
-        /// M0-00B FINAL, branch B (0x42ce8c): ally auto-potion at HP < 50% of
-        /// SELF MaxHP, held item (1,4), action 0x50. This is eligibility only;
-        /// inventory removal and healing were not proven for this branch.
+        /// Gates at the head of CombatBehavior::vfunc_0 (0x42cbac..0x42cbc6) that end the WHOLE AI tick
+        /// before either potion branch: flag +0x128 set (stun field, matrix C-22), or the creature is
+        /// still inside its own potion action (action 0x50 with timer &lt; 3000 ms).
+        /// Re-verified by Claude M0-00 prebatch review (disassembly), DIRECT.
         /// </summary>
-        public static bool ShouldDrinkPotion(double health, double maxHealth, int faction)
+        public static bool PotionTickBlocked(CreatureState state, bool flag128Set)
         {
-            ValidatePotionHealth(health, maxHealth);
-            return faction == (int)Faction.Ally && health < maxHealth * 0.5;
+            if (state == null)
+            {
+                throw new ArgumentNullException(nameof(state));
+            }
+
+            return flag128Set || (state.ActionId == 0x50 && state.ActionTimerMs < PotionReentryMs);
         }
 
         /// <summary>
-        /// M0-00B FINAL, branch A (0x42cbdc): HP < 25% of SELF MaxHP,
-        /// requires inventory LifePotion (1,1). Alpha spends one item;
-        /// this pilot checks only eligibility, not inventory mutation.
+        /// M0-00B FINAL, branch B (0x42ce8c): ally auto-potion at HP &lt; 50% of SELF MaxHP,
+        /// faction 3, held item (1,4), action 0x50. Reached only after target resolution and only when
+        /// the resolved target pointer is null (0x42ce36 test ebx / je) - i.e. out of combat
+        /// (DIRECT branch, semantics of the null target PARTIAL). Inventory removal and healing were
+        /// not proven for this branch.
         /// </summary>
-        public static bool ShouldDrinkInventoryPotion(double health, double maxHealth, bool hasLifePotion)
+        public static bool ShouldDrinkPotion(double health, double maxHealth, int faction, bool hasTarget)
         {
             ValidatePotionHealth(health, maxHealth);
-            return hasLifePotion && health < maxHealth * 0.25;
+            return !hasTarget && faction == (int)Faction.Ally && health < maxHealth * 0.5;
+        }
+
+        /// <summary>
+        /// M0-00B FINAL, branch A (0x42cbdc): HP &lt; 25% of SELF MaxHP, any faction, the current
+        /// action must be over (timer +0x6c strictly greater than combat_getAttackTiming 0x43d1a0 of
+        /// the current action, 0x42cbfc..0x42cc04), and an inventory LifePotion (1,1) must exist.
+        /// Alpha then copies the item into the held slot (0x42c5e0) and spends one; this pilot checks
+        /// eligibility only, not the inventory mutation.
+        /// </summary>
+        public static bool ShouldDrinkInventoryPotion(double health, double maxHealth, bool hasLifePotion,
+            int actionTimerMs, int currentActionDurationMs)
+        {
+            ValidatePotionHealth(health, maxHealth);
+            return hasLifePotion && health < maxHealth * 0.25 && actionTimerMs > currentActionDurationMs;
+        }
+
+        /// <summary>Order of one AI tick as in Alpha: tick gates, branch A, target resolution, branch B.</summary>
+        public static PotionDecision EvaluatePotion(CreatureState state, bool flag128Set, bool hasLifePotion,
+            int currentActionDurationMs, bool hasTarget)
+        {
+            if (PotionTickBlocked(state, flag128Set))
+            {
+                return PotionDecision.TickBlocked;
+            }
+
+            if (ShouldDrinkInventoryPotion(state.Health, state.MaxHealth, hasLifePotion,
+                    state.ActionTimerMs, currentActionDurationMs))
+            {
+                return PotionDecision.InventoryPotion;
+            }
+
+            return ShouldDrinkPotion(state.Health, state.MaxHealth, state.Faction, hasTarget)
+                ? PotionDecision.AllyAutoPotion
+                : PotionDecision.None;
         }
 
         private static void ValidatePotionHealth(double health, double maxHealth)

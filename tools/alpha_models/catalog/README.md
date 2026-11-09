@@ -27,7 +27,8 @@
 
 ```powershell
 python -m tools.alpha_models.catalog.item_layer --out .scratch/catalog/item_layer.json --export-evidence
-python -m tools.alpha_models.catalog.item_layer --verify
+python -m tools.alpha_models.catalog.item_layer --verify        # перезапуск эмуляции и сравнение с evidence (~1.5 мин, --workers 8)
+python -m tools.alpha_models.catalog.item_layer --check-pins    # быстро: только SHA-256 пины
 python -m tools.alpha_models.catalog.verify_catalog_import --manifest <catalog_import.json> --db "D:\Games\Cube world\data1.db"
 python -m tools.alpha_models.universal.pipeline scan --out .scratch/universal/static/alpha_static.json
 python -m tools.alpha_models.catalog.asset_catalog                       # + alpha_static, item_models, registry_sizes

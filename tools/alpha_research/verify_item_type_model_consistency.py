@@ -22,8 +22,10 @@ import re
 import sys
 from pathlib import Path
 
-CUBE = Path(sys.argv[1]) if len(sys.argv) > 1 and not sys.argv[1].startswith("--") else Path(
-    r"D:\Projects\CubeGame-deepseek\.scratch\CubeWorld-Reversal\cube")
+# Default resolves inside THIS checkout (was hard-coded to the DeepSeek worktree; Claude prebatch P5).
+_ROOT = Path(__file__).resolve().parents[2]
+CUBE = Path(sys.argv[1]) if len(sys.argv) > 1 and not sys.argv[1].startswith("--") else (
+    _ROOT / ".scratch" / "CubeWorld-Reversal" / "cube")
 VERBOSE = "--verbose" in sys.argv
 
 WORLD = CUBE / "world" / "World.cpp"

@@ -4,12 +4,12 @@
  "tool": "tools/alpha_models/catalog/item_layer.py",
  "exe_sha256": "84a7a132a84d4282338e7ea45a1940d32066d64e39cbafed8f2418d5a6dc30bf",
  "code_sha256": {
-  "tools/alpha_models/catalog/item_layer.py": "34601ea9c452f326bb9e95974880f19b15ed7dd4bdfdf8de7a12090a4afcbd30",
+  "tools/alpha_models/catalog/item_layer.py": "c3076656fed421cb314539e0113e93766f443cb3c5e93d3dadd025f6a239e8e2",
   "tools/alpha_models/universal/item_attach.py": "715584fd1e80a4b127070a5a764c8e549f89d6c6d0fd0e1da6129e1cea1fe1a1",
   "tools/alpha_models/universal/anim_states.py": "a32108d947c86916240714a9d5a05e9a52841dc13316119bbe0cdf456eaaa856",
   "tools/alpha_models/universal/drawmodel_emu.py": "712c04cd373f6b18bc96ac5b7b319c21e114c8c17eb7420a4914eb85d311a8f4",
   "tools/alpha_models/universal/x86emu.py": "d535d2ce41d7e03e41a4447313e1a8e53c7d5b260d4093d1714e787c2a412643",
-  "tools/alpha_models/universal/alpha_static.py": "fca7545031205a6f85da73d460d131635b21be59f2a0fad87f0131300853ed58"
+  "tools/alpha_models/universal/alpha_static.py": "22dd8ee9c1d92bf371e381e1e551648fa79b54bfe3bf15e9539e4c7a8f51de95"
  },
  "units": {
   "kind": "0x02",

@@ -89,23 +89,53 @@ namespace CubeGame.M0Pilots.Npc
         private static void PotionAndDodge()
         {
             Check.True("Ally auto-potion: HP 49 below half of SELF MaxHP 100",
-                NpcRules.ShouldDrinkPotion(49.0, 100.0, (int)Faction.Ally));
+                NpcRules.ShouldDrinkPotion(49.0, 100.0, (int)Faction.Ally, false));
             Check.True("Ally auto-potion: HP 50 equals threshold, does not drink",
-                !NpcRules.ShouldDrinkPotion(50.0, 100.0, (int)Faction.Ally));
+                !NpcRules.ShouldDrinkPotion(50.0, 100.0, (int)Faction.Ally, false));
             Check.True("Monster is not eligible for faction 3 ally auto-potion",
-                !NpcRules.ShouldDrinkPotion(24.0, 100.0, (int)Faction.Monster));
+                !NpcRules.ShouldDrinkPotion(24.0, 100.0, (int)Faction.Monster, false));
             Check.True("NPC faction 5 is not eligible for faction 3 ally auto-potion",
-                !NpcRules.ShouldDrinkPotion(24.0, 100.0, (int)Faction.Npc));
+                !NpcRules.ShouldDrinkPotion(24.0, 100.0, (int)Faction.Npc, false));
             Check.True("Inventory potion: HP 24 below 25%, LifePotion present",
-                NpcRules.ShouldDrinkInventoryPotion(24.0, 100.0, true));
+                NpcRules.ShouldDrinkInventoryPotion(24.0, 100.0, true, 1000, 500));
             Check.True("Inventory potion: strict quarter threshold excludes HP 25",
-                !NpcRules.ShouldDrinkInventoryPotion(25.0, 100.0, true));
+                !NpcRules.ShouldDrinkInventoryPotion(25.0, 100.0, true, 1000, 500));
             Check.True("Inventory potion: without item (1,1), cannot drink",
-                !NpcRules.ShouldDrinkInventoryPotion(24.0, 100.0, false));
+                !NpcRules.ShouldDrinkInventoryPotion(24.0, 100.0, false, 1000, 500));
             Check.True("Ally auto-potion: HP 133 < 50% of MaxHP 268",
-                NpcRules.ShouldDrinkPotion(133.0, 268.0, (int)Faction.Ally));
+                NpcRules.ShouldDrinkPotion(133.0, 268.0, (int)Faction.Ally, false));
             Check.Throws<ArgumentOutOfRangeException>("Potion MaxHP must be positive",
-                () => NpcRules.ShouldDrinkPotion(0.0, 0.0, (int)Faction.Ally));
+                () => NpcRules.ShouldDrinkPotion(0.0, 0.0, (int)Faction.Ally, false));
+
+            // Claude M0-00 prebatch review: gates proven by disassembly of 0x42cb20..0x42cee7.
+            Check.True("Ally auto-potion is skipped while a combat target exists (0x42ce36)",
+                !NpcRules.ShouldDrinkPotion(10.0, 100.0, (int)Faction.Ally, true));
+            Check.True("Inventory potion waits until the current action is over (timer > duration)",
+                !NpcRules.ShouldDrinkInventoryPotion(10.0, 100.0, true, 500, 500));
+            Check.True("Inventory potion: timer one ms past the action duration is enough",
+                NpcRules.ShouldDrinkInventoryPotion(10.0, 100.0, true, 501, 500));
+            var monster = new CreatureState { Faction = (int)Faction.Monster, Health = 10.0, MaxHealth = 100.0, ActionTimerMs = 501 };
+            Check.Equal("Inventory potion is not faction-gated (a monster with a LifePotion drinks)",
+                PotionDecision.InventoryPotion, NpcRules.EvaluatePotion(monster, false, true, 500, true));
+
+            var drinking = new CreatureState { Faction = (int)Faction.Ally, Health = 10.0, MaxHealth = 100.0, ActionId = 0x50, ActionTimerMs = 2999 };
+            Check.Equal("re-entry guard: action 0x50 younger than 3000 ms blocks the tick",
+                PotionDecision.TickBlocked, NpcRules.EvaluatePotion(drinking, false, true, 0, false));
+            drinking.ActionTimerMs = 3000;
+            Check.Equal("re-entry guard releases at 3000 ms; inventory branch A wins over B",
+                PotionDecision.InventoryPotion, NpcRules.EvaluatePotion(drinking, false, true, 0, false));
+            Check.Equal("flag +0x128 blocks the whole tick",
+                PotionDecision.TickBlocked, NpcRules.EvaluatePotion(drinking, true, true, 0, false));
+            var ally = new CreatureState { Faction = (int)Faction.Ally, Health = 40.0, MaxHealth = 100.0, ActionTimerMs = 100 };
+            Check.Equal("40% HP, no target, ally: branch B",
+                PotionDecision.AllyAutoPotion, NpcRules.EvaluatePotion(ally, false, true, 50, false));
+            Check.Equal("40% HP, ally in combat: no potion",
+                PotionDecision.None, NpcRules.EvaluatePotion(ally, false, true, 50, true));
+            ally.Health = 20.0;
+            Check.Equal("20% HP, action still running, no target: falls through to branch B",
+                PotionDecision.AllyAutoPotion, NpcRules.EvaluatePotion(ally, false, true, 5000, false));
+            Check.Equal("20% HP, action running, in combat: no potion this tick",
+                PotionDecision.None, NpcRules.EvaluatePotion(ally, false, true, 5000, true));
 
             var state = new CreatureState();
             NpcRules.ApplyPotionAction(state);
