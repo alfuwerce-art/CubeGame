@@ -1,0 +1,5760 @@
+{
+ "format": "cubegame.item_layer_evidence/1",
+ "decision": "D71 / M0-00B (issue #10)",
+ "tool": "tools/alpha_models/catalog/item_layer.py",
+ "exe_sha256": "84a7a132a84d4282338e7ea45a1940d32066d64e39cbafed8f2418d5a6dc30bf",
+ "code_sha256": {
+  "tools/alpha_models/catalog/item_layer.py": "34601ea9c452f326bb9e95974880f19b15ed7dd4bdfdf8de7a12090a4afcbd30",
+  "tools/alpha_models/universal/item_attach.py": "715584fd1e80a4b127070a5a764c8e549f89d6c6d0fd0e1da6129e1cea1fe1a1",
+  "tools/alpha_models/universal/anim_states.py": "a32108d947c86916240714a9d5a05e9a52841dc13316119bbe0cdf456eaaa856",
+  "tools/alpha_models/universal/drawmodel_emu.py": "712c04cd373f6b18bc96ac5b7b319c21e114c8c17eb7420a4914eb85d311a8f4",
+  "tools/alpha_models/universal/x86emu.py": "d535d2ce41d7e03e41a4447313e1a8e53c7d5b260d4093d1714e787c2a412643",
+  "tools/alpha_models/universal/alpha_static.py": "fca7545031205a6f85da73d460d131635b21be59f2a0fad87f0131300853ed58"
+ },
+ "units": {
+  "kind": "0x02",
+  "seed": [
+   0,
+   0
+  ]
+ },
+ "verification": {
+  "weaponLaws": [
+   {
+    "subtype": 0,
+    "model": "iron-sword1.cub",
+    "model_index": 899,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.5,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 1,
+    "model": "iron-axe1.cub",
+    "model_index": 1770,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      -0.0,
+      0.0
+     ],
+     [
+      -0.0,
+      0.5,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 2,
+    "model": "iron-mace1.cub",
+    "model_index": 609,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      -0.0,
+      0.5,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 3,
+    "model": "iron-dagger1.cub",
+    "model_index": 954,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.5,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     0.0,
+     0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 4,
+    "model": "iron-fist1.cub",
+    "model_index": 1009,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      0.5,
+      0.0
+     ],
+     [
+      -0.0,
+      0.0,
+      0.5
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "IN_HAND",
+    "status": "PASS"
+   },
+   {
+    "subtype": 5,
+    "model": "iron-longsword1.cub",
+    "model_index": 1880,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      0.5,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 6,
+    "model": "bow.cub",
+    "model_index": 674,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      0.0,
+      0.5
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 7,
+    "model": "wood-crossbow1.cub",
+    "model_index": 729,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      -0.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      0.5
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 8,
+    "model": "wood-boomerang1.cub",
+    "model_index": 784,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 9,
+    "model": "arrow.cub",
+    "model_index": 840,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      -0.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 10,
+    "model": "wood-staff1.cub",
+    "model_index": 434,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      -0.0
+     ],
+     [
+      0.0,
+      0.5,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 11,
+    "model": "wood-wand1.cub",
+    "model_index": 489,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.5,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 12,
+    "model": "silver-bracelet1.cub",
+    "model_index": 574,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      1.0,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      0.5
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "IN_HAND",
+    "status": "PASS"
+   },
+   {
+    "subtype": 13,
+    "model": "iron-shield01.cub",
+    "model_index": 1064,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      -0.0,
+      0.0
+     ],
+     [
+      -0.0,
+      0.5,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     0.0,
+     0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 14,
+    "model": "quiver.cub",
+    "model_index": 839,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.5,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 15,
+    "model": "iron-greatsword1.cub",
+    "model_index": 1825,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      -0.0,
+      0.0
+     ],
+     [
+      -0.0,
+      0.5,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 16,
+    "model": "iron-greataxe1.cub",
+    "model_index": 1937,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      -0.0,
+      0.5,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 17,
+    "model": "iron-greatmace1.cub",
+    "model_index": 1996,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      -0.0,
+      0.5,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 18,
+    "model": "pitchfork.cub",
+    "model_index": 2331,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      -0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.5,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 19,
+    "model": "iron-pickaxe.cub",
+    "model_index": 2051,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      -0.0,
+      0.5,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 20,
+    "model": "torch.cub",
+    "model_index": 842,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      0.5,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 21,
+    "model": "iron-sword1.cub",
+    "model_index": 899,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.5,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 22,
+    "model": "iron-sword1.cub",
+    "model_index": 899,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.5,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 23,
+    "model": "iron-sword1.cub",
+    "model_index": 899,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.5,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 24,
+    "model": "iron-sword1.cub",
+    "model_index": 899,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.5,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   },
+   {
+    "subtype": 25,
+    "model": "iron-sword1.cub",
+    "model_index": 899,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.5,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "measured_coeff_idle_z": [
+     -0.0,
+     -0.0,
+     0.5
+    ],
+    "idle_branch": "ON_BACK",
+    "status": "PASS"
+   }
+  ],
+  "offhandLaws": [
+   {
+    "subtype": 3,
+    "model": "iron-dagger1.cub",
+    "model_index": 954,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.5,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "status": "PASS"
+   },
+   {
+    "subtype": 4,
+    "model": "iron-fist1.cub",
+    "model_index": 1009,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      -0.0,
+      0.0
+     ],
+     [
+      -0.0,
+      0.5,
+      0.0
+     ],
+     [
+      -0.0,
+      0.0,
+      0.5
+     ]
+    ],
+    "grip_in_hand": true,
+    "status": "PASS"
+   },
+   {
+    "subtype": 6,
+    "model": "bow.cub",
+    "model_index": 674,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      1.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      0.0,
+      0.5
+     ]
+    ],
+    "grip_in_hand": true,
+    "status": "PASS"
+   },
+   {
+    "subtype": 7,
+    "model": "wood-crossbow1.cub",
+    "model_index": 729,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      -0.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     [
+      0.0,
+      -0.0,
+      0.5
+     ]
+    ],
+    "grip_in_hand": true,
+    "status": "PASS"
+   },
+   {
+    "subtype": 12,
+    "model": "silver-bracelet1.cub",
+    "model_index": 574,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      1.0,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      0.5
+     ]
+    ],
+    "grip_in_hand": true,
+    "status": "PASS"
+   },
+   {
+    "subtype": 13,
+    "model": "iron-shield01.cub",
+    "model_index": 1064,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      0.0,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     [
+      -0.0,
+      0.0,
+      0.5
+     ]
+    ],
+    "grip_in_hand": false,
+    "status": "PASS"
+   },
+   {
+    "subtype": 20,
+    "model": "torch.cub",
+    "model_index": 842,
+    "problems": [],
+    "measured_coeff": [
+     [
+      0.5,
+      -0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.5,
+      0.0
+     ],
+     [
+      -0.0,
+      -0.0,
+      -0.0
+     ]
+    ],
+    "grip_in_hand": true,
+    "status": "PASS"
+   }
+  ],
+  "branchChecks": [
+   {
+    "action": 0,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 1,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 2,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 3,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 5,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 6,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 8,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 9,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 11,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 12,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 13,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 14,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 19,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 21,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      0.0,
+      0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 22,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 600
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 23,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 24,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 25,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 26,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 27,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 30,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 31,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 32,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 33,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 38,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 44,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 45,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 46,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 55,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 57,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 59,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 60,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 61,
+    "weapon": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "IN_HAND",
+     "drawn": "IN_HAND",
+     "block": "offhand_b",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      -0.0
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 79,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 80,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 81,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      -0.0,
+      0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 82,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      0.0,
+      0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 83,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      -0.0,
+      0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 84,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      0.0,
+      0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 85,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 91,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      -0.0,
+      0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 96,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      0.0,
+      0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 105,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 106,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 107,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      0.0,
+      0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      -0.0,
+      0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   },
+   {
+    "action": 109,
+    "weapon": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "offhand": {
+     "predicate": "ON_BACK",
+     "drawn": "ON_BACK",
+     "block": "offhand_a",
+     "coeff_z": [
+      -0.0,
+      -0.0,
+      0.5
+     ],
+     "timer_ms": 200
+    },
+    "problems": [],
+    "inconclusive": []
+   }
+  ],
+  "twoHandedBranch": [
+   {
+    "subtype": 15,
+    "action": 57,
+    "state": 2,
+    "coeff_z": [
+     -0.0,
+     -0.0,
+     -0.0
+    ],
+    "model": "iron-greatsword1.cub",
+    "grip_in_hand": true,
+    "problems": []
+   },
+   {
+    "subtype": 15,
+    "action": 67,
+    "state": 37,
+    "coeff_z": [
+     -0.0,
+     -0.0,
+     -0.0
+    ],
+    "model": "iron-greatsword1.cub",
+    "grip_in_hand": true,
+    "problems": []
+   },
+   {
+    "subtype": 15,
+    "action": 58,
+    "state": 3,
+    "coeff_z": [
+     -0.0,
+     -0.0,
+     -0.0
+    ],
+    "model": "iron-greatsword1.cub",
+    "grip_in_hand": true,
+    "problems": []
+   },
+   {
+    "subtype": 16,
+    "action": 57,
+    "state": 2,
+    "coeff_z": [
+     -0.0,
+     -0.0,
+     -0.0
+    ],
+    "model": "iron-greataxe1.cub",
+    "grip_in_hand": true,
+    "problems": []
+   },
+   {
+    "subtype": 16,
+    "action": 67,
+    "state": 37,
+    "coeff_z": [
+     -0.0,
+     -0.0,
+     -0.0
+    ],
+    "model": "iron-greataxe1.cub",
+    "grip_in_hand": true,
+    "problems": []
+   },
+   {
+    "subtype": 16,
+    "action": 58,
+    "state": 3,
+    "coeff_z": [
+     -0.0,
+     -0.0,
+     -0.0
+    ],
+    "model": "iron-greataxe1.cub",
+    "grip_in_hand": true,
+    "problems": []
+   },
+   {
+    "subtype": 17,
+    "action": 57,
+    "state": 2,
+    "coeff_z": [
+     -0.0,
+     -0.0,
+     -0.0
+    ],
+    "model": "iron-greatmace1.cub",
+    "grip_in_hand": true,
+    "problems": []
+   },
+   {
+    "subtype": 17,
+    "action": 67,
+    "state": 37,
+    "coeff_z": [
+     -0.0,
+     -0.0,
+     -0.0
+    ],
+    "model": "iron-greatmace1.cub",
+    "grip_in_hand": true,
+    "problems": []
+   },
+   {
+    "subtype": 17,
+    "action": 58,
+    "state": 3,
+    "coeff_z": [
+     -0.0,
+     -0.0,
+     -0.0
+    ],
+    "model": "iron-greatmace1.cub",
+    "grip_in_hand": true,
+    "problems": []
+   }
+  ],
+  "consumable": {
+   "cases": [
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 0,
+     "timer": 0,
+     "cooldown": 3000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 80,
+     "timer": 0,
+     "cooldown": 3000,
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 81,
+     "timer": 0,
+     "cooldown": 3000,
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 0,
+     "timer": 1,
+     "cooldown": 3000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 80,
+     "timer": 1,
+     "cooldown": 3000,
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 81,
+     "timer": 1,
+     "cooldown": 3000,
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 0,
+     "timer": 2999,
+     "cooldown": 3000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 80,
+     "timer": 2999,
+     "cooldown": 3000,
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 81,
+     "timer": 2999,
+     "cooldown": 3000,
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 0,
+     "timer": 3000,
+     "cooldown": 3000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 80,
+     "timer": 3000,
+     "cooldown": 3000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 81,
+     "timer": 3000,
+     "cooldown": 3000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 0,
+     "timer": 3001,
+     "cooldown": 3000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 80,
+     "timer": 3001,
+     "cooldown": 3000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 1,
+     "action": 81,
+     "timer": 3001,
+     "cooldown": 3000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 0,
+     "timer": 0,
+     "cooldown": 10000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 80,
+     "timer": 0,
+     "cooldown": 10000,
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 81,
+     "timer": 0,
+     "cooldown": 10000,
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 0,
+     "timer": 1,
+     "cooldown": 10000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 80,
+     "timer": 1,
+     "cooldown": 10000,
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 81,
+     "timer": 1,
+     "cooldown": 10000,
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 0,
+     "timer": 9999,
+     "cooldown": 10000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 80,
+     "timer": 9999,
+     "cooldown": 10000,
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 81,
+     "timer": 9999,
+     "cooldown": 10000,
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 0,
+     "timer": 10000,
+     "cooldown": 10000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 80,
+     "timer": 10000,
+     "cooldown": 10000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 81,
+     "timer": 10000,
+     "cooldown": 10000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 0,
+     "timer": 10001,
+     "cooldown": 10000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 80,
+     "timer": 10001,
+     "cooldown": 10000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 1,
+     "subtype": 2,
+     "action": 81,
+     "timer": 10001,
+     "cooldown": 10000,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 11,
+     "subtype": 1,
+     "action": 0,
+     "timer": 0,
+     "cooldown": 0,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 11,
+     "subtype": 1,
+     "action": 80,
+     "timer": 0,
+     "cooldown": 0,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 11,
+     "subtype": 1,
+     "action": 81,
+     "timer": 0,
+     "cooldown": 0,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 11,
+     "subtype": 1,
+     "action": 0,
+     "timer": 1,
+     "cooldown": 0,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 11,
+     "subtype": 1,
+     "action": 80,
+     "timer": 1,
+     "cooldown": 0,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "type": 11,
+     "subtype": 1,
+     "action": 81,
+     "timer": 1,
+     "cooldown": 0,
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    }
+   ],
+   "ok": true
+  },
+  "conditionalSlots": {
+   "cases": [
+    {
+     "flag124": 512,
+     "slot": "0xdf0",
+     "block": "lamp_item",
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "flag124": 16,
+     "slot": "0xdf0",
+     "block": "lamp_item",
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "flag124": 512,
+     "slot": "0xf08",
+     "block": "special_item",
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "flag124": 16,
+     "slot": "0xf08",
+     "block": "special_item",
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "flag124": 528,
+     "slot": "0xdf0",
+     "block": "lamp_item",
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "flag124": 528,
+     "slot": "0xf08",
+     "block": "special_item",
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    },
+    {
+     "action": 0,
+     "slot": "0x1020",
+     "block": "pet_item",
+     "drawn": false,
+     "expected": false,
+     "ok": true
+    },
+    {
+     "action": 82,
+     "slot": "0x1020",
+     "block": "pet_item",
+     "drawn": true,
+     "expected": true,
+     "ok": true
+    }
+   ],
+   "ok": true
+  },
+  "weaponBackPredicate": {
+   "agree": 46,
+   "total": 46,
+   "disagree": []
+  },
+  "offhandBackPredicate": {
+   "agree": 46,
+   "total": 46,
+   "disagree": []
+  },
+  "dynamicParts": [
+   {
+    "kind": "0x6f",
+    "action": 108,
+    "timer": 80,
+    "state": 71,
+    "new_blocks": [
+     {
+      "block": "offhand_b",
+      "model_index": 2101,
+      "model": "iron-deposit.cub",
+      "size": [
+       11,
+       11,
+       15
+      ],
+      "anchor_law": {
+       "law": "offhand_generic_in_hand",
+       "coeff": [
+        0.5,
+        0.5,
+        0.0
+       ],
+       "const": [
+        0.0,
+        0.0,
+        4.0
+       ],
+       "scale": 1.0,
+       "status": "CODE_DERIVED_MEASURED",
+       "evidence": "else fVar2=-4.0 (6839-6842)"
+      }
+     }
+    ],
+    "status": "PART_IDENTIFIED"
+   },
+   {
+    "kind": "0x19",
+    "action": 72,
+    "timer": 80,
+    "state": 41,
+    "new_blocks": [],
+    "status": "NO_NEW_BLOCK"
+   }
+  ]
+ },
+ "contract": {
+  "format": "cubegame.item_layer/1",
+  "researchOnly": true,
+  "source": "Cube.exe executed by the Alpha oracle (no asset data committed)",
+  "units": {
+   "kind": "0x02",
+   "seed": [
+    0,
+    0
+   ]
+  },
+  "slots": [
+   {
+    "offset": "0x418",
+    "name": "neck",
+    "itemTypes": [
+     8
+    ],
+    "block": "neck_item",
+    "law": "neck",
+    "condition": {},
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "offset": "0x530",
+    "name": "chest",
+    "itemTypes": [
+     4
+    ],
+    "block": "body(SWAP)",
+    "law": "center",
+    "condition": {},
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "offset": "0x648",
+    "name": "feet",
+    "itemTypes": [
+     6
+    ],
+    "block": "foot_l/foot_r(SWAP)",
+    "law": "center",
+    "condition": {},
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "offset": "0x760",
+    "name": "hands",
+    "itemTypes": [
+     5
+    ],
+    "block": "hand_l/hand_r(SWAP)",
+    "law": "center",
+    "condition": {},
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "offset": "0x878",
+    "name": "shoulder",
+    "itemTypes": [
+     7
+    ],
+    "block": "shoulder_item",
+    "law": "center",
+    "condition": {},
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "offset": "0x990",
+    "name": "offhand",
+    "itemTypes": [
+     3
+    ],
+    "block": "offhand_a|offhand_b",
+    "law": "item_attach.offhand_present_law",
+    "condition": {
+     "weaponSubtype": true
+    },
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "offset": "0xaa8",
+    "name": "weapon",
+    "itemTypes": [
+     3
+    ],
+    "block": "weapon",
+    "law": "item_attach.weapon_present_law",
+    "condition": {},
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "offset": "0xdf0",
+    "name": "lamp",
+    "itemTypes": [
+     24
+    ],
+    "block": "lamp_item",
+    "law": "lamp",
+    "condition": {
+     "flag124": 512
+    },
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "offset": "0xf08",
+    "name": "special",
+    "itemTypes": [
+     23
+    ],
+    "block": "special_item",
+    "law": "center",
+    "condition": {
+     "flag124": 16
+    },
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "offset": "0x1020",
+    "name": "pet",
+    "itemTypes": [
+     19
+    ],
+    "block": "pet_item",
+    "law": "pet",
+    "condition": {
+     "action": 82
+    },
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "offset": "0x1e8",
+    "name": "held",
+    "itemTypes": [
+     1
+    ],
+    "block": "held_item",
+    "law": "center",
+    "condition": {
+     "actions": [
+      80,
+      81
+     ],
+     "timerBelowItemCooldown": true
+    },
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "offset": "0x300",
+    "name": "unknown",
+    "itemTypes": [],
+    "block": "NOT_DRAWN",
+    "law": null,
+    "condition": {},
+    "status": "UNKNOWN"
+   },
+   {
+    "offset": "0xbc0",
+    "name": "ring_a",
+    "itemTypes": [
+     9
+    ],
+    "block": "NOT_DRAWN",
+    "law": null,
+    "condition": {},
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "offset": "0xcd8",
+    "name": "ring_b",
+    "itemTypes": [
+     9
+    ],
+    "block": "NOT_DRAWN",
+    "law": null,
+    "condition": {},
+    "status": "VERIFIED_EMULATION"
+   }
+  ],
+  "weaponClasses": [
+   {
+    "type": 3,
+    "subtype": 0,
+    "label": "sword",
+    "modelIndex": 899,
+    "model": "iron-sword1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 1,
+    "label": "axe",
+    "modelIndex": 1770,
+    "model": "iron-axe1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 2,
+    "label": "mace",
+    "modelIndex": 609,
+    "model": "iron-mace1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 3,
+    "label": "dagger",
+    "modelIndex": 954,
+    "model": "iron-dagger1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 4,
+    "label": "fist",
+    "modelIndex": 1009,
+    "model": "iron-fist1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_fist_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "subtype 4: fVar2=-sz/2 (6647-6650) -> translate(-size/2)"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": true,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 5,
+    "label": "longsword",
+    "modelIndex": 1880,
+    "model": "iron-longsword1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 6,
+    "label": "bow",
+    "modelIndex": 674,
+    "model": "bow.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_bow_in_hand",
+     "coeff": [
+      0.5,
+      1.0,
+      0.5
+     ],
+     "const": [
+      0.0,
+      -1.5,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "subtype 6: fVar23=1.5-sy, fVar2=-sz/2 (6633-6638)"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 7,
+    "label": "crossbow",
+    "modelIndex": 729,
+    "model": "wood-crossbow1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_crossbow_in_hand",
+     "coeff": [
+      0.5,
+      0.0,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "subtype 7: fVar23=0, fVar2=-sz/2 (6640-6645)"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 8,
+    "label": "boomerang",
+    "modelIndex": 784,
+    "model": "wood-boomerang1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_boomerang_in_hand",
+     "coeff": [
+      0.5,
+      0.0,
+      0.0
+     ],
+     "const": [
+      0.0,
+      2.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "subtype 8: fVar2=-4.0, fVar23=-2.0 (6656-6658)"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 9,
+    "label": "arrow",
+    "modelIndex": 840,
+    "model": "arrow.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_arrow_in_hand",
+     "coeff": [
+      0.5,
+      0.0,
+      0.0
+     ],
+     "const": [
+      1.0,
+      -0.5,
+      -1.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED",
+     "evidence": "model == arrow (vectorU32_at(0x348)): fVar21=-sx/2-1, y=0.5, z=1 (6609-6614); constant not observable by a size sweep"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 10,
+    "label": "staff",
+    "modelIndex": 434,
+    "model": "wood-staff1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_staff_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      10.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "subtype 10: fVar2=-10.0 (6618-6620)"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 11,
+    "label": "wand",
+    "modelIndex": 489,
+    "model": "wood-wand1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 12,
+    "label": "bracelet",
+    "modelIndex": 574,
+    "model": "silver-bracelet1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_bracelet_in_hand",
+     "coeff": [
+      0.5,
+      1.0,
+      0.5
+     ],
+     "const": [
+      0.0,
+      -1.0,
+      0.0
+     ],
+     "scale": 0.6,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "subtype 12: scale 0.6, fVar23=1-sy, fVar2=-sz/2 (6622-6631)"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": true,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 13,
+    "label": "shield",
+    "modelIndex": 1064,
+    "model": "iron-shield01.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 14,
+    "label": "quiver",
+    "modelIndex": 839,
+    "model": "quiver.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 15,
+    "label": "greatsword",
+    "modelIndex": 1825,
+    "model": "iron-greatsword1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": true,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 16,
+    "label": "greataxe",
+    "modelIndex": 1937,
+    "model": "iron-greataxe1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": true,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 17,
+    "label": "greatmace",
+    "modelIndex": 1996,
+    "model": "iron-greatmace1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": true,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 18,
+    "label": "pitchfork",
+    "modelIndex": 2331,
+    "model": "pitchfork.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 19,
+    "label": "pickaxe",
+    "modelIndex": 2051,
+    "model": "iron-pickaxe.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 20,
+    "label": "torch",
+    "modelIndex": 842,
+    "model": "torch.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": true,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 21,
+    "label": "sword(alias21)",
+    "modelIndex": 899,
+    "model": "iron-sword1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 22,
+    "label": "sword(alias22)",
+    "modelIndex": 899,
+    "model": "iron-sword1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 23,
+    "label": "sword(alias23)",
+    "modelIndex": 899,
+    "model": "iron-sword1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 24,
+    "label": "sword(alias24)",
+    "modelIndex": 899,
+    "model": "iron-sword1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 25,
+    "label": "sword(alias25)",
+    "modelIndex": 899,
+    "model": "iron-sword1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "inHand": {
+     "law": "weapon_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else-branch fVar2=-4.0 -> translate(-sx/2,-sy/2,-4.0) (GameController.cpp:6651-6654, 6662); includes greatsword/greataxe/greatmace 15/16/17"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "weapon block back branch: GameController.cpp:6555-6578"
+    },
+    "twoHanded": false,
+    "dualCapable": false,
+    "status": "VERIFIED_EMULATION"
+   }
+  ],
+  "offhandClasses": [
+   {
+    "type": 3,
+    "subtype": 3,
+    "label": "dagger",
+    "modelIndex": 954,
+    "model": "iron-dagger1.cub",
+    "slot": "0x990",
+    "blockInHand": "offhand_b",
+    "blockOnBack": "offhand_a",
+    "inHand": {
+     "law": "offhand_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else fVar2=-4.0 (6839-6842)"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "off-hand block back branch: GameController.cpp:6707-6747"
+    },
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 4,
+    "label": "fist",
+    "modelIndex": 1009,
+    "model": "iron-fist1.cub",
+    "slot": "0x990",
+    "blockInHand": "offhand_b",
+    "blockOnBack": "offhand_a",
+    "inHand": {
+     "law": "offhand_fist_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "subtype 4: rotateY(180), fVar2=-sz/2 (6834-6842) -> centre"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "off-hand block back branch: GameController.cpp:6707-6747"
+    },
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 6,
+    "label": "bow",
+    "modelIndex": 674,
+    "model": "bow.cub",
+    "slot": "0x990",
+    "blockInHand": "offhand_b",
+    "blockOnBack": "offhand_a",
+    "inHand": {
+     "law": "offhand_bow_in_hand",
+     "coeff": [
+      0.5,
+      1.0,
+      0.5
+     ],
+     "const": [
+      0.0,
+      -1.5,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "subtype 6: fVar23=1.5-sy (6806-6811)"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "off-hand block back branch: GameController.cpp:6707-6747"
+    },
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 7,
+    "label": "crossbow",
+    "modelIndex": 729,
+    "model": "wood-crossbow1.cub",
+    "slot": "0x990",
+    "blockInHand": "offhand_b",
+    "blockOnBack": "offhand_a",
+    "inHand": {
+     "law": "offhand_crossbow_in_hand",
+     "coeff": [
+      0.5,
+      0.0,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "subtype 7: fVar23=0 (6813-6817)"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "off-hand block back branch: GameController.cpp:6707-6747"
+    },
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 12,
+    "label": "bracelet",
+    "modelIndex": 574,
+    "model": "silver-bracelet1.cub",
+    "slot": "0x990",
+    "blockInHand": "offhand_b",
+    "blockOnBack": "offhand_a",
+    "inHand": {
+     "law": "offhand_bracelet_in_hand",
+     "coeff": [
+      0.5,
+      1.0,
+      0.5
+     ],
+     "const": [
+      0.0,
+      -1.0,
+      0.0
+     ],
+     "scale": 0.6,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "subtype 12: scale 0.6, fVar23=1-sy (6819-6825)"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "off-hand block back branch: GameController.cpp:6707-6747"
+    },
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 13,
+    "label": "shield",
+    "modelIndex": 1064,
+    "model": "iron-shield01.cub",
+    "slot": "0x990",
+    "blockInHand": "offhand_b",
+    "blockOnBack": "offhand_a",
+    "inHand": {
+     "law": "offhand_shield_in_hand",
+     "coeff": [
+      0.5,
+      0.0,
+      0.5
+     ],
+     "const": [
+      0.0,
+      3.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "subtype 13: fVar23=3.0 (6827-6831)"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "off-hand block back branch: GameController.cpp:6707-6747"
+    },
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 20,
+    "label": "torch",
+    "modelIndex": 842,
+    "model": "torch.cub",
+    "slot": "0x990",
+    "blockInHand": "offhand_b",
+    "blockOnBack": "offhand_a",
+    "inHand": {
+     "law": "offhand_generic_in_hand",
+     "coeff": [
+      0.5,
+      0.5,
+      0.0
+     ],
+     "const": [
+      0.0,
+      0.0,
+      4.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "else fVar2=-4.0 (6839-6842)"
+    },
+    "onBack": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "off-hand block back branch: GameController.cpp:6707-6747"
+    },
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 6,
+    "label": "bow",
+    "modelIndex": 674,
+    "model": "bow.cub",
+    "slot": "0x990",
+    "blockInHand": "quiver_offhand",
+    "blockOnBack": null,
+    "inHand": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "drawModel translate(-size/2) (GameController.cpp:6108 body block)"
+    },
+    "onBack": null,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 7,
+    "label": "crossbow",
+    "modelIndex": 729,
+    "model": "wood-crossbow1.cub",
+    "slot": "0x990",
+    "blockInHand": "quiver_offhand",
+    "blockOnBack": null,
+    "inHand": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "drawModel translate(-size/2) (GameController.cpp:6108 body block)"
+    },
+    "onBack": null,
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 14,
+    "label": "quiver",
+    "modelIndex": 839,
+    "model": "quiver.cub",
+    "slot": "0x990",
+    "blockInHand": "quiver_item",
+    "blockOnBack": null,
+    "inHand": {
+     "law": "center",
+     "coeff": [
+      0.5,
+      0.5,
+      0.5
+     ],
+     "const": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": 1.0,
+     "status": "CODE_DERIVED_MEASURED",
+     "evidence": "drawModel translate(-size/2) (GameController.cpp:6108 body block)"
+    },
+    "onBack": null,
+    "status": "VERIFIED_EMULATION"
+   }
+  ],
+  "slotClasses": [
+   {
+    "type": 8,
+    "subtype": 0,
+    "label": "amulet",
+    "modelIndex": 1564,
+    "model": "gold-amulet1-random1.cub",
+    "slot": "0x418",
+    "block": "neck_item",
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 4,
+    "subtype": 0,
+    "label": "chest armour",
+    "modelIndex": 1124,
+    "model": "iron-chest1.cub",
+    "slot": "0x530",
+    "block": "body(SWAP)",
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 6,
+    "subtype": 0,
+    "label": "boots",
+    "modelIndex": 433,
+    "model": "boot.cub",
+    "slot": "0x648",
+    "block": "foot_l/foot_r(SWAP)",
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 5,
+    "subtype": 0,
+    "label": "gloves",
+    "modelIndex": 7,
+    "model": "glove.cub",
+    "slot": "0x760",
+    "block": "hand_l/hand_r(SWAP)",
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 7,
+    "subtype": 0,
+    "label": "shoulder armour",
+    "modelIndex": 1149,
+    "model": "iron-shoulder1.cub",
+    "slot": "0x878",
+    "block": "shoulder_item",
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 0,
+    "label": "weapon",
+    "modelIndex": 899,
+    "model": "iron-sword1.cub",
+    "slot": "0x990",
+    "block": "offhand_a|offhand_b",
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 3,
+    "subtype": 0,
+    "label": "weapon",
+    "modelIndex": 899,
+    "model": "iron-sword1.cub",
+    "slot": "0xaa8",
+    "block": "weapon",
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 24,
+    "subtype": 0,
+    "label": "lamp",
+    "modelIndex": 2433,
+    "model": "lantern02.cub",
+    "slot": "0xdf0",
+    "block": "lamp_item",
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 23,
+    "subtype": 0,
+    "label": "glider/boat",
+    "modelIndex": 2547,
+    "model": "glider.cub",
+    "slot": "0xf08",
+    "block": "special_item",
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 19,
+    "subtype": 0,
+    "label": "pet box",
+    "modelIndex": 2080,
+    "model": "pet-box.cub",
+    "slot": "0x1020",
+    "block": "pet_item",
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 1,
+    "subtype": 0,
+    "label": "food/potion",
+    "modelIndex": 852,
+    "model": "cookie.cub",
+    "slot": "0x1e8",
+    "block": "held_item",
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 9,
+    "subtype": 0,
+    "label": "ring",
+    "modelIndex": 1619,
+    "model": "gold-ring1-random1.cub",
+    "slot": "0xbc0",
+    "block": "NOT_DRAWN",
+    "status": "VERIFIED_EMULATION"
+   },
+   {
+    "type": 9,
+    "subtype": 0,
+    "label": "ring",
+    "modelIndex": 1619,
+    "model": "gold-ring1-random1.cub",
+    "slot": "0xcd8",
+    "block": "NOT_DRAWN",
+    "status": "VERIFIED_EMULATION"
+   }
+  ],
+  "actions": [
+   {
+    "id": 1,
+    "state": 16,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 2,
+    "state": 15,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 3,
+    "state": 18,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 4,
+    "state": 17,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 5,
+    "state": 33,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 6,
+    "state": 20,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 7,
+    "state": 19,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 8,
+    "state": 9,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 9,
+    "state": 18,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 10,
+    "state": 10,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 11,
+    "state": 28,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 12,
+    "state": 29,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 13,
+    "state": 30,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 14,
+    "state": 31,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 15,
+    "state": 32,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 16,
+    "state": 35,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 17,
+    "state": 35,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 18,
+    "state": 17,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 19,
+    "state": 18,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 20,
+    "state": 50,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 21,
+    "state": 50,
+    "weapon": "ON_BACK",
+    "offhand": "ON_BACK",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 22,
+    "state": 21,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 23,
+    "state": 21,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 24,
+    "state": 22,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 25,
+    "state": 22,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 26,
+    "state": 66,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 27,
+    "state": 67,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 28,
+    "state": 11,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 30,
+    "state": 61,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 31,
+    "state": 61,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 32,
+    "state": 61,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 33,
+    "state": 61,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 34,
+    "state": 61,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 35,
+    "state": 62,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 36,
+    "state": 27,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 37,
+    "state": 23,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 38,
+    "state": 26,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 39,
+    "state": 24,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 40,
+    "state": 25,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 41,
+    "state": 24,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 42,
+    "state": 25,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 43,
+    "state": 23,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 44,
+    "state": 26,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 45,
+    "state": 26,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 46,
+    "state": 26,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 47,
+    "state": 1,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 48,
+    "state": 34,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 49,
+    "state": 61,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 50,
+    "state": 22,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 51,
+    "state": 70,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 54,
+    "state": 1,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 55,
+    "state": 22,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 57,
+    "state": 2,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": true
+   },
+   {
+    "id": 58,
+    "state": 3,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": true
+   },
+   {
+    "id": 59,
+    "state": 4,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 60,
+    "state": 2,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 61,
+    "state": 49,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": true,
+    "twoHandedChain": false
+   },
+   {
+    "id": 62,
+    "state": 18,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 63,
+    "state": 6,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 64,
+    "state": 5,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 65,
+    "state": 48,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 66,
+    "state": 49,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 67,
+    "state": 37,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": true
+   },
+   {
+    "id": 68,
+    "state": 38,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 69,
+    "state": 39,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 70,
+    "state": 40,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 71,
+    "state": 41,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 72,
+    "state": 41,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 73,
+    "state": 42,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 74,
+    "state": 43,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 75,
+    "state": 44,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 76,
+    "state": 45,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 77,
+    "state": 46,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 78,
+    "state": 47,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 79,
+    "state": 54,
+    "weapon": "ON_BACK",
+    "offhand": "ON_BACK",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 80,
+    "state": 51,
+    "weapon": "ON_BACK",
+    "offhand": "ON_BACK",
+    "heldItem": true,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 81,
+    "state": 52,
+    "weapon": "ON_BACK",
+    "offhand": "ON_BACK",
+    "heldItem": true,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 82,
+    "state": 53,
+    "weapon": "ON_BACK",
+    "offhand": "ON_BACK",
+    "heldItem": false,
+    "petItem": true,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 83,
+    "state": 57,
+    "weapon": "ON_BACK",
+    "offhand": "ON_BACK",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 84,
+    "state": 55,
+    "weapon": "ON_BACK",
+    "offhand": "ON_BACK",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 86,
+    "state": 60,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 87,
+    "state": 61,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 88,
+    "state": 61,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 89,
+    "state": 61,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 90,
+    "state": 61,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 91,
+    "state": 63,
+    "weapon": "ON_BACK",
+    "offhand": "ON_BACK",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 92,
+    "state": 61,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 93,
+    "state": 49,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 94,
+    "state": 26,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 95,
+    "state": 26,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 96,
+    "state": 65,
+    "weapon": "ON_BACK",
+    "offhand": "ON_BACK",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 98,
+    "state": 8,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 101,
+    "state": 68,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 103,
+    "state": 68,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 104,
+    "state": 69,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 105,
+    "state": 61,
+    "weapon": "ON_BACK",
+    "offhand": "ON_BACK",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 106,
+    "state": 58,
+    "weapon": "ON_BACK",
+    "offhand": "ON_BACK",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 107,
+    "state": 59,
+    "weapon": "ON_BACK",
+    "offhand": "ON_BACK",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 108,
+    "state": 71,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 109,
+    "state": 72,
+    "weapon": "ON_BACK",
+    "offhand": "ON_BACK",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   },
+   {
+    "id": 110,
+    "state": 73,
+    "weapon": "IN_HAND",
+    "offhand": "IN_HAND",
+    "heldItem": false,
+    "petItem": false,
+    "weaponOnly": false,
+    "twoHandedChain": false
+   }
+  ],
+  "consumable": {
+   "actions": [
+    80,
+    81
+   ],
+   "itemType": 1,
+   "cooldownsMs": {
+    "1": 3000,
+    "other": 10000,
+    "notType1": 0
+   },
+   "block": "held_item",
+   "rule": "timer < itemCooldown(type, subtype); model = item selector result"
+  },
+  "dual": {
+   "subtypes": [
+    4,
+    12,
+    20
+   ],
+   "rule": "both hand items are type 3 with the same subtype; the off-hand is drawn in offhand_b while an action is played (verified by emulation)"
+  },
+  "twoHanded": {
+   "subtypes": [
+    15,
+    16,
+    17
+   ],
+   "chain": [
+    57,
+    67,
+    58
+   ],
+   "grip": "second hand placement is a project rule (D52), not Alpha data",
+   "status": "RECONSTRUCTED_FROM_EVIDENCE"
+  },
+  "dynamicParts": [
+   {
+    "kind": "0x6f",
+    "action": 108,
+    "timer": 80,
+    "state": 71,
+    "new_blocks": [
+     {
+      "block": "offhand_b",
+      "model_index": 2101,
+      "model": "iron-deposit.cub",
+      "size": [
+       11,
+       11,
+       15
+      ],
+      "anchor_law": {
+       "law": "offhand_generic_in_hand",
+       "coeff": [
+        0.5,
+        0.5,
+        0.0
+       ],
+       "const": [
+        0.0,
+        0.0,
+        4.0
+       ],
+       "scale": 1.0,
+       "status": "CODE_DERIVED_MEASURED",
+       "evidence": "else fVar2=-4.0 (6839-6842)"
+      }
+     }
+    ],
+    "status": "PART_IDENTIFIED"
+   },
+   {
+    "kind": "0x19",
+    "action": 72,
+    "timer": 80,
+    "state": 41,
+    "new_blocks": [],
+    "status": "NO_NEW_BLOCK"
+   }
+  ],
+  "unknowns": [
+   "weapon subtype 0x12 (18) exists only in weapon_isSpecialRunePtr; no model block",
+   "type 0x300 storage slot: no draw site found (A-U4)",
+   "ring slots 0xbc0/0xcd8 are stored but never drawn (A.6)",
+   "arrow special branch constants are code-derived only",
+   "off-hand block for subtype 14 (quiver) is quiver_item; anchor law not measured",
+   "turtle 0x19 action 72: no new draw block in the tested state domain (R-8 stays open)"
+  ]
+ }
+}

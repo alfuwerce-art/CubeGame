@@ -18,6 +18,7 @@
 | `pipeline.py` | CLI: `scan`, `build-clips`, `prepare-unity` (+ `"locomotion": "formula"`, пишет `Data/contract.json`), `batch`, `param-walk-validate`, `param-walk-coverage` |
 | `contract.py` | **единый контракт** сущности/частей/анимаций (`cubegame.entity_contract/1`): категория по структуре, роли частей, каналы walk/idle/actions/equipment/visibility/lifecycle, происхождение, профили действий как записи доказательств ([архитектура](../../../docs/architecture/UNIVERSAL_ENTITY_CONTRACT.md)) |
 | `transfer_planner.py` | **планировщик переноса**: `scan`, `plan` (AUTO_READY / NEEDS_RESEARCH / BLOCKED, задания, `coverage.csv`), `validate`, `pilot` (только allowlist эталонов), `batch` (отказ до S05B) |
+| `item_attach.py` | **предметный слой (законы)**: anchor в руке/за спиной для всех подтипов оружия и левой руки (`coeff·size + const`, uniform scale), предикаты «в руке / за спиной» из кода `drawModel`; проверяется исполнением ([исследование](../../../docs/research/alpha2013/ITEM_MODEL_ANIMATION_TRANSFER.md)) |
 | `voxel_markers.py` | **D61 COLOR/TINT**: флаг загрузки моделей из байтов загрузчика, правило прозрачности маркеров (исполнение 0x4E71D0), вершины меша по правилу Alpha, tint волос как `hair_rgb` экземпляра ([отчёт](../../../docs/reports/D61_TINT_REVIEW_FIX_REPORT.md)); `hair_colour_evidence.json` — живые цвета волос |
 | `jobs/*.json` | задания Unity (вид, вариант моделей, экипировка) — без данных Alpha |
 

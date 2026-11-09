@@ -1,0 +1,1454 @@
+{
+  "schemaVersion": 1,
+  "source": "docs/research/alpha2013/M0_00B_ALPHA_GAMEPLAY_COVERAGE_MATRIX.md",
+  "sourceSha256": "3358f6209b77a3676ad9679e6507ae2f45a643fdeb822435ffc0fdd53c08bb8b",
+  "entriesHash": "552a12f30465ced1ef87a478dc4935fc1e159b12cdb1957d235b984325927986",
+  "count": 176,
+  "domains": [
+    "world",
+    "movement",
+    "combat",
+    "npc",
+    "items",
+    "economy_quests",
+    "progression_persistence",
+    "content_ui"
+  ],
+  "summary": {
+    "byDomain": {
+      "world": 20,
+      "movement": 20,
+      "combat": 40,
+      "npc": 32,
+      "items": 28,
+      "economy_quests": 9,
+      "progression_persistence": 12,
+      "content_ui": 15
+    },
+    "byConfidence": {
+      "BLOCKED": 2,
+      "DEFERRED_TO_M0": 1,
+      "DIRECT": 118,
+      "PARTIAL": 30,
+      "UNKNOWN": 25
+    },
+    "byStatus": {
+      "IMPLEMENTED_CORE": 15,
+      "IMPLEMENTED_PILOT": 9,
+      "MISSING": 110,
+      "N/A": 4,
+      "PARTIAL": 37,
+      "TEST_ONLY": 1
+    }
+  },
+  "entries": [
+    {
+      "id": "W-01",
+      "domain": "world",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-02A",
+      "line": 82
+    },
+    {
+      "id": "W-02",
+      "domain": "world",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-02A",
+      "line": 83
+    },
+    {
+      "id": "W-03",
+      "domain": "world",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-02A",
+      "line": 84
+    },
+    {
+      "id": "W-04",
+      "domain": "world",
+      "confidence": "PARTIAL",
+      "status": "IMPLEMENTED_PILOT",
+      "substage": "M0-02A",
+      "line": 85
+    },
+    {
+      "id": "W-05",
+      "domain": "world",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-02A",
+      "line": 86
+    },
+    {
+      "id": "W-06",
+      "domain": "world",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-02A",
+      "line": 87
+    },
+    {
+      "id": "W-07",
+      "domain": "world",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-02C",
+      "line": 88
+    },
+    {
+      "id": "W-08",
+      "domain": "world",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-02C",
+      "line": 89
+    },
+    {
+      "id": "W-09",
+      "domain": "world",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-02C",
+      "line": 90
+    },
+    {
+      "id": "W-10",
+      "domain": "world",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-02B",
+      "line": 91
+    },
+    {
+      "id": "W-11",
+      "domain": "world",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-02B",
+      "line": 92
+    },
+    {
+      "id": "W-12",
+      "domain": "world",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-02D",
+      "line": 93
+    },
+    {
+      "id": "W-13",
+      "domain": "world",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-02D",
+      "line": 94
+    },
+    {
+      "id": "W-14",
+      "domain": "world",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-02D",
+      "line": 95
+    },
+    {
+      "id": "W-15",
+      "domain": "world",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-08A",
+      "line": 96
+    },
+    {
+      "id": "W-16",
+      "domain": "world",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-07A",
+      "line": 97
+    },
+    {
+      "id": "W-17",
+      "domain": "world",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-07A",
+      "line": 98
+    },
+    {
+      "id": "W-18",
+      "domain": "world",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-02C",
+      "line": 99
+    },
+    {
+      "id": "W-19",
+      "domain": "world",
+      "confidence": "PARTIAL",
+      "status": "IMPLEMENTED_PILOT",
+      "substage": "M0-02B",
+      "line": 100
+    },
+    {
+      "id": "W-20",
+      "domain": "world",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-01D",
+      "line": 101
+    },
+    {
+      "id": "P-01",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-03A",
+      "line": 109
+    },
+    {
+      "id": "P-02",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-03A",
+      "line": 110
+    },
+    {
+      "id": "P-03",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-03A",
+      "line": 111
+    },
+    {
+      "id": "P-04",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-03A",
+      "line": 112
+    },
+    {
+      "id": "P-05",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-03A",
+      "line": 113
+    },
+    {
+      "id": "P-06",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-03A",
+      "line": 114
+    },
+    {
+      "id": "P-07",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_PILOT",
+      "substage": "M0-03A",
+      "line": 115
+    },
+    {
+      "id": "P-08",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-04A",
+      "line": 116
+    },
+    {
+      "id": "P-09",
+      "domain": "progression_persistence",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-03D",
+      "line": 117
+    },
+    {
+      "id": "P-10",
+      "domain": "progression_persistence",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-03D",
+      "line": 118
+    },
+    {
+      "id": "P-11",
+      "domain": "progression_persistence",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-03D",
+      "line": 119
+    },
+    {
+      "id": "P-12",
+      "domain": "progression_persistence",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-03D",
+      "line": 120
+    },
+    {
+      "id": "P-13",
+      "domain": "progression_persistence",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-03D",
+      "line": 121
+    },
+    {
+      "id": "P-14",
+      "domain": "progression_persistence",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-03D",
+      "line": 122
+    },
+    {
+      "id": "P-15",
+      "domain": "progression_persistence",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-05B",
+      "line": 123
+    },
+    {
+      "id": "P-16",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_PILOT",
+      "substage": "M0-03B",
+      "line": 124
+    },
+    {
+      "id": "P-17",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_PILOT",
+      "substage": "M0-03B",
+      "line": 125
+    },
+    {
+      "id": "P-18",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-03B",
+      "line": 126
+    },
+    {
+      "id": "P-19",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-03B",
+      "line": 127
+    },
+    {
+      "id": "P-20",
+      "domain": "movement",
+      "confidence": "UNKNOWN",
+      "status": "IMPLEMENTED_PILOT",
+      "substage": "M0-03B",
+      "line": 128
+    },
+    {
+      "id": "P-21",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_PILOT",
+      "substage": "M0-03B",
+      "line": 129
+    },
+    {
+      "id": "P-22",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_PILOT",
+      "substage": "M0-03B",
+      "line": 130
+    },
+    {
+      "id": "P-23",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-03B",
+      "line": 131
+    },
+    {
+      "id": "P-24",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-03B",
+      "line": 132
+    },
+    {
+      "id": "P-25",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-03B",
+      "line": 133
+    },
+    {
+      "id": "P-26",
+      "domain": "movement",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-03B",
+      "line": 134
+    },
+    {
+      "id": "P-27",
+      "domain": "movement",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-03B",
+      "line": 135
+    },
+    {
+      "id": "C-01",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-05A",
+      "line": 143
+    },
+    {
+      "id": "C-02",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06B",
+      "line": 144
+    },
+    {
+      "id": "C-03",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-05A",
+      "line": 145
+    },
+    {
+      "id": "C-04",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-05A",
+      "line": 146
+    },
+    {
+      "id": "C-05",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-05A",
+      "line": 147
+    },
+    {
+      "id": "C-06",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-05A",
+      "line": 148
+    },
+    {
+      "id": "C-07",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-05A",
+      "line": 149
+    },
+    {
+      "id": "C-08",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-05B",
+      "line": 150
+    },
+    {
+      "id": "C-09",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-05A",
+      "line": 151
+    },
+    {
+      "id": "C-10",
+      "domain": "combat",
+      "confidence": "PARTIAL",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-05A",
+      "line": 152
+    },
+    {
+      "id": "C-11",
+      "domain": "combat",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-05B",
+      "line": 153
+    },
+    {
+      "id": "C-12",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-05B",
+      "line": 154
+    },
+    {
+      "id": "C-13",
+      "domain": "combat",
+      "confidence": "PARTIAL",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-05B",
+      "line": 155
+    },
+    {
+      "id": "C-14",
+      "domain": "combat",
+      "confidence": "UNKNOWN",
+      "status": "N/A",
+      "substage": "M0-05B",
+      "line": 156
+    },
+    {
+      "id": "C-15",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-05D",
+      "line": 157
+    },
+    {
+      "id": "C-16",
+      "domain": "combat",
+      "confidence": "PARTIAL",
+      "status": "PARTIAL",
+      "substage": "M0-05D",
+      "line": 158
+    },
+    {
+      "id": "C-17",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-03D",
+      "line": 159
+    },
+    {
+      "id": "C-18",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-05B",
+      "line": 160
+    },
+    {
+      "id": "C-19",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-05B",
+      "line": 161
+    },
+    {
+      "id": "C-20",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-05B",
+      "line": 162
+    },
+    {
+      "id": "C-21",
+      "domain": "combat",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-05B",
+      "line": 163
+    },
+    {
+      "id": "C-22",
+      "domain": "combat",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-05B",
+      "line": 164
+    },
+    {
+      "id": "C-23",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06C",
+      "line": 165
+    },
+    {
+      "id": "C-24",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06C",
+      "line": 166
+    },
+    {
+      "id": "C-25",
+      "domain": "combat",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-05D",
+      "line": 167
+    },
+    {
+      "id": "C-26",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-05B",
+      "line": 168
+    },
+    {
+      "id": "C-27",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-05C",
+      "line": 169
+    },
+    {
+      "id": "C-28",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-05C",
+      "line": 170
+    },
+    {
+      "id": "C-29",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06C",
+      "line": 171
+    },
+    {
+      "id": "C-30",
+      "domain": "combat",
+      "confidence": "PARTIAL",
+      "status": "PARTIAL",
+      "substage": "M0-03C",
+      "line": 172
+    },
+    {
+      "id": "C-31",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-05B",
+      "line": 173
+    },
+    {
+      "id": "C-32",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-06E",
+      "line": 174
+    },
+    {
+      "id": "C-33",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-06E",
+      "line": 175
+    },
+    {
+      "id": "C-34",
+      "domain": "combat",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-05C",
+      "line": 176
+    },
+    {
+      "id": "C-35",
+      "domain": "combat",
+      "confidence": "BLOCKED",
+      "status": "MISSING",
+      "substage": "M0-06E",
+      "line": 177
+    },
+    {
+      "id": "C-36",
+      "domain": "combat",
+      "confidence": "BLOCKED",
+      "status": "MISSING",
+      "substage": "M0-06E",
+      "line": 178
+    },
+    {
+      "id": "C-37",
+      "domain": "combat",
+      "confidence": "DEFERRED_TO_M0",
+      "status": "MISSING",
+      "substage": "M0-06B",
+      "line": 179
+    },
+    {
+      "id": "N-01",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-06A",
+      "line": 187
+    },
+    {
+      "id": "N-02",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06B",
+      "line": 188
+    },
+    {
+      "id": "N-03",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06C",
+      "line": 189
+    },
+    {
+      "id": "N-04",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06C",
+      "line": 190
+    },
+    {
+      "id": "N-05",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06C",
+      "line": 191
+    },
+    {
+      "id": "N-06",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06C",
+      "line": 192
+    },
+    {
+      "id": "N-07",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06C",
+      "line": 193
+    },
+    {
+      "id": "N-08",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06C",
+      "line": 194
+    },
+    {
+      "id": "N-09",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06E",
+      "line": 195
+    },
+    {
+      "id": "N-10",
+      "domain": "npc",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-06E",
+      "line": 196
+    },
+    {
+      "id": "N-11",
+      "domain": "npc",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-06E",
+      "line": 197
+    },
+    {
+      "id": "N-12",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06C",
+      "line": 198
+    },
+    {
+      "id": "N-13",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-07A",
+      "line": 199
+    },
+    {
+      "id": "N-14",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-07A",
+      "line": 200
+    },
+    {
+      "id": "N-15",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-07A",
+      "line": 201
+    },
+    {
+      "id": "N-16",
+      "domain": "npc",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-07C",
+      "line": 202
+    },
+    {
+      "id": "N-17",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-07C",
+      "line": 203
+    },
+    {
+      "id": "N-18",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06B",
+      "line": 204
+    },
+    {
+      "id": "N-19",
+      "domain": "npc",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-06B",
+      "line": 205
+    },
+    {
+      "id": "N-20",
+      "domain": "npc",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-06D",
+      "line": 206
+    },
+    {
+      "id": "N-21",
+      "domain": "npc",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-06D",
+      "line": 207
+    },
+    {
+      "id": "N-22",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-06B",
+      "line": 208
+    },
+    {
+      "id": "N-23",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-06A",
+      "line": 209
+    },
+    {
+      "id": "N-24",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-06A",
+      "line": 210
+    },
+    {
+      "id": "N-25",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-06C",
+      "line": 211
+    },
+    {
+      "id": "N-26",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-06E",
+      "line": 212
+    },
+    {
+      "id": "N-27",
+      "domain": "npc",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-06E",
+      "line": 213
+    },
+    {
+      "id": "N-28",
+      "domain": "npc",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-06E",
+      "line": 214
+    },
+    {
+      "id": "N-29",
+      "domain": "npc",
+      "confidence": "PARTIAL",
+      "status": "PARTIAL",
+      "substage": "M0-06A",
+      "line": 215
+    },
+    {
+      "id": "N-30",
+      "domain": "npc",
+      "confidence": "DIRECT",
+      "status": "N/A",
+      "substage": "M0-06",
+      "line": 216
+    },
+    {
+      "id": "I-01",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-04A",
+      "line": 224
+    },
+    {
+      "id": "I-02",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-04A",
+      "line": 225
+    },
+    {
+      "id": "I-03",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-04A",
+      "line": 226
+    },
+    {
+      "id": "I-04",
+      "domain": "items",
+      "confidence": "PARTIAL",
+      "status": "PARTIAL",
+      "substage": "M0-04A",
+      "line": 227
+    },
+    {
+      "id": "I-05",
+      "domain": "items",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-04A",
+      "line": 228
+    },
+    {
+      "id": "I-06",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-04B",
+      "line": 229
+    },
+    {
+      "id": "I-07",
+      "domain": "items",
+      "confidence": "PARTIAL",
+      "status": "PARTIAL",
+      "substage": "M0-04B",
+      "line": 230
+    },
+    {
+      "id": "I-08",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-04B",
+      "line": 231
+    },
+    {
+      "id": "I-09",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-04B",
+      "line": 232
+    },
+    {
+      "id": "I-10",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-04B",
+      "line": 233
+    },
+    {
+      "id": "I-11",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-04D",
+      "line": 234
+    },
+    {
+      "id": "I-12",
+      "domain": "items",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-04C",
+      "line": 235
+    },
+    {
+      "id": "I-13",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-04C",
+      "line": 236
+    },
+    {
+      "id": "I-14",
+      "domain": "items",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-04C",
+      "line": 237
+    },
+    {
+      "id": "I-15",
+      "domain": "items",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-04C",
+      "line": 238
+    },
+    {
+      "id": "I-16",
+      "domain": "economy_quests",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-04A",
+      "line": 239
+    },
+    {
+      "id": "I-17",
+      "domain": "economy_quests",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-07C",
+      "line": 240
+    },
+    {
+      "id": "I-18",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-04B",
+      "line": 241
+    },
+    {
+      "id": "Q-01",
+      "domain": "content_ui",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-03A",
+      "line": 249
+    },
+    {
+      "id": "Q-02",
+      "domain": "content_ui",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-01B",
+      "line": 250
+    },
+    {
+      "id": "Q-03",
+      "domain": "content_ui",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-01B",
+      "line": 251
+    },
+    {
+      "id": "Q-04",
+      "domain": "content_ui",
+      "confidence": "UNKNOWN",
+      "status": "IMPLEMENTED_PILOT",
+      "substage": "M0-08A",
+      "line": 252
+    },
+    {
+      "id": "Q-05",
+      "domain": "content_ui",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-08A",
+      "line": 253
+    },
+    {
+      "id": "Q-06",
+      "domain": "content_ui",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-08A",
+      "line": 254
+    },
+    {
+      "id": "Q-07",
+      "domain": "content_ui",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-08A",
+      "line": 255
+    },
+    {
+      "id": "Q-08",
+      "domain": "content_ui",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-08A",
+      "line": 256
+    },
+    {
+      "id": "Q-09",
+      "domain": "content_ui",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-08B",
+      "line": 257
+    },
+    {
+      "id": "Q-10",
+      "domain": "content_ui",
+      "confidence": "UNKNOWN",
+      "status": "N/A",
+      "substage": "N/A",
+      "line": 258
+    },
+    {
+      "id": "Q-11",
+      "domain": "progression_persistence",
+      "confidence": "DIRECT",
+      "status": "IMPLEMENTED_CORE",
+      "substage": "M0-01D",
+      "line": 259
+    },
+    {
+      "id": "Q-12",
+      "domain": "progression_persistence",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-04D",
+      "line": 260
+    },
+    {
+      "id": "Q-13",
+      "domain": "progression_persistence",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-01D",
+      "line": 261
+    },
+    {
+      "id": "Q-14",
+      "domain": "progression_persistence",
+      "confidence": "UNKNOWN",
+      "status": "PARTIAL",
+      "substage": "M0-01D",
+      "line": 262
+    },
+    {
+      "id": "Q-15",
+      "domain": "content_ui",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-07A",
+      "line": 263
+    },
+    {
+      "id": "Q-16",
+      "domain": "economy_quests",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-07B",
+      "line": 264
+    },
+    {
+      "id": "Q-17",
+      "domain": "economy_quests",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-07B",
+      "line": 265
+    },
+    {
+      "id": "Q-18",
+      "domain": "economy_quests",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-07D",
+      "line": 266
+    },
+    {
+      "id": "Q-19",
+      "domain": "economy_quests",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-07D",
+      "line": 267
+    },
+    {
+      "id": "Q-20",
+      "domain": "economy_quests",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-07D",
+      "line": 268
+    },
+    {
+      "id": "Q-21",
+      "domain": "economy_quests",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-08A",
+      "line": 269
+    },
+    {
+      "id": "Q-22",
+      "domain": "progression_persistence",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-05D",
+      "line": 270
+    },
+    {
+      "id": "Q-23",
+      "domain": "content_ui",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-07C",
+      "line": 271
+    },
+    {
+      "id": "Q-24",
+      "domain": "content_ui",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-01C",
+      "line": 272
+    },
+    {
+      "id": "Q-25",
+      "domain": "content_ui",
+      "confidence": "UNKNOWN",
+      "status": "N/A",
+      "substage": "M0-07B",
+      "line": 273
+    },
+    {
+      "id": "Q-26",
+      "domain": "economy_quests",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-07D",
+      "line": 274
+    },
+    {
+      "id": "Q-27",
+      "domain": "content_ui",
+      "confidence": "UNKNOWN",
+      "status": "TEST_ONLY",
+      "substage": "M0-05A",
+      "line": 275
+    },
+    {
+      "id": "AI-01",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-04B",
+      "line": 305
+    },
+    {
+      "id": "AI-02",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-04B",
+      "line": 306
+    },
+    {
+      "id": "AI-03",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-04B",
+      "line": 307
+    },
+    {
+      "id": "AI-04",
+      "domain": "items",
+      "confidence": "PARTIAL",
+      "status": "MISSING",
+      "substage": "M0-05C",
+      "line": 308
+    },
+    {
+      "id": "AI-05",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-04B",
+      "line": 309
+    },
+    {
+      "id": "AI-06",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-04B",
+      "line": 310
+    },
+    {
+      "id": "AI-07",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-04B",
+      "line": 311
+    },
+    {
+      "id": "AI-08",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-03B",
+      "line": 312
+    },
+    {
+      "id": "AI-09",
+      "domain": "items",
+      "confidence": "PARTIAL",
+      "status": "PARTIAL",
+      "substage": "M0-04B",
+      "line": 313
+    },
+    {
+      "id": "AI-10",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-04A",
+      "line": 314
+    },
+    {
+      "id": "AI-11",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-05B",
+      "line": 315
+    },
+    {
+      "id": "AI-12",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-05B",
+      "line": 316
+    },
+    {
+      "id": "AI-13",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-05B",
+      "line": 317
+    },
+    {
+      "id": "AI-14",
+      "domain": "combat",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-05B",
+      "line": 318
+    },
+    {
+      "id": "AI-15",
+      "domain": "combat",
+      "confidence": "UNKNOWN",
+      "status": "MISSING",
+      "substage": "M0-05C",
+      "line": 319
+    },
+    {
+      "id": "AI-16",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
+      "substage": "M0-04A",
+      "line": 320
+    },
+    {
+      "id": "AI-17",
+      "domain": "items",
+      "confidence": "DIRECT",
+      "status": "MISSING",
+      "substage": "M0-07A",
+      "line": 321
+    }
+  ]
+}
