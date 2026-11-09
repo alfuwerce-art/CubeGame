@@ -15,8 +15,10 @@ namespace CubeGame.Features.AI
         public const double DefaultAggroRadius = 16.0;
         /// <summary>Melee distance used by the proven dodge rule (distance &lt; 2).</summary>
         public const double DefaultAttackRange = 2.0;
-        /// <summary>PLACEHOLDER_NOT_ALPHA: median captured AI walk speed (OQ-23).</summary>
-        public const double DefaultWalkSpeed = 3.7;
+        /// <summary>ALPHA_CODE: path walk speed of Creature_findPathToTarget (0x5A7EB0), C2 scale of blocks/s.</summary>
+        public const double DefaultWalkSpeed = CreatureMovement.WalkSpeed;
+        /// <summary>ALPHA_CODE: run speed of the same scale (max 6 × 2, 0x619DB8); used when a behaviour runs.</summary>
+        public const double DefaultRunSpeed = CreatureMovement.RunSpeed;
         public const int WanderRepickMs = 2000;
         /// <summary>CUBEGAME_CONTRACT: retry throttle for action requests (Alpha's own action lock is elsewhere).</summary>
         public const int ActionRetryMs = 250;
