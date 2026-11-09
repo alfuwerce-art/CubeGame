@@ -166,6 +166,33 @@ namespace CubeGame.AlphaModels.Tests.PlayMode
             }
         }
         [UnityTest]
+        public IEnumerator ActionTimingComesFromTheClipEvidence()
+        {
+            var source = AlphaContentSource.Resolve();
+            if (source.State != AlphaContentState.Ready) Assert.Ignore(source.Diagnosis);
+            var library = new AlphaActorLibrary(source);
+            if (!library.TryGet("d86_human_0x02_greatsword", out var def)) Assert.Ignore("human is not staged");
+            Assert.IsTrue(def.ActionTimings.ContainsKey(1), "action_001 exposes its Alpha timing");
+            var timing = def.ActionTimings[1];
+            Assert.AreEqual(1, timing.ActionCode);
+            Assert.AreEqual(986f, timing.ActionEndMs, 0.01f);
+            Assert.AreEqual(992f, timing.RecoveryStartMs, 0.01f);
+            Assert.AreEqual(296f, timing.WindupMs, 0.01f);
+            var view = AlphaActorView.Spawn(def, null, new List<string>());
+            try
+            {
+                Assert.IsTrue(view.TryGetActionTiming(1, out var fromView));
+                Assert.AreEqual(timing.ActionEndMs, fromView.ActionEndMs);
+                Assert.IsFalse(view.TryGetActionTiming(9999, out _), "unknown codes have no invented timing");
+                yield return null;
+            }
+            finally
+            {
+                Object.Destroy(view.gameObject);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator ActorChurnDoesNotLeakMeshes()
         {
             var source = AlphaContentSource.Resolve();

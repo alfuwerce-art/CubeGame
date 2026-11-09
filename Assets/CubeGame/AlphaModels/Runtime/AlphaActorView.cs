@@ -44,6 +44,16 @@ namespace CubeGame.AlphaModels
 
         public string[] AvailableActions => Definition != null ? Definition.RequiredActions : Array.Empty<string>();
 
+        /// <summary>Alpha timing of an action code (windup/actionEnd/recovery), if the clip has one.</summary>
+        public bool TryGetActionTiming(int actionCode, out AlphaActionTiming timing)
+        {
+            timing = default;
+            return Definition != null && Definition.ActionTimings.TryGetValue(actionCode, out timing);
+        }
+
+        public AlphaActionTiming ActionTimingOf(int actionCode) =>
+            Definition != null && Definition.ActionTimings.TryGetValue(actionCode, out var timing) ? timing : default;
+
         /// <summary>Build geometry and controller from a loaded actor definition.</summary>
         public bool Initialize(AlphaActorDefinition def)
         {

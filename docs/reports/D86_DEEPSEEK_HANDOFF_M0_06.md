@@ -64,6 +64,7 @@ int removed = spawner.DespawnBeyond(playerPosition);   // blob сохраняе�
 - Визуалы подготовлены для **всех 156 видов** (130 боевых + 26 пассивных). **Действия подключены к 115 видам (851 клип)** — полный набор D65-библиотек плюс S05A-2/D83. **15 видов — `LOCOMOTION_ONLY`** (человекоидная семья 0x00/0x01/0x03/0x07/0x08/0x0d/0x0e, кот/runner 0x1e/0x1f/0x20/0x3f/0x40/0x41/0x42 и RuneGiant 0x76); AI возвращает `IN_RANGE_NO_ACTION_EVIDENCE` и не выдумывает действий. `RuneGiant 0x76` — особое поведение `BLOCKED` (R-9).
 - `CreatureSpawner.GroundHeight(x, z)` — передайте высоту из генератора мира, чтобы существа вставали на поверхность; без хука используется Y из плана.
 - `CreatureAi.ActionRetryMs = 250` — троттлинг запросов действий (`CUBEGAME_CONTRACT`, не константа Alpha); замер: 12 существ, 600 кадров → 451 запрос, 0.172 мс/кадр. Если у вас есть собственный action lock, сообщите — уменьшим/увеличим троттлинг.
+- `AlphaActorView.TryGetActionTiming(code, out timing)` → `AlphaActionTiming { ActionEndMs, RecoveryStartMs, WindupMs, AttackTimingMs }` из `provenance.timings` клипа. Урон/эффект лучше привязывать к windup/attack_timing, а не к концу клипа; если у кода нет тайминга — API возвращает `false`, не выдумывайте числа.
 - Симуляция вне экрана не заявлена: только blob сохранения.
 
 ## 6. Проверки

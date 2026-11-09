@@ -56,6 +56,8 @@ namespace CubeGame.AlphaModels
         public string[] ClipJson { get; internal set; } = Array.Empty<string>();
         public string[] RequiredActions { get; internal set; } = Array.Empty<string>();
         public List<AlphaClip> Clips { get; } = new List<AlphaClip>();
+        /// <summary>Action code → Alpha timing (actionEnd/recovery/windup) for combat scheduling.</summary>
+        public Dictionary<int, AlphaActionTiming> ActionTimings { get; } = new Dictionary<int, AlphaActionTiming>();
         /// <summary>Raw clip documents as written by the pipeline (what AlphaClipPlayer consumes).</summary>
         public List<string> ClipJsonTexts { get; } = new List<string>();
         public List<string> Problems { get; } = new List<string>();
@@ -252,6 +254,8 @@ namespace CubeGame.AlphaModels
                     var clip = AlphaClip.Parse(text, def.Rig.rig, problems);
                     def.Problems.AddRange(problems);
                     if (clip != null) { def.Clips.Add(clip); def.ClipJsonTexts.Add(text); }
+                    if (clip != null && clip.Data.actionCode >= 0 && clip.Data.category == "MOTION")
+                        def.ActionTimings[clip.Data.actionCode] = clip.Timing;
                 }
             }
             if (def.Clips.Count == 0) def.Problems.Add("ACTOR_NO_CLIPS");

@@ -40,6 +40,29 @@ namespace CubeGame.AlphaTransfer
         public string validation;
     }
 
+    [Serializable]
+    public class AlphaClipTimings
+    {
+        public float attack_timing, windup, stamina, reload;
+    }
+
+    [Serializable]
+    public class AlphaClipProvenance
+    {
+        public AlphaClipTimings timings;
+    }
+
+    /// <summary>Gameplay-relevant timing of one Alpha action (evidence from the clip provenance).</summary>
+    [Serializable]
+    public struct AlphaActionTiming
+    {
+        public int ActionCode;
+        public float ActionEndMs;
+        public float RecoveryStartMs;
+        public float WindupMs;
+        public float AttackTimingMs;
+    }
+
     public struct PartPose
     {
         public Vector3 position;
@@ -51,6 +74,7 @@ namespace CubeGame.AlphaTransfer
     {
         public const string TransferredStatus = "TRANSFERRED_FROM_ALPHA";
         public AlphaClipData Data { get; }
+        public AlphaActionTiming Timing { get; }
         public int PartCount => Data.parts.Length;
         readonly PartPose[][] _poses;   // [key][part]
         readonly bool[][] _visible;
@@ -60,6 +84,29 @@ namespace CubeGame.AlphaTransfer
         AlphaClip(AlphaClipData data, PartPose[][] poses, bool[][] visible)
         {
             Data=data;_poses=poses;_visible=visible;
+            var timing = new AlphaActionTiming
+            {
+                ActionCode = data.actionCode,
+                ActionEndMs = data.actionEndMs,
+                RecoveryStartMs = data.recoveryStartMs,
+            };
+            if (!string.IsNullOrEmpty(data.provenance))
+            {
+                try
+                {
+                    var provenance = JsonUtility.FromJson<AlphaClipProvenance>(data.provenance);
+                    if (provenance != null && provenance.timings != null)
+                    {
+                        timing.WindupMs = provenance.timings.windup;
+                        timing.AttackTimingMs = provenance.timings.attack_timing;
+                    }
+                }
+                catch (Exception)
+                {
+                    // Provenance is advisory; the clip still plays, timing stays whatever the fields say.
+                }
+            }
+            Timing = timing;
             _weaponPivotPart=data.twoHandedAttack && data.weaponOnBack ? Array.IndexOf(data.parts,"weapon") : -1;
             if(_weaponPivotPart>=0)_weaponGripOffset=new Vector3(0,4-data.capturedSizes[3*_weaponPivotPart+2]*.5f,0);
         }
