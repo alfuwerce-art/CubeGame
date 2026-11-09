@@ -7,7 +7,9 @@
         "CubeGame.Presentation",
         "CubeGame.Features",
         "CubeGame.Presentation.Visual",
-        "CubeGame.Content"
+        "CubeGame.Content",
+        "CubeGame.AlphaModels",
+        "CubeGame.Features.Creatures"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

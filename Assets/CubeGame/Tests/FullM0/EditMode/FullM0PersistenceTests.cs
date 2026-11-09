@@ -61,6 +61,8 @@ namespace CubeGame.Tests.FullM0.EditMode
             session.Hero.Yaw = 33.5f;
             Assert.IsTrue(ItemInstance.TryCreateFromIdentifiers((int)ItemType.Weapon, 3, 4, 2, 99, 0, 0, 1, out ItemInstance sword, out string error), error);
             session.Hero.Items.Add(sword);
+            session.Hero.Health.ApplyDamage(17.25);
+            double heroHp = session.Hero.Health.CurrentHealth;
 
             SaveResult saved = slots.Save(session, 999L);
             Assert.IsTrue(saved.IsSuccess, saved.ToString());
@@ -75,8 +77,11 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.AreEqual(session.Hero.Sheet.Progression.Experience, loaded.Hero.Sheet.Progression.Experience);
             Assert.AreEqual(new WorldPosition(10.5, 40.25, -3.75), loaded.Hero.Position);
             Assert.AreEqual(33.5f, loaded.Hero.Yaw);
-            Assert.AreEqual(1, loaded.Hero.Items.Count);
-            Assert.AreEqual(sword.Subtype, loaded.Hero.Items[0].Subtype);
+            // M0-05A: a new hero carries the starting greatsword, so the added sword is the second item.
+            Assert.AreEqual(2, loaded.Hero.Items.Count);
+            Assert.AreEqual(sword.Subtype, loaded.Hero.Items[1].Subtype);
+            Assert.AreEqual(heroHp, loaded.Hero.Health.CurrentHealth, 1e-9, "current HP survives the checkpoint");
+            Assert.IsNotNull(loaded.Hero.Loadout.GetEquipped(Core.Equipment.EquipmentSlot.MainHand), "first weapon re-equipped");
             Assert.IsFalse(loaded.Hero.NeedsGroundPlacement);
 
             var restored = new GameSession();
@@ -84,6 +89,19 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.IsTrue(restored.BeginLoadedWorld("slot0", loaded.World, loaded.Hero, loaded.ClockTick));
             Assert.IsTrue(restored.CompleteLoading());
             Assert.AreEqual(451L, restored.Clock.Tick);
+        }
+
+        [Test]
+        public void SessionWrittenBeforeHeroHealthFieldMeansFullHealth()
+        {
+            // A session payload of format v1 written before M0-05A has no heroHealth field.
+            var legacy = new SessionSaveData { heroName = "Old", worldName = "W", generatorId = Generator };
+            string json = new JsonSessionSerializer().Serialize(legacy).Replace(",\"heroHealth\":-1.0", string.Empty);
+            StringAssert.DoesNotContain("heroHealth", json);
+            SessionSaveData read = new JsonSessionSerializer().Deserialize(json);
+            Assert.IsNotNull(read);
+            Assert.AreEqual(-1.0, read.heroHealth, "missing field keeps the 'full HP' sentinel");
+            Assert.AreEqual(SessionSaveFormat.CurrentVersion, read.formatVersion);
         }
 
         [Test]

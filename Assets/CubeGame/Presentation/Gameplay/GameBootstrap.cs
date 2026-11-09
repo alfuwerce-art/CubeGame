@@ -1,7 +1,9 @@
 using System;
 using System.Globalization;
+using CubeGame.AlphaModels;
 using CubeGame.Core.Characters;
 using CubeGame.Core.Persistence;
+using CubeGame.Features.Combat;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.Persistence;
 using CubeGame.Features.Session;
@@ -34,6 +36,15 @@ namespace CubeGame.Gameplay
 
         public const uint DefaultSeed = 666666u;
 
+        /// <summary>Hero primary attack: Alpha action 57 (two-handed greatsword attack, S05A-2 / C-31).</summary>
+        public static readonly ActionId HeroAttackAction = new ActionId(57);
+
+        /// <summary>Training enemy species: Alpha Wolf 0x1c (staged S05 visual with actions).</summary>
+        public static readonly KindId TrainingTargetKind = new KindId(0x1c);
+
+        /// <summary>Training target distance in front of the hero, blocks (CubeGame test setup, not Alpha).</summary>
+        public const double TrainingTargetDistance = 2.0;
+
         public static readonly string[] SlotKeys = { "slot0", "slot1", "slot2" };
 
         [SerializeField] private Material terrainMaterial;
@@ -58,6 +69,10 @@ namespace CubeGame.Gameplay
         private Camera _camera;
 
         private string _status = string.Empty;
+        private string _combatLog = string.Empty;
+        private Combatant _trainingTarget;
+        private GameObject _trainingTargetView;
+        private ulong _runtimeSerial;
         private int _frames;
         private string _screenshotPath;
         private int _screenshotFrame = -1;
@@ -105,7 +120,7 @@ namespace CubeGame.Gameplay
                 _slots = CreateSlots(_saveDirectory);
             }
 
-            _session = new GameSession();
+            _session = new GameSession(new AlphaActionTimingSource(AlphaActorLibrary.Shared));
             _session.EnterMainMenu();
             EnsureCameraAndLight();
             _formSeed = _commandLineSeed.ToString(CultureInfo.InvariantCulture);
@@ -140,6 +155,11 @@ namespace CubeGame.Gameplay
 
             if (_session.State == SessionState.InGame)
             {
+                if (_motor != null && _motor.enabled && Input.GetMouseButtonDown(0) && GUIUtility.hotControl == 0)
+                {
+                    HeroAttack();
+                }
+
                 _session.AdvanceFrame(Time.deltaTime);
                 RebaseIfFar();
                 SyncHeroFromView();
@@ -254,6 +274,107 @@ namespace CubeGame.Gameplay
                 || Report(false, $"voxel edit refused at ({blockX},{blockY},{blockZ})");
         }
 
+        public Combatant TrainingTarget => _trainingTarget;
+
+        public string CombatLog => _combatLog;
+
+        /// <summary>Hero primary attack (left mouse). Gameplay decides phases and damage; visuals only follow events.</summary>
+        public bool HeroAttack()
+        {
+            if (_session.State != SessionState.InGame || _session.Combat == null)
+            {
+                return Report(false, "attack refused: no running world");
+            }
+
+            SyncHeroFromView();
+            if (!_session.Combat.TryStartAttack(_session.Hero.Id, HeroAttackAction, _session.Clock.TimeMs, "action_057"))
+            {
+                _combatLog = $"attack refused: {_session.Combat.LastRejection}";
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Spawns a hostile training target in front of the hero (runtime entity, not saved; M0-06 replaces it with
+        /// world spawns). HP from Core for a level-1 Warrior sheet: PLACEHOLDER_NOT_ALPHA for creature HP.
+        /// </summary>
+        public Combatant SpawnTrainingTarget()
+        {
+            if (_session.State != SessionState.InGame || _session.Combat == null || _worldState == null)
+            {
+                Report(false, "spawn refused: no running world");
+                return null;
+            }
+
+            DespawnTrainingTarget();
+            SyncHeroFromView();
+            HeroState hero = _session.Hero;
+            double yaw = hero.Yaw * Math.PI / 180.0;
+            double x = hero.Position.X + Math.Sin(yaw) * TrainingTargetDistance;
+            double z = hero.Position.Z + Math.Cos(yaw) * TrainingTargetDistance;
+            int ground = Math.Max(_worldState.SurfaceAt((int)Math.Floor(x), (int)Math.Floor(z)), _worldState.Generator.WaterLevel);
+            double y = Math.Abs(ground + 1 - hero.Position.Y) <= 2.0 ? ground + 1 : hero.Position.Y;
+
+            var target = Combatant.Create(StableEntityId.ForRuntime(++_runtimeSerial), TrainingTargetKind, "Wolf (training)", CharacterClass.Warrior, 1);
+            target.Hostile = true;
+            target.Position = new WorldPosition(x, y, z);
+            target.Yaw = hero.Yaw + 180f;
+            _session.Combat.Register(target);
+            _trainingTarget = target;
+
+            _trainingTargetView = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            _trainingTargetView.name = "TrainingTarget_PLACEHOLDER";
+            Destroy(_trainingTargetView.GetComponent<Collider>());
+            _trainingTargetView.transform.localScale = new Vector3(0.9f, 0.9f, 1.4f);
+            _trainingTargetView.transform.SetPositionAndRotation(_worldView.ToScene(x, y + 0.45, z), Quaternion.Euler(0f, target.Yaw, 0f));
+            _trainingTargetView.GetComponent<Renderer>().material.color = new Color(0.55f, 0.35f, 0.25f);
+
+            _session.Events.Publish(new EntitySpawned
+            {
+                TimeMs = _session.Clock.TimeMs,
+                Entity = target.Id,
+                Kind = target.Kind,
+                Position = target.Position,
+                Yaw = target.Yaw,
+            });
+            _combatLog = $"spawned {target}";
+            return target;
+        }
+
+        private void DespawnTrainingTarget()
+        {
+            if (_trainingTarget != null && _session.Combat != null)
+            {
+                _session.Combat.Unregister(_trainingTarget.Id);
+                _session.Events.Publish(new EntityDespawned { TimeMs = _session.Clock?.TimeMs ?? 0, Entity = _trainingTarget.Id });
+            }
+
+            if (_trainingTargetView != null)
+            {
+                Destroy(_trainingTargetView);
+            }
+
+            _trainingTarget = null;
+            _trainingTargetView = null;
+        }
+
+        private void OnHitResolved(HitResolved hit)
+        {
+            _combatLog = $"hit {hit.Target} damage {hit.Damage:F1} hp left {hit.TargetHealthAfter:F1}{(hit.Killed ? " KILLED" : string.Empty)}";
+            Debug.Log($"[Combat] {_combatLog}");
+        }
+
+        private void OnEntityDied(EntityDied died)
+        {
+            if (_trainingTarget != null && died.Entity.Equals(_trainingTarget.Id) && _trainingTargetView != null)
+            {
+                _trainingTargetView.transform.localScale = new Vector3(1.4f, 0.3f, 0.9f);
+                _trainingTargetView.GetComponent<Renderer>().material.color = Color.gray;
+            }
+        }
+
         /// <summary>Automation/debug: places the hero above column (x, z) and loads the surroundings.</summary>
         public void TeleportHero(int x, int z)
         {
@@ -323,6 +444,9 @@ namespace CubeGame.Gameplay
 
             SetGameplayInput(true);
             PublishHeroSpawn();
+            _session.Events.Subscribe<HitResolved>(OnHitResolved);
+            _session.Events.Subscribe<EntityDied>(OnEntityDied);
+            SpawnTrainingTarget();
             return Report(true, description);
         }
 
@@ -385,6 +509,8 @@ namespace CubeGame.Gameplay
 
         private void DestroyWorldViews()
         {
+            DespawnTrainingTarget();
+            _combatLog = string.Empty;
             if (_orbitCamera != null)
             {
                 _orbitCamera.Target = null;
@@ -461,7 +587,7 @@ namespace CubeGame.Gameplay
             {
                 TimeMs = _session.Clock.TimeMs,
                 Entity = hero.Id,
-                Kind = new KindId(-1),
+                Kind = GameSession.HeroKind,
                 Position = hero.Position,
                 Yaw = hero.Yaw,
             });
@@ -692,6 +818,15 @@ namespace CubeGame.Gameplay
                 $"{_session.World.Name}  seed {_session.World.Seed}  time {_session.Clock.TimeMs / 1000.0:F1}s  " +
                 $"{hero.Name} {hero.Sheet.Class} L{hero.Sheet.Progression.Level}  pos {hero.Position}  " +
                 $"{(_worldView != null ? _worldView.Center.ToString() : "-")} loaded {(_worldView != null ? _worldView.LoadedCount : 0)}  [Esc] menu");
+            GUI.Label(new Rect(10f, 32f, 700f, 22f),
+                $"HP {hero.Health.CurrentHealth:F0}/{hero.Health.MaxHealth:F0}  weapon {hero.Loadout.GetEquipped(Core.Equipment.EquipmentSlot.MainHand)?.ToString() ?? "none"}  [LMB] attack");
+            if (_trainingTarget != null)
+            {
+                GUI.Label(new Rect(10f, 54f, 700f, 22f),
+                    $"{_trainingTarget.Name}: HP {_trainingTarget.Health.CurrentHealth:F0}/{_trainingTarget.Health.MaxHealth:F0}{(_trainingTarget.IsDead ? " (dead)" : string.Empty)}");
+            }
+
+            GUI.Label(new Rect(10f, 76f, 700f, 22f), _combatLog);
         }
 
         private static string LabeledField(string label, string value)

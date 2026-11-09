@@ -1,0 +1,298 @@
+using System.Collections.Generic;
+using CubeGame.Core.Characters;
+using CubeGame.Core.Combat;
+using CubeGame.Core.Equipment;
+using CubeGame.Features.Combat;
+using CubeGame.Features.Contracts;
+using CubeGame.Features.Session;
+using NUnit.Framework;
+
+namespace CubeGame.Tests.FullM0.EditMode
+{
+    /// <summary>
+    /// M0-05A first slice: attack phases on game time, one hit per strike through Core S03/S04, death,
+    /// determinism, refusals with reasons, pause, and the hero combatant sharing the hero's Core state.
+    /// </summary>
+    public sealed class FullM0CombatTests
+    {
+        private static readonly KindId Human = new KindId(0x02);
+        private static readonly KindId Wolf = new KindId(0x1c);
+        private static readonly ActionId Attack57 = new ActionId(57);
+
+        // Alpha action 57 timings from the S05 clip provenance: windup 790, action end 1382, recovery 1392.
+        private static readonly ActionTiming Alpha57 = ActionTiming.FromAlpha(790, 1382, 1392);
+
+        private GameEventBus _events;
+        private List<object> _log;
+        private CombatSystem _combat;
+        private Combatant _hero;
+        private Combatant _wolf;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _events = new GameEventBus();
+            _log = new List<object>();
+            _events.Subscribe<ActionStarted>(e => _log.Add(e));
+            _events.Subscribe<ActionPhaseChanged>(e => _log.Add(e));
+            _events.Subscribe<ActionResolved>(e => _log.Add(e));
+            _events.Subscribe<HitResolved>(e => _log.Add(e));
+            _events.Subscribe<EntityDied>(e => _log.Add(e));
+            _combat = new CombatSystem(_events, new ActionTimingTable().Add(Human, Attack57, Alpha57), 666666);
+
+            _hero = Combatant.Create(StableEntityId.Hero, Human, "Hero", CharacterClass.Warrior, 1);
+            _hero.Loadout.Equip(EquipmentSlot.MainHand, HeroState.CreateStartingWeapon());
+            _hero.Position = new WorldPosition(100, 50, 100);
+            _hero.Yaw = 0f; // facing +Z
+            _wolf = Combatant.Create(StableEntityId.ForRuntime(1), Wolf, "Wolf", CharacterClass.Warrior, 1);
+            _wolf.Hostile = true;
+            _wolf.Position = new WorldPosition(100, 50, 102);
+            _combat.Register(_hero);
+            _combat.Register(_wolf);
+        }
+
+        [Test]
+        public void AlphaTimingMapsToPhases()
+        {
+            Assert.AreEqual(790, Alpha57.WindupMs);
+            Assert.AreEqual(592, Alpha57.StrikeMs);
+            Assert.AreEqual(10, Alpha57.RecoverMs);
+            Assert.AreEqual("EMULATED_ALPHA_CODE", Alpha57.Source);
+        }
+
+        [Test]
+        public void HitResolvesExactlyAtStrikeStartWithCoreDamage()
+        {
+            double before = _wolf.Health.CurrentHealth;
+            Assert.IsTrue(_combat.TryStartAttack(_hero.Id, Attack57, 1000));
+
+            _combat.Update(1000 + 789);
+            Assert.AreEqual(before, _wolf.Health.CurrentHealth, "no damage during windup");
+            Assert.IsTrue(_combat.TryGetPhase(_hero.Id, out ActionPhase phase));
+            Assert.AreEqual(ActionPhase.Windup, phase);
+
+            _combat.Update(1000 + 790);
+            Assert.IsTrue(_combat.TryGetPhase(_hero.Id, out phase));
+            Assert.AreEqual(ActionPhase.Strike, phase);
+
+            // Independent recomputation with Core only: same inputs and the same strike seed.
+            var expectedTarget = new HealthPool(before);
+            CombatAttack attack = new EquipmentCombatAdapter().BuildAttack(_hero.Sheet, _hero.Loadout, 1.0,
+                EquipmentCombatAdapter.ComputeTargetArmor(_wolf.Loadout), 0.0);
+            CombatOutcome expected = new DamageResolver(new SeededCombatRandom(_combat.StrikeSeed(_hero.Id, _wolf.Id, 1)))
+                .Resolve(attack, expectedTarget);
+
+            Assert.IsTrue(expected.IsHit);
+            Assert.Greater(expected.AppliedDamage, 0.0);
+            Assert.AreEqual(expectedTarget.CurrentHealth, _wolf.Health.CurrentHealth, 1e-9);
+            HitResolved hit = Single<HitResolved>();
+            Assert.AreEqual(expected.AppliedDamage, hit.Damage, 1e-9);
+            Assert.AreEqual(1000 + 790, hit.TimeMs);
+
+            _combat.Update(1000 + 5000);
+            Assert.IsFalse(_combat.IsActing(_hero.Id));
+            Assert.AreEqual(1, Count<HitResolved>(), "one strike = one hit");
+            ActionResolved done = Single<ActionResolved>();
+            Assert.AreEqual(ActionOutcome.Completed, done.Outcome);
+            Assert.AreEqual(1000 + 1392, done.TimeMs);
+        }
+
+        [Test]
+        public void PhaseEventsCarryAlphaDurations()
+        {
+            _combat.TryStartAttack(_hero.Id, Attack57, 0, "action_057");
+            _combat.Update(10000);
+            ActionStarted started = Single<ActionStarted>();
+            CollectionAssert.AreEqual(new long[] { 790, 592, 10 }, started.PhaseDurationsMs);
+            Assert.AreEqual("action_057", started.AnimationKey);
+
+            var phases = new List<ActionPhase>();
+            foreach (object e in _log)
+            {
+                if (e is ActionPhaseChanged changed)
+                {
+                    phases.Add(changed.Phase);
+                }
+            }
+
+            CollectionAssert.AreEqual(new[] { ActionPhase.Windup, ActionPhase.Strike, ActionPhase.Recover, ActionPhase.Finished }, phases);
+        }
+
+        [Test]
+        public void TargetOutsideReachOrBehindIsNotHit()
+        {
+            _wolf.Position = new WorldPosition(100, 50, 100 + _combat.Rules.MeleeReach + 0.5);
+            _combat.TryStartAttack(_hero.Id, Attack57, 0);
+            _combat.Update(2000);
+            Assert.AreEqual(0, Count<HitResolved>());
+
+            _wolf.Position = new WorldPosition(100, 50, 98); // behind the hero
+            _combat.TryStartAttack(_hero.Id, Attack57, 3000);
+            _combat.Update(6000);
+            Assert.AreEqual(0, Count<HitResolved>());
+            Assert.AreEqual(_wolf.Health.MaxHealth, _wolf.Health.CurrentHealth);
+        }
+
+        [Test]
+        public void SameSideIsNeverHit()
+        {
+            _wolf.Hostile = false;
+            _combat.TryStartAttack(_hero.Id, Attack57, 0);
+            _combat.Update(2000);
+            Assert.AreEqual(0, Count<HitResolved>());
+        }
+
+        [Test]
+        public void SecondAttackWhileActingIsRefusedWithReason()
+        {
+            Assert.IsTrue(_combat.TryStartAttack(_hero.Id, Attack57, 0));
+            Assert.IsFalse(_combat.TryStartAttack(_hero.Id, Attack57, 100));
+            StringAssert.Contains("still performing", _combat.LastRejection);
+            Assert.AreEqual(1, Count<ActionStarted>());
+
+            _combat.Update(1392);
+            Assert.IsTrue(_combat.TryStartAttack(_hero.Id, Attack57, 1392), "free again after the action end");
+        }
+
+        [Test]
+        public void KillPublishesDeathOnceAndDeadTargetTakesNoMoreDamage()
+        {
+            long now = 0;
+            int guard = 0;
+            while (!_wolf.IsDead && guard++ < 500)
+            {
+                Assert.IsTrue(_combat.TryStartAttack(_hero.Id, Attack57, now), _combat.LastRejection);
+                now += 1392;
+                _combat.Update(now);
+            }
+
+            Assert.IsTrue(_wolf.IsDead, "the wolf dies from repeated Core hits");
+            Assert.AreEqual(1, Count<EntityDied>());
+            Assert.AreEqual(_wolf.Id, Single<EntityDied>().Entity);
+
+            int hits = Count<HitResolved>();
+            _combat.TryStartAttack(_hero.Id, Attack57, now);
+            _combat.Update(now + 2000);
+            Assert.AreEqual(hits, Count<HitResolved>(), "dead targets are skipped");
+            Assert.AreEqual(0.0, _wolf.Health.CurrentHealth);
+
+            _wolf.Hostile = false;
+            Assert.IsFalse(_combat.TryStartAttack(_wolf.Id, Attack57, now), "dead combatants cannot act");
+        }
+
+        [Test]
+        public void SameSeedGivesSameDamageSequence()
+        {
+            List<double> first = DamageSequence(666666);
+            List<double> second = DamageSequence(666666);
+            CollectionAssert.AreEqual(first, second);
+            Assert.Greater(first.Count, 1);
+        }
+
+        [Test]
+        public void UnknownActionUsesPlaceholderTiming()
+        {
+            _combat.TryStartAttack(_hero.Id, new ActionId(1), 0);
+            ActionStarted started = Single<ActionStarted>();
+            CollectionAssert.AreEqual(_combat.Rules.FallbackTiming.PhaseDurations, started.PhaseDurationsMs);
+            Assert.AreEqual("PLACEHOLDER_NOT_ALPHA", _combat.Rules.FallbackTiming.Source);
+        }
+
+        [Test]
+        public void SessionDrivesCombatByClockAndPauseStopsIt()
+        {
+            var session = new GameSession(new ActionTimingTable().Add(GameSession.HeroKind, Attack57, Alpha57));
+            session.EnterMainMenu();
+            Assert.IsTrue(session.BeginNewWorld("slot0", new NewWorldRequest { Seed = 7, GeneratorId = "test" }, 0));
+            Assert.IsTrue(session.CompleteLoading());
+
+            HeroState hero = session.Hero;
+            Assert.AreEqual(1, hero.Items.Count, "new hero carries the starting weapon");
+            Assert.IsNotNull(hero.Loadout.GetEquipped(EquipmentSlot.MainHand), "starting weapon is equipped");
+            Assert.IsTrue(session.Combat.TryGet(hero.Id, out Combatant heroCombatant));
+            Assert.AreSame(hero.Health, heroCombatant.Health, "hero combatant shares the hero's Core HP");
+
+            hero.Position = new WorldPosition(10, 5, 10);
+            hero.Yaw = 90f; // facing +X
+            Combatant wolf = Combatant.Create(StableEntityId.ForRuntime(9), Wolf, "Wolf", CharacterClass.Warrior, 1);
+            wolf.Hostile = true;
+            wolf.Position = new WorldPosition(12, 5, 10);
+            session.Combat.Register(wolf);
+
+            Assert.IsTrue(session.Combat.TryStartAttack(hero.Id, Attack57, session.Clock.TimeMs));
+            session.Pause();
+            Run(session, 5.0);
+            Assert.AreEqual(wolf.Health.MaxHealth, wolf.Health.CurrentHealth, "paused clock: no strike");
+
+            session.Resume();
+            Run(session, 0.5);
+            Assert.AreEqual(wolf.Health.MaxHealth, wolf.Health.CurrentHealth, "0.5 s < 790 ms windup");
+            Run(session, 0.4);
+            Assert.Less(wolf.Health.CurrentHealth, wolf.Health.MaxHealth, "strike after 790 ms of game time");
+        }
+
+        /// <summary>Advances the session in 0.1 s frames (the clock caps ticks per frame).</summary>
+        private static void Run(GameSession session, double seconds)
+        {
+            for (double t = 0.0; t < seconds - 1e-9; t += 0.1)
+            {
+                session.AdvanceFrame(0.1);
+            }
+        }
+
+        private List<double> DamageSequence(int seed)
+        {
+            var events = new GameEventBus();
+            var damages = new List<double>();
+            events.Subscribe<HitResolved>(e => damages.Add(e.Damage));
+            var combat = new CombatSystem(events, new ActionTimingTable().Add(Human, Attack57, Alpha57), seed);
+            Combatant hero = Combatant.Create(StableEntityId.Hero, Human, "Hero", CharacterClass.Warrior, 1);
+            hero.Loadout.Equip(EquipmentSlot.MainHand, HeroState.CreateStartingWeapon());
+            Combatant wolf = Combatant.Create(StableEntityId.ForRuntime(1), Wolf, "Wolf", CharacterClass.Warrior, 1);
+            wolf.Hostile = true;
+            wolf.Position = new WorldPosition(0, 0, 2);
+            combat.Register(hero);
+            combat.Register(wolf);
+            long now = 0;
+            for (int i = 0; i < 5 && !wolf.IsDead; i++)
+            {
+                combat.TryStartAttack(hero.Id, Attack57, now);
+                now += 1392;
+                combat.Update(now);
+            }
+
+            return damages;
+        }
+
+        private T Single<T>()
+        {
+            T found = default;
+            int count = 0;
+            foreach (object e in _log)
+            {
+                if (e is T typed)
+                {
+                    found = typed;
+                    count++;
+                }
+            }
+
+            Assert.AreEqual(1, count, $"expected exactly one {typeof(T).Name}");
+            return found;
+        }
+
+        private int Count<T>()
+        {
+            int count = 0;
+            foreach (object e in _log)
+            {
+                if (e is T)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+    }
+}

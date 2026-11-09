@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using CubeGame.Core.Characters;
+using CubeGame.Core.Combat;
+using CubeGame.Core.Equipment;
 using CubeGame.Core.Items;
+using CubeGame.Features.Combat;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.World;
 
@@ -48,6 +51,17 @@ namespace CubeGame.Features.Session
             Name = string.IsNullOrWhiteSpace(name) ? "Hero" : name.Trim();
             RaceId = raceId;
             Sheet = sheet ?? throw new ArgumentNullException(nameof(sheet));
+            Loadout = new EquipmentLoadout();
+            Health = new HealthPool(EquipmentCombatAdapter.ComputeMaxHealth(sheet));
+        }
+
+        /// <summary>
+        /// Starting weapon of a new hero: one level-1 common greatsword (Core S04 item), matching the S05 player
+        /// visual (human with greatsword, action 57). PLACEHOLDER_NOT_ALPHA: Alpha's class start kit is not restored.
+        /// </summary>
+        public static ItemInstance CreateStartingWeapon()
+        {
+            return new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Greatsword, 1, 0, 1);
         }
 
         public StableEntityId Id => StableEntityId.Hero;
@@ -60,6 +74,38 @@ namespace CubeGame.Features.Session
         public CharacterSheet Sheet { get; }
 
         public List<ItemInstance> Items { get; } = new List<ItemInstance>();
+
+        /// <summary>Equipped items (Core S04). Not stored by save v1 (SAVE-EQUIPMENT-GAP): rebuilt by <see cref="EquipFromItems"/>.</summary>
+        public EquipmentLoadout Loadout { get; }
+
+        /// <summary>Current HP; maximum from Core <see cref="EquipmentCombatAdapter.ComputeMaxHealth"/>.</summary>
+        public HealthPool Health { get; }
+
+        /// <summary>
+        /// Rebuilds the loadout from the carried items: the first weapon goes to the main hand. CubeGame rule
+        /// (PLACEHOLDER_NOT_ALPHA) until equipment slots are part of the save (M0-04D, decision on save v2).
+        /// </summary>
+        public void EquipFromItems()
+        {
+            foreach (ItemInstance item in Items)
+            {
+                if (item.Type == ItemType.Weapon && Loadout.IsSlotEmpty(EquipmentSlot.MainHand))
+                {
+                    Loadout.Equip(EquipmentSlot.MainHand, item);
+                }
+            }
+        }
+
+        /// <summary>Restores current HP from a save (values above maximum or non-finite are clamped/ignored).</summary>
+        public void RestoreHealth(double current)
+        {
+            if (double.IsNaN(current) || double.IsInfinity(current) || current < 0.0 || current >= Health.CurrentHealth)
+            {
+                return;
+            }
+
+            Health.ApplyDamage(Health.CurrentHealth - current);
+        }
 
         public WorldPosition Position { get; set; }
 
@@ -109,10 +155,17 @@ namespace CubeGame.Features.Session
 
         private SessionState _stateBeforeSave = SessionState.InGame;
 
-        public GameSession()
+        public GameSession(IActionTimingSource actionTimings = null)
         {
             Events = new GameEventBus();
+            ActionTimings = actionTimings;
         }
+
+        /// <summary>Attack phase source for the combat system (Alpha clip timings in the game, fixed table in tests).</summary>
+        public IActionTimingSource ActionTimings { get; set; }
+
+        /// <summary>Combat of the running world (M0-05A first slice); created on LoadingWorld, advanced by clock ticks.</summary>
+        public CombatSystem Combat { get; private set; }
 
         public SessionState State { get; private set; } = SessionState.Boot;
 
@@ -167,6 +220,8 @@ namespace CubeGame.Features.Session
                 Position = request.Spawn,
                 NeedsGroundPlacement = true,
             };
+            hero.Items.Add(HeroState.CreateStartingWeapon());
+            hero.EquipFromItems();
 
             var world = new WorldInfo(request.WorldName, new WorldSeed(request.Seed), request.GeneratorId, nowUtcTicks);
             return Attach(slotKey, world, hero, new GameClock(), new WorldDeltaStore());
@@ -283,6 +338,13 @@ namespace CubeGame.Features.Session
             Hero = hero;
             Clock = clock;
             WorldDeltas = deltas;
+            Combat = new CombatSystem(Events, ActionTimings, unchecked((int)world.Seed.Value));
+            Combat.Register(new Combatant(hero.Id, HeroKind, hero.Name, hero.Sheet, hero.Loadout, hero.Health)
+            {
+                Position = hero.Position,
+                Yaw = hero.Yaw,
+            });
+            Clock.Ticked += OnClockTicked;
             if (!TryTransition(SessionState.LoadingWorld))
             {
                 DropWorld();
@@ -292,8 +354,33 @@ namespace CubeGame.Features.Session
             return true;
         }
 
+        /// <summary>Species of the hero for visuals and action timings: Alpha HumanMale (0x02), until race selection (M0-03A).</summary>
+        public static readonly KindId HeroKind = new KindId(0x02);
+
+        private void OnClockTicked(GameClock clock)
+        {
+            if (Combat == null || Hero == null)
+            {
+                return;
+            }
+
+            if (Combat.TryGet(Hero.Id, out Combatant heroCombatant))
+            {
+                heroCombatant.Position = Hero.Position;
+                heroCombatant.Yaw = Hero.Yaw;
+            }
+
+            Combat.Update(clock.TimeMs);
+        }
+
         private void DropWorld()
         {
+            if (Clock != null)
+            {
+                Clock.Ticked -= OnClockTicked;
+            }
+
+            Combat = null;
             World = null;
             Hero = null;
             Clock = null;

@@ -40,6 +40,11 @@ namespace CubeGame.Features.Persistence
 
         public float heroYaw;
 
+        /// <summary>
+        /// Current hero HP (M0-05A). Optional addition to format v1: -1 (and slots written before this field) = full HP.
+        /// </summary>
+        public double heroHealth = -1.0;
+
         /// <summary>FNV-1a 64 (hex) of the framed character save text written in the same checkpoint.</summary>
         public string characterChecksum = string.Empty;
 

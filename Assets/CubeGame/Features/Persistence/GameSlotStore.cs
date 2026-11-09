@@ -155,6 +155,7 @@ namespace CubeGame.Features.Persistence
                 heroY = hero.Position.Y,
                 heroZ = hero.Position.Z,
                 heroYaw = hero.Yaw,
+                heroHealth = hero.Health.CurrentHealth,
                 characterChecksum = Checksum(characterText),
                 worldChecksum = worldChecksum,
             };
@@ -281,6 +282,11 @@ namespace CubeGame.Features.Persistence
                 NeedsGroundPlacement = false,
             };
             hero.Items.AddRange(items);
+            hero.EquipFromItems();
+            if (data.heroHealth >= 0.0)
+            {
+                hero.RestoreHealth(data.heroHealth);
+            }
 
             return new SlotLoadResult
             {
@@ -454,7 +460,7 @@ namespace CubeGame.Features.Persistence
                 return false;
             }
 
-            if (!IsFinite(data.heroX) || !IsFinite(data.heroY) || !IsFinite(data.heroZ) || !IsFinite(data.heroYaw))
+            if (!IsFinite(data.heroX) || !IsFinite(data.heroY) || !IsFinite(data.heroZ) || !IsFinite(data.heroYaw) || !IsFinite(data.heroHealth))
             {
                 error = "hero position is not finite";
                 return false;
