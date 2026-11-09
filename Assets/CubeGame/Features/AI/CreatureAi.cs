@@ -125,11 +125,18 @@ namespace CubeGame.Features.AI
                 self.WeaponItemType, self.WeaponItemSubtype, TargetPointerParity);
             LastSelectedAttack = preferred;
             bool preferredInLibrary = Array.IndexOf(actions, preferred) >= 0;
+            bool hasWeapon = AlphaNpcWeaponActions.HasWeapon(self);
             for (int i = -1; i < actions.Length; i++)
             {
                 if (i < 0 && !preferredInLibrary) continue;
                 int action = i < 0 ? preferred : actions[i];
                 if (action < 0 || (i >= 0 && action == preferred)) continue;
+                // R-2 data rule: an Alpha action that needs a weapon is never launched without one.
+                if (!AlphaNpcWeaponActions.IsAllowed(action, hasWeapon))
+                {
+                    LastReason = "ACTION_NEEDS_WEAPON " + action;
+                    continue;
+                }
                 LastRequestedAction = action;
                 if (world.TryBeginAction(self, action, out var reason))
                 {

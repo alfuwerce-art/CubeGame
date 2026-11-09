@@ -305,6 +305,8 @@ namespace CubeGame.Gameplay
 
         public void OnHitResolved(HitResolved e)
         {
+            // CUBEGAME_CONTRACT (CombatFeedback): a short scale pulse on the target; Alpha's hit effects are R-3.
+            if (_entries.TryGetValue(e.Target, out Entry entry)) entry.HitTimeMs = e.TimeMs;
         }
 
         public void OnEntityDied(EntityDied e)
@@ -314,9 +316,10 @@ namespace CubeGame.Gameplay
                 return;
             }
 
-            // Alpha death presentation is not restored (PLACEHOLDER_NOT_ALPHA): the body lies on its side.
+            // Alpha death presentation is not restored (PLACEHOLDER_NOT_ALPHA): the body lies on its side and sinks.
             entry.Dead = true;
-            entry.Root.rotation = Quaternion.Euler(0f, entry.Yaw, 90f);
+            entry.DeathTimeMs = e.TimeMs;
+            entry.Root.rotation = Quaternion.Euler(0f, entry.Yaw, CombatFeedback.DeathTiltDegrees);
         }
 
         public void OnFrame(long gameTimeMs, double interpolationAlpha)
@@ -335,10 +338,22 @@ namespace CubeGame.Gameplay
                     entry.Root.position = _toScene(entry.Position);
                 }
 
-                if (!entry.Dead)
+                if (entry.Dead)
                 {
-                    entry.Root.rotation = Quaternion.Euler(0f, entry.Yaw, 0f);
+                    // CubeGame corpse: lies on its side (set at death) and sinks; hidden when fully sunk.
+                    float sink = CombatFeedback.DeathSink(gameTimeMs - entry.DeathTimeMs);
+                    entry.Root.position += Vector3.down * sink;
+                    if (CombatFeedback.CorpseFinished(gameTimeMs - entry.DeathTimeMs))
+                    {
+                        foreach (Renderer renderer in entry.Root.GetComponentsInChildren<Renderer>()) renderer.enabled = false;
+                    }
+
+                    continue;
                 }
+
+                entry.Root.rotation = Quaternion.Euler(0f, entry.Yaw, 0f);
+                float flash = CombatFeedback.FlashIntensity(gameTimeMs - entry.HitTimeMs);
+                entry.Root.localScale = flash > 0f ? Vector3.one * (1f + 0.06f * flash) : Vector3.one;
 
                 if (entry.View == null || entry.Dead)
                 {
@@ -528,6 +543,8 @@ namespace CubeGame.Gameplay
             public LocomotionMode Mode;
             public bool IsHero;
             public bool Dead;
+            public long DeathTimeMs;
+            public long HitTimeMs = long.MinValue / 2;
         }
     }
 }
