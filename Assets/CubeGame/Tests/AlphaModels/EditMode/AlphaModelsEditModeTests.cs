@@ -337,6 +337,24 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         }
 
         [Test]
+        public void EquipmentModelsFollowTheSlotAndTierLaw()
+        {
+            Assert.IsEmpty(AlphaEquipmentCatalog.Validate(), string.Join("\n", AlphaEquipmentCatalog.Validate()));
+            Assert.AreEqual(32, AlphaEquipmentCatalog.Items.Count);
+            Assert.AreEqual("iron-chest1.cub", AlphaEquipmentCatalog.Items[0].Model);
+            Assert.IsTrue(AlphaEquipmentCatalog.TryModel(4, 5, out var silk));
+            Assert.AreEqual("silk-chest5.cub", silk.Model);
+            Assert.IsTrue(AlphaEquipmentCatalog.TryModel(7, 0, out var shoulder));
+            Assert.AreEqual("iron-shoulder1.cub", shoulder.Model);
+            Assert.AreEqual(EquipmentSlot.Chest, AlphaEquipmentCatalog.SlotOf(4));
+            Assert.AreEqual(EquipmentSlot.Hands, AlphaEquipmentCatalog.SlotOf(5));
+            Assert.AreEqual(EquipmentSlot.Feet, AlphaEquipmentCatalog.SlotOf(6));
+            Assert.AreEqual(EquipmentSlot.Shoulder, AlphaEquipmentCatalog.SlotOf(7));
+            Assert.AreEqual(EquipmentSlot.None, AlphaEquipmentCatalog.SlotOf(3));
+            StringAssert.Contains("equipmentItems=32", AlphaEquipmentCatalog.Summary());
+        }
+
+        [Test]
         public void NpcServiceFurnitureMapsToContractKinds()
         {
             Assert.IsEmpty(AlphaNpcServices.Validate(), string.Join("\n", AlphaNpcServices.Validate()));

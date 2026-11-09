@@ -31,6 +31,8 @@
 | `Assets/CubeGame/AlphaModels/Runtime/AlphaOffhandLayer.cs` | модель левой руки: child `offhand_mesh` у `part_hand_l`, измеренный якорь (`shield y=3`, `bow sy−1.5`, `bracelet scale 0.6` и т.д.), `Clear`, `HasOffhand`, `EquippableSubtypes`; отказы `OFFHAND_SUBTYPE_UNKNOWN`, `OFFHAND_ANCHOR_NOT_MEASURED`, `OFFHAND_FILE_MISSING` |
 | `Assets/CubeGame/AlphaModels/Runtime/AlphaHeldItemLayer.cs` | удерживаемый предмет: child `held_mesh` у `part_hand_r`, якорь `center` (слот 0x1e8), выбор модели по `(type, subtype)`; отказы `HELD_ITEM_NO_MODEL`, `HELD_ITEM_FILE_MISSING`, `HELD_MESH` |
 | `tools/alpha_content/build_held_item_models.py` + `data/held_item_models.json` + `Content/Generated/AlphaHeldItemModels.g.cs` | дистилляция карты «предмет → модель» из исполненного `item_icon_id` (0x4EC400): 14 предметов (11 расходников, планер, лодка, лампа) |
+| `tools/alpha_content/build_equipment_models.py` + `data/equipment_models.json` + `Content/Generated/AlphaEquipmentModels.g.cs` | карта брони: 4 слота × 8 подтипов (iron 1–4, iron/silk/linen/wool 5) = 32 модели |
+| `Assets/CubeGame/AlphaModels/Runtime/AlphaEquipmentLayer.cs` | SWAP-слой: грудь → `body`, перчатки → `hand_l/hand_r`, сапоги → `foot_l/foot_r`; исходный рендерер скрывается, `Unequip` восстанавливает; плечо (`shoulder_item`) в гуманоидном риге отсутствует → отказ `EQUIPMENT_SHOULDER_BLOCK_NOT_IN_HUMAN_RIG` |
 | `Assets/CubeGame/AlphaModels/Runtime/AlphaRig.cs` | аддитивно: `weaponAnchorInHand/OnBack`, `weaponScale`; `AnchorOf` использует измеренный закон только когда он установлен |
 | `tools/alpha_content/extract_item_models.py` | выгрузка предметных `.cubdec` из `data1.db` (только чтение) в локальный кэш |
 | `Assets/CubeGame/Tests/AlphaModels/EditMode/AlphaModelsEditModeTests.cs` | `AlphaItemAnchorTests`: 26/10 якорей, sword `(sx/2, sy/2, 4)`, bow `sy−1.5`, shield `y=3`, bracelet scale 0.6, отказ неизмеренного, `EquippableInHand ≥ 20` |
@@ -42,10 +44,10 @@
 
 | Прогон | Результат |
 |---|---|
-| EditMode (весь проект) | `total=348 passed=348 failed=0` (`AlphaOutput/editmode.xml`) |
-| PlayMode (весь проект) | `total=40 passed=40 failed=0` (`AlphaOutput/playmode.xml`), +2: левая рука (щит/кинжал) и удерживаемый предмет (зелье/лампа/планер) |
-| Выгрузка предметных моделей | `EXTRACT_ITEM_MODELS=PASS written=28` (+14 удерживаемых моделей) |
-| Карта «предмет → модель» | `HELD_ITEM_MODELS=PASS items=14`; исходный свип `ITEM_MODELS DONE types=24 models=1565 errors=0` |
+| EditMode (весь проект) | `total=349 passed=349 failed=0` (`AlphaOutput/editmode.xml`) |
+| PlayMode (весь проект) | `total=41 passed=41 failed=0` (`AlphaOutput/playmode.xml`), +3: левая рука (щит/кинжал), удерживаемый предмет (зелье/лампа/планер), броня (грудь/перчатки/сапоги + отказ плеча) |
+| Выгрузка предметных моделей | `EXTRACT_ITEM_MODELS=PASS written=28` (+14 удерживаемых +4 брони) |
+| Карта «предмет → модель» | `HELD_ITEM_MODELS=PASS items=14`, `EQUIPMENT_MODELS=PASS items=32`; исходный свип `ITEM_MODELS DONE types=24 models=1565 errors=0` |
 | Кэш/таблицы | `ALPHA_CONTENT_RESULT=PASS`, `ALPHA_TABLES_RESULT=PASS` |
 
 ---
@@ -69,6 +71,7 @@
 - **Масштаб оружия** из клипов (`0.95` в job) и закон `scale` (браслет 0.6) пока не применяются к позе: масштаб задаётся клипом; `rig.weaponScale` публикуется для будущего слоя.
 - **Левая рука** реализована как child-меш у `part_hand_l` с измеренным якорем (`AlphaOffhandLayer`, PlayMode-проверка щит/кинжал).
 - **Удерживаемый предмет**: 11 расходников, планер, лодка и лампа имеют модель и визуальный слой (`AlphaHeldItemLayer`, якорь `center`); что предмет *делает* (лечение, кулдаун, списание) — по-прежнему в игровом слое (`B-U1` открыт).
+- **Броня**: грудь/перчатки/сапоги подменяют блоки `body`/`hand_l+hand_r`/`foot_l+foot_r` по закону `center` (`AlphaEquipmentLayer`), 32 модели, `Unequip` восстанавливает исходный вид; плечо (`shoulder_item`) не отображается — в подготовленном гуманоидном риге нет такой части, это честный отказ, а не подмена.
 - **Статы/редкости/прочность** — не здесь: визуальный слой не считает и не хранит статы (S04/Core).
 - **Иконки UI** — M0-08, не в этой партии.
 

@@ -22,6 +22,7 @@ AlphaItemRules.IsAnchorMeasured(set.InHand);             // стрела 9 = PAR
 - `AlphaWeaponLayer.TryEquip` заменяет меш части `weapon` (мешер `VoxelMesh`, маркерное правило D61), записывает размеры, устанавливает `weaponAnchorInHand/OnBack` из таблицы и пересчитывает локальное смещение меша (`-GridToUnity(anchor)`); «в руке / за спиной» переключается `AlphaRig.SetWeaponOnBack`, как и раньше.
 - `AlphaOffhandLayer.TryEquipFromFile` вешает модель на `part_hand_l` с измеренным якорем левой руки.
 - `AlphaHeldItemLayer.TryEquipFromItem(rig, itemsDir, type, subtype)` вешает удерживаемый предмет (расходники 1/0…1/10, планер 23/0, лодка 23/1, лампа 24) на `part_hand_r` с якорем `center`; модель берётся из таблицы `AlphaHeldItemModels` (исполненный `item_icon_id` 0x4EC400), файл — `.cubdec` из локального кэша.
+- `AlphaEquipmentLayer.TryEquipFromItem(rig, itemsDir, type, subtype)` подменяет блоки брони: грудь → `body`, перчатки → `hand_l/hand_r`, сапоги → `foot_l/foot_r` (SWAP + `center`), исходный рендерер скрывается; `Unequip`/`UnequipSlot` восстанавливают. Плечо (тип 7) в подготовленном гуманоидном риге не отображается — возвращается `EQUIPMENT_SHOULDER_BLOCK_NOT_IN_HUMAN_RIG`.
 - Если подтип неизвестен, якорь не измерен или файла нет, модель **не** подменяется: возвращается причина. Это осознанный отказ, не ошибка.
 - `.cubdec` предметов лежат в локальном кэше `<content>/items/` (не в Git): `python -m tools.alpha_content.extract_item_models`.
 
@@ -33,11 +34,11 @@ AlphaItemRules.IsAnchorMeasured(set.InHand);             // стрела 9 = PAR
 
 ## 4. Ограничения
 
-- Левая рука и удерживаемые предметы реализованы (PlayMode-проверки щит/кинжал, зелье/лампа/планер); «передний» слот и квестовые предметы в руке пока не визуализируются.
+- Левая рука и удерживаемые предметы реализованы (PlayMode-проверки щит/кинжал, зелье/лампа/планер); броня грудь/перчатки/сапоги — SWAP, плечо не отображается (нет `shoulder_item` в риге); «передний» слот и квестовые предметы в руке пока не визуализируются.
 - Стрела 9 — `PARTIAL` (только константы кода).
 - `rig.weaponScale` публикуется, но поза масштаба остаётся за клипами; `AlphaHeldItemLayer` не масштабирует модель (закон масштаба для расходников не найден).
 - Иконки инвентаря — M0-08 (рантайм и пакетная выгрузка 28 моделей).
 
 ## 5. Проверки
 
-`AlphaOutput/editmode.xml` — 348/348; `AlphaOutput/playmode.xml` — 40/40 (замена оружия, левая рука, удерживаемый предмет, отказы без подмены). Выгрузка моделей: `EXTRACT_ITEM_MODELS=PASS written=28` + 14 удерживаемых моделей; карта `HELD_ITEM_MODELS=PASS items=14`.
+`AlphaOutput/editmode.xml` — 349/349; `AlphaOutput/playmode.xml` — 41/41 (замена оружия, левая рука, удерживаемый предмет, броня с Unequip, отказы без подмены). Выгрузка моделей: `EXTRACT_ITEM_MODELS=PASS written=28` + 14 удерживаемых + 4 брони; карты `HELD_ITEM_MODELS=PASS items=14`, `EQUIPMENT_MODELS=PASS items=32`.

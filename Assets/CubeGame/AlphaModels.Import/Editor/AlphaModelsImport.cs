@@ -143,6 +143,8 @@ namespace CubeGame.AlphaModels.Import
             text.AppendLine("ALPHA_CONTENT_SUMMARY " + CubeGame.Content.AlphaContentSummary.Report());
             foreach (var p in CubeGame.Content.AlphaHeldItemCatalog.Validate()) text.AppendLine("HELD_ITEM_PROBLEM " + p);
             text.AppendLine(CubeGame.Content.AlphaHeldItemCatalog.Summary());
+            foreach (var p in CubeGame.Content.AlphaEquipmentCatalog.Validate()) text.AppendLine("EQUIPMENT_PROBLEM " + p);
+            text.AppendLine(CubeGame.Content.AlphaEquipmentCatalog.Summary());
             text.AppendLine(CubeGame.Content.AlphaNpcServices.Describe());
             text.AppendLine(CubeGame.Content.AlphaWorldContent.Describe());
             Write("content_status.txt", text.ToString());

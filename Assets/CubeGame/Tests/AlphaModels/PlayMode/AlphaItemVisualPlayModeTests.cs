@@ -61,6 +61,47 @@ namespace CubeGame.AlphaModels.Tests.PlayMode
             }
         }
         [UnityTest]
+        public IEnumerator ArmorSwapsBodyHandsAndFeet()
+        {
+            var source = AlphaContentSource.Resolve();
+            if (source.State != AlphaContentState.Ready) Assert.Ignore(source.Diagnosis);
+            var items = Path.Combine(source.Root, "items");
+            foreach (var name in new[] { "iron-chest1.cubdec", "iron-hand1.cubdec", "iron-foot1.cubdec" })
+                if (!File.Exists(Path.Combine(items, name))) Assert.Ignore("armour payload is not staged: " + name);
+            var library = new AlphaActorLibrary(source);
+            if (!library.TryGet("d86_human_0x02_greatsword", out var def)) Assert.Ignore("human variant is not staged");
+            var view = AlphaActorView.Spawn(def, null, new List<string>());
+            try
+            {
+                Assert.IsTrue(view.Ready, string.Join("\n", view.Problems));
+                Assert.IsFalse(AlphaEquipmentLayer.HasEquipment(view.Rig, 4));
+                Assert.IsTrue(AlphaEquipmentLayer.TryEquipFromItem(view.Rig, items, 4, 0, out var chestReason), chestReason);
+                Assert.IsTrue(AlphaEquipmentLayer.HasEquipment(view.Rig, 4));
+                int body = view.Rig.IndexOf("body");
+                Assert.IsFalse(view.Rig.meshes[body].GetComponent<MeshRenderer>().enabled,
+                    "the original body renderer is hidden under the armour swap");
+                Assert.IsNotNull(view.Rig.meshes[body].Find(AlphaEquipmentLayer.ChildName));
+
+                Assert.IsTrue(AlphaEquipmentLayer.TryEquipFromItem(view.Rig, items, 5, 0, out var handReason), handReason);
+                Assert.IsTrue(AlphaEquipmentLayer.TryEquipFromItem(view.Rig, items, 6, 0, out var footReason), footReason);
+                Assert.IsTrue(AlphaEquipmentLayer.HasEquipment(view.Rig, 5));
+                Assert.IsTrue(AlphaEquipmentLayer.HasEquipment(view.Rig, 6));
+
+                Assert.IsFalse(AlphaEquipmentLayer.TryEquipFromItem(view.Rig, items, 7, 0, out var shoulderReason));
+                StringAssert.Contains("SHOULDER", shoulderReason);
+
+                AlphaEquipmentLayer.Unequip(view.Rig);
+                Assert.IsFalse(AlphaEquipmentLayer.HasEquipment(view.Rig, 4));
+                Assert.IsTrue(view.Rig.meshes[body].GetComponent<MeshRenderer>().enabled, "unequip restores the body");
+                yield return null;
+            }
+            finally
+            {
+                Object.Destroy(view.gameObject);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator HeldItemsAttachToTheRightHand()
         {
             var source = AlphaContentSource.Resolve();
