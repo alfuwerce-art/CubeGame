@@ -352,6 +352,9 @@ namespace CubeGame.Tests.Creatures.EditMode
             Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x65));
             Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x78), "plant objects are staged as static visuals");
             Assert.IsFalse(CreatureVisualCatalog.IsStaged(0x99));
+            // Every passive object of the Alpha catalog must stay prepared: they are the world decor set.
+            foreach (var kind in AlphaCreatureCatalog.PassiveKinds)
+                Assert.IsTrue(CreatureVisualCatalog.IsStaged(kind), $"passive object 0x{kind:x2} has no staged visual");
             var plant = System.Array.Find(AlphaStagedVisuals.All, s => s.Kind == 0x78);
             Assert.AreEqual("STATIC_OBJECT", plant.ControllerMode);
             StringAssert.Contains("staged kinds", CreatureVisualCatalog.Describe());
