@@ -139,6 +139,8 @@
 **P0 — первый общий играбельный срез (цель продюсера):** в `Pilot.unity` герой — реальная модель HumanMale с мечом, idle/walk/attack-клипы, камера и управление, враг из DeepSeek-спавна, удар через `Core/Combat` с фактическим уменьшением HP, сохранение и загрузка этой же сцены.
 Шов: `IEntityVisualSink` → `AlphaActorView`; `AlphaActionTiming` → окно удара; владелец сцены Claude, визуальные компоненты DeepSeek.
 
+**P0 — проверенный дефицит (чтение кода 2026-11-09):** контракт достаточен (`IEntityVisualSink`: Spawned/Despawned/Moved/EquipmentChanged/ActionStarted/PhaseChanged/Resolved/HitResolved/Died/OnFrame), но рёбер сборок нет. Нужно ровно два ребра asmdef: `CubeGame.Presentation.Visual → CubeGame.Features` и `CubeGame.Gameplay → CubeGame.Presentation.Visual`. Владелец asmdef — Claude (общий файл, по D87 §3 только через CLAIM). Не хватает одной таблицы `KindId → AlphaActorId` (должна жить в `Content`) и явного правила `WorldPosition → сцена` (владение Claude, `StreamingWorldView`); время визуала — только `OnFrame(gameTimeMs, alpha)`.
+
 **P1 — мир и содержимое:** регистрация `IZoneContentProvider` в игре (деревья W-18, декор, структуры), спавн существ на `WorldState.SurfaceAt`, проверка «выгрузка региона не теряет существ».
 **P2 — предметы/инвентарь:** подключение `AlphaItemSlots`/иконок к UI Claude, экипировка в сейв (после решения M0-00D).
 **P3 — NPC/торговля/задания:** правила F-U5, J-U4/U5 — сначала доказательства Alpha, затем код.
