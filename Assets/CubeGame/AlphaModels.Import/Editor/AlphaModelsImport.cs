@@ -139,6 +139,8 @@ namespace CubeGame.AlphaModels.Import
             text.AppendLine(CubeGame.Content.AlphaScatterSelector.Summary());
             foreach (var p in CubeGame.Content.AlphaVegetationPlanner.Validate()) text.AppendLine("VEGETATION_PROBLEM " + p);
             text.AppendLine(CubeGame.Content.AlphaVegetationPlanner.Summary());
+            foreach (var p in CubeGame.Content.AlphaContentSummary.Validate()) text.AppendLine("SUMMARY_PROBLEM " + p);
+            text.AppendLine("ALPHA_CONTENT_SUMMARY " + CubeGame.Content.AlphaContentSummary.Report());
             text.AppendLine(CubeGame.Content.AlphaNpcServices.Describe());
             text.AppendLine(CubeGame.Content.AlphaWorldContent.Describe());
             Write("content_status.txt", text.ToString());

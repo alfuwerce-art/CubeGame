@@ -18,6 +18,8 @@ namespace CubeGame.Features.AI
         /// <summary>PLACEHOLDER_NOT_ALPHA: median captured AI walk speed (OQ-23).</summary>
         public const double DefaultWalkSpeed = 3.7;
         public const int WanderRepickMs = 2000;
+        /// <summary>CUBEGAME_CONTRACT: retry throttle for action requests (Alpha's own action lock is elsewhere).</summary>
+        public const int ActionRetryMs = 250;
 
         public CreatureAiState State { get; private set; } = CreatureAiState.Idle;
         public string TargetId { get; private set; }
@@ -29,6 +31,7 @@ namespace CubeGame.Features.AI
 
         int _wanderRemainingMs;
         int _wanderDirection;
+        int _actionRetryInMs;
 
         public void Tick(CreatureState self, int elapsedMs, ICreatureAiWorld world)
         {
@@ -41,6 +44,7 @@ namespace CubeGame.Features.AI
             if (self.IsPassiveObject) { State = CreatureAiState.Idle; LastReason = "PASSIVE_OBJECT"; return; }
             if (!self.CanThink) { State = CreatureAiState.Idle; LastReason = "STUNNED"; return; }
             if (self.ActionLockMs > 0) { LastReason = "ACTION_LOCK"; return; }
+            if (_actionRetryInMs > 0) _actionRetryInMs = Math.Max(0, _actionRetryInMs - elapsedMs);
 
             CreatureRules.RegenerateFriendly(self, elapsedMs / 1000.0);
 
@@ -98,13 +102,23 @@ namespace CubeGame.Features.AI
             LastReason = "IN_RANGE";
             var actions = world.AvailableActions(self);
             if (actions == null || actions.Length == 0) { LastReason = "IN_RANGE_NO_ACTION_EVIDENCE"; return; }
+            // CUBEGAME_CONTRACT: Alpha's per-action cooldown/lock lives in the attack choice, not in the
+            // AI tick; without it the AI would ask the game every 31 ms tick. 250 ms is a CubeGame
+            // throttle and is NOT an Alpha constant.
+            if (_actionRetryInMs > 0) { LastReason = "ACTION_RETRY_WAIT"; return; }
             for (int i = 0; i < actions.Length; i++)
             {
                 int action = actions[i];
                 LastRequestedAction = action;
-                if (world.TryBeginAction(self, action, out var reason)) { LastReason = "ACTION " + action; return; }
+                if (world.TryBeginAction(self, action, out var reason))
+                {
+                    LastReason = "ACTION " + action;
+                    _actionRetryInMs = ActionRetryMs;
+                    return;
+                }
                 LastReason = "ACTION_REFUSED " + action + " " + reason;
             }
+            _actionRetryInMs = ActionRetryMs;
         }
 
         string SelectTarget(CreatureState self, ICreatureAiWorld world, bool hasTarget, int elapsedMs)

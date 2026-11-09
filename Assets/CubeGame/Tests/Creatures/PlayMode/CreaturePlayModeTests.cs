@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using CubeGame.AlphaModels;
+using CubeGame.Content;
 using CubeGame.Features.AI;
 using CubeGame.Features.Creatures;
 using NUnit.Framework;
@@ -301,6 +302,60 @@ namespace CubeGame.Tests.Creatures.PlayMode
                 playerGo.transform.position = new Vector3(1.5f, 0, 0);
                 for (int i = 0; i < 120 && requested < 0; i++) agent.Tick(0.05f);
                 Assert.AreEqual(37, requested, "the game hook receives the Alpha action code the AI requested");
+                yield return null;
+            }
+            finally
+            {
+                CreatureTargets.Clear();
+                Object.Destroy(root);
+                Object.Destroy(playerGo);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ManyActionCreaturesStayWithinBudget()
+        {
+            if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");
+            var root = new GameObject("LoadRoot");
+            var playerGo = new GameObject("LoadTarget");
+            var player = playerGo.AddComponent<TestTarget>();
+            player.TargetId = "player";
+            player.Faction = (int)CreatureFaction.Player;
+            CreatureTargets.Register(player);
+            try
+            {
+                var actionKinds = new List<int>();
+                foreach (var staged in AlphaStagedVisuals.All)
+                    if (staged.ControllerMode == "ACTIONS" && actionKinds.Count < 12) actionKinds.Add(staged.Kind);
+                Assert.GreaterOrEqual(actionKinds.Count, 12, "enough kinds with action libraries are staged");
+                var spawnerGo = new GameObject("LoadSpawner");
+                spawnerGo.transform.SetParent(root.transform, false);
+                var spawner = spawnerGo.AddComponent<CreatureSpawner>();
+                spawner.SpawnOnStart = false;
+                spawner.AiFactory = () => new CreatureAi();
+                spawner.ActorLibrary = AlphaActorLibrary.Shared;
+                int requests = 0;
+                for (int i = 0; i < actionKinds.Count; i++)
+                {
+                    var request = new CreatureSpawnRequest
+                    {
+                        StableId = "load:" + i, Kind = actionKinds[i], Level = 5, Stars = 0,
+                        Faction = (int)CreatureFaction.Monster,
+                        X = (i % 4) * 2.0, Z = (i / 4) * 2.0,
+                    };
+                    var agent = spawner.SpawnOne(request, spawner.ActorLibrary);
+                    Assert.IsTrue(agent.VisualAvailable, agent.VisualStatus);
+                    agent.ActionRequested += (a, code, source) => requests++;
+                }
+                playerGo.transform.position = new Vector3(1f, 0f, 1f);
+                for (int i = 0; i < 20; i++) spawner.TickAll(1f / 60f);
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                for (int i = 0; i < 600; i++) spawner.TickAll(1f / 60f);
+                watch.Stop();
+                double msPerFrame = watch.Elapsed.TotalMilliseconds / 600.0;
+                TestContext.WriteLine($"ACTION_LOAD_TICK_MS={msPerFrame:F3} agents={spawner.SpawnedCount} requests={requests}");
+                Assert.Greater(requests, 0, "the loaded creatures really requested their actions");
+                Assert.Less(msPerFrame, 60.0, $"{spawner.SpawnedCount} creatures with actions took {msPerFrame:F2} ms/frame");
                 yield return null;
             }
             finally

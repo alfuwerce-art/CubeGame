@@ -312,6 +312,17 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         }
 
         [Test]
+        public void ContentSummaryReportsWhatIsActuallyLoaded()
+        {
+            Assert.IsEmpty(AlphaContentSummary.Validate(), string.Join("\n", AlphaContentSummary.Validate()));
+            var report = AlphaContentSummary.Report();
+            foreach (var token in new[] { "kinds=156", "staged=156", "actions=", "clips=", "itemTypes=24",
+                         "weaponAnchors=26", "worldObjects=67", "itemNames=133", "skills=27", "scatterGroups=" })
+                StringAssert.Contains(token, report);
+            Assert.That(report, Does.Contain("staticObjects=26"));
+        }
+
+        [Test]
         public void NpcServiceFurnitureMapsToContractKinds()
         {
             Assert.IsEmpty(AlphaNpcServices.Validate(), string.Join("\n", AlphaNpcServices.Validate()));
