@@ -5,7 +5,9 @@
         "CubeGame.Core",
         "CubeGame.Persistence",
         "CubeGame.Presentation",
-        "CubeGame.Features"
+        "CubeGame.Features",
+        "CubeGame.Presentation.Visual",
+        "CubeGame.Content"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
