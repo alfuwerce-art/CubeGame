@@ -184,8 +184,8 @@ namespace CubeGame.Core.Items
                 case (int)ItemType.Formula:
                 case (int)ItemType.Weapon:
                 case (int)ItemType.Chest:
-                case (int)ItemType.Boots:
                 case (int)ItemType.Gloves:
+                case (int)ItemType.Boots:
                 case (int)ItemType.Shoulders:
                 case (int)ItemType.Amulet:
                 case (int)ItemType.Ring:

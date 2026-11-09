@@ -210,8 +210,8 @@ namespace CubeGame.M0Pilots.Items
         {
             var mismatches = new List<string>();
 
-            CheckPair(mismatches, "ItemType", 5, "Gloves", (int)ItemType.Boots, ItemType.Boots.ToString());
-            CheckPair(mismatches, "ItemType", 6, "Boots", (int)ItemType.Gloves, ItemType.Gloves.ToString());
+            CheckPair(mismatches, "ItemType", 5, "Gloves", (int)ItemType.Gloves, ItemType.Gloves.ToString());
+            CheckPair(mismatches, "ItemType", 6, "Boots", (int)ItemType.Boots, ItemType.Boots.ToString());
 
             var expectedWeapons = new Dictionary<int, string>
             {
@@ -417,9 +417,9 @@ namespace CubeGame.M0Pilots.Items
             List<string> mismatches = CoreEnumAudit.FindMismatches();
             // 2026-11-09: weapon subtype names in Core were aligned with the r3 table (producer decision);
             // only the two item type labels (5/6) remain.
-            Check.Equal("two enum mismatches (item labels 5/6) between Core and the r3 table", 2, mismatches.Count);
-            Check.True("Core ItemType remains Boots=5, Gloves=6 (accepted S04, not modified)",
-                CoreEnumAudit.CoreCanRepresentAlphaType(5));
+            // 2026-11-09: item type labels 5/6 aligned as well — Core names now match the r3 table.
+            Check.Equal("no enum mismatches between Core and the r3 table", 0, mismatches.Count);
+            Check.True("Core represents Alpha gloves type 5", CoreEnumAudit.CoreCanRepresentAlphaType(5));
             Check.True("Core cannot represent Alpha consumables (type 1)",
                 !CoreEnumAudit.CoreCanRepresentAlphaType(1));
             Check.True("Core cannot represent Alpha material type 0x0b",
@@ -433,8 +433,7 @@ namespace CubeGame.M0Pilots.Items
             Check.True("Core represents Bow subtype 6", CoreEnumAudit.CoreCanRepresentWeaponSubtype(6));
             Check.True("Core names subtype 1 Axe (r3)", Enum.GetName(typeof(WeaponSubtype), 1) == "Axe");
             Check.True("Core names subtype 0 Sword (r3)", Enum.GetName(typeof(WeaponSubtype), 0) == "Sword");
-            Check.True("the mismatch list mentions Gloves/Boots",
-                mismatches[0].Contains("Gloves") || mismatches[1].Contains("Gloves"));
+            Check.True("Core type 5 is named Gloves", Enum.GetName(typeof(ItemType), 5) == "Gloves");
         }
 
         private static void StatsReuse()
@@ -447,7 +446,7 @@ namespace CubeGame.M0Pilots.Items
             Check.Near("shield level 1 rarity 0 = 2.0 (S04 formula)", 2.0,
                 ItemStatsCalculator.WeaponDamage(1, 0, WeaponSubtype.Shield), 1e-9);
             Check.True("item value for a weapon is positive", ItemStatsCalculator.Value(1, 0, ItemType.Weapon) >= 1);
-            Check.True("item value is clamped to at least 1", ItemStatsCalculator.Value(1, 0, ItemType.Boots) >= 1);
+            Check.True("item value is clamped to at least 1", ItemStatsCalculator.Value(1, 0, ItemType.Gloves) >= 1);
         }
     }
 }

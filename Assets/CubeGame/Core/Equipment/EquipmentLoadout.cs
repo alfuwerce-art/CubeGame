@@ -28,8 +28,8 @@ namespace CubeGame.Core.Equipment
             EquipmentSlot.MainHand,
             EquipmentSlot.OffHand,
             EquipmentSlot.Chest,
-            EquipmentSlot.Gloves,
             EquipmentSlot.Boots,
+            EquipmentSlot.Gloves,
             EquipmentSlot.Shoulders,
         };
 
@@ -54,10 +54,10 @@ namespace CubeGame.Core.Equipment
                     return itemType == ItemType.Weapon;
                 case EquipmentSlot.Chest:
                     return itemType == ItemType.Chest;
-                case EquipmentSlot.Gloves:
-                    return itemType == ItemType.Gloves;
                 case EquipmentSlot.Boots:
                     return itemType == ItemType.Boots;
+                case EquipmentSlot.Gloves:
+                    return itemType == ItemType.Gloves;
                 case EquipmentSlot.Shoulders:
                     return itemType == ItemType.Shoulders;
                 default:

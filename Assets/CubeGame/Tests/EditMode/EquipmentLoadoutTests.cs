@@ -41,9 +41,9 @@ namespace CubeGame.Tests.EditMode
         }
 
         [TestCase(EquipmentSlot.Chest, ItemType.Weapon)]
-        [TestCase(EquipmentSlot.Gloves, ItemType.Chest)]
-        [TestCase(EquipmentSlot.Boots, ItemType.Gloves)]
-        [TestCase(EquipmentSlot.Shoulders, ItemType.Boots)]
+        [TestCase(EquipmentSlot.Boots, ItemType.Chest)]
+        [TestCase(EquipmentSlot.Gloves, ItemType.Boots)]
+        [TestCase(EquipmentSlot.Shoulders, ItemType.Gloves)]
         [TestCase(EquipmentSlot.MainHand, ItemType.Chest)]
         [TestCase(EquipmentSlot.OffHand, ItemType.Shoulders)]
         public void WrongTypeForSlotIsRejected(EquipmentSlot slot, ItemType itemType)
@@ -74,15 +74,15 @@ namespace CubeGame.Tests.EditMode
         public void UnequipReturnsItemAndClearsSlot()
         {
             var loadout = new EquipmentLoadout();
-            ItemInstance boots = CreateItemOfType(ItemType.Boots);
-            loadout.Equip(EquipmentSlot.Boots, boots);
+            ItemInstance boots = CreateItemOfType(ItemType.Gloves);
+            loadout.Equip(EquipmentSlot.Gloves, boots);
 
-            ItemInstance removed = loadout.Unequip(EquipmentSlot.Boots);
+            ItemInstance removed = loadout.Unequip(EquipmentSlot.Gloves);
 
             Assert.AreSame(boots, removed);
-            Assert.IsNull(loadout.GetEquipped(EquipmentSlot.Boots));
-            Assert.IsTrue(loadout.IsSlotEmpty(EquipmentSlot.Boots));
-            Assert.IsNull(loadout.Unequip(EquipmentSlot.Boots), "повторное снятие пустого слота безопасно");
+            Assert.IsNull(loadout.GetEquipped(EquipmentSlot.Gloves));
+            Assert.IsTrue(loadout.IsSlotEmpty(EquipmentSlot.Gloves));
+            Assert.IsNull(loadout.Unequip(EquipmentSlot.Gloves), "повторное снятие пустого слота безопасно");
         }
 
         [Test]
@@ -145,8 +145,8 @@ namespace CubeGame.Tests.EditMode
             Assert.IsTrue(EquipmentLoadout.IsSlotCompatible(EquipmentSlot.MainHand, ItemType.Weapon));
             Assert.IsTrue(EquipmentLoadout.IsSlotCompatible(EquipmentSlot.OffHand, ItemType.Weapon));
             Assert.IsTrue(EquipmentLoadout.IsSlotCompatible(EquipmentSlot.Chest, ItemType.Chest));
-            Assert.IsTrue(EquipmentLoadout.IsSlotCompatible(EquipmentSlot.Gloves, ItemType.Gloves));
             Assert.IsTrue(EquipmentLoadout.IsSlotCompatible(EquipmentSlot.Boots, ItemType.Boots));
+            Assert.IsTrue(EquipmentLoadout.IsSlotCompatible(EquipmentSlot.Gloves, ItemType.Gloves));
             Assert.IsTrue(EquipmentLoadout.IsSlotCompatible(EquipmentSlot.Shoulders, ItemType.Shoulders));
 
             Assert.IsFalse(EquipmentLoadout.IsSlotCompatible(EquipmentSlot.Chest, ItemType.Ring));
@@ -168,9 +168,9 @@ namespace CubeGame.Tests.EditMode
             var asList = EquipmentLoadout.Slots as IList<EquipmentSlot>;
             Assert.IsNotNull(asList, "контракт IReadOnlyList сохраняется, приведение к IList допустимо только для чтения");
 
-            Assert.Throws<NotSupportedException>(() => asList[0] = EquipmentSlot.Boots,
+            Assert.Throws<NotSupportedException>(() => asList[0] = EquipmentSlot.Gloves,
                 "запись по индексу должна отвергаться");
-            Assert.Throws<NotSupportedException>(() => asList.Add(EquipmentSlot.Boots),
+            Assert.Throws<NotSupportedException>(() => asList.Add(EquipmentSlot.Gloves),
                 "добавление должно отвергаться");
             Assert.Throws<NotSupportedException>(() => asList.RemoveAt(0),
                 "удаление должно отвергаться");
@@ -188,8 +188,8 @@ namespace CubeGame.Tests.EditMode
                     EquipmentSlot.MainHand,
                     EquipmentSlot.OffHand,
                     EquipmentSlot.Chest,
-                    EquipmentSlot.Gloves,
                     EquipmentSlot.Boots,
+                    EquipmentSlot.Gloves,
                     EquipmentSlot.Shoulders,
                 },
                 EquipmentLoadout.Slots,
@@ -198,8 +198,8 @@ namespace CubeGame.Tests.EditMode
             Assert.AreEqual(0, (int)EquipmentSlot.MainHand);
             Assert.AreEqual(1, (int)EquipmentSlot.OffHand);
             Assert.AreEqual(2, (int)EquipmentSlot.Chest);
-            Assert.AreEqual(3, (int)EquipmentSlot.Gloves);
-            Assert.AreEqual(4, (int)EquipmentSlot.Boots);
+            Assert.AreEqual(3, (int)EquipmentSlot.Boots);
+            Assert.AreEqual(4, (int)EquipmentSlot.Gloves);
             Assert.AreEqual(5, (int)EquipmentSlot.Shoulders);
         }
 
@@ -237,10 +237,10 @@ namespace CubeGame.Tests.EditMode
                     return CreateSword(1);
                 case ItemType.Chest:
                     return CreateChest();
-                case ItemType.Boots:
-                    return new ItemInstance(ItemType.Boots, 0, 5, 0, seed: 1);
                 case ItemType.Gloves:
                     return new ItemInstance(ItemType.Gloves, 0, 5, 0, seed: 1);
+                case ItemType.Boots:
+                    return new ItemInstance(ItemType.Boots, 0, 5, 0, seed: 1);
                 case ItemType.Shoulders:
                     return new ItemInstance(ItemType.Shoulders, 0, 5, 0, seed: 1);
                 default:

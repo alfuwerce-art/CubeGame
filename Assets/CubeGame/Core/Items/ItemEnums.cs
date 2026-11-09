@@ -16,11 +16,11 @@ namespace CubeGame.Core.Items
         /// <summary>Нагрудник (Alpha 4).</summary>
         Chest = 4,
 
-        /// <summary>Обувь (Alpha 5).</summary>
-        Boots = 5,
+        /// <summary>Перчатки (Alpha 5, r3: модель iron-hand; до 2026-11-09 Core ошибочно называл тип «Boots»).</summary>
+        Gloves = 5,
 
-        /// <summary>Перчатки (Alpha 6).</summary>
-        Gloves = 6,
+        /// <summary>Обувь (Alpha 6, r3: модель iron-foot; до 2026-11-09 Core ошибочно называл тип «Gloves»).</summary>
+        Boots = 6,
 
         /// <summary>Наплечники (Alpha 7).</summary>
         Shoulders = 7,

@@ -117,7 +117,7 @@ namespace CubeGame.Tests.EditMode
 
             SaveGame save = CharacterSaveMapper.ToSaveGame(sheet, new[]
             {
-                new ItemInstance(ItemType.Boots, 0, 10, 2, seed: 42, modifier: ItemModifier.M1A),
+                new ItemInstance(ItemType.Gloves, 0, 10, 2, seed: 42, modifier: ItemModifier.M1A),
             });
 
             Assert.IsTrue(_service.Save(save).IsSuccess);
@@ -133,7 +133,7 @@ namespace CubeGame.Tests.EditMode
             Assert.AreEqual(sheet.Progression.Experience, restored.Progression.Experience);
             Assert.AreEqual(expectedHealth, restored.MaxHealth, 1e-4);
             Assert.AreEqual(1, items.Count);
-            Assert.AreEqual(ItemType.Boots, items[0].Type);
+            Assert.AreEqual(ItemType.Gloves, items[0].Type);
             Assert.AreEqual(42, items[0].Seed);
         }
 

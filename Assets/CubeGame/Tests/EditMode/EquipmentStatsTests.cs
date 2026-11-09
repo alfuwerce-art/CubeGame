@@ -55,7 +55,7 @@ namespace CubeGame.Tests.EditMode
         {
             var loadout = new EquipmentLoadout();
             loadout.Equip(EquipmentSlot.Chest, new ItemInstance(ItemType.Chest, 0, 1, 0, seed: 0));
-            loadout.Equip(EquipmentSlot.Boots, new ItemInstance(ItemType.Boots, 0, 1, 0, seed: 0));
+            loadout.Equip(EquipmentSlot.Gloves, new ItemInstance(ItemType.Gloves, 0, 1, 0, seed: 0));
 
             EquipmentStatSummary summary = EquipmentStats.Compute(loadout);
 
@@ -130,7 +130,7 @@ namespace CubeGame.Tests.EditMode
 
             var loadout = new EquipmentLoadout();
             loadout.Equip(EquipmentSlot.Chest, new ItemInstance(ItemType.Chest, 0, 10, 4, seed: 0));
-            loadout.Equip(EquipmentSlot.Boots, new ItemInstance(ItemType.Boots, 0, 10, 4, seed: 0));
+            loadout.Equip(EquipmentSlot.Gloves, new ItemInstance(ItemType.Gloves, 0, 10, 4, seed: 0));
 
             double healthWithArmor = EquipmentCombatAdapter.ComputeMaxHealth(sheet);
 

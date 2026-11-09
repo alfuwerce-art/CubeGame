@@ -65,7 +65,7 @@ namespace CubeGame.Tests.EditMode
         public void NonChestArmorUsesHalfRarityFactor()
         {
             double chest = ItemStatsCalculator.Armor(1, 0, ItemType.Chest);
-            double boots = ItemStatsCalculator.Armor(1, 0, ItemType.Boots);
+            double boots = ItemStatsCalculator.Armor(1, 0, ItemType.Gloves);
 
             Assert.That(boots, Is.EqualTo(chest * 0.5).Within(Tolerance), "у не-нагрудника rarityFactor 0.5");
         }
@@ -174,7 +174,7 @@ namespace CubeGame.Tests.EditMode
         public void BlockValueAppliesOnlyToArmorTypes()
         {
             Assert.That(ItemStatsCalculator.BlockValue(1, 0, ItemType.Chest), Is.EqualTo(1.0).Within(Tolerance));
-            Assert.That(ItemStatsCalculator.BlockValue(1, 0, ItemType.Boots), Is.EqualTo(0.5).Within(Tolerance));
+            Assert.That(ItemStatsCalculator.BlockValue(1, 0, ItemType.Gloves), Is.EqualTo(0.5).Within(Tolerance));
             Assert.AreEqual(0.0, ItemStatsCalculator.BlockValue(1, 0, ItemType.Weapon));
         }
 
@@ -189,7 +189,7 @@ namespace CubeGame.Tests.EditMode
 
         [TestCase(ItemType.Weapon, 20)]
         [TestCase(ItemType.Chest, 20)]
-        [TestCase(ItemType.Boots, 10)]
+        [TestCase(ItemType.Gloves, 10)]
         [TestCase(ItemType.Ring, 10)]
         [TestCase(ItemType.Amulet, 15)]
         [TestCase(ItemType.Formula, 2)]

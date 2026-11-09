@@ -128,14 +128,14 @@ namespace CubeGame.Tests.EditMode
             var bareTarget = new EquipmentLoadout();
             var armoredTarget = new EquipmentLoadout();
             armoredTarget.Equip(EquipmentSlot.Chest, new ItemInstance(ItemType.Chest, 0, 10, 2, seed: 0));
-            armoredTarget.Equip(EquipmentSlot.Boots, new ItemInstance(ItemType.Boots, 0, 10, 2, seed: 0));
+            armoredTarget.Equip(EquipmentSlot.Gloves, new ItemInstance(ItemType.Gloves, 0, 10, 2, seed: 0));
 
             double armorBare = EquipmentCombatAdapter.ComputeTargetArmor(bareTarget);
             double armorArmored = EquipmentCombatAdapter.ComputeTargetArmor(armoredTarget);
 
             Assert.That(armorBare, Is.EqualTo(0.0).Within(Tolerance));
             Assert.That(armorArmored,
-                Is.EqualTo(ItemStatsCalculator.BlockValue(10, 2, ItemType.Chest) + ItemStatsCalculator.BlockValue(10, 2, ItemType.Boots))
+                Is.EqualTo(ItemStatsCalculator.BlockValue(10, 2, ItemType.Chest) + ItemStatsCalculator.BlockValue(10, 2, ItemType.Gloves))
                     .Within(1e-9),
                 "защита цели = Σ BlockValue (E3, PARTIAL)");
 

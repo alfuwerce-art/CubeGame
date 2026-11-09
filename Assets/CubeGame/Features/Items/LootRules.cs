@@ -23,7 +23,7 @@ namespace CubeGame.Features.Items
         {
             (ItemType.Weapon, 0), (ItemType.Weapon, 1), (ItemType.Weapon, 2), (ItemType.Weapon, 5),
             (ItemType.Weapon, 15), (ItemType.Weapon, 16), (ItemType.Weapon, 17),
-            (ItemType.Chest, 0), (ItemType.Boots, 0), (ItemType.Gloves, 0), (ItemType.Shoulders, 0),
+            (ItemType.Chest, 0), (ItemType.Gloves, 0), (ItemType.Boots, 0), (ItemType.Shoulders, 0),
         };
 
         /// <summary>

@@ -87,8 +87,8 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.AreEqual(EquipmentSlot.Chest, chest);
             Assert.IsTrue(inventory.TryEquip(1, out EquipmentSlot shield));
             Assert.AreEqual(EquipmentSlot.OffHand, shield);
-            Assert.AreEqual(VisualEquipmentSlot.Hands, GameBootstrap.VisualSlotOf(EquipmentSlot.Boots, null), "byte 5 = Alpha gloves");
-            Assert.AreEqual(VisualEquipmentSlot.Feet, GameBootstrap.VisualSlotOf(EquipmentSlot.Gloves, null), "byte 6 = Alpha boots");
+            Assert.AreEqual(VisualEquipmentSlot.Hands, GameBootstrap.VisualSlotOf(EquipmentSlot.Gloves, null), "byte 5 = Alpha gloves");
+            Assert.AreEqual(VisualEquipmentSlot.Feet, GameBootstrap.VisualSlotOf(EquipmentSlot.Boots, null), "byte 6 = Alpha boots");
         }
 
         [Test]

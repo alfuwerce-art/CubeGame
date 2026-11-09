@@ -188,8 +188,8 @@ namespace CubeGame.Core.Items
                 case ItemType.Chest:
                     multiplier = 2.0;
                     break;
-                case ItemType.Boots:
                 case ItemType.Gloves:
+                case ItemType.Boots:
                 case ItemType.Ring:
                     multiplier = 1.0;
                     break;
@@ -219,7 +219,7 @@ namespace CubeGame.Core.Items
         /// <summary>Арморные типы Alpha: нагрудник, обувь, перчатки, наплечники.</summary>
         public static bool IsArmorType(ItemType type)
         {
-            return type == ItemType.Chest || type == ItemType.Boots || type == ItemType.Gloves || type == ItemType.Shoulders;
+            return type == ItemType.Chest || type == ItemType.Gloves || type == ItemType.Boots || type == ItemType.Shoulders;
         }
 
         /// <summary>

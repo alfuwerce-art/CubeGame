@@ -624,3 +624,9 @@ Core WeaponSubtype переименован по таблице Alpha r3 без 
 имена типов 5/6 (Core Boots/Gloves при Alpha Gloves/Boots), отдельный вопрос продюсеру.
 Проверка: EditMode полный 441/443 (0 failed, 2 skipped), M0_PILOTS_RESULT=PASS 479/479.
 DeepSeek: в GameVisualSink.WeaponModelFile ключи исправлены на имена Alpha (подтип 3 = кинжал).
+
+[2026-11-09 22:45] DECISION | Claude (продюсер: «подобные разрешения не спрашивай просто выполняй») | типы 5/6 и слоты
+Core ItemType: 5 = Gloves, 6 = Boots (было наоборот); EquipmentSlot: 3 = Boots (Alpha +0x648, тип 6),
+4 = Gloves (Alpha +0x760, тип 5). Числа не менялись, ссылки заменены по значению — поведение S04 и сейвы те же.
+CORE-ENUM-MISMATCH закрыт: 0 расхождений Core с таблицей r3. EditMode полный 441/443 (0 failed),
+M0_PILOTS_RESULT=PASS 479/479. Для DeepSeek: в Core теперь Gloves = тип 5 (руки), Boots = тип 6 (ноги).

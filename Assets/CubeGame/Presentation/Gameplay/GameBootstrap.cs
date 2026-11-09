@@ -480,10 +480,7 @@ namespace CubeGame.Gameplay
             }
         }
 
-        /// <summary>
-        /// Visual slot by the Alpha meaning of the item type: Alpha type 5 = hands, 6 = feet (the Core enum names
-        /// Boots/Gloves are swapped, CORE-ENUM-MISMATCH; the byte values are Alpha's).
-        /// </summary>
+        /// <summary>Visual slot of an equipment slot (Alpha type 5 gloves → hands, 6 boots → feet).</summary>
         public static VisualEquipmentSlot VisualSlotOf(EquipmentSlot slot, ItemInstance item)
         {
             switch (slot)
@@ -492,8 +489,8 @@ namespace CubeGame.Gameplay
                 case EquipmentSlot.OffHand: return VisualEquipmentSlot.OffHand;
                 case EquipmentSlot.Chest: return VisualEquipmentSlot.Chest;
                 case EquipmentSlot.Shoulders: return VisualEquipmentSlot.Shoulders;
-                case EquipmentSlot.Boots: return VisualEquipmentSlot.Hands;   // Core Boots = byte 5 = Alpha gloves
-                case EquipmentSlot.Gloves: return VisualEquipmentSlot.Feet;   // Core Gloves = byte 6 = Alpha boots
+                case EquipmentSlot.Gloves: return VisualEquipmentSlot.Hands;
+                case EquipmentSlot.Boots: return VisualEquipmentSlot.Feet;
                 default: return VisualEquipmentSlot.MainHand;
             }
         }
