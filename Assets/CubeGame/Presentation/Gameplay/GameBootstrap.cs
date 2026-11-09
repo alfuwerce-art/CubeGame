@@ -4,6 +4,9 @@ using CubeGame.AlphaModels;
 using CubeGame.Core.Characters;
 using CubeGame.Core.Persistence;
 using CubeGame.Features.Combat;
+using CubeGame.Features.Items;
+using CubeGame.Core.Equipment;
+using CubeGame.Core.Items;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.Persistence;
 using CubeGame.Features.Session;
@@ -87,6 +90,10 @@ namespace CubeGame.Gameplay
         private AlphaActionTimingSource _timings;
         private CreatureCombatDriver _creatures;
         private long _heroRespawnAtMs = -1;
+        private bool _inventoryOpen;
+        private Vector2 _inventoryScroll;
+        private readonly System.Collections.Generic.Dictionary<StableEntityId, GameObject> _groundItems =
+            new System.Collections.Generic.Dictionary<StableEntityId, GameObject>();
         private Vector3 _lastHeroScenePosition;
         private int _frames;
         private string _screenshotPath;
@@ -141,7 +148,7 @@ namespace CubeGame.Gameplay
             }
 
             _timings = new AlphaActionTimingSource(AlphaActorLibrary.Shared);
-            _session = new GameSession(_timings);
+            _session = new GameSession(_timings) { ConsumableCooldownMs = CubeGame.Content.AlphaConsumableRules.CooldownMs };
             _session.EnterMainMenu();
             EnsureCameraAndLight();
             _formSeed = _commandLineSeed.ToString(CultureInfo.InvariantCulture);
@@ -171,7 +178,24 @@ namespace CubeGame.Gameplay
             _frames++;
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                TogglePause();
+                if (_inventoryOpen)
+                {
+                    ToggleInventory();
+                }
+                else
+                {
+                    TogglePause();
+                }
+            }
+
+            if (_session.State == SessionState.InGame && Input.GetKeyDown(KeyCode.I))
+            {
+                ToggleInventory();
+            }
+
+            if (_session.State == SessionState.InGame && !_inventoryOpen && Input.GetKeyDown(KeyCode.Q))
+            {
+                UseFirst(LootRules.LifePotion);
             }
 
             if (_session.State == SessionState.InGame)
@@ -402,6 +426,107 @@ namespace CubeGame.Gameplay
             Debug.Log($"[Combat] {_combatLog}");
         }
 
+        /// <summary>Uses the first bag stack of an Alpha item (Q: life potion).</summary>
+        public bool UseFirst(RawAlphaItemId raw)
+        {
+            if (_session.Hero == null)
+            {
+                return false;
+            }
+
+            int slot = _session.Hero.Inventory.FindFirst(raw);
+            if (slot < 0)
+            {
+                _combatLog = $"no {raw} in the bags";
+                return false;
+            }
+
+            bool used = _session.TryUseItem(slot);
+            _combatLog = used ? $"used {raw}" : $"use refused: {_session.LastRejection}";
+            return used;
+        }
+
+        public void ToggleInventory()
+        {
+            _inventoryOpen = !_inventoryOpen;
+            if (_motor != null)
+            {
+                _motor.enabled = !_inventoryOpen && !HeroDead;
+            }
+        }
+
+        public bool InventoryOpen => _inventoryOpen;
+
+        private void OnEquipmentChanged(EquipmentSlot slot, ItemInstance item)
+        {
+            _session.Events.Publish(new EquipmentVisualChanged
+            {
+                TimeMs = _session.Clock?.TimeMs ?? 0,
+                Entity = StableEntityId.Hero,
+                Slot = VisualSlotOf(slot, item),
+                Item = item != null ? new RawAlphaItemId((int)item.Type, item.Subtype) : (RawAlphaItemId?)null,
+            });
+        }
+
+        private void PublishEquipment()
+        {
+            foreach (EquipmentSlot slot in EquipmentLoadout.Slots)
+            {
+                ItemInstance item = _session.Hero.Loadout.GetEquipped(slot);
+                if (item != null)
+                {
+                    OnEquipmentChanged(slot, item);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Visual slot by the Alpha meaning of the item type: Alpha type 5 = hands, 6 = feet (the Core enum names
+        /// Boots/Gloves are swapped, CORE-ENUM-MISMATCH; the byte values are Alpha's).
+        /// </summary>
+        public static VisualEquipmentSlot VisualSlotOf(EquipmentSlot slot, ItemInstance item)
+        {
+            switch (slot)
+            {
+                case EquipmentSlot.MainHand: return VisualEquipmentSlot.MainHand;
+                case EquipmentSlot.OffHand: return VisualEquipmentSlot.OffHand;
+                case EquipmentSlot.Chest: return VisualEquipmentSlot.Chest;
+                case EquipmentSlot.Shoulders: return VisualEquipmentSlot.Shoulders;
+                case EquipmentSlot.Boots: return VisualEquipmentSlot.Hands;   // Core Boots = byte 5 = Alpha gloves
+                case EquipmentSlot.Gloves: return VisualEquipmentSlot.Feet;   // Core Gloves = byte 6 = Alpha boots
+                default: return VisualEquipmentSlot.MainHand;
+            }
+        }
+
+        private void OnWorldItemDropped(WorldItemDropped dropped)
+        {
+            if (_worldView == null)
+            {
+                return;
+            }
+
+            // Ground item placeholder until the visual layer shows item models (D88: DeepSeek).
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.name = "GroundItem_PLACEHOLDER";
+            Destroy(cube.GetComponent<Collider>());
+            cube.transform.SetParent(_worldRoot.transform, true);
+            cube.transform.localScale = Vector3.one * 0.35f;
+            cube.transform.position = _worldView.ToScene(dropped.Position.X, dropped.Position.Y + 0.2, dropped.Position.Z);
+            cube.GetComponent<Renderer>().material.color = dropped.Raw.Type == 1 ? Color.red : new Color(0.9f, 0.8f, 0.2f);
+            _groundItems[dropped.Item] = cube;
+        }
+
+        private void OnWorldItemRemoved(WorldItemRemoved removed)
+        {
+            if (_groundItems.TryGetValue(removed.Item, out GameObject cube))
+            {
+                Destroy(cube);
+                _groundItems.Remove(removed.Item);
+            }
+
+            _combatLog = "picked up an item";
+        }
+
         public bool HeroDead => _session.Hero != null && _session.Hero.Health.IsDead;
 
         public CreatureCombatDriver Creatures => _creatures;
@@ -566,6 +691,10 @@ namespace CubeGame.Gameplay
             _session.Events.Subscribe<HitResolved>(OnHitResolved);
             _session.Events.Subscribe<EntityDied>(OnEntityDied);
             _heroRespawnAtMs = -1;
+            _session.Events.Subscribe<WorldItemDropped>(OnWorldItemDropped);
+            _session.Events.Subscribe<WorldItemRemoved>(OnWorldItemRemoved);
+            _session.Hero.Inventory.EquipmentChanged += OnEquipmentChanged;
+            PublishEquipment();
             _creatures = new CreatureCombatDriver(_session, GroundAt, kind => _timings.AttackActionsOf(kind), _session.World.Seed.Value);
             _session.Clock.Ticked += _creatures.Tick;
             // The target appears once the hero stands on the ground and the camera has a facing (see Update).
@@ -638,6 +767,21 @@ namespace CubeGame.Gameplay
         private void DestroyWorldViews()
         {
             DespawnTrainingTarget();
+            foreach (GameObject ground in _groundItems.Values)
+            {
+                if (ground != null)
+                {
+                    Destroy(ground);
+                }
+            }
+
+            _groundItems.Clear();
+            if (_session?.Hero != null)
+            {
+                _session.Hero.Inventory.EquipmentChanged -= OnEquipmentChanged;
+            }
+
+            _inventoryOpen = false;
             _trainingTargetPending = false;
             _heroRespawnAtMs = -1;
             _creatures = null;
@@ -877,6 +1021,11 @@ namespace CubeGame.Gameplay
                     break;
                 case SessionState.InGame:
                     DrawHud();
+                    if (_inventoryOpen)
+                    {
+                        DrawInventory();
+                    }
+
                     break;
             }
         }
@@ -965,7 +1114,8 @@ namespace CubeGame.Gameplay
                 $"{hero.Name} {hero.Sheet.Class} L{hero.Sheet.Progression.Level}  pos {hero.Position}  " +
                 $"{(_worldView != null ? _worldView.Center.ToString() : "-")} loaded {(_worldView != null ? _worldView.LoadedCount : 0)}  [Esc] menu");
             GUI.Label(new Rect(10f, 32f, 700f, 22f),
-                $"HP {hero.Health.CurrentHealth:F0}/{hero.Health.MaxHealth:F0}  weapon {hero.Loadout.GetEquipped(Core.Equipment.EquipmentSlot.MainHand)?.ToString() ?? "none"}  [LMB] attack");
+                $"HP {hero.Health.CurrentHealth:F0}/{hero.Health.MaxHealth:F0}  weapon {hero.Loadout.GetEquipped(EquipmentSlot.MainHand)?.ToString() ?? "none"}  " +
+                $"potions {hero.Inventory.CountOf(LootRules.LifePotion)}  [LMB] attack  [Q] potion  [I] inventory");
             if (_trainingTarget != null)
             {
                 GUI.Label(new Rect(10f, 54f, 700f, 22f),
@@ -973,6 +1123,53 @@ namespace CubeGame.Gameplay
             }
 
             GUI.Label(new Rect(10f, 76f, 700f, 22f), _combatLog);
+        }
+
+        /// <summary>Temporary inventory window (M0-08 replaces it): equipment, bags, equip/unequip/use.</summary>
+        private void DrawInventory()
+        {
+            HeroState hero = _session.Hero;
+            GUILayout.BeginArea(new Rect(Screen.width - 470f, 40f, 450f, Screen.height - 80f), GUI.skin.box);
+            GUILayout.Label($"Inventory  {hero.Inventory.UsedSlots}/{HeroInventory.Capacity}  [I] close");
+            foreach (EquipmentSlot slot in EquipmentLoadout.Slots)
+            {
+                ItemInstance item = hero.Loadout.GetEquipped(slot);
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"{slot}: {(item != null ? item.ToString() : "-")}", GUILayout.Width(360f));
+                if (item != null && GUILayout.Button("Off", GUILayout.Width(60f)) && !hero.Inventory.TryUnequip(slot))
+                {
+                    _combatLog = hero.Inventory.LastRejection;
+                }
+
+                GUILayout.EndHorizontal();
+            }
+
+            GUILayout.Space(6f);
+            _inventoryScroll = GUILayout.BeginScrollView(_inventoryScroll);
+            for (int i = 0; i < HeroInventory.Capacity; i++)
+            {
+                InventoryEntry entry = hero.Inventory[i];
+                if (entry == null)
+                {
+                    continue;
+                }
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"[{i / HeroInventory.SlotsPerBag}:{i % HeroInventory.SlotsPerBag}] {entry}", GUILayout.Width(330f));
+                if (entry.IsCore && GUILayout.Button("Equip", GUILayout.Width(80f)) && !hero.Inventory.TryEquip(i, out _))
+                {
+                    _combatLog = hero.Inventory.LastRejection;
+                }
+                else if (!entry.IsCore && entry.Raw.Type == 1 && GUILayout.Button("Use", GUILayout.Width(80f)) && !_session.TryUseItem(i))
+                {
+                    _combatLog = _session.LastRejection;
+                }
+
+                GUILayout.EndHorizontal();
+            }
+
+            GUILayout.EndScrollView();
+            GUILayout.EndArea();
         }
 
         private static string LabeledField(string label, string value)

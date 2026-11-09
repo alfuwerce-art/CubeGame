@@ -179,6 +179,32 @@ namespace CubeGame.Features.Contracts
         public StableEntityId Killer { get; set; }
     }
 
+    /// <summary>An item lies in the world (loot drop). Visual layer shows the item model; gameplay owns pickup.</summary>
+    public sealed class WorldItemDropped : IGameEvent
+    {
+        public long TimeMs { get; set; }
+
+        /// <summary>Runtime id of the item on the ground.</summary>
+        public StableEntityId Item { get; set; }
+
+        public RawAlphaItemId Raw { get; set; }
+
+        public int Count { get; set; } = 1;
+
+        public WorldPosition Position { get; set; }
+    }
+
+    /// <summary>An item left the world (picked up or expired).</summary>
+    public sealed class WorldItemRemoved : IGameEvent
+    {
+        public long TimeMs { get; set; }
+
+        public StableEntityId Item { get; set; }
+
+        /// <summary>Who picked it up; None when it expired.</summary>
+        public StableEntityId PickedBy { get; set; }
+    }
+
     public sealed class SessionStateChanged : IGameEvent
     {
         public long TimeMs { get; set; }

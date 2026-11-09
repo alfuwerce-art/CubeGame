@@ -60,7 +60,7 @@ namespace CubeGame.Tests.FullM0.EditMode
             session.Hero.Sheet.AddExperience(5);
             session.Hero.Yaw = 33.5f;
             Assert.IsTrue(ItemInstance.TryCreateFromIdentifiers((int)ItemType.Weapon, 3, 4, 2, 99, 0, 0, 1, out ItemInstance sword, out string error), error);
-            session.Hero.Items.Add(sword);
+            Assert.IsTrue(session.Hero.Inventory.TryAdd(Features.Items.InventoryEntry.FromCore(sword)), session.Hero.Inventory.LastRejection);
             session.Hero.Health.ApplyDamage(17.25);
             double heroHp = session.Hero.Health.CurrentHealth;
 

@@ -6,6 +6,7 @@ using CubeGame.Core.Equipment;
 using CubeGame.Core.Items;
 using CubeGame.Features.Combat;
 using CubeGame.Features.Contracts;
+using CubeGame.Features.Items;
 using CubeGame.Features.World;
 
 namespace CubeGame.Features.Session
@@ -52,6 +53,7 @@ namespace CubeGame.Features.Session
             RaceId = raceId;
             Sheet = sheet ?? throw new ArgumentNullException(nameof(sheet));
             Loadout = new EquipmentLoadout();
+            Inventory = new HeroInventory(Loadout);
             Health = new HealthPool(EquipmentCombatAdapter.ComputeMaxHealth(sheet));
         }
 
@@ -73,10 +75,23 @@ namespace CubeGame.Features.Session
 
         public CharacterSheet Sheet { get; }
 
+        /// <summary>
+        /// Core items the Core save v1 stores (bags + equipment). The live state is <see cref="Inventory"/>;
+        /// call <see cref="SyncItemsFromInventory"/> before saving.
+        /// </summary>
         public List<ItemInstance> Items { get; } = new List<ItemInstance>();
 
-        /// <summary>Equipped items (Core S04). Not stored by save v1 (SAVE-EQUIPMENT-GAP): rebuilt by <see cref="EquipFromItems"/>.</summary>
+        /// <summary>Equipped Core items (S04 loadout, shared with <see cref="Inventory"/> and the hero combatant).</summary>
         public EquipmentLoadout Loadout { get; }
+
+        /// <summary>Bags (4 × 50, Alpha I-06) and equipment operations (M0-04B).</summary>
+        public HeroInventory Inventory { get; }
+
+        public void SyncItemsFromInventory()
+        {
+            Items.Clear();
+            Items.AddRange(Inventory.AllCoreItems());
+        }
 
         /// <summary>Current HP; maximum from Core <see cref="EquipmentCombatAdapter.ComputeMaxHealth"/>.</summary>
         public HealthPool Health { get; private set; }
@@ -88,18 +103,64 @@ namespace CubeGame.Features.Session
         }
 
         /// <summary>
-        /// Rebuilds the loadout from the carried items: the first weapon goes to the main hand. CubeGame rule
-        /// (PLACEHOLDER_NOT_ALPHA) until equipment slots are part of the save (M0-04D, decision on save v2).
+        /// Rebuilds bags and equipment from <see cref="Items"/> (Core save order) and a placement list from the
+        /// session file: placement[i] ≥ 0 is a bag slot, −(1+slot) an equipment slot. Without a valid placement
+        /// (slots saved before M0-04B) every item goes to the bags and the first weapon to the main hand
+        /// (CubeGame rule, PLACEHOLDER_NOT_ALPHA). Returns false when a placement entry could not be honoured.
         /// </summary>
-        public void EquipFromItems()
+        public bool RestoreInventory(IReadOnlyList<int> placement)
         {
-            foreach (ItemInstance item in Items)
+            Inventory.Clear();
+            bool exact = placement != null && placement.Count == Items.Count;
+            bool ok = true;
+            for (int i = 0; i < Items.Count; i++)
             {
-                if (item.Type == ItemType.Weapon && Loadout.IsSlotEmpty(EquipmentSlot.MainHand))
+                ItemInstance item = Items[i];
+                bool placed = false;
+                if (exact)
                 {
-                    Loadout.Equip(EquipmentSlot.MainHand, item);
+                    int code = placement[i];
+                    placed = code >= 0
+                        ? Inventory.TryPlace(code, InventoryEntry.FromCore(item))
+                        : Inventory.TryEquipDirect((EquipmentSlot)(-code - 1), item);
+                    ok &= placed;
+                }
+                else if (item.Type == ItemType.Weapon && Loadout.IsSlotEmpty(EquipmentSlot.MainHand))
+                {
+                    placed = Inventory.TryEquipDirect(EquipmentSlot.MainHand, item);
+                }
+
+                if (!placed && !Inventory.TryAdd(InventoryEntry.FromCore(item)))
+                {
+                    ok = false;
                 }
             }
+
+            return ok;
+        }
+
+        /// <summary>Placement codes for <see cref="Items"/> after <see cref="SyncItemsFromInventory"/> (same order).</summary>
+        public int[] InventoryPlacement()
+        {
+            var codes = new List<int>();
+            foreach (EquipmentSlot slot in EquipmentLoadout.Slots)
+            {
+                if (Loadout.GetEquipped(slot) != null)
+                {
+                    codes.Add(-1 - (int)slot);
+                }
+            }
+
+            for (int i = 0; i < HeroInventory.Capacity; i++)
+            {
+                InventoryEntry entry = Inventory[i];
+                if (entry != null && entry.IsCore)
+                {
+                    codes.Add(i);
+                }
+            }
+
+            return codes.ToArray();
         }
 
         /// <summary>Restores current HP from a save (values above maximum or non-finite are clamped/ignored).</summary>
@@ -173,6 +234,26 @@ namespace CubeGame.Features.Session
         /// <summary>Combat of the running world (M0-05A first slice); created on LoadingWorld, advanced by clock ticks.</summary>
         public CombatSystem Combat { get; private set; }
 
+        /// <summary>Items lying in the running world (loot); runtime only.</summary>
+        public WorldItems WorldItems { get; private set; }
+
+        /// <summary>
+        /// Consumable cooldown in ms for an Alpha (type, subtype); injected from the content layer
+        /// (AlphaConsumableRules: 3 s life potion, 10 s others — EVIDENCED_COOLDOWN). Null = no cooldown.
+        /// </summary>
+        public Func<int, int, int> ConsumableCooldownMs { get; set; }
+
+        /// <summary>
+        /// Share of max HP a life potion restores. PLACEHOLDER_NOT_ALPHA: the Alpha heal amount is not
+        /// restored (B-U1 open).
+        /// </summary>
+        public const double LifePotionHealShare = 0.5;
+
+        /// <summary>Alpha action started when the hero uses a consumable (80, item layer consumable.actions).</summary>
+        public static readonly ActionId UseItemAction = new ActionId(80);
+
+        private readonly Dictionary<RawAlphaItemId, long> _cooldownUntilMs = new Dictionary<RawAlphaItemId, long>();
+
         public SessionState State { get; private set; } = SessionState.Boot;
 
         public GameEventBus Events { get; }
@@ -226,8 +307,8 @@ namespace CubeGame.Features.Session
                 Position = request.Spawn,
                 NeedsGroundPlacement = true,
             };
-            hero.Items.Add(HeroState.CreateStartingWeapon());
-            hero.EquipFromItems();
+            hero.Inventory.TryEquipDirect(EquipmentSlot.MainHand, HeroState.CreateStartingWeapon());
+            hero.SyncItemsFromInventory();
 
             var world = new WorldInfo(request.WorldName, new WorldSeed(request.Seed), request.GeneratorId, nowUtcTicks);
             return Attach(slotKey, world, hero, new GameClock(), new WorldDeltaStore());
@@ -351,6 +432,9 @@ namespace CubeGame.Features.Session
                 Yaw = hero.Yaw,
             });
             Clock.Ticked += OnClockTicked;
+            WorldItems = new WorldItems(Events);
+            _cooldownUntilMs.Clear();
+            Events.Subscribe<EntityDied>(OnEntityDied);
             if (!TryTransition(SessionState.LoadingWorld))
             {
                 DropWorld();
@@ -398,6 +482,75 @@ namespace CubeGame.Features.Session
             }
 
             Combat.Update(clock.TimeMs);
+            if (!Hero.Health.IsDead && WorldItems != null && WorldItems.Count > 0)
+            {
+                WorldItems.PickupNear(Hero, clock.TimeMs);
+            }
+        }
+
+        /// <summary>Loot of a killed creature falls where it died (hero deaths drop nothing).</summary>
+        private void OnEntityDied(EntityDied died)
+        {
+            if (died.Entity.Equals(StableEntityId.Hero) || Combat == null || WorldItems == null
+                || !Combat.TryGet(died.Entity, out Combatant dead))
+            {
+                return;
+            }
+
+            int seed = unchecked((int)(World.Seed.Value * 2654435761u) ^ (int)died.Entity.Value ^ (int)(died.Entity.Value >> 32));
+            foreach (InventoryEntry entry in LootRules.Roll(dead.Sheet.Progression.Level, seed))
+            {
+                WorldItems.Drop(entry, dead.Position, died.TimeMs);
+            }
+        }
+
+        /// <summary>
+        /// Uses the item in a bag slot (M0-04B consumables): only Alpha consumables (type 1); refused while dead,
+        /// acting or on cooldown. Starts Alpha action 80 (no hit), removes one item and applies the effect.
+        /// </summary>
+        public bool TryUseItem(int bagSlot)
+        {
+            if (Hero == null || Combat == null || State != SessionState.InGame)
+            {
+                return Reject("item use refused: no running world");
+            }
+
+            InventoryEntry entry = Hero.Inventory[bagSlot];
+            if (entry == null)
+            {
+                return Reject($"slot {bagSlot} is empty");
+            }
+
+            if (entry.IsCore || entry.Raw.Type != 1)
+            {
+                return Reject($"{entry} is not a consumable");
+            }
+
+            if (Hero.Health.IsDead)
+            {
+                return Reject("the hero is dead");
+            }
+
+            if (_cooldownUntilMs.TryGetValue(entry.Raw, out long until) && Clock.TimeMs < until)
+            {
+                return Reject($"cooldown {until - Clock.TimeMs} ms");
+            }
+
+            if (!Combat.TryStartAction(Hero.Id, UseItemAction, Clock.TimeMs, "action_080", false))
+            {
+                return Reject(Combat.LastRejection);
+            }
+
+            Hero.Inventory.TakeFrom(bagSlot, 1);
+            int cooldown = ConsumableCooldownMs?.Invoke(entry.Raw.Type, entry.Raw.Subtype) ?? 0;
+            _cooldownUntilMs[entry.Raw] = Clock.TimeMs + cooldown;
+            if (entry.Raw.Equals(LootRules.LifePotion))
+            {
+                Hero.Health.Heal(Hero.Health.MaxHealth * LifePotionHealShare);
+            }
+
+            LastRejection = string.Empty;
+            return true;
         }
 
         private void DropWorld()
@@ -408,6 +561,7 @@ namespace CubeGame.Features.Session
             }
 
             Combat = null;
+            WorldItems = null;
             World = null;
             Hero = null;
             Clock = null;

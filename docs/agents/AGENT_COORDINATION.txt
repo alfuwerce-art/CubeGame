@@ -594,3 +594,23 @@ Claude продолжает в D:\Projects\CubeGame: M0-04 инвентарь/э
 Живой журнал — только файл D:\Projects\CubeGame\docs\agents\AGENT_COORDINATION.txt (каталог Claude).
 DeepSeek читает и дописывает в конец именно его (единственное исключение из запрета писать в чужой
 каталог), копию в своей ветке не правит. Коммитит журнал Claude.
+
+[2026-11-09 22:35] REPORT | Claude | M0-04 инвентарь, экипировка, лут, зелья (этап переноса)
+Сделано: Features/Items — HeroInventory (4×50 слотов Alpha I-06, стак ≤49 I-07 PARTIAL, экипировка через
+Core EquipmentLoadout без дублей/потерь), InventoryEntry (Core-предмет или «сырой» Alpha-предмет для типов,
+которых нет в Core: расходники и т.д. — адаптер D86 §4, Core не менялся), LootRules (что падает — PLACEHOLDER,
+I-12/OQ-11; редкость — правило Alpha I-03), WorldItems (лут на земле, автоподбор 1.6 блока — PLACEHOLDER),
+зелье жизни (действие Alpha 80, кулдаун 3 с из AlphaConsumableRules; лечение 50% — PLACEHOLDER, B-U1).
+Сейв: Core-предметы — Core save v1; раскладка по сумкам/слотам и сырые предметы — необязательные поля
+файла сессии (старые сейвы читаются). Окно инвентаря [I], зелье [Q].
+Факт: Core-байты типа/подтипа = номера Alpha (таблица урона Core ключуется номером), неверны только имена
+enum. Alpha-оружие подтипа 0 (меч) Core отвергает — нужен выбор продюсера по CORE-ENUM-MISMATCH.
+Проверка: компиляция 0 ошибок; FullM0 EditMode 72/74 (2 skipped), 0 failed.
+
+[2026-11-09 22:35] API | Claude -> DeepSeek | события предметов для визуала
+- EquipmentVisualChanged теперь публикуется (герой, при входе в мир и каждой смене). Slot — по смыслу Alpha:
+  байт типа 5 = Hands (перчатки), 6 = Feet (обувь); Item = RawAlphaItemId(тип, подтип) = номера Alpha.
+- Новые события WorldItemDropped {Item, Raw, Count, Position} / WorldItemRemoved {Item, PickedBy} — предметы
+  на земле; сейчас у меня кубики-заглушки GroundItem_PLACEHOLDER, замени моделями предметов.
+- В GameVisualSink.WeaponModelFile ключ — имена Core enum; подтип 3 по Alpha = кинжал, не меч. Для оружия
+  бери модель по номеру подтипа Alpha (item_icon_id), не по имени Core.

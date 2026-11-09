@@ -6,6 +6,7 @@ using CubeGame.Core.Characters;
 using CubeGame.Core.Items;
 using CubeGame.Core.Persistence;
 using CubeGame.Features.Contracts;
+using CubeGame.Features.Items;
 using CubeGame.Features.Session;
 using CubeGame.Features.World;
 
@@ -84,6 +85,7 @@ namespace CubeGame.Features.Persistence
 
             string slotKey = session.SlotKey;
             var characterService = new SaveService(_store, _characterSerializer, slotKey);
+            session.Hero.SyncItemsFromInventory();
             SaveGame character = CharacterSaveMapper.ToSaveGame(session.Hero.Sheet, session.Hero.Items);
             SaveResult characterResult = characterService.Save(character);
             if (!characterResult.IsSuccess)
@@ -156,9 +158,11 @@ namespace CubeGame.Features.Persistence
                 heroZ = hero.Position.Z,
                 heroYaw = hero.Yaw,
                 heroHealth = hero.Health.CurrentHealth,
+                inventoryPlacement = hero.InventoryPlacement(),
                 characterChecksum = Checksum(characterText),
                 worldChecksum = worldChecksum,
             };
+            WriteRawItems(hero, data);
 
             if (!TryValidate(data, out string validationError))
             {
@@ -282,7 +286,8 @@ namespace CubeGame.Features.Persistence
                 NeedsGroundPlacement = false,
             };
             hero.Items.AddRange(items);
-            hero.EquipFromItems();
+            hero.RestoreInventory(data.inventoryPlacement);
+            RestoreRawItems(hero, data);
             if (data.heroHealth >= 0.0)
             {
                 hero.RestoreHealth(data.heroHealth);
@@ -537,6 +542,53 @@ namespace CubeGame.Features.Persistence
         private static string Checksum(string text)
         {
             return SaveService.Fnv1a64(text).ToString("x16", CultureInfo.InvariantCulture);
+        }
+
+        private static void WriteRawItems(HeroState hero, SessionSaveData data)
+        {
+            var types = new List<int>();
+            var subtypes = new List<int>();
+            var counts = new List<int>();
+            var slots = new List<int>();
+            for (int i = 0; i < HeroInventory.Capacity; i++)
+            {
+                InventoryEntry entry = hero.Inventory[i];
+                if (entry != null && !entry.IsCore)
+                {
+                    types.Add(entry.Raw.Type);
+                    subtypes.Add(entry.Raw.Subtype);
+                    counts.Add(entry.Count);
+                    slots.Add(i);
+                }
+            }
+
+            data.rawItemTypes = types.ToArray();
+            data.rawItemSubtypes = subtypes.ToArray();
+            data.rawItemCounts = counts.ToArray();
+            data.rawItemSlots = slots.ToArray();
+        }
+
+        private static void RestoreRawItems(HeroState hero, SessionSaveData data)
+        {
+            int n = data.rawItemTypes?.Length ?? 0;
+            if (n == 0 || data.rawItemSubtypes?.Length != n || data.rawItemCounts?.Length != n || data.rawItemSlots?.Length != n)
+            {
+                return;
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                if (data.rawItemCounts[i] <= 0 || ItemInstance.IsSupportedType(data.rawItemTypes[i]))
+                {
+                    continue;
+                }
+
+                InventoryEntry entry = InventoryEntry.FromRaw(new RawAlphaItemId(data.rawItemTypes[i], data.rawItemSubtypes[i]), data.rawItemCounts[i]);
+                if (!hero.Inventory.TryPlace(data.rawItemSlots[i], entry))
+                {
+                    hero.Inventory.TryAdd(entry);
+                }
+            }
         }
 
         private static bool IsFinite(double value)

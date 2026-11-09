@@ -101,6 +101,15 @@ namespace CubeGame.Features.Combat
         /// </summary>
         public bool TryStartAttack(StableEntityId attackerId, ActionId action, long nowMs, string animationKey = "")
         {
+            return TryStartAction(attackerId, action, nowMs, animationKey, true);
+        }
+
+        /// <summary>
+        /// Starts an action with the same phases and refusals as an attack. Non-attack actions (item use, emotes)
+        /// never resolve melee hits.
+        /// </summary>
+        public bool TryStartAction(StableEntityId attackerId, ActionId action, long nowMs, string animationKey, bool isAttack)
+        {
             if (!_combatants.TryGetValue(attackerId, out Combatant attacker))
             {
                 return Reject($"unknown attacker {attackerId}");
@@ -122,7 +131,7 @@ namespace CubeGame.Features.Combat
                 timing = known;
             }
 
-            var active = new ActiveAction(attackerId, action, nowMs, timing, ++_actionSerial);
+            var active = new ActiveAction(attackerId, action, nowMs, timing, ++_actionSerial) { IsAttack = isAttack };
             _actions[attackerId] = active;
             LastRejection = string.Empty;
             _events.Publish(new ActionStarted
@@ -153,7 +162,10 @@ namespace CubeGame.Features.Combat
                 if (action.Phase == ActionPhase.Windup && elapsed >= action.Timing.StrikeAtMs)
                 {
                     SetPhase(action, ActionPhase.Strike, action.StartMs + action.Timing.StrikeAtMs);
-                    ResolveMelee(action, action.StartMs + action.Timing.StrikeAtMs);
+                    if (action.IsAttack)
+                    {
+                        ResolveMelee(action, action.StartMs + action.Timing.StrikeAtMs);
+                    }
                 }
 
                 if (action.Phase == ActionPhase.Strike && elapsed >= action.Timing.StrikeEndMs)
@@ -332,6 +344,8 @@ namespace CubeGame.Features.Combat
             public ActionPhase Phase { get; set; }
 
             public int HitCount { get; set; }
+
+            public bool IsAttack { get; set; } = true;
         }
     }
 }

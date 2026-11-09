@@ -45,6 +45,21 @@ namespace CubeGame.Features.Persistence
         /// </summary>
         public double heroHealth = -1.0;
 
+        /// <summary>
+        /// M0-04B, optional: placement of the Core items of the character save (same order): bag slot ≥ 0 or
+        /// −(1+equipment slot). Missing (older slots) → items go to the bags, first weapon to the main hand.
+        /// </summary>
+        public int[] inventoryPlacement;
+
+        /// <summary>M0-04B, optional: Alpha items Core does not model (consumables, materials…) — parallel arrays.</summary>
+        public int[] rawItemTypes;
+
+        public int[] rawItemSubtypes;
+
+        public int[] rawItemCounts;
+
+        public int[] rawItemSlots;
+
         /// <summary>FNV-1a 64 (hex) of the framed character save text written in the same checkpoint.</summary>
         public string characterChecksum = string.Empty;
 
