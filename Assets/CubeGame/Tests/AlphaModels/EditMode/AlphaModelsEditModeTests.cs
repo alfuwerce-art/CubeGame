@@ -419,6 +419,14 @@ namespace CubeGame.AlphaModels.Tests.EditMode
             var wet = new AlphaScatterField(new FakeClimate(0.5, 0.5, 0.9), 0.5);
             Assert.AreEqual(ScatterResolution.TranslatedFromCode, wet.SelectAt(0, 0, 6).Resolution);
             Assert.Throws<ArgumentNullException>(() => new AlphaScatterField(null, 0.5));
+
+            // Per-position spacing provider: the Alpha spacing formula can be plugged in later.
+            var varied = new AlphaScatterField(new FakeClimate(0.5, 0.5, 0.0), (x, z) => x > 0 ? 0.5 : 0.05);
+            Assert.AreEqual(0.5, varied.SpacingAt(10, 0), 1e-9);
+            CollectionAssert.Contains(varied.SelectAt(100, 0, 6).ObjectKinds, 0x2f,
+                "spacing above 0.3 adds the third dry object");
+            CollectionAssert.DoesNotContain(varied.SelectAt(-100, 0, 6).ObjectKinds, 0x2f,
+                "low spacing keeps the two-object dry branch");
         }
 
         [Test]

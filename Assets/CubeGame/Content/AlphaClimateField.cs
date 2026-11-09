@@ -3,6 +3,10 @@
 // The world module owns the humidity/temperature/region-cell grids; this adapter samples them at a cell
 // and answers with AlphaScatterSelector's translated Alpha selection, or with concrete vegetation
 // placements. Nothing here guesses climate: a missing grid is an error, not a default value.
+//
+// Spacing: Alpha's World_placeObjectWithSpacing @ 0x005effa0 (noise formula, not ported yet) feeds the
+// fVar6 argument of W-18. The field accepts either a fixed value or a per-position provider, so the real
+// formula can be plugged in later without changing callers.
 using System;
 using System.Collections.Generic;
 
@@ -21,20 +25,28 @@ namespace CubeGame.Content
     public sealed class AlphaScatterField
     {
         readonly IAlphaClimateGrid _grid;
-        readonly double _spacing;
+        readonly Func<double, double, double> _spacingAt;
 
         /// <param name="spacing">World_placeObjectWithSpacing (fVar6); not ported, caller supplies it.</param>
         public AlphaScatterField(IAlphaClimateGrid grid, double spacing)
+            : this(grid, (x, z) => spacing)
+        {
+        }
+
+        /// <param name="spacingAt">Per-position spacing provider (x, z) → fVar6; use once the Alpha noise formula is ported.</param>
+        public AlphaScatterField(IAlphaClimateGrid grid, Func<double, double, double> spacingAt)
         {
             _grid = grid ?? throw new ArgumentNullException(nameof(grid));
-            _spacing = spacing;
+            _spacingAt = spacingAt ?? throw new ArgumentNullException(nameof(spacingAt));
         }
+
+        public double SpacingAt(double x, double z) => _spacingAt(x, z);
 
         public AlphaScatterSelection SelectAt(double x, double z, int level, int mode = 0)
         {
             if (_grid == null) throw new InvalidOperationException("CLIMATE_GRID_MISSING");
             return AlphaScatterSelector.Select(_grid.Humidity(x, z), _grid.Temperature(x, z),
-                _grid.RegionCell(x, z), _spacing, level, mode);
+                _grid.RegionCell(x, z), _spacingAt(x, z), level, mode);
         }
 
         /// <summary>Place the selected objects of one cell (deterministic; only staged kinds are placed).</summary>
@@ -50,7 +62,7 @@ namespace CubeGame.Content
                 return new List<AlphaScatterPlacement>();
             }
             return AlphaVegetationPlanner.Plan(seed, regionX, regionZ, cellX, cellZ,
-                _grid.Humidity(x, z), _grid.Temperature(x, z), _grid.RegionCell(x, z), _spacing,
+                _grid.Humidity(x, z), _grid.Temperature(x, z), _grid.RegionCell(x, z), _spacingAt(x, z),
                 level, mode, stagedKinds, problems);
         }
 
