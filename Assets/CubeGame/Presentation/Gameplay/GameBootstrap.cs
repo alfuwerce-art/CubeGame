@@ -383,7 +383,11 @@ namespace CubeGame.Gameplay
             }
 
             SyncHeroFromView();
-            if (!_session.Combat.TryStartAttack(_session.Hero.Id, HeroAttackAction, _session.Clock.TimeMs, "action_057"))
+            HeroState hero = _session.Hero;
+            ActionId action = AlphaPrimaryAttack.SelectMelee(hero.Sheet.Class,
+                hero.Loadout.GetEquipped(EquipmentSlot.MainHand), hero.Loadout.GetEquipped(EquipmentSlot.OffHand))
+                ?? HeroAttackAction; // Legacy placeholder for ranged and casting input (C4/D5).
+            if (!_session.Combat.TryStartAttack(hero.Id, action, _session.Clock.TimeMs, $"action_{action.Value:000}"))
             {
                 _combatLog = $"attack refused: {_session.Combat.LastRejection}";
                 return false;

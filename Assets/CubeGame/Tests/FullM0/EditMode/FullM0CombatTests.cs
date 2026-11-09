@@ -32,6 +32,27 @@ namespace CubeGame.Tests.FullM0.EditMode
         private Combatant _hero;
         private Combatant _wolf;
 
+        [TestCase(CharacterClass.Warrior, -1, -1, 6)]
+        [TestCase(CharacterClass.Ranger, 0, -1, 1)]
+        [TestCase(CharacterClass.Warrior, 0, 13, 10)]
+        [TestCase(CharacterClass.Rogue, 3, 3, 19)]
+        [TestCase(CharacterClass.Warrior, 4, 13, 6)]
+        [TestCase(CharacterClass.Warrior, 5, 13, 14)]
+        [TestCase(CharacterClass.Warrior, 17, 13, 57)]
+        [TestCase(CharacterClass.Warrior, 18, -1, 57)]
+        [TestCase(CharacterClass.Warrior, 0, 6, -1)]
+        [TestCase(CharacterClass.Ranger, 6, -1, -1)]
+        [TestCase(CharacterClass.Ranger, 8, -1, -1)]
+        [TestCase(CharacterClass.Warrior, 11, -1, -1)]
+        [TestCase(CharacterClass.Mage, 0, -1, -1)]
+        public void FirstMeleeActionFollowsAlphaPrimaryInput(CharacterClass characterClass, int main, int off, int expected)
+        {
+            ItemInstance mainHand = main < 0 ? null : new ItemInstance(ItemType.Weapon, (byte)main, 1, 0, 1);
+            ItemInstance offHand = off < 0 ? null : new ItemInstance(ItemType.Weapon, (byte)off, 1, 0, 2);
+            ActionId? action = AlphaPrimaryAttack.SelectMelee(characterClass, mainHand, offHand);
+            Assert.AreEqual(expected, action?.Value ?? -1);
+        }
+
         [SetUp]
         public void SetUp()
         {
