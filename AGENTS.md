@@ -15,9 +15,9 @@
 
 ---
 
-# D71 — текущий режим работы Claude / DeepSeek (2026-11-08)
+# D88 — текущий режим работы Claude / DeepSeek (2026-11-09)
 
-**УТВЕРЖДЕНО ПРОДЮСЕРОМ:** два агента теперь могут работать **одновременно в разных каталогах Git worktree**, подробнее [D71](docs/decisions/D71-parallel-isolated-worktrees.md), [новый протокол](docs/agents/MULTI_AGENT_WORKFLOW.md) и [инструкция создания](docs/agents/PARALLEL_WORKTREE_SETUP.md). **Claude:** `D:\Projects\CubeGame`, Dragon #7 и M0-00C #9; **DeepSeek:** `D:\Projects\CubeGame-deepseek`, M0-00B #5/#8. Старый запрет на *второй worktree* и параллельную работу **в двух отдельных директориях** заменён D71; запрет на совместную запись **в одну директорию** сохраняется. Каждый агент делает свои commit/push в своей ветке; последний агент **не** коммитит и не пушит чужую работу. Согласование через GitHub issues + SHA; интеграция только отдельно, после review и решения продюсера. S05B-2: Dragon 0x65 визуально **НЕ принят**, `VISUAL_REVIEW_FIX_REQUIRED`, issue #7. M0-00D: DRAFT; M0-01+: NOT_AUTHORIZED.
+**УТВЕРЖДЕНО ПРОДЮСЕРОМ:** [D88](docs/decisions/D88-two-agent-split-transfer-first.md). Два агента переносят всю игру Alpha в один Unity-проект. **Claude:** `D:\Projects\CubeGame`, ветка `integration/m0-all` (интегратор; персонаж, предметы, бой, состояние существ, торговля/задания, UI, мир, сборка в сцену). **DeepSeek:** `D:\Projects\CubeGame-deepseek`, ветка `deepseek/m0-content` (наполнение мира, существа/NPC, поселения/данжи, визуал). Этапы: перенос → проверки → отдельный визуальный осмотр срезов. Связь — `docs/agents/AGENT_COORDINATION.txt`. Заменяет режимы D71/D85 и раздел «одна папка» D87 (история). `main` не трогать; ACCEPTED — только продюсер.
 
 ---
 

@@ -552,3 +552,34 @@ Unity: EditMode 429/431, PlayMode 56/57, 0 failed; Windows-сборка + кад
 CreatureCombatDriver: CreatureAi (Alpha) -> движение/атаки через CombatSystem; HP существ — Core
 CalcCreatureMaxHealth; смерть героя -> 5 с -> ReviveHero (PLACEHOLDER, GS-06). Unity: EditMode 433/435,
 PlayMode 56/57, 0 failed; сборка + кадр .scratch/m0/m0_03c/fight.png. Отчёт дополнен (M0_05A_COMBAT_SLICE_REPORT).
+
+[2026-11-09 22:25] DECISION | Claude (утверждено продюсером) | D88 — два агента, сначала перенос
+Документ: docs/decisions/D88-two-agent-split-transfer-first.md. Кратко:
+- Работают Claude и DeepSeek. Итог — вся игра Alpha в одном Unity-проекте.
+- Каталоги раздельные: Claude — D:\Projects\CubeGame, ветка integration/m0-all (интегратор);
+  DeepSeek — D:\Projects\CubeGame-deepseek, ветка deepseek/m0-content (создана от общей ветки).
+- Этап 1 перенос (перед коммитом — компиляция без ошибок; правила с числами Alpha — тест вместе с кодом),
+  этап 2 проверки (полные EditMode/PlayMode, сквозные сценарии), этап 3 визуальный осмотр срезов отдельно.
+- Claude: M0-03 персонаж, M0-04 предметы, M0-05 бой, M0-06D состояние существ, M0-07C/D торговля и задания,
+  M0-08 UI, мир (генератор/стриминг/дельты), интеграция в сцену.
+- DeepSeek: M0-02C наполнение мира, M0-06A/B/C/E существа и NPC, M0-07A/B поселения и данжи, визуал
+  (броня/предметы на модели, эффекты R-3, динамические части R-8, смерть существ, иконки, звук).
+- Файлы: таблица D88 §3. Core, чужие asmdef, Packages, ProjectSettings — только через QUESTION.
+
+[2026-11-09 22:25] HANDOFF | Claude -> DeepSeek | старт работы по D88
+1. В своём каталоге: git fetch && git checkout deepseek/m0-content (база — SHA в следующей записи REPORT).
+   Локальный кэш .scratch/content у тебя уже есть.
+2. Что уже есть в игре (не переделывать): GameSession/бой (Features/Combat), герой и волк с моделями S05
+   через GameVisualSink (теперь твой файл), ИИ волка через CreatureCombatDriver (мой) поверх твоего CreatureAi,
+   HP существ = Core CalcCreatureMaxHealth. Отчёт: docs/reports/M0_05A_COMBAT_SLICE_REPORT.md.
+3. Стыки, которые я подключаю в игру:
+   - API IWorldPopulationSource (Features/Contracts/WorldContracts.cs, новое): SpawnsForZone(ZoneKey) ->
+     список SpawnDefinition (вид, позиция, фракция, уровень, класс, экипировка RawAlphaItemId, BehaviourKey,
+     Provenance). Детерминированно от seed. Я превращаю записи в сущности/бойцов/ИИ/модели и сохраняю убитых.
+   - Выбор атаки: внутри твоего CreatureAi (C-29 CombatBehavior_chooseAttack); сейчас берётся первая атака
+     библиотеки. Я вызываю ИИ через ICreatureAiWorld и ничего в нём не меняю.
+   - Визуал: GameVisualSink.cs и WorldContentSource.cs — твои файлы; события шины не меняются без записи API.
+4. Первые пакеты (порядок на твоё усмотрение): (a) IWorldPopulationSource по зонам с биомами и спавн-таблицами;
+   (b) C-29 выбор атаки + атаки NPC с оружием R-1/R-2; (c) постройки/деревни/данжи в мире;
+   (d) броня и предметы на модели героя по экипировке (через EquipmentVisualChanged — я начну его публиковать).
+5. По каждому пакету — REPORT: файлы, SHA, компиляция, что PARTIAL/BLOCKED, какие интерфейсы нужны от меня.

@@ -41,6 +41,18 @@ namespace CubeGame.Features.Contracts
         public string Provenance { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Population of the world (D88: implemented by DeepSeek in Features/Creatures or Content, consumed by gameplay).
+    /// Deterministic: the same seed and zone always give the same list, so unloading and reloading a zone never
+    /// creates new entities. Gameplay turns each record into a persistent entity (StableEntityId.ForSpawn),
+    /// a combatant, AI and a visual, and applies saved deltas (killed/looted) on top.
+    /// </summary>
+    public interface IWorldPopulationSource
+    {
+        /// <summary>Spawns (creatures, NPCs, passive objects) of one zone; empty list for an empty zone.</summary>
+        IReadOnlyList<SpawnDefinition> SpawnsForZone(ZoneKey zone);
+    }
+
     /// <summary>One persistent change of a generated world region relative to the generator output.</summary>
     public sealed class WorldDelta
     {
