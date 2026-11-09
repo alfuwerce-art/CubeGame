@@ -66,7 +66,8 @@ namespace CubeGame.Features.Persistence
 
         /// <summary>
         /// M0-04B, optional: placement of the Core items of the character save (same order): bag slot ≥ 0 or
-        /// −(1+equipment slot). Missing (older slots) → items go to the bags, first weapon to the main hand.
+        /// −(1+equipment slot). C5 extra slots use the Alpha creature offset instead of a Core slot index.
+        /// Missing (older slots) → items go to the bags, first weapon to the main hand.
         /// </summary>
         public int[] inventoryPlacement;
 
@@ -77,6 +78,7 @@ namespace CubeGame.Features.Persistence
 
         public int[] rawItemCounts;
 
+        /// <summary>Bag slot ≥ 0 or C5 extra equipment −(1+Alpha creature offset).</summary>
         public int[] rawItemSlots;
 
         /// <summary>FNV-1a 64 (hex) of the framed character save text written in the same checkpoint.</summary>

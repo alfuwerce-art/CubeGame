@@ -6,10 +6,20 @@ using CubeGame.Features.Contracts;
 
 namespace CubeGame.Features.Items
 {
+    /// <summary>Alpha creature offsets for equipment outside the Core S04 loadout.</summary>
+    public enum ExtraEquipmentSlot
+    {
+        Neck = 0x418,
+        LeftRing = 0xBC0,
+        RightRing = 0xCD8,
+        Light = 0xDF0,
+        Travel = 0xF08,
+    }
+
     /// <summary>
     /// The hero's bags and equipment (M0-04B). Alpha layout: 4 containers × 50 slots (I-06, DIRECT).
-    /// Equipment uses the Core S04 <see cref="EquipmentLoadout"/> (6 slots; Alpha has 13 — rings, amulet, lamp,
-    /// special are not equippable until the slot decision, I-08). Every operation either succeeds completely or
+    /// Equipment uses the Core S04 <see cref="EquipmentLoadout"/> and five identified Alpha slots (C5, I-08).
+    /// Every operation either succeeds completely or
     /// refuses with a reason and changes nothing — items are never duplicated or lost.
     /// </summary>
     public sealed class HeroInventory
@@ -28,8 +38,19 @@ namespace CubeGame.Features.Items
         /// <summary>Alpha weapon subtype 13 = shield (off hand).</summary>
         public const byte ShieldSubtype = 13;
 
+        private static readonly RawAlphaItemId Lamp = new RawAlphaItemId(0x18, 0);
+        private static readonly RawAlphaItemId HangGlider = new RawAlphaItemId(0x17, 0);
+        private static readonly RawAlphaItemId Boat = new RawAlphaItemId(0x17, 1);
+
+        public static IReadOnlyList<ExtraEquipmentSlot> ExtraSlots { get; } = Array.AsReadOnly(new[]
+        {
+            ExtraEquipmentSlot.Neck, ExtraEquipmentSlot.LeftRing, ExtraEquipmentSlot.RightRing,
+            ExtraEquipmentSlot.Light, ExtraEquipmentSlot.Travel,
+        });
+
         private readonly InventoryEntry[] _slots = new InventoryEntry[Capacity];
         private readonly EquipmentLoadout _loadout;
+        private readonly Dictionary<ExtraEquipmentSlot, InventoryEntry> _extra = new Dictionary<ExtraEquipmentSlot, InventoryEntry>();
 
         public HeroInventory(EquipmentLoadout loadout)
         {
@@ -47,6 +68,103 @@ namespace CubeGame.Features.Items
         public event Action<EquipmentSlot, ItemInstance> EquipmentChanged;
 
         public InventoryEntry this[int slot] => slot >= 0 && slot < Capacity ? _slots[slot] : null;
+
+        public InventoryEntry GetExtra(ExtraEquipmentSlot slot) =>
+            _extra.TryGetValue(slot, out InventoryEntry entry) ? entry : null;
+
+        public bool HangGliderEquipped => GetExtra(ExtraEquipmentSlot.Travel)?.Raw.Equals(HangGlider) == true;
+
+        public static bool CanEquipExtra(ExtraEquipmentSlot slot, InventoryEntry entry)
+        {
+            if (entry == null)
+            {
+                return false;
+            }
+
+            switch (slot)
+            {
+                case ExtraEquipmentSlot.Neck:
+                    return entry.Raw.Type == (int)ItemType.Amulet;
+                case ExtraEquipmentSlot.LeftRing:
+                case ExtraEquipmentSlot.RightRing:
+                    return entry.Raw.Type == (int)ItemType.Ring;
+                case ExtraEquipmentSlot.Light:
+                    return entry.Raw.Equals(Lamp);
+                case ExtraEquipmentSlot.Travel:
+                    return entry.Raw.Equals(HangGlider) || entry.Raw.Equals(Boat);
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>Moves one item into an extra slot and returns the displaced item to the bags.</summary>
+        public bool TryEquipExtra(int bagSlot, ExtraEquipmentSlot slot)
+        {
+            InventoryEntry entry = this[bagSlot];
+            if (!CanEquipExtra(slot, entry))
+            {
+                return Reject($"bag slot {bagSlot} has no compatible item for {slot}");
+            }
+
+            InventoryEntry previous = GetExtra(slot);
+            if (entry.Count == 1)
+            {
+                _slots[bagSlot] = previous;
+                _extra[slot] = entry;
+                return Done();
+            }
+
+            int free = previous != null ? FirstFree() : -1;
+            if (previous != null && free < 0)
+            {
+                return Reject("bags are full");
+            }
+
+            _extra[slot] = InventoryEntry.FromRaw(entry.Raw, 1);
+            entry.Remove(1);
+            if (previous != null)
+            {
+                _slots[free] = previous;
+            }
+
+            return Done();
+        }
+
+        public bool TryUnequipExtra(ExtraEquipmentSlot slot)
+        {
+            InventoryEntry entry = GetExtra(slot);
+            if (entry == null)
+            {
+                return Reject($"{slot} is empty");
+            }
+
+            int free = FirstFree();
+            if (free < 0)
+            {
+                return Reject("bags are full");
+            }
+
+            _extra.Remove(slot);
+            _slots[free] = entry;
+            return Done();
+        }
+
+        internal bool TryEquipExtraDirect(ExtraEquipmentSlot slot, InventoryEntry entry)
+        {
+            if (!CanEquipExtra(slot, entry) || entry.Count != 1 || _extra.ContainsKey(slot))
+            {
+                return Reject($"cannot equip {entry} into {slot}");
+            }
+
+            _extra.Add(slot, entry);
+            return Done();
+        }
+
+        // Existing negative placement codes -1..-6 are the Core slot indices. Extra slots encode Alpha offsets.
+        internal static int ExtraPlacement(ExtraEquipmentSlot slot) => -1 - (int)slot;
+
+        internal bool TryRestoreExtra(int placement, InventoryEntry entry) =>
+            placement < 0 && TryEquipExtraDirect((ExtraEquipmentSlot)(-(placement + 1)), entry);
 
         public int UsedSlots
         {
@@ -245,6 +363,15 @@ namespace CubeGame.Features.Items
                 }
             }
 
+            foreach (ExtraEquipmentSlot slot in ExtraSlots)
+            {
+                InventoryEntry entry = GetExtra(slot);
+                if (entry != null && entry.IsCore)
+                {
+                    items.Add(entry.Core);
+                }
+            }
+
             foreach (InventoryEntry entry in _slots)
             {
                 if (entry != null && entry.IsCore)
@@ -286,6 +413,7 @@ namespace CubeGame.Features.Items
         public void Clear()
         {
             Array.Clear(_slots, 0, _slots.Length);
+            _extra.Clear();
             foreach (EquipmentSlot slot in EquipmentLoadout.Slots)
             {
                 _loadout.Unequip(slot);

@@ -219,7 +219,7 @@ namespace CubeGame.Gameplay
 
             if (_session.State == SessionState.InGame)
             {
-                ApplyHeroMovementRanks(_session.Hero);
+                ApplyHeroMovementState(_session.Hero);
                 if (_motor != null && _motor.enabled && Input.GetMouseButtonDown(0) && GUIUtility.hotControl == 0)
                 {
                     HeroAttack();
@@ -702,7 +702,7 @@ namespace CubeGame.Gameplay
 
         public GameVisualSink Visuals => _visuals;
 
-        private void ApplyHeroMovementRanks(HeroState hero)
+        private void ApplyHeroMovementState(HeroState hero)
         {
             if (_motor == null)
             {
@@ -712,6 +712,7 @@ namespace CubeGame.Gameplay
             _motor.Movement.ClimbingRank = hero.SkillRanks[HeroSkill.Climbing];
             _motor.Movement.HangGlidingRank = hero.SkillRanks[HeroSkill.HangGliding];
             _motor.Movement.SwimmingRank = hero.SkillRanks[HeroSkill.Swimming];
+            _motor.Movement.HasGlider = hero.Inventory.HangGliderEquipped;
         }
 
         /// <summary>Publishes the hero's movement (position, facing, speed, mode) and drives the visual frame.</summary>
@@ -884,7 +885,7 @@ namespace CubeGame.Gameplay
             _lastHeroScenePosition = heroPoint;
 
             _motor = _player.AddComponent<PlayerMotor>();
-            ApplyHeroMovementRanks(hero);
+            ApplyHeroMovementState(hero);
             _motor.SetCamera(_camera.transform);
             WorldState waterWorld = _worldState;
             _motor.WaterAt = p =>
@@ -1461,6 +1462,7 @@ namespace CubeGame.Gameplay
                 _skillDraft.TryReplace(hero.SkillRanks.ToArray());
             }
 
+            _inventoryScroll = GUILayout.BeginScrollView(_inventoryScroll);
             foreach (EquipmentSlot slot in EquipmentLoadout.Slots)
             {
                 ItemInstance item = hero.Loadout.GetEquipped(slot);
@@ -1474,8 +1476,19 @@ namespace CubeGame.Gameplay
                 GUILayout.EndHorizontal();
             }
 
+            foreach (ExtraEquipmentSlot slot in HeroInventory.ExtraSlots)
+            {
+                InventoryEntry entry = hero.Inventory.GetExtra(slot);
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"{slot}: {(entry != null ? entry.ToString() : "-")}", GUILayout.Width(360f));
+                if (entry != null && GUILayout.Button("Off", GUILayout.Width(60f)) && !hero.Inventory.TryUnequipExtra(slot))
+                {
+                    _combatLog = hero.Inventory.LastRejection;
+                }
+                GUILayout.EndHorizontal();
+            }
+
             GUILayout.Space(6f);
-            _inventoryScroll = GUILayout.BeginScrollView(_inventoryScroll);
             for (int i = 0; i < HeroInventory.Capacity; i++)
             {
                 InventoryEntry entry = hero.Inventory[i];
@@ -1485,8 +1498,9 @@ namespace CubeGame.Gameplay
                 }
 
                 GUILayout.BeginHorizontal();
-                GUILayout.Label($"[{i / HeroInventory.SlotsPerBag}:{i % HeroInventory.SlotsPerBag}] {entry}", GUILayout.Width(330f));
-                if (entry.IsCore && GUILayout.Button("Equip", GUILayout.Width(80f)) && !hero.Inventory.TryEquip(i, out _))
+                GUILayout.Label($"[{i / HeroInventory.SlotsPerBag}:{i % HeroInventory.SlotsPerBag}] {entry}", GUILayout.Width(302f));
+                if (!DrawExtraEquipActions(hero.Inventory, i, entry) && entry.IsCore
+                    && GUILayout.Button("Equip", GUILayout.Width(80f)) && !hero.Inventory.TryEquip(i, out _))
                 {
                     _combatLog = hero.Inventory.LastRejection;
                 }
@@ -1500,6 +1514,32 @@ namespace CubeGame.Gameplay
 
             GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        private bool DrawExtraEquipActions(HeroInventory inventory, int bagSlot, InventoryEntry entry)
+        {
+            bool hasExtraSlot = false;
+            foreach (ExtraEquipmentSlot slot in HeroInventory.ExtraSlots)
+            {
+                if (!HeroInventory.CanEquipExtra(slot, entry))
+                {
+                    continue;
+                }
+
+                hasExtraSlot = true;
+                string label = slot switch
+                {
+                    ExtraEquipmentSlot.LeftRing => "L ring",
+                    ExtraEquipmentSlot.RightRing => "R ring",
+                    _ => "Equip",
+                };
+                if (GUILayout.Button(label, GUILayout.Width(54f)) && !inventory.TryEquipExtra(bagSlot, slot))
+                {
+                    _combatLog = inventory.LastRejection;
+                }
+            }
+
+            return hasExtraSlot;
         }
 
         private void DrawSkillDraft(HeroState hero)
@@ -1526,7 +1566,7 @@ namespace CubeGame.Gameplay
             {
                 if (_session.TryApplySkillRanks(_skillDraft))
                 {
-                    ApplyHeroMovementRanks(hero);
+                    ApplyHeroMovementState(hero);
                     _skillDraft = null;
                 }
                 else

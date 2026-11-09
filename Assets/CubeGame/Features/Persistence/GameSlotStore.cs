@@ -589,20 +589,29 @@ namespace CubeGame.Features.Persistence
             var slots = new List<int>();
             for (int i = 0; i < HeroInventory.Capacity; i++)
             {
-                InventoryEntry entry = hero.Inventory[i];
-                if (entry != null && !entry.IsCore)
-                {
-                    types.Add(entry.Raw.Type);
-                    subtypes.Add(entry.Raw.Subtype);
-                    counts.Add(entry.Count);
-                    slots.Add(i);
-                }
+                Record(hero.Inventory[i], i);
+            }
+
+            foreach (ExtraEquipmentSlot slot in HeroInventory.ExtraSlots)
+            {
+                Record(hero.Inventory.GetExtra(slot), HeroInventory.ExtraPlacement(slot));
             }
 
             data.rawItemTypes = types.ToArray();
             data.rawItemSubtypes = subtypes.ToArray();
             data.rawItemCounts = counts.ToArray();
             data.rawItemSlots = slots.ToArray();
+
+            void Record(InventoryEntry entry, int placement)
+            {
+                if (entry != null && !entry.IsCore)
+                {
+                    types.Add(entry.Raw.Type);
+                    subtypes.Add(entry.Raw.Subtype);
+                    counts.Add(entry.Count);
+                    slots.Add(placement);
+                }
+            }
         }
 
         private static void RestoreRawItems(HeroState hero, SessionSaveData data)
@@ -621,7 +630,11 @@ namespace CubeGame.Features.Persistence
                 }
 
                 InventoryEntry entry = InventoryEntry.FromRaw(new RawAlphaItemId(data.rawItemTypes[i], data.rawItemSubtypes[i]), data.rawItemCounts[i]);
-                if (!hero.Inventory.TryPlace(data.rawItemSlots[i], entry))
+                int placement = data.rawItemSlots[i];
+                bool placed = placement >= 0
+                    ? hero.Inventory.TryPlace(placement, entry)
+                    : hero.Inventory.TryRestoreExtra(placement, entry);
+                if (!placed)
                 {
                     hero.Inventory.TryAdd(entry);
                 }

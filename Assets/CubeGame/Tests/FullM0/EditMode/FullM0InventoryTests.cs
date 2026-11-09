@@ -161,6 +161,36 @@ namespace CubeGame.Tests.FullM0.EditMode
         }
 
         [Test]
+        public void TravelStackSwapIsAtomicWhenBagsAreFull()
+        {
+            var inventory = new HeroInventory(new EquipmentLoadout());
+            var glider = new RawAlphaItemId(0x17, 0);
+            var boat = new RawAlphaItemId(0x17, 1);
+            var lamp = new RawAlphaItemId(0x18, 0);
+            Assert.IsTrue(inventory.TryPlace(0, InventoryEntry.FromRaw(glider, 1)));
+            Assert.IsTrue(inventory.TryEquipExtra(0, ExtraEquipmentSlot.Travel));
+            Assert.IsTrue(inventory.HangGliderEquipped);
+            Assert.IsTrue(inventory.TryPlace(0, InventoryEntry.FromRaw(boat, 2)));
+            for (int i = 1; i < HeroInventory.Capacity; i++)
+            {
+                Assert.IsTrue(inventory.TryPlace(i, InventoryEntry.FromRaw(lamp, 1)));
+            }
+
+            Assert.IsFalse(inventory.TryEquipExtra(0, ExtraEquipmentSlot.Light), "boat belongs in the travel slot");
+            Assert.IsFalse(inventory.TryEquipExtra(0, ExtraEquipmentSlot.Travel));
+            Assert.IsFalse(inventory.TryUnequipExtra(ExtraEquipmentSlot.Travel));
+            Assert.IsTrue(inventory.HangGliderEquipped);
+            Assert.AreEqual(2, inventory[0].Count);
+
+            Assert.IsNotNull(inventory.TakeFrom(1));
+            Assert.IsTrue(inventory.TryEquipExtra(0, ExtraEquipmentSlot.Travel));
+            Assert.AreEqual(glider, inventory[1].Raw);
+            Assert.AreEqual(1, inventory[0].Count);
+            Assert.AreEqual(boat, inventory.GetExtra(ExtraEquipmentSlot.Travel).Raw);
+            Assert.IsFalse(inventory.HangGliderEquipped, "a boat never enables gliding");
+        }
+
+        [Test]
         public void WholeInventorySurvivesACheckpoint()
         {
             var store = new MemoryStore();
@@ -171,6 +201,12 @@ namespace CubeGame.Tests.FullM0.EditMode
             inv.TryPlace(60, InventoryEntry.FromCore(new ItemInstance(ItemType.Chest, 0, 2, 1, 5)));
             Assert.IsTrue(inv.TryEquip(60, out _));
             inv.TryPlace(12, InventoryEntry.FromRaw(Potion, 9));
+            var glider = new RawAlphaItemId(0x17, 0);
+            var necklace = new ItemInstance(ItemType.Amulet, 0, 2, 1, 42);
+            Assert.IsTrue(inv.TryPlace(13, InventoryEntry.FromRaw(glider, 2)));
+            Assert.IsTrue(inv.TryEquipExtra(13, ExtraEquipmentSlot.Travel));
+            Assert.IsTrue(inv.TryPlace(14, InventoryEntry.FromCore(necklace)));
+            Assert.IsTrue(inv.TryEquipExtra(14, ExtraEquipmentSlot.Neck));
 
             Assert.IsTrue(slots.Save(session, 1L).IsSuccess);
             SlotLoadResult loaded = slots.Load("slot0", "test");
@@ -182,7 +218,34 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.AreEqual(Potion, back[12].Raw);
             Assert.AreEqual(ItemType.Chest, back.Loadout.GetEquipped(EquipmentSlot.Chest).Type);
             Assert.AreEqual(inv.Loadout.GetEquipped(EquipmentSlot.MainHand), back.Loadout.GetEquipped(EquipmentSlot.MainHand), "start kit weapon");
+            Assert.IsTrue(back.HangGliderEquipped);
+            Assert.AreEqual(glider, back[13].Raw);
+            Assert.AreEqual(1, back[13].Count);
+            Assert.AreEqual(necklace, back.GetExtra(ExtraEquipmentSlot.Neck).Core);
+            Assert.AreEqual(inv.GetExtra(ExtraEquipmentSlot.Light).Raw, back.GetExtra(ExtraEquipmentSlot.Light).Raw);
+            Assert.AreEqual(inv.GetExtra(ExtraEquipmentSlot.LeftRing).Core, back.GetExtra(ExtraEquipmentSlot.LeftRing).Core);
+            Assert.AreEqual(inv.GetExtra(ExtraEquipmentSlot.RightRing).Core, back.GetExtra(ExtraEquipmentSlot.RightRing).Core);
             Assert.AreEqual(inv.UsedSlots, back.UsedSlots);
+        }
+
+        [Test]
+        public void OldBagPlacementDoesNotAutoEquipTheAccessoriesOnLoad()
+        {
+            GameSession session = Running();
+            HeroInventory inv = session.Hero.Inventory;
+            Assert.IsTrue(inv.TryUnequipExtra(ExtraEquipmentSlot.Light));
+            Assert.IsTrue(inv.TryUnequipExtra(ExtraEquipmentSlot.LeftRing));
+            Assert.IsTrue(inv.TryUnequipExtra(ExtraEquipmentSlot.RightRing));
+            var slots = new GameSlotStore(new MemoryStore(), new JsonSaveSerializer(), new JsonSessionSerializer(), new JsonWorldSerializer());
+            Assert.IsTrue(slots.Save(session, 1L).IsSuccess);
+
+            SlotLoadResult loaded = slots.Load("slot0", "test");
+            Assert.IsTrue(loaded.IsSuccess, loaded.ToString());
+            Assert.IsNull(loaded.Hero.Inventory.GetExtra(ExtraEquipmentSlot.Light));
+            Assert.IsNull(loaded.Hero.Inventory.GetExtra(ExtraEquipmentSlot.LeftRing));
+            Assert.IsNull(loaded.Hero.Inventory.GetExtra(ExtraEquipmentSlot.RightRing));
+            Assert.AreEqual(1, loaded.Hero.Inventory.CountOf(new RawAlphaItemId(0x18, 0)));
+            Assert.AreEqual(2, loaded.Hero.Inventory.CountOf(new RawAlphaItemId(9, 0)));
         }
 
         private static GameSession Running()

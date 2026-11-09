@@ -59,16 +59,27 @@ namespace CubeGame.Features.Session
         }
 
         /// <summary>
-        /// Gives the Alpha class start kit (C1, <see cref="AlphaHeroCreation.StarterKit"/>): weapons into the hands
-        /// Alpha fills, the rest into the bags. Rings and the lamp go to the bags until their slots exist (C5).
+        /// Gives the Alpha class start kit (C1, <see cref="AlphaHeroCreation.StarterKit"/>): weapons, rings and lamp
+        /// into their recorded slots, the remaining items into the bags.
         /// </summary>
         public void GiveStarterKit()
         {
             foreach (StarterKitItem item in AlphaHeroCreation.StarterKit(Sheet.Class))
             {
-                bool done = item.Core != null && item.Equip.HasValue
-                    ? Inventory.TryEquipDirect(item.Equip.Value, item.Core)
-                    : Inventory.TryAdd(item.Core != null ? InventoryEntry.FromCore(item.Core) : InventoryEntry.FromRaw(item.Raw, item.Count));
+                bool done;
+                if (item.Core != null && item.Equip.HasValue)
+                {
+                    done = Inventory.TryEquipDirect(item.Equip.Value, item.Core);
+                }
+                else
+                {
+                    InventoryEntry entry = item.Core != null ? InventoryEntry.FromCore(item.Core) : InventoryEntry.FromRaw(item.Raw, item.Count);
+                    var extraSlot = (ExtraEquipmentSlot)item.AlphaSlotOffset;
+                    done = HeroInventory.CanEquipExtra(extraSlot, entry)
+                        ? Inventory.TryEquipExtraDirect(extraSlot, entry)
+                        : Inventory.TryAdd(entry);
+                }
+
                 if (!done)
                 {
                     throw new InvalidOperationException($"start kit item refused: {Inventory.LastRejection}");
@@ -124,7 +135,7 @@ namespace CubeGame.Features.Session
 
         /// <summary>
         /// Rebuilds bags and equipment from <see cref="Items"/> (Core save order) and a placement list from the
-        /// session file: placement[i] ≥ 0 is a bag slot, −(1+slot) an equipment slot. Without a valid placement
+        /// session file: placement[i] ≥ 0 is a bag slot, −(1+slot) is a Core index or extra Alpha slot offset. Without valid placement
         /// (slots saved before M0-04B) every item goes to the bags and the first weapon to the main hand
         /// (CubeGame rule, PLACEHOLDER_NOT_ALPHA). Returns false when a placement entry could not be honoured.
         /// </summary>
@@ -140,9 +151,10 @@ namespace CubeGame.Features.Session
                 if (exact)
                 {
                     int code = placement[i];
+                    InventoryEntry entry = InventoryEntry.FromCore(item);
                     placed = code >= 0
-                        ? Inventory.TryPlace(code, InventoryEntry.FromCore(item))
-                        : Inventory.TryEquipDirect((EquipmentSlot)(-code - 1), item);
+                        ? Inventory.TryPlace(code, entry)
+                        : Inventory.TryRestoreExtra(code, entry) || Inventory.TryEquipDirect((EquipmentSlot)(-(code + 1)), item);
                     ok &= placed;
                 }
                 else if (item.Type == ItemType.Weapon && Loadout.IsSlotEmpty(EquipmentSlot.MainHand))
@@ -168,6 +180,14 @@ namespace CubeGame.Features.Session
                 if (Loadout.GetEquipped(slot) != null)
                 {
                     codes.Add(-1 - (int)slot);
+                }
+            }
+
+            foreach (ExtraEquipmentSlot slot in HeroInventory.ExtraSlots)
+            {
+                if (Inventory.GetExtra(slot)?.IsCore == true)
+                {
+                    codes.Add(HeroInventory.ExtraPlacement(slot));
                 }
             }
 
