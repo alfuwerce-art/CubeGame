@@ -78,7 +78,7 @@ namespace CubeGame.Features.Creatures
             return false;
         }
 
-        public double WalkSpeed { get; set; } = 3.7;     // PLACEHOLDER_NOT_ALPHA (OQ-23)
+        public double WalkSpeed { get; set; } = CreatureMovement.WalkSpeed;   // ALPHA_CODE 0x5A7EB0 (C2 scale)
         public double AggroRadius { get; set; } = 16.0;  // CUBEGAME_CONTRACT
         public double AttackRange { get; set; } = 2.0;   // proven dodge distance
         public int LastMoveFrames { get; private set; }

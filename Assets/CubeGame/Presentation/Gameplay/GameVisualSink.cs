@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using CubeGame.AlphaModels;
+using CubeGame.Content;
 using CubeGame.Core.Items;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.Creatures;
@@ -28,11 +29,14 @@ namespace CubeGame.Gameplay
         public const float WalkAmplitude = 0.19f;
 
         private readonly Dictionary<StableEntityId, Entry> _entries = new Dictionary<StableEntityId, Entry>();
+        private readonly Dictionary<StableEntityId, GameObject> _groundItems = new Dictionary<StableEntityId, GameObject>();
         private AlphaActorLibrary _library;
         private Func<WorldPosition, Vector3> _toScene;
         private Transform _heroRoot;
         private string _itemsDirectory;
         private long _lastTimeMs = -1;
+        private CharacterVisualRequest _heroRequest;
+        private Features.Session.GameEventBus _bus;
 
         /// <summary>Alpha model voxel → world block factor, measured on the hero model (0 until the hero model exists).</summary>
         public float ModelScale { get; private set; }
@@ -138,7 +142,144 @@ namespace CubeGame.Gameplay
 
         public void OnEquipmentChanged(EquipmentVisualChanged e)
         {
-            // M0-04B: the loadout UI publishes this; the starting weapon is applied when the hero model is built.
+            // D4: the loadout UI publishes raw Alpha item ids; the hero model is rebuilt with the new armour,
+            // weapon or off-hand. Slots this layer cannot show (neck/rings/lamp/pet/back) are reported, not faked.
+            if (!e.Entity.Equals(StableEntityId.Hero))
+            {
+                return;
+            }
+
+            if (!HeroLoadout.TryApply(_heroRequest, e.Slot, e.Item, _itemsDirectory, out CharacterVisualRequest updated,
+                    out string problem))
+            {
+                Problems.Add($"EQUIP_SLOT {e.Slot}: {problem}");
+                return;
+            }
+
+            _heroRequest = updated;
+            RebuildHero();
+        }
+
+        /// <summary>
+        /// Subscribes the sink to the item events (the sink interface carries entity events only). The game
+        /// bootstrap calls this once the bus exists; without it ground items keep their gameplay placeholder.
+        /// </summary>
+        public void BindItems(Features.Session.GameEventBus bus)
+        {
+            if (_bus != null)
+            {
+                _bus.Unsubscribe<WorldItemDropped>(OnWorldItemDropped);
+                _bus.Unsubscribe<WorldItemRemoved>(OnWorldItemRemoved);
+            }
+
+            _bus = bus;
+            if (_bus == null) return;
+            _bus.Subscribe<WorldItemDropped>(OnWorldItemDropped);
+            _bus.Subscribe<WorldItemRemoved>(OnWorldItemRemoved);
+        }
+
+        /// <summary>Visual of one item on the ground: the Alpha model staged for that raw item id.</summary>
+        public void OnWorldItemDropped(WorldItemDropped e)
+        {
+            OnWorldItemRemoved(new WorldItemRemoved { Item = e.Item });
+            GameObject visual = BuildGroundItem(e.Raw, e.Item);
+            if (visual == null) return;
+            visual.transform.SetParent(transform, false);
+            if (_toScene != null) visual.transform.position = _toScene(e.Position);
+            _groundItems[e.Item] = visual;
+        }
+
+        public void OnWorldItemRemoved(WorldItemRemoved e)
+        {
+            if (_groundItems.TryGetValue(e.Item, out GameObject visual))
+            {
+                Destroy(visual);
+                _groundItems.Remove(e.Item);
+            }
+        }
+
+        /// <summary>Number of item visuals currently shown (tests/diagnostics).</summary>
+        public int GroundItemCount => _groundItems.Count;
+
+        GameObject BuildGroundItem(RawAlphaItemId raw, StableEntityId item)
+        {
+            if (_itemsDirectory == null)
+            {
+                Problems.Add("DATA_MISSING item model: no staged items directory");
+                return null;
+            }
+
+            string modelName = GroundItemModelName(raw);
+            if (string.IsNullOrEmpty(modelName))
+            {
+                Problems.Add($"DATA_MISSING item model {raw}");
+                return null;
+            }
+
+            string path = HeroLoadout.ModelFile(_itemsDirectory, modelName);
+            if (path == null || !File.Exists(path))
+            {
+                Problems.Add("DATA_MISSING item model file " + path);
+                return null;
+            }
+
+            CubeGame.AlphaTransfer.VoxelMesh.Result result =
+                CubeGame.AlphaTransfer.VoxelMesh.Build(File.ReadAllBytes(path), "ground_" + item.Value.ToString("x"));
+            if (result.mesh == null)
+            {
+                Problems.Add($"ITEM_MESH {raw}: {result.problem}");
+                return null;
+            }
+
+            var go = new GameObject($"GroundItem_{item.Value:x}");
+            go.AddComponent<MeshFilter>().sharedMesh = result.mesh;
+            var renderer = go.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = new Material(Shader.Find("Standard"));
+            go.transform.localScale = Vector3.one * (ModelScale > 0f ? ModelScale : 1f);
+            go.transform.localRotation = Quaternion.Euler(0f, 45f, 0f);
+            return go;
+        }
+
+        /// <summary>Alpha model of a ground item: consumables/held items first, then weapon subtypes.</summary>
+        public static string GroundItemModelName(RawAlphaItemId raw)
+        {
+            if (AlphaHeldItemCatalog.TryModel(raw.Type, raw.Subtype, out AlphaHeldItemDef held))
+            {
+                return held.Model;
+            }
+
+            if (raw.Type == 3 && AlphaItemRules.TryWeaponSubtype(raw.Subtype, out AlphaWeaponSubtypeDef weapon))
+            {
+                return weapon.DefaultModel;
+            }
+
+            if (AlphaEquipmentCatalog.TryModel(raw.Type, raw.Subtype, out AlphaEquipmentDef armour))
+            {
+                return armour.Model;
+            }
+
+            return null;
+        }
+
+        void RebuildHero()
+        {
+            if (!_entries.TryGetValue(StableEntityId.Hero, out Entry entry) || entry.Root == null) return;
+            if (entry.View != null)
+            {
+                Destroy(entry.View.gameObject);
+            }
+
+            if (entry.Placeholder != null)
+            {
+                Destroy(entry.Placeholder);
+                entry.Placeholder = null;
+            }
+
+            entry.View = BuildHero(entry.Root);
+            if (entry.View == null)
+            {
+                entry.Placeholder = MakePlaceholder(entry.Root, true);
+            }
         }
 
         public void OnActionStarted(ActionStarted e)
@@ -228,6 +369,13 @@ namespace CubeGame.Gameplay
             }
 
             _entries.Clear();
+            foreach (GameObject visual in _groundItems.Values)
+            {
+                if (visual != null) Destroy(visual);
+            }
+
+            _groundItems.Clear();
+            BindItems(null);
         }
 
         private AlphaActorView BuildHero(Transform root)
@@ -237,17 +385,23 @@ namespace CubeGame.Gameplay
                 return null;
             }
 
-            CharacterVisualRequest request = CharacterVisualRequest.Default;
-            request.Kind = Features.Session.GameSession.HeroKind.Value;
-            string weapon = _itemsDirectory != null ? Path.Combine(_itemsDirectory, WeaponModelFile(WeaponSubtype.Greatsword)) : null;
-            if (weapon != null && File.Exists(weapon))
+            CharacterVisualRequest request = _heroRequest;
+            if (request.Kind == 0)
             {
-                request.WeaponSubtype = (int)WeaponSubtype.Greatsword;
-                request.WeaponModelPath = weapon;
-            }
-            else
-            {
-                Problems.Add("DATA_MISSING hero weapon model " + weapon);
+                request = CharacterVisualRequest.Default;
+                request.Kind = Features.Session.GameSession.HeroKind.Value;
+                string weapon = _itemsDirectory != null ? Path.Combine(_itemsDirectory, WeaponModelFile(WeaponSubtype.Greatsword)) : null;
+                if (weapon != null && File.Exists(weapon))
+                {
+                    request.WeaponSubtype = (int)WeaponSubtype.Greatsword;
+                    request.WeaponModelPath = weapon;
+                }
+                else
+                {
+                    Problems.Add("DATA_MISSING hero weapon model " + weapon);
+                }
+
+                _heroRequest = request;
             }
 
             CharacterVisualResult result = AlphaPlayerVisualBuilder.Build(request, root, _library, _itemsDirectory);

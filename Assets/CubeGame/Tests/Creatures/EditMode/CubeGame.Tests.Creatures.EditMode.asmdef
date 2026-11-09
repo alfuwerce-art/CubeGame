@@ -1,29 +1,35 @@
-{
-    "name": "CubeGame.Tests.Creatures.EditMode",
-    "rootNamespace": "CubeGame.Tests.Creatures.EditMode",
-    "references": [
-        "CubeGame.Core",
-        "CubeGame.Content",
-        "CubeGame.AlphaModels",
-        "CubeGame.Features.Creatures",
-        "CubeGame.Features.AI",
-        "CubeGame.Features",
-        "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": true,
-    "precompiledReferences": [
-        "nunit.framework.dll"
-    ],
-    "autoReferenced": false,
-    "defineConstraints": [
-        "UNITY_INCLUDE_TESTS"
-    ],
-    "versionDefines": [],
-    "noEngineReferences": false
+﻿{
+    "name":  "CubeGame.Tests.Creatures.EditMode",
+    "rootNamespace":  "CubeGame.Tests.Creatures.EditMode",
+    "references":  [
+                       "CubeGame.Core",
+                       "CubeGame.Content",
+                       "CubeGame.AlphaModels",
+                       "CubeGame.Features.Creatures",
+                       "CubeGame.Features.AI",
+                       "CubeGame.Features",
+                       "UnityEngine.TestRunner",
+                       "UnityEditor.TestRunner",
+                       "CubeGame.Presentation.Visual",
+                       "CubeGame.Gameplay"
+                   ],
+    "includePlatforms":  [
+                             "Editor"
+                         ],
+    "excludePlatforms":  [
+
+                         ],
+    "allowUnsafeCode":  false,
+    "overrideReferences":  true,
+    "precompiledReferences":  [
+                                  "nunit.framework.dll"
+                              ],
+    "autoReferenced":  false,
+    "defineConstraints":  [
+                              "UNITY_INCLUDE_TESTS"
+                          ],
+    "versionDefines":  [
+
+                       ],
+    "noEngineReferences":  false
 }
