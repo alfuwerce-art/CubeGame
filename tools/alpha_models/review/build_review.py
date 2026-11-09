@@ -107,12 +107,14 @@ def select_batch_specimens(batch_dir: Path, entries=None, prefix: str = ""):
     jobs = {e["id"]: batch_dir / "jobs" / f"{e['id']}.json" for e in entries}
     seen, rows = set(), []
     for e in entries:
-        key = (e["kind"], tuple(e["seed"]))
+        # issue #7: an optional "variant_tag" keeps two variants of one kind/seed (Alpha parity vs a visual
+        # correction proposal) as separate specimens; scopes without it behave as before
+        key = (e["kind"], tuple(e["seed"]), e.get("variant_tag", ""))
         if key in seen:
             continue
         seen.add(key)
         rows.append(e)
-    rows.sort(key=lambda e: (int(e["kind"], 16), tuple(e["seed"]) != (0, 0), tuple(e["seed"])))
+    rows.sort(key=lambda e: (int(e["kind"], 16), tuple(e["seed"]) != (0, 0), tuple(e["seed"]), e.get("variant_tag", "")))
     out = []
     for e in rows:
         job = jobs[e["id"]]

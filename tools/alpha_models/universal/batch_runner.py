@@ -322,7 +322,7 @@ def build_entries(rows, scope, run_slots, static_table):
 
 # code whose change must invalidate every baked library (П2 = drawModel oracle + the baker itself)
 BAKE_CODE = ("action_baker.py", "alpha_oracle.py", "drawmodel_emu.py", "x86emu.py", "creature_rig.py",
-             "alpha_static.py", "contract.py")
+             "alpha_static.py", "contract.py", "visual_correction.py")
 CACHE_KEY_FILE = "cache_key.json"
 
 
@@ -333,7 +333,7 @@ def bake_cache_key(entry, exe=None):
     from tools.alpha_models.universal import contract as ct
     here = Path(__file__).resolve().parent
     prof = ct.ACTION_PROFILES[entry["profile"]]
-    return {"format": "cubegame.bake_cache_key/1",
+    key = {"format": "cubegame.bake_cache_key/1",
             "exe_sha256": sha256_file(exe or ab.DEFAULT_EXE),
             "profile": entry["profile"],
             "profile_sha256": sha256_json(prof),
@@ -341,6 +341,11 @@ def bake_cache_key(entry, exe=None):
             "code_sha256": {n: sha256_file(here / n) for n in BAKE_CODE},
             "request": {"kind": entry["kind"], "seed": list(entry["seed"]),
                         "actions": sorted(prof["launched_actions"])}}
+    # issue #7: a library baked under a VISUAL CORRECTION PROPOSAL is a different library
+    from tools.alpha_models.universal import visual_correction as vc
+    if vc.current() is not None:
+        key["visual_correction"] = vc.current()
+    return key
 
 
 def library_reusable(lib, key):

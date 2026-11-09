@@ -343,9 +343,12 @@ namespace CubeGame.AlphaTransfer.Review.Editor
             foreach (var k in idx.kinds)
             {
                 var vars = idx.specimens.Where(s => s.kind == k && s.prepare == "PASS").ToList();
-                // review #4: base specimen from four sides (front, right, back, left), idle and walk rows
+                // review #4: base specimen from four sides (front, right, back, left) + top, idle and walk rows;
+                // issue #7: a small review scope (<= 3 specimens of a kind, e.g. Alpha vs correction proposal)
+                // gets the sheet for every specimen, so before/after are compared on identical sheets
                 var bse = vars.FirstOrDefault(v => v.IsBaseVariant) ?? vars.FirstOrDefault();
-                if (bse != null) FourSides(cam, root, mat, bse, $"sides_{bse.id}.png");
+                foreach (var v in vars.Count <= 3 ? vars : (bse != null ? new List<ReviewSpecimenInfo> { bse } : new List<ReviewSpecimenInfo>()))
+                    FourSides(cam, root, mat, v, $"sides_{v.id}.png");
                 Grid(cam, root, mat, vars.Select(v => (v, (Func<ReviewSpecimen, (ReviewSource, float)>)(s =>
                     (s.Sources(ReviewMode.Idle).LastOrDefault(), 0f)))).ToList(), $"variants_{k}.png", 200f, 10f);
                 foreach (var v in vars)
@@ -390,7 +393,9 @@ namespace CubeGame.AlphaTransfer.Review.Editor
             // not drawn here (the interactive viewer still shows it, labelled "disabled in game").
             bool isStatic = s.contract != null && s.contract.controllerMode == "STATIC_OBJECT";
             if (walk != null && !isStatic) { rowsSrc.Add((walk, 1.0f)); rowsSrc.Add((walk, 2.6f)); }
-            float[] yaws = { 180f, 90f, 0f, 270f };
+            // front, right, back, left, top (issue #7 asks for the top view as well)
+            float[] yaws = { 180f, 90f, 0f, 270f, 180f };
+            float[] pitches = { 8f, 8f, 8f, 8f, 89f };
             int rows = rowsSrc.Count;
             var sheet = new Texture2D(yaws.Length * Cell, rows * Cell, TextureFormat.RGB24, false);
             for (int r = 0; r < rows; r++)
@@ -398,7 +403,7 @@ namespace CubeGame.AlphaTransfer.Review.Editor
                 {
                     if (rowsSrc[r].src == null) continue;
                     s.Apply(rowsSrc[r].src, rowsSrc[r].x);
-                    Aim(cam, frame, yaws[c], 8f, 0.8f);
+                    Aim(cam, frame, yaws[c], pitches[c], 0.8f);
                     var tex = Render(cam, Cell, Cell);
                     sheet.SetPixels(c * Cell, (rows - 1 - r) * Cell, Cell, Cell, tex.GetPixels());
                     UnityEngine.Object.DestroyImmediate(tex);

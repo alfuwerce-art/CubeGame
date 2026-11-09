@@ -342,6 +342,22 @@ def game_usage(kind):
     return {"policy": "CREATURE", "basis": None, "reason": None, "walk": "ALLOWED", "actions": "BY_PROFILE"}
 
 
+def _kept_by_visual_correction(pid, kind, prof):
+    """Issue #7: an ACTIVE visual correction proposal may keep one profile of its kind, declared with the Alpha
+    family it patches (``keeps_profiles``). Triggers do not depend on the corrected offsets and the poses are
+    re-baked by the drawModel oracle on the corrected appearance; ``visual_correction.apply`` refuses unless the
+    patched fields hold Alpha's documented values. Returns the reason note, or None."""
+    from tools.alpha_models.universal import visual_correction as vc
+    name = vc.current()
+    if name is None:
+        return None
+    c = vc.get(name)
+    base = c.get("keeps_profiles", {}).get(pid)
+    if c["kind"] != kind or base is None or base not in prof["evidence_families"]:
+        return None
+    return f"{c['status']} {name}: profile {pid} kept on the corrected appearance (Alpha family {base})"
+
+
 def action_profile_for(kind, seed_variant, family_id, parts, specimen_families=None):
     """(profile_id | None, status, reasons) for one entity.
 
@@ -353,13 +369,14 @@ def action_profile_for(kind, seed_variant, family_id, parts, specimen_families=N
     for pid, prof in ACTION_PROFILES.items():
         fams = set((specimen_families or {}).get(pid, ())) | set(prof["evidence_families"])
         if any(s["kind"] == kind and list(s["seed_variant"]) == seed for s in prof["specimens"]):
-            if family_id not in prof["evidence_families"]:
+            kept = _kept_by_visual_correction(pid, kind, prof)
+            if family_id not in prof["evidence_families"] and not kept:
                 return None, "BLOCKED", [f"SPECIMEN_APPEARANCE_DIFFERS {pid}: family {family_id} is not the "
                                          f"verified {prof['evidence_families']}"]
             missing = [p for p in prof["requires_parts"] if p not in parts and p != "weapon"]
             if missing:
                 return None, "BLOCKED", [f"PROFILE_PARTS_MISSING {pid} {missing}"]
-            return pid, prof["status"], []
+            return pid, prof["status"], ([kept] if kept and family_id not in prof["evidence_families"] else [])
         if family_id in fams:
             compatible.append(pid)
     if compatible:

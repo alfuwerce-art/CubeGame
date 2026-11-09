@@ -156,6 +156,30 @@ def resolve_kind(exe, kind, seed=(0, 0)):
 
 
 def prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None):
+    """Prepares one job; a job field ``visual_correction`` (issue #7) runs the whole preparation with that
+    opt-in VISUAL CORRECTION PROPOSAL active and records its provenance next to the data (not Alpha parity)."""
+    from tools.alpha_models.universal import visual_correction as vc
+    name = job.get("visual_correction")
+    with vc.active(name):
+        out = _prepare_unity(job, project, exe, db, clips_root)
+    data_dir = Path(project) / "Assets" / "AlphaTransfer" / "Data"
+    prov = data_dir / "visual_correction.json"
+    if name is None:
+        if prov.exists():
+            prov.unlink()          # a stale proposal of an earlier job must never label this one
+        return out
+    record = vc.provenance(name)
+    prov.write_text(json.dumps(record, indent=1), encoding="utf-8")
+    con = data_dir / "contract.json"
+    if con.exists():
+        c = json.loads(con.read_text(encoding="utf-8"))
+        c.update(visualCorrection=name, visualCorrectionStatus=record["status"])
+        con.write_text(json.dumps(c, indent=1), encoding="utf-8")
+    out["visual_correction"] = record
+    return out
+
+
+def _prepare_unity(job, project, exe=DEFAULT_EXE, db=DEFAULT_DB, clips_root=None):
     problems = []
     kind = int(str(job["kind"]), 0)
     seed = tuple(job.get("seed_variant", [0, 0]))

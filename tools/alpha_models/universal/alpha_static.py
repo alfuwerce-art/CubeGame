@@ -149,6 +149,9 @@ class AppearanceEmulator:
         cpu.mem.write(self.SEED + 0x10, bytes(hair))
         cpu.call(GENERATE_APPEARANCE_VA, args=(self.KIND, self.ITEM, self.SEED))
         raw = cpu.mem.read(self.ITEM, APPEARANCE_SIZE)
+        # issue #7: an explicitly activated VISUAL CORRECTION PROPOSAL (off by default; not Alpha parity)
+        from tools.alpha_models.universal import visual_correction as vc
+        raw = vc.apply(cpu.mem.u(self.KIND, 4), raw)
         return {"raw": raw, "defaults": defaults, "rand_calls": len(rand_calls),
                 "kind_after": cpu.mem.u(self.KIND, 4), "steps": cpu.steps}
 

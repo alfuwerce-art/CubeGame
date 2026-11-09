@@ -109,10 +109,23 @@ def joints(oracle, frame, kind):
 
 
 def _bake_one(payload):
-    exe, sizes, kind, seed, weapon, parts, family, exe_hash, dt_ms, out, action, profile_id = payload
+    exe, sizes, kind, seed, weapon, parts, family, exe_hash, dt_ms, out, action, profile_id, correction = payload
+    # issue #7: worker processes do not inherit the parent's active visual correction -> re-activate it
+    from tools.alpha_models.universal import visual_correction as vc
+    with vc.active(correction):
+        return _bake_one_active(exe, sizes, kind, seed, weapon, parts, family, exe_hash, dt_ms, out, action,
+                                profile_id)
+
+
+def _bake_one_active(exe, sizes, kind, seed, weapon, parts, family, exe_hash, dt_ms, out, action, profile_id):
     profile = contract.ACTION_PROFILES[profile_id]
     oracle = alpha_oracle.load(str(exe), str(sizes))
-    c, _ = oracle.creature(kind, seed)
+    c, app_w = oracle.creature(kind, seed)
+    # the worker's own appearance must resolve to the manifest's family (the parent computed it): a mismatch
+    # means the worker baked another body than the manifest claims
+    fam_w = cr.resolve(kind, app_w, equipment=('weapon',) if 'weapon' in parts else ()).family_id
+    if fam_w != family:
+        raise ValueError(f'WORKER_FAMILY_MISMATCH {fam_w} != {family}')
     name = f'action_{action:03d}'
     entry = {'action': action, 'clip': name, 'status': 'BLOCKED'}
     dest = Path(out) / f'{name}.alphaclip.json'
@@ -182,8 +195,11 @@ def bake_job(job, actions, out, exe=DEFAULT_EXE, sizes=DEFAULT_SIZES, dt_ms=16, 
                 'action_semantics': 'pose library, not gameplay authorization',
                 'actions': []}
     manifest['profile'] = profile_id
+    from tools.alpha_models.universal import visual_correction as vc
     payloads = [(str(exe), str(sizes), kind, seed, weapon, res.parts, res.family_id,
-                 manifest['exe_sha256'], dt_ms, str(out), a, profile_id) for a in actions]
+                 manifest['exe_sha256'], dt_ms, str(out), a, profile_id, vc.current()) for a in actions]
+    if vc.current() is not None:
+        manifest['visual_correction'] = vc.provenance(vc.current())
     (out / 'actions.json').write_text(json.dumps(manifest, indent=1), encoding='utf8')
     with ProcessPoolExecutor(max_workers=workers) as pool:
         futures = [pool.submit(_bake_one,p) for p in payloads]
