@@ -61,6 +61,26 @@ namespace CubeGame.Tests.Creatures.EditMode
         }
 
         [Test]
+        public void StructureGeometryOriginAndDoorComeFromThePlacement()
+        {
+            var placement = Placement(ContentPlacementKind.Structure, 0);
+            placement.X = 8396810.0;
+            placement.Z = 8396820.0;
+            placement.SurfaceY = 63;
+            placement.Width = 3;
+            placement.Depth = 3;
+            placement.Height = 4;
+            placement.Yaw = 180f;
+            var origin = AlphaZoneContentProvider.HouseOrigin(placement);
+            Assert.AreEqual(8396808, origin.X, "origin is floor(centre - width/2)");
+            Assert.AreEqual(8396818, origin.Z);
+            Assert.AreEqual(64, origin.Y, "the house stands on the voxel above the surface");
+            Assert.AreEqual(2, AlphaZoneContentProvider.DoorSide(placement), "180° → +Z door");
+            placement.Yaw = -90f;
+            Assert.AreEqual(3, AlphaZoneContentProvider.DoorSide(placement), "negative rotation is normalised");
+        }
+
+        [Test]
         public void RegionAndPositionFollowTheZone()
         {
             var spawn = AlphaZoneContentProvider.ToSpawn(Placement(ContentPlacementKind.Vegetation, 0x78), Zone, 1);
