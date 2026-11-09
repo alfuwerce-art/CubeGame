@@ -75,7 +75,7 @@ namespace CubeGame.Features.World
         {
             if (generatorId == AlphaTerrainGenerator.Id)
             {
-                generator = new AlphaTerrainGenerator(seed, ZoneContentRegistry.Providers);
+                generator = new AlphaTerrainGenerator(seed);
                 return true;
             }
 
@@ -100,8 +100,8 @@ namespace CubeGame.Features.World
     }
 
     /// <summary>
-    /// Content providers used by every generator the game creates (registered once at startup by the content
-    /// modules, DeepSeek #13). Empty in M0-02: the world is terrain only.
+    /// Registry for explicitly assembling content providers. A versioned generator uses the provider set
+    /// assigned to its id so registrations cannot change an existing world.
     /// </summary>
     public static class ZoneContentRegistry
     {

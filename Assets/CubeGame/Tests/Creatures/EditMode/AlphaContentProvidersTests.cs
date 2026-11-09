@@ -32,12 +32,23 @@ namespace CubeGame.Tests.Creatures.EditMode
         }
 
         [Test]
-        public void RegistrationAddsTheProvidersToTheWorldRegistry()
+        public void RegistrationAddsProvidersWithoutChangingTheLegacyGenerator()
         {
-            int before = ZoneContentRegistry.Providers.Count;
-            int added = AlphaContentProviders.RegisterDefaults();
-            Assert.AreEqual(2, added);
-            Assert.AreEqual(before + 2, ZoneContentRegistry.Providers.Count);
+            var before = ZoneContentRegistry.Providers;
+            try
+            {
+                int added = AlphaContentProviders.RegisterDefaults();
+                Assert.AreEqual(2, added);
+                Assert.AreEqual(before.Count + 2, ZoneContentRegistry.Providers.Count);
+
+                Assert.IsTrue(WorldState.TryCreateGenerator(AlphaTerrainGenerator.Id, 666666u, out var generator));
+                Assert.IsEmpty(((AlphaTerrainGenerator)generator).ContentProviders);
+            }
+            finally
+            {
+                ZoneContentRegistry.Clear();
+                foreach (var provider in before) ZoneContentRegistry.Register(provider);
+            }
         }
 
         [Test]
