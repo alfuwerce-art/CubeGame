@@ -27,7 +27,7 @@ using UnityEngine;
 
 namespace CubeGame.AlphaModels.Import
 {
-    public static class AlphaModelsImport
+    public static partial class AlphaModelsImport
     {
         public const string ResourcesDir = "Assets/CubeGame/AlphaModels/Resources";
 
