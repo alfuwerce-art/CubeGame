@@ -40,6 +40,21 @@ namespace CubeGame.Features.Creatures
         public double X;
         public double Y;
         public double Z;
+
+        // ---- Alpha attack-variant inputs (C-29). Not part of the saved blob: the M0NPC|1 format stays
+        // byte-identical, and a creature without a world spawn record (R-1) keeps the unarmed defaults.
+        /// <summary>Raw Alpha item type of the weapon in hand (3 = weapon); -1 = nothing known.</summary>
+        public int WeaponItemType = -1;
+
+        /// <summary>Raw Alpha item subtype of the weapon in hand; -1 = nothing known.</summary>
+        public int WeaponItemSubtype = -1;
+
+        /// <summary>Alpha class byte [creature+0x140] from the world spawn record; -1 = unknown.</summary>
+        public int ClassId = -1;
+
+        /// <summary>Alpha specialisation byte [creature+0x141] from the world spawn record; -1 = unknown.</summary>
+        public int SpecialisationId = -1;
+
         public readonly Dictionary<string, double> Threat = new Dictionary<string, double>(StringComparer.Ordinal);
 
         public bool IsBoss => CreatureKinds.IsBoss(Kind);
