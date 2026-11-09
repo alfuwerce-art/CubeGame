@@ -20,6 +20,7 @@ using CubeGame.AlphaTransfer;
 using CubeGame.Content;
 using CubeGame.Features.AI;
 using CubeGame.Features.Creatures;
+using CubeGame.Presentation.Visual;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -70,6 +71,45 @@ namespace CubeGame.AlphaModels.Import
                 Write("resources.txt", "ALPHA_RESOURCES_RESULT=FAIL " + e);
             }
             if (exit == 0) Write("resources.txt", "ALPHA_RESOURCES_RESULT=PASS dir=" + ResourcesDir);
+            EditorApplication.Exit(exit);
+        }
+
+        // ---------------------------------------------------------------- item icons
+        [MenuItem("CubeGame/Alpha Models/Render Item Icons")]
+        public static void RenderItemIcons()
+        {
+            var problems = new List<string>();
+            var source = AlphaContentSource.Resolve();
+            var items = source.Root != null ? Path.Combine(source.Root, "items") : null;
+            var summary = new StringBuilder();
+            int rendered = 0;
+            if (items == null || !Directory.Exists(items))
+            {
+                Write("icons.txt", "ICONS_RESULT=NOT_CONFIGURED item cache missing");
+                return;
+            }
+            var outDir = Path.Combine(OutDir, "icons");
+            Directory.CreateDirectory(outDir);
+            foreach (var file in Directory.GetFiles(items, "*.cubdec"))
+            {
+                var name = Path.GetFileNameWithoutExtension(file);
+                var sprite = AlphaItemIconRenderer.RenderFromFile(file, 64, problems);
+                if (sprite == null) continue;
+                File.WriteAllBytes(Path.Combine(outDir, name + ".png"), sprite.texture.EncodeToPNG());
+                UnityEngine.Object.DestroyImmediate(sprite.texture);
+                UnityEngine.Object.DestroyImmediate(sprite);
+                rendered++;
+            }
+            summary.Append($"ICONS_RESULT={(problems.Count == 0 && rendered > 0 ? "PASS" : "FAIL")} icons={rendered} problems={problems.Count}");
+            foreach (var p in problems) summary.Append('\n').Append(p);
+            Write("icons.txt", summary.ToString());
+        }
+
+        public static void RunRenderItemIcons()
+        {
+            int exit = 1;
+            try { RenderItemIcons(); exit = 0; }
+            catch (Exception e) { Write("icons.txt", "ICONS_RESULT=FAIL exception=" + e); }
             EditorApplication.Exit(exit);
         }
 

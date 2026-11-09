@@ -5,7 +5,8 @@
         "CubeGame.AlphaModels",
         "CubeGame.Content",
         "CubeGame.Features.Creatures",
-        "CubeGame.Features.AI"
+        "CubeGame.Features.AI",
+        "CubeGame.Presentation.Visual"
     ],
     "includePlatforms": [
         "Editor"

@@ -41,7 +41,7 @@
 | Прогон | Результат |
 |---|---|
 | EditMode (весь проект) | `total=346 passed=346 failed=0` — `AlphaOutput/editmode.xml` |
-| PlayMode (весь проект) | `total=37 passed=37 failed=0` — `AlphaOutput/playmode.xml`; волк 0x1c проигрывает первое действие из подключённой библиотеки; `CREATURE_TICK_MS=0.166` при 6 существах |
+| PlayMode (весь проект) | `total=38 passed=38 failed=0` — `AlphaOutput/playmode.xml`; волк 0x1c проигрывает первое действие библиотеки; **действие AI доходит до игрового хука** (`ActionRequested` = 37 у дракона); `CREATURE_TICK_MS=0.166` при 6 существах |
 | Кадры существ | `RunPreview` → 156 акторов, **403 кадра** (idle/walk/action для 115 видов с действиями + встречи + кадр мира), `PASS problems=0` |
 | Кэш контента | **156/156 видов**: 26 пассивных (`STATIC_OBJECT`), **115 видов с библиотекой действий (851 клип)**, 15 — только формульная ходьба/покой (человекоидная семья без D65-библиотек и RuneGiant 0x76) |
 

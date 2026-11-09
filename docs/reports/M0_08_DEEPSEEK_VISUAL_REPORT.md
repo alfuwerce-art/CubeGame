@@ -27,6 +27,7 @@
 | `Assets/CubeGame/Presentation/Visual/AlphaAppearance.cs` | `AlphaAppearance` (hair tint по D61, resolve race actor) + `AlphaItemIconRenderer` (иконки из Alpha-модели) |
 | `Assets/CubeGame/Tests/Visual/PlayMode/CubeGame.Tests.Visual.PlayMode.asmdef` | тестовая сборка |
 | `Assets/CubeGame/Tests/Visual/PlayMode/AlphaVisualPlayModeTests.cs` | tint волос реального человека (значение + property block), отказ вне диапазона; иконка iron-sword 64×64 с непрозрачными пикселями, отказ для отсутствующего файла |
+| `Assets/CubeGame/AlphaModels.Import/Editor/AlphaModelsImport.cs` | `RenderItemIcons`/`RunRenderItemIcons`: пакетный рендер иконок всех `.cubdec` кэша в `AlphaOutput/icons`, маркер `ICONS_RESULT` |
 
 ---
 
@@ -34,8 +35,9 @@
 
 | Прогон | Результат |
 |---|---|
-| EditMode | `total=337 passed=337 failed=0` |
-| PlayMode | `total=28 passed=28 failed=0` (+2 новых) |
+| EditMode | `total=346 passed=346 failed=0` |
+| PlayMode | `total=38 passed=38 failed=0` (+2 новых: tint/иконка и AI→игровой хук действия) |
+| Иконки предметов | `RunRenderItemIcons` → **`ICONS_RESULT=PASS icons=28 problems=0`**, PNG 64×64 в `AlphaOutput/icons` (локально) |
 
 ---
 
@@ -53,7 +55,7 @@
 
 - **VFX/эффекты R-3, снаряды, динамические части R-8** — по-прежнему `UNKNOWN`: в этой партии ничего не имитировалось.
 - **Аудио** — данных Alpha о звуках в подтверждённом виде нет (`UNKNOWN`), звуковая система не создавалась.
-- **Иконки** есть как рантайм-рендер; импорт готовых PNG-иконок/атласов и UI-раскладка — M0-08A за Claude.
+- **Иконки** есть как рантайм-рендер и пакетная выгрузка (28 моделей предметов): вид спереди, 64×64, прозрачный фон — это CubeGame-представление, а не доказанный Alpha UI-рендер; раскладка/размеры слотов — M0-08A за Claude.
 - **Цвет волос игрока** применяется как Alpha-тинт; UI-выбор цвета и стартовые значения — за созданием персонажа (M0-03A).
 - **Расы**: только человек-воин подготовлен как визуальный актор; эльфы/прочие расы используют тот же motion family, но отдельные модели не подготовлены в этой партии.
 

@@ -274,6 +274,44 @@ namespace CubeGame.Tests.Creatures.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator CreatureActionReachesTheGameHook()
+        {
+            if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");
+            var library = AlphaActorLibrary.Shared;
+            if (!library.TryGet("d86_dragon_0x65", out var def)) Assert.Ignore("dragon variant is not staged");
+            var root = new GameObject("ActionHookRoot");
+            var playerGo = new GameObject("ActionTarget");
+            var player = playerGo.AddComponent<TestTarget>();
+            player.TargetId = "player";
+            player.Faction = (int)CreatureFaction.Player;
+            CreatureTargets.Register(player);
+            try
+            {
+                var go = new GameObject("DragonHook");
+                go.transform.SetParent(root.transform, false);
+                var agent = go.AddComponent<CreatureAgent>();
+                var state = new CreatureState
+                {
+                    StableId = "test:hook", Kind = 0x65, Faction = (int)CreatureFaction.Monster,
+                    Level = 5, MaxHealth = 100, Health = 100, X = 0, Z = 0,
+                };
+                int requested = -1;
+                agent.ActionRequested += (a, code, source) => requested = code;
+                agent.Initialize(state, new CreatureAi(), def, 11u);
+                playerGo.transform.position = new Vector3(1.5f, 0, 0);
+                for (int i = 0; i < 120 && requested < 0; i++) agent.Tick(0.05f);
+                Assert.AreEqual(37, requested, "the game hook receives the Alpha action code the AI requested");
+                yield return null;
+            }
+            finally
+            {
+                CreatureTargets.Clear();
+                Object.Destroy(root);
+                Object.Destroy(playerGo);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator PassiveObjectStaysStill()
         {
             if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");
