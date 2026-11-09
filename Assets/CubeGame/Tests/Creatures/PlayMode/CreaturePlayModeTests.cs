@@ -302,6 +302,9 @@ namespace CubeGame.Tests.Creatures.PlayMode
                 playerGo.transform.position = new Vector3(1.5f, 0, 0);
                 for (int i = 0; i < 120 && requested < 0; i++) agent.Tick(0.05f);
                 Assert.AreEqual(37, requested, "the game hook receives the Alpha action code the AI requested");
+                Assert.IsTrue(agent.TryGetActionTiming(37, out var timing), "the agent exposes the Alpha action timing");
+                Assert.Greater(timing.ActionEndMs, 0f);
+                Assert.IsFalse(agent.TryGetActionTiming(9999, out _), "unknown actions have no invented timing");
                 yield return null;
             }
             finally

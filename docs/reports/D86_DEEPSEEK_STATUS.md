@@ -49,7 +49,8 @@
 | 37 | M0-08A: рантайм-загрузчик атласа иконок `AlphaIconAtlas` (PNG+JSON → спрайты) | `2f531b6` | 353/353 | 46/46 |
 | 38 | M0-04B: правила расходников (`AlphaConsumableRules`: кулдауны 3с/10с, действия 80/81); лечение — B-U1 открыт | `112f815` | 354/354 | 46/46 |
 | 39 | M0-09C/07B: витрина показывает комнаты данжа и сундуки; выход `RunValidateContent` в batchmode иногда `0xC0000005` после PASS (артефакты валидны) | `d05a647` | 354/354 | 46/46 |
-| 40 | M0-09C: машинный манифест контента `AlphaContentManifest` (JSON из коммит-таблиц) + `RunBuildContentManifest` | эта партия | 355/355 | 46/46 |
+| 40 | M0-09C: машинный манифест контента `AlphaContentManifest` (JSON из коммит-таблиц) + `RunBuildContentManifest` | `384ffbc` | 355/355 | 46/46 |
+| 41 | M0-05C/06: `CreatureAgent.TryGetActionTiming` — бой получает windup/actionEnd прямо у агента; оговорка о родителе блока special | эта партия | 355/355 | 46/46 |
 
 Все прогоны — Unity 6000.3.27f2, `-batchmode -runTests`, артефакты в `AlphaOutput/editmode.xml` и `AlphaOutput/playmode.xml` (локально, не в Git).
 

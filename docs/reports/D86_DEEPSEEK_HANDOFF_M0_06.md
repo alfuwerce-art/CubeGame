@@ -65,6 +65,7 @@ int removed = spawner.DespawnBeyond(playerPosition);   // blob сохраняе�
 - `CreatureSpawner.GroundHeight(x, z)` — передайте высоту из генератора мира, чтобы существа вставали на поверхность; без хука используется Y из плана.
 - `CreatureAi.ActionRetryMs = 250` — троттлинг запросов действий (`CUBEGAME_CONTRACT`, не константа Alpha); замер: 12 существ, 600 кадров → 451 запрос, 0.172 мс/кадр. Если у вас есть собственный action lock, сообщите — уменьшим/увеличим троттлинг.
 - `AlphaActorView.TryGetActionTiming(code, out timing)` → `AlphaActionTiming { ActionEndMs, RecoveryStartMs, WindupMs, AttackTimingMs }` из `provenance.timings` клипа. Урон/эффект лучше привязывать к windup/attack_timing, а не к концу клипа; если у кода нет тайминга — API возвращает `false`, не выдумывайте числа.
+- `CreatureAgent.TryGetActionTiming(code, out timing)` — тот же тайминг прямо на агенте: подпишитесь на `ActionRequested`, сразу получите `timing.WindupMs/ActionEndMs` и запланируйте урон/эффект. Для неизвестного кода — `false`.
 - Симуляция вне экрана не заявлена: только blob сохранения.
 
 ## 6. Проверки

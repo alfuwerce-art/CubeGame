@@ -70,6 +70,14 @@ namespace CubeGame.Features.Creatures
         public string VisualStatus { get; private set; } = "NOT_RESOLVED";
         public bool VisualAvailable => View != null && View.Ready;
 
+        /// <summary>Alpha action timing (windup/actionEnd/recovery) for combat scheduling; false if unknown.</summary>
+        public bool TryGetActionTiming(int actionCode, out CubeGame.AlphaTransfer.AlphaActionTiming timing)
+        {
+            if (View != null) return View.TryGetActionTiming(actionCode, out timing);
+            timing = default;
+            return false;
+        }
+
         public double WalkSpeed { get; set; } = 3.7;     // PLACEHOLDER_NOT_ALPHA (OQ-23)
         public double AggroRadius { get; set; } = 16.0;  // CUBEGAME_CONTRACT
         public double AttackRange { get; set; } = 2.0;   // proven dodge distance
