@@ -747,6 +747,12 @@ namespace CubeGame.Gameplay
 
             _motor = _player.AddComponent<PlayerMotor>();
             _motor.SetCamera(_camera.transform);
+            WorldState waterWorld = _worldState;
+            _motor.WaterAt = p =>
+            {
+                view.ToWorld(p, out double wx, out double wy, out double wz);
+                return Voxel.IsWater(waterWorld.VoxelAt((int)Math.Floor(wx), (int)Math.Floor(wy), (int)Math.Floor(wz)));
+            };
             _orbitCamera.Target = _player.transform;
             _orbitCamera.Distance = OrbitCameraController.DefaultDistance;
             if (_cameraOverride)
