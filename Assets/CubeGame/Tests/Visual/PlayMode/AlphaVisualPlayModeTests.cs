@@ -74,5 +74,62 @@ namespace CubeGame.Tests.Visual.PlayMode
                 }
             }
         }
+        [UnityTest]
+        public IEnumerator PlayerVisualBuilderAppliesHairWeaponAndOffhand()
+        {
+            var source = AlphaContentSource.Resolve();
+            if (source.State != AlphaContentState.Ready) Assert.Ignore(source.Diagnosis);
+            var items = Path.Combine(source.Root, "items");
+            var sword = Path.Combine(items, "iron-sword1.cubdec");
+            var shield = Path.Combine(items, "iron-shield01.cubdec");
+            if (!File.Exists(sword) || !File.Exists(shield))
+                Assert.Ignore("item payloads are not staged (python -m tools.alpha_content.extract_item_models)");
+            var library = new AlphaActorLibrary(source);
+            var request = new CharacterVisualRequest
+            {
+                Kind = 0x02,
+                HasHairColour = true,
+                HairColour = new Color(0.2f, 0.4f, 0.6f, 1f),
+                WeaponSubtype = 0,
+                WeaponModelPath = sword,
+                OffhandSubtype = 13,
+                OffhandModelPath = shield,
+            };
+            Assert.IsEmpty(AlphaPlayerVisualBuilder.Validate(request, library), "the descriptor matches staged content");
+            var result = AlphaPlayerVisualBuilder.Build(request, null, library);
+            try
+            {
+                Assert.IsTrue(result.Ok, result.Status);
+                Assert.IsTrue(result.View.Ready);
+                int hair = result.View.Rig.IndexOf("hair");
+                Assert.AreEqual(request.HairColour, result.View.Rig.TintOf(hair), "hair tint is applied");
+                Assert.AreEqual(0, result.View.Rig.weaponSubtype, "weapon subtype 0 was equipped");
+                Assert.IsTrue(AlphaOffhandLayer.HasOffhand(result.View.Rig), "shield is attached to the left hand");
+                yield return null;
+            }
+            finally
+            {
+                if (result.View != null) Object.Destroy(result.View.gameObject);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator PlayerVisualBuilderReportsRefusalsInsteadOfSubstituting()
+        {
+            var source = AlphaContentSource.Resolve();
+            if (source.State != AlphaContentState.Ready) Assert.Ignore(source.Diagnosis);
+            var library = new AlphaActorLibrary(source);
+            var unknown = new CharacterVisualRequest { Kind = 0xFE, WeaponSubtype = -1, OffhandSubtype = -1 };
+            var result = AlphaPlayerVisualBuilder.Build(unknown, null, library);
+            Assert.IsFalse(result.Ok);
+            Assert.That(result.Problems, Has.Some.Contains("MISSING_VISUAL_CONTENT"));
+            var badWeapon = new CharacterVisualRequest
+            {
+                Kind = 0x02, WeaponSubtype = 99, WeaponModelPath = "somewhere.cubdec", OffhandSubtype = -1,
+            };
+            var problems = AlphaPlayerVisualBuilder.Validate(badWeapon, library);
+            Assert.That(problems, Has.Some.Contains("WEAPON_SUBTYPE_NOT_EQUIPPABLE 99"));
+            yield return null;
+        }
     }
 }
