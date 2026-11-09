@@ -7,6 +7,7 @@ using CubeGame.Features.Contracts;
 using CubeGame.Features.World;
 using CubeGame.Presentation.Rendering;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace CubeGame.Gameplay.Streaming
 {
@@ -33,6 +34,7 @@ namespace CubeGame.Gameplay.Streaming
         private WorldState _world;
         private WorldStreamingPolicy _policy;
         private Material _terrainMaterial;
+        private Material _waterMaterial;
         private bool _ownsTerrainMaterial;
         private ChunkKey _center;
         private bool _hasCenter;
@@ -88,6 +90,15 @@ namespace CubeGame.Gameplay.Streaming
             Material source = PilotMaterials.Terrain(terrainMaterial);
             _ownsTerrainMaterial = source.HasProperty(DaylightBrightness);
             _terrainMaterial = _ownsTerrainMaterial ? new Material(source) : source;
+            if (source.shader.name == "CubeGame/PilotVertexColor")
+            {
+                _waterMaterial = new Material(source) { renderQueue = (int)RenderQueue.Transparent };
+                _waterMaterial.SetOverrideTag("RenderType", "Transparent");
+                _waterMaterial.SetFloat("_UseVertexAlpha", 1f);
+                _waterMaterial.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+                _waterMaterial.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+                _waterMaterial.SetFloat("_ZWrite", 0f);
+            }
             Origin = origin;
             _maxWorkers = Math.Max(1, Environment.ProcessorCount - 1);
             _world.Deltas.RegionChanged += OnRegionChanged;
@@ -98,6 +109,11 @@ namespace CubeGame.Gameplay.Streaming
             if (_ownsTerrainMaterial)
             {
                 _terrainMaterial.SetFloat(DaylightBrightness, brightness);
+            }
+
+            if (_waterMaterial != null)
+            {
+                _waterMaterial.SetFloat(DaylightBrightness, brightness);
             }
         }
 
@@ -226,6 +242,11 @@ namespace CubeGame.Gameplay.Streaming
                 _ownsTerrainMaterial = false;
             }
             _terrainMaterial = null;
+            if (_waterMaterial != null)
+            {
+                Destroy(_waterMaterial);
+                _waterMaterial = null;
+            }
         }
 
         private void OnDestroy()
@@ -362,7 +383,7 @@ namespace CubeGame.Gameplay.Streaming
                 var waterObject = new GameObject("Water");
                 waterObject.transform.SetParent(root.transform, false);
                 waterObject.AddComponent<MeshFilter>().sharedMesh = water;
-                waterObject.AddComponent<MeshRenderer>().sharedMaterial = renderer.sharedMaterial;
+                waterObject.AddComponent<MeshRenderer>().sharedMaterial = _waterMaterial ?? _terrainMaterial;
             }
 
             _loaded[key] = new ChunkView

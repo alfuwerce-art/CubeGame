@@ -7,6 +7,10 @@ Shader "CubeGame/PilotVertexColor"
     {
         _Unused("Unused", Float) = 0
         _DaylightBrightness("Daylight brightness", Range(0, 1)) = 1
+        [HideInInspector] _UseVertexAlpha("Use vertex alpha", Float) = 0
+        [HideInInspector] _SrcBlend("Source blend", Float) = 1
+        [HideInInspector] _DstBlend("Destination blend", Float) = 0
+        [HideInInspector] _ZWrite("Depth write", Float) = 1
     }
     SubShader
     {
@@ -14,12 +18,16 @@ Shader "CubeGame/PilotVertexColor"
 
         Pass
         {
+            Blend [_SrcBlend] [_DstBlend]
+            ZWrite [_ZWrite]
+
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
             #include "UnityCG.cginc"
 
             float _DaylightBrightness;
+            float _UseVertexAlpha;
 
             struct appdata
             {
@@ -40,7 +48,8 @@ Shader "CubeGame/PilotVertexColor"
                 o.pos = UnityObjectToClipPos(v.vertex);
                 float3 n = UnityObjectToWorldNormal(v.normal);
                 float lambert = saturate(dot(n, normalize(float3(0.35, 0.80, 0.25))));
-                o.color = float4(v.color.rgb * (0.55 + 0.45 * lambert) * _DaylightBrightness, 1.0);
+                o.color = float4(v.color.rgb * (0.55 + 0.45 * lambert) * _DaylightBrightness,
+                    lerp(1.0, v.color.a, _UseVertexAlpha));
                 return o;
             }
 
