@@ -32,8 +32,39 @@ HEAP_SIZE = 0x01000000
 START_VOXEL = 32800 * 256 + 128
 
 
+TEB = 0x7FFD0000
+
+
 class WorldCPU(EmuCPU):
-    """EmuCPU + double-precision shifts SHLD/SHRD (used by Alpha's 16.16 world coordinates)."""
+    """EmuCPU + SHLD/SHRD (Alpha 16.16 world coordinates) + FS segment over a synthetic TEB (SEH frames)."""
+
+    fs_active = False
+
+    def step(self):
+        if self.mem.read(self.eip, 1)[0] == 0x64:
+            self.eip += 1
+            op = self.mem.read(self.eip, 1)[0]
+            if op in (0xA1, 0xA3):                       # mov eax, fs:[moffs] / mov fs:[moffs], eax
+                self.steps += 1
+                self.eip += 1
+                addr = TEB + self.imm(4)
+                if op == 0xA1:
+                    self.r["eax"] = self.mem.u(addr, 4)
+                else:
+                    self.mem.w(addr, 4, self.r["eax"])
+                return
+            self.fs_active = True
+            try:
+                return super().step()
+            finally:
+                self.fs_active = False
+        return super().step()
+
+    def modrm(self):
+        mod, reg, kind, val = super().modrm()
+        if self.fs_active and kind == "mem":
+            val = (val + TEB) & MASK
+        return mod, reg, kind, val
 
     def _exec0f(self, size, rep, start):
         save = self.eip
@@ -104,7 +135,16 @@ def import_slots(image):
 
 
 class Oracle:
-    def __init__(self, exe, master_seed, extra_stubs=None):
+    @staticmethod
+    def _noise_stub(cpu):
+        """perlinNoise2D_cosInterp replaced by its port (identical results on 300 executed samples, see
+        compare_port.py); cdecl (double x, double y) -> ST0. Only used with fast_noise=True to make long
+        functions such as generateRegion tractable in the Python interpreter."""
+        from tools.alpha_models.world.terrain_port import noise
+        x, y = struct.unpack("<2d", cpu.mem.read(cpu.r["esp"] + 4, 16))
+        cpu.fpu.append(noise(x, y))
+
+    def __init__(self, exe, master_seed, extra_stubs=None, fast_noise=False):
         self.image = load(exe)
         self.crt = Crt()
         self.heap_top = HEAP
@@ -114,8 +154,17 @@ class Oracle:
         self.cpu.mem.map(STACK_BASE, STACK_SIZE)
         self.cpu.mem.map(WORLD, WORLD_SIZE)
         self.cpu.mem.map(HEAP, HEAP_SIZE)
+        self.cpu.mem.map(TEB, 0x1000)
+        # Zero-filled tails of sections (.bss): virtual size beyond the raw data, as the Windows loader maps them.
+        for sec in self.image.sections:
+            if sec.virtual_size > sec.raw_size:
+                start = self.image.image_base + sec.virtual_address + sec.raw_size
+                self.cpu.mem.map(start, sec.virtual_size - sec.raw_size)
         self.imports = import_slots(self.image)
         self._install_imports()
+        if fast_noise:
+            self.cpu.stubs[0x4C0EF0] = (self._noise_stub, 0)
+            self.cpu.max_steps = 400_000_000
         self.seed_world(master_seed)
 
     def _install_imports(self):
@@ -130,12 +179,21 @@ class Oracle:
         def new(cpu, skip):
             return self.alloc(cpu.mem.u(cpu.r["esp"] + skip, 4))
 
-        known = {"srand": srand, "rand": rand, "??2@YAPAXI@Z": new}
+        def delete(cpu, skip):
+            return 0   # freeing synthetic heap memory does not influence results
+
+        known = {"srand": srand, "rand": rand, "??2@YAPAXI@Z": new, "??3@YAXPAX@Z": delete}
+
+        def noop(cpu, skip):
+            return cpu.r["eax"]
 
         def resolve(slot):
             name = self.imports[slot].split("!")[1]
             if name in known:
                 return known[name]
+            if "_Container_base0" in name:
+                # std::_Container_base0 members are empty in the release STL (no iterator debugging).
+                return noop
 
             def fail(cpu, skip):
                 raise EmuError(f"unstubbed import {self.imports[slot]} (slot 0x{slot:08X})")

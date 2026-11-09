@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CubeGame.Features.Contracts;
 
 namespace CubeGame.Features.World
@@ -68,25 +69,27 @@ namespace CubeGame.Features.World
     }
 
     /// <summary>
-    /// Alpha natural terrain in voxel coordinates.
+    /// Alpha terrain in voxel coordinates, including region landmarks.
     ///
-    /// <b>Verified against executed Cube.exe code</b> (EMULATED_ALPHA_CODE fixture, FullM0AlphaOracleTests):
-    /// climate cells 0x5D7A70, base height 0x5C5E20 (with 0x5F9340, 0x5EEA60, 0x5CADE0, 0x5F9F70, 0x59FC90,
-    /// 0x5EF5A0) and the mountain mask 0x5EFFA0 — for a world without region landmark columns.
-    /// <b>RECONSTRUCTED</b> (inline in 0x5E4850, constants from the decompilation, inputs verified):
-    /// ridges t1/t2, height = (n+1.5)·60·m + m·t2·8 + base, rock flag.
-    /// <b>Not yet ported</b> (PARTIAL): region landmark columns (types 1/2/4/5/6/7/10/13 — villages, craters, peaks…),
-    /// the dome of types 6/13, the region-cell term 0x5EF040 and the 256-cell height cache (both 0 in a fresh world),
-    /// caves, rivers/roads, water level (0 = hypothesis, U3/Q-2), surface colours.
+    /// <b>Verified against executed Cube.exe code</b> (EMULATED_ALPHA_CODE fixtures, FullM0AlphaOracleTests):
+    /// climate cells 0x5D7A70; region landmark columns of generateRegion 0x5DA280 (AlphaRegionGenerator);
+    /// base height 0x5C5E20 and mountain mask 0x5EFFA0 with their helpers (0x5F9340, 0x5EEA60, 0x5CADE0,
+    /// 0x5F9F70, 0x59FC90, 0x5EF5A0, 0x5989D0, 0x5EF040, 0x5F8E10) — with and without landmarks.
+    /// <b>RECONSTRUCTED</b> (inline in 0x5E4850, constants from the decompilation, inputs verified): ridges t1/t2,
+    /// the Canyon/Peak dome, height = (n+1.5)·60·m + m'·t2·8 + base, rock flag.
+    /// <b>Not ported</b> (PARTIAL): zone grid / village roads / houses (M0-07), Peak (0xD) distance warp (Peak is
+    /// not produced by generateRegion), caves, rivers/roads in terrain, water level (0 = hypothesis), colours.
     /// </summary>
     public sealed class AlphaTerrainGenerator : IWorldGenerator
     {
-        public const string Id = "cubegame.alpha_terrain/2";
+        public const string Id = "cubegame.alpha_terrain/3";
 
         public const int DefaultWaterLevel = 0;
 
         private readonly AlphaWorldSeeds _seeds;
         private readonly AlphaClimateGrid _climate;
+        private readonly Dictionary<long, AlphaRegion> _regions = new Dictionary<long, AlphaRegion>();
+        private readonly object _regionLock = new object();
 
         public AlphaTerrainGenerator(uint masterSeed)
         {
@@ -112,24 +115,58 @@ namespace CubeGame.Features.World
                 return new RegionInfo(region, 0, 0, 0, null);
             }
 
-            AlphaClimateCell climate = _climate.Get(region.X, region.Z);
-            var rng = new AlphaCrtRandom(unchecked(_seeds.WorldSeed + region.Z * 0x400 + region.X));
-            int level = Level(region.X, region.Z);
-            int variant = 0;
-            if (level > 4)
-            {
-                variant = rng.Next() % 5;
-            }
-
-            int orientation = rng.Next() & 3;
-            rng.Next(); // local_2AC = rand() % 10000 (consumed; purpose UNKNOWN)
-            if (climate != null && climate.Field4 > 0.81f)
-            {
-                orientation = (rng.Next() & 1) + 4;
-            }
-
-            return new RegionInfo(region, level, variant, orientation, climate);
+            AlphaRegion record = RegionRecord(region.X, region.Z);
+            return new RegionInfo(region, record.Level, record.Variant, record.Orientation, _climate.Get(region.X, region.Z));
         }
+
+        /// <summary>Lazily generated (thread-safe) region record with its 64 landmark columns.</summary>
+        public AlphaRegion RegionRecord(int rx, int rz)
+        {
+            if (rx < 0 || rz < 0 || rx >= WorldLayout.RegionGrid || rz >= WorldLayout.RegionGrid)
+            {
+                return null;
+            }
+
+            long key = ((long)rx << 20) | (uint)rz;
+            lock (_regionLock)
+            {
+                if (!_regions.TryGetValue(key, out AlphaRegion region))
+                {
+                    region = AlphaRegionGenerator.Generate(this, rx, rz);
+                    _regions.Add(key, region);
+                }
+
+                return region;
+            }
+        }
+
+        /// <summary>GameController_getVoxelColumn8 (0x487DA0): landmark column containing voxel (x, z).</summary>
+        public LandmarkColumn ColumnAt(int x, int z)
+        {
+            if (x < 0 || z < 0 || x >= WorldLayout.WorldVoxels || z >= WorldLayout.WorldVoxels)
+            {
+                return null;
+            }
+
+            int rx = x >> 14;
+            int rz = z >> 14;
+            AlphaRegion region = _lastRegion;
+            if (region == null || region.Rx != rx || region.Rz != rz || _lastOwner != this)
+            {
+                region = RegionRecord(rx, rz);
+                _lastRegion = region;
+                _lastOwner = this;
+            }
+
+            return region?.Column((x >> 11) & 7, (z >> 11) & 7);
+        }
+
+        // Per-thread cache of the last region looked up (worker threads sample neighbouring voxels in bursts).
+        [ThreadStatic]
+        private static AlphaRegion _lastRegion;
+
+        [ThreadStatic]
+        private static AlphaTerrainGenerator _lastOwner;
 
         /// <summary>Alpha <c>FUN_005A4710</c>.</summary>
         public static int Level(int rx, int rz)
@@ -164,17 +201,42 @@ namespace CubeGame.Features.World
             r2 = 1.0f - r2 * r2 * r2;
             float t2 = r2 * r2 + t1;
 
-            float mt = m * t2;
-            float k = Clamp01(mt * 1.25f);
-            float rockWeight = Smooth(k);
+            // Dome of Canyon (6) / Peak (13) columns on the mountain weight of the ridge term (0x5E4850).
+            float domed = m;
+            LandmarkColumn column = ColumnAt(x, z);
+            if (column != null && (column.Type == LandmarkType.Canyon || column.Type == LandmarkType.Peak))
+            {
+                float f = Falloff(Distance2(column, x, z)) * 2.0f;
+                if (f > 1.0f)
+                {
+                    f = 1.0f;
+                }
 
+                f = 1.0f - f * f;
+                float k = 1.0f - f * f;
+                float s = AlphaNoise.Sample(dx * 0.01 + 985.0, dz * 0.01 + 98584.0) * 1.3f + 1.0f;
+                s = s < 0f ? 0f : (s > 1f ? 1f : s);
+                domed = Smooth(s) * k * 0.4f + m;
+            }
+
+            float mt = domed * t2;
+            float rockWeight = Smooth(Clamp01(mt * 1.25f));
             float n = AlphaNoise.Sample(dx * 0.01 + 34432.0, dz * 0.01 + 8992.0);
             float height = (n + 1.5f) * 60.0f * m + mt * 8.0f + baseHeight;
             return new TerrainColumn((int)height, rockWeight > 0.5f, m, baseHeight);
         }
 
+        public float Base(int x, int z) => BaseCore(x, z, true);
+
+        /// <summary>Base without landmark columns (used while generating regions, and by the landmark-free oracle).</summary>
+        public float BaseIsolated(int x, int z) => BaseCore(x, z, false);
+
+        public float Mountain(int x, int z) => MountainCore(x, z, true);
+
+        public float MountainIsolated(int x, int z) => MountainCore(x, z, false);
+
         // ------------------------------------------------------------ 0x5C5E20 base height
-        public float Base(int x, int z)
+        private float BaseCore(int x, int z, bool landmarks)
         {
             double fx = x;
             double fz = z;
@@ -184,14 +246,13 @@ namespace CubeGame.Features.World
             float l158 = SquaredHalf(0x8001A4, 0x8001A8, fx, fz, 0.001);
             float l140 = SquaredHalf(0x8001AC, 0x8001B0, fx, fz, 0.002);
 
-            float s = Math.Min(SampleTerrainHeight(x, z) * 4.0f, 1.0f);
+            float s = Math.Min(SampleTerrainHeight(x, z, landmarks) * 4.0f, 1.0f);
             float l150 = Smooth(s);
             l150 = l150 * l150;
             float le4 = l150 * l160;
             float l174 = l150 * l158;
             l150 = l150 * l140;
 
-            // Distance-weighted climate base around the domain-warped point (16.16 offsets).
             float n1 = AlphaNoise.Sample(fz * 0.0005, 3423.0);
             float n2 = AlphaNoise.Sample(fx * 0.0005, 23421.0);
             double px = x + (int)((n1 * 3.0f * 256.0f) * 65536.0f) / 65536.0;
@@ -222,7 +283,7 @@ namespace CubeGame.Features.World
                 }
             }
 
-            float baseValue = 0f;
+            float weighted = 0f;
             float land = 1f;
             if (found)
             {
@@ -250,23 +311,38 @@ namespace CubeGame.Features.World
                     }
                 }
 
-                baseValue = wbase / wsum;
+                weighted = wbase / wsum;
                 land = wland / wsum;
             }
 
             float a = AlphaNoise.Sample(_seeds.At(0x8001BC) + fx * 0.0002, _seeds.At(0x8001C0) + fz * 0.0002);
             float l154 = (a + 1.0f) * 100.0f * l148;
             float b = AlphaNoise.Sample(_seeds.At(0x8001B4) + fx * 0.0002, _seeds.At(0x8001B8) + fz * 0.0002);
-            l154 = (l154 + (b + 1.0f) * 100.0f * l14c) * land + baseValue;
+            l154 = (l154 + (b + 1.0f) * 100.0f * l14c) * land + weighted;
 
-            // Terrain_sampleHeightAtWorldXY = 0 without landmark columns: no reduction of l150.
-            float q = Math.Min(Math.Max(RotateAndPlace(x, z), 0.02f) * 2.0f, 1.0f);
-            float f = 1.0f - q;
-            float f4 = 1.0f - f * f * f * f;
+            float r = HeightAtXY(x, z, landmarks);
+            if (r > 0.5f)
+            {
+                float f = Math.Min((r - 0.5f) * 2.0f, 1.0f);
+                l150 = (1.0f - Smooth(f)) * l150;
+            }
+
+            float q = Math.Min(Math.Max(RotateAndPlace(x, z, landmarks), 0.02f) * 2.0f, 1.0f);
+            float g = 1.0f - q;
+            float f4 = 1.0f - g * g * g * g;
             float k = f4 * 0.1f + 0.9f;
             l150 = (f4 * 0.5f + 0.5f) * l150;
             l148 = k * le4;
             l14c = k * l174;
+
+            LandmarkColumn column = landmarks ? ColumnAt(x, z) : null;
+            if (column != null && column.Type == LandmarkType.Village)
+            {
+                float f = 1.0f - Falloff(Distance2(column, x, z)) * 0.5f;
+                l148 *= f;
+                l14c *= f;
+                l150 *= f;
+            }
 
             float c1 = AlphaNoise.Sample(_seeds.At(0x8001CC) + fx * 0.002, _seeds.At(0x8001D0) + fz * 0.002);
             float result = (c1 + 1.0f) * 50.0f * l14c;
@@ -274,11 +350,79 @@ namespace CubeGame.Features.World
             result += (c2 + 1.0f) * 50.0f * l148;
             float c3 = AlphaNoise.Sample(_seeds.At(0x8001D4) + fx * 0.01, _seeds.At(0x8001D8) + fz * 0.01);
             result = result + (c3 + 1.0f) * 20.0f * l150 + l154;
+
+            if (column != null && column.Type != LandmarkType.None)
+            {
+                AlphaClimateCell near = NearestCell((int)column.X, (int)column.Z);
+                if (near != null && near.BaseHeight < 0 && column.Type != LandmarkType.Rock)
+                {
+                    // Landmark over a water cell: raise an island (0x5C5E20, nearest-cell branch).
+                    float na = AlphaNoise.Sample(x * 0.0025 + 8432984.0, z * 0.0025 + 90493.0);
+                    float ddx = (float)((double)(na * 100.0f) + x - column.X);
+                    float nb = AlphaNoise.Sample(x * 0.0025 + 3423.0, z * 0.0025 + 112.0);
+                    // Alpha adds z in float here ((float)n·100 + (float)z, 1-voxel steps at 8.4M), x in exact 16.16.
+                    // Explicit (float) forces the rounding even if the runtime keeps float temporaries in double.
+                    float ddz = (float)((double)(float)(nb * 100.0f + (float)z) - column.Z);
+                    float rr = column.Radius + 256.0f;
+                    float f = Math.Min((ddz * ddz + ddx * ddx) / (rr * rr), 1.0f);
+                    if (1.0f - f > 0f)
+                    {
+                        float h = Math.Min((1.0f - f) * 1.1f, 1.0f);
+                        result -= Smooth(h) * near.BaseHeight;
+                    }
+                }
+
+                if (column.Type == LandmarkType.Lake)
+                {
+                    float d2 = Distance2(column, x, z);
+                    if (d2 > 0.25f)
+                    {
+                        if (d2 < 1.0f)
+                        {
+                            float f = ((float)Math.Sqrt(d2) - 0.5f) * 2.0f;
+                            f = 1.0f - f * f;
+                            result = ((column.Base - 25.0f) - result) * f * f + result;
+                        }
+                    }
+                    else
+                    {
+                        float f = 1.0f - d2 * 4.0f;
+                        f *= f;
+                        result = (1.0f - f) * (column.Base - 25.0f) + (column.Base - 50.0f) * f;
+                    }
+                }
+
+                if (column.Type == LandmarkType.Canyon || column.Type == LandmarkType.Valley)
+                {
+                    float d2 = Distance2(column, x, z);
+                    if (d2 > 0.25f)
+                    {
+                        if (d2 < 1.0f)
+                        {
+                            float f = ((float)Math.Sqrt(d2) - 0.5f) * 2.0f;
+                            f = 1.0f - f * f;
+                            result = f * f * 10.0f + result;
+                        }
+                    }
+                    else
+                    {
+                        float f = 1.0f - d2 * 4.0f;
+                        f *= f;
+                        result = (1.0f - f) * (result + 10.0f) + (result - 30.0f) * f;
+                    }
+
+                    if (result < weighted)
+                    {
+                        result = weighted;
+                    }
+                }
+            }
+
             return result;
         }
 
         // ------------------------------------------------------------ 0x5EFFA0 mountain mask
-        public float Mountain(int x, int z)
+        private float MountainCore(int x, int z, bool landmarks)
         {
             double nx = x * 0.01;
             double nz = z * 0.01;
@@ -292,22 +436,84 @@ namespace CubeGame.Features.World
             float v = 1.0f - Math.Abs(n1 + n2) * ((1.0f - k * k) * 1.3f + 2.0f);
             float n3 = AlphaNoise.Sample(x * 0.005 + 94.0, z * 0.005 + 874.0);
             v *= n3 * 0.4f + 0.6f;
-            if (v < 0f)
+
+            LandmarkColumn column = landmarks ? ColumnAt(x, z) : null;
+            if (column != null && (column.Type == LandmarkType.Canyon || column.Type == LandmarkType.Valley))
             {
-                return 0f;
+                float d2 = Distance2(column, x, z);
+                float rim = v < 1.0f ? (v + 0.5f > 1.0f ? 1.0f - v : 0.5f) : 0.0f;
+                if (d2 > 0.36f)
+                {
+                    if (d2 < 1.0f)
+                    {
+                        float f = ((float)Math.Sqrt(d2) - 0.6f) / 0.39999998f;
+                        f = 1.0f - f * f;
+                        v = f * f * rim + v;
+                    }
+                }
+                else
+                {
+                    float f = Math.Min((1.0f - d2 / 0.36f) * 1.5f, 1.0f);
+                    v = (rim + v) * (1.0f - f * f);
+                }
             }
 
-            float s = Math.Min(SampleTerrainHeight(x, z) * 2.0f, 1.0f);
-            v = Smooth(s) * v;
-            float q = Math.Min(RotateAndPlace(x, z), 1.0f);
-            v = Smooth(q) * v;
-            // Terrain_sampleHeightAtWorldXY = 0 → factor (1 − smoothstep(0))³ = 1.
+            if (v >= 0f)
+            {
+                float s = Math.Min(SampleTerrainHeight(x, z, landmarks) * 2.0f, 1.0f);
+                v = Smooth(s) * v;
+                float q = Math.Min(RotateAndPlace(x, z, landmarks), 1.0f);
+                v = Smooth(q) * v;
+                float r = 1.0f - Smooth(Math.Min(HeightAtXY(x, z, landmarks) * 2.0f, 1.0f));
+                v = r * r * r * v;
+            }
+            else
+            {
+                v = 0f;
+            }
+
+            if (column != null)
+            {
+                if (column.Type == LandmarkType.Mountain)
+                {
+                    return Smooth(v) + Falloff(Distance2(column, x, z));
+                }
+
+                if (column.Type == LandmarkType.Unnamed10 && column.Radius > 0f)
+                {
+                    float d2 = Distance2(column, x, z, warped: false);
+                    if (d2 < 1.0f)
+                    {
+                        float f = 1.0f - d2;
+                        v = (1.0f - f * f) * v;
+                    }
+                }
+
+                if (column.Type == LandmarkType.Lake || column.Type == LandmarkType.Ruins)
+                {
+                    float d2 = Distance2(column, x, z);
+                    if (d2 > 0.25f)
+                    {
+                        if (d2 < 1.0f)
+                        {
+                            float f = ((float)Math.Sqrt(d2) - 0.5f) * 2.0f;
+                            f = 1.0f - f * f;
+                            v = (1.0f - f * f) * v;
+                        }
+                    }
+                    else
+                    {
+                        v = 0f;
+                    }
+                }
+            }
+
             return Smooth(v);
         }
 
         // ------------------------------------------------------------ helpers
-        /// <summary>0x5F9340 (no landmark columns; region-cell and 256-cell terms are 0 in a fresh world).</summary>
-        public float SampleTerrainHeight(int x, int z)
+        /// <summary>0x5F9340: terrain sampler used for placement weights.</summary>
+        public float SampleTerrainHeight(int x, int z, bool landmarks = true)
         {
             float a = AlphaNoise.Sample(_seeds.At(0x800170) + x * 0.01, _seeds.At(0x800174) + z * 0.01);
             float b = AlphaNoise.Sample(_seeds.At(0x800168) + x * 0.001, _seeds.At(0x80016C) + z * 0.001);
@@ -321,13 +527,157 @@ namespace CubeGame.Features.World
                 v = k * k * 0.05f + v;
             }
 
-            return v;
+            LandmarkColumn column = landmarks ? ColumnAt(x, z) : null;
+            if (column != null)
+            {
+                LandmarkType t = column.Type;
+                if (t == LandmarkType.Village || t == LandmarkType.Mountain || t == LandmarkType.Lake || t == LandmarkType.Peak)
+                {
+                    v = Falloff(Distance2(column, x, z)) + v;
+                }
+
+                if (t == LandmarkType.Canyon || t == LandmarkType.Valley)
+                {
+                    v = Falloff(Distance2(column, x, z)) * 0.5f + v;
+                }
+            }
+
+            return RareCellTerm(x, z) + v;
         }
 
-        /// <summary>0x5F9F70 without landmark columns: equals the nearest-edge measure.</summary>
-        public float RotateAndPlace(int x, int z)
+        /// <summary>0x5989D0: village weight (1 − d²)² inside a Village disk, else 0.</summary>
+        public float HeightAtXY(int x, int z, bool landmarks = true)
         {
-            return NearestEdge(x, z);
+            LandmarkColumn column = landmarks ? ColumnAt(x, z) : null;
+            return column != null && column.Type == LandmarkType.Village ? Falloff(Distance2(column, x, z)) : 0f;
+        }
+
+        /// <summary>0x5F9F70: nearest-edge measure with village street grid and mountain/lake boost.</summary>
+        public float RotateAndPlace(int x, int z, bool landmarks = true)
+        {
+            float r = HeightAtXY(x, z, landmarks);
+            WarpedPoint(x, z, out double hx, out double hz);
+            float near = NearestEdge(x, z);
+            if (r > 0f)
+            {
+                float f = Math.Min(r * 3.0f, 1.0f);
+                f = 1.0f - f * f;
+                float w = 1.0f - f * f;
+                float c = (float)(Math.Cos(hx / 16384.0 * 360.0) * w + 1.0);
+                if (c < near)
+                {
+                    near = c;
+                }
+
+                c = (float)(Math.Cos(hz / 16384.0 * 360.0) * w + 1.0);
+                if (c < near)
+                {
+                    near = c;
+                }
+            }
+
+            if (r > 0.65f)
+            {
+                float f = (0.7f - r) / 0.05f;
+                near = (f > 0f ? f : 0f) * near;
+            }
+
+            LandmarkColumn column = landmarks ? ColumnAt(x, z) : null;
+            if (column != null && (column.Type == LandmarkType.Mountain || column.Type == LandmarkType.Lake))
+            {
+                near = Falloff(Distance2(column, x, z)) * 2.0f + near;
+            }
+
+            return near;
+        }
+
+        /// <summary>0x5EF040: weight share of "rare" (flagged) climate cells around the warped point.</summary>
+        public float RareCellTerm(int x, int z)
+        {
+            int rx0 = (x - 0x4000) >> 14;
+            int rx1 = (x + 0x4000) >> 14;
+            int rz0 = (z - 0x4000) >> 14;
+            int rz1 = (z + 0x4000) >> 14;
+            bool anyFlag = false;
+            for (int rx = rx0; rx <= rx1; rx++)
+            {
+                for (int rz = rz0; rz <= rz1; rz++)
+                {
+                    AlphaClimateCell cell = _climate.Get(rx, rz);
+                    if (cell == null)
+                    {
+                        return 0f;
+                    }
+
+                    anyFlag |= cell.Flag;
+                }
+            }
+
+            if (!anyFlag)
+            {
+                return 0f;
+            }
+
+            WarpedCellPoint(x, z, out int px, out int pz);
+            int best = int.MaxValue;
+            for (int rx = rx0; rx <= rx1; rx++)
+            {
+                for (int rz = rz0; rz <= rz1; rz++)
+                {
+                    best = Math.Min(best, IntDistance(_climate.Get(rx, rz), px, pz));
+                }
+            }
+
+            float total = 0f;
+            float flagged = 0f;
+            for (int rx = rx0; rx <= rx1; rx++)
+            {
+                for (int rz = rz0; rz <= rz1; rz++)
+                {
+                    AlphaClimateCell cell = _climate.Get(rx, rz);
+                    float w = 1.0f - Math.Min(1.0f, (IntDistance(cell, px, pz) - best) * 5e-07f);
+                    total += w;
+                    if (cell.Flag)
+                    {
+                        flagged += w;
+                    }
+                }
+            }
+
+            return total > 0f ? flagged / total : 0f;
+        }
+
+        /// <summary>0x5C4800 (field 3) / 0x5C4DD0 (field 4) without the Forest bonus: weighted climate field.</summary>
+        public float ClimateAverage(int x, int z, bool useField4)
+        {
+            WarpedCellPoint(x, z, out int px, out int pz);
+            int rx0 = (x - 0x4000) >> 14;
+            int rx1 = (x + 0x4000) >> 14;
+            int rz0 = (z - 0x4000) >> 14;
+            int rz1 = (z + 0x4000) >> 14;
+            int best = int.MaxValue;
+            for (int rx = rx0; rx <= rx1; rx++)
+            {
+                for (int rz = rz0; rz <= rz1; rz++)
+                {
+                    best = Math.Min(best, IntDistance(_climate.Get(rx, rz), px, pz));
+                }
+            }
+
+            float tw = 0f;
+            float tv = 0f;
+            for (int rx = rx0; rx <= rx1; rx++)
+            {
+                for (int rz = rz0; rz <= rz1; rz++)
+                {
+                    AlphaClimateCell cell = _climate.Get(rx, rz);
+                    float w = 1.0f - Math.Min(1.0f, (IntDistance(cell, px, pz) - best) * 5e-07f);
+                    tw += w;
+                    tv += (useField4 ? cell.Field4 : cell.Field3) * w;
+                }
+            }
+
+            return tv / tw;
         }
 
         /// <summary>
@@ -336,7 +686,7 @@ namespace CubeGame.Features.World
         /// </summary>
         public float NearestEdge(int x, int z)
         {
-            if (!NearestCell(x, z, out int rx, out int rz))
+            if (!NearestCellRegion(x, z, out int rx, out int rz))
             {
                 return 0f;
             }
@@ -351,6 +701,97 @@ namespace CubeGame.Features.World
             Consider(_climate.Get(rx, rz - 1), px, pz, bx, bz, ref best);
             Consider(_climate.Get(rx, rz + 1), px, pz, bx, bz, ref best);
             return best < 0f ? 0f : best * 0.0002f;
+        }
+
+        /// <summary>0x5CADE0 / 0x477E10: region whose climate anchor is nearest to the warped point (first wins).</summary>
+        public bool NearestCellRegion(int x, int z, out int bestRx, out int bestRz)
+        {
+            WarpedCellPoint(x, z, out int wx, out int wz);
+            bestRx = bestRz = -1;
+            bool found = false;
+            int bestDistance = 0;
+            for (int rx = (x - 0x4000) >> 14; rx <= (x + 0x4000) >> 14; rx++)
+            {
+                for (int rz = (z - 0x4000) >> 14; rz <= (z + 0x4000) >> 14; rz++)
+                {
+                    AlphaClimateCell cell = _climate.Get(rx, rz);
+                    if (cell == null)
+                    {
+                        continue;
+                    }
+
+                    int distance = IntDistance(cell, wx, wz);
+                    if (!found || distance < bestDistance)
+                    {
+                        found = true;
+                        bestDistance = distance;
+                        bestRx = rx;
+                        bestRz = rz;
+                    }
+                }
+            }
+
+            return found;
+        }
+
+        private AlphaClimateCell NearestCell(int x, int z)
+        {
+            return NearestCellRegion(x, z, out int rx, out int rz) ? _climate.Get(rx, rz) : null;
+        }
+
+        private static void WarpedCellPoint(int x, int z, out int wx, out int wz)
+        {
+            float n1 = AlphaNoise.Sample(z * 0.0005, 3423.0);
+            float n2 = AlphaNoise.Sample(x * 0.0005, 23421.0);
+            wx = (int)(float)((float)x + (float)(n1 * 3.0f * 256.0f));
+            wz = (int)(float)((float)z + (float)(n2 * 3.0f * 256.0f));
+        }
+
+        private static int IntDistance(AlphaClimateCell cell, int wx, int wz)
+        {
+            float dx = cell.AnchorX - wx;
+            float dz = cell.AnchorZ - wz;
+            return (int)(dz * dz + dx * dx);
+        }
+
+        /// <summary>
+        /// vec3_distanceSquared (0x5F8E10): squared distance to the landmark centre / radius². Except Rock, Tree and
+        /// Zone14 the point is displaced by noise(x·0.0025+8432984, z·0.0025+90493)·256 and
+        /// noise(x·0.0025+3423, z·0.0025+112)·256 (scale fitted to executed values), giving irregular outlines.
+        /// </summary>
+        private static float Distance2(LandmarkColumn column, int x, int z, bool warped = true)
+        {
+            float r = column.Radius;
+            if (r < 0.001f)
+            {
+                return 0f;
+            }
+
+            float dx;
+            float dz;
+            LandmarkType t = column.Type;
+            if (!warped || t == LandmarkType.Rock || t == LandmarkType.Tree || t == LandmarkType.Zone14)
+            {
+                dx = (float)(x - column.X);
+                dz = (float)(z - column.Z);
+            }
+            else
+            {
+                float n1 = AlphaNoise.Sample(x * 0.0025 + 8432984.0, z * 0.0025 + 90493.0);
+                float n2 = AlphaNoise.Sample(x * 0.0025 + 3423.0, z * 0.0025 + 112.0);
+                // Alpha works in 16.16 fixed point here: keep double precision at ~8.4M voxels.
+                dx = (float)((double)(n1 * 256.0f) + x - column.X);
+                dz = (float)((double)(n2 * 256.0f) + z - column.Z);
+            }
+
+            return (dz * dz + dx * dx) / (r * r);
+        }
+
+        /// <summary>GameController_entityDistanceSq: (1 − d²)² inside, 0 outside.</summary>
+        private static float Falloff(float d2)
+        {
+            float f = 1.0f - d2;
+            return f > 0f ? f * f : 0f;
         }
 
         private static void Consider(AlphaClimateCell neighbour, double px, double pz, double bx, double bz, ref float best)
@@ -413,42 +854,6 @@ namespace CubeGame.Features.World
             double hz = ((double)a * 0.1 + b) * 500.0 * 6.103515625e-05 + z * 6.103515625e-05;
             wx = hx * 16384.0;
             wz = hz * 16384.0;
-        }
-
-        /// <summary>0x5CADE0: region whose climate anchor is nearest to the warped point (integer distance, first wins).</summary>
-        private bool NearestCell(int x, int z, out int bestRx, out int bestRz)
-        {
-            float n1 = AlphaNoise.Sample(z * 0.0005, 3423.0);
-            float n2 = AlphaNoise.Sample(x * 0.0005, 23421.0);
-            int wx = (int)((float)x + n1 * 3.0f * 256.0f);
-            int wz = (int)((float)z + n2 * 3.0f * 256.0f);
-            bestRx = bestRz = -1;
-            bool found = false;
-            int bestDistance = 0;
-            for (int rx = (x - 0x4000) >> 14; rx <= (x + 0x4000) >> 14; rx++)
-            {
-                for (int rz = (z - 0x4000) >> 14; rz <= (z + 0x4000) >> 14; rz++)
-                {
-                    AlphaClimateCell cell = _climate.Get(rx, rz);
-                    if (cell == null)
-                    {
-                        continue;
-                    }
-
-                    float dx = cell.AnchorX - wx;
-                    float dz = cell.AnchorZ - wz;
-                    int distance = (int)(dz * dz + dx * dx);
-                    if (!found || distance < bestDistance)
-                    {
-                        found = true;
-                        bestDistance = distance;
-                        bestRx = rx;
-                        bestRz = rz;
-                    }
-                }
-            }
-
-            return found;
         }
 
         private float SquaredHalf(int offsetA, int offsetB, double fx, double fz, double scale)

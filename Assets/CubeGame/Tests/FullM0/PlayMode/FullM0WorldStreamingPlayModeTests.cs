@@ -116,10 +116,19 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.IsTrue(game.Session.WorldDeltas.IsDiscovered(new ZoneKey(32800, 32800)));
             Assert.IsTrue(game.Session.WorldDeltas.IsDiscovered(new ZoneKey(targetX >> 8, 32800)));
 
-            // Ground under the hero exists in the rebased scene.
-            Vector3 down = player.position + Vector3.up * 50f;
-            Assert.IsTrue(Physics.Raycast(down, Vector3.down, out RaycastHit hit, 400f));
-            Assert.AreEqual(game.WorldState.SurfaceAt(targetX, WorldLayout.StartVoxel) + 1, hit.point.y, 0.01f);
+            // The target column exists in the rebased scene at its generated height (terrain colliders only).
+            int targetSurface = game.WorldState.SurfaceAt(targetX, WorldLayout.StartVoxel);
+            Vector3 above = game.WorldView.ToScene(targetX + 0.5, targetSurface + 60.0, WorldLayout.StartVoxel + 0.5);
+            float terrainHit = float.NaN;
+            foreach (RaycastHit h in Physics.RaycastAll(above, Vector3.down, 400f))
+            {
+                if (h.collider.name.StartsWith("Chunk_") && (float.IsNaN(terrainHit) || h.point.y > terrainHit))
+                {
+                    terrainHit = h.point.y;
+                }
+            }
+
+            Assert.AreEqual(targetSurface + 1, terrainHit, 0.01f);
             Assert.IsTrue(game.ExitToMenu(false));
         }
 

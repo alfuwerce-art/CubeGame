@@ -64,6 +64,9 @@ namespace CubeGame.Gameplay
         private string _autoNewSlot;
         private string _autoLoadSlot;
         private uint _commandLineSeed = DefaultSeed;
+        private bool _teleport;
+        private int _teleportDx;
+        private int _teleportDz;
 
         // Main menu form state.
         private string _formWorldName = "New World";
@@ -119,6 +122,11 @@ namespace CubeGame.Gameplay
             if (!string.IsNullOrEmpty(_autoNewSlot))
             {
                 StartNewWorld(_autoNewSlot, "Auto World", _commandLineSeed, "Hero", CharacterClass.Warrior);
+            }
+
+            if (_teleport && _session.State == SessionState.InGame)
+            {
+                TeleportHero(WorldLayout.StartVoxel + _teleportDx, WorldLayout.StartVoxel + _teleportDz);
             }
         }
 
@@ -232,6 +240,24 @@ namespace CubeGame.Gameplay
 
             return _session.WorldDeltas.SetColumnSurface(blockX, blockZ, surface, _session.Clock.TimeMs)
                 || Report(false, $"terrain edit refused at ({blockX},{blockZ})");
+        }
+
+        /// <summary>Automation/debug: places the hero above column (x, z) and loads the surroundings.</summary>
+        public void TeleportHero(int x, int z)
+        {
+            if (_worldView == null || _player == null)
+            {
+                return;
+            }
+
+            int ground = Math.Max(_worldState.SurfaceAt(x, z), _worldState.Generator.WaterLevel);
+            Vector2Int origin = StreamingWorldView.OriginFor(x, z);
+            Vector3 shift = _worldView.Rebase(origin);
+            _player.transform.position = _worldView.ToScene(x + 0.5, ground + 3.0, z + 0.5);
+            Physics.SyncTransforms();
+            _worldView.LoadAround(_player.transform.position, 2);
+            SyncHeroFromView();
+            Report(true, $"teleported to ({x},{z}) ground {ground} (shift {shift})");
         }
 
         public void TogglePause()
@@ -522,6 +548,15 @@ namespace CubeGame.Gameplay
                     case "-cubeScreenshot":
                         _screenshotPath = value;
                         _screenshotFrame = 120;
+                        break;
+                    case "-cubeTeleport":
+                        if (i + 2 < args.Length
+                            && int.TryParse(args[i + 1], NumberStyles.Integer, CultureInfo.InvariantCulture, out _teleportDx)
+                            && int.TryParse(args[i + 2], NumberStyles.Integer, CultureInfo.InvariantCulture, out _teleportDz))
+                        {
+                            _teleport = true;
+                        }
+
                         break;
                     case "-cubeFrames":
                         if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int frames) && frames > 0)

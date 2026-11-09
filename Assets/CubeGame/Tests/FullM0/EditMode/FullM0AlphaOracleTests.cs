@@ -96,8 +96,9 @@ namespace CubeGame.Tests.FullM0.EditMode
             double worstMountain = 0;
             foreach (Sample s in oracle.samples)
             {
-                worstBase = Math.Max(worstBase, Math.Abs(generator.Base(s.x, s.z) - s.@base));
-                worstMountain = Math.Max(worstMountain, Math.Abs(generator.Mountain(s.x, s.z) - s.mountain));
+                // This fixture was executed in a world without generated regions: compare the landmark-free functions.
+                worstBase = Math.Max(worstBase, Math.Abs(generator.BaseIsolated(s.x, s.z) - s.@base));
+                worstMountain = Math.Max(worstMountain, Math.Abs(generator.MountainIsolated(s.x, s.z) - s.mountain));
             }
 
             Debug.Log($"[FullM0] oracle worst |Δbase|={worstBase:E3} |Δmountain|={worstMountain:E3} over {oracle.samples.Count} samples");
