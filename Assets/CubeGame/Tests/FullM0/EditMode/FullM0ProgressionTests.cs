@@ -30,6 +30,51 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.AreEqual(5, ranks[HeroSkill.Swimming], "input and output arrays cannot mutate stored ranks");
         }
 
+        [Test]
+        public void RankDraftUsesTwoPointsPerLevelAndRequiresFiveRanksInPreviousSkill()
+        {
+            var draft = new HeroSkillRanks();
+            Assert.IsFalse(draft.TryRaise(HeroSkill.Climbing, 1));
+            Assert.AreEqual(6L, draft.UnspentLevelPoints(4));
+            for (int i = 0; i < 4; i++)
+            {
+                Assert.IsTrue(draft.TryRaise(HeroSkill.Climbing, 4));
+            }
+
+            Assert.IsFalse(draft.TryRaise(HeroSkill.HangGliding, 4));
+            Assert.IsTrue(draft.TryRaise(HeroSkill.Climbing, 4));
+            Assert.IsTrue(draft.TryRaise(HeroSkill.HangGliding, 4));
+            Assert.AreEqual(0L, draft.UnspentLevelPoints(4));
+            Assert.IsFalse(draft.TryRaise(HeroSkill.Swimming, 4));
+        }
+
+        [Test]
+        public void SessionConfirmsFreeRanksAtomicallyAndRejectsUnfundedChangesAndResets()
+        {
+            var session = new GameSession();
+            session.EnterMainMenu();
+            Assert.IsTrue(session.BeginNewWorld("slot0", new NewWorldRequest { GeneratorId = "test" }, 0));
+            Assert.IsTrue(session.CompleteLoading());
+            HeroState hero = session.Hero;
+            hero.Sheet.AddExperience(AlphaMath.ExperienceCostForNextLevel(1));
+
+            var draft = new HeroSkillRanks();
+            Assert.IsTrue(draft.TryReplace(new[] { 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0 }));
+            Assert.IsFalse(session.TryApplySkillRanks(draft), "prerequisite missing");
+            CollectionAssert.AreEqual(new int[11], hero.SkillRanks.ToArray());
+
+            Assert.IsTrue(draft.TryReplace(new[] { 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0 }));
+            Assert.IsFalse(session.TryApplySkillRanks(draft), "only two points at level 2");
+            CollectionAssert.AreEqual(new int[11], hero.SkillRanks.ToArray());
+
+            Assert.IsTrue(draft.TryReplace(new[] { 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0 }));
+            Assert.IsTrue(session.TryApplySkillRanks(draft));
+            Assert.AreEqual(1, hero.SkillRanks[HeroSkill.Climbing]);
+            Assert.AreEqual(1, hero.SkillRanks[HeroSkill.Swimming]);
+            Assert.IsFalse(session.TryApplySkillRanks(new HeroSkillRanks()), "paid reset is a separate action");
+            CollectionAssert.AreEqual(draft.ToArray(), hero.SkillRanks.ToArray());
+        }
+
         [TestCase(1, 0, false, 1L)]     // curve 0 → max(1, 0) = 1
         [TestCase(3, 0, false, 1L)]     // 0.0909·20 = 1.82 → 1
         [TestCase(10, 0, false, 6L)]    // (1 − 1/1.45)·20 = 6.2 → 6

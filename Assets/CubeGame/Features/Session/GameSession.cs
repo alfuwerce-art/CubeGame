@@ -583,6 +583,23 @@ namespace CubeGame.Features.Session
             }
         }
 
+        /// <summary>Confirms increases funded by level points. Rank decreases require the paid reset path.</summary>
+        public bool TryApplySkillRanks(HeroSkillRanks draft)
+        {
+            if (State != SessionState.InGame || Hero == null || Hero.Health.IsDead)
+            {
+                return Reject("skill changes require a living hero in a running world");
+            }
+
+            if (!Hero.SkillRanks.TryApplyIncreases(draft, Hero.Sheet.Progression.Level))
+            {
+                return Reject("invalid skill increases or paid reset required");
+            }
+
+            LastRejection = string.Empty;
+            return true;
+        }
+
         /// <summary>
         /// Uses the item in a bag slot (M0-04B consumables): only Alpha consumables (type 1); refused while dead,
         /// acting or on cooldown. Starts Alpha action 80 (no hit), removes one item and applies the effect.

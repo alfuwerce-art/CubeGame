@@ -94,6 +94,7 @@ namespace CubeGame.Gameplay
         private long _heroRespawnAtMs = -1;
         private bool _inventoryOpen;
         private Vector2 _inventoryScroll;
+        private HeroSkillRanks _skillDraft;
         private readonly System.Collections.Generic.Dictionary<StableEntityId, GameObject> _groundItems =
             new System.Collections.Generic.Dictionary<StableEntityId, GameObject>();
         private Vector3 _lastHeroScenePosition;
@@ -455,6 +456,7 @@ namespace CubeGame.Gameplay
         public void ToggleInventory()
         {
             _inventoryOpen = !_inventoryOpen;
+            _skillDraft = null;
             if (_motor != null)
             {
                 _motor.enabled = !_inventoryOpen && !HeroDead;
@@ -878,6 +880,7 @@ namespace CubeGame.Gameplay
             }
 
             _inventoryOpen = false;
+            _skillDraft = null;
             _trainingTargetPending = false;
             _heroRespawnAtMs = -1;
             _creatures = null;
@@ -1296,7 +1299,20 @@ namespace CubeGame.Gameplay
         {
             HeroState hero = _session.Hero;
             GUILayout.BeginArea(new Rect(Screen.width - 470f, 40f, 450f, Screen.height - 80f), GUI.skin.box);
+            if (_skillDraft != null)
+            {
+                DrawSkillDraft(hero);
+                GUILayout.EndArea();
+                return;
+            }
+
             GUILayout.Label($"Inventory  {hero.Inventory.UsedSlots}/{HeroInventory.Capacity}  [I] close");
+            if (GUILayout.Button("Skills"))
+            {
+                _skillDraft = new HeroSkillRanks();
+                _skillDraft.TryReplace(hero.SkillRanks.ToArray());
+            }
+
             foreach (EquipmentSlot slot in EquipmentLoadout.Slots)
             {
                 ItemInstance item = hero.Loadout.GetEquipped(slot);
@@ -1336,6 +1352,46 @@ namespace CubeGame.Gameplay
 
             GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        private void DrawSkillDraft(HeroState hero)
+        {
+            int level = hero.Sheet.Progression.Level;
+            GUILayout.Label($"Skills   Points: {Math.Max(0L, _skillDraft.UnspentLevelPoints(level))}");
+            for (int i = 0; i < HeroSkillRanks.Count; i++)
+            {
+                var skill = (HeroSkill)i;
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"{skill}: {_skillDraft[skill]}", GUILayout.Width(340f));
+                bool enabled = GUI.enabled;
+                GUI.enabled = enabled && _skillDraft.CanRaise(skill, level);
+                if (GUILayout.Button("+", GUILayout.Width(60f)))
+                {
+                    _skillDraft.TryRaise(skill, level);
+                }
+                GUI.enabled = enabled;
+                GUILayout.EndHorizontal();
+            }
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Apply"))
+            {
+                if (_session.TryApplySkillRanks(_skillDraft))
+                {
+                    ApplyHeroMovementRanks(hero);
+                    _skillDraft = null;
+                }
+                else
+                {
+                    _combatLog = _session.LastRejection;
+                }
+            }
+
+            if (GUILayout.Button("Cancel"))
+            {
+                _skillDraft = null;
+            }
+            GUILayout.EndHorizontal();
         }
 
         private static string LabeledField(string label, string value)
