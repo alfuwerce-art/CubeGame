@@ -88,14 +88,24 @@ namespace CubeGame.M0Pilots.Npc
 
         private static void PotionAndDodge()
         {
-            Check.True("faction 3 drinks when HP < 0.5 * incoming damage",
-                NpcRules.ShouldDrinkPotion(10.0, 21.0, (int)Faction.Ally));
-            Check.True("faction 3 does not drink at exactly half incoming damage",
-                !NpcRules.ShouldDrinkPotion(10.0, 20.0, (int)Faction.Ally));
-            Check.True("monster faction never uses the ally potion rule",
-                !NpcRules.ShouldDrinkPotion(1.0, 100.0, (int)Faction.Monster));
-            Check.True("npc faction does not use the ally potion rule",
-                !NpcRules.ShouldDrinkPotion(1.0, 100.0, (int)Faction.Npc));
+            Check.True("Ally auto-potion: HP 49 below half of SELF MaxHP 100",
+                NpcRules.ShouldDrinkPotion(49.0, 100.0, (int)Faction.Ally));
+            Check.True("Ally auto-potion: HP 50 equals threshold, does not drink",
+                !NpcRules.ShouldDrinkPotion(50.0, 100.0, (int)Faction.Ally));
+            Check.True("Monster is not eligible for faction 3 ally auto-potion",
+                !NpcRules.ShouldDrinkPotion(24.0, 100.0, (int)Faction.Monster));
+            Check.True("NPC faction 5 is not eligible for faction 3 ally auto-potion",
+                !NpcRules.ShouldDrinkPotion(24.0, 100.0, (int)Faction.Npc));
+            Check.True("Inventory potion: HP 24 below 25%, LifePotion present",
+                NpcRules.ShouldDrinkInventoryPotion(24.0, 100.0, true));
+            Check.True("Inventory potion: strict quarter threshold excludes HP 25",
+                !NpcRules.ShouldDrinkInventoryPotion(25.0, 100.0, true));
+            Check.True("Inventory potion: without item (1,1), cannot drink",
+                !NpcRules.ShouldDrinkInventoryPotion(24.0, 100.0, false));
+            Check.True("Ally auto-potion: HP 133 < 50% of MaxHP 268",
+                NpcRules.ShouldDrinkPotion(133.0, 268.0, (int)Faction.Ally));
+            Check.Throws<ArgumentOutOfRangeException>("Potion MaxHP must be positive",
+                () => NpcRules.ShouldDrinkPotion(0.0, 0.0, (int)Faction.Ally));
 
             var state = new CreatureState();
             NpcRules.ApplyPotionAction(state);

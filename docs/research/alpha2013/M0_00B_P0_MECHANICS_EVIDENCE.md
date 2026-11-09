@@ -196,9 +196,14 @@ if (HP(+0x16c) < stat_calcAttackDamage() * 0.5) && (faction(+0x60) == 3) {
 }
 ```
 
-Отсюда: **ИИ пьёт зелье, когда текущее HP меньше половины входящего урона**, и только у фракции 3
-(союзники/питомцы); предмет — жёстко заданный `type 1, subtype 4`. Это **исправляет** запись матрицы
-`C-24`/`AI-POTION-01` («HP < 0.25·MaxHP») — условие иное и использует урон, а не MaxHP.
+**Исправление M0-00B FINAL (2026-11-09), поверх r3.** Имя декомпилятора stat_calcAttackDamage для 0x444db0 вводило в заблуждение: эта функция возвращает SELF MAX HP, а не урон (см. D_character §D4.2 и строку C-03).
+
+- **Ветка B (0x42ce8c)**: ecx=edi=self; currentHP < 0.5 × self.maxHP, faction=3, action=0x50, held item=(type 1, subtype 4), timer=0. Доказательства списания из инвентаря в этой ветке нет; достижимость конкретного AI-контекста PARTIAL.
+- **Ветка A (0x42cbdc)**: currentHP < 0.25 × self.maxHP, необходим предмет (type 1, subtype 1) в сумке, одна штука списывается. Это отдельная реальная ветка, а не ошибка r2. Константы: 0x745da0=0.5f и 0x745d98=0.25f.
+- **Оружие subtype 0**: World_generateNpcSpawnList @0x5ca0a0 создаёт type=3, subtype=rand()%3, включая 0, в NPC stock через GameController_addItemToInventory; item_weaponDamage @0x4c7f60 обрабатывает subtype 0 обычной веткой ×4, combat_selectAttackVariant @0x4452a0 даёт атаки 3/4, модель iron-sword1.cub (899). SUBTYPE_0=VALID_WEAPON для NPC и боевого использования (DIRECT), доступ игроку — PARTIAL; отсутствие оружия = пустой слот/type 0, а не subtype 0 при type 3.
+- Алиасы 21–25 не доказаны.
+
+См. отдельный отчёт M0_00B_FINAL_TWO_QUESTIONS.md. 43 статические проверки заявлены DeepSeek в локальной .scratch; независимый повторный прогон ещё не проведён.
 
 Стартовые зелья игрока: `start_game_mode` (`GameController.cpp:28098-28104`) кладёт **5 × `0x0101`** =
 `type 1, subtype 1` = LifePotion.

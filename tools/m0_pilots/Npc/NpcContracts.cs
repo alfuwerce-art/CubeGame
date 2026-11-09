@@ -209,17 +209,36 @@ namespace CubeGame.M0Pilots.Npc
     public static class NpcRules
     {
         /// <summary>
-        /// Corrected potion rule (P0 r3): HP &lt; 0.5 * incoming damage, faction 3 only,
-        /// item (type 1, subtype 4), action 0x50, timer 0. The older "25% MaxHP" note is wrong.
+        /// M0-00B FINAL, branch B (0x42ce8c): ally auto-potion at HP < 50% of
+        /// SELF MaxHP, held item (1,4), action 0x50. This is eligibility only;
+        /// inventory removal and healing were not proven for this branch.
         /// </summary>
-        public static bool ShouldDrinkPotion(double health, double incomingDamage, int faction)
+        public static bool ShouldDrinkPotion(double health, double maxHealth, int faction)
         {
-            if (health < 0.0 || incomingDamage < 0.0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(health), "Health and damage must be non-negative.");
-            }
+            ValidatePotionHealth(health, maxHealth);
+            return faction == (int)Faction.Ally && health < maxHealth * 0.5;
+        }
 
-            return faction == (int)Faction.Ally && health < incomingDamage * 0.5;
+        /// <summary>
+        /// M0-00B FINAL, branch A (0x42cbdc): HP < 25% of SELF MaxHP,
+        /// requires inventory LifePotion (1,1). Alpha spends one item;
+        /// this pilot checks only eligibility, not inventory mutation.
+        /// </summary>
+        public static bool ShouldDrinkInventoryPotion(double health, double maxHealth, bool hasLifePotion)
+        {
+            ValidatePotionHealth(health, maxHealth);
+            return hasLifePotion && health < maxHealth * 0.25;
+        }
+
+        private static void ValidatePotionHealth(double health, double maxHealth)
+        {
+            if (double.IsNaN(health) || double.IsInfinity(health) ||
+                double.IsNaN(maxHealth) || double.IsInfinity(maxHealth) ||
+                health < 0.0 || maxHealth <= 0.0 || health > maxHealth)
+            {
+                throw new ArgumentOutOfRangeException(nameof(health),
+                    "Potion HP inputs must be finite and within [0, maxHealth].");
+            }
         }
 
         public static void ApplyPotionAction(CreatureState state)
