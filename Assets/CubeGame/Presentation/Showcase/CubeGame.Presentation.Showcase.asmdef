@@ -1,0 +1,21 @@
+{
+    "name": "CubeGame.Presentation.Showcase",
+    "rootNamespace": "CubeGame.Presentation.Showcase",
+    "references": [
+        "CubeGame.Core",
+        "CubeGame.Content",
+        "CubeGame.AlphaModels",
+        "CubeGame.Features.Creatures",
+        "CubeGame.Features.AI",
+        "CubeGame.Presentation.Visual"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using CubeGame.AlphaModels;
 using CubeGame.Presentation.Visual;
+using CubeGame.Presentation.Showcase;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -142,6 +143,32 @@ namespace CubeGame.Tests.Visual.PlayMode
             finally
             {
                 if (result.View != null) Object.Destroy(result.View.gameObject);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ShowcaseSpawnsPlayerCreaturesAndHouses()
+        {
+            var source = AlphaContentSource.Resolve();
+            if (source.State != AlphaContentState.Ready) Assert.Ignore(source.Diagnosis);
+            var go = new GameObject("Showcase");
+            var showcase = go.AddComponent<AlphaContentShowcase>();
+            showcase.SpawnOnStart = false;
+            showcase.Seed = 5u;
+            showcase.CreatureCount = 4;
+            showcase.StructureCount = 2;
+            try
+            {
+                showcase.Build();
+                Assert.IsEmpty(showcase.Problems, string.Join("\n", showcase.Problems));
+                Assert.IsNotNull(showcase.Player, "player visual is assembled");
+                Assert.GreaterOrEqual(showcase.SpawnedCreatures, 4, "creatures are spawned from staged kinds");
+                Assert.GreaterOrEqual(showcase.StructureObjects, 2, "houses come from the structure planner");
+                for (int i = 0; i < 60; i++) { showcase.Tick(1f / 60f); yield return null; }
+            }
+            finally
+            {
+                Object.Destroy(go);
             }
         }
 
