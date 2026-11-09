@@ -84,4 +84,4 @@ AlphaItemRules.WeaponInHand(action)                            // IN_HAND vs ON_
 
 ## 6. Проверки, на которые можно ссылаться
 
-`AlphaOutput/editmode.xml` — 315/315; `AlphaOutput/playmode.xml` — 22/22; `AlphaOutput/content_status.txt` — 5 акторов READY; `AlphaOutput/preview.txt` + 12 PNG — реальные кадры. Локальные артефакты (не в Git): `AlphaOutput/`, `.scratch/content/`.
+`AlphaOutput/editmode.xml` — 356/356; `AlphaOutput/playmode.xml` — 46/46; `AlphaOutput/content_status.txt` — 156 акторов READY; `AlphaOutput/preview.txt` + 12 PNG — реальные кадры. Локальные артефакты (не в Git): `AlphaOutput/`, `.scratch/content/`.

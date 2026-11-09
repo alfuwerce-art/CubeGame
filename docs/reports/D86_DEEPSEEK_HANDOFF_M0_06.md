@@ -70,4 +70,4 @@ int removed = spawner.DespawnBeyond(playerPosition);   // blob сохраняе�
 
 ## 6. Проверки
 
-`AlphaOutput/editmode.xml` — 333/333, в т.ч. 18 новых тестов существ; `AlphaOutput/playmode.xml` — 25/25, в т.ч. 3 PlayMode с реальными существами и драконом 0x65. Локальные артефакты не в Git.
+`AlphaOutput/editmode.xml` — 356/356, в т.ч. 18 новых тестов существ; `AlphaOutput/playmode.xml` — 46/46, в т.ч. 3 PlayMode с реальными существами и драконом 0x65. Локальные артефакты не в Git.

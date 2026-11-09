@@ -25,7 +25,7 @@ AlphaAppearance.TryResolveRaceActor(0x02, library, out var actorId, out var why)
 
 ## 3. Проверки
 
-`AlphaOutput/editmode.xml` — 351/351; `AlphaOutput/playmode.xml` — 45/45 (tint волос, иконка iron-sword, передача действия AI→игровой хук, витрина). Пакетный рендер иконок: `RunRenderItemIcons` → `ICONS_RESULT=PASS icons=28`; атлас: `RunBuildIconAtlas` → `ICON_ATLAS_RESULT=PASS icons=42 columns=8 size=512x384` (`AlphaOutput/icons/atlas.png` + `atlas.json`, origin bottom-left).
+`AlphaOutput/editmode.xml` — 356/356; `AlphaOutput/playmode.xml` — 46/46 (tint волос, иконка iron-sword, передача действия AI→игровой хук, витрина). Пакетный рендер иконок: `RunRenderItemIcons` → `ICONS_RESULT=PASS icons=28`; атлас: `RunBuildIconAtlas` → `ICON_ATLAS_RESULT=PASS icons=42 columns=8 size=512x384` (`AlphaOutput/icons/atlas.png` + `atlas.json`, origin bottom-left).
 
 ## 4. Что дальше у DeepSeek
 

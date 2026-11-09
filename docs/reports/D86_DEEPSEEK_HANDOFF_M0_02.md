@@ -94,4 +94,4 @@ AlphaNpcServices.Status;                                     // явно: кат
 
 ## 5. Проверки
 
-`AlphaOutput/editmode.xml` — 345/345 (+тест сервисов и трансляции W-18); `AlphaOutput/playmode.xml` — 36/36 (включая сквозной контент-сценарий `WorldContentPlayModeTests`). Таблицы воспроизводимы: `python -m tools.alpha_content.build_world_evidence --check`, `build_content_tables --check`, `build_staged_visuals --check`, `scatter_tree_translate2 --check`.
+`AlphaOutput/editmode.xml` — 356/356 (+тест сервисов и трансляции W-18); `AlphaOutput/playmode.xml` — 46/46 (включая сквозной контент-сценарий `WorldContentPlayModeTests`). Таблицы воспроизводимы: `python -m tools.alpha_content.build_world_evidence --check`, `build_content_tables --check`, `build_staged_visuals --check`, `scatter_tree_translate2 --check`.

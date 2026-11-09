@@ -44,4 +44,4 @@ AlphaItemRules.IsAnchorMeasured(set.InHand);             // стрела 9 = PAR
 
 ## 5. Проверки
 
-`AlphaOutput/editmode.xml` — 349/349; `AlphaOutput/playmode.xml` — 41/41 (замена оружия, левая рука, удерживаемый предмет, броня с Unequip, отказы без подмены). Выгрузка моделей: `EXTRACT_ITEM_MODELS=PASS written=28` + 14 удерживаемых + 4 брони; карты `HELD_ITEM_MODELS=PASS items=14`, `EQUIPMENT_MODELS=PASS items=32`.
+`AlphaOutput/editmode.xml` — 356/356; `AlphaOutput/playmode.xml` — 46/46 (замена оружия, левая рука, удерживаемый предмет, броня с Unequip, отказы без подмены). Выгрузка моделей: `EXTRACT_ITEM_MODELS=PASS written=28` + 14 удерживаемых + 4 брони; карты `HELD_ITEM_MODELS=PASS items=14`, `EQUIPMENT_MODELS=PASS items=32`.

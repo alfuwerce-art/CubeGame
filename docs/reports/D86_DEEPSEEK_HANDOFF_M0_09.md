@@ -42,7 +42,7 @@ showcase.SpawnOnStart = true;    // Build() в Start; в тестах можно
 ## 4. Проверки
 
 `AlphaOutput/playmode.xml` — 46/46 (витрина: игрок + 4 существа + 2 дома + 4 комнаты данжа + 2 сундука, 60 кадров без ошибок);
-`AlphaOutput/editmode.xml` — 351/351.
+`AlphaOutput/editmode.xml` — 356/356.
 
 ## 5. Машинный манифест
 

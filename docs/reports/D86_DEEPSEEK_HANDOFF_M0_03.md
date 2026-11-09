@@ -36,4 +36,4 @@ result.View.ApplyLocomotion(state); result.View.Tick(dt);
 
 ## 4. Проверки
 
-`AlphaOutput/playmode.xml` — 42/42 (+3: сборка игрока с волосами/мечом/щитом; броня+зелье в дескрипторе; отказы без подмены), `AlphaOutput/editmode.xml` — 350/350.
+`AlphaOutput/playmode.xml` — 46/46 (+3: сборка игрока с волосами/мечом/щитом; броня+зелье в дескрипторе; отказы без подмены), `AlphaOutput/editmode.xml` — 356/356.
