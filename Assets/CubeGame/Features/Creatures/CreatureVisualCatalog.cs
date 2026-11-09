@@ -32,6 +32,7 @@ namespace CubeGame.Features.Creatures
             { 0x4c, "SpikeCreature family, formula walk (D62 family)" },
             { 0x62, "horse body plan, formula walk" },
             { 0x65, "D83 dragon_0x65_v1, 5 clips" },
+            { 0x76, "RuneGiant: geometry + formula walk staged; special behaviour/actions BLOCKED (R-9)" },
         };
 
         static CreatureVisualProfile[] _cached;

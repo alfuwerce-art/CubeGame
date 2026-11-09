@@ -82,6 +82,8 @@ namespace CubeGame.AlphaModels.Import
             text.AppendLine(report.Detail());
             text.AppendLine("ALPHA_TABLES_RESULT=" + (CubeGame.Content.AlphaContentDatabase.Validate().Count == 0 ? "PASS" : "FAIL"));
             text.AppendLine("ALPHA_STAGED_VISUALS=" + CubeGame.Content.AlphaStagedVisuals.All.Length);
+            foreach (var p in CubeGame.Content.AlphaStagedVisualsValidation.Validate()) text.AppendLine("STAGED_PROBLEM " + p);
+            text.AppendLine(CubeGame.Content.AlphaStagedVisualsValidation.Summary());
             text.AppendLine(CubeGame.Content.AlphaContentDatabase.Summary());
             foreach (var p in CubeGame.Content.AlphaContentDatabase.Validate()) text.AppendLine("TABLE_PROBLEM " + p);
             foreach (var p in CubeGame.Content.AlphaCreatureCatalog.Validate()) text.AppendLine("CATALOG_PROBLEM " + p);

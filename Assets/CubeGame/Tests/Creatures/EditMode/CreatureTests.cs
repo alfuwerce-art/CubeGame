@@ -351,7 +351,7 @@ namespace CubeGame.Tests.Creatures.EditMode
             Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x62));
             Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x65));
             Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x78), "plant objects are staged as static visuals");
-            Assert.IsFalse(CreatureVisualCatalog.IsStaged(0x99));
+            Assert.IsFalse(CreatureVisualCatalog.IsStaged(0xFE), "a kind outside the 156-kind catalog is not staged");
             // Every passive object of the Alpha catalog must stay prepared: they are the world decor set.
             foreach (var kind in AlphaCreatureCatalog.PassiveKinds)
                 Assert.IsTrue(CreatureVisualCatalog.IsStaged(kind), $"passive object 0x{kind:x2} has no staged visual");
@@ -391,6 +391,15 @@ namespace CubeGame.Tests.Creatures.EditMode
                 Assert.GreaterOrEqual(slot, CreatureSpawnPlanner.DecorSlotOffset, "decor ids never collide with creatures");
             }
             Assert.AreEqual(decorA.Count, b.FindAll(r => r.Kind == 0x78 || r.Kind == 0x79).Count);
+        }
+
+        [Test]
+        public void StagedVisualTableIsConsistentWithTheCatalog()
+        {
+            Assert.IsEmpty(AlphaStagedVisualsValidation.Validate(), string.Join("\n", AlphaStagedVisualsValidation.Validate()));
+            var summary = AlphaStagedVisualsValidation.Summary();
+            StringAssert.Contains("staged=", summary);
+            StringAssert.Contains($"/{AlphaCreatureCatalog.PassiveKinds.Count}", summary);
         }
 
         [Test]
