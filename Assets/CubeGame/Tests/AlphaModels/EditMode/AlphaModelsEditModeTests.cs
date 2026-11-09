@@ -443,6 +443,25 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         }
 
         [Test]
+        public void ItemTypesMapToEvidencedSlots()
+        {
+            Assert.IsEmpty(AlphaItemSlotRules.Validate(), string.Join("\n", AlphaItemSlotRules.Validate()));
+            Assert.IsTrue(AlphaItemSlotRules.TrySlot(1, out var held));
+            Assert.AreEqual(AlphaItemSlot.Held, held);
+            Assert.AreEqual("center", AlphaItemSlotRules.LawOf(held));
+            Assert.IsTrue(AlphaItemSlotRules.TrySlot(3, out var weapon));
+            Assert.AreEqual(AlphaItemSlot.Weapon, weapon);
+            Assert.IsTrue(AlphaItemSlotRules.TrySlot(9, out var ring));
+            Assert.IsFalse(AlphaItemSlotRules.IsDrawn(ring), "rings are stored but never drawn");
+            Assert.IsTrue(AlphaItemSlotRules.TrySlot(24, out var lamp));
+            Assert.AreEqual("lamp", AlphaItemSlotRules.LawOf(lamp));
+            Assert.IsTrue(AlphaItemSlotRules.TrySlot(23, out var special));
+            Assert.AreEqual("center", AlphaItemSlotRules.LawOf(special));
+            Assert.IsFalse(AlphaItemSlotRules.TrySlot(11, out _), "materials are not equipped");
+            StringAssert.Contains("mappedTypes=11", AlphaItemSlotRules.Summary());
+        }
+
+        [Test]
         public void NpcServiceFurnitureMapsToContractKinds()
         {
             Assert.IsEmpty(AlphaNpcServices.Validate(), string.Join("\n", AlphaNpcServices.Validate()));

@@ -24,6 +24,7 @@ AlphaItemRules.IsAnchorMeasured(set.InHand);             // стрела 9 = PAR
 - `AlphaHeldItemLayer.TryEquipFromItem(rig, itemsDir, type, subtype)` вешает удерживаемый предмет (расходники 1/0…1/10, планер 23/0, лодка 23/1, лампа 24) на `part_hand_r` с якорем `center`; модель берётся из таблицы `AlphaHeldItemModels` (исполненный `item_icon_id` 0x4EC400), файл — `.cubdec` из локального кэша.
 - `AlphaEquipmentLayer.TryEquipFromItem(rig, itemsDir, type, subtype)` подменяет блоки брони: грудь → `body`, перчатки → `hand_l/hand_r`, сапоги → `foot_l/foot_r` (SWAP + `center`), исходный рендерер скрывается; `Unequip`/`UnequipSlot` восстанавливают. Плечо (тип 7) в подготовленном гуманоидном риге не отображается — возвращается `EQUIPMENT_SHOULDER_BLOCK_NOT_IN_HUMAN_RIG`.
 - Если подтип неизвестен, якорь не измерен или файла нет, модель **не** подменяется: возвращается причина. Это осознанный отказ, не ошибка.
+- `AlphaItemSlotRules.TrySlot(type, out slot)` / `LawOf(slot)` / `IsDrawn(slot)` — карта «тип предмета → слот» по `item_layer` (held/weapon/chest/hands/feet/shoulder/neck/ring/pet/special/lamp); кольца «хранятся, но не рисуются», материалы/еда/монеты — `None`. Используйте для инвентаря/экипировки вместо догадок.
 - `.cubdec` предметов лежат в локальном кэше `<content>/items/` (не в Git): `python -m tools.alpha_content.extract_item_models`.
 
 ## 3. Что нужно от игры
