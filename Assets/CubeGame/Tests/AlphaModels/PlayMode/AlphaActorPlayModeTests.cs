@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using CubeGame.AlphaModels;
 using CubeGame.AlphaTransfer;
+using CubeGame.Content;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -164,6 +165,53 @@ namespace CubeGame.AlphaModels.Tests.PlayMode
                 Object.Destroy(view.gameObject);
             }
         }
+        [UnityTest]
+        public IEnumerator ActorChurnDoesNotLeakMeshes()
+        {
+            var source = AlphaContentSource.Resolve();
+            if (source.State != AlphaContentState.Ready) Assert.Ignore(source.Diagnosis);
+            var lib = new AlphaActorLibrary(source);
+            if (!lib.TryGet("d86_human_0x02_greatsword", out var human)) Assert.Ignore("human is not staged");
+            string staticId = null;
+            foreach (var staged in CubeGame.Content.AlphaStagedVisuals.All)
+                if (staged.ControllerMode == "STATIC_OBJECT") { staticId = staged.Variant; break; }
+            AlphaActorDefinition staticDef = default;
+            if (staticId == null || !lib.TryGet(staticId, out staticDef)) Assert.Ignore("no static actor is staged");
+
+            var problems = new List<string>();
+            var probe = AlphaActorView.Spawn(human, null, problems);
+            Assert.IsTrue(probe.Ready, string.Join("\n", probe.Problems));
+            Object.Destroy(probe.gameObject);
+            yield return null;
+            yield return null;
+            long baseline = System.GC.GetTotalMemory(true);
+            int meshFilters = Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None).Length;
+
+            for (int round = 0; round < 25; round++)
+            {
+                var views = new List<AlphaActorView>();
+                for (int i = 0; i < 4; i++)
+                {
+                    var def = i % 2 == 0 ? human : staticDef;
+                    var view = AlphaActorView.Spawn(def, null, problems);
+                    Assert.IsTrue(view != null && view.Ready, view != null ? string.Join("\n", view.Problems) : "SPAWN_FAILED");
+                    views.Add(view);
+                }
+                foreach (var view in views) Object.Destroy(view.gameObject);
+                yield return null;
+            }
+            yield return null;
+            yield return null;
+            System.GC.Collect();
+            System.GC.WaitForPendingFinalizers();
+            long after = System.GC.GetTotalMemory(true);
+            int afterFilters = Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None).Length;
+            TestContext.WriteLine($"ACTOR_CHURN baseline={baseline} after={after} deltaMB={(after - baseline) / 1048576.0:F2} " +
+                                  $"meshFilters={meshFilters}->{afterFilters} spawned=200");
+            Assert.LessOrEqual(afterFilters, meshFilters + 4, "destroyed actors leave no mesh filters behind");
+            Assert.Less((after - baseline) / 1048576.0, 64.0, "200 spawn/destroy cycles must not leak tens of megabytes");
+        }
+
         [UnityTest]
         public IEnumerator CreatureWithActionLibraryPlaysItsFirstAction()
         {
