@@ -37,7 +37,7 @@ def build_jobs(out=OUT):
     after = dict(before)
     after.update(variant="issue7_fix_0x65", visual_correction=NAME,
                  action_manifest=br._rel(Path(lib) / "actions.json"), clips=br._rel(lib),
-                 actions_status=f"profile {entry['profile']} baked under {NAME} ({vc.STATUS})",
+                 actions_status=f"profile {entry['profile']} baked under {NAME} ({vc.get(NAME)['status']})",
                  library_sha256=br.sha256_file(Path(lib) / "actions.json"))
     return {"before": (before, entry), "after": (after, dict(entry, id="0x65_fix"), lib)}
 
@@ -76,7 +76,7 @@ def build_scope(out=OUT, dst=SCOPE):
     (dst / "jobs").mkdir(parents=True)
     entries = []
     for key, eid, label in (("before", "0x65_s0-0_alpha", "Dragon 0x65 - Alpha parity (as drawn by Alpha's code)"),
-                            ("after", "0x65_s0-0_fix", f"Dragon 0x65 - {NAME}: {vc.STATUS}")):
+                            ("after", "0x65_s0-0_fix", f"Dragon 0x65 - {NAME}: {vc.get(NAME)['status']}")):
         src = Path(out) / "jobs" / f"0x65_{key}.json"
         shutil.copyfile(src, dst / "jobs" / f"{eid}.json")
         entries.append({"id": eid, "kind": "0x65", "seed": [0, 0], "name_hint": label, "variant_tag": key,

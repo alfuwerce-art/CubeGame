@@ -8,8 +8,10 @@ library baking; then ``alpha_static.AppearanceEmulator.run`` patches the listed 
 one kind after Alpha's generator ran. Everything downstream (drawModel oracle, action clips, walk formula,
 entity contract) sees the same corrected appearance, so the parts stay consistent in every clip.
 
-Every clip/specimen made under a correction is provenance ``VISUAL_CORRECTION_PROPOSAL_NOT_ALPHA``; it
-needs the producer's approval and never counts as a transferred Alpha result.
+Every clip/specimen made under a correction carries the correction's status: ``VISUAL_CORRECTION_PROPOSAL_NOT_ALPHA``
+until the producer approves it, then ``VISUAL_CORRECTION_APPROVED_NOT_ALPHA`` (``dragon_0x65_v1``: D83, 2026-11-09).
+Neither ever counts as a transferred Alpha result. Approved corrections listed in ``GAME_DEFAULTS`` are used by
+every game job of their kind (``transfer_planner.job_for``); Alpha-parity checks keep running without them.
 
 Dragon 0x65 (root cause, Cube.exe ``creature_generateAppearance`` kind branch at 0x442E91):
 Alpha's own data place all four legs with z = +1 (front legs (3, 4, 1) scale 1.5, hind legs (3, -4, 1))
@@ -28,11 +30,16 @@ import contextlib
 import struct
 
 STATUS = "VISUAL_CORRECTION_PROPOSAL_NOT_ALPHA"
+APPROVED_STATUS = "VISUAL_CORRECTION_APPROVED_NOT_ALPHA"   # producer approved for the game; still not Alpha parity
 
 CORRECTIONS = {
     "dragon_0x65_v1": {
         "kind": 0x65,
-        "status": STATUS,
+        "status": APPROVED_STATUS,
+        "approval": {"decision": "D83", "date": "2026-11-09", "by": "producer"},
+        # rig family of the corrected appearance (alpha_creature/ccddb0483c without the correction);
+        # a game job only accepts action libraries baked under the correction with this family
+        "game_family": "alpha_creature/95251fe7e5",
         "issue": "#7",
         # appearance offset -> (field name, Alpha value, proposed value)
         "fields": {
@@ -48,7 +55,19 @@ CORRECTIONS = {
     },
 }
 
+# kind -> correction every GAME job of that kind uses (transfer_planner.job_for). Only approved corrections.
+# Alpha-parity paths (oracle tests, D69 verification of the D64 library) never read this table.
+GAME_DEFAULTS = {0x65: "dragon_0x65_v1"}
+
 _active = None
+
+
+def game_default(kind):
+    """Approved correction a game job of ``kind`` must use, else None."""
+    name = GAME_DEFAULTS.get(int(kind, 16) if isinstance(kind, str) else kind)
+    if name is not None and get(name).get("status") != APPROVED_STATUS:
+        raise ValueError(f"{name} is in GAME_DEFAULTS but not approved")
+    return name
 
 
 def get(name):
@@ -95,6 +114,7 @@ def apply(kind, raw):
 
 def provenance(name):
     c = get(name)
-    return {"visual_correction": name, "status": c["status"], "issue": c["issue"], "kind": f"0x{c['kind']:02x}",
+    return {"visual_correction": name, "status": c["status"], "approval": c.get("approval"),
+            "issue": c["issue"], "kind": f"0x{c['kind']:02x}",
             "fields": {n: {"alpha": list(a), "proposed": list(p)} for n, a, p in c["fields"].values()},
             "rules": c["rules"]}

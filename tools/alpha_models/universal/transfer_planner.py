@@ -35,6 +35,7 @@ from pathlib import Path
 
 from tools.alpha_models.universal import contract as ct
 from tools.alpha_models.universal import creature_rig as cr
+from tools.alpha_models.universal import visual_correction as vc
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRATCH = ROOT / ".scratch"
@@ -148,6 +149,10 @@ def find_action_library(entity, dirs=LIBRARY_DIRS):
         return None
     prof = ct.ACTION_PROFILES[acts["profile"]]
     kind = int(entity["kind"], 16)
+    # D83: a kind with an approved game correction only takes a library baked under that correction
+    # (its corrected rig family); an Alpha library would put Alpha matrices on the corrected body
+    correction = vc.game_default(kind)
+    rig = vc.get(correction)["game_family"] if correction else entity["family_id"]
     best = None
     for d in dirs:
         for path in sorted(Path(d).rglob("actions.json")):
@@ -156,7 +161,8 @@ def find_action_library(entity, dirs=LIBRARY_DIRS):
             except (OSError, ValueError):
                 continue
             if (m.get("format") != "cubegame.alpha_actions/1" or m.get("BAKE_RESULT") != "PASS"
-                    or m.get("kind") != kind or m.get("rig") != entity["family_id"]
+                    or m.get("kind") != kind or m.get("rig") != rig
+                    or (m.get("visual_correction") or {}).get("visual_correction") != correction
                     or list(m.get("seed_variant", [])) != list(entity["seed_variant"])):
                 continue
             w = (prof.get("equipment") or {}).get("weapon")
@@ -177,6 +183,9 @@ def job_for(entity, capture_dirs=CAPTURE_DIRS, library_dirs=LIBRARY_DIRS):
     job = {"kind": entity["kind"], "seed_variant": entity["seed_variant"],
            "variant": f"auto_{entity['kind']}_{(entity.get('name_hint') or 'kind').lower()}",
            "generated_by": "transfer_planner PLAN", "contract": ct.FORMAT}
+    correction = vc.game_default(entity["kind"])
+    if correction:                       # D83: approved visual correction, not Alpha parity
+        job["visual_correction"] = correction
     walk = entity["channels"]["walk"]
     if any(s["source"] == "param_walk_formula" for s in walk["sources"]):
         job.update(locomotion="formula", amp=DEFAULT_LOCOMOTION["amp"], speed_xy=DEFAULT_LOCOMOTION["speed_xy"],

@@ -63,7 +63,8 @@ class CorrectionUnitTests(unittest.TestCase):
             with vc.active("no_such_fix"):
                 pass
         p = vc.provenance("dragon_0x65_v1")
-        self.assertEqual(p["status"], "VISUAL_CORRECTION_PROPOSAL_NOT_ALPHA")
+        self.assertEqual(p["status"], "VISUAL_CORRECTION_APPROVED_NOT_ALPHA")      # D83
+        self.assertEqual(p["approval"]["decision"], "D83")
         self.assertEqual(set(p["fields"]), {"offset_hand", "offset_foot", "offset_tail"})
 
     def test_action_profile_kept_only_under_the_declared_correction(self):
@@ -77,7 +78,7 @@ class CorrectionUnitTests(unittest.TestCase):
         with vc.active("dragon_0x65_v1"):
             prof, status, reasons = ct.action_profile_for(0x65, [0, 0], corrected_family, parts)
             self.assertEqual(prof, pid)
-            self.assertIn("VISUAL_CORRECTION_PROPOSAL_NOT_ALPHA", reasons[0])
+            self.assertIn("VISUAL_CORRECTION_APPROVED_NOT_ALPHA", reasons[0])
             self.assertIsNone(ct.action_profile_for(0x1E, [0, 0], corrected_family, ["head"])[0])
             # the Alpha family itself needs no note
             self.assertEqual(ct.action_profile_for(0x65, [0, 0], "alpha_creature/ccddb0483c", parts)[2], [])
@@ -96,6 +97,70 @@ class CorrectionUnitTests(unittest.TestCase):
         self.assertNotIn("visual_correction", plain)
         self.assertEqual(fixed["visual_correction"], "dragon_0x65_v1")
         self.assertIn("visual_correction.py", plain["code_sha256"])
+
+
+class GameDefaultTests(unittest.TestCase):
+    """D83: the producer approved dragon_0x65_v1 for the game. Game jobs of 0x65 use it by default and take
+    only an action library baked under it; Alpha-parity paths (oracle, D69 verification) do not read it."""
+    PID = "alpha_actions/creature_ai_d64_dragon_0x65"
+
+    def test_game_default_only_for_the_approved_kind(self):
+        self.assertEqual(vc.game_default(0x65), "dragon_0x65_v1")
+        self.assertEqual(vc.game_default("0x65"), "dragon_0x65_v1")
+        self.assertIsNone(vc.game_default(0x1E))
+        self.assertIsNone(vc.current())                     # a default never switches the correction on by itself
+
+    def test_unapproved_correction_cannot_be_a_game_default(self):
+        c = vc.CORRECTIONS["dragon_0x65_v1"]
+        old = c["status"]
+        try:
+            c["status"] = vc.STATUS
+            with self.assertRaises(ValueError):
+                vc.game_default(0x65)
+        finally:
+            c["status"] = old
+
+    def _entity(self, kind, family):
+        return {"kind": kind, "seed_variant": [0, 0], "name_hint": "Dragon", "family_id": family,
+                "channels": {"walk": {"sources": []}, "actions": {"status": "AVAILABLE", "profile": self.PID}}}
+
+    def _lib(self, root, name, rig, correction):
+        import json
+        d = Path(root) / name
+        d.mkdir()
+        m = {"format": "cubegame.alpha_actions/1", "BAKE_RESULT": "PASS", "kind": 0x65, "rig": rig,
+             "seed_variant": [0, 0], "weapon": [0, 0], "actions": []}
+        if correction:
+            m["visual_correction"] = vc.provenance(correction)
+        (d / "actions.json").write_text(json.dumps(m), encoding="utf-8")
+        return d / "actions.json"
+
+    def test_planner_job_uses_the_correction_and_its_library(self):
+        import tempfile
+        from tools.alpha_models.universal import transfer_planner as tp
+        alpha_rig = vc.CORRECTIONS["dragon_0x65_v1"]["keeps_profiles"][self.PID]
+        game_rig = vc.CORRECTIONS["dragon_0x65_v1"]["game_family"]
+        (ROOT / ".scratch").mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=ROOT / ".scratch") as root:      # job paths are repo-relative
+            self._lib(root, "alpha", alpha_rig, None)
+            entity = self._entity("0x65", alpha_rig)
+            self.assertIsNone(tp.find_action_library(entity, [root]))        # Alpha library refused for the game
+            self._lib(root, "wrong_rig", alpha_rig, "dragon_0x65_v1")
+            self.assertIsNone(tp.find_action_library(entity, [root]))        # correction tag alone is not enough
+            fixed = self._lib(root, "fixed", game_rig, "dragon_0x65_v1")
+            self.assertEqual(tp.find_action_library(entity, [root])["path"], fixed)
+            job = tp.job_for(entity, capture_dirs=[], library_dirs=[root])
+            self.assertEqual(job["visual_correction"], "dragon_0x65_v1")
+            self.assertTrue(job["action_manifest"].endswith("fixed/actions.json") or
+                            job.get("clips", "").endswith("fixed"))
+
+    def test_recorded_game_family_is_the_corrected_rig(self):
+        if not HAVE_ALPHA:
+            self.skipTest("local Alpha copy (.scratch/alphatest2) missing")
+        from tools.alpha_models.universal import alpha_oracle as ao, creature_rig as cr
+        with vc.active("dragon_0x65_v1"):
+            _, app = ao.load(str(CUBE), str(SIZES)).creature(0x65, (0, 0))
+        self.assertEqual(cr.resolve(0x65, app).family_id, vc.CORRECTIONS["dragon_0x65_v1"]["game_family"])
 
 
 @unittest.skipUnless(HAVE_ALPHA, "local Alpha copy (.scratch/alphatest2) missing")
