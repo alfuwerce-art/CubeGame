@@ -46,6 +46,22 @@ namespace CubeGame.Features.Persistence
         public double heroHealth = -1.0;
 
         /// <summary>
+        /// C1, optional: hero editor choice (gender 0/1, face, haircut, hair colour bytes). −1 (and slots written before
+        /// C1) = Alpha defaults (male, face 0, haircut 0, hair FF C8 32); race is <see cref="raceId"/> (−1 → Human).
+        /// </summary>
+        public int heroGender = -1;
+
+        public int heroFace = -1;
+
+        public int heroHaircut = -1;
+
+        public int heroHairR = -1;
+
+        public int heroHairG = -1;
+
+        public int heroHairB = -1;
+
+        /// <summary>
         /// M0-04B, optional: placement of the Core items of the character save (same order): bag slot ≥ 0 or
         /// −(1+equipment slot). Missing (older slots) → items go to the bags, first weapon to the main hand.
         /// </summary>

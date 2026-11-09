@@ -120,6 +120,7 @@ namespace CubeGame.Tests.FullM0.EditMode
         {
             GameSession session = Running();
             session.ConsumableCooldownMs = Content.AlphaConsumableRules.CooldownMs;
+            int kit = session.Hero.Inventory.CountOf(Potion);   // C1: the start kit already carries five (1,1)
             session.Hero.Inventory.TryAdd(InventoryEntry.FromRaw(Potion, 2));
             session.Hero.Health.ApplyDamage(200.0);
             double hurt = session.Hero.Health.CurrentHealth;
@@ -127,7 +128,7 @@ namespace CubeGame.Tests.FullM0.EditMode
 
             Assert.IsTrue(session.TryUseItem(slot), session.LastRejection);
             Assert.Greater(session.Hero.Health.CurrentHealth, hurt);
-            Assert.AreEqual(1, session.Hero.Inventory.CountOf(Potion));
+            Assert.AreEqual(kit + 1, session.Hero.Inventory.CountOf(Potion));
             Assert.IsTrue(session.Combat.IsActing(session.Hero.Id), "the use action 80 runs");
 
             Run(session, 2.0);
@@ -135,7 +136,7 @@ namespace CubeGame.Tests.FullM0.EditMode
             StringAssert.Contains("cooldown", session.LastRejection);
             Run(session, 1.2);
             Assert.IsTrue(session.TryUseItem(slot), session.LastRejection);
-            Assert.AreEqual(0, session.Hero.Inventory.CountOf(Potion));
+            Assert.AreEqual(kit, session.Hero.Inventory.CountOf(Potion));
         }
 
         [Test]
@@ -180,7 +181,7 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.AreEqual(9, back[12].Count);
             Assert.AreEqual(Potion, back[12].Raw);
             Assert.AreEqual(ItemType.Chest, back.Loadout.GetEquipped(EquipmentSlot.Chest).Type);
-            Assert.AreEqual(HeroState.CreateStartingWeapon(), back.Loadout.GetEquipped(EquipmentSlot.MainHand));
+            Assert.AreEqual(inv.Loadout.GetEquipped(EquipmentSlot.MainHand), back.Loadout.GetEquipped(EquipmentSlot.MainHand), "start kit weapon");
             Assert.AreEqual(inv.UsedSlots, back.UsedSlots);
         }
 

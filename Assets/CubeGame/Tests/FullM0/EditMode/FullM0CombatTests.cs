@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using CubeGame.Core.Characters;
 using CubeGame.Core.Combat;
 using CubeGame.Core.Equipment;
+using CubeGame.Core.Items;
 using CubeGame.Features.Combat;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.Session;
@@ -15,6 +16,9 @@ namespace CubeGame.Tests.FullM0.EditMode
     /// </summary>
     public sealed class FullM0CombatTests
     {
+        /// <summary>Level-1 common greatsword used by the combat-number tests (before C1 it was the start weapon).</summary>
+        private static ItemInstance Greatsword() => new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Greatsword, 1, 0, 1);
+
         private static readonly KindId Human = new KindId(0x02);
         private static readonly KindId Wolf = new KindId(0x1c);
         private static readonly ActionId Attack57 = new ActionId(57);
@@ -41,7 +45,7 @@ namespace CubeGame.Tests.FullM0.EditMode
             _combat = new CombatSystem(_events, new ActionTimingTable().Add(Human, Attack57, Alpha57), 666666);
 
             _hero = Combatant.Create(StableEntityId.Hero, Human, "Hero", CharacterClass.Warrior, 1);
-            _hero.Loadout.Equip(EquipmentSlot.MainHand, HeroState.CreateStartingWeapon());
+            _hero.Loadout.Equip(EquipmentSlot.MainHand, Greatsword());
             _hero.Position = new WorldPosition(100, 50, 100);
             _hero.Yaw = 0f; // facing +Z
             _wolf = Combatant.Create(StableEntityId.ForRuntime(1), Wolf, "Wolf", CharacterClass.Warrior, 1);
@@ -207,8 +211,14 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.IsTrue(session.CompleteLoading());
 
             HeroState hero = session.Hero;
-            Assert.AreEqual(1, hero.Items.Count, "new hero carries the starting weapon");
-            Assert.IsNotNull(hero.Loadout.GetEquipped(EquipmentSlot.MainHand), "starting weapon is equipped");
+            int kitCore = 0;
+            foreach (StarterKitItem item in AlphaHeroCreation.StarterKit(CharacterClass.Warrior))
+            {
+                kitCore += item.Core != null ? 1 : 0;
+            }
+
+            Assert.AreEqual(kitCore, hero.Items.Count, "new hero carries the Alpha start kit (C1)");
+            Assert.AreEqual((byte)WeaponSubtype.Greatmace, hero.Loadout.GetEquipped(EquipmentSlot.MainHand).Subtype, "Warrior: greatmace in the hand");
             Assert.IsTrue(session.Combat.TryGet(hero.Id, out Combatant heroCombatant));
             Assert.AreSame(hero.Health, heroCombatant.Health, "hero combatant shares the hero's Core HP");
 
@@ -247,7 +257,7 @@ namespace CubeGame.Tests.FullM0.EditMode
             events.Subscribe<HitResolved>(e => damages.Add(e.Damage));
             var combat = new CombatSystem(events, new ActionTimingTable().Add(Human, Attack57, Alpha57), seed);
             Combatant hero = Combatant.Create(StableEntityId.Hero, Human, "Hero", CharacterClass.Warrior, 1);
-            hero.Loadout.Equip(EquipmentSlot.MainHand, HeroState.CreateStartingWeapon());
+            hero.Loadout.Equip(EquipmentSlot.MainHand, Greatsword());
             Combatant wolf = Combatant.Create(StableEntityId.ForRuntime(1), Wolf, "Wolf", CharacterClass.Warrior, 1);
             wolf.Hostile = true;
             wolf.Position = new WorldPosition(0, 0, 2);

@@ -73,6 +73,9 @@ namespace CubeGame.Features.Contracts
 
         /// <summary>Visual appearance seed (hair colour etc.; Alpha: server rand() per NPC).</summary>
         public uint AppearanceSeed { get; set; }
+
+        /// <summary>Hero editor choice (C1): race, gender, face, haircut, hair colour. Null for creatures.</summary>
+        public HeroAppearance? Appearance { get; set; }
     }
 
     public sealed class EntityDespawned : IGameEvent

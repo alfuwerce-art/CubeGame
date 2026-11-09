@@ -158,6 +158,12 @@ namespace CubeGame.Features.Persistence
                 heroZ = hero.Position.Z,
                 heroYaw = hero.Yaw,
                 heroHealth = hero.Health.CurrentHealth,
+                heroGender = hero.Appearance.Gender,
+                heroFace = hero.Appearance.Face,
+                heroHaircut = hero.Appearance.Haircut,
+                heroHairR = hero.Appearance.HairR,
+                heroHairG = hero.Appearance.HairG,
+                heroHairB = hero.Appearance.HairB,
                 inventoryPlacement = hero.InventoryPlacement(),
                 characterChecksum = Checksum(characterText),
                 worldChecksum = worldChecksum,
@@ -285,6 +291,18 @@ namespace CubeGame.Features.Persistence
                 Yaw = data.heroYaw,
                 NeedsGroundPlacement = false,
             };
+            if (data.heroGender >= 0)
+            {
+                HeroAppearance d = AlphaHeroCreation.Default;
+                hero.Appearance = AlphaHeroCreation.Normalize(new HeroAppearance(
+                    hero.RaceId,
+                    data.heroGender,
+                    data.heroFace < 0 ? d.Face : data.heroFace,
+                    data.heroHaircut < 0 ? d.Haircut : data.heroHaircut,
+                    data.heroHairR < 0 ? d.HairR : (byte)data.heroHairR,
+                    data.heroHairG < 0 ? d.HairG : (byte)data.heroHairG,
+                    data.heroHairB < 0 ? d.HairB : (byte)data.heroHairB));
+            }
             hero.Items.AddRange(items);
             hero.RestoreInventory(data.inventoryPlacement);
             RestoreRawItems(hero, data);
@@ -468,6 +486,13 @@ namespace CubeGame.Features.Persistence
             if (!IsFinite(data.heroX) || !IsFinite(data.heroY) || !IsFinite(data.heroZ) || !IsFinite(data.heroYaw) || !IsFinite(data.heroHealth))
             {
                 error = "hero position is not finite";
+                return false;
+            }
+
+            if (data.raceId < -1 || data.raceId >= AlphaHeroCreation.RaceCount || data.heroGender < -1 || data.heroGender > 1
+                || data.heroHairR > 255 || data.heroHairG > 255 || data.heroHairB > 255)
+            {
+                error = $"hero appearance out of range: race={data.raceId} gender={data.heroGender}";
                 return false;
             }
 

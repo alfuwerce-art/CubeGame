@@ -50,7 +50,8 @@ namespace CubeGame.Features.Session
         public HeroState(string name, int raceId, CharacterSheet sheet)
         {
             Name = string.IsNullOrWhiteSpace(name) ? "Hero" : name.Trim();
-            RaceId = raceId;
+            HeroAppearance d = AlphaHeroCreation.Default;
+            Appearance = AlphaHeroCreation.Normalize(new HeroAppearance(raceId < 0 ? 0 : raceId, d.Gender, d.Face, d.Haircut, d.HairR, d.HairG, d.HairB));
             Sheet = sheet ?? throw new ArgumentNullException(nameof(sheet));
             Loadout = new EquipmentLoadout();
             Inventory = new HeroInventory(Loadout);
@@ -58,20 +59,37 @@ namespace CubeGame.Features.Session
         }
 
         /// <summary>
-        /// Starting weapon of a new hero: one level-1 common greatsword (Core S04 item), matching the S05 player
-        /// visual (human with greatsword, action 57). PLACEHOLDER_NOT_ALPHA: Alpha's class start kit is not restored.
+        /// Gives the Alpha class start kit (C1, <see cref="AlphaHeroCreation.StarterKit"/>): weapons into the hands
+        /// Alpha fills, the rest into the bags. Rings and the lamp go to the bags until their slots exist (C5).
         /// </summary>
-        public static ItemInstance CreateStartingWeapon()
+        public void GiveStarterKit()
         {
-            return new ItemInstance(ItemType.Weapon, (byte)WeaponSubtype.Greatsword, 1, 0, 1);
+            foreach (StarterKitItem item in AlphaHeroCreation.StarterKit(Sheet.Class))
+            {
+                bool done = item.Core != null && item.Equip.HasValue
+                    ? Inventory.TryEquipDirect(item.Equip.Value, item.Core)
+                    : Inventory.TryAdd(item.Core != null ? InventoryEntry.FromCore(item.Core) : InventoryEntry.FromRaw(item.Raw, item.Count));
+                if (!done)
+                {
+                    throw new InvalidOperationException($"start kit item refused: {Inventory.LastRejection}");
+                }
+            }
+
+            SyncItemsFromInventory();
         }
 
         public StableEntityId Id => StableEntityId.Hero;
 
         public string Name { get; }
 
-        /// <summary>Race id (M0-03A; -1 until the race table is integrated).</summary>
-        public int RaceId { get; }
+        /// <summary>Race 0…7 of the hero editor (Alpha widget +0x18C; C1). Saves written before C1 read as Human.</summary>
+        public int RaceId => Appearance.Race;
+
+        /// <summary>Hero editor choice: race, gender, face, haircut, hair colour (C1).</summary>
+        public HeroAppearance Appearance { get; set; }
+
+        /// <summary>Alpha species of the hero (race + gender, creature +0x64) — what the hero looks like.</summary>
+        public KindId Kind => AlphaHeroCreation.KindOf(Appearance);
 
         public CharacterSheet Sheet { get; }
 
@@ -192,7 +210,8 @@ namespace CubeGame.Features.Session
 
         public string HeroName { get; set; } = "Hero";
 
-        public int RaceId { get; set; } = -1;
+        /// <summary>Hero editor choice (C1); face/haircut are wrapped into the species ranges on creation.</summary>
+        public HeroAppearance Appearance { get; set; } = AlphaHeroCreation.Default;
 
         public CharacterClass Class { get; set; } = CharacterClass.Warrior;
 
@@ -302,13 +321,13 @@ namespace CubeGame.Features.Session
             }
 
             var sheet = new CharacterSheet(request.Class, request.Specialization);
-            var hero = new HeroState(request.HeroName, request.RaceId, sheet)
+            var hero = new HeroState(AlphaHeroCreation.NormalizeName(request.HeroName), 0, sheet)
             {
                 Position = request.Spawn,
                 NeedsGroundPlacement = true,
+                Appearance = AlphaHeroCreation.Normalize(request.Appearance),
             };
-            hero.Inventory.TryEquipDirect(EquipmentSlot.MainHand, HeroState.CreateStartingWeapon());
-            hero.SyncItemsFromInventory();
+            hero.GiveStarterKit();
 
             var world = new WorldInfo(request.WorldName, new WorldSeed(request.Seed), request.GeneratorId, nowUtcTicks);
             return Attach(slotKey, world, hero, new GameClock(), new WorldDeltaStore());
@@ -444,7 +463,11 @@ namespace CubeGame.Features.Session
             return true;
         }
 
-        /// <summary>Species of the hero for visuals and action timings: Alpha HumanMale (0x02), until race selection (M0-03A).</summary>
+        /// <summary>
+        /// Species whose action timings the hero's combat uses: Alpha HumanMale (0x02), the only player species with
+        /// captured action clips. Alpha player attack timing comes from class/weapon, not species (C4); the hero's look
+        /// is <see cref="HeroState.Kind"/>.
+        /// </summary>
         public static readonly KindId HeroKind = new KindId(0x02);
 
         /// <summary>

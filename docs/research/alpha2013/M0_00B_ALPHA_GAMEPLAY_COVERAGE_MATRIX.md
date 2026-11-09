@@ -106,14 +106,14 @@ Gloves/Boots доказаны по моделям (34 проверки, `RESULT=
 
 | mechanic_id | Alpha source | conf | CubeGame implementation | status | S05 dep | M0 substage | verification scenario | открытый вопрос / блокер |
 |---|---|---|---|---|---|---|---|---|
-| P-01 | расы: 8 (Human, Elf, Dwarf, Orc, Goblin, Lizard, Undead, Frogman) — `drawCharacterAppearancePanel` `00428e40` | DIRECT | NONE (`CharacterClass.cs` описывает только 4 класса) | MISSING | — | M0-03A | `GS-11` | — |
+| P-01 | расы: 8 (Human, Elf, Dwarf, Orc, Goblin, Lizard, Undead, Frogman) — поле `+0x18C`, `drawCharacterAppearancePanel` `00428e40`; раса+пол → вид `база[раса]+пол` (`0x42C080`) | DIRECT | `Features/Session/AlphaHeroCreation.cs`, `HeroState.Appearance/Kind` | IMPLEMENTED (правило, сейв, редактор); модели рас — D4 | — | C1 | `FullM0HeroCreationTests` | — |
 | P-02 | классы: 4 (Warrior/Ranger/Mage/Rogue), `+0x140 = classIdx+1` | DIRECT | `Core/Characters/CharacterClass.cs` | IMPLEMENTED_CORE | — | M0-03A | `GS-11` | — |
-| P-03 | пол Male/Female (`+0x04` appearance) | DIRECT | NONE | MISSING | — | M0-03A | `GS-11` | — |
-| P-04 | Face/Haircut + `styleId = baseStyle[race]+gender` (16 значений); диапазоны зависят от style id | DIRECT (правило) | NONE | MISSING | — | M0-03A | `GS-11` | полные таблицы id моделей head/hair (`0x4d4…0x535`) |
-| P-05 | цвет волос: палитра 16 RGB, дефолт `FFC832` (`00428e40`, `CharCreation_reset_defaults`) | DIRECT | NONE (механизм tint — только в S05-пилоте) | PARTIAL | RUNTIME | M0-03A | `GS-11` | перенос tint-правила в игру не выполнен |
-| P-06 | имя персонажа `NameInput_handle_key` `0043a0d0`, ≤255 байт | DIRECT | NONE | MISSING | — | M0-03A | `GS-11` | — |
-| P-07 | применение выбора: `+0x64 = styleId`, `creature_generateAppearance(styleId, +0x78, appearance)` | DIRECT | `tools/alpha_models/universal/pipeline.py` (вне `Assets/`) | IMPLEMENTED_PILOT | PIPE/RUNTIME | M0-03A / M0-03C | `GEN-APPEAR-01` | смысл `+0x78` и 11 узлов appearance |
-| P-08 | стартовый набор по классу (`start_game_mode` `0x47742e`) | DIRECT | NONE | MISSING | — | M0-04A | `GS-07` | — |
+| P-03 | пол Male/Female (`+0x194`), вид +1 у женского | DIRECT | `AlphaHeroCreation.KindOf` | IMPLEMENTED | — | C1 | `FullM0HeroCreationTests` | — |
+| P-04 | лицо `+0x198` / причёска `+0x19C` — индекс в диапазоне моделей вида (таблица `0x42C41C`, 16 видов), круговой индекс | DIRECT | `AlphaHeroCreation.ModelRanges/Wrap/HeadModel/HairModel` | IMPLEMENTED (правило); модели голов/причёсок — D4 | RUNTIME | C1 | `FullM0HeroCreationTests` | — |
+| P-05 | цвет волос: палитра 16 оттенков × 7 ступеней = 112 (`0x428E40`), умолчание `FF C8 32` (`0x42BD90`) | DIRECT | `AlphaHeroCreation.PaletteColor`, `HeroAppearance.Hair*` | IMPLEMENTED (выбор, сейв); tint модели — D4 | RUNTIME | C1 | `FullM0HeroCreationTests` | применение tint на модели героя — D4 |
+| P-06 | имя: поле существа `+0x1168` 16 байт → ≤15 символов (`0x60E62D`) | DIRECT | `AlphaHeroCreation.NormalizeName` | IMPLEMENTED | — | C1 | `FullM0HeroCreationTests` | прежнее «≤255 байт» — общее поле ввода |
+| P-07 | применение выбора: `+0x64 = вид`, `+0x140 = класс+1`, `creature_generateAppearance(вид, +0x78, appearance)` | DIRECT | `HeroState.Kind`, `EntitySpawned.Appearance` → D4; `tools/alpha_models/universal/pipeline.py` | PARTIAL (данные переданы, модель героя по выбору — D4) | PIPE/RUNTIME | C1 / D4 | `GEN-APPEAR-01` | смысл `+0x78` и 11 узлов appearance |
+| P-08 | стартовый набор по классу (`0x4772B0`, таблица `0x4777D8`): Warrior Greatmace + 2 Sword + Shield; Ranger Bow + Crossbow + Wand; Mage Staff + 2 Bracelet + Wand; Rogue 2 Dagger в руках + 2 Fist + Longsword; всем 2 кольца, лампа, 5× зелье (1,1) | DIRECT | `AlphaHeroCreation.StarterKit`, `HeroState.GiveStarterKit` | IMPLEMENTED (кольца/лампа в сумке до C5; материал 2 → None до решения) | — | C1 | `FullM0HeroCreationTests` | материал 2 в Core S04 не разрешён — вопрос продюсеру |
 | P-09 | XP: `cost(L)=int((1−1/((L−1)·0.05+1))·1000+50)`, асимптота 1050 | DIRECT | `Core/Progression/AlphaMath.cs`, `ProgressionState.cs` | IMPLEMENTED_CORE | — | M0-03D | `GS-01` | кап уровня не доказан (D-U1) |
 | P-10 | maxHP = `base(0x178)·levelFactor·starFactorOr2·classMult·specMult + equipmentBonuses` | DIRECT | `Core/Characters/CharacterStats.cs` | IMPLEMENTED_CORE | — | M0-03D | `STATS-01` | OQ-25 OPEN: HP от экипировки — отдельное явное поле |
 | P-11 | `starFactor` игрока = 2.0; мобов `2^(0.25S)` | DIRECT | `CharacterStats` (игрок), звёзды мобов — NONE | PARTIAL | — | M0-03D | `STATS-02` | звёздная система мобов отсутствует |
@@ -246,7 +246,7 @@ Gloves/Boots доказаны по моделям (34 проверки, `RESULT=
 
 | mechanic_id | Alpha source | conf | CubeGame implementation | status | S05 dep | M0 substage | verification scenario | открытый вопрос / блокер |
 |---|---|---|---|---|---|---|---|---|
-| Q-01 | создание героя: экраны/поля `drawCharacterAppearancePanel` `00428e40`, `CharCreation_refresh_model` `0042c080` | DIRECT (поля) / UNKNOWN (раскладка UI) | NONE | MISSING | — | M0-03A (UI — M0-08A) | `GS-11` | Plasma UI не переносится (K_assets §K2) |
+| Q-01 | создание героя: поля `drawCharacterAppearancePanel` `00428e40`, `CharCreation_refresh_model` `0042c080` | DIRECT (поля) / UNKNOWN (раскладка UI) | редактор IMGUI в меню нового мира (`GameBootstrap.DrawHeroEditor`) | IMPLEMENTED_PILOT (итоговый UI — C10) | — | C1 (UI — C10) | `GS-11` | Plasma UI не переносится (K_assets §K2) |
 | Q-02 | меню/новый мир/загрузка/выход | нет спецификации (только структура `worlds.db`) | NONE | MISSING | — | M0-01B | `GS-01` | **UI-сценарии Alpha не каталогизированы (`VISUAL_CATALOG` — `DEFERRED`)** |
 | Q-03 | смена сцен/жизненный цикл мира | — | NONE (`SceneManager` в рантайме отсутствует) | MISSING | — | M0-01B | `GS-01` | — |
 | Q-04 | HUD (HP/XP/ресурс/подсказки) | нет спецификации | `Presentation/Hud/PilotDebugHud.cs` (IMGUI seed/координаты/FPS) | IMPLEMENTED_PILOT | — | M0-08A | `GS-05` | это отладочный оверлей, не HUD |

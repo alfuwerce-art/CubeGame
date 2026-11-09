@@ -116,6 +116,7 @@ namespace CubeGame.Gameplay
         private string _formHeroName = "Hero";
         private int _formClass;
         private int _formSlot;
+        private HeroAppearance _formLook = AlphaHeroCreation.Default;
 
         public GameSession Session => _session;
 
@@ -242,7 +243,7 @@ namespace CubeGame.Gameplay
 
         // ----- Public game API (UI, automation, PlayMode tests) -----
 
-        public bool StartNewWorld(string slotKey, string worldName, uint seed, string heroName, CharacterClass heroClass)
+        public bool StartNewWorld(string slotKey, string worldName, uint seed, string heroName, CharacterClass heroClass, HeroAppearance? appearance = null)
         {
             var request = new NewWorldRequest
             {
@@ -252,6 +253,7 @@ namespace CubeGame.Gameplay
                 HeroName = heroName,
                 Class = heroClass,
                 Specialization = CharacterSpecialization.Primary,
+                Appearance = appearance ?? AlphaHeroCreation.Default,
             };
 
             if (!_session.BeginNewWorld(slotKey, request, DateTime.UtcNow.Ticks))
@@ -867,9 +869,10 @@ namespace CubeGame.Gameplay
             {
                 TimeMs = _session.Clock.TimeMs,
                 Entity = hero.Id,
-                Kind = GameSession.HeroKind,
+                Kind = hero.Kind,
                 Position = hero.Position,
                 Yaw = hero.Yaw,
+                Appearance = hero.Appearance,
             });
         }
 
@@ -1033,6 +1036,76 @@ namespace CubeGame.Gameplay
             }
         }
 
+        /// <summary>
+        /// Hero editor (C1, Alpha fields of drawCharacterAppearancePanel 0x428E40): race, gender, face, haircut, hair colour
+        /// palette 16×7, class, name. Temporary IMGUI; the final interface is C10.
+        /// </summary>
+        private void DrawHeroEditor()
+        {
+            GUILayout.Label("Hero");
+            _formHeroName = LabeledField("Name", _formHeroName);
+            if (_formHeroName.Length > AlphaHeroCreation.MaxNameLength)
+            {
+                _formHeroName = _formHeroName.Substring(0, AlphaHeroCreation.MaxNameLength);
+            }
+
+            HeroAppearance a = _formLook;
+            int race = GUILayout.SelectionGrid(a.Race, AlphaHeroCreation.Races, 4);
+            int gender = GUILayout.Toolbar(a.Gender, new[] { "Male", "Female" });
+            KindId kind = AlphaHeroCreation.KindOf(race, gender);
+            int face = a.Face;
+            int hair = a.Haircut;
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("<", GUILayout.Width(30f)))
+            {
+                face--;
+            }
+
+            GUILayout.Label($"Face {AlphaHeroCreation.Wrap(face, AlphaHeroCreation.FaceCount(kind)) + 1}/{AlphaHeroCreation.FaceCount(kind)}", GUILayout.Width(110f));
+            if (GUILayout.Button(">", GUILayout.Width(30f)))
+            {
+                face++;
+            }
+
+            if (GUILayout.Button("<", GUILayout.Width(30f)))
+            {
+                hair--;
+            }
+
+            GUILayout.Label($"Haircut {AlphaHeroCreation.Wrap(hair, AlphaHeroCreation.HaircutCount(kind)) + 1}/{AlphaHeroCreation.HaircutCount(kind)}", GUILayout.Width(110f));
+            if (GUILayout.Button(">", GUILayout.Width(30f)))
+            {
+                hair++;
+            }
+
+            GUILayout.EndHorizontal();
+
+            byte r = a.HairR;
+            byte g = a.HairG;
+            byte b = a.HairB;
+            GUILayout.Label($"Hair colour ({r}, {g}, {b})");
+            Color saved = GUI.backgroundColor;
+            for (int row = 0; row < AlphaHeroCreation.PaletteRows; row++)
+            {
+                GUILayout.BeginHorizontal();
+                for (int column = 0; column < AlphaHeroCreation.PaletteColumns; column++)
+                {
+                    var c = AlphaHeroCreation.PaletteColor(column, row);
+                    GUI.backgroundColor = new Color32(c.R, c.G, c.B, 255);
+                    if (GUILayout.Button(GUIContent.none, GUILayout.Width(22f), GUILayout.Height(14f)))
+                    {
+                        (r, g, b) = c;
+                    }
+                }
+
+                GUILayout.EndHorizontal();
+            }
+
+            GUI.backgroundColor = saved;
+            _formLook = AlphaHeroCreation.Normalize(new HeroAppearance(race, gender, face, hair, r, g, b));
+            _formClass = GUILayout.Toolbar(_formClass, new[] { "Warrior", "Ranger", "Mage", "Rogue" });
+        }
+
         private void DrawMainMenu()
         {
             GUILayout.BeginArea(new Rect(Screen.width / 2f - 220f, 60f, 440f, Screen.height - 120f), GUI.skin.box);
@@ -1041,13 +1114,12 @@ namespace CubeGame.Gameplay
             GUILayout.Label("New world");
             _formWorldName = LabeledField("World name", _formWorldName);
             _formSeed = LabeledField("Seed", _formSeed);
-            _formHeroName = LabeledField("Hero name", _formHeroName);
-            _formClass = GUILayout.Toolbar(_formClass, new[] { "Warrior", "Ranger", "Mage", "Rogue" });
+            DrawHeroEditor();
             _formSlot = GUILayout.Toolbar(_formSlot, SlotKeys);
             if (GUILayout.Button("Create world"))
             {
                 uint seed = uint.TryParse(_formSeed, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint parsed) ? parsed : DefaultSeed;
-                StartNewWorld(SlotKeys[_formSlot], _formWorldName, seed, _formHeroName, CharacterClasses.FromId(_formClass));
+                StartNewWorld(SlotKeys[_formSlot], _formWorldName, seed, _formHeroName, CharacterClasses.FromId(_formClass), _formLook);
             }
 
             GUILayout.Space(12f);

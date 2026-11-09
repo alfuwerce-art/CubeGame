@@ -77,9 +77,9 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.AreEqual(session.Hero.Sheet.Progression.Experience, loaded.Hero.Sheet.Progression.Experience);
             Assert.AreEqual(new WorldPosition(10.5, 40.25, -3.75), loaded.Hero.Position);
             Assert.AreEqual(33.5f, loaded.Hero.Yaw);
-            // M0-05A: a new hero carries the starting greatsword, so the added sword is the second item.
-            Assert.AreEqual(2, loaded.Hero.Items.Count);
-            Assert.AreEqual(sword.Subtype, loaded.Hero.Items[1].Subtype);
+            // C1: a new hero carries the Alpha start kit, so the added sword is the last Core item.
+            Assert.AreEqual(session.Hero.Items.Count, loaded.Hero.Items.Count);
+            Assert.AreEqual(sword, loaded.Hero.Items[loaded.Hero.Items.Count - 1]);
             Assert.AreEqual(heroHp, loaded.Hero.Health.CurrentHealth, 1e-9, "current HP survives the checkpoint");
             Assert.IsNotNull(loaded.Hero.Loadout.GetEquipped(Core.Equipment.EquipmentSlot.MainHand), "first weapon re-equipped");
             Assert.IsFalse(loaded.Hero.NeedsGroundPlacement);
