@@ -1,29 +1,35 @@
+using CubeGame.Core.Movement;
 using UnityEngine;
 
 namespace CubeGame.Presentation.Player
 {
     /// <summary>
-    /// Temporary pilot character movement on top of CharacterController.
+    /// Hero movement: Alpha 2013 locomotion (<see cref="AlphaMovement"/>, numbers from Cube.exe, C2) on top of
+    /// CharacterController collision. One Alpha speed unit = one block per second = one Unity unit per second.
     ///
-    /// PLACEHOLDER_NOT_ALPHA: walk/sprint/jump values and the camera-relative control scheme are
-    /// pilot decisions. Alpha 2013 movement was not measured yet (S00-04), see
-    /// docs/research/alpha2013/GENERATION_MOVEMENT_SPEC.md section 4.
+    /// Keys as in Alpha (DirectInput table in WinMain 0x4C91F2): W/S/A/D move relative to the camera, Space jumps
+    /// (hold to jump higher, 100 ms boost), left Shift walks — without it the hero runs (action flag 0x40).
+    ///
+    /// Collision stays Unity's capsule (CubeGame decision, I8/P-23): Alpha's swept voxel collision is not ported.
+    /// Time is stepped in whole milliseconds like Alpha; the fractional rest is carried to the next frame.
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
     public sealed class PlayerMotor : MonoBehaviour
     {
-        public const float WalkSpeed = 5.0f;
-        public const float SprintSpeed = 8.0f;
-        public const float JumpSpeed = 7.0f;
-        public const float Gravity = -24.0f;
-
         [SerializeField] private Transform cameraTransform;
 
+        private readonly AlphaMovement _movement = new AlphaMovement();
         private CharacterController _controller;
-        private float _verticalSpeed;
+        private double _carryMs;
 
-        public bool Sprinting => Input.GetKey(KeyCode.LeftShift);
-        public float VerticalSpeed => _verticalSpeed;
+        /// <summary>Alpha action flag 0x40: the hero runs (left Shift not held).</summary>
+        public bool Sprinting => _movement.Running;
+
+        public float VerticalSpeed => (float)_movement.VelocityY;
+
+        public float HorizontalSpeed => (float)_movement.HorizontalSpeed;
+
+        public AlphaMovement Movement => _movement;
 
         public void SetCamera(Transform cameraTarget)
         {
@@ -35,12 +41,27 @@ namespace CubeGame.Presentation.Player
             _controller = GetComponent<CharacterController>();
         }
 
+        private void OnDisable()
+        {
+            _movement.Stop();
+            _carryMs = 0.0;
+        }
+
         private void Update()
         {
             if (_controller == null)
             {
                 return;
             }
+
+            _carryMs += Time.deltaTime * 1000.0;
+            int elapsedMs = (int)_carryMs;
+            if (elapsedMs <= 0)
+            {
+                return;
+            }
+
+            _carryMs -= elapsedMs;
 
             float inputX = 0f;
             float inputZ = 0f;
@@ -74,30 +95,15 @@ namespace CubeGame.Presentation.Player
                 right = Vector3.Cross(Vector3.up, forward).normalized * -1f;
             }
 
+            // Alpha adds 80 blocks/s² per pressed key along the camera axes (a diagonal is not normalised).
             Vector3 direction = forward * inputZ + right * inputX;
-            if (direction.sqrMagnitude > 1f)
-            {
-                direction.Normalize();
-            }
+            bool walkHeld = Input.GetKey(KeyCode.LeftShift);
+            bool jumpHeld = Input.GetKey(KeyCode.Space);
 
-            float speed = Sprinting ? SprintSpeed : WalkSpeed;
-            Vector3 horizontal = direction * (speed * Time.deltaTime);
-
-            if (IsGrounded)
-            {
-                if (_verticalSpeed < 0f)
-                {
-                    _verticalSpeed = -2f;
-                }
-
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    _verticalSpeed = JumpSpeed;
-                }
-            }
-
-            _verticalSpeed += Gravity * Time.deltaTime;
-            _controller.Move(horizontal + Vector3.up * (_verticalSpeed * Time.deltaTime));
+            (double dx, double dy, double dz) = _movement.BeginFrame(
+                elapsedMs, direction.x, direction.z, walkHeld, jumpHeld, IsGrounded);
+            CollisionFlags flags = _controller.Move(new Vector3((float)dx, (float)dy, (float)dz));
+            _movement.EndFrame(elapsedMs, IsGrounded, (flags & CollisionFlags.Above) != 0);
         }
 
         /// <summary>
@@ -117,7 +123,7 @@ namespace CubeGame.Presentation.Player
                     return true;
                 }
 
-                if (_verticalSpeed > 0f)
+                if (_movement.VelocityY > 0.0)
                 {
                     return false;
                 }
