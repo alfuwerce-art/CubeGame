@@ -1,0 +1,271 @@
+{
+ "format": "cubegame.alpha_attack_selection/1",
+ "cube_sha256": "84a7a132a84d4282338e7ea45a1940d32066d64e39cbafed8f2418d5a6dc30bf",
+ "function": {
+  "va": "0x4452A0",
+  "bytes": 268,
+  "sha256": "81822ebcab8578ecd2280bddedeb3b23e88354afd01cc45a486480c244bf17bc"
+ },
+ "checks": [
+  {
+   "va": "0x4452A0",
+   "bytes": "8a81a80a0000",
+   "ok": true,
+   "meaning": "al = weapon item type [self+0xaa8]"
+  },
+  {
+   "va": "0x4452AA",
+   "bytes": "80b9a90a000006",
+   "ok": true,
+   "meaning": "cmp weapon item subtype [self+0xaa9], 6"
+  },
+  {
+   "va": "0x4452B3",
+   "bytes": "b817000000",
+   "ok": true,
+   "meaning": "attack 0x17: weapon (type 3, subtype 6) \u2014 checked before class/kind"
+  },
+  {
+   "va": "0x4452B9",
+   "bytes": "80b94001000003",
+   "ok": true,
+   "meaning": "cmp class [self+0x140], 3  -> class/specialisation branch"
+  },
+  {
+   "va": "0x4452C6",
+   "bytes": "8b5164",
+   "ok": true,
+   "meaning": "kind = [self+0x64]"
+  },
+  {
+   "va": "0x4452C9",
+   "bytes": "83fa75",
+   "ok": true,
+   "meaning": "cmp kind, 0x75 -> class branch"
+  },
+  {
+   "va": "0x4452D2",
+   "bytes": "83fa56",
+   "ok": true,
+   "meaning": "cmp kind, 0x56 -> class branch"
+  },
+  {
+   "va": "0x4452DB",
+   "bytes": "3c03",
+   "ok": true,
+   "meaning": "cmp weapon item type, 3"
+  },
+  {
+   "va": "0x4452E5",
+   "bytes": "80fa0a",
+   "ok": true,
+   "meaning": "cmp subtype, 0x0a -> class branch"
+  },
+  {
+   "va": "0x4452EA",
+   "bytes": "80fa0b",
+   "ok": true,
+   "meaning": "cmp subtype, 0x0b -> class branch"
+  },
+  {
+   "va": "0x4452EF",
+   "bytes": "80fa0c",
+   "ok": true,
+   "meaning": "cmp subtype, 0x0c -> class branch"
+  },
+  {
+   "va": "0x4452F8",
+   "bytes": "80fa05",
+   "ok": true,
+   "meaning": "cmp subtype, 5"
+  },
+  {
+   "va": "0x4452FD",
+   "bytes": "b805000000",
+   "ok": true,
+   "meaning": "attack 5: weapon subtype 5"
+  },
+  {
+   "va": "0x445307",
+   "bytes": "8a81a90a0000",
+   "ok": true,
+   "meaning": "al = subtype (second read)"
+  },
+  {
+   "va": "0x44530D",
+   "bytes": "3c0f",
+   "ok": true,
+   "meaning": "cmp subtype, 0x0f"
+  },
+  {
+   "va": "0x445333",
+   "bytes": "7517",
+   "ok": true,
+   "meaning": "jne -> unarmed branch when no parity subtype matched"
+  },
+  {
+   "va": "0x445335",
+   "bytes": "8b4170",
+   "ok": true,
+   "meaning": "eax = [self+0x70] (parity source)"
+  },
+  {
+   "va": "0x445338",
+   "bytes": "2501000080",
+   "ok": true,
+   "meaning": "and eax, 0x80000001 -> bit0 only"
+  },
+  {
+   "va": "0x445348",
+   "bytes": "83c042",
+   "ok": true,
+   "meaning": "attack = 0x42 - parity"
+  },
+  {
+   "va": "0x445361",
+   "bytes": "83c003",
+   "ok": true,
+   "meaning": "attack = 3 + parity (unarmed)"
+  },
+  {
+   "va": "0x445365",
+   "bytes": "8a81a90a0000",
+   "ok": true,
+   "meaning": "class branch: al = subtype"
+  },
+  {
+   "va": "0x44536B",
+   "bytes": "3c0b",
+   "ok": true,
+   "meaning": "cmp subtype, 0x0b"
+  },
+  {
+   "va": "0x445371",
+   "bytes": "80b94101000001",
+   "ok": true,
+   "meaning": "cmp specialisation [self+0x141], 1"
+  },
+  {
+   "va": "0x44537B",
+   "bytes": "83c02d",
+   "ok": true,
+   "meaning": "subtype 0x0b: attack = 0x2d + (specialisation != 1)"
+  },
+  {
+   "va": "0x44537F",
+   "bytes": "3c0a",
+   "ok": true,
+   "meaning": "cmp subtype, 0x0a"
+  },
+  {
+   "va": "0x44538F",
+   "bytes": "8d04451f000000",
+   "ok": true,
+   "meaning": "subtype 0x0a: attack = 0x1f + 2*(specialisation == 1)"
+  },
+  {
+   "va": "0x445397",
+   "bytes": "80b94101000001",
+   "ok": true,
+   "meaning": "cmp specialisation, 1 (default class-branch attack)"
+  },
+  {
+   "va": "0x44539E",
+   "bytes": "b825000000",
+   "ok": true,
+   "meaning": "default 0x25"
+  },
+  {
+   "va": "0x4453A3",
+   "bytes": "ba2b000000",
+   "ok": true,
+   "meaning": "specialisation 1 -> 0x2b"
+  },
+  {
+   "va": "0x4453A8",
+   "bytes": "0f44c2",
+   "ok": true,
+   "meaning": "cmove eax, edx"
+  },
+  {
+   "va": "0x4453AB",
+   "bytes": "c3",
+   "ok": true,
+   "meaning": "ret (function end)"
+  }
+ ],
+ "rules": {
+  "status": "ALPHA_CODE_STATIC",
+  "source": "Cube.exe 0x4452A0 combat_selectAttackVariant",
+  "weapon_item_type": 3,
+  "parity_field_offset": "0x70",
+  "parity_mask": "0x80000001",
+  "immediate": [
+   {
+    "item_type": 3,
+    "item_subtype": 6,
+    "attack": 23,
+    "note": "checked first: even a class-3 creature with this weapon gets 0x17"
+   },
+   {
+    "item_type": 3,
+    "item_subtype": 5,
+    "attack": 5
+   }
+  ],
+  "class_branch_trigger": {
+   "class_offset": "0x140",
+   "class_id": 3,
+   "kinds": [
+    117,
+    86
+   ],
+   "note": "class 3 or kind 0x75/0x56 always use the class/specialisation branch"
+  },
+  "class_branch_subtypes": [
+   10,
+   11,
+   12
+  ],
+  "class_branch": {
+   "item_subtype_0x0b": {
+    "specialisation_ne_1": 45,
+    "specialisation_eq_1": 46
+   },
+   "item_subtype_0x0a": {
+    "specialisation_ne_1": 31,
+    "specialisation_eq_1": 33
+   },
+   "default": {
+    "specialisation_ne_1": 37,
+    "specialisation_eq_1": 43
+   }
+  },
+  "weapon_parity_subtypes": [
+   15,
+   16,
+   17,
+   5,
+   10,
+   11,
+   18,
+   8,
+   6,
+   7
+  ],
+  "weapon_parity_attack": {
+   "parity_0": 66,
+   "parity_1": 65
+  },
+  "unarmed_attack": {
+   "parity_0": 3,
+   "parity_1": 4
+  },
+  "partial": {
+   "parity_source": "bit0 of field +0x70; the same field is tested as `== 0` (no target) in CombatBehavior_chooseAttack, so it holds a target handle/pointer \u2014 what makes bit0 flip is NOT established (PARTIAL)",
+   "specialisation_id_1": "specialisation 1 is used as a flag; which Alpha specialisation it is, is UNKNOWN (R-1 world spawn record not executed)"
+  }
+ },
+ "problems": [],
+ "RESULT": "PASS"
+}

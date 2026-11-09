@@ -29,6 +29,16 @@ namespace CubeGame.Features.AI
         public int ThinkTicks { get; private set; }
         public int LastRequestedAction { get; private set; } = -1;
 
+        /// <summary>Attack id Alpha's C-29 table selected for the last attack attempt (-1 = none yet).</summary>
+        public int LastSelectedAttack { get; private set; } = -1;
+
+        /// <summary>
+        /// PARTIAL: Alpha's attack table reads one parity bit from field +0x70 (the field its attack gate
+        /// tests as "no target"), and what flips that bit is not established. The game therefore uses the
+        /// even branch (attack 3 unarmed / 0x42 with a weapon) — the value every observed launch shows.
+        /// </summary>
+        public bool TargetPointerParity { get; set; }
+
         int _wanderRemainingMs;
         int _wanderDirection;
         int _actionRetryInMs;
@@ -106,13 +116,22 @@ namespace CubeGame.Features.AI
             // AI tick; without it the AI would ask the game every 31 ms tick. 250 ms is a CubeGame
             // throttle and is NOT an Alpha constant.
             if (_actionRetryInMs > 0) { LastReason = "ACTION_RETRY_WAIT"; return; }
-            for (int i = 0; i < actions.Length; i++)
+            // C-29 (M0-06C): Alpha decides the attack from the weapon/class table (AlphaAttackSelection),
+            // then requires it to exist in the creature's own action set; library order is only a fallback
+            // for a kind whose evidence does not contain the Alpha-selected id.
+            int preferred = AlphaAttackSelection.SelectAttackId(self.Kind, self.ClassId, self.SpecialisationId,
+                self.WeaponItemType, self.WeaponItemSubtype, TargetPointerParity);
+            LastSelectedAttack = preferred;
+            bool preferredInLibrary = Array.IndexOf(actions, preferred) >= 0;
+            for (int i = -1; i < actions.Length; i++)
             {
-                int action = actions[i];
+                if (i < 0 && !preferredInLibrary) continue;
+                int action = i < 0 ? preferred : actions[i];
+                if (action < 0 || (i >= 0 && action == preferred)) continue;
                 LastRequestedAction = action;
                 if (world.TryBeginAction(self, action, out var reason))
                 {
-                    LastReason = "ACTION " + action;
+                    LastReason = (preferredInLibrary ? "ACTION_C29 " : "ACTION_C29_NOT_IN_LIBRARY " + preferred + " ") + action;
                     _actionRetryInMs = ActionRetryMs;
                     return;
                 }
