@@ -83,6 +83,9 @@ namespace CubeGame.AlphaModels.Import
             foreach (var p in CubeGame.Content.AlphaContentDatabase.Validate()) text.AppendLine("TABLE_PROBLEM " + p);
             foreach (var p in CubeGame.Content.AlphaCreatureCatalog.Validate()) text.AppendLine("CATALOG_PROBLEM " + p);
             foreach (var p in CubeGame.Content.AlphaItemRules.Validate()) text.AppendLine("ITEM_PROBLEM " + p);
+            foreach (var p in CubeGame.Content.AlphaWorldContent.Validate()) text.AppendLine("WORLD_PROBLEM " + p);
+            foreach (var p in CubeGame.Content.AlphaStructurePlacementPlanner.Validate()) text.AppendLine("STRUCTURE_PROBLEM " + p);
+            text.AppendLine(CubeGame.Content.AlphaWorldContent.Describe());
             Write("content_status.txt", text.ToString());
             if (!report.Ready) Debug.LogWarning(text.ToString());
         }

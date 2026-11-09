@@ -182,6 +182,11 @@ namespace CubeGame.AlphaModels.Tests.EditMode
             Assert.AreEqual(16, AlphaContentTables.Abilities.Length);
             Assert.AreEqual(156, AlphaContentTables.CreatureKinds.Length);
             Assert.AreEqual(101, AlphaContentTables.ItemActions.Length);
+            Assert.AreEqual(67, AlphaContentTables.WorldObjects.Length);
+            Assert.AreEqual(133, AlphaContentTables.ItemNames.Length);
+            Assert.AreEqual(27, AlphaContentTables.Skills.Length);
+            Assert.IsEmpty(AlphaWorldContent.Validate(), string.Join("\n", AlphaWorldContent.Validate()));
+            Assert.IsEmpty(AlphaStructurePlacementPlanner.Validate(), string.Join("\n", AlphaStructurePlacementPlanner.Validate()));
         }
 
         [Test]
@@ -237,6 +242,68 @@ namespace CubeGame.AlphaModels.Tests.EditMode
             Assert.AreEqual("Forest", forest.Name);
             Assert.AreEqual(65536, AlphaContentTables.WorldBlocks);
             Assert.AreEqual(1024, AlphaContentTables.WorldRegionGrid);
+        }
+    }
+
+    public class AlphaWorldContentTests
+    {
+        [Test]
+        public void WorldTablesHoldAlphaNamesAndCategories()
+        {
+            Assert.IsEmpty(AlphaWorldContent.Validate(), string.Join("\n", AlphaWorldContent.Validate()));
+            Assert.IsTrue(AlphaWorldContent.TryObject(1, out var door));
+            Assert.AreEqual("Door", door.Name);
+            Assert.AreEqual(AlphaWorldObjectCategory.StructurePart, AlphaWorldContent.CategoryOf(1));
+            Assert.AreEqual(AlphaWorldObjectCategory.Container, AlphaWorldContent.CategoryOf(10), "Chest");
+            Assert.AreEqual(AlphaWorldObjectCategory.Service, AlphaWorldContent.CategoryOf(76), "Workbench");
+            Assert.AreEqual(AlphaWorldObjectCategory.Trap, AlphaWorldContent.CategoryOf(6), "FireTrap");
+            Assert.IsTrue(AlphaWorldContent.TryItemName(1, 1, out var potion));
+            Assert.AreEqual("LifePotion", potion.Name);
+            Assert.IsTrue(AlphaWorldContent.TryItemName(0x17, 0, out var glider));
+            Assert.AreEqual("HangGlider", glider.Name);
+            Assert.IsTrue(AlphaWorldContent.TrySkill(2, out var climb));
+            Assert.AreEqual("SkillClimbing", climb.Name);
+            Assert.GreaterOrEqual(AlphaWorldContent.ServiceObjects().Count, 8);
+        }
+
+        [Test]
+        public void StructureTemplatesAndPlacementAreDeterministic()
+        {
+            Assert.IsEmpty(AlphaStructurePlacementPlanner.Validate(), string.Join("\n", AlphaStructurePlacementPlanner.Validate()));
+            Assert.IsTrue(AlphaStructureTemplates.TryGet(AlphaStructureTemplates.HouseId, out var house));
+            Assert.AreEqual(3, house.Width);
+            Assert.AreEqual(3, house.Depth);
+            Assert.AreEqual(4, house.Height);
+            Assert.AreEqual(1, house.StyleFirst);
+            Assert.AreEqual(5, house.StyleLast);
+            Assert.IsTrue(AlphaStructureTemplates.TryGet(AlphaStructureTemplates.DungeonRoomId, out var room));
+            Assert.AreEqual(3, room.Height);
+
+            var templates = new List<string> { AlphaStructureTemplates.HouseId, AlphaStructureTemplates.DungeonRoomId };
+            var problems = new List<string>();
+            var a = AlphaStructurePlacementPlanner.Plan(7u, 10, 20, 3, 4, templates, (x, z, w, d) => true, problems);
+            var b = AlphaStructurePlacementPlanner.Plan(7u, 10, 20, 3, 4, templates, (x, z, w, d) => true, new List<string>());
+            Assert.IsEmpty(problems, string.Join("\n", problems));
+            Assert.AreEqual(a.Count, b.Count);
+            for (int i = 0; i < a.Count; i++)
+            {
+                Assert.AreEqual(a[i].StableId, b[i].StableId);
+                Assert.AreEqual(a[i].X, b[i].X);
+                Assert.AreEqual(a[i].Z, b[i].Z);
+                Assert.AreEqual(a[i].Rotation, b[i].Rotation);
+                Assert.GreaterOrEqual(a[i].Rotation, 0);
+                Assert.LessOrEqual(a[i].Rotation, 3);
+                Assert.Greater(a[i].Width, 0);
+            }
+
+            var blockedProblems = new List<string>();
+            var blocked = AlphaStructurePlacementPlanner.Plan(7u, 10, 20, 3, 4, templates, (x, z, w, d) => false, blockedProblems);
+            Assert.IsEmpty(blocked, "no building is forced onto an occupied footprint");
+            Assert.That(blockedProblems, Has.Some.Contains("STRUCTURE_NO_FREE_FOOTPRINT"));
+
+            var unknownProblems = new List<string>();
+            AlphaStructurePlacementPlanner.Plan(1u, 0, 0, 0, 0, new List<string> { "castle_unknown" }, (x, z, w, d) => true, unknownProblems);
+            Assert.That(unknownProblems, Has.Some.Contains("STRUCTURE_TEMPLATE_UNKNOWN"));
         }
     }
 

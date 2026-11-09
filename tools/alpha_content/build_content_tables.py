@@ -36,6 +36,7 @@ WALK = ROOT / "tools/alpha_models/catalog/walk_oracle_evidence.json"
 SPAWN = ROOT / "tools/alpha_models/catalog/spawn_role_evidence.json"
 NPC = ROOT / "tools/alpha_models/universal/npc_action_evidence.json"
 ITEM = ROOT / "tools/alpha_models/catalog/item_layer_evidence.json"
+WORLD = ROOT / "tools/alpha_content/data/world_ctor_evidence.json"
 
 EVIDENCE = {"DIRECT": "Direct", "PARTIAL": "Partial", "UNKNOWN": "Unknown",
             "BLOCKED": "Blocked", "PRODUCER_RULE_D67": "ProducerRule",
@@ -120,6 +121,7 @@ def build() -> tuple[str, dict]:
     spawn = load(SPAWN)
     npc = load(NPC)
     item = load(ITEM)["contract"]
+    world = load(WORLD)
 
     # --- item types -------------------------------------------------------
     item_types = []
@@ -293,6 +295,25 @@ def build() -> tuple[str, dict]:
     lines.append("        { Id = id; DrawState = drawState; Weapon = weapon; Offhand = offhand; HeldItem = heldItem; PetItem = petItem; WeaponOnly = weaponOnly; TwoHandedChain = twoHandedChain; }")
     lines.append("    }")
     lines.append("")
+    lines.append("    public readonly struct AlphaWorldObjectDef")
+    lines.append("    {")
+    lines.append("        public readonly int Id; public readonly string Name; public readonly bool Ambiguous;")
+    lines.append("        public AlphaWorldObjectDef(int id, string name, bool ambiguous) { Id = id; Name = name; Ambiguous = ambiguous; }")
+    lines.append("    }")
+    lines.append("")
+    lines.append("    public readonly struct AlphaItemNameDef")
+    lines.append("    {")
+    lines.append("        public readonly int Type, Subtype; public readonly string Name; public readonly bool Ambiguous;")
+    lines.append("        public AlphaItemNameDef(int type, int subtype, string name, bool ambiguous)")
+    lines.append("        { Type = type; Subtype = subtype; Name = name; Ambiguous = ambiguous; }")
+    lines.append("    }")
+    lines.append("")
+    lines.append("    public readonly struct AlphaSkillDef")
+    lines.append("    {")
+    lines.append("        public readonly int Id; public readonly string Name;")
+    lines.append("        public AlphaSkillDef(int id, string name) { Id = id; Name = name; }")
+    lines.append("    }")
+    lines.append("")
     lines.append("    public readonly struct AlphaAnchorDef")
     lines.append("    {")
     lines.append("        public readonly float Cx, Cy, Cz, Ox, Oy, Oz, Scale;")
@@ -377,6 +398,25 @@ def build() -> tuple[str, dict]:
                      anchor_ctor(on_back) + ", " + cs(status) + "),")
     lines.append("        };")
     lines.append("")
+    lines.append("        public static readonly AlphaWorldObjectDef[] WorldObjects =")
+    lines.append("        {")
+    for row in world["objects"]:
+        lines.append(f"            new AlphaWorldObjectDef({int(row['id'])}, {cs(row['name'])}, {str(bool(row.get('ambiguous'))).lower()}),")
+    lines.append("        };")
+    lines.append("")
+    lines.append("        public static readonly AlphaItemNameDef[] ItemNames =")
+    lines.append("        {")
+    for row in world["items"]:
+        lines.append(f"            new AlphaItemNameDef({int(row['type'])}, {int(row['subtype'])}, {cs(row['name'])}, "
+                     f"{str(bool(row.get('ambiguous'))).lower()}),")
+    lines.append("        };")
+    lines.append("")
+    lines.append("        public static readonly AlphaSkillDef[] Skills =")
+    lines.append("        {")
+    for row in world["skills"]:
+        lines.append(f"            new AlphaSkillDef({int(row['id'])}, {cs(row['name'])}),")
+    lines.append("        };")
+    lines.append("")
     lines.append("        public const int InventoryContainers = %d;" % int(tables["inventory"]["containers"]))
     lines.append("        public const int InventorySlotsPerContainer = %d;" % int(tables["inventory"]["slotsPerContainer"]))
     lines.append("        public const int InventoryStackLimit = %d;" % int(tables["inventory"]["stackLimit"]))
@@ -394,7 +434,8 @@ def build() -> tuple[str, dict]:
               "abilities": len(abilities), "regions": len(regions), "kinds": len(kinds),
               "passiveKinds": sum(1 for k in kinds if k["passive"]), "slots": len(slots),
               "itemActions": len(actions), "weaponAnchors": len(weapon_anchors),
-              "offhandAnchors": len(offhand_anchors)}
+              "offhandAnchors": len(offhand_anchors), "worldObjects": len(world["objects"]),
+              "itemNames": len(world["items"]), "skills": len(world["skills"])}
     return "\n".join(lines) + "\n", counts
 
 
