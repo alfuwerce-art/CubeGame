@@ -1,0 +1,229 @@
+{
+ "format": "cubegame.staged_visuals/1",
+ "entries": [
+  {
+   "kind": 0,
+   "variant": "elf_male_0x00_no_alpha_run",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 8,
+   "clips": 3,
+   "rig": "alpha_creature/e66d96be5a"
+  },
+  {
+   "kind": 1,
+   "variant": "d86_kind_0x01_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 7,
+   "clips": 1,
+   "rig": "alpha_creature/e66d96be5a"
+  },
+  {
+   "kind": 2,
+   "variant": "d86_human_0x02_greatsword",
+   "mode": "ACTIONS",
+   "parts": 8,
+   "clips": 94,
+   "rig": "alpha_creature/e66d96be5a"
+  },
+  {
+   "kind": 3,
+   "variant": "d86_kind_0x03_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 7,
+   "clips": 1,
+   "rig": "alpha_creature/e66d96be5a"
+  },
+  {
+   "kind": 7,
+   "variant": "d86_kind_0x07_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 7,
+   "clips": 1,
+   "rig": "alpha_creature/e66d96be5a"
+  },
+  {
+   "kind": 8,
+   "variant": "d86_kind_0x08_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 7,
+   "clips": 1,
+   "rig": "alpha_creature/e66d96be5a"
+  },
+  {
+   "kind": 13,
+   "variant": "d86_kind_0x0d_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 7,
+   "clips": 1,
+   "rig": "alpha_creature/e66d96be5a"
+  },
+  {
+   "kind": 14,
+   "variant": "d86_kind_0x0e_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 7,
+   "clips": 1,
+   "rig": "alpha_creature/e66d96be5a"
+  },
+  {
+   "kind": 24,
+   "variant": "d86_kind_0x18_formula",
+   "mode": "STATIC_OBJECT",
+   "parts": 1,
+   "clips": 1,
+   "rig": "alpha_creature/6314f0fa45"
+  },
+  {
+   "kind": 28,
+   "variant": "wolf_0x1c_formula_only",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 7,
+   "clips": 1,
+   "rig": "alpha_creature/96e1a8db48"
+  },
+  {
+   "kind": 30,
+   "variant": "d86_kind_0x1e_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 7,
+   "clips": 2,
+   "rig": "alpha_creature/ced63e5e96"
+  },
+  {
+   "kind": 31,
+   "variant": "d86_kind_0x1f_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 7,
+   "clips": 2,
+   "rig": "alpha_creature/ced63e5e96"
+  },
+  {
+   "kind": 32,
+   "variant": "whitecat_0x20_formula_vs_alpha",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 7,
+   "clips": 2,
+   "rig": "alpha_creature/ced63e5e96"
+  },
+  {
+   "kind": 63,
+   "variant": "plainrunner_0x3f_formula_vs_alpha",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 3,
+   "clips": 2,
+   "rig": "alpha_creature/51aeec9280"
+  },
+  {
+   "kind": 64,
+   "variant": "d86_kind_0x40_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 3,
+   "clips": 2,
+   "rig": "alpha_creature/51aeec9280"
+  },
+  {
+   "kind": 65,
+   "variant": "d86_kind_0x41_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 3,
+   "clips": 2,
+   "rig": "alpha_creature/51aeec9280"
+  },
+  {
+   "kind": 66,
+   "variant": "d86_kind_0x42_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 3,
+   "clips": 2,
+   "rig": "alpha_creature/51aeec9280"
+  },
+  {
+   "kind": 76,
+   "variant": "spikecreature_0x4c_formula",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 6,
+   "clips": 1,
+   "rig": "alpha_creature/773a44f932"
+  },
+  {
+   "kind": 98,
+   "variant": "horse_0x62_formula_only",
+   "mode": "LOCOMOTION_ONLY",
+   "parts": 7,
+   "clips": 1,
+   "rig": "alpha_creature/0300a9e9de"
+  },
+  {
+   "kind": 101,
+   "variant": "d86_dragon_0x65",
+   "mode": "ACTIONS",
+   "parts": 7,
+   "clips": 5,
+   "rig": "alpha_creature/95251fe7e5"
+  },
+  {
+   "kind": 120,
+   "variant": "d86_kind_0x78_formula",
+   "mode": "STATIC_OBJECT",
+   "parts": 1,
+   "clips": 1,
+   "rig": "alpha_creature/153aadf202"
+  },
+  {
+   "kind": 121,
+   "variant": "d86_kind_0x79_formula",
+   "mode": "STATIC_OBJECT",
+   "parts": 1,
+   "clips": 1,
+   "rig": "alpha_creature/153aadf202"
+  },
+  {
+   "kind": 122,
+   "variant": "d86_kind_0x7a_formula",
+   "mode": "STATIC_OBJECT",
+   "parts": 1,
+   "clips": 1,
+   "rig": "alpha_creature/153aadf202"
+  },
+  {
+   "kind": 123,
+   "variant": "d86_kind_0x7b_formula",
+   "mode": "STATIC_OBJECT",
+   "parts": 1,
+   "clips": 1,
+   "rig": "alpha_creature/c26f5122a7"
+  },
+  {
+   "kind": 124,
+   "variant": "d86_kind_0x7c_formula",
+   "mode": "STATIC_OBJECT",
+   "parts": 1,
+   "clips": 1,
+   "rig": "alpha_creature/e078a2673d"
+  },
+  {
+   "kind": 125,
+   "variant": "d86_kind_0x7d_formula",
+   "mode": "STATIC_OBJECT",
+   "parts": 1,
+   "clips": 1,
+   "rig": "alpha_creature/0a9fd02f9d"
+  },
+  {
+   "kind": 126,
+   "variant": "d86_kind_0x7e_formula",
+   "mode": "STATIC_OBJECT",
+   "parts": 1,
+   "clips": 1,
+   "rig": "alpha_creature/e078a2673d"
+  },
+  {
+   "kind": 127,
+   "variant": "d86_kind_0x7f_formula",
+   "mode": "STATIC_OBJECT",
+   "parts": 1,
+   "clips": 1,
+   "rig": "alpha_creature/61a0f49a33"
+  }
+ ]
+}

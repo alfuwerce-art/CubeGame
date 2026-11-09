@@ -171,6 +171,38 @@ namespace CubeGame.Tests.Creatures.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator StaticPlantLoadsWithAlphaVisualAndNeverMoves()
+        {
+            if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");
+            var library = AlphaActorLibrary.Shared;
+            if (!library.TryGet("d86_kind_0x78_formula", out var def)) Assert.Ignore("plant variant 0x78 is not staged");
+            var go = new GameObject("PlantVisual");
+            try
+            {
+                var agent = go.AddComponent<CreatureAgent>();
+                var state = new CreatureState
+                {
+                    StableId = "test:plant:visual", Kind = 0x78, Faction = (int)CreatureFaction.Passive,
+                    Level = 1, MaxHealth = 10, Health = 10, X = 0, Z = 0,
+                };
+                agent.Initialize(state, new CreatureAi(), def, 5u);
+                Assert.IsTrue(agent.VisualAvailable, agent.VisualStatus);
+                Assert.IsTrue(agent.View.Controller.staticObject, "D69: passive objects have no walk and no actions");
+                Assert.AreEqual("STATIC_OBJECT", def.ControllerMode);
+                var start = agent.transform.position;
+                for (int i = 0; i < 20; i++) agent.Tick(0.1f);
+                Assert.AreEqual(start, agent.transform.position, "a passive object never moves");
+                Assert.AreEqual("PASSIVE_OBJECT", agent.Ai.LastReason);
+                Assert.Greater(agent.View.Locomotion.FramesApplied, 0, "the standing pose is still applied every tick");
+                yield return null;
+            }
+            finally
+            {
+                Object.Destroy(go);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator PassiveObjectStaysStill()
         {
             if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");

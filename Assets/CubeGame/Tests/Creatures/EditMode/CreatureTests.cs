@@ -343,12 +343,17 @@ namespace CubeGame.Tests.Creatures.EditMode
             Assert.IsTrue(CreatureVisualCatalog.TryResolve(0x99, null, out var none, out var reason) == false);
             Assert.IsNull(none);
             StringAssert.Contains("MISSING_VISUAL_CONTENT", reason);
+            Assert.AreEqual(AlphaStagedVisuals.All.Length, CreatureVisualCatalog.Staged.Count);
+            Assert.GreaterOrEqual(CreatureVisualCatalog.Staged.Count, 28);
             Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x00), "ElfMale 0x00 has a staged variant");
             Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x02));
             Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x4c));
             Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x62));
             Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x65));
+            Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x78), "plant objects are staged as static visuals");
             Assert.IsFalse(CreatureVisualCatalog.IsStaged(0x99));
+            var plant = System.Array.Find(AlphaStagedVisuals.All, s => s.Kind == 0x78);
+            Assert.AreEqual("STATIC_OBJECT", plant.ControllerMode);
             StringAssert.Contains("staged kinds", CreatureVisualCatalog.Describe());
         }
 
@@ -372,7 +377,7 @@ namespace CubeGame.Tests.Creatures.EditMode
             var library = new AlphaActorLibrary(source);
             foreach (var profile in CreatureVisualCatalog.Staged)
                 Assert.IsTrue(CreatureVisualCatalog.TryResolve(profile.Kind, library, out var id, out var reason), reason);
-            Assert.GreaterOrEqual(CreatureVisualCatalog.AvailableKinds(library).Count, 8);
+            Assert.GreaterOrEqual(CreatureVisualCatalog.AvailableKinds(library).Count, AlphaStagedVisuals.All.Length);
         }
     }
 }

@@ -20,27 +20,51 @@ namespace CubeGame.Features.Creatures
 
     public static class CreatureVisualCatalog
     {
-        // CUBEGAME_CONTRACT: staged local variants (variant names of the transfer pipeline).
-        static readonly CreatureVisualProfile[] Known =
+        // Evidence notes for kinds whose preparation is documented in a report; the rest is the
+        // pipeline's own status (formula walk / static object) taken from the staged table.
+        static readonly Dictionary<int, string> EvidenceNotes = new Dictionary<int, string>
         {
-            new CreatureVisualProfile { Kind = 0x00, ActorId = "elf_male_0x00_no_alpha_run", Evidence = "ElfMale, same motion family as the captured human; no live run (LOCOMOTION_ONLY)" },
-            new CreatureVisualProfile { Kind = 0x02, ActorId = "d86_human_0x02_greatsword", Evidence = "D85 S05A-2 human, 94 clips" },
-            new CreatureVisualProfile { Kind = 0x1c, ActorId = "wolf_0x1c_formula_only", Evidence = "formula walk (no capture)" },
-            new CreatureVisualProfile { Kind = 0x20, ActorId = "whitecat_0x20_formula_vs_alpha", Evidence = "captured WhiteCat, formula walk" },
-            new CreatureVisualProfile { Kind = 0x3f, ActorId = "plainrunner_0x3f_formula_vs_alpha", Evidence = "captured PlainRunner, formula walk" },
-            new CreatureVisualProfile { Kind = 0x4c, ActorId = "spikecreature_0x4c_formula", Evidence = "SpikeCreature family, formula walk (D62 family)" },
-            new CreatureVisualProfile { Kind = 0x62, ActorId = "horse_0x62_formula_only", Evidence = "horse body plan, formula walk" },
-            new CreatureVisualProfile { Kind = 0x65, ActorId = "d86_dragon_0x65", Evidence = "D83 dragon_0x65_v1, 5 clips" },
+            { 0x00, "ElfMale, same motion family as the captured human; no live run (LOCOMOTION_ONLY)" },
+            { 0x02, "D85 S05A-2 human, 94 clips" },
+            { 0x1c, "formula walk (no capture)" },
+            { 0x20, "captured WhiteCat, formula walk" },
+            { 0x3f, "captured PlainRunner, formula walk" },
+            { 0x4c, "SpikeCreature family, formula walk (D62 family)" },
+            { 0x62, "horse body plan, formula walk" },
+            { 0x65, "D83 dragon_0x65_v1, 5 clips" },
         };
 
-        public static IReadOnlyList<CreatureVisualProfile> Staged => Known;
+        static CreatureVisualProfile[] _cached;
+
+        /// <summary>Kind -> staged variant pairs (committed list; the variants live in the local cache).</summary>
+        public static IReadOnlyList<CreatureVisualProfile> Staged
+        {
+            get
+            {
+                if (_cached != null) return _cached;
+                var list = new List<CreatureVisualProfile>(AlphaStagedVisuals.All.Length);
+                foreach (var staged in AlphaStagedVisuals.All)
+                {
+                    list.Add(new CreatureVisualProfile
+                    {
+                        Kind = staged.Kind,
+                        ActorId = staged.Variant,
+                        Evidence = EvidenceNotes.TryGetValue(staged.Kind, out var note)
+                            ? note
+                            : $"staged {staged.ControllerMode} ({staged.Parts} parts, {staged.Clips} clips)",
+                    });
+                }
+                _cached = list.ToArray();
+                return _cached;
+            }
+        }
 
         /// <summary>Resolve a kind to a staged actor id; false + reason when the cache lacks that variant.</summary>
         public static bool TryResolve(int kind, AlphaActorLibrary library, out string actorId, out string reason)
         {
             actorId = null;
             reason = null;
-            foreach (var profile in Known)
+            foreach (var profile in Staged)
                 if (profile.Kind == kind) { actorId = profile.ActorId; reason = profile.Evidence; }
             if (actorId == null)
             {
@@ -61,14 +85,18 @@ namespace CubeGame.Features.Creatures
         public static List<int> AvailableKinds(AlphaActorLibrary library)
         {
             var kinds = new List<int>();
-            foreach (var profile in Known)
+            foreach (var profile in Staged)
                 if (TryResolve(profile.Kind, library, out _, out _)) kinds.Add(profile.Kind);
             return kinds;
         }
 
-        public static bool IsStaged(int kind) => Array.FindIndex(Known, p => p.Kind == kind) >= 0;
+        public static bool IsStaged(int kind)
+        {
+            foreach (var profile in Staged) if (profile.Kind == kind) return true;
+            return false;
+        }
 
         public static string Describe() =>
-            $"{Known.Length} staged kinds: " + string.Join(", ", Array.ConvertAll(Known, p => $"0x{p.Kind:x2}->{p.ActorId}"));
+            $"{Staged.Count} staged kinds: " + string.Join(", ", System.Linq.Enumerable.Select(Staged, p => $"0x{p.Kind:x2}->{p.ActorId}"));
     }
 }

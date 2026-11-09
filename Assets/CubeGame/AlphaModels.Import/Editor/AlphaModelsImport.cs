@@ -81,6 +81,7 @@ namespace CubeGame.AlphaModels.Import
             text.AppendLine("ALPHA_CONTENT_RESULT=" + (report.Ready ? "PASS" : report.State == AlphaContentState.NotConfigured ? "NOT_CONFIGURED" : "FAIL"));
             text.AppendLine(report.Detail());
             text.AppendLine("ALPHA_TABLES_RESULT=" + (CubeGame.Content.AlphaContentDatabase.Validate().Count == 0 ? "PASS" : "FAIL"));
+            text.AppendLine("ALPHA_STAGED_VISUALS=" + CubeGame.Content.AlphaStagedVisuals.All.Length);
             text.AppendLine(CubeGame.Content.AlphaContentDatabase.Summary());
             foreach (var p in CubeGame.Content.AlphaContentDatabase.Validate()) text.AppendLine("TABLE_PROBLEM " + p);
             foreach (var p in CubeGame.Content.AlphaCreatureCatalog.Validate()) text.AppendLine("CATALOG_PROBLEM " + p);
@@ -133,15 +134,19 @@ namespace CubeGame.AlphaModels.Import
                 if (view == null || !view.Ready) { problems.Add(id + ": VIEW_NOT_READY"); continue; }
                 view.transform.position = new Vector3(x, 0f, 0f);
                 x += 6f;
+                bool isStatic = def.Contract != null && def.Contract.StaticObject;
                 images += RenderPose(cam, view, id, "idle", 0.2f, AlphaLocomotionState.Standing, problems);
-                images += RenderPose(cam, view, id, "walk", 0.35f,
-                    new AlphaLocomotionState { SpeedXY = 3.7f, Amplitude = 0.19f, OnGround = true }, problems);
-                var action = FirstAction(def);
-                if (action != null)
+                if (!isStatic)
                 {
-                    view.TryPlayAction(AlphaActorView.ActionCodeOf(action), out _);
-                    images += RenderPose(cam, view, id, "action_" + action, 0.30f, null, problems);
-                    view.Controller.Step(6f);            // finish the action so the next actor starts clean
+                    images += RenderPose(cam, view, id, "walk", 0.35f,
+                        new AlphaLocomotionState { SpeedXY = 3.7f, Amplitude = 0.19f, OnGround = true }, problems);
+                    var action = FirstAction(def);
+                    if (action != null)
+                    {
+                        view.TryPlayAction(AlphaActorView.ActionCodeOf(action), out _);
+                        images += RenderPose(cam, view, id, "action_" + action, 0.30f, null, problems);
+                        view.Controller.Step(6f);            // finish the action so the next actor starts clean
+                    }
                 }
                 summary.AppendLine($"  {id}: parts={def.Rig.parts.Length} clips={def.Clips.Count} actions={def.RequiredActions.Length} mode={def.ControllerMode}");
             }
