@@ -23,11 +23,14 @@ namespace CubeGame.Features.Creatures
         // CUBEGAME_CONTRACT: staged local variants (variant names of the transfer pipeline).
         static readonly CreatureVisualProfile[] Known =
         {
+            new CreatureVisualProfile { Kind = 0x00, ActorId = "elf_male_0x00_no_alpha_run", Evidence = "ElfMale, same motion family as the captured human; no live run (LOCOMOTION_ONLY)" },
             new CreatureVisualProfile { Kind = 0x02, ActorId = "d86_human_0x02_greatsword", Evidence = "D85 S05A-2 human, 94 clips" },
-            new CreatureVisualProfile { Kind = 0x65, ActorId = "d86_dragon_0x65", Evidence = "D83 dragon_0x65_v1, 5 clips" },
+            new CreatureVisualProfile { Kind = 0x1c, ActorId = "wolf_0x1c_formula_only", Evidence = "formula walk (no capture)" },
             new CreatureVisualProfile { Kind = 0x20, ActorId = "whitecat_0x20_formula_vs_alpha", Evidence = "captured WhiteCat, formula walk" },
             new CreatureVisualProfile { Kind = 0x3f, ActorId = "plainrunner_0x3f_formula_vs_alpha", Evidence = "captured PlainRunner, formula walk" },
-            new CreatureVisualProfile { Kind = 0x1c, ActorId = "wolf_0x1c_formula_only", Evidence = "formula walk (no capture)" },
+            new CreatureVisualProfile { Kind = 0x4c, ActorId = "spikecreature_0x4c_formula", Evidence = "SpikeCreature family, formula walk (D62 family)" },
+            new CreatureVisualProfile { Kind = 0x62, ActorId = "horse_0x62_formula_only", Evidence = "horse body plan, formula walk" },
+            new CreatureVisualProfile { Kind = 0x65, ActorId = "d86_dragon_0x65", Evidence = "D83 dragon_0x65_v1, 5 clips" },
         };
 
         public static IReadOnlyList<CreatureVisualProfile> Staged => Known;

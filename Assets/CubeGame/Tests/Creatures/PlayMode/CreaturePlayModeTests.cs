@@ -119,6 +119,58 @@ namespace CubeGame.Tests.Creatures.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator CreatureTicksStayWithinTheFrameBudget()
+        {
+            if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");
+            var root = new GameObject("PerfRoot");
+            var playerGo = new GameObject("PerfTarget");
+            var player = playerGo.AddComponent<TestTarget>();
+            player.TargetId = "player";
+            player.Faction = (int)CreatureFaction.Player;
+            CreatureTargets.Register(player);
+            CreatureSpawner spawner = null;
+            try
+            {
+                for (uint seed = 1; seed <= 12 && spawner == null; seed++)
+                {
+                    var go = new GameObject("PerfSpawner" + seed);
+                    go.transform.SetParent(root.transform, false);
+                    var candidate = go.AddComponent<CreatureSpawner>();
+                    candidate.SpawnOnStart = false;
+                    candidate.Seed = seed;
+                    candidate.MaxPerCell = 8;
+                    candidate.ActorLibrary = AlphaActorLibrary.Shared;
+                    candidate.AiFactory = () => new CreatureAi();
+                    if (candidate.Spawn().Count >= 2) spawner = candidate;
+                    else Object.Destroy(go);
+                }
+                if (spawner == null) Assert.Ignore("no seed produced a multi-creature plan");
+                playerGo.transform.position = spawner.transform.position + new Vector3(2f, 0f, 0f);
+                for (int i = 0; i < 10; i++) spawner.TickAll(1f / 60f);
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                for (int i = 0; i < 300; i++) spawner.TickAll(1f / 60f);
+                watch.Stop();
+                double msPerFrame = watch.Elapsed.TotalMilliseconds / 300.0;
+                TestContext.WriteLine($"CREATURE_TICK_MS={msPerFrame:F3} agents={spawner.SpawnedCount}");
+                Assert.Less(msPerFrame, 25.0,
+                    $"300 visual/AI ticks of {spawner.SpawnedCount} creatures took {msPerFrame:F2} ms per frame");
+                foreach (var agent in spawner.Spawned.Values)
+                {
+                    Assert.IsNotNull(agent.View, "every spawned creature keeps its visual");
+                    Assert.Greater(agent.View.Locomotion.FramesApplied + agent.View.Clips.FramesApplied, 0,
+                        "the visual layer really posed the creature during the run");
+                }
+                yield return null;
+            }
+            finally
+            {
+                CreatureTargets.Clear();
+                Object.Destroy(root);
+                Object.Destroy(playerGo);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator PassiveObjectStaysStill()
         {
             if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");

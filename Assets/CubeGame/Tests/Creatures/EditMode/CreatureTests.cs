@@ -1,5 +1,6 @@
 // D86 M0-06 — EditMode checks of the proven creature contracts, the Alpha AI and the spawn schema.
 using System.Collections.Generic;
+using CubeGame.AlphaModels;
 using CubeGame.Content;
 using CubeGame.Features.AI;
 using CubeGame.Features.Creatures;
@@ -342,10 +343,36 @@ namespace CubeGame.Tests.Creatures.EditMode
             Assert.IsTrue(CreatureVisualCatalog.TryResolve(0x99, null, out var none, out var reason) == false);
             Assert.IsNull(none);
             StringAssert.Contains("MISSING_VISUAL_CONTENT", reason);
+            Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x00), "ElfMale 0x00 has a staged variant");
             Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x02));
+            Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x4c));
+            Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x62));
             Assert.IsTrue(CreatureVisualCatalog.IsStaged(0x65));
             Assert.IsFalse(CreatureVisualCatalog.IsStaged(0x99));
             StringAssert.Contains("staged kinds", CreatureVisualCatalog.Describe());
+        }
+
+        [Test]
+        public void BossAndPetFactsStayWithinEvidence()
+        {
+            Assert.AreEqual(10, CreatureKinds.BossKindsSorted.Count);
+            CollectionAssert.Contains(CreatureKinds.BossKindsSorted, 0x65);
+            Assert.IsTrue(CreatureKinds.IsBoss(0x65));
+            Assert.IsFalse(CreatureKinds.IsBoss(0x02));
+            StringAssert.Contains("only 0x65", CreatureKinds.BossEvidence);
+            Assert.AreEqual(2, CreaturePets.SummonLimit);
+            Assert.AreEqual(0x5C, CreaturePets.SummonAbilityId);
+            StringAssert.Contains("UNKNOWN", CreaturePets.Status);
+        }
+        [Test]
+        public void AllStagedKindsResolveAgainstTheCache()
+        {
+            var source = AlphaContentSource.Resolve();
+            if (source.State != AlphaContentState.Ready) Assert.Ignore(source.Diagnosis);
+            var library = new AlphaActorLibrary(source);
+            foreach (var profile in CreatureVisualCatalog.Staged)
+                Assert.IsTrue(CreatureVisualCatalog.TryResolve(profile.Kind, library, out var id, out var reason), reason);
+            Assert.GreaterOrEqual(CreatureVisualCatalog.AvailableKinds(library).Count, 8);
         }
     }
 }

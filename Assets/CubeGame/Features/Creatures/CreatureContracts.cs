@@ -60,6 +60,11 @@ namespace CubeGame.Features.Creatures
     {
         // Boss kinds proven in M0-00B (N-05): 0x65 and the ten listed in the pilot contract.
         static readonly HashSet<int> BossKinds = new HashSet<int> { 0x65, 0x6B, 0x6C, 0x6D, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77 };
+        static readonly int[] BossKindList = { 0x65, 0x6B, 0x6C, 0x6D, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77 };
+
+        /// <summary>Boss kinds of the Alpha spawn table (M0-00B N-05). Behaviour beyond dragon 0x65 is UNKNOWN.</summary>
+        public static IReadOnlyList<int> BossKindsSorted => BossKindList;
+        public const string BossEvidence = "M0-00B N-05 list; only 0x65 has a transferred action library (D83)";
 
         public static bool IsBoss(int kind) => BossKinds.Contains(kind);
 
@@ -254,6 +259,18 @@ namespace CubeGame.Features.Creatures
 
         public const int PetSummonLimit = 2;
         public const int PetSummonAbilityId = 0x5C;
+    }
+
+    /// <summary>
+    /// Pet/special-creature facts (M0-06E). Alpha evidence covers only the summon limit and the summon
+    /// ability id; taming, riding, pet AI and boss behaviours beyond dragon 0x65 are UNKNOWN and are not
+    /// implemented instead of being guessed.
+    /// </summary>
+    public static class CreaturePets
+    {
+        public const int SummonLimit = CreatureRules.PetSummonLimit;
+        public const int SummonAbilityId = CreatureRules.PetSummonAbilityId;
+        public const string Status = "PARTIAL: summon limit/ability proven; taming, riding and pet AI UNKNOWN (M0-06E)";
     }
 
     /// <summary>
