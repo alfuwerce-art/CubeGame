@@ -692,3 +692,55 @@ deepseek/m0-content @ 811122f влит в integration/m0-all без конфли
 docs/planning/M0_D88_FULL_WORK_PLAN.md: части Claude (C1–C11) и DeepSeek (D1–D6), стыки, 5 волн, этапы
 проверок и визуального осмотра, вопросы продюсеру. DeepSeek, твоя волна 1: D1 заселение мира (исполнение
 спавна эмулятором, см. ANSWER выше) и D3 постройки/данжи в мире. Claude, волна 1: C2 движение, C1 создание героя.
+
+[2026-11-09 23:20] REPORT | DeepSeek | D1 заселение мира: таблица спавна исполнена, источник популяции готов
+Ветка deepseek/m0-content @ 24c6095 (сверху merge integration/m0-all @ 00f46fd).
+Исполнил эмулятором (tools/alpha_models/world/spawn_oracle.py + terrain_oracle.Oracle): Cube.exe
+0x5C9B30 World_generateMonsterSpawnList и 0x5CA0A0 World_generateNpcSpawnList на 5 seed'ах
+(666666, 1, 4242, 999983, 31337) — 0 проблем, 171 дескриптор монстров + 310 NPC. Поля записи 0x118
+сверены с аргументами построителей 0x5F51E0/0x5F8AD0: +0 type (2 монстр / 3 NPC), +1 вид, +4 вес,
++0x10 уровень; звёзды у NPC = +0xC (~1 %), у монстров этот байт — не звёзды (50/50) → PARTIAL, в игре 0.
+Сделано: tools/alpha_content/data/spawn_descriptors.json; Content/Generated/AlphaSpawnTable.g.cs
+(132 строки монстров, 267 NPC; генератор build_spawn_table.py с --check); Features/Creatures/
+AlphaWorldPopulation.cs (IWorldPopulationSource: детерминизм от seed, стабильные SpawnIndex,
+BehaviourKey creature_ai, провенанс в каждой записи); 7 EditMode-тестов.
+Стык: ребро asmdef CubeGame.Features.Creatures → CubeGame.Features (контракты), цикла нет
+(Features ссылается только на Core). Изменён только мой asmdef и asmdef моих тестов.
+Факт: SPAWN_ORACLE_RESULT=PASS seeds=5 problems=0; SPAWN_TABLE_RESULT=PASS drift=false; Unity 6000.3.27f2
+EditMode 461 (455 passed, 0 failed, 6 skipped), PlayMode 57/57 (0 failed), error CS 0.
+PARTIAL: позиции и число спавнов на зону = CUBEGAME_CONTRACT (Chunk_generateObjects 0x5AF170 не исполнена),
+биом не привязан (вызывающий код передаёт variant=-1), NPC-таблица собрана, но в игру не подключена.
+Отчёт: docs/reports/D1_WORLD_POPULATION_REPORT.md.
+Claude (C6): new AlphaWorldPopulation(seed, zoneLevel, groundHeight: (zone,lx,lz)->Y). ClassId и
+SpecializationId = −1 (R-1 не исполнена), поэтому C-29 даёт безоружную атаку 3 — это ожидаемо.
+
+[2026-11-09 23:20] HANDOFF | DeepSeek -> Claude | следующий шаг волны 1
+D1 доказательная часть закрыта; полная привязка к биому/позициям требует исполнения
+Chunk_generateObjects (0x5AF170) — это следующий проход оракула (нужны регионы мира и проходы
+биом-контента, как в zone_oracle.py). Беру D3: постройки/города/данжи + растительность через один
+путь размещения. Данные уже есть: AlphaStructures, AlphaDungeons, AlphaDungeonChests,
+AlphaVegetationPlanner, AlphaScatterTree/AlphaScatterSelector/AlphaClimateField.
+Перед кодом пришлю записи API о стыке «постройки/сундуки/сервисы зоны → Claude (C5/C7/C8)»:
+какой контракт нужен для позиций построек, сундуков и NPC-сервисов, чтобы не дублировать
+IZoneContentProvider и WorldContentSource.
+
+[2026-11-09 23:45] REPORT | Claude | C2 шаг 1: движение героя по байтам Cube.exe, OQ-23 закрыт
+integration/m0-all @ 7b15c18. Новое правило Core/Movement/AlphaMovement.cs (чистый C#, шаг по целым мс) и
+PlayerMotor на нём. Числа (DIRECT, адреса в docs/research/alpha2013/C2_ALPHA_MOVEMENT_PHYSICS.md):
+единицы — pos += (v+extra)·dt·65536, 65536 = блок → 1 ед. скорости = 1 блок/с = 1 ед. Unity/с (OQ-23 закрыт);
+ввод +80 блок/с² на клавишу; max 6, бег ×2 = 12 (флаг 0x40 = левый Shift НЕ нажат — бег по умолчанию, Shift
+= шаг); кламп |v_xz|; гравитация 30; трение на земле 0.005/мс (0.0025 при вводе); прыжок 0x4A8C8A: окно 200 мс,
+vz = min(|v_xz|+2, 10), подкачка 100 мс +0.08/мс до 10. Клавиши Alpha (DIK): WASD, пробел, LShift, LCtrl=лазание.
+Поправка: стамина +0x1194 бегом по земле не тратится (только пробел в планировании и лазание) — P-18 исправлен.
+Скорость 20.0 — только при бите мира +0x84&1, это не обычная скорость героя.
+Проверка: EditMode 462/464 (0 failed), m0_pilots 479/479. Не сделано: плавание, лазание, дельтаплан, лодка,
+«жёсткое приземление» (0x444650 PARTIAL), скорости атак (C4).
+Для DeepSeek (D2): скорости ИИ теперь в блоках/с без пересчёта — путь 6 / бег 12 (Creature_findPathToTarget
+0x5A7EB0: v → 6·dir с k 0.001/мс, бег 12), CombatBehavior 80/40 — это ускорения/скорости той же шкалы.
+CreatureAi.DefaultWalkSpeed = 3.7 (PLACEHOLDER) можно заменить числами Alpha.
+
+[2026-11-09 23:45] REPORT | Claude | D1 DeepSeek принят в общую ветку
+deepseek/m0-content @ 24c6095 влит без конфликтов: merge 234b61f. Проверка на общей ветке (вместе с C2):
+EditMode 469/471 (0 failed, 2 skipped), PlayMode 56/57 (0 failed, 1 skipped), error CS 0.
+AlphaWorldPopulation в игру подключу в C6 (волна 2). DeepSeek: подтяни общую ветку. D3 — жду записи API
+о стыке «постройки/сундуки/сервисы зоны» до кода, как ты и предложил.
