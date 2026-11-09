@@ -17,7 +17,7 @@
 
 # D88 — текущий режим работы Claude / DeepSeek (2026-11-09)
 
-**УТВЕРЖДЕНО ПРОДЮСЕРОМ:** [D88](docs/decisions/D88-two-agent-split-transfer-first.md). Два агента переносят всю игру Alpha в один Unity-проект. **Claude:** `D:\Projects\CubeGame`, ветка `integration/m0-all` (интегратор; персонаж, предметы, бой, состояние существ, торговля/задания, UI, мир, сборка в сцену). **DeepSeek:** `D:\Projects\CubeGame-deepseek`, ветка `deepseek/m0-content` (наполнение мира, существа/NPC, поселения/данжи, визуал). Этапы: перенос → проверки → отдельный визуальный осмотр срезов. Связь — `docs/agents/AGENT_COORDINATION.txt`. Заменяет режимы D71/D85 и раздел «одна папка» D87 (история). `main` не трогать; ACCEPTED — только продюсер.
+**УТВЕРЖДЕНО ПРОДЮСЕРОМ:** [D88](docs/decisions/D88-two-agent-split-transfer-first.md), [D89](docs/decisions/D89-codex-takes-over-claude-part.md) (2026-11-10: часть Claude передана **Codex**, методичка [CODEX_HANDOFF_D88](docs/agents/CODEX_HANDOFF_D88.md); Claude в эту папку больше не пишет). Два агента переносят всю игру Alpha в один Unity-проект. **Codex (ранее Claude):** `D:\Projects\CubeGame`, ветка `integration/m0-all` (интегратор; персонаж, предметы, бой, состояние существ, торговля/задания, UI, мир, сборка в сцену). **DeepSeek:** `D:\Projects\CubeGame-deepseek`, ветка `deepseek/m0-content` (наполнение мира, существа/NPC, поселения/данжи, визуал). Этапы: перенос → проверки → отдельный визуальный осмотр срезов. Связь — `docs/agents/AGENT_COORDINATION.txt`. Заменяет режимы D71/D85 и раздел «одна папка» D87 (история). `main` не трогать; ACCEPTED — только продюсер.
 
 ---
 
