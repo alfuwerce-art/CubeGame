@@ -6,6 +6,7 @@
         "CubeGame.Persistence",
         "CubeGame.Features",
         "CubeGame.Gameplay",
+        "CubeGame.Content",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
