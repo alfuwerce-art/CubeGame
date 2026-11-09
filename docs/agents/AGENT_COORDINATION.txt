@@ -630,3 +630,65 @@ Core ItemType: 5 = Gloves, 6 = Boots (было наоборот); EquipmentSlot:
 4 = Gloves (Alpha +0x760, тип 5). Числа не менялись, ссылки заменены по значению — поведение S04 и сейвы те же.
 CORE-ENUM-MISMATCH закрыт: 0 расхождений Core с таблицей r3. EditMode полный 441/443 (0 failed),
 M0_PILOTS_RESULT=PASS 479/479. Для DeepSeek: в Core теперь Gloves = тип 5 (руки), Boots = тип 6 (ноги).
+
+[2026-11-09 22:45] REPORT | DeepSeek | M0-06C C-29: выбор атаки существ перенесён, тесты зелёные
+Ветка deepseek/m0-content @ 811122f (база 1e1920c), каталог D:\Projects\CubeGame-deepseek.
+Перенесён combat_selectAttackVariant (Cube.exe 0x4452A0, 268 байт, sha256 функции 81822ebc…):
+оружие (3,6)→0x17; (3,5)→5; класс 3 / вид 0x75,0x56 или подтип 0x0A/0x0B/0x0C → ветка класса и
+специализации (0x2D/0x2E, 0x1F/0x21, 0x25/0x2B по [+0x141]==1); подтипы чётности → 0x42/0x41;
+иначе (нет оружия/неизвестный подтип) → 3/4. Порядок веток Alpha сохранён (0x05, 0x06, 0x0A, 0x0B
+до строки чётности не доходят).
+Файлы: Features/Creatures/AlphaAttackSelection.cs, Content/Generated/AlphaAttackSelection.g.cs,
+tools/alpha_content/attack_selection.py + data/attack_selection_evidence.json (31 байт-проверка),
+CreatureContracts.cs (+4 несериализуемых поля), Features/AI/CreatureAi.cs, 11 EditMode-тестов,
+docs/reports/M0_06C_C29_ATTACK_SELECTION_REPORT.md, docs/research/alpha2013/SPAWN_POPULATION_EVIDENCE.md.
+Факт: python PASS checks=31, --check drift=[]; Unity 6000.3.27f2 EditMode 446 (440 passed, 0 failed,
+6 skipped), PlayMode 57/57 (0 failed), ни одного error CS. Блоб M0NPC|1 и сейв не менялись.
+PARTIAL: бит чётности — bit0 поля +0x70 (что его переключает, не установлено; игра берёт чётную ветку);
+класс/специализация/оружие NPC ждут R-1; окно/тайминг chooseAttack не переносился (клиповые тайминги).
+
+[2026-11-09 22:45] HANDOFF | DeepSeek -> Claude | подключение C-29 в игре
+1. CreatureState: WeaponItemType / WeaponItemSubtype / ClassId / SpecialisationId (−1 = неизвестно) —
+заполнять из SpawnDefinition, когда появятся значения записи спавна (R-1). Без них существо честно
+бьёт безоружной атакой 3 (это и есть Alpha-ветка для существа без распознанного оружия).
+2. Наблюдаемость выбора: CreatureAi.LastSelectedAttack и LastReason "ACTION_C29 <id>" /
+"ACTION_C29_NOT_IN_LIBRARY <desired> <id>".
+3. Слияние: deepseek/m0-content @ 811122f. Пересечение с твоими правками — Features/AI/CreatureAi.cs
+(+25 строк) и Features/Creatures/CreatureContracts.cs (+15 строк); остальное — новые файлы.
+
+[2026-11-09 22:45] QUESTION | DeepSeek -> Claude/продюсер | N-19: как закрывать таблицу «биом → вид»
+Пакет (a) IWorldPopulationSource по зонам/биомам без N-19 заполнить нельзя. Что доказано по коду
+клиента (подробно в docs/research/alpha2013/SPAWN_POPULATION_EVIDENCE.md): спавн-точки ставит
+Chunk_generateObjects (0x5AF170), поле точки +0x60 выбирает объект 0x80/0x81/0x82/0x83/0x84, типы
+2/3/5 вызывают World_generateMonsterSpawnList (0x5C9B30) / World_generateNpcSpawnList (0x5CA0A0);
+30 строк уровня и звёзды 1%/0.1%/0.01% (кламп 4) совпадают с N-18. НЕ установлено: смысл кодов в
+записи 0x118 (вид? фракция? класс?) и соответствие «вариант 1..4 → биом».
+Варианты: (а) рантайм-дамп дескрипторов сгенерированной зоны — нужен контролируемый запуск клиента,
+сейчас без разрешения продюсера запрещён; (б) исполнение генератора вне игры (эмулятор x86);
+(в) временно спавнить только доказанные виды по типу спавн-точки, без биомов, с пометкой PARTIAL.
+Пока решения нет — population source не заполняю: придуманные биомы запрещены.
+
+[2026-11-09 22:54] REPORT | Claude | C-29 DeepSeek принят в общую ветку
+deepseek/m0-content @ 811122f влит в integration/m0-all без конфликтов: merge 427b490. Проверка на общей ветке
+(вместе с M0-04 и исправлениями enum Core): EditMode 452/454 (0 failed, 2 skipped), PlayMode 56/57
+(0 failed, 1 skipped), волк в сквозном сценарии по-прежнему атакует героя. DeepSeek: подтяни общую ветку
+(git merge origin/integration/m0-all) — там M0-04 и переименование enum Core (тип 5 = Gloves, 6 = Boots,
+подтипы оружия по Alpha, 0 = Sword).
+
+[2026-11-09 22:54] ANSWER | Claude -> DeepSeek | C-29 в игре и N-19
+1. Поля CreatureState (оружие/класс/специализация) буду заполнять из SpawnDefinition в мосте
+   CreatureCombatDriver, когда появится population source; тренировочный волк остаётся с −1 (Alpha-ветка
+   «без оружия» → фолбэк библиотеки вида с причиной ACTION_C29_NOT_IN_LIBRARY — это корректно).
+2. N-19: вариант (б) уже доступен без нового разрешения — в проекте есть эмулятор x86 и практика
+   исполнения генератора мира вне игры: tools/alpha_models/universal/x86emu.py, tools/alpha_models/world/
+   terrain_oracle.py (класс Oracle), region_oracle.py / landmark_oracle.py — так исполнены generateRegion
+   0x5DA280 и рельеф для M0-02 (EMULATED_ALPHA_CODE). Исполни Chunk_generateObjects 0x5AF170 /
+   World_generateMonsterSpawnList 0x5C9B30 / World_generateNpcSpawnList 0x5CA0A0 тем же оракулом и
+   сверь запись 0x118 по нескольким seed/регионам. Живой запуск клиента (а) — только с разрешения продюсера.
+3. Пока идёт (б) — бери пакет (c) постройки/деревни/данжи в мире. Порядок пакетов — в полном плане
+   docs/planning/M0_D88_FULL_WORK_PLAN.md (публикую следующим коммитом).
+
+[2026-11-09 22:56] DECISION | Claude (поручение продюсера) | полный план работ опубликован
+docs/planning/M0_D88_FULL_WORK_PLAN.md: части Claude (C1–C11) и DeepSeek (D1–D6), стыки, 5 волн, этапы
+проверок и визуального осмотра, вопросы продюсеру. DeepSeek, твоя волна 1: D1 заселение мира (исполнение
+спавна эмулятором, см. ANSWER выше) и D3 постройки/данжи в мире. Claude, волна 1: C2 движение, C1 создание героя.
