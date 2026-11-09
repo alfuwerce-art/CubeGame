@@ -462,6 +462,21 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         }
 
         [Test]
+        public void ConsumableRulesFollowTheItemLayer()
+        {
+            Assert.IsEmpty(AlphaConsumableRules.Validate(), string.Join("\n", AlphaConsumableRules.Validate()));
+            Assert.AreEqual(3000, AlphaConsumableRules.CooldownMs(1, 1), "life potion cooldown");
+            Assert.AreEqual(10000, AlphaConsumableRules.CooldownMs(1, 2), "other consumables");
+            Assert.AreEqual(10000, AlphaConsumableRules.CooldownMs(1, 0));
+            Assert.AreEqual(0, AlphaConsumableRules.CooldownMs(3, 0), "weapons have no consumable cooldown");
+            CollectionAssert.AreEquivalent(new[] { 80, 81 }, AlphaConsumableRules.UseActions);
+            Assert.IsTrue(AlphaConsumableRules.IsConsumable(1));
+            Assert.IsFalse(AlphaConsumableRules.IsConsumable(3));
+            StringAssert.Contains("heal/effect amount is NOT recovered", AlphaConsumableRules.Status);
+            StringAssert.Contains("cooldownLifePotion=3000", AlphaConsumableRules.Summary());
+        }
+
+        [Test]
         public void NpcServiceFurnitureMapsToContractKinds()
         {
             Assert.IsEmpty(AlphaNpcServices.Validate(), string.Join("\n", AlphaNpcServices.Validate()));

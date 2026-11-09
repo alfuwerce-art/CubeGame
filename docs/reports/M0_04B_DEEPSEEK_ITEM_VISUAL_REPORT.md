@@ -47,7 +47,8 @@
 | M0-04B (законы слотов) | `held_item`/`special_item` = `center`; `lamp_item` = `lamp`, `pet_item` = `pet` — лампа/пет **отказываются** (`HELD_ITEM_LAW_NOT_IMPLEMENTED`), а не рисуются произвольно; EditMode `LawOf`, PlayMode: лампа → отказ, зелье/планер → успех |
 | Preview | Кадры `item_actor_only` / `item_chest` / `item_potion`: крупный план груди с бронёй и зелья в правой руке; утечка preview-акторов между кадрами устранена |
 | Слоты предметов | `AlphaItemSlotRules`: 11 типов → слоты по `item_layer` (held/weapon/chest/hands/feet/shoulder/neck/ring/pet/special/lamp); кольца «хранятся, но не рисуются», материалы/еда/монеты не экипируются |
-| EditMode (весь проект) | `total=353 passed=353 failed=0` (`AlphaOutput/editmode.xml`) |
+| Расходники | `AlphaConsumableRules`: действия использования 80/81, кулдаун 3000 мс для life potion и 10000 мс для остальных type-1, 0 для прочих; **эффект/лечение не восстановлены** (B-U1 открыт) |
+| EditMode (весь проект) | `total=354 passed=354 failed=0` (`AlphaOutput/editmode.xml`) |
 | PlayMode (весь проект) | `total=42 passed=42 failed=0` (`AlphaOutput/playmode.xml`), +4: левая рука (щит/кинжал), удерживаемый предмет (зелье/лампа/планер), броня (грудь/перчатки/сапоги + отказ плеча), полный дескриптор игрока (броня+зелье) |
 | Выгрузка предметных моделей | `EXTRACT_ITEM_MODELS=PASS written=28` (+14 удерживаемых +4 брони) |
 | Карта «предмет → модель» | `HELD_ITEM_MODELS=PASS items=14`, `EQUIPMENT_MODELS=PASS items=32`; исходный свип `ITEM_MODELS DONE types=24 models=1565 errors=0` |
