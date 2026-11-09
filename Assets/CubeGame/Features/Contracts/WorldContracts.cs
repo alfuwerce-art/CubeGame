@@ -34,6 +34,9 @@ namespace CubeGame.Features.Contracts
         /// <summary>Equipment as raw Alpha ids (converted by the item adapter on spawn).</summary>
         public IReadOnlyList<RawAlphaItemId> Equipment { get; set; } = Array.Empty<RawAlphaItemId>();
 
+        /// <summary>Raw Alpha weapon (type 3) proved to be in the main hand; null if the hand is unknown or empty.</summary>
+        public RawAlphaItemId? MainHandWeapon { get; set; }
+
         /// <summary>Behaviour profile key owned by Features/AI (DeepSeek); empty = static object.</summary>
         public string BehaviourKey { get; set; } = string.Empty;
 

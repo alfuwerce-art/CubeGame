@@ -638,7 +638,7 @@ namespace CubeGame.Gameplay
             creature.Hostile = def.Faction == (int)CreatureFaction.Monster;
             creature.IsBoss = CreatureKinds.IsBoss(def.Kind.Value);
             _session.Combat.Register(creature);
-            _creatures?.Add(creature, def.Level, 0, def.Faction, def.ClassId, def.SpecializationId);
+            _creatures?.Add(creature, def.Level, 0, def.Faction, def.ClassId, def.SpecializationId, def.MainHandWeapon);
             _session.Events.Publish(new EntitySpawned
             {
                 TimeMs = _session.Clock.TimeMs,

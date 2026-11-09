@@ -56,11 +56,13 @@ namespace CubeGame.Gameplay
         }
 
         /// <summary>
-        /// World spawn (C6): faction, class and specialisation come from the spawn record so that Alpha's attack
-        /// selection C-29 sees them (−1 = unknown → Alpha's unarmed branch).
+        /// World spawn (C6): faction, class, specialisation and main-hand weapon from the spawn record
+        /// drive Alpha's attack selection (C-29/R-2).
         /// </summary>
-        public void Add(Combatant combatant, int level, int stars, int faction, int classId, int specialisationId)
+        public void Add(Combatant combatant, int level, int stars, int faction, int classId, int specialisationId,
+            RawAlphaItemId? mainHandWeapon = null)
         {
+            RawAlphaItemId? weapon = mainHandWeapon?.Type == AlphaNpcWeaponActions.WeaponItemType ? mainHandWeapon : null;
             var state = new CreatureState
             {
                 StableId = combatant.Id.ToString(),
@@ -68,6 +70,8 @@ namespace CubeGame.Gameplay
                 Faction = faction,
                 ClassId = classId,
                 SpecialisationId = specialisationId,
+                WeaponItemType = weapon?.Type ?? -1,
+                WeaponItemSubtype = weapon?.Subtype ?? -1,
                 Level = level,
                 Stars = stars,
                 Health = combatant.Health.CurrentHealth,

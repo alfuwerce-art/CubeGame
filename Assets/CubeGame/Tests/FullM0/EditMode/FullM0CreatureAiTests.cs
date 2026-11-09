@@ -1,5 +1,6 @@
 using CubeGame.Features.Combat;
 using CubeGame.Features.Contracts;
+using CubeGame.Features.Creatures;
 using CubeGame.Features.Session;
 using CubeGame.Gameplay;
 using NUnit.Framework;
@@ -43,6 +44,30 @@ namespace CubeGame.Tests.FullM0.EditMode
         {
             Assert.AreEqual(Core.Characters.CharacterStats.CalcCreatureMaxHealth(100.0, 1, 0), _wolf.Health.MaxHealth, 1e-9);
             Assert.IsTrue(_wolf.Hostile);
+        }
+
+        [TestCase(null, false)]
+        [TestCase(1, false)]
+        [TestCase(3, true)]
+        public void OnlyAWeaponInMainHandAllowsWeaponActions(int? itemType, bool expectsAttack)
+        {
+            var action = new ActionId(AlphaNpcWeaponActions.WeaponOnly[0]);
+            ((ActionTimingTable)_session.ActionTimings).Add(Wolf, action, ActionTiming.FromAlpha(100, 200, 300));
+            _session.Clock.Ticked -= _driver.Tick;
+            _driver = new CreatureCombatDriver(_session, (x, z) => 5.0, kind => new[] { action.Value }, 11u);
+            _session.Clock.Ticked += _driver.Tick;
+            _wolf.Position = new WorldPosition(1, 5, 0);
+            RawAlphaItemId? weapon = itemType.HasValue ? new RawAlphaItemId(itemType.Value, 0) : (RawAlphaItemId?)null;
+            _driver.Add(_wolf, 1, 0, (int)CreatureFaction.Monster, -1, -1, weapon);
+
+            _session.Clock.StepTicks(1);
+
+            Assert.IsTrue(_driver.TryGetAi(_wolf.Id, out var ai));
+            Assert.AreEqual(expectsAttack, _session.Combat.IsActing(_wolf.Id), ai.LastReason);
+            if (!expectsAttack)
+            {
+                StringAssert.Contains("ACTION_NEEDS_WEAPON", ai.LastReason);
+            }
         }
 
         [Test]
