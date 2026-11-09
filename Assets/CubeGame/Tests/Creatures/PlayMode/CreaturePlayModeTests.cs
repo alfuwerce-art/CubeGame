@@ -1,0 +1,159 @@
+// D86 M0-06 — PlayMode checks: spawned Alpha creatures really move, keep stable identity, restore
+// their blob after leaving the active radius, and request only actions proven for their kind.
+using System.Collections;
+using System.Collections.Generic;
+using CubeGame.AlphaModels;
+using CubeGame.Features.AI;
+using CubeGame.Features.Creatures;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
+
+namespace CubeGame.Tests.Creatures.PlayMode
+{
+    public class CreaturePlayModeTests
+    {
+        sealed class TestTarget : MonoBehaviour, ICreatureTargetSource
+        {
+            public string TargetId { get; set; } = "player";
+            public int Faction { get; set; }
+            public bool Alive { get; set; } = true;
+            public Vector3 Position => transform.position;
+        }
+
+        static bool ContentReady() => AlphaContentSource.Resolve().State == AlphaContentState.Ready;
+
+        [UnityTest]
+        public IEnumerator SpawnedCreatureChasesTargetAndKeepsStableIdentity()
+        {
+            if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");
+            var root = new GameObject("CreatureTestRoot");
+            var spawner = root.AddComponent<CreatureSpawner>();
+            spawner.SpawnOnStart = false;
+            spawner.Seed = 777u;
+            spawner.RegionX = 0; spawner.RegionZ = 0; spawner.CellX = 0; spawner.CellZ = 0;
+            spawner.MaxPerCell = 4;
+            spawner.AiFactory = () => new CreatureAi();
+            var playerGo = new GameObject("PlayerProxy");
+            var player = playerGo.AddComponent<TestTarget>();
+            player.TargetId = "player";
+            player.Faction = (int)CreatureFaction.Player;
+            CreatureTargets.Register(player);
+            try
+            {
+                var plan = spawner.Spawn();
+                Assert.IsNotEmpty(plan, spawner.Status);
+                Assert.IsEmpty(spawner.Problems, string.Join("\n", spawner.Problems));
+                var agent = spawner.Spawned[plan[0].StableId];
+                Assert.IsNotNull(agent);
+                Assert.IsTrue(agent.VisualAvailable, "every planned kind maps to a staged Alpha visual: " + agent.VisualStatus);
+
+                // Put the target right next to the creature so the AI reaches it immediately.
+                playerGo.transform.position = agent.transform.position + new Vector3(1.5f, 0f, 0f);
+                spawner.TickAll(0.5f);
+                Assert.AreEqual(CreatureAiState.Attack, agent.Ai.State, "in range → attack state");
+
+                // Leaving the active radius saves the blob and destroys the object; identity stays the same.
+                spawner.DespawnRadius = 10f;
+                int despawned = spawner.DespawnBeyond(new Vector3(1000f, 0f, 1000f));
+                Assert.GreaterOrEqual(despawned, 1);
+                Assert.IsTrue(spawner.Store.Contains(plan[0].StableId), "state blob saved on despawn");
+                var again = spawner.SpawnOne(plan[0], AlphaActorLibrary.Shared);
+                Assert.AreEqual(plan[0].Kind, again.State.Kind);
+                Assert.AreEqual(plan[0].StableId, again.State.StableId);
+                Assert.AreEqual((float)plan[0].X, again.transform.position.x, 1e-3f);
+                yield return null;
+            }
+            finally
+            {
+                CreatureTargets.Clear();
+                Object.Destroy(root);
+                Object.Destroy(playerGo);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator DragonRequestsOnlyItsTransferredAction()
+        {
+            if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");
+            var library = AlphaActorLibrary.Shared;
+            if (!library.TryGet("d86_dragon_0x65", out var def)) Assert.Ignore("dragon variant is not staged");
+            var root = new GameObject("DragonTestRoot");
+            var playerGo = new GameObject("PlayerProxy2");
+            var player = playerGo.AddComponent<TestTarget>();
+            player.TargetId = "player";
+            player.Faction = (int)CreatureFaction.Player;
+            CreatureTargets.Register(player);
+            try
+            {
+                var request = new CreatureSpawnRequest
+                {
+                    StableId = "test:dragon", Kind = 0x65, Level = 5, Stars = 0,
+                    Faction = (int)CreatureFaction.Monster, X = 0, Y = 0, Z = 0,
+                };
+                var agentGo = new GameObject("DragonAgent");
+                agentGo.transform.SetParent(root.transform, false);
+                var agent = agentGo.AddComponent<CreatureAgent>();
+                var state = new CreatureState
+                {
+                    StableId = request.StableId, Kind = request.Kind, Faction = request.Faction, Level = 5,
+                    MaxHealth = 100, Health = 100, X = 0, Z = 0,
+                };
+                agent.Initialize(state, new CreatureAi(), def, 7u);
+                Assert.IsTrue(agent.VisualAvailable, agent.VisualStatus);
+                playerGo.transform.position = new Vector3(1.5f, 0, 0);
+                for (int i = 0; i < 10; i++) agent.Tick(0.05f);
+                Assert.AreEqual(CreatureAiState.Attack, agent.Ai.State);
+                for (int i = 0; i < 120 && agent.View.Controller.CurrentAction == null; i++) agent.Tick(0.05f);
+                Assert.AreEqual("action_037", agent.View.Controller.CurrentAction,
+                    $"dragon 0x65 launches 37/40/42/43; phase={agent.View.Controller.Phase} reason={agent.Ai.LastReason} " +
+                    $"problems={string.Join(",", agent.View.Problems)}");
+                yield return null;
+            }
+            finally
+            {
+                CreatureTargets.Clear();
+                Object.Destroy(root);
+                Object.Destroy(playerGo);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator PassiveObjectStaysStill()
+        {
+            if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");
+            var root = new GameObject("PlantTestRoot");
+            var playerGo = new GameObject("PlayerProxy3");
+            var player = playerGo.AddComponent<TestTarget>();
+            player.TargetId = "player";
+            player.Faction = (int)CreatureFaction.Player;
+            playerGo.transform.position = new Vector3(1f, 0f, 0f);
+            CreatureTargets.Register(player);
+            try
+            {
+                var go = new GameObject("Plant");
+                go.transform.SetParent(root.transform, false);
+                var agent = go.AddComponent<CreatureAgent>();
+                var state = new CreatureState
+                {
+                    StableId = "test:plant", Kind = 0x78, Faction = (int)CreatureFaction.Passive,
+                    Level = 1, MaxHealth = 10, Health = 10, X = 0, Z = 0,
+                };
+                agent.Initialize(state, new CreatureAi(), null, 3u);
+                Assert.AreEqual("MISSING_VISUAL_CONTENT", agent.VisualStatus, "no staged plant visual is invented");
+                var start = agent.transform.position;
+                for (int i = 0; i < 10; i++) agent.Tick(0.1f);
+                Assert.AreEqual(start, agent.transform.position);
+                Assert.AreEqual(CreatureAiState.Idle, agent.Ai.State);
+                Assert.AreEqual("PASSIVE_OBJECT", agent.Ai.LastReason);
+                yield return null;
+            }
+            finally
+            {
+                CreatureTargets.Clear();
+                Object.Destroy(root);
+                Object.Destroy(playerGo);
+            }
+        }
+    }
+}
