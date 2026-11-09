@@ -411,6 +411,22 @@ namespace CubeGame.Tests.Creatures.EditMode
             foreach (var profile in CreatureVisualCatalog.Staged)
                 Assert.IsTrue(CreatureVisualCatalog.TryResolve(profile.Kind, library, out var id, out var reason), reason);
             Assert.GreaterOrEqual(CreatureVisualCatalog.AvailableKinds(library).Count, AlphaStagedVisuals.All.Length);
+            // The committed staged table must describe the cache exactly: mode, clip count and action coverage.
+            foreach (var staged in AlphaStagedVisuals.All)
+            {
+                Assert.IsTrue(library.TryGet(staged.Variant, out var def), staged.Variant);
+                Assert.AreEqual(staged.ControllerMode, def.ControllerMode, staged.Variant);
+                Assert.AreEqual(staged.Clips, def.Clips.Count, staged.Variant + " clip count");
+                if (staged.ControllerMode == "ACTIONS")
+                {
+                    Assert.Greater(def.RequiredActions.Length, 0, staged.Variant + " actions");
+                    Assert.Greater(def.ActionTimings.Count, 0, staged.Variant + " action timing");
+                }
+                else
+                {
+                    Assert.AreEqual(0, def.RequiredActions.Length, staged.Variant + " must not claim actions");
+                }
+            }
         }
     }
 }

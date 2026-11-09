@@ -51,7 +51,8 @@
 | 39 | M0-09C/07B: витрина показывает комнаты данжа и сундуки; выход `RunValidateContent` в batchmode иногда `0xC0000005` после PASS (артефакты валидны) | `d05a647` | 354/354 | 46/46 |
 | 40 | M0-09C: машинный манифест контента `AlphaContentManifest` (JSON из коммит-таблиц) + `RunBuildContentManifest` | `384ffbc` | 355/355 | 46/46 |
 | 41 | M0-05C/06: `CreatureAgent.TryGetActionTiming` — бой получает windup/actionEnd прямо у агента; оговорка о родителе блока special | `a655594` | 355/355 | 46/46 |
-| 42 | M0-02C: найдена `World_placeObjectWithSpacing @ 0x005effa0`; климат-поле принимает spacing как функцию `(x,z)` под будущий порт | эта партия | 355/355 | 46/46 |
+| 42 | M0-02C: найдена `World_placeObjectWithSpacing @ 0x005effa0`; климат-поле принимает spacing как функцию `(x,z)` под будущий порт | `94f626c` | 355/355 | 46/46 |
+| 43 | M0-06: инвариант коммит-таблицы ↔ кэша для всех 156 видов (режим/клипы/действия/тайминги) | эта партия | 355/355 | 46/46 |
 
 Все прогоны — Unity 6000.3.27f2, `-batchmode -runTests`, артефакты в `AlphaOutput/editmode.xml` и `AlphaOutput/playmode.xml` (локально, не в Git).
 
