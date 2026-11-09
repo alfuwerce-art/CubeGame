@@ -245,6 +245,18 @@ namespace CubeGame.AlphaModels.Tests.EditMode
             Assert.AreEqual(1024, AlphaContentTables.WorldRegionGrid);
         }
         [Test]
+        public void ScatterEvidenceIsExtractedButNotAPlacementRule()
+        {
+            Assert.IsEmpty(AlphaScatterEvidenceValidation.Validate(), string.Join("\n", AlphaScatterEvidenceValidation.Validate()));
+            Assert.GreaterOrEqual(AlphaScatterEvidence.Groups.Length, 4);
+            StringAssert.Contains("PARTIAL", AlphaScatterEvidence.Status);
+            StringAssert.Contains("scatterGroups=", AlphaScatterEvidenceValidation.Summary());
+            int seen = 0;
+            foreach (var group in AlphaScatterEvidence.Groups) seen += group.ObjectKinds?.Length ?? 0;
+            Assert.GreaterOrEqual(seen, 20, "the extracted branches carry real object ids");
+        }
+
+        [Test]
         public void NpcServiceFurnitureMapsToContractKinds()
         {
             Assert.IsEmpty(AlphaNpcServices.Validate(), string.Join("\n", AlphaNpcServices.Validate()));

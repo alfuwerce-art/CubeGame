@@ -92,6 +92,8 @@ namespace CubeGame.AlphaModels.Import
             foreach (var p in CubeGame.Content.AlphaStructurePlacementPlanner.Validate()) text.AppendLine("STRUCTURE_PROBLEM " + p);
             foreach (var p in CubeGame.Content.AlphaDungeonRules.Validate()) text.AppendLine("DUNGEON_PROBLEM " + p);
             foreach (var p in CubeGame.Content.AlphaNpcServices.Validate()) text.AppendLine("SERVICE_PROBLEM " + p);
+            foreach (var p in CubeGame.Content.AlphaScatterEvidenceValidation.Validate()) text.AppendLine("SCATTER_PROBLEM " + p);
+            text.AppendLine(CubeGame.Content.AlphaScatterEvidenceValidation.Summary());
             text.AppendLine(CubeGame.Content.AlphaNpcServices.Describe());
             text.AppendLine(CubeGame.Content.AlphaWorldContent.Describe());
             Write("content_status.txt", text.ToString());

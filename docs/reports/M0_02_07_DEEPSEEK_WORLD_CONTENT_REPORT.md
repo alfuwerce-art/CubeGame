@@ -17,7 +17,8 @@
 | Постройки | в реестре как «MISSING» | `AlphaStructureTemplates`: дом 3×3×4 (стили 1…5), комната данжа 3×3×3 (шаг 7); габариты `DIRECT`, интерьер `UNKNOWN` |
 | Размещение | алгоритм W-16 только описан | `AlphaStructurePlacementPlanner`: детерминированные кандидаты на клетку, 4 попытки, 4 поворота, проверка свободного футпринта через предикат мира; без свободного места — явная проблема, не принудительная постройка |
 | Данжи (M0-07B) | только размеры комнат в evidence | `AlphaDungeonRules` (комната 3×3×3, шаг 7, сундук ровно 10 предметов, имена входов) + `AlphaDungeonLayoutPlanner`: детерминированный связный скелет на решётке 5×5 с L-коридорами; статус `PARTIAL` (порядок вырезания коридоров/содержимое комнат неизвестны) |
-| Тесты | — | +3 EditMode (340/340 всего); PlayMode без регрессий (30/30) |
+| **W-18 климат→объекты** | `UNKNOWN`, таблица не выгружена | **`PARTIAL`**: из декомпилированной `WorldInfo_scatterObjectsInArea @ 0x005f56c0` извлечены ветки (условия по humidity `local_80`, temperature `local_84`, spacing `fVar6`, `level`) и 64 различных id объектов; данные закоммичены (`AlphaScatterEvidence`, генератор `extract_scatter_table.py`). Рантайм-селектор **не** реализован: ветвление в оригинале идёт через goto, поэтому размещение по этим группам не выдаётся за Alpha |
+| Тесты | — | +4 EditMode (344/344 всего); PlayMode без регрессий (34/34) |
 
 ---
 
@@ -34,6 +35,8 @@
 | `Assets/CubeGame/Content/AlphaDungeons.cs` | `AlphaDungeonRules` (размер комнаты, шаг, 10 предметов в сундуке, входы), `AlphaDungeonLayoutPlanner` (связный скелет с L-коридорами, детерминизм по seed), статус `PARTIAL` |
 | `Assets/CubeGame/Content/AlphaNpcServices.cs` | `AlphaServiceKind` (Trade/Craft/Customize/Rest/Smelt) и `AlphaNpcServices`: сервисная мебель Alpha → категория взаимодействия; `Status` явно помечает `CUBEGAME_CONTRACT`, торговые правила F-U5 `UNKNOWN` |
 | `Assets/CubeGame/Tests/World/PlayMode/WorldContentPlayModeTests.cs` | сквозной контент-сценарий: размещение дома, план данжа, сервисы, спавн существ+декора с Alpha-визуалами, тик, despawn/respawn со стабильным id |
+| `tools/alpha_content/extract_scatter_table.py` + `data/scatter_evidence.json` + `Content/Generated/AlphaScatterEvidence.g.cs` | извлечение W-18: 6 веток, 64 id, условия декомпилятора дословно, статус `PARTIAL` |
+| `Assets/CubeGame/Content/AlphaScatterEvidenceValidation.cs` | проверка извлечённых данных (известные виды, непустые ветки, статус PARTIAL) |
 | `Assets/CubeGame/Tests/AlphaModels/EditMode/AlphaModelsEditModeTests.cs` | `AlphaWorldContentTests`: имена Door/Chest/Workbench/FireTrap, LifePotion (1,1), HangGlider (0x17/0), SkillClimbing, сервисы ≥8, шаблоны и размещение (детерминизм, отказ при занятом футпринте, неизвестный шаблон) |
 | `Assets/CubeGame/AlphaModels.Import/Editor/AlphaModelsImport.cs` | в проверку кэша добавлены отчёты мира/структур |
 
