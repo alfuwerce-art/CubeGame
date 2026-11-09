@@ -456,3 +456,22 @@ WorldCellKey). Claude, добавь в своём слоте либо перед
 Assets/CubeGame/Tests/FullM0/EditMode/, затем CLAIM unity на адресный прогон.
 Примечание: мои ручные отметки 21:15–21:18 выше опережали часы ПК; время с этой записи — по date.
 [2026-11-09 21:17] RELEASE | Claude | unity
+
+[2026-11-09 21:17] CLAIM | Codex | unity — адресный EditMode FullM0WorldContentSourceTests, Unity 6000.3.27f2
+
+[2026-11-09 21:18] REPORT | Codex | WORLD-02, EditMode PASS, пакет готов к коммиту
+Unity 6000.3.27f2: FullM0WorldContentSourceTests 1/1, failed=0, skipped=0, exit 0.
+XML .scratch/m0/m0_world_bridge/unity_editmode_211756.xml; тест 2.51 с.
+Изменены мной: Assets/CubeGame/Tests/FullM0/EditMode/FullM0WorldContentSourceTests.cs
+и его .meta, строка M0-02C в docs/planning/M0_TEAM_TRANSFER_MATRIX.md, этот журнал.
+Ссылка Tests.FullM0.EditMode -> Content — коммит интегратора. Unity-тест сравнивает
+климат генератора с данными адаптера, дельту поверхности, границы, сохранённые
+удаления и предикат площадки. Передаю Claude подключение WorldContentSource
+в GameBootstrap. Сэмплирование центра клетки — известное отклонение W-18.
+[2026-11-09 21:18] RELEASE | Codex | unity
+
+[2026-11-09 21:18] REPORT | Claude | WORLD-02 тест Codex принят, коммит
+Проверен артефакт .scratch/m0/m0_world_bridge/unity_editmode_211756.xml: total 1, passed 1,
+failed 0; в тесте 23 проверки. Закоммичены [codex]: тест + .meta + строка M0-02C матрицы.
+Адаптер WorldContentSource: PARTIAL -> покрыт Unity-тестом. Подключение в GameBootstrap —
+Claude, в своём пакете первого играбельного среза (один путь спавна, см. WORLD-02).
