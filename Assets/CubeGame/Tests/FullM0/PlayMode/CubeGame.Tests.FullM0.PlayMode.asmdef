@@ -7,6 +7,7 @@
         "CubeGame.Presentation",
         "CubeGame.Features",
         "CubeGame.Gameplay",
+        "CubeGame.AlphaModels",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

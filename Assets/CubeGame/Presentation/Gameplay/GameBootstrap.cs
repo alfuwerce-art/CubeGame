@@ -24,7 +24,8 @@ namespace CubeGame.Gameplay
     /// world is entered and destroyed on exit, so "menu → world → menu → world" leaves no leftovers.
     ///
     /// Command line (automation): -cubeSaveDir &lt;dir&gt;, -cubeAutoNew &lt;slot&gt;, -cubeAutoLoad &lt;slot&gt;,
-    /// -cubeSeed &lt;uint&gt;, -cubeScreenshot &lt;png&gt; (+ -cubeFrames &lt;n&gt;): capture then quit.
+    /// -cubeSeed &lt;uint&gt;, -cubeScreenshot &lt;png&gt; (+ -cubeFrames &lt;n&gt;): capture then quit;
+    /// -cubeCamera &lt;yaw&gt; &lt;pitch&gt; &lt;distance&gt;: orbit camera at world entry; -cubeAttackFrame &lt;n&gt;: hero attacks once.
     /// </summary>
     public sealed class GameBootstrap : MonoBehaviour
     {
@@ -42,8 +43,14 @@ namespace CubeGame.Gameplay
         /// <summary>Training enemy species: Alpha Wolf 0x1c (staged S05 visual with actions).</summary>
         public static readonly KindId TrainingTargetKind = new KindId(0x1c);
 
-        /// <summary>Training target distance in front of the hero, blocks (CubeGame test setup, not Alpha).</summary>
-        public const double TrainingTargetDistance = 2.0;
+        /// <summary>Training target distance from the hero, blocks (CubeGame test setup, not Alpha; inside the 3-block reach).</summary>
+        public const double TrainingTargetDistance = 2.5;
+
+        /// <summary>
+        /// Training target bearing relative to the hero's facing, degrees: off the camera line so the hero does not hide it,
+        /// still inside the ±70° melee sector (CubeGame test setup, not Alpha).
+        /// </summary>
+        public const double TrainingTargetBearing = 35.0;
 
         public static readonly string[] SlotKeys = { "slot0", "slot1", "slot2" };
 
@@ -71,8 +78,10 @@ namespace CubeGame.Gameplay
         private string _status = string.Empty;
         private string _combatLog = string.Empty;
         private Combatant _trainingTarget;
-        private GameObject _trainingTargetView;
         private ulong _runtimeSerial;
+        private bool _trainingTargetPending;
+        private GameVisualSink _visuals;
+        private Vector3 _lastHeroScenePosition;
         private int _frames;
         private string _screenshotPath;
         private int _screenshotFrame = -1;
@@ -80,6 +89,11 @@ namespace CubeGame.Gameplay
         private string _autoLoadSlot;
         private uint _commandLineSeed = DefaultSeed;
         private bool _teleport;
+        private bool _cameraOverride;
+        private float _cameraYaw;
+        private float _cameraPitch;
+        private float _cameraDistance = OrbitCameraController.DefaultDistance;
+        private int _attackFrame = -1;
         private int _teleportDx;
         private int _teleportDz;
 
@@ -163,10 +177,22 @@ namespace CubeGame.Gameplay
                 _session.AdvanceFrame(Time.deltaTime);
                 RebaseIfFar();
                 SyncHeroFromView();
+                PublishHeroMovement();
+                if (_trainingTargetPending && _motor != null && _motor.IsGrounded)
+                {
+                    _trainingTargetPending = false;
+                    SpawnTrainingTarget();
+                }
                 if (_worldView != null && _player != null)
                 {
                     _worldView.SetFocus(_player.transform.position);
                 }
+            }
+
+            if (_attackFrame >= 0 && _frames >= _attackFrame && _session.State == SessionState.InGame && _trainingTarget != null)
+            {
+                _attackFrame = -1;
+                HeroAttack();
             }
 
             if (_screenshotFrame >= 0 && _frames >= _screenshotFrame)
@@ -308,10 +334,11 @@ namespace CubeGame.Gameplay
                 return null;
             }
 
+            _trainingTargetPending = false;
             DespawnTrainingTarget();
             SyncHeroFromView();
             HeroState hero = _session.Hero;
-            double yaw = hero.Yaw * Math.PI / 180.0;
+            double yaw = (hero.Yaw + TrainingTargetBearing) * Math.PI / 180.0;
             double x = hero.Position.X + Math.Sin(yaw) * TrainingTargetDistance;
             double z = hero.Position.Z + Math.Cos(yaw) * TrainingTargetDistance;
             int ground = Math.Max(_worldState.SurfaceAt((int)Math.Floor(x), (int)Math.Floor(z)), _worldState.Generator.WaterLevel);
@@ -324,13 +351,6 @@ namespace CubeGame.Gameplay
             _session.Combat.Register(target);
             _trainingTarget = target;
 
-            _trainingTargetView = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            _trainingTargetView.name = "TrainingTarget_PLACEHOLDER";
-            Destroy(_trainingTargetView.GetComponent<Collider>());
-            _trainingTargetView.transform.localScale = new Vector3(0.9f, 0.9f, 1.4f);
-            _trainingTargetView.transform.SetPositionAndRotation(_worldView.ToScene(x, y + 0.45, z), Quaternion.Euler(0f, target.Yaw, 0f));
-            _trainingTargetView.GetComponent<Renderer>().material.color = new Color(0.55f, 0.35f, 0.25f);
-
             _session.Events.Publish(new EntitySpawned
             {
                 TimeMs = _session.Clock.TimeMs,
@@ -340,6 +360,10 @@ namespace CubeGame.Gameplay
                 Yaw = target.Yaw,
             });
             _combatLog = $"spawned {target}";
+            Debug.Log($"[Game] training target {target} at {target.Position} scene {_worldView.ToScene(x, y, z)} " +
+                      $"hero {hero.Position} yaw {hero.Yaw:F1} scene {_player.transform.position} " +
+                      $"visual {(_visuals != null && _visuals.TryGetRoot(target.Id, out Transform root) ? root.position.ToString() : "none")} " +
+                      $"problems [{(_visuals != null ? string.Join("; ", _visuals.Problems) : string.Empty)}]");
             return target;
         }
 
@@ -351,13 +375,7 @@ namespace CubeGame.Gameplay
                 _session.Events.Publish(new EntityDespawned { TimeMs = _session.Clock?.TimeMs ?? 0, Entity = _trainingTarget.Id });
             }
 
-            if (_trainingTargetView != null)
-            {
-                Destroy(_trainingTargetView);
-            }
-
             _trainingTarget = null;
-            _trainingTargetView = null;
         }
 
         private void OnHitResolved(HitResolved hit)
@@ -368,10 +386,47 @@ namespace CubeGame.Gameplay
 
         private void OnEntityDied(EntityDied died)
         {
-            if (_trainingTarget != null && died.Entity.Equals(_trainingTarget.Id) && _trainingTargetView != null)
+            if (_trainingTarget != null && died.Entity.Equals(_trainingTarget.Id))
             {
-                _trainingTargetView.transform.localScale = new Vector3(1.4f, 0.3f, 0.9f);
-                _trainingTargetView.GetComponent<Renderer>().material.color = Color.gray;
+                _combatLog += $"  {_trainingTarget.Name} died";
+            }
+        }
+
+        public GameVisualSink Visuals => _visuals;
+
+        /// <summary>Publishes the hero's movement (position, facing, speed, mode) and drives the visual frame.</summary>
+        private void PublishHeroMovement()
+        {
+            if (_player == null || _session.Hero == null)
+            {
+                return;
+            }
+
+            Vector3 scene = _player.transform.position;
+            Vector3 delta = scene - _lastHeroScenePosition;
+            _lastHeroScenePosition = scene;
+            float dt = Mathf.Max(Time.deltaTime, 1e-4f);
+            float speed = new Vector2(delta.x, delta.z).magnitude / dt;
+            bool grounded = _motor == null || _motor.IsGrounded;
+            LocomotionMode mode = !grounded ? (delta.y > 0f ? LocomotionMode.Jump : LocomotionMode.Fall)
+                : speed < 0.2f ? LocomotionMode.Idle
+                : _motor != null && _motor.Sprinting ? LocomotionMode.Run : LocomotionMode.Walk;
+
+            HeroState hero = _session.Hero;
+            _session.Events.Publish(new EntityMoved
+            {
+                TimeMs = _session.Clock.TimeMs,
+                Entity = hero.Id,
+                Position = hero.Position,
+                Yaw = hero.Yaw,
+                Mode = mode,
+                Speed = speed,
+            });
+
+            long frameMs = (long)((_session.Clock.Tick + _session.Clock.Alpha) * 1000.0 / _session.Clock.TicksPerSecond);
+            foreach (IEntityVisualSink sink in _session.Events.VisualSinks)
+            {
+                sink.OnFrame(frameMs, _session.Clock.Alpha);
             }
         }
 
@@ -388,6 +443,7 @@ namespace CubeGame.Gameplay
             Vector3 shift = _worldView.Rebase(origin);
             _player.transform.position = _worldView.ToScene(x + 0.5, ground + 3.0, z + 0.5);
             Physics.SyncTransforms();
+            _lastHeroScenePosition = _player.transform.position;
             _worldView.LoadAround(_player.transform.position, 2);
             SyncHeroFromView();
             Report(true, $"teleported to ({x},{z}) ground {ground} (shift {shift})");
@@ -446,7 +502,8 @@ namespace CubeGame.Gameplay
             PublishHeroSpawn();
             _session.Events.Subscribe<HitResolved>(OnHitResolved);
             _session.Events.Subscribe<EntityDied>(OnEntityDied);
-            SpawnTrainingTarget();
+            // The target appears once the hero stands on the ground and the camera has a facing (see Update).
+            _trainingTargetPending = true;
             return Report(true, description);
         }
 
@@ -487,19 +544,24 @@ namespace CubeGame.Gameplay
             _player.transform.SetPositionAndRotation(heroPoint, Quaternion.Euler(0f, hero.Yaw, 0f));
             Physics.SyncTransforms();
 
-            // Placeholder body until the S05 visual runtime (DeepSeek, issue #13) is attached via IEntityVisualSink.
-            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            body.name = "PlayerBody_PLACEHOLDER";
-            body.transform.SetParent(_player.transform, false);
-            body.transform.localScale = new Vector3(0.8f, 0.9f, 0.8f);
-            body.transform.localPosition = new Vector3(0f, 0.9f, 0f);
-            Destroy(body.GetComponent<Collider>());
-            body.GetComponent<Renderer>().sharedMaterial = PilotMaterials.Terrain(null);
+            // Visual runtime: S05 Alpha models and clips driven only by gameplay events (placeholders when the cache is missing).
+            var visualObject = new GameObject("GameVisuals");
+            visualObject.transform.SetParent(_worldRoot.transform, false);
+            _visuals = visualObject.AddComponent<GameVisualSink>();
+            StreamingWorldView view = _worldView;
+            _visuals.Initialise(AlphaActorLibrary.Shared, p => view.ToScene(p.X, p.Y, p.Z), _player.transform);
+            _session.Events.AddVisualSink(_visuals);
+            _lastHeroScenePosition = heroPoint;
 
             _motor = _player.AddComponent<PlayerMotor>();
             _motor.SetCamera(_camera.transform);
             _orbitCamera.Target = _player.transform;
             _orbitCamera.Distance = OrbitCameraController.DefaultDistance;
+            if (_cameraOverride)
+            {
+                _orbitCamera.Distance = _cameraDistance;
+                _orbitCamera.SetAngles(_cameraYaw, _cameraPitch);
+            }
 
             var region = generator.Region(WorldLayout.RegionOf((int)Math.Floor(hero.Position.X), (int)Math.Floor(hero.Position.Z)));
             Debug.Log($"[Game] world built seed={world.Seed} gen={world.GeneratorId} chunks={_worldView.LoadedCount} origin={_worldView.Origin} " +
@@ -510,6 +572,7 @@ namespace CubeGame.Gameplay
         private void DestroyWorldViews()
         {
             DespawnTrainingTarget();
+            _trainingTargetPending = false;
             _combatLog = string.Empty;
             if (_orbitCamera != null)
             {
@@ -533,6 +596,7 @@ namespace CubeGame.Gameplay
 
             _worldRoot = null;
             _worldView = null;
+            _visuals = null;
             _worldState = null;
             _player = null;
             _motor = null;
@@ -571,6 +635,7 @@ namespace CubeGame.Gameplay
             _worldView.ToWorld(p, out double x, out _, out double z);
             Vector3 shift = _worldView.Rebase(StreamingWorldView.OriginFor(x, z));
             _player.transform.position = p + shift;
+            _lastHeroScenePosition += shift;
             if (_camera != null)
             {
                 _camera.transform.position += shift;
@@ -695,6 +760,19 @@ namespace CubeGame.Gameplay
                             _teleport = true;
                         }
 
+                        break;
+                    case "-cubeCamera":
+                        if (i + 3 < args.Length
+                            && float.TryParse(args[i + 1], NumberStyles.Float, CultureInfo.InvariantCulture, out _cameraYaw)
+                            && float.TryParse(args[i + 2], NumberStyles.Float, CultureInfo.InvariantCulture, out _cameraPitch)
+                            && float.TryParse(args[i + 3], NumberStyles.Float, CultureInfo.InvariantCulture, out _cameraDistance))
+                        {
+                            _cameraOverride = true;
+                        }
+
+                        break;
+                    case "-cubeAttackFrame":
+                        int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out _attackFrame);
                         break;
                     case "-cubeFrames":
                         if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int frames) && frames > 0)

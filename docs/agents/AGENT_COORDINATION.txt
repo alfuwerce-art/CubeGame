@@ -538,3 +538,12 @@ StreamingWorldView.ToScene (floating origin); EntityMoved пока не публ
   - DeepSeek A: провенанс-хеш таблиц не зависит от CRLF (tools/alpha_content) + перегенерация;
   - Codex: подключение WorldContentSource + размещение контента зоны в игре (WORLD-02).
 Ветка integration/m0-all, база c7f8205.
+
+[2026-11-09 22:05] REPORT | Claude | M0-03C/M0-05C — модели Alpha в игре (бывшая задача DeepSeek-2)
+GameVisualSink (Presentation/Gameplay) реализует IEntityVisualSink поверх S05: герой — AlphaPlayerVisualBuilder
+(вид 0x02, iron-greatsword1 в руке), существа — CreatureVisualCatalog + AlphaActorView; клипы действий по
+ActionStarted (action_057 у героя), ходьба по EntityMoved (герой публикует скорость/режим каждый кадр),
+смерть — тело на боку (PLACEHOLDER). Заглушки остались только на случай отсутствия кэша (DATA_MISSING).
+Масштаб модели: герой подогнан к росту контроллера 1.8, тот же коэффициент (0.5825) у существ — PLACEHOLDER_NOT_ALPHA.
+Тренировочный волк появляется, когда герой стоит на земле, на 2.5 блока под углом 35° (не за героем).
+Unity: EditMode 429/431, PlayMode 56/57, 0 failed; Windows-сборка + кадры .scratch/m0/m0_03c/{front,attack}.png.

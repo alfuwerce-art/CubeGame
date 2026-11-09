@@ -1,5 +1,6 @@
 using System.Collections;
 using System.IO;
+using CubeGame.AlphaModels;
 using CubeGame.Core.Characters;
 using CubeGame.Core.Equipment;
 using CubeGame.Features.Combat;
@@ -51,6 +52,66 @@ namespace CubeGame.Tests.FullM0.PlayMode
             {
                 Directory.Delete(_saveDir, true);
             }
+        }
+
+        [UnityTest]
+        public IEnumerator HeroAndWolfUseAlphaModelsAndAttackPlaysAction57()
+        {
+            if (AlphaActorLibrary.Shared.State != AlphaContentState.Ready)
+            {
+                Assert.Ignore("Alpha content cache is not staged: " + AlphaActorLibrary.Shared.Diagnosis);
+            }
+
+            _host = new GameObject("GameBootstrap");
+            GameBootstrap game = _host.AddComponent<GameBootstrap>();
+            game.SaveDirectory = _saveDir;
+            yield return null;
+            Assert.IsTrue(game.StartNewWorld("slot0", "Visual", 424242u, "Fighter", CharacterClass.Warrior), game.Status);
+            float deadline = Time.realtimeSinceStartup + 8f;
+            while (game.TrainingTarget == null && Time.realtimeSinceStartup < deadline)
+            {
+                yield return null;
+            }
+
+            Assert.IsNotNull(game.TrainingTarget, "the training wolf appears once the hero stands on the ground");
+
+            GameVisualSink visuals = game.Visuals;
+            Assert.IsNotNull(visuals);
+            Assert.IsTrue(visuals.TryGetView(StableEntityId.Hero, out AlphaActorView hero), string.Join("; ", visuals.Problems));
+            Assert.IsTrue(hero.Ready, hero.Status());
+            Assert.Greater(visuals.ModelScale, 0f);
+            Assert.IsTrue(hero.Rig.weaponSubtype >= 0, "the greatsword model is in the hero's hand");
+            Assert.IsTrue(visuals.TryGetView(game.TrainingTarget.Id, out AlphaActorView wolf), string.Join("; ", visuals.Problems));
+            Assert.IsTrue(wolf.Ready, wolf.Status());
+
+            Bounds heroBounds = BoundsOf(hero.transform);
+            Assert.AreEqual(GameVisualSink.HeroVisualHeight, heroBounds.size.y, 0.25f, "hero model fitted to the controller height");
+
+            Assert.IsTrue(game.HeroAttack(), game.CombatLog);
+            for (int i = 0; i < 5; i++)
+            {
+                yield return null;
+            }
+
+            StringAssert.Contains("action_057", hero.Status(), "the hero plays Alpha action 57 when gameplay starts the attack");
+            foreach (string problem in visuals.Problems)
+            {
+                StringAssert.DoesNotStartWith("ANIM_MISSING", problem);
+            }
+
+            Debug.Log($"[FullM0Visual] scale {visuals.ModelScale:F4} hero {hero.Status()} wolf {wolf.Status()} problems [{string.Join("; ", visuals.Problems)}]");
+        }
+
+        private static Bounds BoundsOf(Transform root)
+        {
+            Renderer[] renderers = root.GetComponentsInChildren<Renderer>();
+            Bounds bounds = renderers[0].bounds;
+            foreach (Renderer renderer in renderers)
+            {
+                bounds.Encapsulate(renderer.bounds);
+            }
+
+            return bounds;
         }
 
         [UnityTest]
@@ -123,6 +184,12 @@ namespace CubeGame.Tests.FullM0.PlayMode
             yield return null;
             Assert.IsTrue(game.LoadWorld("slot0"), game.Status);
             yield return null;
+
+            deadline = Time.realtimeSinceStartup + 8f;
+            while (game.TrainingTarget == null && Time.realtimeSinceStartup < deadline)
+            {
+                yield return null;
+            }
 
             HeroState loaded = game.Session.Hero;
             Assert.AreEqual(heroHp, loaded.Health.CurrentHealth, 1e-6, "hero HP restored from the save");

@@ -38,6 +38,14 @@ namespace CubeGame.Presentation.CameraRig
         public float Yaw => _yaw;
         public float Pitch => _pitch;
 
+        /// <summary>Sets the orbit angles directly (automation, cut-scenes); pitch is clamped like mouse look.</summary>
+        public void SetAngles(float yaw, float pitch)
+        {
+            _yaw = yaw;
+            _pitch = Mathf.Clamp(pitch, MinPitch, MaxPitch);
+            ApplyTransform();
+        }
+
         private void Start()
         {
             _yaw = transform.eulerAngles.y;
