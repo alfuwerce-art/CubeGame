@@ -69,6 +69,24 @@ namespace CubeGame.Content
         { Id = id; DrawState = drawState; Weapon = weapon; Offhand = offhand; HeldItem = heldItem; PetItem = petItem; WeaponOnly = weaponOnly; TwoHandedChain = twoHandedChain; }
     }
 
+    public readonly struct AlphaAnchorDef
+    {
+        public readonly float Cx, Cy, Cz, Ox, Oy, Oz, Scale;
+        public readonly string Law, Status;
+        public AlphaAnchorDef(float cx, float cy, float cz, float ox, float oy, float oz, float scale, string law, string status)
+        { Cx = cx; Cy = cy; Cz = cz; Ox = ox; Oy = oy; Oz = oz; Scale = scale; Law = law; Status = status; }
+        /// <summary>Alpha anchor = coeff * size + const (voxels of the model grid).</summary>
+        public void Anchor(float sizeX, float sizeY, float sizeZ, out float x, out float y, out float z)
+        { x = Cx * sizeX + Ox; y = Cy * sizeY + Oy; z = Cz * sizeZ + Oz; }
+    }
+
+    public readonly struct AlphaAnchorSetDef
+    {
+        public readonly int Subtype; public readonly AlphaAnchorDef InHand, OnBack; public readonly string Status;
+        public AlphaAnchorSetDef(int subtype, AlphaAnchorDef inHand, AlphaAnchorDef onBack, string status)
+        { Subtype = subtype; InHand = inHand; OnBack = onBack; Status = status; }
+    }
+
     /// <summary>Committed Alpha content tables (ids/names/routes only; assets stay local).</summary>
     public static class AlphaContentTables
     {
@@ -443,6 +461,50 @@ namespace CubeGame.Content
             new AlphaItemActionDef(108, 71, "IN_HAND", "IN_HAND", false, false, false, false),
             new AlphaItemActionDef(109, 72, "ON_BACK", "ON_BACK", false, false, false, false),
             new AlphaItemActionDef(110, 73, "IN_HAND", "IN_HAND", false, false, false, false),
+        };
+
+        public static readonly AlphaAnchorSetDef[] WeaponAnchors =
+        {
+            new AlphaAnchorSetDef(0, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(1, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(2, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(3, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(4, new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "weapon_fist_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(5, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(6, new AlphaAnchorDef(0.5f, 1.0f, 0.5f, 0.0f, -1.5f, 0.0f, 1.0f, "weapon_bow_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(7, new AlphaAnchorDef(0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "weapon_crossbow_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(8, new AlphaAnchorDef(0.5f, 0.0f, 0.0f, 0.0f, 2.0f, 4.0f, 1.0f, "weapon_boomerang_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(9, new AlphaAnchorDef(0.5f, 0.0f, 0.0f, 1.0f, -0.5f, -1.0f, 1.0f, "weapon_arrow_in_hand", "CODE_DERIVED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(10, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 10.0f, 1.0f, "weapon_staff_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(11, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(12, new AlphaAnchorDef(0.5f, 1.0f, 0.5f, 0.0f, -1.0f, 0.0f, 0.6f, "weapon_bracelet_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(13, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(14, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(15, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(16, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(17, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(18, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(19, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(20, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(21, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(22, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(23, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(24, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(25, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "weapon_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+        };
+
+        public static readonly AlphaAnchorSetDef[] OffhandAnchors =
+        {
+            new AlphaAnchorSetDef(3, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "offhand_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(4, new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "offhand_fist_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(6, new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, "", ""), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(6, new AlphaAnchorDef(0.5f, 1.0f, 0.5f, 0.0f, -1.5f, 0.0f, 1.0f, "offhand_bow_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(7, new AlphaAnchorDef(0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "offhand_crossbow_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(7, new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, "", ""), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(12, new AlphaAnchorDef(0.5f, 1.0f, 0.5f, 0.0f, -1.0f, 0.0f, 0.6f, "offhand_bracelet_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(13, new AlphaAnchorDef(0.5f, 0.0f, 0.5f, 0.0f, 3.0f, 0.0f, 1.0f, "offhand_shield_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(14, new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, "", ""), "VERIFIED_EMULATION"),
+            new AlphaAnchorSetDef(20, new AlphaAnchorDef(0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 4.0f, 1.0f, "offhand_generic_in_hand", "CODE_DERIVED_MEASURED"), new AlphaAnchorDef(0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, "center", "CODE_DERIVED_MEASURED"), "VERIFIED_EMULATION"),
         };
 
         public const int InventoryContainers = 4;

@@ -30,6 +30,32 @@ namespace CubeGame.Content
         public static bool TryAction(int action, out AlphaItemActionDef def) =>
             AlphaContentDatabase.TryItemAction(action, out def);
 
+        /// <summary>Measured anchor sets of the 26 weapon subtypes (in hand / on back).</summary>
+        public static IReadOnlyList<AlphaAnchorSetDef> WeaponAnchorSets => AlphaContentTables.WeaponAnchors;
+        /// <summary>Measured anchor sets of the 10 off-hand classes.</summary>
+        public static IReadOnlyList<AlphaAnchorSetDef> OffhandAnchorSets => AlphaContentTables.OffhandAnchors;
+
+        public static bool TryWeaponAnchors(int subtype, out AlphaAnchorSetDef set)
+        {
+            foreach (var s in AlphaContentTables.WeaponAnchors)
+                if (s.Subtype == subtype) { set = s; return true; }
+            set = default;
+            return false;
+        }
+
+        public static bool TryOffhandAnchors(int subtype, out AlphaAnchorSetDef set)
+        {
+            foreach (var s in AlphaContentTables.OffhandAnchors)
+                if (s.Subtype == subtype) { set = s; return true; }
+            set = default;
+            return false;
+        }
+
+        /// <summary>An anchor is usable only when a law was recovered and its status says so.</summary>
+        public static bool IsAnchorMeasured(in AlphaAnchorDef anchor) =>
+            !string.IsNullOrEmpty(anchor.Law) &&
+            (anchor.Status == "CODE_DERIVED_MEASURED" || anchor.Status == "VERIFIED_EMULATION" || anchor.Status == "MEASURED");
+
         /// <summary>Action draws the main-hand weapon in the hand (otherwise it is on the back).</summary>
         public static bool WeaponInHand(int action) =>
             AlphaContentDatabase.TryItemAction(action, out var def) && def.Weapon == "IN_HAND";
@@ -59,6 +85,8 @@ namespace CubeGame.Content
                 p.Add($"ITEM_SLOT_COUNT {AlphaContentTables.ItemSlots.Length}");
             if (!IsConsumableAction(80) || !IsConsumableAction(81)) p.Add("ITEM_CONSUMABLE_ACTIONS");
             if (TwoHandedSubtypes().Count == 0) p.Add("ITEM_NO_TWO_HANDED_SUBTYPE");
+            if (AlphaContentTables.WeaponAnchors.Length != 26) p.Add($"ITEM_WEAPON_ANCHORS {AlphaContentTables.WeaponAnchors.Length} != 26");
+            if (AlphaContentTables.OffhandAnchors.Length != 10) p.Add($"ITEM_OFFHAND_ANCHORS {AlphaContentTables.OffhandAnchors.Length} != 10");
             foreach (var s in AlphaContentTables.ItemSlots)
                 if (s.Rendered && string.IsNullOrEmpty(s.AnchorLaw)) p.Add($"ITEM_RENDERED_SLOT_NO_LAW {s.Name}");
             foreach (var a in AlphaContentTables.ItemActions)
@@ -67,6 +95,15 @@ namespace CubeGame.Content
                 if (a.Weapon != "IN_HAND" && a.Weapon != "ON_BACK" && a.Weapon != "NONE" && !string.IsNullOrEmpty(a.Weapon))
                     p.Add($"ITEM_ACTION_WEAPON_STATE {a.Id} {a.Weapon}");
             }
+            int partial = 0;
+            foreach (var s in AlphaContentTables.WeaponAnchors)
+            {
+                if (IsAnchorMeasured(s.InHand) && IsAnchorMeasured(s.OnBack)) continue;
+                // subtype 9 (arrow) has code-derived constants only; it is PARTIAL, not a measured law
+                if (s.Subtype == 9) { partial++; continue; }
+                p.Add($"ITEM_WEAPON_ANCHOR_NOT_MEASURED {s.Subtype}");
+            }
+            if (partial > 1) p.Add($"ITEM_ANCHOR_PARTIAL_UNEXPECTED {partial}");
             return p;
         }
     }

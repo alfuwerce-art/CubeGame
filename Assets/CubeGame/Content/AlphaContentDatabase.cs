@@ -120,7 +120,9 @@ namespace CubeGame.Content
               .Append(" regions=").Append(AlphaContentTables.RegionTypes.Length)
               .Append(" kinds=").Append(kinds.Length).Append(" passive=").Append(passive).Append(" combat=").Append(combat)
               .Append(" slots=").Append(AlphaContentTables.ItemSlots.Length)
-              .Append(" itemActions=").Append(AlphaContentTables.ItemActions.Length);
+              .Append(" itemActions=").Append(AlphaContentTables.ItemActions.Length)
+              .Append(" weaponAnchors=").Append(AlphaContentTables.WeaponAnchors.Length)
+              .Append(" offhandAnchors=").Append(AlphaContentTables.OffhandAnchors.Length);
             return sb.ToString();
         }
     }

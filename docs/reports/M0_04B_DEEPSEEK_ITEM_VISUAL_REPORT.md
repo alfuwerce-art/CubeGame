@@ -1,0 +1,76 @@
+# D86 M0-04B — предметный визуальный слой: модели оружия и законы крепления (партия DeepSeek, №3)
+
+**TASK:** D86 (issue #13), M0-04B в зоне DeepSeek: подключить предметные модели к главному ригу через измеренные законы крепления Alpha (26 подтипов оружия, 10 классов левой руки), заменить модель оружия в рантайме, показать «в руке / за спиной» без имитации статов.
+
+**STATUS: `READY_FOR_REVIEW` — не `ACCEPTED`.** `main` не тронут, ассеты Alpha не публиковались, S04 не изменялся.
+
+**Ветка:** `deepseek/d85-visual-unity` (после `1f591c4`). **Worktree:** `D:\Projects\CubeGame-deepseek`. **Unity:** 6000.3.27f2.
+
+---
+
+## 1. Было → стало
+
+| Что | Было | Стало |
+|---|---|---|
+| Законы крепления | в Python (`universal/item_attach.py`) и в исследовании M0-00B | сгенерированная C#-таблица `AlphaAnchorSetDef[26]` + `[10]` в `Assets/CubeGame/Content/Generated` (с SHA входного evidence) |
+| Модель оружия | фиксировалась ригом при сборке (greatsword из job) | `AlphaWeaponLayer.TryEquip*` меняет меш оружия в рантайме по `.cubdec`, ставит измеренные якоря рука/спина, отказывает неизмеренным подтипам |
+| Якоря рига | универсальное правило `center` / `+4` для всех | при экипировке риг получает точные `weaponAnchorInHand/OnBack` (лук `sy−1.5`, посох `z=10`, бумеранг, кулак и т.д.); без экипировки — прежнее поведение (регрессий нет) |
+| Предметные payload’ы | не подготовлены в кэше | `tools/alpha_content/extract_item_models.py` (переиспользует принятый `cub_format`) → `.scratch/content/items`, 28 моделей |
+| Тесты | — | +2 EditMode, +1 PlayMode; полный прогон **335/335** и **26/26** |
+
+---
+
+## 2. Файлы
+
+| Файл | Назначение |
+|---|---|
+| `tools/alpha_content/build_content_tables.py` | теперь также выпускает `AlphaAnchorDef`, `AlphaAnchorSetDef`, `AlphaWeaponAnchors[26]`, `AlphaOffhandAnchors[10]`; `--check` ловит дрейф |
+| `Assets/CubeGame/Content/Generated/AlphaContentTables.g.cs` | таблицы якорей: `coeff`, `const`, `scale`, имя закона, статус (`CODE_DERIVED_MEASURED`, для стрелы — `CODE_DERIVED`) |
+| `Assets/CubeGame/Content/AlphaItemRules.cs` | `TryWeaponAnchors`, `TryOffhandAnchors`, `IsAnchorMeasured`, `WeaponAnchorSets/OffhandAnchorSets`; валидация 26/10 и единственного `PARTIAL` (стрела 9) |
+| `Assets/CubeGame/AlphaModels/Runtime/AlphaWeaponLayer.cs` | `TryEquip(rig, bytes, subtype)`, `TryEquipFromFile`, `ExpectedMeshOffset`, `EquippableInHand`; отказы: `WEAPON_SUBTYPE_UNKNOWN`, `ANCHOR_NOT_MEASURED`, `WEAPON_MESH`, `WEAPON_MODEL_HAS_MARKERS`, `WEAPON_FILE_MISSING` |
+| `Assets/CubeGame/AlphaModels/Runtime/AlphaRig.cs` | аддитивно: `weaponAnchorInHand/OnBack`, `weaponScale`; `AnchorOf` использует измеренный закон только когда он установлен |
+| `tools/alpha_content/extract_item_models.py` | выгрузка предметных `.cubdec` из `data1.db` (только чтение) в локальный кэш |
+| `Assets/CubeGame/Tests/AlphaModels/EditMode/AlphaModelsEditModeTests.cs` | `AlphaItemAnchorTests`: 26/10 якорей, sword `(sx/2, sy/2, 4)`, bow `sy−1.5`, shield `y=3`, bracelet scale 0.6, отказ неизмеренного, `EquippableInHand ≥ 20` |
+| `Assets/CubeGame/Tests/AlphaModels/PlayMode/AlphaItemVisualPlayModeTests.cs` | реальный человек-риг: замена greatsword → iron-sword (subtype 0) и bow (subtype 6), проверка локальных смещений меша в руке и за спиной, отказы для subtype 99 и отсутствующего файла |
+
+---
+
+## 3. Фактические прогоны
+
+| Прогон | Результат |
+|---|---|
+| EditMode (весь проект) | `total=335 passed=335 failed=0` (`AlphaOutput/editmode.xml`) |
+| PlayMode (весь проект) | `total=26 passed=26 failed=0` (`AlphaOutput/playmode.xml`) |
+| Выгрузка предметных моделей | `EXTRACT_ITEM_MODELS=PASS written=28 absent=0 problems=0` |
+| Кэш/таблицы | `ALPHA_CONTENT_RESULT=PASS`, `ALPHA_TABLES_RESULT=PASS` (таблицы расширены якорями; отчёт обновится следующим прогоном ValidateContent) |
+
+---
+
+## 4. ALPHA_REFERENCE + DELTA
+
+| Элемент | Доказательство | Реализация |
+|---|---|---|
+| Оружие в руке (15/16/17 и одноручное) | `drawModel` 6651–6662, `CODE_DERIVED_MEASURED` | anchor = `(sx/2, sy/2, 4)` |
+| Лук | 6806–6811, `fVar23 = 1.5 − sy` | anchor `y = sy − 1.5` |
+| Арбалет / щит / браслет / бумеранг / посох / кулак | соответствующие ветки `drawModel`, `CODE_DERIVED_MEASURED` | таблица якорей по подтипам |
+| За спиной | центральный блок, `center` | `AnchorOf` при `weaponOnBack` |
+| Стрела 9 | только константы кода (`CODE_DERIVED`) | помечена `PARTIAL`, в `EquippableInHand` не входит |
+| Модель предмета | `item_icon_id` (D64/D65) / `item_layer` | `.cubdec` из той же БД, мешер `VoxelMesh` |
+
+---
+
+## 5. PARTIAL / UNKNOWN
+
+- **Стрела (subtype 9)** — `PARTIAL`: константы только из кода, закон не измерен.
+- **Масштаб оружия** из клипов (`0.95` в job) и закон `scale` (браслет 0.6) пока не применяются к позе: масштаб задаётся клипом; `rig.weaponScale` публикуется для будущего слоя.
+- **Перчатка/наруч/лампа/питомец** (офф-хенд блоки вне оружия) — таблица якорей левой руки есть, но визуальная подмена модели левой руки ещё не реализована (M0-04B следующая часть).
+- **Статы/редкости/прочность** — не здесь: визуальный слой не считает и не хранит статы (S04/Core).
+- **Иконки UI** — M0-08, не в этой партии.
+
+---
+
+## 6. Handoff
+
+API: `AlphaWeaponLayer.TryEquipFromFile(rig, path, subtype, out reason)` + `AlphaItemRules.TryWeaponAnchors/TryOffhandAnchors`. Визуальный слой не решает, можно ли экипировать предмет; игра вызывает его после своего решения. Подробности — [D86_DEEPSEEK_HANDOFF_M0_04](D86_DEEPSEEK_HANDOFF_M0_04.md).
+
+Следующая партия DeepSeek — M0-02/M0-07 (биомы/растительность/постройки/города/данжи) и M0-08 (VFX/аудио/иконки), затем расширение предметного слоя (левая рука, расходники 80/81 в руке).

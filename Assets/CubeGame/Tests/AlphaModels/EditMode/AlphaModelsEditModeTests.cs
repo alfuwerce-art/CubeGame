@@ -240,6 +240,49 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         }
     }
 
+    public class AlphaItemAnchorTests
+    {
+        [Test]
+        public void WeaponAnchorLawsCoverEverySubtype()
+        {
+            Assert.IsEmpty(AlphaItemRules.Validate(), string.Join("\n", AlphaItemRules.Validate()));
+            Assert.AreEqual(26, AlphaItemRules.WeaponAnchorSets.Count);
+            Assert.AreEqual(10, AlphaItemRules.OffhandAnchorSets.Count);
+
+            Assert.IsTrue(AlphaItemRules.TryWeaponAnchors(0, out var sword));
+            Assert.IsTrue(AlphaItemRules.IsAnchorMeasured(sword.InHand));
+            sword.InHand.Anchor(10, 8, 4, out var x, out var y, out var z);
+            Assert.AreEqual(5f, x, 1e-6f);
+            Assert.AreEqual(4f, y, 1e-6f);
+            Assert.AreEqual(4f, z, 1e-6f, "the generic hand anchor is 4 voxels forward of the grip");
+
+            Assert.IsTrue(AlphaItemRules.TryWeaponAnchors(6, out var bow));
+            bow.InHand.Anchor(10, 10, 20, out x, out y, out z);
+            Assert.AreEqual(5f, x, 1e-6f);
+            Assert.AreEqual(8.5f, y, 1e-6f, "bow: fVar23 = 1.5 - sy");
+            Assert.AreEqual(10f, z, 1e-6f);
+
+            Assert.IsFalse(AlphaItemRules.TryWeaponAnchors(99, out _));
+        }
+
+        [Test]
+        public void OffhandLawsKeepShieldAndBraceletRules()
+        {
+            Assert.IsTrue(AlphaItemRules.TryOffhandAnchors(13, out var shield));
+            shield.InHand.Anchor(6, 8, 10, out var x, out var y, out var z);
+            Assert.AreEqual(3f, x, 1e-6f);
+            Assert.AreEqual(3f, y, 1e-6f, "shield: fVar23 = 3.0");
+            Assert.AreEqual(5f, z, 1e-6f);
+
+            Assert.IsTrue(AlphaItemRules.TryOffhandAnchors(12, out var bracelet));
+            Assert.AreEqual(0.6f, bracelet.InHand.Scale, 1e-6f, "bracelet is drawn at 0.6 scale");
+
+            Assert.IsTrue(AlphaItemRules.IsAnchorMeasured(shield.InHand));
+            Assert.IsFalse(AlphaItemRules.IsAnchorMeasured(default), "an empty law is not a measurement");
+            Assert.GreaterOrEqual(AlphaWeaponLayer.EquippableInHand().Count, 20);
+        }
+    }
+
     public class AlphaContentCacheTests
     {
         static AlphaContentSource Source(bool requireReady = true)

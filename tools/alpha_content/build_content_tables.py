@@ -92,6 +92,20 @@ def str_array(values) -> str:
     return "new[] { " + ", ".join(cs(v) for v in values) + " }"
 
 
+def fnum(value: float) -> str:
+    text = repr(float(value))
+    if "e" in text or "E" in text or "." in text:
+        return text + "f"
+    return text + ".0f"
+
+
+def anchor_ctor(anchor) -> str:
+    cx, cy, cz, ox, oy, oz, scale, law, status = anchor
+    return ("new AlphaAnchorDef(" + fnum(cx) + ", " + fnum(cy) + ", " + fnum(cz) + ", " +
+            fnum(ox) + ", " + fnum(oy) + ", " + fnum(oz) + ", " + fnum(scale) + ", " +
+            cs(law) + ", " + cs(status) + ")")
+
+
 def kind_int(key: str) -> int:
     return int(str(key), 16)
 
@@ -124,6 +138,27 @@ def build() -> tuple[str, dict]:
                              bool(cls.get("twoHanded", False)), bool(cls.get("dualCapable", False)),
                              cls.get("status") or w.get("confidence")))
     weapon_types.sort()
+
+    # --- anchor laws of weapon and off-hand blocks (M0-00B item layer) ----
+    def anchor(d):
+        d = d or {}
+        coeff = d.get("coeff") or [0.0, 0.0, 0.0]
+        const = d.get("const") or [0.0, 0.0, 0.0]
+        return (float(coeff[0]), float(coeff[1]), float(coeff[2]),
+                float(const[0]), float(const[1]), float(const[2]),
+                float(d.get("scale", 1.0)), d.get("law", ""), d.get("status", ""))
+
+    weapon_anchors = []
+    for w in item["weaponClasses"]:
+        if "subtype" not in w:
+            continue
+        weapon_anchors.append((int(w["subtype"]), anchor(w.get("inHand")), anchor(w.get("onBack")), w.get("status", "")))
+    weapon_anchors.sort()
+    offhand_anchors = []
+    for o in item.get("offhandClasses", []):
+        offhand_anchors.append((int(o.get("subtype", o.get("id", -1))), anchor(o.get("inHand")),
+                               anchor(o.get("onBack")), o.get("status", "")))
+    offhand_anchors.sort()
 
     # --- abilities and their stamina costs -------------------------------
     stamina = {}
@@ -258,6 +293,24 @@ def build() -> tuple[str, dict]:
     lines.append("        { Id = id; DrawState = drawState; Weapon = weapon; Offhand = offhand; HeldItem = heldItem; PetItem = petItem; WeaponOnly = weaponOnly; TwoHandedChain = twoHandedChain; }")
     lines.append("    }")
     lines.append("")
+    lines.append("    public readonly struct AlphaAnchorDef")
+    lines.append("    {")
+    lines.append("        public readonly float Cx, Cy, Cz, Ox, Oy, Oz, Scale;")
+    lines.append("        public readonly string Law, Status;")
+    lines.append("        public AlphaAnchorDef(float cx, float cy, float cz, float ox, float oy, float oz, float scale, string law, string status)")
+    lines.append("        { Cx = cx; Cy = cy; Cz = cz; Ox = ox; Oy = oy; Oz = oz; Scale = scale; Law = law; Status = status; }")
+    lines.append("        /// <summary>Alpha anchor = coeff * size + const (voxels of the model grid).</summary>")
+    lines.append("        public void Anchor(float sizeX, float sizeY, float sizeZ, out float x, out float y, out float z)")
+    lines.append("        { x = Cx * sizeX + Ox; y = Cy * sizeY + Oy; z = Cz * sizeZ + Oz; }")
+    lines.append("    }")
+    lines.append("")
+    lines.append("    public readonly struct AlphaAnchorSetDef")
+    lines.append("    {")
+    lines.append("        public readonly int Subtype; public readonly AlphaAnchorDef InHand, OnBack; public readonly string Status;")
+    lines.append("        public AlphaAnchorSetDef(int subtype, AlphaAnchorDef inHand, AlphaAnchorDef onBack, string status)")
+    lines.append("        { Subtype = subtype; InHand = inHand; OnBack = onBack; Status = status; }")
+    lines.append("    }")
+    lines.append("")
     lines.append("    /// <summary>Committed Alpha content tables (ids/names/routes only; assets stay local).</summary>")
     lines.append("    public static class AlphaContentTables")
     lines.append("    {")
@@ -310,6 +363,20 @@ def build() -> tuple[str, dict]:
                      f"{str(held).lower()}, {str(pet).lower()}, {str(weapon_only).lower()}, {str(chain).lower()}),")
     lines.append("        };")
     lines.append("")
+    lines.append("        public static readonly AlphaAnchorSetDef[] WeaponAnchors =")
+    lines.append("        {")
+    for subtype, in_hand, on_back, status in weapon_anchors:
+        lines.append("            new AlphaAnchorSetDef(" + str(subtype) + ", " + anchor_ctor(in_hand) + ", " +
+                     anchor_ctor(on_back) + ", " + cs(status) + "),")
+    lines.append("        };")
+    lines.append("")
+    lines.append("        public static readonly AlphaAnchorSetDef[] OffhandAnchors =")
+    lines.append("        {")
+    for subtype, in_hand, on_back, status in offhand_anchors:
+        lines.append("            new AlphaAnchorSetDef(" + str(subtype) + ", " + anchor_ctor(in_hand) + ", " +
+                     anchor_ctor(on_back) + ", " + cs(status) + "),")
+    lines.append("        };")
+    lines.append("")
     lines.append("        public const int InventoryContainers = %d;" % int(tables["inventory"]["containers"]))
     lines.append("        public const int InventorySlotsPerContainer = %d;" % int(tables["inventory"]["slotsPerContainer"]))
     lines.append("        public const int InventoryStackLimit = %d;" % int(tables["inventory"]["stackLimit"]))
@@ -326,7 +393,8 @@ def build() -> tuple[str, dict]:
     counts = {"itemTypes": len(item_types), "weaponSubtypes": len(weapon_types),
               "abilities": len(abilities), "regions": len(regions), "kinds": len(kinds),
               "passiveKinds": sum(1 for k in kinds if k["passive"]), "slots": len(slots),
-              "itemActions": len(actions)}
+              "itemActions": len(actions), "weaponAnchors": len(weapon_anchors),
+              "offhandAnchors": len(offhand_anchors)}
     return "\n".join(lines) + "\n", counts
 
 
