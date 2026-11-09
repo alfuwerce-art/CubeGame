@@ -19,7 +19,7 @@ namespace CubeGame.Features.Session
         /// <summary>Alpha equipment slot the kit writes directly; null = bags (or no CubeGame slot yet, C5).</summary>
         public EquipmentSlot? Equip { get; set; }
 
-        /// <summary>Alpha material byte +0x0D of the kit item (may differ from Core.Modifier, see Weapon()).</summary>
+        /// <summary>Alpha material byte +0x0D of the kit item (same as Core.Modifier).</summary>
         public int AlphaMaterial { get; set; }
 
         /// <summary>Alpha slot offset of the creature, for the record (0xAA8 right weapon, 0x990 left, 0xBC0/0xCD8 rings, 0xDF0 light).</summary>
@@ -230,13 +230,9 @@ namespace CubeGame.Features.Session
 
         private static StarterKitItem Weapon(WeaponSubtype subtype, int material, EquipmentSlot? slot = null, int alphaSlot = 0)
         {
-            // Core S04 accepts modifiers 0/1/0x0B/0x0C/… only; Alpha material 2 (wood weapons of the kit) is kept in
-            // AlphaMaterial and the Core item gets None until the producer allows value 2 in Core (weapon damage does
-            // not read the modifier, so combat numbers are the same).
-            bool supported = ItemInstance.IsSupportedModifier(material);
             return new StarterKitItem
             {
-                Core = new ItemInstance(ItemType.Weapon, (byte)subtype, 1, 0, 0, supported ? (ItemModifier)material : ItemModifier.None),
+                Core = new ItemInstance(ItemType.Weapon, (byte)subtype, 1, 0, 0, (ItemModifier)material),
                 AlphaMaterial = material,
                 Equip = slot,
                 AlphaSlotOffset = alphaSlot,

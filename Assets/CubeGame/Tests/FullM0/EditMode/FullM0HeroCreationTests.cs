@@ -124,7 +124,7 @@ namespace CubeGame.Tests.FullM0.EditMode
         {
             IReadOnlyList<StarterKitItem> warrior = AlphaHeroCreation.StarterKit(CharacterClass.Warrior);
             Assert.AreEqual(2, warrior[0].AlphaMaterial, "greatmace material 2 (0x477455)");
-            Assert.AreEqual(ItemModifier.None, warrior[0].Core.Modifier, "Core S04 has no material 2 yet");
+            Assert.AreEqual(ItemModifier.M02, warrior[0].Core.Modifier, "material 2 allowed in Core (producer, 2026-11-10)");
             Assert.AreEqual(ItemModifier.M01, warrior[1].Core.Modifier, "swords material 1");
             Assert.AreEqual((byte)WeaponSubtype.Shield, warrior[3].Core.Subtype);
             IReadOnlyList<StarterKitItem> mage = AlphaHeroCreation.StarterKit(CharacterClass.Mage);

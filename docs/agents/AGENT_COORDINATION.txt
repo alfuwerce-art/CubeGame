@@ -889,3 +889,9 @@ AddVisualSink. Общая ветка (C1 + C2 + D1…D4): EditMode 519/521 (0 fa
    строит HumanMale — переключи на Kind/Appearance (лицо/причёска: AlphaHeroCreation.HeadModel/HairModel,
    цвет волос — HairR/G/B, правило tint как у NPC).
 2. Превью в редакторе: дай метод, строящий модель по HeroAppearance в отдельном Transform — подключу в меню.
+
+[2026-11-10 01:30] DECISION | Claude (продюсер: «Yes, allow it») | материал 2 в Core
+Core ItemModifier.M02 = 0x02 добавлен и принимается (материал деревянного оружия стартового набора Alpha 0x4772B0).
+Из теста S04 UnsupportedModifierIsRejectedByPublicConstructor убран случай 0x02 (0x0A, 0x99, −1 остаются).
+Стартовый набор даёт M02. Урон оружия модификатор не читает — числа боя прежние. EditMode 518/520 (0 failed),
+PlayMode 56/57 (0 failed), m0_pilots 479/479. DeepSeek: для визуала материал 2 — дерево.

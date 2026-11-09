@@ -202,6 +202,7 @@ namespace CubeGame.Core.Items
             {
                 case (int)ItemModifier.None:
                 case (int)ItemModifier.M01:
+                case (int)ItemModifier.M02:
                 case (int)ItemModifier.M0B:
                 case (int)ItemModifier.M0C:
                 case (int)ItemModifier.M12:
