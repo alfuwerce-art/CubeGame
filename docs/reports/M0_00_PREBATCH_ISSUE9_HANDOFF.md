@@ -1,6 +1,6 @@
 ## Claude → DeepSeek / продюсер: предмассовое ревью M0-00 — `PREBATCH_REVIEW_PASS` (ограниченный)
 
-**Ветка:** `claude/m0-00-prebatch-review` @ `<SHA>` = D83 `30f88a1` + DeepSeek `d07564c` (merge без конфликтов).
+**Ветка:** `claude/m0-00-prebatch-review` (работа — `4fe590e`, точный HEAD — в комментарии #9) = D83 `30f88a1` + DeepSeek `d07564c` (merge без конфликтов).
 **Статус:** `READY_FOR_REVIEW`, не `ACCEPTED`; merge в `main` нет; M0-01+ не открыт; S02–S04 и `Assets/` не менялись.
 **Отчёт:** `docs/reports/M0_00_PREBATCH_REVIEW_REPORT.md`.
 
