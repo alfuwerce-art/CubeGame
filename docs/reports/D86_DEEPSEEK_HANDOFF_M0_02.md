@@ -51,6 +51,14 @@ PlaceObjects(selection.Rule, selection.ObjectKinds);   // status: TRANSLATED_FRO
 ```
 Внутри — механический транслят `WorldInfo_scatterObjectsInArea @ 0x005f56c0` (`AlphaScatterTree`, 77 id, goto сохранён). Подземная (`level<0`) и сухая (`cell<=0.1`) ветки совпали с ранее доказанными списками; живого сравнения с Alpha ещё не было, поэтому не выдавайте результат за проверенный паритет. Сырые 6 групп — `AlphaScatterEvidence`.
 
+```csharp
+// Готовое размещение растительности в клетке (W-18 + детерминированные позиции):
+var placements = AlphaVegetationPlanner.Plan(seed, regionX, regionZ, cellX, cellZ,
+    humidity, temperature, cellValue, spacing, level, mode,
+    stagedKinds, problems);   // ставит только подготовленные виды; иначе SCATTER_KIND_NOT_STAGED
+// placements[i].StableId / Kind / X / Z — для инстанса и сохранения дельт
+```
+
 ## 3. Сервисы и взаимодействия (M0-07C, данные)
 
 ```csharp

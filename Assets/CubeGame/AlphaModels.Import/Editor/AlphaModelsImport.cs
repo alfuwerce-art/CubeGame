@@ -17,6 +17,7 @@ using System.IO;
 using System.Text;
 using CubeGame.AlphaModels;
 using CubeGame.AlphaTransfer;
+using CubeGame.Content;
 using CubeGame.Features.AI;
 using CubeGame.Features.Creatures;
 using UnityEditor;
@@ -96,6 +97,8 @@ namespace CubeGame.AlphaModels.Import
             text.AppendLine(CubeGame.Content.AlphaScatterEvidenceValidation.Summary());
             foreach (var p in CubeGame.Content.AlphaScatterSelector.Validate()) text.AppendLine("SCATTER_SELECTOR_PROBLEM " + p);
             text.AppendLine(CubeGame.Content.AlphaScatterSelector.Summary());
+            foreach (var p in CubeGame.Content.AlphaVegetationPlanner.Validate()) text.AppendLine("VEGETATION_PROBLEM " + p);
+            text.AppendLine(CubeGame.Content.AlphaVegetationPlanner.Summary());
             text.AppendLine(CubeGame.Content.AlphaNpcServices.Describe());
             text.AppendLine(CubeGame.Content.AlphaWorldContent.Describe());
             Write("content_status.txt", text.ToString());
@@ -159,6 +162,7 @@ namespace CubeGame.AlphaModels.Import
                 summary.AppendLine($"  {id}: parts={def.Rig.parts.Length} clips={def.Clips.Count} actions={def.RequiredActions.Length} mode={def.ControllerMode}");
             }
             images += RenderCreatureEncounter(cam, summary, problems);
+            images += RenderWorldFrame(cam, summary, problems);
             summary.Append("ALPHA_PREVIEW_RESULT=").Append(problems.Count == 0 ? "PASS" : "FAIL")
                    .Append(" actors=").Append(report.Actors.Count).Append(" images=").Append(images)
                    .Append(" problems=").Append(problems.Count);
@@ -173,6 +177,76 @@ namespace CubeGame.AlphaModels.Import
             try { Preview(); exit = 0; }
             catch (Exception e) { Write("preview.txt", "ALPHA_PREVIEW_RESULT=FAIL exception=" + e); }
             EditorApplication.Exit(exit);
+        }
+
+        /// <summary>Structures, dungeon skeleton and W-18 vegetation as one world-content frame.</summary>
+        static int RenderWorldFrame(Camera cam, StringBuilder summary, List<string> problems)
+        {
+            var root = new GameObject("WorldContentPreview");
+            try
+            {
+                var houses = AlphaStructurePlacementPlanner.Plan(2024u, 0, 0, 0, 0,
+                    new[] { AlphaStructureTemplates.HouseId }, (x, z, w, d) => true, problems);
+                foreach (var p in houses)
+                    MakeBox(root, new Vector3((float)p.X + p.Width * 0.5f, p.Height * 0.5f, (float)p.Z + p.Depth * 0.5f),
+                        new Vector3(p.Width, p.Height, p.Depth), "house");
+
+                var dungeon = AlphaDungeonLayoutPlanner.Plan(2024u, 4, 40, 0, problems);
+                foreach (var r in dungeon.Rooms)
+                    MakeBox(root, new Vector3(r.X + 1.5f, 1.5f, r.Z + 1.5f), new Vector3(3f, 3f, 3f), "dungeon_room");
+                foreach (var corridor in dungeon.Corridors)
+                    foreach (var cell in corridor.Cells)
+                        MakeBox(root, new Vector3(cell.X + 0.5f, 0.2f, cell.Z + 0.5f), new Vector3(1f, 0.4f, 1f), "corridor");
+
+                var library = AlphaActorLibrary.Shared;
+                var staged = CreatureVisualCatalog.AvailableKinds(library);
+                var vegetation = AlphaVegetationPlanner.Plan(2024u, 0, 0, 2, 2, 0.5, 0.5, 0.0, 0.5, 6, 0,
+                    staged, problems);
+                int plants = 0;
+                foreach (var v in vegetation)
+                {
+                    if (plants >= 6) break;
+                    if (!CreatureVisualCatalog.TryResolve(v.Kind, library, out var actorId, out _)) continue;
+                    if (!library.TryGet(actorId, out var def)) continue;
+                    var view = AlphaActorView.Spawn(def, root.transform, problems);
+                    if (view == null || !view.Ready) continue;
+                    view.transform.position = new Vector3((float)v.X, 0f, (float)v.Z);
+                    plants++;
+                }
+                FrameObjects(cam, root);
+                summary.AppendLine($"  world content: houses={houses.Count} dungeonRooms={dungeon.Rooms.Count} " +
+                                   $"corridorCells={dungeon.Corridors.Count} vegetation={plants}");
+                return SaveFrame(cam, "world_content", problems);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        static void MakeBox(GameObject root, Vector3 position, Vector3 scale, string name)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(root.transform, false);
+            go.transform.position = position;
+            go.transform.localScale = scale;
+            var filter = go.AddComponent<MeshFilter>();
+            filter.sharedMesh = Resources.GetBuiltinResource<Mesh>("Cube.fbx");
+            var renderer = go.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = AlphaVisualResources.Base;
+        }
+
+        static void FrameObjects(Camera cam, GameObject root)
+        {
+            var bounds = new Bounds(root.transform.position, Vector3.one);
+            bool first = true;
+            foreach (var renderer in root.GetComponentsInChildren<Renderer>())
+            {
+                if (renderer == null) continue;
+                if (first) { bounds = renderer.bounds; first = false; }
+                else bounds.Encapsulate(renderer.bounds);
+            }
+            if (!first) FrameAt(cam, bounds);
         }
 
         static string FirstAction(AlphaActorDefinition def)

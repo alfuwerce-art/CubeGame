@@ -284,6 +284,34 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         }
 
         [Test]
+        public void VegetationPlannerPlacesOnlyStagedKinds()
+        {
+            Assert.IsEmpty(AlphaVegetationPlanner.Validate(), string.Join("\n", AlphaVegetationPlanner.Validate()));
+            var staged = new List<int> { 0x15, 0x2e, 0x2f };
+            var problems = new List<string>();
+            var dry = AlphaVegetationPlanner.Plan(11u, 1, 2, 0, 0, 0.5, 0.5, 0.0, 0.5, 6, 0, staged, problems);
+            Assert.IsNotEmpty(dry);
+            foreach (var placement in dry)
+            {
+                Assert.That(staged, Has.Member(placement.Kind), "only staged Alpha objects are placed");
+                StringAssert.StartsWith("scatter:", placement.StableId);
+                Assert.That(placement.Source, Does.Contain("TRANSLATED_FROM_CODE"));
+            }
+            var again = AlphaVegetationPlanner.Plan(11u, 1, 2, 0, 0, 0.5, 0.5, 0.0, 0.5, 6, 0, staged);
+            Assert.AreEqual(dry.Count, again.Count);
+            for (int i = 0; i < dry.Count; i++)
+            {
+                Assert.AreEqual(dry[i].StableId, again[i].StableId);
+                Assert.AreEqual(dry[i].X, again[i].X);
+                Assert.AreEqual(dry[i].Z, again[i].Z);
+            }
+            var unstagedProblems = new List<string>();
+            var none = AlphaVegetationPlanner.Plan(11u, 1, 2, 0, 0, 0.5, 0.5, 0.0, 0.5, 6, 0, new List<int>(), unstagedProblems);
+            Assert.IsEmpty(none, "Alpha-selected but unstaged objects are not substituted");
+            Assert.That(unstagedProblems, Has.Some.Contains("SCATTER_KIND_NOT_STAGED"));
+        }
+
+        [Test]
         public void NpcServiceFurnitureMapsToContractKinds()
         {
             Assert.IsEmpty(AlphaNpcServices.Validate(), string.Join("\n", AlphaNpcServices.Validate()));

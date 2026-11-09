@@ -18,6 +18,7 @@
 | Размещение | алгоритм W-16 только описан | `AlphaStructurePlacementPlanner`: детерминированные кандидаты на клетку, 4 попытки, 4 поворота, проверка свободного футпринта через предикат мира; без свободного места — явная проблема, не принудительная постройка |
 | Данжи (M0-07B) | только размеры комнат в evidence | `AlphaDungeonRules` (комната 3×3×3, шаг 7, сундук ровно 10 предметов, имена входов) + `AlphaDungeonLayoutPlanner`: детерминированный связный скелет на решётке 5×5 с L-коридорами; статус `PARTIAL` (порядок вырезания коридоров/содержимое комнат неизвестны) |
 | **W-18 климат→объекты** | `UNKNOWN`, таблица не выгружена | **`TRANSLATED_FROM_CODE`**: дерево `WorldInfo_scatterObjectsInArea @ 0x005f56c0` механически транслировано в C# (`AlphaScatterTree`, 77 id, условия декомпилятора сохранены, goto→`goto End`), `AlphaScatterSelector` вызывается с `humidity/temperature/cell/spacing/level/mode`. Подземная и «сухая» ветки совпали с ранее доказанными списками; **живой Alpha-проверки нет** — статус не `VERIFIED_ALPHA` |
+| **Размещение растительности** | не было | `AlphaVegetationPlanner`: селектор W-18 → детерминированные позиции в клетке; ставятся только подготовленные виды, отсутствующий вид даёт `SCATTER_KIND_NOT_STAGED` (без подмены); позиции — `CUBEGAME_CONTRACT` (`World_placeObjectWithSpacing` не портирован) |
 | Тесты | — | +4 EditMode (344/344 всего); PlayMode без регрессий (34/34) |
 
 ---
@@ -38,6 +39,7 @@
 | `tools/alpha_content/extract_scatter_table.py` + `data/scatter_evidence.json` + `Content/Generated/AlphaScatterEvidence.g.cs` | извлечение W-18: 6 веток, 64 id, условия декомпилятора дословно |
 | `tools/alpha_content/scatter_tree_translate2.py` + `Content/Generated/AlphaScatterTree.g.cs` | механическая трансляция всего дерева `scatterObjectsInArea` в C# (77 id, goto→`goto End`) |
 | `Assets/CubeGame/Content/AlphaScatterSelector.cs` | фасад выбора W-18: `Select(humidity, temperature, cell, spacing, level, mode)`, статус `TRANSLATED_FROM_CODE` |
+| `Assets/CubeGame/Content/AlphaVegetationPlanner.cs` | детерминированное размещение объектов W-18 в клетке, только подготовленные виды, отчёт о несопоставленных id |
 | `Assets/CubeGame/Content/AlphaScatterEvidenceValidation.cs` | проверка извлечённых данных (известные виды, непустые ветки, статус PARTIAL) |
 | `Assets/CubeGame/Tests/AlphaModels/EditMode/AlphaModelsEditModeTests.cs` | `AlphaWorldContentTests`: имена Door/Chest/Workbench/FireTrap, LifePotion (1,1), HangGlider (0x17/0), SkillClimbing, сервисы ≥8, шаблоны и размещение (детерминизм, отказ при занятом футпринте, неизвестный шаблон) |
 | `Assets/CubeGame/AlphaModels.Import/Editor/AlphaModelsImport.cs` | в проверку кэша добавлены отчёты мира/структур |
@@ -48,8 +50,9 @@
 
 | Прогон | Результат |
 |---|---|
-| EditMode | `total=340 passed=340 failed=0` (`AlphaOutput/editmode.xml`) |
-| PlayMode | `total=30 passed=30 failed=0` (`AlphaOutput/playmode.xml`) |
+| EditMode | `total=346 passed=346 failed=0` (`AlphaOutput/editmode.xml`) |
+| PlayMode | `total=36 passed=36 failed=0` (`AlphaOutput/playmode.xml`) |
+| Кадр мира | `RunPreview` → `world_content.png`: дом 3×3×4, 4 комнаты данжа + 3 коридорных набора, 6 объектов растительности по W-18; `ALPHA_PREVIEW_RESULT=PASS actors=156 images=290 problems=0` |
 | Выгрузка таблиц мира | `WORLD_CTOR_EVIDENCE=PASS objects=67 items=133 skills=27` |
 | Генерация контента | `ALPHA_CONTENT_TABLES=PASS … worldObjects=67 itemNames=133 skills=27` |
 

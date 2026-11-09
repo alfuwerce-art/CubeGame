@@ -26,7 +26,8 @@
 | 14 | M0-02C: **W-18 переведена из UNKNOWN в PARTIAL** — из декомпилированной `scatterObjectsInArea` извлечены ветки климата (humidity/temperature/spacing/level) и 64 id объектов; рантайм-селектор не заявлен | `07583a2` | 344/344 | 34/34 |
 | 15 | M0-02C: `AlphaScatterSelector` — реальный выбор для доказанных веток (underground, dry), `UNRESOLVED` для goto-веток без выдумывания | `8d70c18` | 345/345 | 34/34 |
 | 16 | M0-03C/M0-04B: `AlphaPlayerVisualBuilder` — визуал игрока из дескриптора (раса, цвет волос, оружие, левая рука) с отказами вместо подмены | `dab72db` | 345/345 | 36/36 |
-| 17 | M0-02C: **полное дерево W-18 транслировано в C#** (`AlphaScatterTree`, 77 id, goto сохранён), селектор больше не оставляет климат «нерешённым»; статус `TRANSLATED_FROM_CODE`, не `VERIFIED_ALPHA` | эта партия | 345/345 | 36/36 |
+| 17 | M0-02C: **полное дерево W-18 транслировано в C#** (`AlphaScatterTree`, 77 id, goto сохранён), селектор больше не оставляет климат «нерешённым»; статус `TRANSLATED_FROM_CODE`, не `VERIFIED_ALPHA` | `5d0796b`, `f74e2e2` | 345/345 | 36/36 |
+| 18 | M0-02C: `AlphaVegetationPlanner` — размещение объектов W-18 в клетке (детерминизм, только подготовленные виды); preview-кадр «дом + данж + растительность» | эта партия | 346/346 | 36/36 |
 
 Все прогоны — Unity 6000.3.27f2, `-batchmode -runTests`, артефакты в `AlphaOutput/editmode.xml` и `AlphaOutput/playmode.xml` (локально, не в Git).
 
