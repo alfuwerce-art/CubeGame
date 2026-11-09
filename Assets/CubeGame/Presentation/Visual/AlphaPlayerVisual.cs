@@ -23,6 +23,20 @@ namespace CubeGame.Presentation.Visual
         /// <summary>Alpha off-hand class subtype or -1 for none.</summary>
         public int OffhandSubtype;
         public string OffhandModelPath;
+        /// <summary>Armour subtypes (0..7) or -1: chest swaps body, hands swap both hands, feet swap both feet.</summary>
+        public int ChestSubtype;
+        public int HandsSubtype;
+        public int FeetSubtype;
+        /// <summary>Held item (Alpha type/subtype, e.g. 1/1 life potion) or -1.</summary>
+        public int HeldType;
+        public int HeldSubtype;
+
+        /// <summary>Descriptor with every optional slot disabled (use this instead of `default`).</summary>
+        public static CharacterVisualRequest Default => new CharacterVisualRequest
+        {
+            Kind = 0x02, WeaponSubtype = -1, OffhandSubtype = -1,
+            ChestSubtype = -1, HandsSubtype = -1, FeetSubtype = -1, HeldType = -1, HeldSubtype = -1,
+        };
     }
 
     public sealed class CharacterVisualResult
@@ -35,7 +49,8 @@ namespace CubeGame.Presentation.Visual
 
     public static class AlphaPlayerVisualBuilder
     {
-        public static CharacterVisualResult Build(CharacterVisualRequest request, Transform parent, AlphaActorLibrary library)
+        public static CharacterVisualResult Build(CharacterVisualRequest request, Transform parent, AlphaActorLibrary library,
+            string itemsDirectory = null)
         {
             var result = new CharacterVisualResult();
             if (library == null)
@@ -75,7 +90,31 @@ namespace CubeGame.Presentation.Visual
                 else if (!AlphaOffhandLayer.TryEquipFromFile(view.Rig, request.OffhandModelPath, request.OffhandSubtype, out var offhandReason))
                     result.Problems.Add(offhandReason);
             }
+
+            ApplyArmour(result, view, itemsDirectory, 4, request.ChestSubtype);
+            ApplyArmour(result, view, itemsDirectory, 5, request.HandsSubtype);
+            ApplyArmour(result, view, itemsDirectory, 6, request.FeetSubtype);
+
+            if (request.HeldType >= 0)
+            {
+                if (string.IsNullOrEmpty(itemsDirectory)) result.Problems.Add("EQUIPMENT_ITEMS_DIRECTORY_MISSING");
+                else if (!AlphaHeldItemLayer.TryEquipFromItem(view.Rig, itemsDirectory, request.HeldType,
+                             request.HeldSubtype, out var heldReason))
+                    result.Problems.Add(heldReason);
+            }
             return result;
+        }
+
+        static void ApplyArmour(CharacterVisualResult result, AlphaActorView view, string itemsDirectory, int type, int subtype)
+        {
+            if (subtype < 0) return;
+            if (string.IsNullOrEmpty(itemsDirectory))
+            {
+                result.Problems.Add("EQUIPMENT_ITEMS_DIRECTORY_MISSING");
+                return;
+            }
+            if (!AlphaEquipmentLayer.TryEquipFromItem(view.Rig, itemsDirectory, type, subtype, out var reason))
+                result.Problems.Add(reason);
         }
 
         /// <summary>Check a descriptor against the staged content without building anything.</summary>
@@ -99,6 +138,18 @@ namespace CubeGame.Presentation.Visual
                     p.Add($"OFFHAND_SUBTYPE_NOT_EQUIPPABLE {request.OffhandSubtype}");
                 if (string.IsNullOrEmpty(request.OffhandModelPath)) p.Add("OFFHAND_MODEL_PATH_MISSING");
             }
+            var armours = new (int Type, int Subtype)[]
+            {
+                (4, request.ChestSubtype), (5, request.HandsSubtype), (6, request.FeetSubtype),
+            };
+            foreach (var armour in armours)
+            {
+                if (armour.Subtype < 0) continue;
+                if (!AlphaEquipmentCatalog.TryModel(armour.Type, armour.Subtype, out _))
+                    p.Add($"EQUIPMENT_SUBTYPE_NOT_AVAILABLE {armour.Type}/{armour.Subtype}");
+            }
+            if (request.HeldType >= 0 && !AlphaHeldItemCatalog.TryModel(request.HeldType, request.HeldSubtype, out _))
+                p.Add($"HELD_ITEM_NO_MODEL {request.HeldType}/{request.HeldSubtype}");
             return p;
         }
     }

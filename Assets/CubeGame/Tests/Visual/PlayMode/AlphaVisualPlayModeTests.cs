@@ -85,16 +85,14 @@ namespace CubeGame.Tests.Visual.PlayMode
             if (!File.Exists(sword) || !File.Exists(shield))
                 Assert.Ignore("item payloads are not staged (python -m tools.alpha_content.extract_item_models)");
             var library = new AlphaActorLibrary(source);
-            var request = new CharacterVisualRequest
-            {
-                Kind = 0x02,
-                HasHairColour = true,
-                HairColour = new Color(0.2f, 0.4f, 0.6f, 1f),
-                WeaponSubtype = 0,
-                WeaponModelPath = sword,
-                OffhandSubtype = 13,
-                OffhandModelPath = shield,
-            };
+            var request = CharacterVisualRequest.Default;
+            request.Kind = 0x02;
+            request.HasHairColour = true;
+            request.HairColour = new Color(0.2f, 0.4f, 0.6f, 1f);
+            request.WeaponSubtype = 0;
+            request.WeaponModelPath = sword;
+            request.OffhandSubtype = 13;
+            request.OffhandModelPath = shield;
             Assert.IsEmpty(AlphaPlayerVisualBuilder.Validate(request, library), "the descriptor matches staged content");
             var result = AlphaPlayerVisualBuilder.Build(request, null, library);
             try
@@ -105,6 +103,40 @@ namespace CubeGame.Tests.Visual.PlayMode
                 Assert.AreEqual(request.HairColour, result.View.Rig.TintOf(hair), "hair tint is applied");
                 Assert.AreEqual(0, result.View.Rig.weaponSubtype, "weapon subtype 0 was equipped");
                 Assert.IsTrue(AlphaOffhandLayer.HasOffhand(result.View.Rig), "shield is attached to the left hand");
+                yield return null;
+            }
+            finally
+            {
+                if (result.View != null) Object.Destroy(result.View.gameObject);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator PlayerVisualBuilderEquipsArmourAndHeldItems()
+        {
+            var source = AlphaContentSource.Resolve();
+            if (source.State != AlphaContentState.Ready) Assert.Ignore(source.Diagnosis);
+            var items = Path.Combine(source.Root, "items");
+            foreach (var name in new[] { "iron-chest1.cubdec", "iron-hand1.cubdec", "iron-foot1.cubdec", "life-potion.cubdec" })
+                if (!File.Exists(Path.Combine(items, name))) Assert.Ignore("item payload is not staged: " + name);
+            var library = new AlphaActorLibrary(source);
+            var request = CharacterVisualRequest.Default;
+            request.Kind = 0x02;
+            request.ChestSubtype = 0;
+            request.HandsSubtype = 0;
+            request.FeetSubtype = 0;
+            request.HeldType = 1;
+            request.HeldSubtype = 1;
+            Assert.IsEmpty(AlphaPlayerVisualBuilder.Validate(request, library),
+                string.Join("\n", AlphaPlayerVisualBuilder.Validate(request, library)));
+            var result = AlphaPlayerVisualBuilder.Build(request, null, library, items);
+            try
+            {
+                Assert.IsTrue(result.Ok, result.Status);
+                Assert.IsTrue(AlphaEquipmentLayer.HasEquipment(result.View.Rig, 4));
+                Assert.IsTrue(AlphaEquipmentLayer.HasEquipment(result.View.Rig, 5));
+                Assert.IsTrue(AlphaEquipmentLayer.HasEquipment(result.View.Rig, 6));
+                Assert.IsTrue(AlphaHeldItemLayer.HasHeldItem(result.View.Rig));
                 yield return null;
             }
             finally

@@ -5,17 +5,16 @@
 ## 1. API
 
 ```csharp
-var request = new CharacterVisualRequest {
-    Kind = 0x02,                          // Alpha kind расы (0x02 HumanMale — подготовлен)
-    HasHairColour = true,                 // цвет волос по закону Alpha (D61)
-    HairColour = new Color(0.2f, 0.4f, 0.6f, 1f),
-    WeaponSubtype = 0,                    // Alpha-подтип оружия 0..25, -1 = без оружия
-    WeaponModelPath = ".../items/iron-sword1.cubdec",
-    OffhandSubtype = 13,                  // Alpha-класс левой руки (щит), -1 = без
-    OffhandModelPath = ".../items/iron-shield01.cubdec",
-};
-var problems = AlphaPlayerVisualBuilder.Validate(request, AlphaActorLibrary.Shared);
-var result = AlphaPlayerVisualBuilder.Build(request, playerTransform, AlphaActorLibrary.Shared);
+var request = CharacterVisualRequest.Default;   // все опциональные слоты выключены (-1)
+request.Kind = 0x02;                            // Alpha kind расы (0x02 HumanMale — подготовлен)
+request.HasHairColour = true; request.HairColour = new Color(0.2f, 0.4f, 0.6f, 1f);
+request.WeaponSubtype = 0; request.WeaponModelPath = ".../items/iron-sword1.cubdec";
+request.OffhandSubtype = 13; request.OffhandModelPath = ".../items/iron-shield01.cubdec";
+request.ChestSubtype = 0;                       // броня: грудь/перчатки/сапоги, -1 = нет
+request.HandsSubtype = 0; request.FeetSubtype = 0;
+request.HeldType = 1; request.HeldSubtype = 1;  // зелье жизни в руке, -1 = нет
+var items = ".../.scratch/content/items";      // локальный кэш предметных .cubdec
+var result = AlphaPlayerVisualBuilder.Build(request, playerTransform, AlphaActorLibrary.Shared, items);
 if (!result.Ok) Debug.Log(result.Status);    // причины: MISSING_VISUAL_CONTENT, WEAPON_SUBTYPE_NOT_EQUIPPABLE, ...
 result.View.ApplyLocomotion(state); result.View.Tick(dt);
 ```
@@ -37,4 +36,4 @@ result.View.ApplyLocomotion(state); result.View.Tick(dt);
 
 ## 4. Проверки
 
-`AlphaOutput/playmode.xml` — 36/36 (+2: сборка игрока с волосами/мечом/щитом; отказы без подмены), `AlphaOutput/editmode.xml` — 345/345.
+`AlphaOutput/playmode.xml` — 42/42 (+3: сборка игрока с волосами/мечом/щитом; броня+зелье в дескрипторе; отказы без подмены), `AlphaOutput/editmode.xml` — 350/350.

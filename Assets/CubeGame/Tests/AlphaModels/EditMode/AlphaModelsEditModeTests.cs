@@ -323,6 +323,34 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         }
 
         [Test]
+        public void ScatterTreeAgreesWithTheExtractedEvidence()
+        {
+            var evidence = new HashSet<int>();
+            foreach (var group in AlphaScatterEvidence.Groups)
+                foreach (var kind in group.ObjectKinds ?? new int[0]) evidence.Add(kind);
+
+            var underground = AlphaScatterTree.Select(0.5, 0.5, 0.5, 0.0, -1, 0);
+            Assert.AreEqual(8, underground.Length);
+            foreach (var kind in underground) CollectionAssert.Contains(evidence, kind);
+
+            var dry = AlphaScatterTree.Select(0.5, 0.5, 0.0, 0.0, 6, 0);
+            CollectionAssert.Contains(dry, 0x15);
+            CollectionAssert.Contains(dry, 0x2e);
+            CollectionAssert.Contains(AlphaScatterTree.Select(0.5, 0.5, 0.0, 0.5, 6, 0), 0x2f);
+
+            // Every id the translated tree can return must be a known Alpha kind.
+            for (int hi = 0; hi <= 10; hi += 2)
+            for (int ti = 0; ti <= 10; ti += 2)
+            {
+                var ids = AlphaScatterTree.Select(hi / 10.0, ti / 10.0, 0.2, 0.4, 6, 0);
+                foreach (var kind in ids)
+                    Assert.IsTrue(AlphaContentDatabase.TryCreatureKind(kind, out _),
+                        $"0x{kind:x2} from the W-18 tree is not a catalog kind");
+            }
+            Assert.AreEqual(AlphaScatterTree.Symbol, AlphaScatterSelector.EvidenceSymbol);
+        }
+
+        [Test]
         public void HeldItemModelsComeFromTheItemIconSweep()
         {
             Assert.IsEmpty(AlphaHeldItemCatalog.Validate(), string.Join("\n", AlphaHeldItemCatalog.Validate()));

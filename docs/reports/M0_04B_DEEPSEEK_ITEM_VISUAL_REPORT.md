@@ -44,8 +44,8 @@
 
 | Прогон | Результат |
 |---|---|
-| EditMode (весь проект) | `total=349 passed=349 failed=0` (`AlphaOutput/editmode.xml`) |
-| PlayMode (весь проект) | `total=41 passed=41 failed=0` (`AlphaOutput/playmode.xml`), +3: левая рука (щит/кинжал), удерживаемый предмет (зелье/лампа/планер), броня (грудь/перчатки/сапоги + отказ плеча) |
+| EditMode (весь проект) | `total=350 passed=350 failed=0` (`AlphaOutput/editmode.xml`) |
+| PlayMode (весь проект) | `total=42 passed=42 failed=0` (`AlphaOutput/playmode.xml`), +4: левая рука (щит/кинжал), удерживаемый предмет (зелье/лампа/планер), броня (грудь/перчатки/сапоги + отказ плеча), полный дескриптор игрока (броня+зелье) |
 | Выгрузка предметных моделей | `EXTRACT_ITEM_MODELS=PASS written=28` (+14 удерживаемых +4 брони) |
 | Карта «предмет → модель» | `HELD_ITEM_MODELS=PASS items=14`, `EQUIPMENT_MODELS=PASS items=32`; исходный свип `ITEM_MODELS DONE types=24 models=1565 errors=0` |
 | Кэш/таблицы | `ALPHA_CONTENT_RESULT=PASS`, `ALPHA_TABLES_RESULT=PASS` |
