@@ -52,7 +52,8 @@
 | 40 | M0-09C: машинный манифест контента `AlphaContentManifest` (JSON из коммит-таблиц) + `RunBuildContentManifest` | `384ffbc` | 355/355 | 46/46 |
 | 41 | M0-05C/06: `CreatureAgent.TryGetActionTiming` — бой получает windup/actionEnd прямо у агента; оговорка о родителе блока special | `a655594` | 355/355 | 46/46 |
 | 42 | M0-02C: найдена `World_placeObjectWithSpacing @ 0x005effa0`; климат-поле принимает spacing как функцию `(x,z)` под будущий порт | `94f626c` | 355/355 | 46/46 |
-| 43 | M0-06: инвариант коммит-таблицы ↔ кэша для всех 156 видов (режим/клипы/действия/тайминги) | эта партия | 355/355 | 46/46 |
+| 43 | M0-06: инвариант коммит-таблицы ↔ кэша для всех 156 видов (режим/клипы/действия/тайминги) | `2858a53` | 355/355 | 46/46 |
+| 44 | M0-09: **финальный интеграционный пакет** [D86_DEEPSEEK_FINAL_HANDOFF.md](D86_DEEPSEEK_FINAL_HANDOFF.md) + полный прогон доказательств (EditMode/PlayMode/preview/манифест/генераторы) | эта партия | 355/355 | 46/46 |
 
 Все прогоны — Unity 6000.3.27f2, `-batchmode -runTests`, артефакты в `AlphaOutput/editmode.xml` и `AlphaOutput/playmode.xml` (локально, не в Git).
 
@@ -105,3 +106,9 @@ python -m tools.alpha_content.extract_item_models         # локальные .
 ## Известные дефекты окружения
 
 - `-executeMethod` в batchmode иногда завершает редактор кодом `-1073741819` (0xC0000005) **после** записи результатов (`RunValidateContent`, `RunBuildContentManifest`, иконки/атлас). Артефакты при этом валидны и проверяются по файлам/XML; это дефект завершения Unity-редактора, не контента. Требует перепроверки на CI/другой машине.
+
+
+## Финал
+
+- Все API, доказательства, блокеры и следующие шаги собраны в [D86_DEEPSEEK_FINAL_HANDOFF.md](D86_DEEPSEEK_FINAL_HANDOFF.md).
+- Последний полный прогон: EditMode **355/355**, PlayMode **46/46**, preview **PASS 156/420/0**, манифест собран, все генераторы `--check` PASS.
