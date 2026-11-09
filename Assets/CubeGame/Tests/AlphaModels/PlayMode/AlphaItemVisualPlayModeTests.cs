@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using CubeGame.AlphaModels;
+using CubeGame.Content;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -58,6 +59,58 @@ namespace CubeGame.AlphaModels.Tests.PlayMode
             {
                 Object.Destroy(view.gameObject);
             }
+        }
+        [UnityTest]
+        public IEnumerator OffhandModelFollowsTheLeftHandWithMeasuredAnchor()
+        {
+            var source = AlphaContentSource.Resolve();
+            if (source.State != AlphaContentState.Ready) Assert.Ignore(source.Diagnosis);
+            var items = Path.Combine(source.Root, "items");
+            var shield = Path.Combine(items, "iron-shield01.cubdec");
+            var dagger = Path.Combine(items, "iron-dagger1.cubdec");
+            if (!File.Exists(shield) || !File.Exists(dagger))
+                Assert.Ignore("item payloads are not staged (python -m tools.alpha_content.extract_item_models)");
+            var library = new AlphaActorLibrary(source);
+            if (!library.TryGet("d86_human_0x02_greatsword", out var def)) Assert.Ignore("human variant is not staged");
+            var view = AlphaActorView.Spawn(def, null, new List<string>());
+            try
+            {
+                Assert.IsTrue(view.Ready, string.Join("\n", view.Problems));
+                int hand = view.Rig.IndexOf("hand_l");
+                Assert.GreaterOrEqual(hand, 0);
+                Assert.IsFalse(AlphaOffhandLayer.HasOffhand(view.Rig));
+
+                Assert.IsTrue(AlphaOffhandLayer.TryEquipFromFile(view.Rig, shield, 13, out var reason), reason);
+                Assert.IsTrue(AlphaOffhandLayer.HasOffhand(view.Rig));
+                var child = view.Rig.parts[hand].Find(AlphaOffhandLayer.MeshChildName);
+                Assert.IsNotNull(child, "the off-hand model is a child of the posed left hand");
+                Assert.IsTrue(AlphaItemRules.TryOffhandAnchors(13, out var set));
+                var mesh = child.GetComponent<MeshFilter>().sharedMesh;
+                var bounds = mesh.bounds.size;
+                var grid = new Vector3Int(Mathf.RoundToInt(bounds.x), Mathf.RoundToInt(bounds.z), Mathf.RoundToInt(bounds.y));
+                Assert.AreEqual(AlphaOffhandLayer.Offset(set.InHand, grid), child.localPosition,
+                    "shield: anchor = (sx/2, 3, sz/2)");
+                Assert.Greater(mesh.vertexCount, 0);
+
+                Assert.IsTrue(AlphaOffhandLayer.TryEquipFromFile(view.Rig, dagger, 3, out var daggerReason), daggerReason);
+                Assert.AreEqual(1, CountChildren(view.Rig.parts[hand]), "equipping again replaces the model, no duplicates");
+                Assert.IsFalse(AlphaOffhandLayer.TryEquipFromFile(view.Rig, shield, 99, out var bad));
+                StringAssert.Contains("OFFHAND_SUBTYPE_UNKNOWN", bad);
+                AlphaOffhandLayer.Clear(view.Rig);
+                Assert.IsFalse(AlphaOffhandLayer.HasOffhand(view.Rig));
+                yield return null;
+            }
+            finally
+            {
+                Object.Destroy(view.gameObject);
+            }
+        }
+
+        static int CountChildren(Transform parent)
+        {
+            int count = 0;
+            foreach (Transform child in parent) if (child.name == AlphaOffhandLayer.MeshChildName) count++;
+            return count;
         }
     }
 }

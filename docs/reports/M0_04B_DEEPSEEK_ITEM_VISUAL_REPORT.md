@@ -28,6 +28,7 @@
 | `Assets/CubeGame/Content/Generated/AlphaContentTables.g.cs` | таблицы якорей: `coeff`, `const`, `scale`, имя закона, статус (`CODE_DERIVED_MEASURED`, для стрелы — `CODE_DERIVED`) |
 | `Assets/CubeGame/Content/AlphaItemRules.cs` | `TryWeaponAnchors`, `TryOffhandAnchors`, `IsAnchorMeasured`, `WeaponAnchorSets/OffhandAnchorSets`; валидация 26/10 и единственного `PARTIAL` (стрела 9) |
 | `Assets/CubeGame/AlphaModels/Runtime/AlphaWeaponLayer.cs` | `TryEquip(rig, bytes, subtype)`, `TryEquipFromFile`, `ExpectedMeshOffset`, `EquippableInHand`; отказы: `WEAPON_SUBTYPE_UNKNOWN`, `ANCHOR_NOT_MEASURED`, `WEAPON_MESH`, `WEAPON_MODEL_HAS_MARKERS`, `WEAPON_FILE_MISSING` |
+| `Assets/CubeGame/AlphaModels/Runtime/AlphaOffhandLayer.cs` | модель левой руки: child `offhand_mesh` у `part_hand_l`, измеренный якорь (`shield y=3`, `bow sy−1.5`, `bracelet scale 0.6` и т.д.), `Clear`, `HasOffhand`, `EquippableSubtypes`; отказы `OFFHAND_SUBTYPE_UNKNOWN`, `OFFHAND_ANCHOR_NOT_MEASURED`, `OFFHAND_FILE_MISSING` |
 | `Assets/CubeGame/AlphaModels/Runtime/AlphaRig.cs` | аддитивно: `weaponAnchorInHand/OnBack`, `weaponScale`; `AnchorOf` использует измеренный закон только когда он установлен |
 | `tools/alpha_content/extract_item_models.py` | выгрузка предметных `.cubdec` из `data1.db` (только чтение) в локальный кэш |
 | `Assets/CubeGame/Tests/AlphaModels/EditMode/AlphaModelsEditModeTests.cs` | `AlphaItemAnchorTests`: 26/10 якорей, sword `(sx/2, sy/2, 4)`, bow `sy−1.5`, shield `y=3`, bracelet scale 0.6, отказ неизмеренного, `EquippableInHand ≥ 20` |
@@ -63,7 +64,7 @@
 
 - **Стрела (subtype 9)** — `PARTIAL`: константы только из кода, закон не измерен.
 - **Масштаб оружия** из клипов (`0.95` в job) и закон `scale` (браслет 0.6) пока не применяются к позе: масштаб задаётся клипом; `rig.weaponScale` публикуется для будущего слоя.
-- **Перчатка/наруч/лампа/питомец** (офф-хенд блоки вне оружия) — таблица якорей левой руки есть, но визуальная подмена модели левой руки ещё не реализована (M0-04B следующая часть).
+- **Левая рука** реализована как child-меш у `part_hand_l` с измеренным якорем (`AlphaOffhandLayer`, PlayMode-проверка щит/кинжал); расходники 80/81 в руке и «передний» слот пока не визуализируются.
 - **Статы/редкости/прочность** — не здесь: визуальный слой не считает и не хранит статы (S04/Core).
 - **Иконки UI** — M0-08, не в этой партии.
 
