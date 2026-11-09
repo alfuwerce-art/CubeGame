@@ -164,6 +164,7 @@ namespace CubeGame.Features.Persistence
                 heroHairR = hero.Appearance.HairR,
                 heroHairG = hero.Appearance.HairG,
                 heroHairB = hero.Appearance.HairB,
+                heroSkillRanks = hero.SkillRanks.ToArray(),
                 inventoryPlacement = hero.InventoryPlacement(),
                 characterChecksum = Checksum(characterText),
                 worldChecksum = worldChecksum,
@@ -304,6 +305,11 @@ namespace CubeGame.Features.Persistence
                     data.heroHairB < 0 ? d.HairB : (byte)data.heroHairB));
             }
             hero.Items.AddRange(items);
+            if (data.heroSkillRanks != null && data.heroSkillRanks.Length != 0)
+            {
+                hero.SkillRanks.TryReplace(data.heroSkillRanks);
+            }
+
             hero.RestoreInventory(data.inventoryPlacement);
             RestoreRawItems(hero, data);
             if (data.heroHealth >= 0.0)
@@ -499,6 +505,12 @@ namespace CubeGame.Features.Persistence
             if (string.IsNullOrEmpty(data.characterChecksum))
             {
                 error = "character checksum missing";
+                return false;
+            }
+
+            if (data.heroSkillRanks != null && data.heroSkillRanks.Length != 0 && !HeroSkillRanks.IsValid(data.heroSkillRanks))
+            {
+                error = "invalid hero skill ranks";
                 return false;
             }
 

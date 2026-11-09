@@ -59,6 +59,8 @@ namespace CubeGame.Tests.FullM0.EditMode
             session.Clock.StepTicks(451);
             session.Hero.Sheet.AddExperience(5);
             session.Hero.Yaw = 33.5f;
+            var ranks = new[] { 2, 0, 7, 6, 3, 0, 1, 9, 0, 0, 4 };
+            Assert.IsTrue(session.Hero.SkillRanks.TryReplace(ranks));
             Assert.IsTrue(ItemInstance.TryCreateFromIdentifiers((int)ItemType.Weapon, 3, 4, 2, 99, 0, 0, 1, out ItemInstance sword, out string error), error);
             Assert.IsTrue(session.Hero.Inventory.TryAdd(Features.Items.InventoryEntry.FromCore(sword)), session.Hero.Inventory.LastRejection);
             session.Hero.Health.ApplyDamage(17.25);
@@ -77,6 +79,7 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.AreEqual(session.Hero.Sheet.Progression.Experience, loaded.Hero.Sheet.Progression.Experience);
             Assert.AreEqual(new WorldPosition(10.5, 40.25, -3.75), loaded.Hero.Position);
             Assert.AreEqual(33.5f, loaded.Hero.Yaw);
+            CollectionAssert.AreEqual(ranks, loaded.Hero.SkillRanks.ToArray());
             // C1: a new hero carries the Alpha start kit, so the added sword is the last Core item.
             Assert.AreEqual(session.Hero.Items.Count, loaded.Hero.Items.Count);
             Assert.AreEqual(sword, loaded.Hero.Items[loaded.Hero.Items.Count - 1]);
@@ -102,6 +105,41 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.IsNotNull(read);
             Assert.AreEqual(-1.0, read.heroHealth, "missing field keeps the 'full HP' sentinel");
             Assert.AreEqual(SessionSaveFormat.CurrentVersion, read.formatVersion);
+        }
+
+        [Test]
+        public void LegacySessionWithoutRanksLoadsWithZeroRanks()
+        {
+            var store = new MemoryStore();
+            GameSlotStore slots = Slots(store);
+            Assert.IsTrue(slots.Save(RunningSession(5u, CharacterClass.Warrior), 1L).IsSuccess);
+            const string key = "slot0.session";
+            Assert.IsTrue(GameSlotStore.TryUnframe(store.Files[key], SessionSaveFormat.Header, out int version, out string payload, out string error), error);
+            string legacy = payload.Replace(",\"heroSkillRanks\":[0,0,0,0,0,0,0,0,0,0,0]", string.Empty);
+            StringAssert.DoesNotContain("heroSkillRanks", legacy);
+            store.Files[key] = GameSlotStore.Frame(SessionSaveFormat.Header, version, legacy);
+
+            SlotLoadResult loaded = slots.Load("slot0", Generator);
+            Assert.IsTrue(loaded.IsSuccess, loaded.ToString());
+            CollectionAssert.AreEqual(new int[11], loaded.Hero.SkillRanks.ToArray());
+        }
+
+        [TestCase("[1]")]
+        [TestCase("[0,0,0,0,-1,0,0,0,0,0,0]")]
+        public void InvalidSavedRanksAreRejected(string invalidRanks)
+        {
+            var store = new MemoryStore();
+            GameSlotStore slots = Slots(store);
+            Assert.IsTrue(slots.Save(RunningSession(5u, CharacterClass.Warrior), 1L).IsSuccess);
+            const string key = "slot0.session";
+            Assert.IsTrue(GameSlotStore.TryUnframe(store.Files[key], SessionSaveFormat.Header, out int version, out string payload, out string error), error);
+            string damaged = payload.Replace("\"heroSkillRanks\":[0,0,0,0,0,0,0,0,0,0,0]", "\"heroSkillRanks\":" + invalidRanks);
+            Assert.AreNotEqual(payload, damaged);
+            store.Files[key] = GameSlotStore.Frame(SessionSaveFormat.Header, version, damaged);
+
+            SlotLoadResult loaded = slots.Load("slot0", Generator);
+            Assert.AreEqual(SlotLoadStatus.Corrupted, loaded.Status, loaded.ToString());
+            StringAssert.Contains("skill ranks", loaded.Message);
         }
 
         [Test]

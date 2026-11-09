@@ -203,6 +203,7 @@ namespace CubeGame.Gameplay
 
             if (_session.State == SessionState.InGame)
             {
+                ApplyHeroMovementRanks(_session.Hero);
                 if (_motor != null && _motor.enabled && Input.GetMouseButtonDown(0) && GUIUtility.hotControl == 0)
                 {
                     HeroAttack();
@@ -655,6 +656,18 @@ namespace CubeGame.Gameplay
 
         public GameVisualSink Visuals => _visuals;
 
+        private void ApplyHeroMovementRanks(HeroState hero)
+        {
+            if (_motor == null)
+            {
+                return;
+            }
+
+            _motor.Movement.ClimbingRank = hero.SkillRanks[HeroSkill.Climbing];
+            _motor.Movement.HangGlidingRank = hero.SkillRanks[HeroSkill.HangGliding];
+            _motor.Movement.SwimmingRank = hero.SkillRanks[HeroSkill.Swimming];
+        }
+
         /// <summary>Publishes the hero's movement (position, facing, speed, mode) and drives the visual frame.</summary>
         private void PublishHeroMovement()
         {
@@ -824,6 +837,7 @@ namespace CubeGame.Gameplay
             _lastHeroScenePosition = heroPoint;
 
             _motor = _player.AddComponent<PlayerMotor>();
+            ApplyHeroMovementRanks(hero);
             _motor.SetCamera(_camera.transform);
             WorldState waterWorld = _worldState;
             _motor.WaterAt = p =>

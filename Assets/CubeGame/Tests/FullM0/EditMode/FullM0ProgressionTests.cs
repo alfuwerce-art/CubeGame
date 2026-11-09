@@ -11,6 +11,25 @@ namespace CubeGame.Tests.FullM0.EditMode
     /// <summary>C3: kill experience (Cube.exe 0x595A60) and level-up healing (0x447B00).</summary>
     public sealed class FullM0ProgressionTests
     {
+        [Test]
+        public void SkillRanksUseAlphaOrderAndRejectInvalidChanges()
+        {
+            var ranks = new HeroSkillRanks();
+            CollectionAssert.AreEqual(new int[11], ranks.ToArray());
+            var values = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+            Assert.IsTrue(ranks.TryReplace(values));
+            Assert.AreEqual(3, ranks[HeroSkill.Climbing]);
+            Assert.AreEqual(4, ranks[HeroSkill.HangGliding]);
+            Assert.AreEqual(5, ranks[HeroSkill.Swimming]);
+            Assert.AreEqual(11, ranks[HeroSkill.Ability5]);
+
+            values[4] = -1;
+            Assert.IsFalse(ranks.TryReplace(values));
+            Assert.IsFalse(ranks.TryReplace(new int[10]));
+            ranks.ToArray()[4] = 99;
+            Assert.AreEqual(5, ranks[HeroSkill.Swimming], "input and output arrays cannot mutate stored ranks");
+        }
+
         [TestCase(1, 0, false, 1L)]     // curve 0 → max(1, 0) = 1
         [TestCase(3, 0, false, 1L)]     // 0.0909·20 = 1.82 → 1
         [TestCase(10, 0, false, 6L)]    // (1 − 1/1.45)·20 = 6.2 → 6

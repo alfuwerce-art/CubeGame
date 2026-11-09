@@ -61,6 +61,9 @@ namespace CubeGame.Features.Persistence
 
         public int heroHairB = -1;
 
+        /// <summary>C3: eleven ranks in Alpha order. Slots without this field start with zero ranks.</summary>
+        public int[] heroSkillRanks;
+
         /// <summary>
         /// M0-04B, optional: placement of the Core items of the character save (same order): bag slot ≥ 0 or
         /// −(1+equipment slot). Missing (older slots) → items go to the bags, first weapon to the main hand.

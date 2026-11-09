@@ -93,6 +93,8 @@ namespace CubeGame.Features.Session
 
         public CharacterSheet Sheet { get; }
 
+        public HeroSkillRanks SkillRanks { get; } = new HeroSkillRanks();
+
         /// <summary>
         /// Core items the Core save v1 stores (bags + equipment). The live state is <see cref="Inventory"/>;
         /// call <see cref="SyncItemsFromInventory"/> before saving.
