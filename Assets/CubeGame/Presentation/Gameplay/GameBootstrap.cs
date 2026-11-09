@@ -1,11 +1,12 @@
 using System;
 using System.Globalization;
 using CubeGame.Core.Characters;
-using CubeGame.Core.Generation;
 using CubeGame.Core.Persistence;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.Persistence;
 using CubeGame.Features.Session;
+using CubeGame.Features.World;
+using CubeGame.Gameplay.Streaming;
 using CubeGame.Persistence;
 using CubeGame.Presentation.CameraRig;
 using CubeGame.Presentation.Player;
@@ -26,24 +27,28 @@ namespace CubeGame.Gameplay
     public sealed class GameBootstrap : MonoBehaviour
     {
         /// <summary>
-        /// World generator in use. PLACEHOLDER_NOT_ALPHA: the S01 pilot height field stands in until the
-        /// M0-02 Alpha world generator replaces it (saves record the id; mismatching saves are refused).
+        /// World generator in use (M0-02): Alpha terrain reconstruction, see <see cref="AlphaTerrainGenerator"/>.
+        /// Saves record the id; a save made by another generator (e.g. the M0-01 pilot height field) is refused.
         /// </summary>
-        public const string PilotGeneratorId = "cubegame.pilot_heightfield/1";
+        public const string GeneratorId = AlphaTerrainGenerator.Id;
 
         public const uint DefaultSeed = 666666u;
 
         public static readonly string[] SlotKeys = { "slot0", "slot1", "slot2" };
 
         [SerializeField] private Material terrainMaterial;
-        [SerializeField] private int chunksPerAxis = PilotWorldLayout.ViewChunks;
+
+        /// <summary>Regions shown around the hero / kept before release (CubeGame decision, PLACEHOLDER until profiling).</summary>
+        [SerializeField] private int viewRadius = 2;
+        [SerializeField] private int keepRadius = 3;
 
         private GameSession _session;
         private GameSlotStore _slots;
         private string _saveDirectory;
 
         private GameObject _worldRoot;
-        private PilotWorldView _worldView;
+        private StreamingWorldView _worldView;
+        private WorldState _worldState;
         private GameObject _player;
         private PlayerMotor _motor;
         private OrbitCameraController _orbitCamera;
@@ -66,7 +71,9 @@ namespace CubeGame.Gameplay
 
         public GameSession Session => _session;
 
-        public PilotWorldView WorldView => _worldView;
+        public StreamingWorldView WorldView => _worldView;
+
+        public WorldState WorldState => _worldState;
 
         public Transform PlayerTransform => _player != null ? _player.transform : null;
 
@@ -124,6 +131,10 @@ namespace CubeGame.Gameplay
             {
                 _session.AdvanceFrame(Time.deltaTime);
                 SyncHeroFromView();
+                if (_worldView != null && _player != null)
+                {
+                    _worldView.SetFocus(_player.transform.position);
+                }
             }
 
             if (_screenshotFrame >= 0 && _frames >= _screenshotFrame)
@@ -143,7 +154,7 @@ namespace CubeGame.Gameplay
             {
                 WorldName = worldName,
                 Seed = seed,
-                GeneratorId = PilotGeneratorId,
+                GeneratorId = GeneratorId,
                 HeroName = heroName,
                 Class = heroClass,
                 Specialization = CharacterSpecialization.Primary,
@@ -159,13 +170,13 @@ namespace CubeGame.Gameplay
 
         public bool LoadWorld(string slotKey)
         {
-            SlotLoadResult result = _slots.Load(slotKey, PilotGeneratorId);
+            SlotLoadResult result = _slots.Load(slotKey, GeneratorId);
             if (!result.IsSuccess)
             {
                 return Report(false, $"load {slotKey} failed: {result}");
             }
 
-            if (!_session.BeginLoadedWorld(slotKey, result.World, result.Hero, result.ClockTick))
+            if (!_session.BeginLoadedWorld(slotKey, result.World, result.Hero, result.ClockTick, result.WorldDeltas))
             {
                 return Report(false, $"load refused: {_session.LastRejection}");
             }
@@ -202,6 +213,21 @@ namespace CubeGame.Gameplay
 
             DestroyWorldViews();
             return Report(true, "returned to main menu");
+        }
+
+        /// <summary>
+        /// Sets the top solid block of one column through the world delta store (persistent, saved with the slot).
+        /// Gameplay entry point for terrain changes (Alpha: bombs / changed-voxel flag 0x80); the view rebuilds affected regions.
+        /// </summary>
+        public bool EditColumn(int blockX, int blockZ, int surface)
+        {
+            if (_session.State != SessionState.InGame || _session.WorldDeltas == null)
+            {
+                return Report(false, "terrain edit refused: no running world");
+            }
+
+            return _session.WorldDeltas.SetColumnSurface(blockX, blockZ, surface, _session.Clock.TimeMs)
+                || Report(false, $"terrain edit refused at ({blockX},{blockZ})");
         }
 
         public void TogglePause()
@@ -264,19 +290,25 @@ namespace CubeGame.Gameplay
             WorldInfo world = _session.World;
             HeroState hero = _session.Hero;
 
-            _worldRoot = new GameObject("WorldRoot");
-            _worldView = _worldRoot.AddComponent<PilotWorldView>();
-            _worldView.TerrainMaterial = terrainMaterial;
-            _worldView.Build(world.Seed.Value, chunksPerAxis, 0, 0);
+            if (!WorldState.TryCreateGenerator(world.GeneratorId, world.Seed.Value, out IWorldGenerator generator))
+            {
+                throw new InvalidOperationException($"unknown world generator '{world.GeneratorId}'");
+            }
 
+            _worldState = new WorldState(generator, _session.WorldDeltas);
             if (hero.NeedsGroundPlacement)
             {
-                int spawnX = chunksPerAxis * PilotWorldLayout.ChunkSize / 2;
-                int spawnZ = chunksPerAxis * PilotWorldLayout.ChunkSize / 2;
-                int ground = new PilotHeightField(world.Seed.Value).HeightAt(spawnX, spawnZ);
-                hero.Position = new WorldPosition(spawnX + 0.5, ground + 1.2, spawnZ + 0.5);
+                hero.Position = WorldState.StartPosition(generator, _session.WorldDeltas);
                 hero.NeedsGroundPlacement = false;
             }
+
+            _worldRoot = new GameObject("WorldRoot");
+            _worldView = _worldRoot.AddComponent<StreamingWorldView>();
+            _worldView.Initialise(_worldState, new WorldStreamingPolicy(viewRadius, keepRadius), terrainMaterial);
+            var heroPoint = new Vector3((float)hero.Position.X, (float)hero.Position.Y, (float)hero.Position.Z);
+            var loadTimer = System.Diagnostics.Stopwatch.StartNew();
+            _worldView.LoadAround(heroPoint, 1);
+            loadTimer.Stop();
 
             _player = new GameObject("Player");
             var controller = _player.AddComponent<CharacterController>();
@@ -304,8 +336,10 @@ namespace CubeGame.Gameplay
             _orbitCamera.Target = _player.transform;
             _orbitCamera.Distance = OrbitCameraController.DefaultDistance;
 
-            Debug.Log($"[Game] world built seed={world.Seed} gen={world.GeneratorId} chunks={_worldView.ChunkCount} " +
-                      $"vertices={_worldView.LastVertexCount} {_worldView.LastBuildMilliseconds:F1}ms hero={hero.Position}");
+            var region = generator.Region(StreamingWorldView.RegionAt(heroPoint));
+            Debug.Log($"[Game] world built seed={world.Seed} gen={world.GeneratorId} regions={_worldView.LoadedCount} " +
+                      $"vertices={_worldView.LoadedVertices} {loadTimer.Elapsed.TotalMilliseconds:F1}ms hero={hero.Position} " +
+                      $"region={region.Key} level={region.Level} base={region.Climate?.BaseHeight}");
         }
 
         private void DestroyWorldViews()
@@ -332,6 +366,7 @@ namespace CubeGame.Gameplay
 
             _worldRoot = null;
             _worldView = null;
+            _worldState = null;
             _player = null;
             _motor = null;
             SetCursorLocked(false);
@@ -409,7 +444,7 @@ namespace CubeGame.Gameplay
 
         private GameSlotStore CreateSlots(string directory)
         {
-            return new GameSlotStore(new FileSaveStore(directory), new JsonSaveSerializer(), new JsonSessionSerializer());
+            return new GameSlotStore(new FileSaveStore(directory), new JsonSaveSerializer(), new JsonSessionSerializer(), new JsonWorldSerializer());
         }
 
         private string DescribeSaveDirectory()
@@ -576,7 +611,8 @@ namespace CubeGame.Gameplay
             HeroState hero = _session.Hero;
             GUI.Label(new Rect(10f, 10f, 700f, 22f),
                 $"{_session.World.Name}  seed {_session.World.Seed}  time {_session.Clock.TimeMs / 1000.0:F1}s  " +
-                $"{hero.Name} {hero.Sheet.Class} L{hero.Sheet.Progression.Level}  pos {hero.Position}  [Esc] menu");
+                $"{hero.Name} {hero.Sheet.Class} L{hero.Sheet.Progression.Level}  pos {hero.Position}  " +
+                $"region {(_worldView != null ? _worldView.Center.ToString() : "-")} loaded {(_worldView != null ? _worldView.LoadedCount : 0)}  [Esc] menu");
         }
 
         private static string LabeledField(string label, string value)

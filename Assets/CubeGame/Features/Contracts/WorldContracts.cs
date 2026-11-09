@@ -68,6 +68,9 @@ namespace CubeGame.Features.Contracts
         ObjectRemoved = 1,
         ContainerOpened = 2,
         EntityStateChanged = 3,
+
+        /// <summary>Height-field edit: X/Z column, Value = new top solid block Y (M0-02).</summary>
+        ColumnSurfaceSet = 4,
     }
 
     /// <summary>

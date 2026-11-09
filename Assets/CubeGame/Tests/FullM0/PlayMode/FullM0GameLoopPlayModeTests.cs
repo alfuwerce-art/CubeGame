@@ -80,8 +80,8 @@ namespace CubeGame.Tests.FullM0.PlayMode
 
             Assert.IsTrue(game.StartNewWorld("slot0", "Golden", 424242u, "Tester", CharacterClass.Mage), game.Status);
             Assert.AreEqual(SessionState.InGame, game.Session.State);
-            Assert.Greater(game.WorldView.ChunkCount, 0);
-            Assert.Greater(game.WorldView.LastVertexCount, 0);
+            Assert.GreaterOrEqual(game.WorldView.LoadedCount, 9, "3x3 regions around the hero are built before play");
+            Assert.Greater(game.WorldView.LoadedVertices, 0);
 
             PlayerMotor motor = game.PlayerTransform.GetComponent<PlayerMotor>();
             float deadline = Time.realtimeSinceStartup + 6f;

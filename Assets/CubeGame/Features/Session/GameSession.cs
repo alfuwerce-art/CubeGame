@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using CubeGame.Core.Characters;
 using CubeGame.Core.Items;
 using CubeGame.Features.Contracts;
+using CubeGame.Features.World;
 
 namespace CubeGame.Features.Session
 {
@@ -123,6 +124,9 @@ namespace CubeGame.Features.Session
 
         public GameClock Clock { get; private set; }
 
+        /// <summary>Persistent world changes and explored regions of the running world (M0-02).</summary>
+        public WorldDeltaStore WorldDeltas { get; private set; }
+
         public string SlotKey { get; private set; }
 
         public string LastRejection { get; private set; } = string.Empty;
@@ -165,11 +169,11 @@ namespace CubeGame.Features.Session
             };
 
             var world = new WorldInfo(request.WorldName, new WorldSeed(request.Seed), request.GeneratorId, nowUtcTicks);
-            return Attach(slotKey, world, hero, new GameClock());
+            return Attach(slotKey, world, hero, new GameClock(), new WorldDeltaStore());
         }
 
         /// <summary>MainMenu → LoadingWorld with state restored from a save slot.</summary>
-        public bool BeginLoadedWorld(string slotKey, WorldInfo world, HeroState hero, long clockTick)
+        public bool BeginLoadedWorld(string slotKey, WorldInfo world, HeroState hero, long clockTick, WorldDeltaStore deltas = null)
         {
             if (world == null || hero == null)
             {
@@ -181,7 +185,7 @@ namespace CubeGame.Features.Session
                 return Reject($"cannot load a world from {State}");
             }
 
-            return Attach(slotKey, world, hero, new GameClock(GameClock.DefaultTicksPerSecond, clockTick));
+            return Attach(slotKey, world, hero, new GameClock(GameClock.DefaultTicksPerSecond, clockTick), deltas ?? new WorldDeltaStore());
         }
 
         public bool CompleteLoading()
@@ -272,12 +276,13 @@ namespace CubeGame.Features.Session
             return Clock.Advance(realSeconds);
         }
 
-        private bool Attach(string slotKey, WorldInfo world, HeroState hero, GameClock clock)
+        private bool Attach(string slotKey, WorldInfo world, HeroState hero, GameClock clock, WorldDeltaStore deltas)
         {
             SlotKey = slotKey;
             World = world;
             Hero = hero;
             Clock = clock;
+            WorldDeltas = deltas;
             if (!TryTransition(SessionState.LoadingWorld))
             {
                 DropWorld();
@@ -292,6 +297,7 @@ namespace CubeGame.Features.Session
             World = null;
             Hero = null;
             Clock = null;
+            WorldDeltas = null;
             SlotKey = null;
             Events.Clear();
         }

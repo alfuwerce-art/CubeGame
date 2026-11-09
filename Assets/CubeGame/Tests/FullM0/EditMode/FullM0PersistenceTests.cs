@@ -31,7 +31,7 @@ namespace CubeGame.Tests.FullM0.EditMode
         }
 
         private static GameSlotStore Slots(ISaveStore store) =>
-            new GameSlotStore(store, new JsonSaveSerializer(), new JsonSessionSerializer());
+            new GameSlotStore(store, new JsonSaveSerializer(), new JsonSessionSerializer(), new JsonWorldSerializer());
 
         private static GameSession RunningSession(uint seed, CharacterClass heroClass, string slot = "slot0")
         {
@@ -155,7 +155,7 @@ namespace CubeGame.Tests.FullM0.EditMode
             string dir = Path.Combine(Path.GetTempPath(), "cubegame_fullm0_" + System.Guid.NewGuid().ToString("N"));
             try
             {
-                var slots = new GameSlotStore(new FileSaveStore(dir), new JsonSaveSerializer(), new JsonSessionSerializer());
+                var slots = new GameSlotStore(new FileSaveStore(dir), new JsonSaveSerializer(), new JsonSessionSerializer(), new JsonWorldSerializer());
                 GameSession session = RunningSession(77u, CharacterClass.Warrior, "slot2");
                 session.Clock.StepTicks(30);
                 Assert.IsTrue(slots.Save(session, 5L).IsSuccess);

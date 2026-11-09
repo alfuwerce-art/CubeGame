@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace CubeGame.Features.Persistence
 {
@@ -41,6 +42,9 @@ namespace CubeGame.Features.Persistence
 
         /// <summary>FNV-1a 64 (hex) of the framed character save text written in the same checkpoint.</summary>
         public string characterChecksum = string.Empty;
+
+        /// <summary>FNV-1a 64 (hex) of the framed world file of the same checkpoint; empty = slot written before M0-02 (no world file).</summary>
+        public string worldChecksum = string.Empty;
     }
 
     public static class SessionSaveFormat
@@ -50,6 +54,53 @@ namespace CubeGame.Features.Persistence
         public const string Header = "CUBEGAME_SESSION";
 
         public const string KeySuffix = ".session";
+    }
+
+    /// <summary>World file of a save slot (M0-02): <c>CUBEGAME_WORLD</c> v1 — deltas and explored regions.</summary>
+    public static class WorldSaveFormat
+    {
+        public const int CurrentVersion = 1;
+
+        public const string Header = "CUBEGAME_WORLD";
+
+        public const string KeySuffix = ".world";
+
+        public const int MaxDeltas = 1000000;
+    }
+
+    [Serializable]
+    public sealed class WorldDeltaRecord
+    {
+        public int regionX;
+        public int regionZ;
+        public int kind;
+        public int x;
+        public int y;
+        public int z;
+        public int value;
+        public long timeMs;
+    }
+
+    [Serializable]
+    public sealed class WorldSaveData
+    {
+        public int formatVersion = WorldSaveFormat.CurrentVersion;
+
+        public string generatorId = string.Empty;
+
+        public long worldSeed;
+
+        public List<WorldDeltaRecord> deltas = new List<WorldDeltaRecord>();
+
+        /// <summary>Explored regions as flat pairs (x0, z0, x1, z1, …) — Alpha "discovered" blob, own format.</summary>
+        public List<int> discovered = new List<int>();
+    }
+
+    public interface IWorldSaveSerializer
+    {
+        string Serialize(WorldSaveData data);
+
+        WorldSaveData Deserialize(string payload);
     }
 
     public interface ISessionSerializer
