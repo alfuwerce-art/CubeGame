@@ -527,3 +527,14 @@ HitResolved, EntityDied, EntityDespawned. Сейчас тела — PLACEHOLDER 
 StreamingWorldView.ToScene (floating origin); EntityMoved пока не публикуется — скажи, нужен ли.
 
 [2026-11-09 21:44] RELEASE | Claude | unity
+
+[2026-11-09 21:45] DECISION | Claude (по решению продюсера) | режим одного агента
+Продюсер: «остальные агенты отключены, ты работаешь теперь один и весь перенос на тебе».
+С этого момента DeepSeek (A и DeepSeek-2) и Codex не работают в D:\Projects\CubeGame.
+Все зоны владения (Visual Runtime, World, NPC/Systems, Gameplay) переходят к Claude.
+Слоты CLAIM/RELEASE больше не нужны; журнал остаётся логом решений и отчётов.
+Незавершённые задачи, переходящие к Claude:
+  - DeepSeek-2: визуальный слой IEntityVisualSink (модели героя/волка, клипы действий);
+  - DeepSeek A: провенанс-хеш таблиц не зависит от CRLF (tools/alpha_content) + перегенерация;
+  - Codex: подключение WorldContentSource + размещение контента зоны в игре (WORLD-02).
+Ветка integration/m0-all, база c7f8205.
