@@ -41,6 +41,10 @@ AlphaDungeonRules.EntranceNames;    // overground-dungeon01 / underground-dungeo
 ```
 Порядок вырезания коридоров, содержимое комнат, свет/факелы и таблицы встреч — `UNKNOWN`; планировщик даёт связный скелет, а не «Alpha-данж».
 
+### Справочники контента
+
+`AlphaContentDatabase.TrySkill(id)` (27 навыков), `TryWorldObject(id)` (67 объектов), `TryItemName(type, subtype)` (133 имени) — полные lookup-API для заданий/торговли/UI; неизвестный ключ возвращает `false`.
+
 ### Климат → объекты (W-18, TRANSLATED_FROM_CODE)
 
 ```csharp

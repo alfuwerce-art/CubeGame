@@ -498,6 +498,24 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         }
 
         [Test]
+        public void SkillsWorldObjectsAndItemNamesAreLookupable()
+        {
+            Assert.IsEmpty(AlphaContentDatabase.Validate(), string.Join("\n", AlphaContentDatabase.Validate()));
+            Assert.AreEqual(27, AlphaContentDatabase.Skills.Count);
+            Assert.AreEqual(67, AlphaContentDatabase.WorldObjects.Count);
+            Assert.AreEqual(133, AlphaContentDatabase.ItemNames.Count);
+            var skill = AlphaContentDatabase.Skills[0];
+            Assert.IsTrue(AlphaContentDatabase.TrySkill(skill.Id, out var foundSkill));
+            Assert.AreEqual(skill.Name, foundSkill.Name);
+            var worldObject = AlphaContentDatabase.WorldObjects[0];
+            Assert.IsTrue(AlphaContentDatabase.TryWorldObject(worldObject.Id, out var foundObject));
+            Assert.AreEqual(worldObject.Name, foundObject.Name);
+            Assert.IsTrue(AlphaContentDatabase.TryItemName(1, 1, out var itemName));
+            Assert.IsFalse(string.IsNullOrEmpty(itemName.Name), "the item name is not empty");
+            Assert.IsFalse(AlphaContentDatabase.TryItemName(99, 99, out _), "unknown item names are not invented");
+        }
+
+        [Test]
         public void NpcServiceFurnitureMapsToContractKinds()
         {
             Assert.IsEmpty(AlphaNpcServices.Validate(), string.Join("\n", AlphaNpcServices.Validate()));

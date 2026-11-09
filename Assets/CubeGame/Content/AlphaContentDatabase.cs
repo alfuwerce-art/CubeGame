@@ -23,6 +23,9 @@ namespace CubeGame.Content
         public const int ExpectedAbilities = 16;
         public const int ExpectedCreatureKinds = 156;
         public const int ExpectedItemActions = 101;
+        public const int ExpectedSkills = 27;
+        public const int ExpectedWorldObjects = 67;
+        public const int ExpectedItemNames = 133;
 
         static readonly Dictionary<int, AlphaItemTypeDef> ItemTypeById = new Dictionary<int, AlphaItemTypeDef>();
         static readonly Dictionary<int, AlphaWeaponSubtypeDef> WeaponBySubtype = new Dictionary<int, AlphaWeaponSubtypeDef>();
@@ -32,6 +35,9 @@ namespace CubeGame.Content
         static readonly Dictionary<string, AlphaItemSlotDef> SlotByName = new Dictionary<string, AlphaItemSlotDef>(StringComparer.Ordinal);
         static readonly Dictionary<string, AlphaItemSlotDef> SlotByOffset = new Dictionary<string, AlphaItemSlotDef>(StringComparer.Ordinal);
         static readonly Dictionary<int, AlphaItemActionDef> ItemActionById = new Dictionary<int, AlphaItemActionDef>();
+        static readonly Dictionary<int, AlphaSkillDef> SkillById = new Dictionary<int, AlphaSkillDef>();
+        static readonly Dictionary<int, AlphaWorldObjectDef> WorldObjectById = new Dictionary<int, AlphaWorldObjectDef>();
+        static readonly Dictionary<long, AlphaItemNameDef> ItemNameByKey = new Dictionary<long, AlphaItemNameDef>();
 
         static AlphaContentDatabase()
         {
@@ -46,6 +52,9 @@ namespace CubeGame.Content
                 SlotByOffset[s.Offset] = s;
             }
             foreach (var a in AlphaContentTables.ItemActions) ItemActionById[a.Id] = a;
+            foreach (var s in AlphaContentTables.Skills) SkillById[s.Id] = s;
+            foreach (var o in AlphaContentTables.WorldObjects) WorldObjectById[o.Id] = o;
+            foreach (var n in AlphaContentTables.ItemNames) ItemNameByKey[((long)n.Type << 32) | (uint)n.Subtype] = n;
         }
 
         public static IReadOnlyList<AlphaItemTypeDef> ItemTypes => AlphaContentTables.ItemTypes;
@@ -55,6 +64,9 @@ namespace CubeGame.Content
         public static IReadOnlyList<AlphaCreatureKindDef> CreatureKinds => AlphaContentTables.CreatureKinds;
         public static IReadOnlyList<AlphaItemSlotDef> ItemSlots => AlphaContentTables.ItemSlots;
         public static IReadOnlyList<AlphaItemActionDef> ItemActions => AlphaContentTables.ItemActions;
+        public static IReadOnlyList<AlphaSkillDef> Skills => AlphaContentTables.Skills;
+        public static IReadOnlyList<AlphaWorldObjectDef> WorldObjects => AlphaContentTables.WorldObjects;
+        public static IReadOnlyList<AlphaItemNameDef> ItemNames => AlphaContentTables.ItemNames;
 
         public static bool TryItemType(int id, out AlphaItemTypeDef def) => ItemTypeById.TryGetValue(id, out def);
         public static bool TryWeaponSubtype(int subtype, out AlphaWeaponSubtypeDef def) => WeaponBySubtype.TryGetValue(subtype, out def);
@@ -67,6 +79,10 @@ namespace CubeGame.Content
             return SlotByName.TryGetValue(nameOrOffset, out def) || SlotByOffset.TryGetValue(nameOrOffset, out def);
         }
         public static bool TryItemAction(int id, out AlphaItemActionDef def) => ItemActionById.TryGetValue(id, out def);
+        public static bool TrySkill(int id, out AlphaSkillDef def) => SkillById.TryGetValue(id, out def);
+        public static bool TryWorldObject(int id, out AlphaWorldObjectDef def) => WorldObjectById.TryGetValue(id, out def);
+        public static bool TryItemName(int type, int subtype, out AlphaItemNameDef def) =>
+            ItemNameByKey.TryGetValue(((long)type << 32) | (uint)subtype, out def);
 
         /// <summary>Structural validation of the committed tables; empty list means the tables are usable.</summary>
         public static List<string> Validate()
@@ -80,6 +96,9 @@ namespace CubeGame.Content
                 p.Add($"CONTENT_ABILITIES {AlphaContentTables.Abilities.Length} != {ExpectedAbilities}");
             if (AlphaContentTables.CreatureKinds.Length != ExpectedCreatureKinds)
                 p.Add($"CONTENT_CREATURE_KINDS {AlphaContentTables.CreatureKinds.Length} != {ExpectedCreatureKinds}");
+            if (AlphaContentTables.Skills.Length != ExpectedSkills) p.Add($"CONTENT_SKILLS {AlphaContentTables.Skills.Length} != {ExpectedSkills}");
+            if (AlphaContentTables.WorldObjects.Length != ExpectedWorldObjects) p.Add($"CONTENT_WORLD_OBJECTS {AlphaContentTables.WorldObjects.Length} != {ExpectedWorldObjects}");
+            if (AlphaContentTables.ItemNames.Length != ExpectedItemNames) p.Add($"CONTENT_ITEM_NAMES {AlphaContentTables.ItemNames.Length} != {ExpectedItemNames}");
             if (AlphaContentTables.ItemActions.Length != ExpectedItemActions)
                 p.Add($"CONTENT_ITEM_ACTIONS {AlphaContentTables.ItemActions.Length} != {ExpectedItemActions}");
             if (AlphaContentTables.ItemSlots.Length < 13)

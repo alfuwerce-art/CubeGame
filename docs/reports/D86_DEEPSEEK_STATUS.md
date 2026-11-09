@@ -53,7 +53,8 @@
 | 41 | M0-05C/06: `CreatureAgent.TryGetActionTiming` — бой получает windup/actionEnd прямо у агента; оговорка о родителе блока special | `a655594` | 355/355 | 46/46 |
 | 42 | M0-02C: найдена `World_placeObjectWithSpacing @ 0x005effa0`; климат-поле принимает spacing как функцию `(x,z)` под будущий порт | `94f626c` | 355/355 | 46/46 |
 | 43 | M0-06: инвариант коммит-таблицы ↔ кэша для всех 156 видов (режим/клипы/действия/тайминги) | `2858a53` | 355/355 | 46/46 |
-| 44 | M0-09: **финальный интеграционный пакет** [D86_DEEPSEEK_FINAL_HANDOFF.md](D86_DEEPSEEK_FINAL_HANDOFF.md) + полный прогон доказательств (EditMode/PlayMode/preview/манифест/генераторы) | эта партия | 355/355 | 46/46 |
+| 44 | M0-09: **финальный интеграционный пакет** [D86_DEEPSEEK_FINAL_HANDOFF.md](D86_DEEPSEEK_FINAL_HANDOFF.md) + полный прогон доказательств (EditMode/PlayMode/preview/манифест/генераторы) | `3e83730` | 355/355 | 46/46 |
+| 45 | M0-02/07: полные lookup-API контента — навыки (27), объекты мира (67), имена предметов (133) с валидацией | эта партия | 356/356 | 46/46 |
 
 Все прогоны — Unity 6000.3.27f2, `-batchmode -runTests`, артефакты в `AlphaOutput/editmode.xml` и `AlphaOutput/playmode.xml` (локально, не в Git).
 
