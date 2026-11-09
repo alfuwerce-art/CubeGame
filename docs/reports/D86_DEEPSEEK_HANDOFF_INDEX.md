@@ -1,7 +1,7 @@
 # D86 — индекс handoff DeepSeek → Claude (M0-01…M0-09)
 
 **Ветка:** `deepseek/d85-visual-unity`. **Статус:** `READY_FOR_REVIEW` (не ACCEPTED; приёмка — продюсер/ChatGPT).
-**Голова на момент индекса:** `b29dd09` + текущая партия. Рабочий репозиторий: `D:\Projects\CubeGame-deepseek`.
+**Голова на момент индекса:** `be0b798`. Рабочий репозиторий: `D:\Projects\CubeGame-deepseek`.
 
 ## 1. Handoff-файлы
 

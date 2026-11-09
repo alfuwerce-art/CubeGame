@@ -2,7 +2,7 @@
 
 **Ветка:** `deepseek/d85-visual-unity`. **Репозиторий:** `D:\Projects\CubeGame-deepseek`.
 **Статус:** `READY_FOR_REVIEW` (не ACCEPTED; приёмка — продюсер/ChatGPT).
-**Голова:** `2858a53` + текущий коммит. Все факты ниже подтверждены прогонами, ссылки на артефакты — в конце.
+**Голова:** `be0b798` (последний код — `97ff314`, далее только документация). Все факты ниже подтверждены прогонами, ссылки на артефакты — в конце.
 
 ## 1. Что готово к подключению (API)
 
@@ -22,7 +22,7 @@
 
 ## 2. Доказательства (реальные прогоны)
 
-- **EditMode: 355/355 passed** — `AlphaOutput/editmode.xml`.
+- **EditMode: 356/356 passed** — `AlphaOutput/editmode.xml`.
 - **PlayMode: 46/46 passed** — `AlphaOutput/playmode.xml`; включает: человека с клипом, дракона, волка с библиотекой, пассивный объект, AI→хук действия, тайминг у агента, viz despawn/respawn, 12 существ × 600 кадров (0.172 мс/кадр), churn 200 spawn/destroy (0 mesh-утечек, +41.8 МБ), игрока с бронёй/зельем, атлас иконок, витрину.
 - **Preview: PASS** — 156 акторов, **420 кадров**, 0 проблем; кадры мира/экипировки.
 - **Манифест**: `AlphaOutput/content_manifest.json` — `kinds=156, actionsKinds=129, actionClips=900, heldItems=14, equipmentItems=32, itemSlots=11, worldObjects=67, itemNames=133, skills=27, dungeonChestItems=10`.
