@@ -17,6 +17,7 @@ using CubeGame.Persistence;
 using CubeGame.Presentation.CameraRig;
 using CubeGame.Presentation.Player;
 using CubeGame.Presentation.Rendering;
+using CubeGame.Presentation.Visual;
 using UnityEngine;
 
 namespace CubeGame.Gameplay
@@ -97,6 +98,9 @@ namespace CubeGame.Gameplay
         private bool _inventoryOpen;
         private Vector2 _inventoryScroll;
         private HeroSkillRanks _skillDraft;
+        private Texture2D _localMap;
+        private Vector2Int _localMapOrigin;
+        private const int LocalMapZoneSpan = 3;
         private readonly System.Collections.Generic.Dictionary<StableEntityId, GameObject> _groundItems =
             new System.Collections.Generic.Dictionary<StableEntityId, GameObject>();
         private Vector3 _lastHeroScenePosition;
@@ -184,7 +188,11 @@ namespace CubeGame.Gameplay
             _frames++;
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                if (_inventoryOpen)
+                if (_localMap != null)
+                {
+                    ToggleLocalMap();
+                }
+                else if (_inventoryOpen)
                 {
                     ToggleInventory();
                 }
@@ -194,12 +202,17 @@ namespace CubeGame.Gameplay
                 }
             }
 
-            if (_session.State == SessionState.InGame && Input.GetKeyDown(KeyCode.I))
+            if (_session.State == SessionState.InGame && !_inventoryOpen && !HeroDead && Input.GetKeyDown(KeyCode.M))
+            {
+                ToggleLocalMap();
+            }
+
+            if (_session.State == SessionState.InGame && _localMap == null && Input.GetKeyDown(KeyCode.I))
             {
                 ToggleInventory();
             }
 
-            if (_session.State == SessionState.InGame && !_inventoryOpen && Input.GetKeyDown(KeyCode.Q))
+            if (_session.State == SessionState.InGame && !_inventoryOpen && _localMap == null && Input.GetKeyDown(KeyCode.Q))
             {
                 UseFirst(LootRules.LifePotion);
             }
@@ -577,6 +590,7 @@ namespace CubeGame.Gameplay
             if (died.Entity.Equals(StableEntityId.Hero))
             {
                 _heroRespawnAtMs = died.TimeMs + HeroRespawnDelayMs;
+                CloseLocalMap();
                 SetGameplayInput(false);
                 _combatLog = $"you died - respawn in {HeroRespawnDelayMs / 1000} s";
                 return;
@@ -867,6 +881,7 @@ namespace CubeGame.Gameplay
 
         private void DestroyWorldViews()
         {
+            CloseLocalMap();
             if (_sun != null)
             {
                 _sun.intensity = _sunDayIntensity;
@@ -1148,13 +1163,91 @@ namespace CubeGame.Gameplay
                     break;
                 case SessionState.InGame:
                     DrawHud();
-                    if (_inventoryOpen)
+                    if (_localMap != null)
+                    {
+                        DrawLocalMap();
+                    }
+                    else if (_inventoryOpen)
                     {
                         DrawInventory();
                     }
 
                     break;
             }
+        }
+
+        private void ToggleLocalMap()
+        {
+            if (_localMap != null)
+            {
+                CloseLocalMap();
+                SetGameplayInput(!HeroDead);
+                return;
+            }
+
+            // W-14 partial: the temporary map shows the current and explored neighbouring zones.
+            // D6 supplies the texture layout and colour sampling. Discovery is already part of the world save.
+            WorldPosition position = _session.Hero.Position;
+            ZoneKey center = WorldLayout.ZoneOf((int)Math.Floor(position.X), (int)Math.Floor(position.Z));
+            int halfSpan = LocalMapZoneSpan / 2;
+            _localMapOrigin = new Vector2Int((center.X - halfSpan) * WorldLayout.ZoneSize, (center.Z - halfSpan) * WorldLayout.ZoneSize);
+            int size = LocalMapZoneSpan * MapTileBuilder.DefaultTileSize;
+            int step = WorldLayout.ZoneSize / MapTileBuilder.DefaultTileSize;
+            byte[] pixels = MapTileBuilder.Render(size, (px, pz) =>
+            {
+                int x = _localMapOrigin.x + px * step + step / 2;
+                int z = _localMapOrigin.y + pz * step + step / 2;
+                ZoneKey zone = WorldLayout.ZoneOf(x, z);
+                if (!zone.Equals(center) && !_session.WorldDeltas.IsDiscovered(zone))
+                {
+                    return default;
+                }
+
+                VoxelColumn column = _worldState.EffectiveColumn(x, z);
+                return column != null ? MapTileBuilder.FromColumn(column) : default;
+            });
+
+            _localMap = new Texture2D(size, size, TextureFormat.RGBA32, false) { name = "Local world map", filterMode = FilterMode.Point };
+            _localMap.LoadRawTextureData(pixels);
+            _localMap.Apply(false, true);
+            SetGameplayInput(false);
+        }
+
+        private void CloseLocalMap()
+        {
+            if (_localMap != null)
+            {
+                Destroy(_localMap);
+                _localMap = null;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            CloseLocalMap();
+        }
+
+        private void DrawLocalMap()
+        {
+            float edge = Mathf.Min(_localMap.width * 2, Screen.width - 32, Screen.height - 112);
+            if (edge <= 0f)
+            {
+                return;
+            }
+
+            var rect = new Rect((Screen.width - edge) / 2f, (Screen.height - edge) / 2f, edge, edge);
+            GUI.Box(rect, GUIContent.none);
+            GUI.DrawTexture(rect, _localMap);
+
+            WorldPosition position = _session.Hero.Position;
+            double worldEdge = LocalMapZoneSpan * WorldLayout.ZoneSize;
+            float heroX = rect.x + edge * (float)((position.X - _localMapOrigin.x) / worldEdge);
+            float heroY = rect.yMax - edge * (float)((position.Z - _localMapOrigin.y) / worldEdge);
+            Color previous = GUI.color;
+            GUI.color = Color.yellow;
+            GUI.DrawTexture(new Rect(heroX - 3f, heroY - 3f, 6f, 6f), Texture2D.whiteTexture);
+            GUI.color = previous;
+            GUI.Label(new Rect(rect.x, rect.y - 24f, rect.width, 22f), "Local map  [M] close");
         }
 
         /// <summary>
@@ -1312,7 +1405,7 @@ namespace CubeGame.Gameplay
                 $"{(_worldView != null ? _worldView.Center.ToString() : "-")} loaded {(_worldView != null ? _worldView.LoadedCount : 0)}  [Esc] menu");
             GUI.Label(new Rect(10f, 32f, 700f, 22f),
                 $"HP {hero.Health.CurrentHealth:F0}/{hero.Health.MaxHealth:F0}  weapon {hero.Loadout.GetEquipped(EquipmentSlot.MainHand)?.ToString() ?? "none"}  " +
-                $"potions {hero.Inventory.CountOf(LootRules.LifePotion)}  [LMB] attack  [Q] potion  [I] inventory");
+                $"potions {hero.Inventory.CountOf(LootRules.LifePotion)}  [LMB] attack  [Q] potion  [I] inventory  [M] map");
             if (_trainingTarget != null)
             {
                 GUI.Label(new Rect(10f, 54f, 700f, 22f),
