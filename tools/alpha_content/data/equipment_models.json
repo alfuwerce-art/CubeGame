@@ -1,0 +1,204 @@
+{
+ "format": "cubegame.equipment_models/1",
+ "status": "EMULATED_ALPHA_CODE: models selected by executing item_icon_id; slot laws from item_layer evidence",
+ "source": {
+  "selector": "0x004EC400",
+  "tool": "tools/alpha_models/catalog/item_models.py",
+  "sweep_models": 1564,
+  "note": "names encode slot+tier; selectors confirm b0c 0..3/4..7 families"
+ },
+ "items": [
+  {
+   "type": 4,
+   "subtype": 0,
+   "slot": "chest",
+   "model": "iron-chest1.cub"
+  },
+  {
+   "type": 4,
+   "subtype": 1,
+   "slot": "chest",
+   "model": "iron-chest2.cub"
+  },
+  {
+   "type": 4,
+   "subtype": 2,
+   "slot": "chest",
+   "model": "iron-chest3.cub"
+  },
+  {
+   "type": 4,
+   "subtype": 3,
+   "slot": "chest",
+   "model": "iron-chest4.cub"
+  },
+  {
+   "type": 4,
+   "subtype": 4,
+   "slot": "chest",
+   "model": "iron-chest5.cub"
+  },
+  {
+   "type": 4,
+   "subtype": 5,
+   "slot": "chest",
+   "model": "silk-chest5.cub"
+  },
+  {
+   "type": 4,
+   "subtype": 6,
+   "slot": "chest",
+   "model": "linen-chest5.cub"
+  },
+  {
+   "type": 4,
+   "subtype": 7,
+   "slot": "chest",
+   "model": "wool-chest5.cub"
+  },
+  {
+   "type": 5,
+   "subtype": 0,
+   "slot": "hand",
+   "model": "iron-hand1.cub"
+  },
+  {
+   "type": 5,
+   "subtype": 1,
+   "slot": "hand",
+   "model": "iron-hand2.cub"
+  },
+  {
+   "type": 5,
+   "subtype": 2,
+   "slot": "hand",
+   "model": "iron-hand3.cub"
+  },
+  {
+   "type": 5,
+   "subtype": 3,
+   "slot": "hand",
+   "model": "iron-hand4.cub"
+  },
+  {
+   "type": 5,
+   "subtype": 4,
+   "slot": "hand",
+   "model": "iron-hand5.cub"
+  },
+  {
+   "type": 5,
+   "subtype": 5,
+   "slot": "hand",
+   "model": "silk-hand5.cub"
+  },
+  {
+   "type": 5,
+   "subtype": 6,
+   "slot": "hand",
+   "model": "linen-hand5.cub"
+  },
+  {
+   "type": 5,
+   "subtype": 7,
+   "slot": "hand",
+   "model": "wool-hand5.cub"
+  },
+  {
+   "type": 6,
+   "subtype": 0,
+   "slot": "foot",
+   "model": "iron-foot1.cub"
+  },
+  {
+   "type": 6,
+   "subtype": 1,
+   "slot": "foot",
+   "model": "iron-foot2.cub"
+  },
+  {
+   "type": 6,
+   "subtype": 2,
+   "slot": "foot",
+   "model": "iron-foot3.cub"
+  },
+  {
+   "type": 6,
+   "subtype": 3,
+   "slot": "foot",
+   "model": "iron-foot4.cub"
+  },
+  {
+   "type": 6,
+   "subtype": 4,
+   "slot": "foot",
+   "model": "iron-foot5.cub"
+  },
+  {
+   "type": 6,
+   "subtype": 5,
+   "slot": "foot",
+   "model": "silk-foot5.cub"
+  },
+  {
+   "type": 6,
+   "subtype": 6,
+   "slot": "foot",
+   "model": "linen-foot5.cub"
+  },
+  {
+   "type": 6,
+   "subtype": 7,
+   "slot": "foot",
+   "model": "wool-foot5.cub"
+  },
+  {
+   "type": 7,
+   "subtype": 0,
+   "slot": "shoulder",
+   "model": "iron-shoulder1.cub"
+  },
+  {
+   "type": 7,
+   "subtype": 1,
+   "slot": "shoulder",
+   "model": "iron-shoulder2.cub"
+  },
+  {
+   "type": 7,
+   "subtype": 2,
+   "slot": "shoulder",
+   "model": "iron-shoulder3.cub"
+  },
+  {
+   "type": 7,
+   "subtype": 3,
+   "slot": "shoulder",
+   "model": "iron-shoulder4.cub"
+  },
+  {
+   "type": 7,
+   "subtype": 4,
+   "slot": "shoulder",
+   "model": "iron-shoulder5.cub"
+  },
+  {
+   "type": 7,
+   "subtype": 5,
+   "slot": "shoulder",
+   "model": "silk-shoulder5.cub"
+  },
+  {
+   "type": 7,
+   "subtype": 6,
+   "slot": "shoulder",
+   "model": "linen-shoulder5.cub"
+  },
+  {
+   "type": 7,
+   "subtype": 7,
+   "slot": "shoulder",
+   "model": "wool-shoulder5.cub"
+  }
+ ]
+}

@@ -56,6 +56,12 @@ namespace CubeGame.AlphaTransfer
         public string[] anchors = new string[0];
         bool _weaponOnBack = true;
 
+        // D86 M0-04B: measured anchor laws of the equipped weapon subtype (Alpha voxels). Zero means
+        // "not equipped through AlphaItemRules" — the built-in drawModel rule below is then used.
+        public Vector3 weaponAnchorInHand, weaponAnchorOnBack;
+        /// <summary>Alpha uniform scale of the equipped weapon block (1 unless a subtype law says otherwise).</summary>
+        public float weaponScale = 1f;
+
         public static readonly int[] TwoHandedSubtypes = { 15, 16, 17 };
 
         public int IndexOf(string part) => Array.IndexOf(partNames, part);
@@ -79,7 +85,12 @@ namespace CubeGame.AlphaTransfer
             throw new ArgumentException($"unknown anchor rule {rule}");
         }
 
-        public Vector3 AnchorOf(int part) => Anchor(anchors[part], sizes[part], _weaponOnBack);
+        public Vector3 AnchorOf(int part)
+        {
+            if (anchors[part] == "weapon" && (weaponAnchorInHand != Vector3.zero || weaponAnchorOnBack != Vector3.zero))
+                return _weaponOnBack ? weaponAnchorOnBack : weaponAnchorInHand;
+            return Anchor(anchors[part], sizes[part], _weaponOnBack);
+        }
 
         /// <summary>Switch the weapon anchor (hand / back) — clips declare which one they need.</summary>
         public void SetWeaponOnBack(bool onBack)

@@ -197,3 +197,6 @@ __pycache__/
 *.pyc
 # Decoded .cub payloads (derived from closed Cube World Alpha assets — local only)
 *.cubdec
+
+# Unified Alpha runtime verification artifacts (local only: frames, logs, results)
+AlphaOutput/

@@ -17,6 +17,9 @@ namespace CubeGame.AlphaTransfer
         public float lookPitchDeg;
         public bool autoPlay = true;
 
+        // Runtime content cache (D86): clip documents read from the local cache instead of TextAssets.
+        string[] _clipJsonTexts = new string[0];
+
         readonly Dictionary<string, AlphaClip> _clips = new Dictionary<string, AlphaClip>();
         readonly Dictionary<string, int[]> _maps = new Dictionary<string, int[]>();
         AlphaRig _rig;
@@ -29,6 +32,29 @@ namespace CubeGame.AlphaTransfer
 
         public AlphaClip Current => _current;
 
+        /// <summary>Provide clip documents loaded from the local content cache (D86 runtime path).</summary>
+        public void SetClipJson(string[] clipJson)
+        {
+            _clipJsonTexts = clipJson ?? new string[0];
+            _clips.Clear();
+            _current = null;
+        }
+
+        void Add(string text, Dictionary<string, AlphaClip> clips, Dictionary<string, int[]> maps, List<string> problems)
+        {
+            var clip = AlphaClip.Parse(text, string.IsNullOrEmpty(_rig.rigId) ? AlphaRig.RigId : _rig.rigId, problems);
+            if (clip == null) return;
+            var map = new int[clip.PartCount];
+            for (int i = 0; i < map.Length; i++)
+            {
+                map[i] = _rig.IndexOf(clip.Data.parts[i]);
+                if (map[i] < 0) problems.Add($"CLIP_PART_NOT_IN_RIG {clip.Data.name} {clip.Data.parts[i]}");
+            }
+            if (clips.ContainsKey(clip.Data.name)) { problems.Add($"CLIP_NAME_DUPLICATE {clip.Data.name}"); return; }
+            clips[clip.Data.name] = clip;
+            maps[clip.Data.name] = map;
+        }
+
         public void LoadClips()
         {
             _rig = GetComponent<AlphaRig>();
@@ -36,17 +62,12 @@ namespace CubeGame.AlphaTransfer
             foreach (var asset in clipAssets)
             {
                 if (asset == null) { Problems.Add("CLIP_ASSET_NULL"); continue; }
-                var clip = AlphaClip.Parse(asset.text, string.IsNullOrEmpty(_rig.rigId) ? AlphaRig.RigId : _rig.rigId, Problems);
-                if (clip == null) continue;
-                var map = new int[clip.PartCount];
-                for (int i = 0; i < map.Length; i++)
-                {
-                    map[i] = _rig.IndexOf(clip.Data.parts[i]);
-                    if (map[i] < 0) Problems.Add($"CLIP_PART_NOT_IN_RIG {clip.Data.name} {clip.Data.parts[i]}");
-                }
-                if (_clips.ContainsKey(clip.Data.name)) { Problems.Add($"CLIP_NAME_DUPLICATE {clip.Data.name}"); continue; }
-                _clips[clip.Data.name] = clip;
-                _maps[clip.Data.name] = map;
+                Add(asset.text, _clips, _maps, Problems);
+            }
+            foreach (var text in _clipJsonTexts)
+            {
+                if (string.IsNullOrEmpty(text)) { Problems.Add("CLIP_DOCUMENT_EMPTY"); continue; }
+                Add(text, _clips, _maps, Problems);
             }
         }
 

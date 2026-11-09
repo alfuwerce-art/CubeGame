@@ -27,18 +27,27 @@ namespace CubeGame.AlphaTransfer
         public float headLeanDeg;
 
         AlphaRig _rig;
+        string _specJson;
         public AlphaLocomotionSpec Spec { get; private set; }
         public List<string> Problems { get; } = new List<string>();
         int[] _parts = new int[0];
         string[] _names = new string[0];
         public int FramesApplied { get; private set; }
 
+        /// <summary>Provide the walk specification loaded from the local content cache (D86 runtime path).</summary>
+        public void SetSpecJson(string json)
+        {
+            _specJson = json;
+            Spec = null;
+        }
+
         public bool Load()
         {
             _rig = GetComponent<AlphaRig>();
             Problems.Clear();
-            if (specAsset == null) { Problems.Add("LOCOMOTION_SPEC_MISSING"); return false; }
-            Spec = AlphaLocomotionSpec.Parse(specAsset.text, Problems);
+            string text = specAsset != null ? specAsset.text : _specJson;
+            if (string.IsNullOrEmpty(text)) { Problems.Add("LOCOMOTION_SPEC_MISSING"); return false; }
+            Spec = AlphaLocomotionSpec.Parse(text, Problems);
             if (Spec == null) return false;
             if (!string.IsNullOrEmpty(_rig.rigId) && Spec.rig != _rig.rigId)
                 Problems.Add($"LOCOMOTION_RIG_MISMATCH spec={Spec.rig} rig={_rig.rigId}");

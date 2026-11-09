@@ -1,0 +1,16 @@
+{
+    "name": "CubeGame.Content",
+    "rootNamespace": "CubeGame.Content",
+    "references": [
+        "CubeGame.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

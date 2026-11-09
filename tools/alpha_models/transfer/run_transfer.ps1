@@ -26,6 +26,8 @@ param(
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path "$PSScriptRoot\..\..\..").Path
 $src  = Join-Path $PSScriptRoot 'unity'
+# D86: the runtime is the production module now (single source of truth); the pilot copies it in.
+$runtimeSrc = Join-Path $repo 'Assets\CubeGame\AlphaModels\Runtime'
 
 # --------------------------------------------------------------------- verdict logic
 # Single source of truth for PASS/FAIL: a step passes only when the marker file exists,
@@ -130,7 +132,8 @@ if (-not (Test-Path -LiteralPath "$Project\Packages\manifest.json")) {
 if (-not (Test-Path -LiteralPath "$Project\ProjectSettings\ProjectVersion.txt")) {
   "m_EditorVersion: 6000.3.27f2" | Set-Content -Encoding ascii "$Project\ProjectSettings\ProjectVersion.txt"
 }
-Copy-Item -Force "$src\Runtime\*" "$Project\Assets\AlphaTransfer\Scripts\Runtime\"
+Copy-Item -Force "$runtimeSrc\*.cs" "$Project\Assets\AlphaTransfer\Scripts\Runtime\"
+Copy-Item -Force "$src\Runtime\*" "$Project\Assets\AlphaTransfer\Scripts\Runtime\"   # research probes only
 Copy-Item -Force "$src\Editor\*"  "$Project\Assets\AlphaTransfer\Scripts\Editor\"
 
 # 2. data (local only: .scratch is git-ignored)

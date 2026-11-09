@@ -1,0 +1,19 @@
+{
+    "name": "CubeGame.Presentation.Visual",
+    "rootNamespace": "CubeGame.Presentation.Visual",
+    "references": [
+        "CubeGame.Core",
+        "CubeGame.Content",
+        "CubeGame.AlphaModels",
+        "CubeGame.Features.Creatures"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,110 @@
+{
+ "format": "cubegame.held_item_models/1",
+ "status": "EMULATED_ALPHA_CODE: models selected by executing item_icon_id; placements are the held block law",
+ "source": {
+  "selector": "0x004EC400",
+  "tool": "tools/alpha_models/catalog/item_models.py",
+  "sweep_sha256": "5fe90deb224ee98623c295ea4ee7e18f5274345d0614f8beb29a65e53f723cf9",
+  "note": "distilled ids/names/model files only; geometry stays in the local cache"
+ },
+ "items": [
+  {
+   "type": 1,
+   "subtype": 0,
+   "label": "consumable",
+   "model": "cookie.cub",
+   "modelIndex": 852
+  },
+  {
+   "type": 1,
+   "subtype": 1,
+   "label": "consumable",
+   "model": "life-potion.cub",
+   "modelIndex": 849
+  },
+  {
+   "type": 1,
+   "subtype": 2,
+   "label": "consumable",
+   "model": "cactus-potion.cub",
+   "modelIndex": 850
+  },
+  {
+   "type": 1,
+   "subtype": 3,
+   "label": "consumable",
+   "model": "mana-potion.cub",
+   "modelIndex": 851
+  },
+  {
+   "type": 1,
+   "subtype": 4,
+   "label": "consumable",
+   "model": "soup-ginseng.cub",
+   "modelIndex": 2395
+  },
+  {
+   "type": 1,
+   "subtype": 5,
+   "label": "consumable",
+   "model": "snow-berry-mash.cub",
+   "modelIndex": 2092
+  },
+  {
+   "type": 1,
+   "subtype": 6,
+   "label": "consumable",
+   "model": "mushroom-spit.cub",
+   "modelIndex": 2393
+  },
+  {
+   "type": 1,
+   "subtype": 7,
+   "label": "consumable",
+   "model": "bomb1.cub",
+   "modelIndex": 2546
+  },
+  {
+   "type": 1,
+   "subtype": 8,
+   "label": "consumable",
+   "model": "pineapple-slice.cub",
+   "modelIndex": 2335
+  },
+  {
+   "type": 1,
+   "subtype": 9,
+   "label": "consumable",
+   "model": "pumpkin-muffin.cub",
+   "modelIndex": 2333
+  },
+  {
+   "type": 1,
+   "subtype": 10,
+   "label": "consumable",
+   "model": "mushroom.cub",
+   "modelIndex": 843
+  },
+  {
+   "type": 23,
+   "subtype": 0,
+   "label": "hangGliderAndBoat",
+   "model": "glider.cub",
+   "modelIndex": 2547
+  },
+  {
+   "type": 23,
+   "subtype": 1,
+   "label": "hangGliderAndBoat",
+   "model": "boat2.cub",
+   "modelIndex": 2548
+  },
+  {
+   "type": 24,
+   "subtype": -1,
+   "label": "lamp",
+   "model": "lantern02.cub",
+   "modelIndex": 2433
+  }
+ ]
+}

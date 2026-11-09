@@ -1,5 +1,7 @@
 # `tools/alpha_models/transfer` — перенос оригинальных анимаций Alpha в Unity (S05A-2)
 
+**D86 (2026-11-09):** runtime-часть пилота **перенесена в основной Unity-проект** — `Assets/CubeGame/AlphaModels` (asmdef `CubeGame.AlphaModels`): `AlphaSpace`, `AlphaClip`, `AlphaRig`, `AlphaClipPlayer`, `AlphaParamWalk`, `AlphaLocomotionDriver`, `AlphaAnimationController`, `AlphaEntityContract`, `VoxelMesh`, шейдер. Источник истины — `Assets/`, копий в `tools` больше нет; здесь остаются исследовательские пробники (`*Probe.cs`) и Editor-проверки пилота. Новая точка входа для игры — `CubeGame.AlphaModels.AlphaActorView` (см. [M0-01 отчёт](../../../docs/reports/M0_01_DEEPSEEK_RUNTIME_REPORT.md)).
+
 **Дополнение 2026-11-06:** рабочий контроллер и автоматические oracle-actions одного гуманоида — [методичка](../../../docs/agents/ANIMATION_SYSTEM_PLAYBOOK.md), [отчёт](../../../docs/reports/S05A2_CLAUDE_CONTINUATION_REPORT.md). Новые клипы имеют статус `EMULATED_ALPHA_CODE`; явные Unity-переходы не выдаются за извлечённые Alpha. Актуальные EditMode-самотесты: **29**, включая реальные часы 30/60/120 Гц и интерполяцию оружия вокруг хвата. Старые числа ниже относятся к первоначальному пилоту.
 
 Методичка (порядок работы, форматы, пороги, типичные ошибки): [ANIMATION_TRANSFER_PLAYBOOK.md](../../../docs/agents/ANIMATION_TRANSFER_PLAYBOOK.md).
