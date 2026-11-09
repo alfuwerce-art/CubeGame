@@ -4,7 +4,8 @@
     "references": [
         "CubeGame.Core",
         "CubeGame.Content",
-        "CubeGame.AlphaModels"
+        "CubeGame.AlphaModels",
+        "CubeGame.Features"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

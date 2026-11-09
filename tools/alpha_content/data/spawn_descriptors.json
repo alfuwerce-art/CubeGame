@@ -1,0 +1,5778 @@
+{
+ "status": "EMULATED_ALPHA_CODE",
+ "cube": ".scratch\\alphatest2\\Cube.exe",
+ "record_bytes": 280,
+ "functions": {
+  "monster": "0x5C9B30",
+  "npc": "0x5CA0A0"
+ },
+ "seeds": [
+  {
+   "seed": 666666,
+   "records": [
+    {
+     "source": "monster",
+     "type": 11,
+     "kind": 12,
+     "weight": 0,
+     "stars": 0,
+     "level": 24,
+     "level16": 1,
+     "record_sha_prefix": "0b0c0000000000000000000000180000"
+    },
+    {
+     "source": "monster",
+     "type": 24,
+     "kind": 0,
+     "weight": 0,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "18000000000000000000000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 24,
+     "kind": 0,
+     "weight": 0,
+     "stars": 2,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "18000000000000000000000002010000"
+    },
+    {
+     "source": "monster",
+     "type": 23,
+     "kind": 0,
+     "weight": 0,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "17000000000000000000000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 23,
+     "kind": 1,
+     "weight": 0,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "17010000000000000000000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 20,
+     "kind": 26,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 1,
+     "record_sha_prefix": "141a0000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 6,
+     "stars": 1,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "02000000060000000500000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 5,
+     "weight": 28,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "020500001c0000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 1,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 5,
+     "weight": 35,
+     "stars": 1,
+     "level": 1,
+     "level16": 2,
+     "record_sha_prefix": "02050000230000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 2,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 3,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 50,
+     "stars": 1,
+     "level": 25,
+     "level16": 3,
+     "record_sha_prefix": "02000000320000000700000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 54,
+     "stars": 1,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "02000000360000000600000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 59,
+     "stars": 1,
+     "level": 27,
+     "level16": 4,
+     "record_sha_prefix": "020000003b00000005000000011b0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 4,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 8,
+     "weight": 34,
+     "stars": 0,
+     "level": 2,
+     "level16": 5,
+     "record_sha_prefix": "02080000220000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 70,
+     "stars": 0,
+     "level": 26,
+     "level16": 5,
+     "record_sha_prefix": "020000004600000007000000001a0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 5,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 7,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 11,
+     "weight": 4,
+     "stars": 0,
+     "level": 2,
+     "level16": 7,
+     "record_sha_prefix": "020b0000040000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 12,
+     "stars": 1,
+     "level": 27,
+     "level16": 7,
+     "record_sha_prefix": "020000000c00000004000000011b0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 7,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 37,
+     "stars": 0,
+     "level": 12,
+     "level16": 9,
+     "record_sha_prefix": "020000002500000008000000000c0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 79,
+     "stars": 0,
+     "level": 26,
+     "level16": 9,
+     "record_sha_prefix": "020000004f00000007000000001a0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 9,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 9,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 13,
+     "stars": 0,
+     "level": 11,
+     "level16": 11,
+     "record_sha_prefix": "020c00000d00000003000000000b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 15,
+     "weight": 58,
+     "stars": 0,
+     "level": 1,
+     "level16": 11,
+     "record_sha_prefix": "020f00003a0000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 11,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 2,
+     "weight": 57,
+     "stars": 1,
+     "level": 1,
+     "level16": 18,
+     "record_sha_prefix": "02020000390000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 57,
+     "stars": 1,
+     "level": 25,
+     "level16": 18,
+     "record_sha_prefix": "02000000390000000600000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 18,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 76,
+     "stars": 0,
+     "level": 27,
+     "level16": 19,
+     "record_sha_prefix": "020000004c00000007000000001b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 3,
+     "weight": 71,
+     "stars": 1,
+     "level": 1,
+     "level16": 19,
+     "record_sha_prefix": "02030000470000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 23,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 46,
+     "stars": 1,
+     "level": 12,
+     "level16": 24,
+     "record_sha_prefix": "020c00002e00000003000000010c0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 93,
+     "stars": 0,
+     "level": 26,
+     "level16": 24,
+     "record_sha_prefix": "020000005d00000007000000001a0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 24,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 72,
+     "stars": 0,
+     "level": 26,
+     "level16": 27,
+     "record_sha_prefix": "020000004800000007000000001a0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 11,
+     "weight": 1,
+     "stars": 0,
+     "level": 2,
+     "level16": 31,
+     "record_sha_prefix": "020b0000010000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 31,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 11,
+     "weight": 61,
+     "stars": 1,
+     "level": 2,
+     "level16": 38,
+     "record_sha_prefix": "020b00003d0000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 10,
+     "weight": 44,
+     "stars": 1,
+     "level": 2,
+     "level16": 38,
+     "record_sha_prefix": "020a00002c0000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 38,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 42,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 5,
+     "weight": 29,
+     "stars": 0,
+     "level": 1,
+     "level16": 48,
+     "record_sha_prefix": "020500001d0000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 6,
+     "weight": 35,
+     "stars": 1,
+     "level": 2,
+     "level16": 48,
+     "record_sha_prefix": "02060000230000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 99,
+     "stars": 0,
+     "level": 27,
+     "level16": 58,
+     "record_sha_prefix": "020000006300000005000000001b0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 58,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 65,
+     "stars": 1,
+     "level": 26,
+     "level16": 79,
+     "record_sha_prefix": "020000004100000005000000011a0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 79,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 61,
+     "stars": 1,
+     "level": 25,
+     "level16": 92,
+     "record_sha_prefix": "020000003d0000000500000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 39,
+     "stars": 1,
+     "level": 26,
+     "level16": 92,
+     "record_sha_prefix": "020000002700000006000000011a0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 87,
+     "stars": 1,
+     "level": 11,
+     "level16": 116,
+     "record_sha_prefix": "020c00005700000003000000010b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 74,
+     "stars": 1,
+     "level": 12,
+     "level16": 140,
+     "record_sha_prefix": "020c00004a00000003000000010c0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 10,
+     "weight": 35,
+     "stars": 1,
+     "level": 2,
+     "level16": 140,
+     "record_sha_prefix": "020a0000230000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 20,
+     "stars": 1,
+     "level": 25,
+     "level16": 186,
+     "record_sha_prefix": "02000000140000000500000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 40,
+     "stars": 1,
+     "level": 25,
+     "level16": 186,
+     "record_sha_prefix": "02000000280000000700000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 186,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 11,
+     "weight": 78,
+     "stars": 0,
+     "level": 2,
+     "level16": 362,
+     "record_sha_prefix": "020b00004e0000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 13,
+     "weight": 37,
+     "stars": 0,
+     "level": 1,
+     "level16": 362,
+     "record_sha_prefix": "020d0000250000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 4,
+     "weight": 61,
+     "stars": 1,
+     "level": 1,
+     "level16": 28289,
+     "record_sha_prefix": "020400003d0000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 64,
+     "stars": 1,
+     "level": 11,
+     "level16": 28289,
+     "record_sha_prefix": "020000004000000008000000010b0000"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 20981,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "03030000f55100000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 25026,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "030b0000c26100000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 8228,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "030a0000242000000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 31354,
+     "stars": 0,
+     "level": 1,
+     "level16": 2,
+     "record_sha_prefix": "030400007a7a00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 28779,
+     "stars": 0,
+     "level": 2,
+     "level16": 2,
+     "record_sha_prefix": "030a00006b7000000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 2,
+     "weight": 21481,
+     "stars": 0,
+     "level": 1,
+     "level16": 2,
+     "record_sha_prefix": "03020000e95300000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 7554,
+     "stars": 0,
+     "level": 2,
+     "level16": 2,
+     "record_sha_prefix": "03060000821d00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 21922,
+     "stars": 0,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "030d0000a25500000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 32400,
+     "stars": 0,
+     "level": 2,
+     "level16": 4,
+     "record_sha_prefix": "03060000907e00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 16,
+     "weight": 25167,
+     "stars": 0,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "031000004f6200000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 310,
+     "stars": 0,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "03030000360100000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 3022,
+     "stars": 0,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "03050000ce0b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 25174,
+     "stars": 0,
+     "level": 2,
+     "level16": 4,
+     "record_sha_prefix": "03080000566200000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 1527,
+     "stars": 0,
+     "level": 1,
+     "level16": 5,
+     "record_sha_prefix": "03050000f70500000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 28469,
+     "stars": 0,
+     "level": 2,
+     "level16": 7,
+     "record_sha_prefix": "030a0000356f00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 7011,
+     "stars": 0,
+     "level": 1,
+     "level16": 7,
+     "record_sha_prefix": "03040000631b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 24558,
+     "stars": 0,
+     "level": 1,
+     "level16": 7,
+     "record_sha_prefix": "03040000ee5f00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 14462,
+     "stars": 0,
+     "level": 2,
+     "level16": 7,
+     "record_sha_prefix": "030800007e3800000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 30238,
+     "stars": 0,
+     "level": 12,
+     "level16": 7,
+     "record_sha_prefix": "030c00001e76000000000000000c0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 24255,
+     "stars": 0,
+     "level": 1,
+     "level16": 9,
+     "record_sha_prefix": "03030000bf5e00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 0,
+     "weight": 117,
+     "stars": 0,
+     "level": 1,
+     "level16": 9,
+     "record_sha_prefix": "03000000750000000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 18490,
+     "stars": 0,
+     "level": 11,
+     "level16": 9,
+     "record_sha_prefix": "030c00003a48000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 20751,
+     "stars": 0,
+     "level": 2,
+     "level16": 10,
+     "record_sha_prefix": "030b00000f5100000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 31314,
+     "stars": 0,
+     "level": 1,
+     "level16": 12,
+     "record_sha_prefix": "03030000527a00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 7012,
+     "stars": 0,
+     "level": 2,
+     "level16": 12,
+     "record_sha_prefix": "030a0000641b00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 915,
+     "stars": 0,
+     "level": 1,
+     "level16": 12,
+     "record_sha_prefix": "03040000930300000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 23901,
+     "stars": 0,
+     "level": 11,
+     "level16": 13,
+     "record_sha_prefix": "030c00005d5d000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 27710,
+     "stars": 0,
+     "level": 1,
+     "level16": 15,
+     "record_sha_prefix": "030500003e6c00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 26719,
+     "stars": 0,
+     "level": 1,
+     "level16": 17,
+     "record_sha_prefix": "030d00005f6800000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 14406,
+     "stars": 0,
+     "level": 12,
+     "level16": 17,
+     "record_sha_prefix": "030c00004638000000000000000c0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 1962,
+     "stars": 0,
+     "level": 1,
+     "level16": 18,
+     "record_sha_prefix": "03010000aa0700000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 19787,
+     "stars": 0,
+     "level": 11,
+     "level16": 18,
+     "record_sha_prefix": "030c00004b4d000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 4994,
+     "stars": 0,
+     "level": 11,
+     "level16": 22,
+     "record_sha_prefix": "030c00008213000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 25497,
+     "stars": 0,
+     "level": 1,
+     "level16": 22,
+     "record_sha_prefix": "03040000996300000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 21557,
+     "stars": 0,
+     "level": 1,
+     "level16": 22,
+     "record_sha_prefix": "03050000355400000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 1958,
+     "stars": 0,
+     "level": 2,
+     "level16": 26,
+     "record_sha_prefix": "030a0000a60700000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 0,
+     "weight": 11887,
+     "stars": 0,
+     "level": 1,
+     "level16": 27,
+     "record_sha_prefix": "030000006f2e00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 5744,
+     "stars": 0,
+     "level": 2,
+     "level16": 32,
+     "record_sha_prefix": "03060000701600000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 16604,
+     "stars": 0,
+     "level": 1,
+     "level16": 32,
+     "record_sha_prefix": "03050000dc4000000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 30390,
+     "stars": 0,
+     "level": 11,
+     "level16": 37,
+     "record_sha_prefix": "030c0000b676000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 29182,
+     "stars": 0,
+     "level": 2,
+     "level16": 37,
+     "record_sha_prefix": "03060000fe7100000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 23725,
+     "stars": 0,
+     "level": 2,
+     "level16": 37,
+     "record_sha_prefix": "03080000ad5c00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 16271,
+     "stars": 0,
+     "level": 1,
+     "level16": 42,
+     "record_sha_prefix": "030d00008f3f00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 16,
+     "weight": 11162,
+     "stars": 0,
+     "level": 1,
+     "level16": 42,
+     "record_sha_prefix": "031000009a2b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 2,
+     "weight": 3487,
+     "stars": 0,
+     "level": 1,
+     "level16": 42,
+     "record_sha_prefix": "030200009f0d00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 774,
+     "stars": 0,
+     "level": 1,
+     "level16": 54,
+     "record_sha_prefix": "03030000060300000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 17342,
+     "stars": 0,
+     "level": 1,
+     "level16": 54,
+     "record_sha_prefix": "030d0000be4300000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 10182,
+     "stars": 0,
+     "level": 2,
+     "level16": 54,
+     "record_sha_prefix": "030a0000c62700000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 23774,
+     "stars": 0,
+     "level": 2,
+     "level16": 56,
+     "record_sha_prefix": "030b0000de5c00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 5623,
+     "stars": 0,
+     "level": 2,
+     "level16": 56,
+     "record_sha_prefix": "030a0000f71500000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 17302,
+     "stars": 0,
+     "level": 2,
+     "level16": 56,
+     "record_sha_prefix": "03060000964300000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 13842,
+     "stars": 0,
+     "level": 1,
+     "level16": 79,
+     "record_sha_prefix": "03030000123600000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 18189,
+     "stars": 0,
+     "level": 1,
+     "level16": 88,
+     "record_sha_prefix": "030500000d4700000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 32350,
+     "stars": 0,
+     "level": 2,
+     "level16": 88,
+     "record_sha_prefix": "030800005e7e00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 29185,
+     "stars": 0,
+     "level": 1,
+     "level16": 130,
+     "record_sha_prefix": "03040000017200000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 11186,
+     "stars": 0,
+     "level": 2,
+     "level16": 130,
+     "record_sha_prefix": "03060000b22b00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 26701,
+     "stars": 0,
+     "level": 2,
+     "level16": 130,
+     "record_sha_prefix": "030b00004d6800000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 18523,
+     "stars": 0,
+     "level": 2,
+     "level16": 136,
+     "record_sha_prefix": "030a00005b4800000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 14597,
+     "stars": 0,
+     "level": 11,
+     "level16": 136,
+     "record_sha_prefix": "030c00000539000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 29254,
+     "stars": 0,
+     "level": 1,
+     "level16": 136,
+     "record_sha_prefix": "030d0000467200000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 18899,
+     "stars": 0,
+     "level": 2,
+     "level16": 249,
+     "record_sha_prefix": "030a0000d34900000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 28647,
+     "stars": 0,
+     "level": 1,
+     "level16": 381,
+     "record_sha_prefix": "03040000e76f00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 25730,
+     "stars": 0,
+     "level": 2,
+     "level16": 33035,
+     "record_sha_prefix": "030a0000826400000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 28097,
+     "stars": 0,
+     "level": 1,
+     "level16": 33035,
+     "record_sha_prefix": "03030000c16d00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 5066,
+     "stars": 0,
+     "level": 1,
+     "level16": 33035,
+     "record_sha_prefix": "030d0000ca1300000000000000010100"
+    }
+   ]
+  },
+  {
+   "seed": 1,
+   "records": [
+    {
+     "source": "monster",
+     "type": 11,
+     "kind": 12,
+     "weight": 0,
+     "stars": 0,
+     "level": 24,
+     "level16": 1,
+     "record_sha_prefix": "0b0c0000000000000000000000180000"
+    },
+    {
+     "source": "monster",
+     "type": 24,
+     "kind": 0,
+     "weight": 0,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "18000000000000000000000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 23,
+     "kind": 0,
+     "weight": 0,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "17000000000000000000000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 23,
+     "kind": 1,
+     "weight": 0,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "17010000000000000000000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 20,
+     "kind": 34,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 1,
+     "record_sha_prefix": "14220000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 1,
+     "weight": 44,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "020100002c0000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 12,
+     "stars": 1,
+     "level": 25,
+     "level16": 2,
+     "record_sha_prefix": "020000000c0000000400000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 11,
+     "weight": 13,
+     "stars": 1,
+     "level": 2,
+     "level16": 2,
+     "record_sha_prefix": "020b00000d0000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 5,
+     "weight": 74,
+     "stars": 1,
+     "level": 1,
+     "level16": 3,
+     "record_sha_prefix": "020500004a0000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 3,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 10,
+     "stars": 1,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "020000000a0000000600000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 4,
+     "weight": 96,
+     "stars": 1,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "02040000600000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 16,
+     "weight": 11,
+     "stars": 1,
+     "level": 1,
+     "level16": 5,
+     "record_sha_prefix": "021000000b0000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 85,
+     "stars": 0,
+     "level": 11,
+     "level16": 5,
+     "record_sha_prefix": "020000005500000008000000000b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 3,
+     "weight": 49,
+     "stars": 0,
+     "level": 1,
+     "level16": 7,
+     "record_sha_prefix": "02030000310000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 86,
+     "stars": 1,
+     "level": 25,
+     "level16": 7,
+     "record_sha_prefix": "02000000560000000700000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 7,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 9,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 10,
+     "weight": 45,
+     "stars": 0,
+     "level": 2,
+     "level16": 12,
+     "record_sha_prefix": "020a00002d0000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 14,
+     "stars": 1,
+     "level": 1,
+     "level16": 14,
+     "record_sha_prefix": "020000000e0000000500000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 13,
+     "weight": 61,
+     "stars": 1,
+     "level": 1,
+     "level16": 14,
+     "record_sha_prefix": "020d00003d0000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 24,
+     "stars": 0,
+     "level": 26,
+     "level16": 15,
+     "record_sha_prefix": "020000001800000004000000001a0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 82,
+     "stars": 0,
+     "level": 26,
+     "level16": 15,
+     "record_sha_prefix": "020000005200000006000000001a0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 5,
+     "weight": 26,
+     "stars": 1,
+     "level": 1,
+     "level16": 18,
+     "record_sha_prefix": "020500001a0000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 18,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 24,
+     "stars": 0,
+     "level": 26,
+     "level16": 20,
+     "record_sha_prefix": "020000001800000007000000001a0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 85,
+     "stars": 0,
+     "level": 27,
+     "level16": 22,
+     "record_sha_prefix": "020000005500000007000000001b0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 22,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 11,
+     "weight": 25,
+     "stars": 0,
+     "level": 2,
+     "level16": 33,
+     "record_sha_prefix": "020b0000190000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 93,
+     "stars": 0,
+     "level": 1,
+     "level16": 33,
+     "record_sha_prefix": "020000005d0000000500000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 40,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 6,
+     "weight": 90,
+     "stars": 1,
+     "level": 2,
+     "level16": 43,
+     "record_sha_prefix": "020600005a0000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 13,
+     "stars": 1,
+     "level": 27,
+     "level16": 50,
+     "record_sha_prefix": "020000000d00000007000000011b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 70,
+     "stars": 1,
+     "level": 25,
+     "level16": 50,
+     "record_sha_prefix": "02000000460000000700000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 59,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 76,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 40,
+     "stars": 1,
+     "level": 26,
+     "level16": 83,
+     "record_sha_prefix": "020000002800000006000000011a0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 5,
+     "weight": 43,
+     "stars": 0,
+     "level": 1,
+     "level16": 83,
+     "record_sha_prefix": "020500002b0000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 83,
+     "stars": 1,
+     "level": 25,
+     "level16": 119,
+     "record_sha_prefix": "02000000530000000600000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 11,
+     "weight": 26,
+     "stars": 0,
+     "level": 2,
+     "level16": 119,
+     "record_sha_prefix": "020b00001a0000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 36,
+     "stars": 0,
+     "level": 1,
+     "level16": 136,
+     "record_sha_prefix": "02000000240000000700000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 3,
+     "stars": 0,
+     "level": 1,
+     "level16": 199,
+     "record_sha_prefix": "02000000030000000700000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 11,
+     "weight": 98,
+     "stars": 0,
+     "level": 2,
+     "level16": 434,
+     "record_sha_prefix": "020b0000620000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 54,
+     "stars": 1,
+     "level": 11,
+     "level16": 434,
+     "record_sha_prefix": "020000003600000008000000010b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 8,
+     "stars": 1,
+     "level": 25,
+     "level16": 8960,
+     "record_sha_prefix": "02000000080000000600000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 8960,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 23941,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "03060000855d00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 4449,
+     "stars": 0,
+     "level": 2,
+     "level16": 2,
+     "record_sha_prefix": "030a0000611100000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 10940,
+     "stars": 0,
+     "level": 2,
+     "level16": 2,
+     "record_sha_prefix": "030b0000bc2a00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 19897,
+     "stars": 0,
+     "level": 2,
+     "level16": 2,
+     "record_sha_prefix": "03080000b94d00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 12393,
+     "stars": 0,
+     "level": 1,
+     "level16": 2,
+     "record_sha_prefix": "03040000693000000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 17,
+     "weight": 13509,
+     "stars": 0,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "03110000c53400000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 15495,
+     "stars": 0,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "03040000873c00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 26268,
+     "stars": 0,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "030300009c6600000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 2376,
+     "stars": 0,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "030d0000480900000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 28149,
+     "stars": 0,
+     "level": 11,
+     "level16": 4,
+     "record_sha_prefix": "030c0000f56d000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 17612,
+     "stars": 0,
+     "level": 2,
+     "level16": 4,
+     "record_sha_prefix": "03080000cc4400000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 2,
+     "weight": 20972,
+     "stars": 0,
+     "level": 1,
+     "level16": 5,
+     "record_sha_prefix": "03020000ec5100000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 11058,
+     "stars": 0,
+     "level": 1,
+     "level16": 5,
+     "record_sha_prefix": "03050000322b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 32075,
+     "stars": 0,
+     "level": 11,
+     "level16": 5,
+     "record_sha_prefix": "030c00004b7d000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 28633,
+     "stars": 0,
+     "level": 2,
+     "level16": 6,
+     "record_sha_prefix": "03060000d96f00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 16,
+     "weight": 31982,
+     "stars": 0,
+     "level": 1,
+     "level16": 6,
+     "record_sha_prefix": "03100000ee7c00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 6477,
+     "stars": 0,
+     "level": 1,
+     "level16": 7,
+     "record_sha_prefix": "030500004d1900000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 8146,
+     "stars": 0,
+     "level": 2,
+     "level16": 9,
+     "record_sha_prefix": "03080000d21f00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 5973,
+     "stars": 0,
+     "level": 1,
+     "level16": 9,
+     "record_sha_prefix": "03040000551700000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 2678,
+     "stars": 0,
+     "level": 1,
+     "level16": 9,
+     "record_sha_prefix": "030d0000760a00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 27007,
+     "stars": 0,
+     "level": 1,
+     "level16": 10,
+     "record_sha_prefix": "030d00007f6900000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 24961,
+     "stars": 0,
+     "level": 1,
+     "level16": 11,
+     "record_sha_prefix": "030d0000816100000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 18110,
+     "stars": 0,
+     "level": 1,
+     "level16": 11,
+     "record_sha_prefix": "03040000be4600000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 17,
+     "weight": 15199,
+     "stars": 0,
+     "level": 1,
+     "level16": 14,
+     "record_sha_prefix": "031100005f3b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 13444,
+     "stars": 0,
+     "level": 1,
+     "level16": 14,
+     "record_sha_prefix": "03050000843400000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 9168,
+     "stars": 0,
+     "level": 1,
+     "level16": 14,
+     "record_sha_prefix": "03010000d02300000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 31531,
+     "stars": 0,
+     "level": 1,
+     "level16": 14,
+     "record_sha_prefix": "030300002b7b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 5725,
+     "stars": 0,
+     "level": 2,
+     "level16": 14,
+     "record_sha_prefix": "030600005d1600000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 3251,
+     "stars": 0,
+     "level": 1,
+     "level16": 14,
+     "record_sha_prefix": "030d0000b30c00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 24791,
+     "stars": 0,
+     "level": 2,
+     "level16": 16,
+     "record_sha_prefix": "03060000d76000000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 3276,
+     "stars": 0,
+     "level": 11,
+     "level16": 16,
+     "record_sha_prefix": "030c0000cc0c000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 5303,
+     "stars": 0,
+     "level": 1,
+     "level16": 16,
+     "record_sha_prefix": "03040000b71400000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 24962,
+     "stars": 0,
+     "level": 1,
+     "level16": 20,
+     "record_sha_prefix": "03030000826100000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 24567,
+     "stars": 0,
+     "level": 1,
+     "level16": 20,
+     "record_sha_prefix": "03050000f75f00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 29151,
+     "stars": 0,
+     "level": 12,
+     "level16": 20,
+     "record_sha_prefix": "030c0000df71000000000000000c0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 27606,
+     "stars": 0,
+     "level": 2,
+     "level16": 21,
+     "record_sha_prefix": "03080000d66b00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 6741,
+     "stars": 0,
+     "level": 2,
+     "level16": 21,
+     "record_sha_prefix": "030a0000551a00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 15891,
+     "stars": 0,
+     "level": 11,
+     "level16": 24,
+     "record_sha_prefix": "030c0000133e000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 0,
+     "weight": 3432,
+     "stars": 0,
+     "level": 1,
+     "level16": 24,
+     "record_sha_prefix": "03000000680d00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 19877,
+     "stars": 0,
+     "level": 1,
+     "level16": 27,
+     "record_sha_prefix": "03010000a54d00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 8636,
+     "stars": 0,
+     "level": 2,
+     "level16": 27,
+     "record_sha_prefix": "03060000bc2100000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 25791,
+     "stars": 0,
+     "level": 2,
+     "level16": 27,
+     "record_sha_prefix": "030b0000bf6400000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 10844,
+     "stars": 0,
+     "level": 2,
+     "level16": 34,
+     "record_sha_prefix": "030b00005c2a00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 32703,
+     "stars": 0,
+     "level": 2,
+     "level16": 34,
+     "record_sha_prefix": "03080000bf7f00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 4042,
+     "stars": 0,
+     "level": 1,
+     "level16": 34,
+     "record_sha_prefix": "03040000ca0f00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 25428,
+     "stars": 0,
+     "level": 12,
+     "level16": 36,
+     "record_sha_prefix": "030c00005463000000000000000c0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 28053,
+     "stars": 0,
+     "level": 1,
+     "level16": 36,
+     "record_sha_prefix": "03010000956d00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 9273,
+     "stars": 0,
+     "level": 2,
+     "level16": 36,
+     "record_sha_prefix": "03060000392400000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 20997,
+     "stars": 0,
+     "level": 1,
+     "level16": 46,
+     "record_sha_prefix": "030d0000055200000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 24979,
+     "stars": 0,
+     "level": 2,
+     "level16": 46,
+     "record_sha_prefix": "03080000936100000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 3690,
+     "stars": 0,
+     "level": 1,
+     "level16": 47,
+     "record_sha_prefix": "030500006a0e00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 12927,
+     "stars": 0,
+     "level": 11,
+     "level16": 56,
+     "record_sha_prefix": "030c00007f32000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 16,
+     "weight": 9858,
+     "stars": 0,
+     "level": 1,
+     "level16": 56,
+     "record_sha_prefix": "03100000822600000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 21109,
+     "stars": 0,
+     "level": 1,
+     "level16": 56,
+     "record_sha_prefix": "03040000755200000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 13037,
+     "stars": 0,
+     "level": 1,
+     "level16": 67,
+     "record_sha_prefix": "030d0000ed3200000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 16,
+     "weight": 17282,
+     "stars": 0,
+     "level": 1,
+     "level16": 67,
+     "record_sha_prefix": "03100000824300000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 12448,
+     "stars": 0,
+     "level": 2,
+     "level16": 83,
+     "record_sha_prefix": "03060000a03000000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 4715,
+     "stars": 0,
+     "level": 1,
+     "level16": 83,
+     "record_sha_prefix": "030500006b1200000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 15,
+     "weight": 821,
+     "stars": 0,
+     "level": 1,
+     "level16": 83,
+     "record_sha_prefix": "030f0000350300000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 2556,
+     "stars": 0,
+     "level": 1,
+     "level16": 101,
+     "record_sha_prefix": "03050000fc0900000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 13787,
+     "stars": 0,
+     "level": 1,
+     "level16": 101,
+     "record_sha_prefix": "03040000db3500000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 15,
+     "weight": 17584,
+     "stars": 0,
+     "level": 1,
+     "level16": 146,
+     "record_sha_prefix": "030f0000b04400000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 22494,
+     "stars": 0,
+     "level": 2,
+     "level16": 146,
+     "record_sha_prefix": "03080000de5700000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 7551,
+     "stars": 1,
+     "level": 12,
+     "level16": 249,
+     "record_sha_prefix": "030c00007f1d000000000000010c0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 28498,
+     "stars": 0,
+     "level": 1,
+     "level16": 424,
+     "record_sha_prefix": "03040000526f00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 10559,
+     "stars": 0,
+     "level": 2,
+     "level16": 33344,
+     "record_sha_prefix": "030a00003f2900000000000000020100"
+    }
+   ]
+  },
+  {
+   "seed": 4242,
+   "records": [
+    {
+     "source": "monster",
+     "type": 11,
+     "kind": 12,
+     "weight": 0,
+     "stars": 0,
+     "level": 24,
+     "level16": 1,
+     "record_sha_prefix": "0b0c0000000000000000000000180000"
+    },
+    {
+     "source": "monster",
+     "type": 24,
+     "kind": 0,
+     "weight": 0,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "18000000000000000000000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 23,
+     "kind": 0,
+     "weight": 0,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "17000000000000000000000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 23,
+     "kind": 1,
+     "weight": 0,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "17010000000000000000000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 20,
+     "kind": 87,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 1,
+     "record_sha_prefix": "14570000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 13,
+     "weight": 80,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "020d0000500000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 6,
+     "weight": 91,
+     "stars": 1,
+     "level": 2,
+     "level16": 2,
+     "record_sha_prefix": "020600005b0000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 11,
+     "weight": 58,
+     "stars": 1,
+     "level": 2,
+     "level16": 3,
+     "record_sha_prefix": "020b00003a0000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 2,
+     "weight": 69,
+     "stars": 1,
+     "level": 1,
+     "level16": 3,
+     "record_sha_prefix": "02020000450000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 4,
+     "stars": 0,
+     "level": 12,
+     "level16": 3,
+     "record_sha_prefix": "020c00000400000003000000000c0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 10,
+     "weight": 81,
+     "stars": 0,
+     "level": 2,
+     "level16": 5,
+     "record_sha_prefix": "020a0000510000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 88,
+     "stars": 0,
+     "level": 25,
+     "level16": 5,
+     "record_sha_prefix": "02000000580000000500000000190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 75,
+     "stars": 1,
+     "level": 12,
+     "level16": 6,
+     "record_sha_prefix": "020c00004b00000003000000010c0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 6,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 8,
+     "stars": 0,
+     "level": 11,
+     "level16": 8,
+     "record_sha_prefix": "020c00000800000003000000000b0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 8,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 89,
+     "stars": 0,
+     "level": 26,
+     "level16": 9,
+     "record_sha_prefix": "020000005900000004000000001a0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 9,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 52,
+     "stars": 1,
+     "level": 27,
+     "level16": 11,
+     "record_sha_prefix": "020000003400000007000000011b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 6,
+     "weight": 93,
+     "stars": 1,
+     "level": 2,
+     "level16": 11,
+     "record_sha_prefix": "020600005d0000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 5,
+     "weight": 2,
+     "stars": 1,
+     "level": 1,
+     "level16": 16,
+     "record_sha_prefix": "02050000020000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 16,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 64,
+     "stars": 0,
+     "level": 27,
+     "level16": 19,
+     "record_sha_prefix": "020000004000000005000000001b0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 19,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 9,
+     "stars": 1,
+     "level": 11,
+     "level16": 23,
+     "record_sha_prefix": "020000000900000008000000010b0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 23,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 25,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 87,
+     "stars": 0,
+     "level": 25,
+     "level16": 29,
+     "record_sha_prefix": "02000000570000000700000000190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 85,
+     "stars": 0,
+     "level": 25,
+     "level16": 31,
+     "record_sha_prefix": "02000000550000000700000000190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 8,
+     "weight": 35,
+     "stars": 0,
+     "level": 2,
+     "level16": 39,
+     "record_sha_prefix": "02080000230000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 39,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 44,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 60,
+     "stars": 0,
+     "level": 1,
+     "level16": 52,
+     "record_sha_prefix": "020000003c0000000600000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 52,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 5,
+     "weight": 91,
+     "stars": 0,
+     "level": 1,
+     "level16": 62,
+     "record_sha_prefix": "020500005b0000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 10,
+     "weight": 13,
+     "stars": 0,
+     "level": 2,
+     "level16": 62,
+     "record_sha_prefix": "020a00000d0000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 62,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 73,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 13,
+     "weight": 49,
+     "stars": 0,
+     "level": 1,
+     "level16": 81,
+     "record_sha_prefix": "020d0000310000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 10,
+     "weight": 28,
+     "stars": 1,
+     "level": 2,
+     "level16": 81,
+     "record_sha_prefix": "020a00001c0000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 23,
+     "stars": 1,
+     "level": 27,
+     "level16": 106,
+     "record_sha_prefix": "020000001700000005000000011b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 33,
+     "stars": 1,
+     "level": 1,
+     "level16": 266,
+     "record_sha_prefix": "02000000210000000400000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 8,
+     "stars": 1,
+     "level": 26,
+     "level16": 266,
+     "record_sha_prefix": "020000000800000007000000011a0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 40,
+     "stars": 1,
+     "level": 1,
+     "level16": 19853,
+     "record_sha_prefix": "02000000280000000600000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 6,
+     "weight": 90,
+     "stars": 1,
+     "level": 2,
+     "level16": 19853,
+     "record_sha_prefix": "020600005a0000000300000001020000"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 13691,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "030300007b3500000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 26088,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "03080000e86500000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 16,
+     "weight": 31842,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "03100000627c00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 17395,
+     "stars": 0,
+     "level": 1,
+     "level16": 2,
+     "record_sha_prefix": "03010000f34300000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 26510,
+     "stars": 0,
+     "level": 11,
+     "level16": 2,
+     "record_sha_prefix": "030c00008e67000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 4288,
+     "stars": 0,
+     "level": 2,
+     "level16": 2,
+     "record_sha_prefix": "030a0000c01000000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 13727,
+     "stars": 0,
+     "level": 1,
+     "level16": 2,
+     "record_sha_prefix": "030d00009f3500000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 18439,
+     "stars": 0,
+     "level": 1,
+     "level16": 3,
+     "record_sha_prefix": "030d0000074800000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 16012,
+     "stars": 0,
+     "level": 1,
+     "level16": 3,
+     "record_sha_prefix": "030500008c3e00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 17119,
+     "stars": 0,
+     "level": 12,
+     "level16": 4,
+     "record_sha_prefix": "030c0000df42000000000000000c0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 19359,
+     "stars": 0,
+     "level": 1,
+     "level16": 5,
+     "record_sha_prefix": "030400009f4b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 16693,
+     "stars": 0,
+     "level": 2,
+     "level16": 5,
+     "record_sha_prefix": "03080000354100000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 15317,
+     "stars": 0,
+     "level": 1,
+     "level16": 5,
+     "record_sha_prefix": "03010000d53b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 23422,
+     "stars": 0,
+     "level": 2,
+     "level16": 7,
+     "record_sha_prefix": "030b00007e5b00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 28805,
+     "stars": 0,
+     "level": 1,
+     "level16": 7,
+     "record_sha_prefix": "03010000857000000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 13094,
+     "stars": 0,
+     "level": 1,
+     "level16": 7,
+     "record_sha_prefix": "03050000263300000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 17,
+     "weight": 14084,
+     "stars": 0,
+     "level": 1,
+     "level16": 8,
+     "record_sha_prefix": "03110000043700000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 28133,
+     "stars": 0,
+     "level": 1,
+     "level16": 8,
+     "record_sha_prefix": "03050000e56d00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 13701,
+     "stars": 0,
+     "level": 1,
+     "level16": 8,
+     "record_sha_prefix": "03030000853500000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 25885,
+     "stars": 0,
+     "level": 1,
+     "level16": 9,
+     "record_sha_prefix": "030d00001d6500000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 18082,
+     "stars": 0,
+     "level": 1,
+     "level16": 9,
+     "record_sha_prefix": "03030000a24600000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 42,
+     "stars": 0,
+     "level": 2,
+     "level16": 10,
+     "record_sha_prefix": "030b00002a0000000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 20913,
+     "stars": 0,
+     "level": 2,
+     "level16": 10,
+     "record_sha_prefix": "03060000b15100000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 5300,
+     "stars": 0,
+     "level": 1,
+     "level16": 11,
+     "record_sha_prefix": "03040000b41400000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 25180,
+     "stars": 0,
+     "level": 1,
+     "level16": 11,
+     "record_sha_prefix": "030d00005c6200000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 19366,
+     "stars": 0,
+     "level": 1,
+     "level16": 11,
+     "record_sha_prefix": "03050000a64b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 32575,
+     "stars": 0,
+     "level": 2,
+     "level16": 13,
+     "record_sha_prefix": "030800003f7f00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 13163,
+     "stars": 0,
+     "level": 2,
+     "level16": 13,
+     "record_sha_prefix": "030b00006b3300000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 6074,
+     "stars": 0,
+     "level": 1,
+     "level16": 13,
+     "record_sha_prefix": "03040000ba1700000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 15816,
+     "stars": 0,
+     "level": 1,
+     "level16": 16,
+     "record_sha_prefix": "030d0000c83d00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 26223,
+     "stars": 0,
+     "level": 12,
+     "level16": 18,
+     "record_sha_prefix": "030c00006f66000000000000000c0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 20807,
+     "stars": 0,
+     "level": 1,
+     "level16": 18,
+     "record_sha_prefix": "03030000475100000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 31857,
+     "stars": 0,
+     "level": 1,
+     "level16": 18,
+     "record_sha_prefix": "03050000717c00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 15,
+     "weight": 1653,
+     "stars": 0,
+     "level": 1,
+     "level16": 19,
+     "record_sha_prefix": "030f0000750600000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 31701,
+     "stars": 0,
+     "level": 1,
+     "level16": 19,
+     "record_sha_prefix": "03050000d57b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 31527,
+     "stars": 0,
+     "level": 2,
+     "level16": 19,
+     "record_sha_prefix": "030a0000277b00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 2808,
+     "stars": 0,
+     "level": 1,
+     "level16": 22,
+     "record_sha_prefix": "03030000f80a00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 14393,
+     "stars": 0,
+     "level": 11,
+     "level16": 22,
+     "record_sha_prefix": "030c00003938000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 16779,
+     "stars": 0,
+     "level": 1,
+     "level16": 22,
+     "record_sha_prefix": "030500008b4100000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 27564,
+     "stars": 0,
+     "level": 2,
+     "level16": 24,
+     "record_sha_prefix": "030b0000ac6b00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 252,
+     "stars": 0,
+     "level": 11,
+     "level16": 24,
+     "record_sha_prefix": "030c0000fc00000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 26021,
+     "stars": 0,
+     "level": 2,
+     "level16": 27,
+     "record_sha_prefix": "030a0000a56500000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 9108,
+     "stars": 0,
+     "level": 1,
+     "level16": 35,
+     "record_sha_prefix": "03040000942300000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 24270,
+     "stars": 0,
+     "level": 2,
+     "level16": 35,
+     "record_sha_prefix": "03060000ce5e00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 3059,
+     "stars": 0,
+     "level": 1,
+     "level16": 38,
+     "record_sha_prefix": "03030000f30b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 16435,
+     "stars": 0,
+     "level": 1,
+     "level16": 46,
+     "record_sha_prefix": "030d0000334000000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 8958,
+     "stars": 0,
+     "level": 2,
+     "level16": 47,
+     "record_sha_prefix": "03080000fe2200000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 17668,
+     "stars": 0,
+     "level": 2,
+     "level16": 65,
+     "record_sha_prefix": "030b0000044500000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 9239,
+     "stars": 0,
+     "level": 1,
+     "level16": 65,
+     "record_sha_prefix": "030d0000172400000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 9327,
+     "stars": 0,
+     "level": 2,
+     "level16": 80,
+     "record_sha_prefix": "030600006f2400000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 3211,
+     "stars": 0,
+     "level": 1,
+     "level16": 80,
+     "record_sha_prefix": "030d00008b0c00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 31663,
+     "stars": 0,
+     "level": 1,
+     "level16": 82,
+     "record_sha_prefix": "030d0000af7b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 23669,
+     "stars": 0,
+     "level": 2,
+     "level16": 82,
+     "record_sha_prefix": "03080000755c00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 22723,
+     "stars": 0,
+     "level": 1,
+     "level16": 82,
+     "record_sha_prefix": "03040000c35800000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 18304,
+     "stars": 0,
+     "level": 1,
+     "level16": 118,
+     "record_sha_prefix": "03040000804700000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 7957,
+     "stars": 0,
+     "level": 1,
+     "level16": 136,
+     "record_sha_prefix": "03030000151f00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 22602,
+     "stars": 0,
+     "level": 1,
+     "level16": 136,
+     "record_sha_prefix": "030d00004a5800000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 31452,
+     "stars": 0,
+     "level": 2,
+     "level16": 189,
+     "record_sha_prefix": "03060000dc7a00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 15,
+     "weight": 21591,
+     "stars": 0,
+     "level": 1,
+     "level16": 189,
+     "record_sha_prefix": "030f0000575400000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 25289,
+     "stars": 0,
+     "level": 2,
+     "level16": 189,
+     "record_sha_prefix": "030b0000c96200000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 11158,
+     "stars": 0,
+     "level": 1,
+     "level16": 570,
+     "record_sha_prefix": "03050000962b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 28761,
+     "stars": 0,
+     "level": 2,
+     "level16": 623,
+     "record_sha_prefix": "03080000597000000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 21909,
+     "stars": 0,
+     "level": 1,
+     "level16": 623,
+     "record_sha_prefix": "03050000955500000000000000010100"
+    }
+   ]
+  },
+  {
+   "seed": 999983,
+   "records": [
+    {
+     "source": "monster",
+     "type": 11,
+     "kind": 12,
+     "weight": 0,
+     "stars": 0,
+     "level": 24,
+     "level16": 1,
+     "record_sha_prefix": "0b0c0000000000000000000000180000"
+    },
+    {
+     "source": "monster",
+     "type": 24,
+     "kind": 0,
+     "weight": 0,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "18000000000000000000000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 24,
+     "kind": 0,
+     "weight": 0,
+     "stars": 1,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "18000000000000000000000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 23,
+     "kind": 0,
+     "weight": 0,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "17000000000000000000000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 23,
+     "kind": 1,
+     "weight": 0,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "17010000000000000000000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 20,
+     "kind": 87,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 1,
+     "record_sha_prefix": "14570000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 3,
+     "weight": 84,
+     "stars": 1,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "02030000540000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 29,
+     "stars": 0,
+     "level": 26,
+     "level16": 2,
+     "record_sha_prefix": "020000001d00000006000000001a0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 76,
+     "stars": 1,
+     "level": 25,
+     "level16": 2,
+     "record_sha_prefix": "020000004c0000000600000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 2,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 24,
+     "stars": 0,
+     "level": 12,
+     "level16": 3,
+     "record_sha_prefix": "020c00001800000003000000000c0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 21,
+     "stars": 0,
+     "level": 11,
+     "level16": 3,
+     "record_sha_prefix": "020000001500000009000000000b0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 3,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 4,
+     "weight": 98,
+     "stars": 1,
+     "level": 1,
+     "level16": 3,
+     "record_sha_prefix": "02040000620000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 4,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 8,
+     "weight": 27,
+     "stars": 0,
+     "level": 2,
+     "level16": 6,
+     "record_sha_prefix": "020800001b0000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 17,
+     "stars": 1,
+     "level": 12,
+     "level16": 6,
+     "record_sha_prefix": "020c00001100000003000000010c0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 3,
+     "weight": 1,
+     "stars": 1,
+     "level": 1,
+     "level16": 7,
+     "record_sha_prefix": "02030000010000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 1,
+     "stars": 1,
+     "level": 1,
+     "level16": 7,
+     "record_sha_prefix": "02000000010000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 3,
+     "weight": 91,
+     "stars": 1,
+     "level": 1,
+     "level16": 8,
+     "record_sha_prefix": "020300005b0000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 8,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 28,
+     "stars": 1,
+     "level": 11,
+     "level16": 10,
+     "record_sha_prefix": "020c00001c00000003000000010b0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 10,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 6,
+     "weight": 73,
+     "stars": 1,
+     "level": 2,
+     "level16": 11,
+     "record_sha_prefix": "02060000490000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 11,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 28,
+     "stars": 0,
+     "level": 25,
+     "level16": 12,
+     "record_sha_prefix": "020000001c0000000500000000190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 50,
+     "stars": 0,
+     "level": 12,
+     "level16": 12,
+     "record_sha_prefix": "020c00003200000003000000000c0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 12,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 78,
+     "stars": 0,
+     "level": 27,
+     "level16": 14,
+     "record_sha_prefix": "020000004e00000005000000001b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 27,
+     "stars": 1,
+     "level": 25,
+     "level16": 14,
+     "record_sha_prefix": "020000001b0000000600000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 14,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 3,
+     "weight": 61,
+     "stars": 0,
+     "level": 1,
+     "level16": 17,
+     "record_sha_prefix": "020300003d0000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 56,
+     "stars": 1,
+     "level": 25,
+     "level16": 17,
+     "record_sha_prefix": "02000000380000000400000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 17,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 46,
+     "stars": 0,
+     "level": 1,
+     "level16": 18,
+     "record_sha_prefix": "020000002e0000000700000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 3,
+     "weight": 69,
+     "stars": 1,
+     "level": 1,
+     "level16": 18,
+     "record_sha_prefix": "02030000450000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 22,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 11,
+     "weight": 68,
+     "stars": 0,
+     "level": 2,
+     "level16": 30,
+     "record_sha_prefix": "020b0000440000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 63,
+     "stars": 0,
+     "level": 26,
+     "level16": 30,
+     "record_sha_prefix": "020000003f00000004000000001a0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 8,
+     "weight": 18,
+     "stars": 1,
+     "level": 2,
+     "level16": 33,
+     "record_sha_prefix": "02080000120000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 36,
+     "stars": 0,
+     "level": 1,
+     "level16": 33,
+     "record_sha_prefix": "02000000240000000600000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 90,
+     "stars": 1,
+     "level": 26,
+     "level16": 46,
+     "record_sha_prefix": "020000005a00000007000000011a0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 46,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 83,
+     "stars": 0,
+     "level": 25,
+     "level16": 53,
+     "record_sha_prefix": "02000000530000000700000000190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 63,
+     "stars": 0,
+     "level": 25,
+     "level16": 53,
+     "record_sha_prefix": "020000003f0000000400000000190000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 53,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 75,
+     "stars": 1,
+     "level": 11,
+     "level16": 58,
+     "record_sha_prefix": "020c00004b00000003000000010b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 92,
+     "stars": 1,
+     "level": 25,
+     "level16": 58,
+     "record_sha_prefix": "020000005c0000000500000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 3,
+     "stars": 1,
+     "level": 25,
+     "level16": 100,
+     "record_sha_prefix": "02000000030000000700000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 82,
+     "stars": 0,
+     "level": 1,
+     "level16": 100,
+     "record_sha_prefix": "02000000520000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 41,
+     "stars": 0,
+     "level": 1,
+     "level16": 105,
+     "record_sha_prefix": "02000000290000000500000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 25,
+     "stars": 0,
+     "level": 27,
+     "level16": 105,
+     "record_sha_prefix": "020000001900000007000000001b0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 105,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 76,
+     "stars": 1,
+     "level": 26,
+     "level16": 226,
+     "record_sha_prefix": "020000004c00000007000000011a0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 80,
+     "stars": 0,
+     "level": 25,
+     "level16": 226,
+     "record_sha_prefix": "02000000500000000400000000190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 47,
+     "stars": 1,
+     "level": 11,
+     "level16": 5729,
+     "record_sha_prefix": "020c00002f00000003000000010b0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 5729,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 12661,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "030a0000753100000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 21303,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "03050000375300000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 23964,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "030100009c5d00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 2,
+     "weight": 23103,
+     "stars": 0,
+     "level": 1,
+     "level16": 3,
+     "record_sha_prefix": "030200003f5a00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 5416,
+     "stars": 0,
+     "level": 2,
+     "level16": 3,
+     "record_sha_prefix": "030a0000281500000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 21379,
+     "stars": 0,
+     "level": 12,
+     "level16": 4,
+     "record_sha_prefix": "030c00008353000000000000000c0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 0,
+     "weight": 17870,
+     "stars": 0,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "03000000ce4500000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 17870,
+     "stars": 0,
+     "level": 1,
+     "level16": 5,
+     "record_sha_prefix": "03050000ce4500000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 3318,
+     "stars": 0,
+     "level": 1,
+     "level16": 6,
+     "record_sha_prefix": "03050000f60c00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 1592,
+     "stars": 0,
+     "level": 1,
+     "level16": 8,
+     "record_sha_prefix": "03040000380600000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 4573,
+     "stars": 0,
+     "level": 2,
+     "level16": 8,
+     "record_sha_prefix": "03080000dd1100000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 3411,
+     "stars": 0,
+     "level": 2,
+     "level16": 9,
+     "record_sha_prefix": "030a0000530d00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 17,
+     "weight": 32529,
+     "stars": 0,
+     "level": 1,
+     "level16": 9,
+     "record_sha_prefix": "03110000117f00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 4792,
+     "stars": 0,
+     "level": 12,
+     "level16": 11,
+     "record_sha_prefix": "030c0000b812000000000000000c0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 1545,
+     "stars": 0,
+     "level": 1,
+     "level16": 13,
+     "record_sha_prefix": "03010000090600000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 26108,
+     "stars": 0,
+     "level": 2,
+     "level16": 13,
+     "record_sha_prefix": "03060000fc6500000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 20191,
+     "stars": 0,
+     "level": 1,
+     "level16": 16,
+     "record_sha_prefix": "030d0000df4e00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 14091,
+     "stars": 0,
+     "level": 2,
+     "level16": 16,
+     "record_sha_prefix": "030600000b3700000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 17,
+     "weight": 15129,
+     "stars": 0,
+     "level": 1,
+     "level16": 17,
+     "record_sha_prefix": "03110000193b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 20156,
+     "stars": 0,
+     "level": 2,
+     "level16": 17,
+     "record_sha_prefix": "03060000bc4e00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 22523,
+     "stars": 0,
+     "level": 1,
+     "level16": 17,
+     "record_sha_prefix": "030d0000fb5700000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 15,
+     "weight": 4002,
+     "stars": 0,
+     "level": 1,
+     "level16": 18,
+     "record_sha_prefix": "030f0000a20f00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 12903,
+     "stars": 0,
+     "level": 2,
+     "level16": 18,
+     "record_sha_prefix": "03060000673200000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 2943,
+     "stars": 0,
+     "level": 1,
+     "level16": 18,
+     "record_sha_prefix": "030400007f0b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 24030,
+     "stars": 0,
+     "level": 1,
+     "level16": 23,
+     "record_sha_prefix": "03030000de5d00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 27065,
+     "stars": 0,
+     "level": 2,
+     "level16": 26,
+     "record_sha_prefix": "030a0000b96900000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 16,
+     "weight": 15062,
+     "stars": 0,
+     "level": 1,
+     "level16": 26,
+     "record_sha_prefix": "03100000d63a00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 0,
+     "weight": 17014,
+     "stars": 0,
+     "level": 1,
+     "level16": 26,
+     "record_sha_prefix": "03000000764200000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 3143,
+     "stars": 0,
+     "level": 1,
+     "level16": 29,
+     "record_sha_prefix": "03040000470c00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 26589,
+     "stars": 0,
+     "level": 1,
+     "level16": 29,
+     "record_sha_prefix": "03050000dd6700000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 19134,
+     "stars": 0,
+     "level": 1,
+     "level16": 29,
+     "record_sha_prefix": "030d0000be4a00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 25994,
+     "stars": 0,
+     "level": 1,
+     "level16": 33,
+     "record_sha_prefix": "030400008a6500000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 22852,
+     "stars": 0,
+     "level": 1,
+     "level16": 33,
+     "record_sha_prefix": "03050000445900000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 6492,
+     "stars": 0,
+     "level": 1,
+     "level16": 33,
+     "record_sha_prefix": "030100005c1900000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 16,
+     "weight": 27564,
+     "stars": 0,
+     "level": 1,
+     "level16": 39,
+     "record_sha_prefix": "03100000ac6b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 18175,
+     "stars": 0,
+     "level": 1,
+     "level16": 39,
+     "record_sha_prefix": "03010000ff4600000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 8827,
+     "stars": 0,
+     "level": 1,
+     "level16": 39,
+     "record_sha_prefix": "030300007b2200000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 9456,
+     "stars": 0,
+     "level": 1,
+     "level16": 44,
+     "record_sha_prefix": "03040000f02400000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 7039,
+     "stars": 0,
+     "level": 1,
+     "level16": 44,
+     "record_sha_prefix": "030d00007f1b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 23448,
+     "stars": 0,
+     "level": 2,
+     "level16": 48,
+     "record_sha_prefix": "030b0000985b00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 19797,
+     "stars": 0,
+     "level": 2,
+     "level16": 48,
+     "record_sha_prefix": "03060000554d00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 12936,
+     "stars": 0,
+     "level": 1,
+     "level16": 65,
+     "record_sha_prefix": "03040000883200000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 0,
+     "weight": 9394,
+     "stars": 0,
+     "level": 1,
+     "level16": 70,
+     "record_sha_prefix": "03000000b22400000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 18341,
+     "stars": 0,
+     "level": 2,
+     "level16": 88,
+     "record_sha_prefix": "03060000a54700000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 10440,
+     "stars": 0,
+     "level": 1,
+     "level16": 88,
+     "record_sha_prefix": "03030000c82800000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 7665,
+     "stars": 0,
+     "level": 2,
+     "level16": 88,
+     "record_sha_prefix": "03080000f11d00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 346,
+     "stars": 0,
+     "level": 1,
+     "level16": 121,
+     "record_sha_prefix": "030300005a0100000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 3220,
+     "stars": 0,
+     "level": 2,
+     "level16": 161,
+     "record_sha_prefix": "030a0000940c00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 17,
+     "weight": 594,
+     "stars": 0,
+     "level": 1,
+     "level16": 243,
+     "record_sha_prefix": "03110000520200000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 21962,
+     "stars": 0,
+     "level": 1,
+     "level16": 243,
+     "record_sha_prefix": "03050000ca5500000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 17750,
+     "stars": 0,
+     "level": 2,
+     "level16": 494,
+     "record_sha_prefix": "030a0000564500000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 31477,
+     "stars": 0,
+     "level": 2,
+     "level16": 494,
+     "record_sha_prefix": "03060000f57a00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 6418,
+     "stars": 0,
+     "level": 2,
+     "level16": 494,
+     "record_sha_prefix": "030b0000121900000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 29635,
+     "stars": 0,
+     "level": 2,
+     "level16": 17895,
+     "record_sha_prefix": "030a0000c37300000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 16,
+     "weight": 23187,
+     "stars": 0,
+     "level": 1,
+     "level16": 17895,
+     "record_sha_prefix": "03100000935a00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 29449,
+     "stars": 0,
+     "level": 2,
+     "level16": 17895,
+     "record_sha_prefix": "030b0000097300000000000000020100"
+    }
+   ]
+  },
+  {
+   "seed": 31337,
+   "records": [
+    {
+     "source": "monster",
+     "type": 11,
+     "kind": 12,
+     "weight": 0,
+     "stars": 0,
+     "level": 24,
+     "level16": 1,
+     "record_sha_prefix": "0b0c0000000000000000000000180000"
+    },
+    {
+     "source": "monster",
+     "type": 24,
+     "kind": 0,
+     "weight": 0,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "18000000000000000000000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 23,
+     "kind": 0,
+     "weight": 0,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "17000000000000000000000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 23,
+     "kind": 1,
+     "weight": 0,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "17010000000000000000000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 20,
+     "kind": 30,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 1,
+     "record_sha_prefix": "141e0000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 8,
+     "weight": 55,
+     "stars": 1,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "02080000370000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 11,
+     "weight": 35,
+     "stars": 0,
+     "level": 2,
+     "level16": 1,
+     "record_sha_prefix": "020b0000230000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 1,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 1,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 11,
+     "weight": 65,
+     "stars": 1,
+     "level": 2,
+     "level16": 3,
+     "record_sha_prefix": "020b0000410000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 3,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 13,
+     "weight": 80,
+     "stars": 0,
+     "level": 1,
+     "level16": 3,
+     "record_sha_prefix": "020d0000500000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 66,
+     "stars": 0,
+     "level": 25,
+     "level16": 3,
+     "record_sha_prefix": "02000000420000000700000000190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 9,
+     "stars": 0,
+     "level": 1,
+     "level16": 5,
+     "record_sha_prefix": "02000000090000000500000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 5,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 19,
+     "stars": 0,
+     "level": 26,
+     "level16": 7,
+     "record_sha_prefix": "020000001300000007000000001a0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 39,
+     "stars": 1,
+     "level": 1,
+     "level16": 7,
+     "record_sha_prefix": "02000000270000000500000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 7,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 11,
+     "weight": 84,
+     "stars": 0,
+     "level": 2,
+     "level16": 8,
+     "record_sha_prefix": "020b0000540000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 8,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 3,
+     "weight": 64,
+     "stars": 0,
+     "level": 1,
+     "level16": 9,
+     "record_sha_prefix": "02030000400000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 66,
+     "stars": 1,
+     "level": 26,
+     "level16": 11,
+     "record_sha_prefix": "020000004200000006000000011a0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 11,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 14,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 4,
+     "weight": 32,
+     "stars": 1,
+     "level": 1,
+     "level16": 15,
+     "record_sha_prefix": "02040000200000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 16,
+     "weight": 99,
+     "stars": 0,
+     "level": 1,
+     "level16": 16,
+     "record_sha_prefix": "02100000630000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 17,
+     "weight": 42,
+     "stars": 1,
+     "level": 1,
+     "level16": 18,
+     "record_sha_prefix": "021100002a0000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 17,
+     "weight": 14,
+     "stars": 0,
+     "level": 1,
+     "level16": 18,
+     "record_sha_prefix": "021100000e0000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 18,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 3,
+     "weight": 82,
+     "stars": 1,
+     "level": 1,
+     "level16": 22,
+     "record_sha_prefix": "02030000520000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 78,
+     "stars": 1,
+     "level": 1,
+     "level16": 22,
+     "record_sha_prefix": "020000004e0000000700000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 15,
+     "weight": 16,
+     "stars": 0,
+     "level": 1,
+     "level16": 24,
+     "record_sha_prefix": "020f0000100000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 5,
+     "weight": 31,
+     "stars": 1,
+     "level": 1,
+     "level16": 24,
+     "record_sha_prefix": "020500001f0000000300000001010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 12,
+     "weight": 82,
+     "stars": 0,
+     "level": 11,
+     "level16": 29,
+     "record_sha_prefix": "020c00005200000003000000000b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 34,
+     "stars": 0,
+     "level": 27,
+     "level16": 32,
+     "record_sha_prefix": "020000002200000007000000001b0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 32,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 54,
+     "stars": 1,
+     "level": 26,
+     "level16": 40,
+     "record_sha_prefix": "020000003600000004000000011a0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 40,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 19,
+     "stars": 1,
+     "level": 25,
+     "level16": 47,
+     "record_sha_prefix": "02000000130000000600000001190000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 5,
+     "weight": 71,
+     "stars": 0,
+     "level": 1,
+     "level16": 56,
+     "record_sha_prefix": "02050000470000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 58,
+     "stars": 0,
+     "level": 27,
+     "level16": 56,
+     "record_sha_prefix": "020000003a00000007000000001b0000"
+    },
+    {
+     "source": "monster",
+     "type": 1,
+     "kind": 7,
+     "weight": 0,
+     "stars": 0,
+     "level": 0,
+     "level16": 56,
+     "record_sha_prefix": "01070000000000000000000000000000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 25,
+     "stars": 0,
+     "level": 27,
+     "level16": 67,
+     "record_sha_prefix": "020000001900000007000000001b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 6,
+     "weight": 35,
+     "stars": 1,
+     "level": 2,
+     "level16": 95,
+     "record_sha_prefix": "02060000230000000300000001020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 67,
+     "stars": 0,
+     "level": 1,
+     "level16": 95,
+     "record_sha_prefix": "02000000430000000500000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 13,
+     "weight": 40,
+     "stars": 0,
+     "level": 1,
+     "level16": 110,
+     "record_sha_prefix": "020d0000280000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 83,
+     "stars": 1,
+     "level": 27,
+     "level16": 110,
+     "record_sha_prefix": "020000005300000005000000011b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 10,
+     "weight": 72,
+     "stars": 0,
+     "level": 2,
+     "level16": 164,
+     "record_sha_prefix": "020a0000480000000300000000020000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 76,
+     "stars": 1,
+     "level": 27,
+     "level16": 536,
+     "record_sha_prefix": "020000004c00000005000000011b0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 4,
+     "weight": 15,
+     "stars": 0,
+     "level": 1,
+     "level16": 536,
+     "record_sha_prefix": "020400000f0000000300000000010000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 84,
+     "stars": 0,
+     "level": 12,
+     "level16": 3909,
+     "record_sha_prefix": "020000005400000009000000000c0000"
+    },
+    {
+     "source": "monster",
+     "type": 2,
+     "kind": 0,
+     "weight": 10,
+     "stars": 0,
+     "level": 25,
+     "level16": 3909,
+     "record_sha_prefix": "020000000a0000000500000000190000"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 10669,
+     "stars": 0,
+     "level": 11,
+     "level16": 1,
+     "record_sha_prefix": "030c0000ad29000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 5864,
+     "stars": 0,
+     "level": 1,
+     "level16": 1,
+     "record_sha_prefix": "03050000e81600000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 8615,
+     "stars": 0,
+     "level": 1,
+     "level16": 2,
+     "record_sha_prefix": "03050000a72100000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 29176,
+     "stars": 0,
+     "level": 1,
+     "level16": 2,
+     "record_sha_prefix": "030d0000f87100000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 23106,
+     "stars": 0,
+     "level": 1,
+     "level16": 2,
+     "record_sha_prefix": "03010000425a00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 16,
+     "weight": 17183,
+     "stars": 0,
+     "level": 1,
+     "level16": 2,
+     "record_sha_prefix": "031000001f4300000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 475,
+     "stars": 0,
+     "level": 1,
+     "level16": 2,
+     "record_sha_prefix": "03050000db0100000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 11700,
+     "stars": 0,
+     "level": 1,
+     "level16": 3,
+     "record_sha_prefix": "03040000b42d00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 20515,
+     "stars": 0,
+     "level": 1,
+     "level16": 3,
+     "record_sha_prefix": "03030000235000000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 17487,
+     "stars": 0,
+     "level": 2,
+     "level16": 4,
+     "record_sha_prefix": "030600004f4400000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 16,
+     "weight": 9947,
+     "stars": 0,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "03100000db2600000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 2,
+     "weight": 31656,
+     "stars": 0,
+     "level": 1,
+     "level16": 4,
+     "record_sha_prefix": "03020000a87b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 24802,
+     "stars": 0,
+     "level": 1,
+     "level16": 5,
+     "record_sha_prefix": "03030000e26000000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 21136,
+     "stars": 0,
+     "level": 1,
+     "level16": 5,
+     "record_sha_prefix": "030d0000905200000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 1098,
+     "stars": 0,
+     "level": 2,
+     "level16": 6,
+     "record_sha_prefix": "030a00004a0400000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 15715,
+     "stars": 0,
+     "level": 11,
+     "level16": 6,
+     "record_sha_prefix": "030c0000633d000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 19184,
+     "stars": 0,
+     "level": 11,
+     "level16": 8,
+     "record_sha_prefix": "030c0000f04a000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 24239,
+     "stars": 0,
+     "level": 2,
+     "level16": 8,
+     "record_sha_prefix": "03080000af5e00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 14373,
+     "stars": 0,
+     "level": 12,
+     "level16": 8,
+     "record_sha_prefix": "030c00002538000000000000000c0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 19695,
+     "stars": 0,
+     "level": 11,
+     "level16": 10,
+     "record_sha_prefix": "030c0000ef4c000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 8023,
+     "stars": 0,
+     "level": 1,
+     "level16": 10,
+     "record_sha_prefix": "03050000571f00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 17,
+     "weight": 15630,
+     "stars": 0,
+     "level": 1,
+     "level16": 10,
+     "record_sha_prefix": "031100000e3d00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 3148,
+     "stars": 0,
+     "level": 12,
+     "level16": 12,
+     "record_sha_prefix": "030c00004c0c000000000000000c0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 2938,
+     "stars": 0,
+     "level": 1,
+     "level16": 12,
+     "record_sha_prefix": "030300007a0b00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 20841,
+     "stars": 0,
+     "level": 2,
+     "level16": 14,
+     "record_sha_prefix": "030a0000695100000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 24228,
+     "stars": 0,
+     "level": 11,
+     "level16": 14,
+     "record_sha_prefix": "030c0000a45e000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 16,
+     "weight": 10117,
+     "stars": 0,
+     "level": 1,
+     "level16": 14,
+     "record_sha_prefix": "03100000852700000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 6423,
+     "stars": 0,
+     "level": 1,
+     "level16": 17,
+     "record_sha_prefix": "03050000171900000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 6054,
+     "stars": 0,
+     "level": 1,
+     "level16": 18,
+     "record_sha_prefix": "03040000a61700000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 5737,
+     "stars": 0,
+     "level": 2,
+     "level16": 23,
+     "record_sha_prefix": "03080000691600000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 18361,
+     "stars": 0,
+     "level": 2,
+     "level16": 23,
+     "record_sha_prefix": "03060000b94700000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 28696,
+     "stars": 0,
+     "level": 1,
+     "level16": 25,
+     "record_sha_prefix": "03040000187000000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 4221,
+     "stars": 0,
+     "level": 2,
+     "level16": 28,
+     "record_sha_prefix": "030a00007d1000000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 3785,
+     "stars": 0,
+     "level": 1,
+     "level16": 28,
+     "record_sha_prefix": "03030000c90e00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 12827,
+     "stars": 0,
+     "level": 11,
+     "level16": 28,
+     "record_sha_prefix": "030c00001b32000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 16,
+     "weight": 3777,
+     "stars": 0,
+     "level": 1,
+     "level16": 34,
+     "record_sha_prefix": "03100000c10e00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 13,
+     "weight": 26006,
+     "stars": 0,
+     "level": 1,
+     "level16": 34,
+     "record_sha_prefix": "030d0000966500000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 3726,
+     "stars": 0,
+     "level": 2,
+     "level16": 34,
+     "record_sha_prefix": "030b00008e0e00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 10,
+     "weight": 21311,
+     "stars": 0,
+     "level": 2,
+     "level16": 40,
+     "record_sha_prefix": "030a00003f5300000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 3,
+     "weight": 28981,
+     "stars": 0,
+     "level": 1,
+     "level16": 40,
+     "record_sha_prefix": "03030000357100000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 1777,
+     "stars": 0,
+     "level": 2,
+     "level16": 40,
+     "record_sha_prefix": "03060000f10600000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 32763,
+     "stars": 0,
+     "level": 1,
+     "level16": 41,
+     "record_sha_prefix": "03040000fb7f00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 16494,
+     "stars": 0,
+     "level": 2,
+     "level16": 55,
+     "record_sha_prefix": "030600006e4000000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 18835,
+     "stars": 0,
+     "level": 11,
+     "level16": 55,
+     "record_sha_prefix": "030c00009349000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 5,
+     "weight": 1476,
+     "stars": 0,
+     "level": 1,
+     "level16": 55,
+     "record_sha_prefix": "03050000c40500000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 26319,
+     "stars": 0,
+     "level": 11,
+     "level16": 56,
+     "record_sha_prefix": "030c0000cf66000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 9851,
+     "stars": 0,
+     "level": 2,
+     "level16": 56,
+     "record_sha_prefix": "030b00007b2600000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 17,
+     "weight": 29339,
+     "stars": 1,
+     "level": 1,
+     "level16": 67,
+     "record_sha_prefix": "031100009b7200000000000001010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 41,
+     "stars": 0,
+     "level": 2,
+     "level16": 86,
+     "record_sha_prefix": "030b0000290000000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 4186,
+     "stars": 0,
+     "level": 1,
+     "level16": 129,
+     "record_sha_prefix": "030100005a1000000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 30132,
+     "stars": 0,
+     "level": 11,
+     "level16": 129,
+     "record_sha_prefix": "030c0000b475000000000000000b0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 12247,
+     "stars": 0,
+     "level": 1,
+     "level16": 168,
+     "record_sha_prefix": "03040000d72f00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 1,
+     "weight": 26794,
+     "stars": 0,
+     "level": 1,
+     "level16": 168,
+     "record_sha_prefix": "03010000aa6800000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 549,
+     "stars": 0,
+     "level": 2,
+     "level16": 168,
+     "record_sha_prefix": "030b0000250200000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 29176,
+     "stars": 0,
+     "level": 1,
+     "level16": 274,
+     "record_sha_prefix": "03040000f87100000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 6,
+     "weight": 3060,
+     "stars": 0,
+     "level": 2,
+     "level16": 274,
+     "record_sha_prefix": "03060000f40b00000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 4,
+     "weight": 20288,
+     "stars": 0,
+     "level": 1,
+     "level16": 315,
+     "record_sha_prefix": "03040000404f00000000000000010100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 11,
+     "weight": 16768,
+     "stars": 0,
+     "level": 2,
+     "level16": 29572,
+     "record_sha_prefix": "030b0000804100000000000000020100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 12,
+     "weight": 24553,
+     "stars": 0,
+     "level": 12,
+     "level16": 29572,
+     "record_sha_prefix": "030c0000e95f000000000000000c0100"
+    },
+    {
+     "source": "npc",
+     "type": 3,
+     "kind": 8,
+     "weight": 15781,
+     "stars": 0,
+     "level": 2,
+     "level16": 29572,
+     "record_sha_prefix": "03080000a53d00000000000000020100"
+    }
+   ]
+  }
+ ],
+ "problems": [],
+ "RESULT": "PASS"
+}
