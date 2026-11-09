@@ -1,7 +1,7 @@
 # Единый контракт сущности, частей и анимаций (Alpha → Unity)
 
 **Статус: DRAFT** (предложение архитектора, не утверждено продюсером). **Дата:** 2026-11-06. **Автор:** Claude Code, задача S05A2-UNIVERSAL-CONTINUE-01.
-**Код:** [contract.py](../../tools/alpha_models/universal/contract.py), [transfer_planner.py](../../tools/alpha_models/universal/transfer_planner.py), [AlphaEntityContract.cs](../../tools/alpha_models/transfer/unity/Runtime/AlphaEntityContract.cs), [AlphaEntityProbe.cs](../../tools/alpha_models/transfer/unity/Runtime/AlphaEntityProbe.cs), [AlphaEntityPlayMode.cs](../../tools/alpha_models/transfer/unity/Editor/AlphaEntityPlayMode.cs).
+**Код:** [contract.py](../../tools/alpha_models/universal/contract.py), [transfer_planner.py](../../tools/alpha_models/universal/transfer_planner.py), [AlphaEntityContract.cs](../../Assets/CubeGame/AlphaModels/Runtime/AlphaEntityContract.cs) (D86: перенесён в основной проект), [AlphaEntityProbe.cs](../../tools/alpha_models/transfer/unity/Runtime/AlphaEntityProbe.cs), [AlphaEntityPlayMode.cs](../../tools/alpha_models/transfer/unity/Editor/AlphaEntityPlayMode.cs).
 **Отчёт:** [S05A2_UNIVERSAL_CONTINUATION_REPORT](../reports/S05A2_UNIVERSAL_CONTINUATION_REPORT.md). **Предыдущая архитектура:** [UNIVERSAL_ASSET_ANIMATION_PIPELINE](UNIVERSAL_ASSET_ANIMATION_PIPELINE.md) (остаётся в силе, этот документ её дополняет).
 **Границы:** S05A-2 IN_PROGRESS, S05B NOT_AUTHORIZED. Данные Alpha — только `.scratch` (D54).
 

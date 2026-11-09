@@ -26,7 +26,7 @@
 | Слой | Файл | Кто меняет |
 |---|---|---|
 | **Ядро формулы** (эталон) | `tools/alpha_models/universal/param_walk.py`: `core`, `joints`, `head_lean_target`, `lean_step`, `phase_rate`, `TERMS`, `terms_used`, `classify` | только архитектор (ревью) |
-| **Ядро формулы** (порт) | `transfer/unity/Runtime/AlphaParamWalk.cs` | только вместе с эталоном, в одном коммите; GOLDEN обязателен |
+| **Ядро формулы** (порт) | `Assets/CubeGame/AlphaModels/Runtime/AlphaParamWalk.cs` (D86: перенесён из `transfer/unity/Runtime`, источник истины — `Assets/`) | только вместе с эталоном, в одном коммите; GOLDEN обязателен |
 | Экспорт/валидация | `param_walk.py`: `generate_walk_clip`, `locomotion_spec`, `golden_cases`, `reference_frames`, `validate_capture`, `coverage`; `pipeline.py`: `param-walk-validate`, `param-walk-coverage`, `prepare-unity` (`_prepare_locomotion`) | архитектор; исполнитель — только исправления ошибок с тестом |
 | Рантайм Unity | `AlphaLocomotionDriver.cs`, `AlphaLocomotionProbe.cs` | исполнитель может добавлять входы игры (скорость, состояния), не меняя `Joint` |
 | Проверки Unity | `Editor/AlphaParamWalkCheck.cs`, `Editor/AlphaParamWalkPlayMode.cs` | пороги не ослаблять |
