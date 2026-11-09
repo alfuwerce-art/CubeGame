@@ -70,6 +70,14 @@ namespace CubeGame.Features.Creatures
             for (int i = 0; i < plan.Items.Count; i++)
             {
                 var item = plan.Items[i];
+                if (item.Kind == ContentPlacementKind.Structure)
+                {
+                    // D3 step 3: the footprint gets real voxels (reconstructed block house of the proven size).
+                    var origin = HouseOrigin(item);
+                    AlphaHouseBuilder.Build(origin.X, origin.Y, origin.Z, item.Width, item.Depth, item.Height,
+                        (x, y, z, voxel) => context.Write(x, y, z, voxel), DoorSide(item));
+                }
+
                 var spawn = ToSpawn(item, zone, index);
                 if (spawn == null) continue;
                 context.Spawns.Add(spawn);
@@ -145,6 +153,23 @@ namespace CubeGame.Features.Creatures
                 BehaviourKey = behaviour,
                 Provenance = provenance,
             };
+        }
+
+        /// <summary>Origin voxel of a structure's block geometry (placement X/Z are the footprint centre).</summary>
+        public static (int X, int Y, int Z) HouseOrigin(ContentPlacement placement)
+        {
+            if (placement == null) throw new ArgumentNullException(nameof(placement));
+            int x = (int)Math.Floor(placement.X - placement.Width * 0.5);
+            int z = (int)Math.Floor(placement.Z - placement.Depth * 0.5);
+            return (x, placement.SurfaceY + 1, z);
+        }
+
+        /// <summary>Door side (0 = -Z, 1 = +X, 2 = +Z, 3 = -X) from the placement's 90° rotation.</summary>
+        public static int DoorSide(ContentPlacement placement)
+        {
+            if (placement == null) throw new ArgumentNullException(nameof(placement));
+            int side = (int)Math.Round(placement.Yaw / 90.0) % 4;
+            return side < 0 ? side + 4 : side;
         }
 
         /// <summary>Adapter: world zone context → the content layer's read-only source.</summary>

@@ -57,8 +57,19 @@ namespace CubeGame.Features.Creatures
                 out var layout, out var chestPlacements);
             LastLayout = layout;
             LastChests = chestPlacements;
+            // D3 step 5: the skeleton is carved into the zone (rooms 3×3×3, L-corridors) below the surface.
+            int baseY = context.Zone.Column(context.Zone.Zx * AlphaZone.Size + AlphaZone.Size / 2,
+                context.Zone.Zz * AlphaZone.Size + AlphaZone.Size / 2).TopSolid();
+            if (baseY > 0)
+            {
+                CarvedVoxels = AlphaDungeonCarver.Carve(layout, baseY, (x, y, z, voxel) => context.Write(x, y, z, voxel));
+            }
+
             for (int i = 0; i < spawns.Count; i++) context.Spawns.Add(spawns[i]);
         }
+
+        /// <summary>Voxels the last populated dungeon zone cleared (diagnostics).</summary>
+        public int CarvedVoxels { get; private set; }
 
         public AlphaDungeonLayout LastLayout { get; private set; }
 
