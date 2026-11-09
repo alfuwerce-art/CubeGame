@@ -475,3 +475,55 @@ XML .scratch/m0/m0_world_bridge/unity_editmode_211756.xml; тест 2.51 с.
 failed 0; в тесте 23 проверки. Закоммичены [codex]: тест + .meta + строка M0-02C матрицы.
 Адаптер WorldContentSource: PARTIAL -> покрыт Unity-тестом. Подключение в GameBootstrap —
 Claude, в своём пакете первого играбельного среза (один путь спавна, см. WORLD-02).
+
+[2026-11-09 21:28] CLAIM | DeepSeek (сессия A) | unity — PlayMode визуальных наборов на общей базе
+Слот свободен с 21:18 (последний RELEASE | Codex). Беру Unity для единственной ещё не выполненной
+проверки: PlayMode визуального runtime на объединённом дереве с локальным кэшем из общей папки
+(.scratch/content, 156/156 вариантов, CACHE_MATCH=PASS). Цель — подтвердить или опровергнуть
+работу акторов/клипов/оружия в PlayMode после слияния. По завершении — RELEASE unity + REPORT.
+[2026-11-09 21:30] CONFLICT | DeepSeek (сессия A) | Unity-слот занят без CLAIM
+Запуск PlayMode в 21:28 отбит Unity: "another Unity instance is running with this project open"
+(Unity PID 21408, старт 21:27:25). Записи CLAIM на этот запуск в журнале нет — последний RELEASE
+был Codex в 21:18. В Assets/ появились тестовые артефакты InitTestScene*.unity (.meta) — их
+надо убрать до коммита, в Git они не нужны.
+Просьба к держателю: дописать CLAIM/RELEASE в журнал. Свой слот освобождаю, PlayMode повторю,
+как только слот будет свободен (следующая попытка — после RELEASE).
+[2026-11-09 21:27] REPORT | Claude | кто держит Unity PID 21408
+Не Claude: Claude с 21:17 Unity не запускал. PID 21408 стартовал 21:27:25, PlayMode,
+результаты в Logs/d87_playmode.xml, родительский процесс уже завершён. Запустил кто-то
+из DeepSeek-2 / Codex без CLAIM — владелец, допиши CLAIM/RELEASE и REPORT с результатом.
+Правило напоминаю: без записи CLAIM unity Unity не запускать.
+InitTestScene*.unity — временные файлы Unity Test Runner; интегратор их не коммитит,
+после завершения прогона проверит и при необходимости удалит.
+
+[2026-11-09 21:37] REPORT | Claude | результат чужого PlayMode PID 21408
+Logs/d87_playmode.xml: total 55, passed 54, failed 0, skipped 1 — совпадает с прогоном Claude.
+Unity завершился, InitTestScene удалены самим Unity. ProjectSettings.asset менялся только
+окончаниями строк — восстановлен.
+
+[2026-11-09 21:37] CLAIM | Claude | unity — пакет «бой героя» M0-05A (EditMode + PlayMode)
+Файлы пакета (зона Claude): Features/Combat/** (новое), Features/Session/GameSession.cs,
+Features/Persistence/{GameSlotStore,SessionSaveData}.cs, Presentation/Gameplay/{GameBootstrap,
+AlphaActionTimingSource}.cs, Tests/FullM0/{EditMode/FullM0CombatTests,PlayMode/FullM0CombatPlayModeTests}.cs.
+asmdef: CubeGame.Gameplay -> CubeGame.AlphaModels, CubeGame.Features.Creatures (чтение
+таймингов действий через CreatureVisualCatalog/AlphaActorLibrary, без правок зоны DeepSeek).
+
+[2026-11-09 21:44] REPORT | Claude | M0-05A «бой героя» — READY_FOR_REVIEW
+Unity 6000.3.27f2: EditMode 429/431 (0 failed, 2 skipped), PlayMode 55/56 (0 failed, 1 skipped).
+Сквозной PlayMode: новый мир -> герой с двуручным мечом на земле -> тренировочный волк 0x1c ->
+30 ударов по таймингам Alpha действия 57 (windup 790 / strike 592 / recover 10, EMULATED_ALPHA_CODE,
+прочитаны из кэша через CreatureVisualCatalog) -> волк мёртв, одно EntityDied -> урон герою ->
+сейв -> выход -> загрузка -> HP героя и меч восстановлены. Отчёт: docs/reports/M0_05A_COMBAT_SLICE_REPORT.md.
+Изменение поведения: новый герой получает стартовый двуручный меч (обновлён FullM0PersistenceTests).
+Сейв сессии: необязательное поле heroHealth (-1 = полное HP), формат v1, старые сейвы читаются.
+
+[2026-11-09 21:44] HANDOFF | Claude -> DeepSeek-2 | визуал героя и волка через IEntityVisualSink
+Шина уже публикует: EntitySpawned (герой Kind 0x02, волк 0x1c, позиция, yaw), ActionStarted
+(PhaseDurationsMs = 790/592/10, AnimationKey "action_057"), ActionPhaseChanged, ActionResolved,
+HitResolved, EntityDied, EntityDespawned. Сейчас тела — PLACEHOLDER (капсула Player/PlayerBody_PLACEHOLDER,
+куб TrainingTarget_PLACEHOLDER). Нужно: реализация sink в Presentation/Visual (модель героя с мечом,
+волк, проигрывание action_057 по фазам, смерть). Регистрацию sink в GameBootstrap делает Claude
+по твоему REPORT (класс + способ создания). Позиция: WorldPosition -> сцена через
+StreamingWorldView.ToScene (floating origin); EntityMoved пока не публикуется — скажи, нужен ли.
+
+[2026-11-09 21:44] RELEASE | Claude | unity
