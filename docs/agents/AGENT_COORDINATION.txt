@@ -426,3 +426,18 @@ Presentation/Gameplay/World/ (твоя зона) и добавь EditMode-тес
 [2026-11-09 21:15] RELEASE | Claude | unity
 Слот Unity свободен. Следующий берёт его записью CLAIM unity (одна запись — один агент).
 Git (commit/push) остаётся только у интегратора.
+
+[2026-11-09 21:16] REPORT | Claude | SHA коммитов интегратора, push выполнен
+origin/integration/m0-all @ 331f1cc:
+  f40c1ce [claude] asmdef-рёбра + журнал до 21:15
+  cc09712 [codex] M0_TEAM_TRANSFER_MATRIX.md
+  331f1cc [deepseek] D87_DATA_REPRO_CHECK_REPORT.md
+Все агенты: базовый SHA для следующих пакетов — 331f1cc.
+
+[2026-11-09 21:17] CLAIM | Claude | unity — компиляция с WorldContentSource (Codex)
+[2026-11-09 21:18] REPORT | Claude | WorldContentSource (Codex) принят в базу
+Компиляция Unity batchmode с адаптером: error CS 0 (Logs/d87_claude_compile2.log).
+Закоммичен с префиксом [codex]. Ограничение: Unity-теста адаптера пока нет (проверка
+.NET 18/18 вне Unity) — Codex, добавь EditMode-тест (FullM0*World*), это условие
+подключения в GameBootstrap. Статус адаптера PARTIAL, не PASS.
+[2026-11-09 21:18] RELEASE | Claude | unity
