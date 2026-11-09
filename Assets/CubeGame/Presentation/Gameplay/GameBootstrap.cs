@@ -43,6 +43,9 @@ namespace CubeGame.Gameplay
         /// <summary>Training enemy species: Alpha Wolf 0x1c (staged S05 visual with actions).</summary>
         public static readonly KindId TrainingTargetKind = new KindId(0x1c);
 
+        /// <summary>Hero respawn delay after death, game ms. PLACEHOLDER_NOT_ALPHA: Alpha's death/respawn rule is not restored (GS-06).</summary>
+        public const long HeroRespawnDelayMs = 5000;
+
         /// <summary>Training target distance from the hero, blocks (CubeGame test setup, not Alpha; inside the 3-block reach).</summary>
         public const double TrainingTargetDistance = 2.5;
 
@@ -81,6 +84,9 @@ namespace CubeGame.Gameplay
         private ulong _runtimeSerial;
         private bool _trainingTargetPending;
         private GameVisualSink _visuals;
+        private AlphaActionTimingSource _timings;
+        private CreatureCombatDriver _creatures;
+        private long _heroRespawnAtMs = -1;
         private Vector3 _lastHeroScenePosition;
         private int _frames;
         private string _screenshotPath;
@@ -134,7 +140,8 @@ namespace CubeGame.Gameplay
                 _slots = CreateSlots(_saveDirectory);
             }
 
-            _session = new GameSession(new AlphaActionTimingSource(AlphaActorLibrary.Shared));
+            _timings = new AlphaActionTimingSource(AlphaActorLibrary.Shared);
+            _session = new GameSession(_timings);
             _session.EnterMainMenu();
             EnsureCameraAndLight();
             _formSeed = _commandLineSeed.ToString(CultureInfo.InvariantCulture);
@@ -178,6 +185,11 @@ namespace CubeGame.Gameplay
                 RebaseIfFar();
                 SyncHeroFromView();
                 PublishHeroMovement();
+                if (_heroRespawnAtMs >= 0 && _session.Clock.TimeMs >= _heroRespawnAtMs)
+                {
+                    RespawnHero();
+                }
+
                 if (_trainingTargetPending && _motor != null && _motor.IsGrounded)
                 {
                     _trainingTargetPending = false;
@@ -244,6 +256,11 @@ namespace CubeGame.Gameplay
 
         public bool SaveCheckpoint()
         {
+            if (HeroDead)
+            {
+                return Report(false, "save refused: the hero is dead");
+            }
+
             SyncHeroFromView();
             if (!_session.BeginSave())
             {
@@ -344,11 +361,11 @@ namespace CubeGame.Gameplay
             int ground = Math.Max(_worldState.SurfaceAt((int)Math.Floor(x), (int)Math.Floor(z)), _worldState.Generator.WaterLevel);
             double y = Math.Abs(ground + 1 - hero.Position.Y) <= 2.0 ? ground + 1 : hero.Position.Y;
 
-            var target = Combatant.Create(StableEntityId.ForRuntime(++_runtimeSerial), TrainingTargetKind, "Wolf (training)", CharacterClass.Warrior, 1);
-            target.Hostile = true;
+            var target = Combatant.CreateCreature(StableEntityId.ForRuntime(++_runtimeSerial), TrainingTargetKind, "Wolf", 1, 0);
             target.Position = new WorldPosition(x, y, z);
             target.Yaw = hero.Yaw + 180f;
             _session.Combat.Register(target);
+            _creatures?.Add(target, 1, 0);
             _trainingTarget = target;
 
             _session.Events.Publish(new EntitySpawned
@@ -372,6 +389,7 @@ namespace CubeGame.Gameplay
             if (_trainingTarget != null && _session.Combat != null)
             {
                 _session.Combat.Unregister(_trainingTarget.Id);
+                _creatures?.Remove(_trainingTarget.Id);
                 _session.Events.Publish(new EntityDespawned { TimeMs = _session.Clock?.TimeMs ?? 0, Entity = _trainingTarget.Id });
             }
 
@@ -384,8 +402,53 @@ namespace CubeGame.Gameplay
             Debug.Log($"[Combat] {_combatLog}");
         }
 
+        public bool HeroDead => _session.Hero != null && _session.Hero.Health.IsDead;
+
+        public CreatureCombatDriver Creatures => _creatures;
+
+        private double GroundAt(double x, double z)
+        {
+            if (_worldState == null)
+            {
+                return 0.0;
+            }
+
+            return Math.Max(_worldState.SurfaceAt((int)Math.Floor(x), (int)Math.Floor(z)), _worldState.Generator.WaterLevel) + 1;
+        }
+
+        /// <summary>Brings a dead hero back with full HP at the world start (PLACEHOLDER_NOT_ALPHA, GS-06).</summary>
+        public void RespawnHero()
+        {
+            _heroRespawnAtMs = -1;
+            HeroState hero = _session.Hero;
+            if (hero == null)
+            {
+                return;
+            }
+
+            if (hero.Health.IsDead && !_session.ReviveHero())
+            {
+                Report(false, _session.LastRejection);
+                return;
+            }
+
+            WorldPosition start = WorldState.StartPosition(_worldState.Generator, _session.WorldDeltas);
+            TeleportHero((int)Math.Floor(start.X), (int)Math.Floor(start.Z));
+            SetGameplayInput(true);
+            PublishHeroSpawn();
+            _combatLog = "respawned at the world start";
+        }
+
         private void OnEntityDied(EntityDied died)
         {
+            if (died.Entity.Equals(StableEntityId.Hero))
+            {
+                _heroRespawnAtMs = died.TimeMs + HeroRespawnDelayMs;
+                SetGameplayInput(false);
+                _combatLog = $"you died - respawn in {HeroRespawnDelayMs / 1000} s";
+                return;
+            }
+
             if (_trainingTarget != null && died.Entity.Equals(_trainingTarget.Id))
             {
                 _combatLog += $"  {_trainingTarget.Name} died";
@@ -502,6 +565,9 @@ namespace CubeGame.Gameplay
             PublishHeroSpawn();
             _session.Events.Subscribe<HitResolved>(OnHitResolved);
             _session.Events.Subscribe<EntityDied>(OnEntityDied);
+            _heroRespawnAtMs = -1;
+            _creatures = new CreatureCombatDriver(_session, GroundAt, kind => _timings.AttackActionsOf(kind), _session.World.Seed.Value);
+            _session.Clock.Ticked += _creatures.Tick;
             // The target appears once the hero stands on the ground and the camera has a facing (see Update).
             _trainingTargetPending = true;
             return Report(true, description);
@@ -573,6 +639,8 @@ namespace CubeGame.Gameplay
         {
             DespawnTrainingTarget();
             _trainingTargetPending = false;
+            _heroRespawnAtMs = -1;
+            _creatures = null;
             _combatLog = string.Empty;
             if (_orbitCamera != null)
             {

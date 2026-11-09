@@ -547,3 +547,8 @@ ActionStarted (action_057 у героя), ходьба по EntityMoved (гер�
 Масштаб модели: герой подогнан к росту контроллера 1.8, тот же коэффициент (0.5825) у существ — PLACEHOLDER_NOT_ALPHA.
 Тренировочный волк появляется, когда герой стоит на земле, на 2.5 блока под углом 35° (не за героем).
 Unity: EditMode 429/431, PlayMode 56/57, 0 failed; Windows-сборка + кадры .scratch/m0/m0_03c/{front,attack}.png.
+
+[2026-11-09 22:16] REPORT | Claude | M0-06C — ИИ волка нападает, смерть и возрождение героя
+CreatureCombatDriver: CreatureAi (Alpha) -> движение/атаки через CombatSystem; HP существ — Core
+CalcCreatureMaxHealth; смерть героя -> 5 с -> ReviveHero (PLACEHOLDER, GS-06). Unity: EditMode 433/435,
+PlayMode 56/57, 0 failed; сборка + кадр .scratch/m0/m0_03c/fight.png. Отчёт дополнен (M0_05A_COMBAT_SLICE_REPORT).

@@ -79,7 +79,13 @@ namespace CubeGame.Features.Session
         public EquipmentLoadout Loadout { get; }
 
         /// <summary>Current HP; maximum from Core <see cref="EquipmentCombatAdapter.ComputeMaxHealth"/>.</summary>
-        public HealthPool Health { get; }
+        public HealthPool Health { get; private set; }
+
+        /// <summary>Replaces a dead hero's HP pool with a full one (Core HealthPool never revives by design).</summary>
+        public void Revive()
+        {
+            Health = new HealthPool(EquipmentCombatAdapter.ComputeMaxHealth(Sheet));
+        }
 
         /// <summary>
         /// Rebuilds the loadout from the carried items: the first weapon goes to the main hand. CubeGame rule
@@ -356,6 +362,27 @@ namespace CubeGame.Features.Session
 
         /// <summary>Species of the hero for visuals and action timings: Alpha HumanMale (0x02), until race selection (M0-03A).</summary>
         public static readonly KindId HeroKind = new KindId(0x02);
+
+        /// <summary>
+        /// Brings a dead hero back with full HP and a fresh combat registration. Where and when is decided by the
+        /// caller (Alpha respawn rule GS-06 is not restored: PLACEHOLDER_NOT_ALPHA).
+        /// </summary>
+        public bool ReviveHero()
+        {
+            if (Hero == null || Combat == null || !Hero.Health.IsDead)
+            {
+                return Reject("revive refused: no dead hero in a running world");
+            }
+
+            Hero.Revive();
+            Combat.Unregister(Hero.Id);
+            Combat.Register(new Combatant(Hero.Id, HeroKind, Hero.Name, Hero.Sheet, Hero.Loadout, Hero.Health)
+            {
+                Position = Hero.Position,
+                Yaw = Hero.Yaw,
+            });
+            return true;
+        }
 
         private void OnClockTicked(GameClock clock)
         {

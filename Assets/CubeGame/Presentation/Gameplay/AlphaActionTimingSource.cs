@@ -37,6 +37,31 @@ namespace CubeGame.Gameplay
             return cached.HasValue;
         }
 
+        /// <summary>
+        /// Alpha attack actions of a species: actions of its S05 library that carry a windup (attack timing),
+        /// in ascending code order. Empty when the species has no staged action library.
+        /// </summary>
+        public int[] AttackActionsOf(KindId kind)
+        {
+            if (_library == null || !CreatureVisualCatalog.TryResolve(kind.Value, _library, out string actorId, out _)
+                || !_library.TryGet(actorId, out AlphaActorDefinition definition))
+            {
+                return System.Array.Empty<int>();
+            }
+
+            var codes = new List<int>();
+            foreach (KeyValuePair<int, AlphaActionTiming> pair in definition.ActionTimings)
+            {
+                if (pair.Value.WindupMs > 0f && pair.Value.ActionEndMs > 0f)
+                {
+                    codes.Add(pair.Key);
+                }
+            }
+
+            codes.Sort();
+            return codes.ToArray();
+        }
+
         private ActionTiming? Lookup(KindId kind, ActionId action)
         {
             if (_library == null)

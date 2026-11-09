@@ -63,6 +63,23 @@ namespace CubeGame.Features.Combat
             return new Combatant(id, kind, name, sheet, new EquipmentLoadout(), new HealthPool(EquipmentCombatAdapter.ComputeMaxHealth(sheet)));
         }
 
+        /// <summary>
+        /// Non-player creature: max HP by the Alpha creature rule (Core <see cref="CharacterStats.CalcCreatureMaxHealth"/>:
+        /// base · levelFactor · 2^(0.25·stars), no class). Attack inputs use a default Core sheet at that level —
+        /// the creature weapon base is PLACEHOLDER_NOT_ALPHA until M0-06B.
+        /// </summary>
+        public static Combatant CreateCreature(StableEntityId id, KindId kind, string name, int level, int stars)
+        {
+            var sheet = new CharacterSheet();
+            if (level > 1)
+            {
+                sheet.RestoreProgression(level, 0);
+            }
+
+            double maxHealth = CharacterStats.CalcCreatureMaxHealth(CharacterStats.DefaultBaseHealth, Math.Max(1, level), Math.Max(0, stars));
+            return new Combatant(id, kind, name, sheet, new EquipmentLoadout(), new HealthPool(maxHealth)) { Hostile = true };
+        }
+
         public override string ToString() => $"{Name} {Id} hp {Health.CurrentHealth:F1}/{Health.MaxHealth:F1}";
     }
 }

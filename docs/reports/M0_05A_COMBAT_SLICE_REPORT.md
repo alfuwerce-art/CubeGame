@@ -38,3 +38,24 @@ EditMode **429/431** (2 skipped, 0 failed), PlayMode **55/56** (1 skipped, 0 fai
 - Волк не атакует (ИИ — DeepSeek, M0-06C); тренировочная цель не сохраняется, при загрузке создаётся заново.
 - Нет блока, уклонения, комбо, способностей, смерти/возрождения героя (GS-06 UNKNOWN), наград и дропа.
 - Максимум HP героя не пересчитывается при получении уровня во время игры (HealthPool создаётся при загрузке).
+
+## Дополнение (Claude, режим одного агента): модели Alpha, ИИ волка, смерть героя
+
+| Механика | Где | Проверка |
+|---|---|---|
+| Модели S05 в игре: герой (вид 0x02) с `iron-greatsword1`, волк (0x1c); клип действия по `ActionStarted` (`action_057` у героя), ходьба по `EntityMoved`; при отсутствии кэша — заглушки и `DATA_MISSING` | `Presentation/Gameplay/GameVisualSink.cs` | PlayMode `HeroAndWolfUseAlphaModelsAndAttackPlaysAction57`; кадры сборки `.scratch/m0/m0_03c/{front,attack,fight}.png` |
+| ИИ существа Alpha (`CreatureAi`, перенос DeepSeek) управляет волком: преследование, атака действием Alpha 37 (замах 1185 мс), урон герою только через Core | `Presentation/Gameplay/CreatureCombatDriver.cs` | EditMode `FullM0CreatureAiTests` (4), PlayMode: 11 укусов героя в сквозном сценарии |
+| HP существ по правилу Alpha `CalcCreatureMaxHealth` (база · уровень · 2^(0.25·звёзды), без класса): волк L1 = 100 HP | `Combatant.CreateCreature` | EditMode |
+| Смерть героя: атаки и сейв запрещены, через 5 с игрового времени — возрождение с полным HP в стартовой точке мира | `GameSession.ReviveHero`, `GameBootstrap.RespawnHero` | EditMode (нет атак по мёртвому герою, воскрешение) |
+
+Unity 6000.3.27f2: EditMode **433/435**, PlayMode **56/57**, 0 failed; Windows-сборка `BUILD_SUCCEEDED`.
+
+| Значение | Статус |
+|---|---|
+| Масштаб модели (подгонка героя к росту 1.8, коэффициент 0.5825 на всех) | `PLACEHOLDER_NOT_ALPHA` |
+| Скорость/амплитуда ходьбы в визуале | `PLACEHOLDER_NOT_ALPHA` (OQ-23) |
+| Радиус агрессии 16, дистанция атаки 2, скорость 3.7 | значения `CreatureAi` (CUBEGAME_CONTRACT / PLACEHOLDER) |
+| Выбор атаки существа: первая атака библиотеки (37) | `PLACEHOLDER_NOT_ALPHA` (`CombatBehavior_chooseAttack` C-29 не перенесён) |
+| Урон существа (≈1 HP за укус: лист Core без оружия) | `PLACEHOLDER_NOT_ALPHA` (оружие/база урона существ — M0-06B) |
+| Возрождение героя (5 с, старт мира, полное HP) | `PLACEHOLDER_NOT_ALPHA` (GS-06 UNKNOWN) |
+| Смерть: тело на боку | `PLACEHOLDER_NOT_ALPHA` |

@@ -7,6 +7,8 @@
         "CubeGame.Features",
         "CubeGame.Gameplay",
         "CubeGame.Content",
+        "CubeGame.Features.AI",
+        "CubeGame.Features.Creatures",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
