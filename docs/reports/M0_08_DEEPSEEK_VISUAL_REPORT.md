@@ -35,10 +35,11 @@
 
 | Прогон | Результат |
 |---|---|
-| EditMode | `total=346 passed=346 failed=0` |
-| PlayMode | `total=38 passed=38 failed=0` (+2 новых: tint/иконка и AI→игровой хук действия) |
+| EditMode | `total=353 passed=353 failed=0` |
+| PlayMode | `total=46 passed=46 failed=0` (tint, иконка, AI→хук, броня/предметы, витрина, атлас) |
 | Иконки предметов | `RunRenderItemIcons` → **`ICONS_RESULT=PASS icons=28 problems=0`**, PNG 64×64 в `AlphaOutput/icons` (локально) |
 | Атлас иконок | `RunBuildIconAtlas` → **`ICON_ATLAS_RESULT=PASS icons=42 columns=8 size=512x384`**, `atlas.png` + `atlas.json` (origin bottom-left, 64×64) |
+| Загрузчик атласа | `AlphaIconAtlas.TryLoad` (рантайм): PNG+JSON → `TryGetRect`/`TryGetSprite`, rect вне текстуры и пустой атлас репортятся, неизвестный предмет не получает выдуманный rect |
 | Аномалия выхода | методы, создающие текстуры, пишут результат и завершаются кодом `-1073741819` (0xC0000005) — тот же эффект, что у `-quit`; артефакты валидны, но это известный дефект завершения батч-редактора и требует перепроверки на CI |
 
 ---

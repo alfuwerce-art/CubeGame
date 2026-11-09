@@ -147,6 +147,29 @@ namespace CubeGame.Tests.Visual.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator IconAtlasLoadsForUi()
+        {
+            var dir = AlphaIconAtlas.DefaultDirectory;
+            if (!File.Exists(Path.Combine(dir, "atlas.json"))) Assert.Ignore("icon atlas is not built here");
+            var problems = new List<string>();
+            Assert.IsTrue(AlphaIconAtlas.TryLoad(dir, out var atlas, problems), string.Join("\n", problems));
+            try
+            {
+                Assert.IsEmpty(AlphaIconAtlas.Validate(atlas), string.Join("\n", AlphaIconAtlas.Validate(atlas)));
+                Assert.GreaterOrEqual(atlas.Rects.Count, 42);
+                var sprite = atlas.TryGetSprite("iron-sword1");
+                Assert.IsNotNull(sprite, "a known item has a sprite");
+                Assert.AreEqual(64f, sprite.rect.width, 0.01f);
+                Assert.IsNull(atlas.TryGetSprite("no-such-item"), "unknown items have no invented rect");
+                yield return null;
+            }
+            finally
+            {
+                Object.Destroy(atlas.Texture);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator ShowcaseSpawnsPlayerCreaturesAndHouses()
         {
             var source = AlphaContentSource.Resolve();
