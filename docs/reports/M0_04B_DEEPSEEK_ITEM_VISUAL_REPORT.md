@@ -44,6 +44,8 @@
 
 | Прогон | Результат |
 |---|---|
+| M0-04B (законы слотов) | `held_item`/`special_item` = `center`; `lamp_item` = `lamp`, `pet_item` = `pet` — лампа/пет **отказываются** (`HELD_ITEM_LAW_NOT_IMPLEMENTED`), а не рисуются произвольно; EditMode `LawOf`, PlayMode: лампа → отказ, зелье/планер → успех |
+| Preview | Кадры `item_actor_only` / `item_chest` / `item_potion`: крупный план груди с бронёй и зелья в правой руке; утечка preview-акторов между кадрами устранена |
 | EditMode (весь проект) | `total=350 passed=350 failed=0` (`AlphaOutput/editmode.xml`) |
 | PlayMode (весь проект) | `total=42 passed=42 failed=0` (`AlphaOutput/playmode.xml`), +4: левая рука (щит/кинжал), удерживаемый предмет (зелье/лампа/планер), броня (грудь/перчатки/сапоги + отказ плеча), полный дескриптор игрока (броня+зелье) |
 | Выгрузка предметных моделей | `EXTRACT_ITEM_MODELS=PASS written=28` (+14 удерживаемых +4 брони) |

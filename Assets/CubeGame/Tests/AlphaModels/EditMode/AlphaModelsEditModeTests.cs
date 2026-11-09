@@ -361,6 +361,10 @@ namespace CubeGame.AlphaModels.Tests.EditMode
             Assert.AreEqual("boat2.cub", AlphaHeldItemCatalog.ModelOf(23, 1));
             Assert.AreEqual("lantern02.cub", AlphaHeldItemCatalog.ModelOf(24, 7), "lantern is a wildcard subtype");
             Assert.IsNull(AlphaHeldItemCatalog.ModelOf(5, 0), "gloves are worn, not held");
+            Assert.AreEqual("center", AlphaHeldItemCatalog.LawOf(1));
+            Assert.AreEqual("center", AlphaHeldItemCatalog.LawOf(23));
+            Assert.AreEqual("lamp", AlphaHeldItemCatalog.LawOf(24), "the lantern has its own draw law");
+            Assert.AreEqual("pet", AlphaHeldItemCatalog.LawOf(19));
             StringAssert.Contains("heldItems=14", AlphaHeldItemCatalog.Summary());
         }
 

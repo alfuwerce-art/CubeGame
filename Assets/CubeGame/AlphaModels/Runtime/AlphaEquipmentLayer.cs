@@ -29,6 +29,8 @@ namespace CubeGame.AlphaModels
     public static class AlphaEquipmentLayer
     {
         public const string ChildName = "equip_swap";
+        /// <summary>Grid size of the last swapped armour model (mesh bounds are solid-voxel bounds).</summary>
+        public static Vector3Int LastEquippedSize { get; private set; }
 
         public static bool TryEquipFromItem(AlphaRig rig, string itemsDirectory, int type, int subtype, out string reason)
         {
@@ -82,6 +84,7 @@ namespace CubeGame.AlphaModels
             if (material == null) { reason = "EQUIPMENT_MATERIAL_MISSING"; return false; }
 
             UnequipSlot(rig, type);
+            LastEquippedSize = built.size;
             var state = rig.GetComponent<AlphaEquipmentState>();
             if (state == null) state = rig.gameObject.AddComponent<AlphaEquipmentState>();
             foreach (var partName in parts)

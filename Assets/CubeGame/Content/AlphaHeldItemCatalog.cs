@@ -30,6 +30,19 @@ namespace CubeGame.Content
         public static string ModelOf(int type, int subtype) =>
             TryModel(type, subtype, out var def) ? def.Model : null;
 
+        /// <summary>Alpha attachment law of the item's draw block (item_layer slots evidence).</summary>
+        public static string LawOf(int type)
+        {
+            switch (type)
+            {
+                case 1: return "center";    // held_item block
+                case 23: return "center";   // special_item block
+                case 24: return "lamp";     // lamp_item block, condition flag124=512
+                case 19: return "pet";      // pet_item block, condition action=82
+                default: return "none";
+            }
+        }
+
         public static List<string> Validate()
         {
             var p = new List<string>();

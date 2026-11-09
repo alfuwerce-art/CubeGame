@@ -37,6 +37,8 @@ namespace CubeGame.Content
               .Append(" itemNames=").Append(AlphaContentTables.ItemNames.Length)
               .Append(" skills=").Append(AlphaContentTables.Skills.Length)
               .Append(" scatterGroups=").Append(AlphaScatterEvidence.Groups.Length)
+              .Append(" heldItems=").Append(AlphaHeldItemModels.Items.Length)
+              .Append(" equipmentItems=").Append(AlphaEquipmentModels.Items.Length)
               .Append(" structures=").Append(AlphaStructureTemplates.All.Count)
               .Append(" services=").Append(AlphaNpcServices.All().Count);
             return sb.ToString();

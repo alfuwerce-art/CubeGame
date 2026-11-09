@@ -206,9 +206,11 @@ namespace CubeGame.AlphaModels.Import
                     }
                 }
                 summary.AppendLine($"  {id}: parts={def.Rig.parts.Length} clips={def.Clips.Count} actions={def.RequiredActions.Length} mode={def.ControllerMode}");
+                UnityEngine.Object.DestroyImmediate(view.gameObject);
             }
             images += RenderCreatureEncounter(cam, summary, problems);
             images += RenderWorldFrame(cam, summary, problems);
+            images += RenderEquipmentFrame(cam, summary, problems);
             summary.Append("ALPHA_PREVIEW_RESULT=").Append(problems.Count == 0 ? "PASS" : "FAIL")
                    .Append(" actors=").Append(report.Actors.Count).Append(" images=").Append(images)
                    .Append(" problems=").Append(problems.Count);
@@ -268,6 +270,87 @@ namespace CubeGame.AlphaModels.Import
             {
                 UnityEngine.Object.DestroyImmediate(root);
             }
+        }
+
+        /// <summary>Close-ups: the actor, then chest armour on the body, then a potion in the right hand.</summary>
+        static int RenderEquipmentFrame(Camera cam, StringBuilder summary, List<string> problems)
+        {
+            var source = AlphaContentSource.Resolve();
+            if (source.State != AlphaContentState.Ready) return 0;
+            var items = Path.Combine(source.Root, "items");
+            foreach (var name in new[] { "iron-chest1.cubdec", "life-potion.cubdec" })
+                if (!File.Exists(Path.Combine(items, name)))
+                {
+                    summary.AppendLine("  equipment frames: skipped (item payloads are not staged)");
+                    return 0;
+                }
+            var library = AlphaActorLibrary.Shared;
+            if (!library.TryGet("d86_human_0x02_greatsword", out var def)) return 0;
+            var root = new GameObject("EquipmentPreview");
+            try
+            {
+                var view = AlphaActorView.Spawn(def, root.transform, problems);
+                if (view == null || !view.Ready)
+                {
+                    problems.Add("EQUIPMENT_PREVIEW_ACTOR_NOT_READY");
+                    return 0;
+                }
+                view.ApplyLocomotion(new AlphaLocomotionState { SpeedXY = 0 });
+                view.Tick(1f / 60f);
+                // The carried greatsword would hide the body; the equipment close-ups do not need it.
+                int weapon = view.Rig.IndexOf("weapon");
+                if (weapon >= 0) view.Rig.meshes[weapon].GetComponent<MeshRenderer>().enabled = false;
+
+                int images = 0;
+                string chest = null, held = null;
+                FramePart(cam, view, "body");
+                images += SaveFrame(cam, "item_actor_only", problems);
+
+                if (!AlphaEquipmentLayer.TryEquipFromItem(view.Rig, items, 4, 0, out chest))
+                    problems.Add("PREVIEW_CHEST " + chest);
+                FramePart(cam, view, "body");
+                images += SaveFrame(cam, "item_chest", problems);
+                AlphaEquipmentLayer.Unequip(view.Rig);
+
+                if (!AlphaHeldItemLayer.TryEquipFromItem(view.Rig, items, 1, 1, out held))
+                    problems.Add("PREVIEW_HELD " + held);
+                IsolatePart(view, "hand_r");
+                FramePart(cam, view, "hand_r");
+                images += SaveFrame(cam, "item_potion", problems);
+                summary.AppendLine($"  equipment frames: chest={chest ?? "ok"} held={held ?? "ok"} " +
+                                   $"chestGrid={AlphaEquipmentLayer.LastEquippedSize} heldGrid={AlphaHeldItemLayer.LastEquippedSize}");
+                return images;
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        /// <summary>Preview focus: keep only one part visible (its mesh child carries the attached item).</summary>
+        static void IsolatePart(AlphaActorView view, string partName)
+        {
+            for (int i = 0; i < view.Rig.parts.Length; i++)
+            {
+                var renderer = view.Rig.meshes[i] != null ? view.Rig.meshes[i].GetComponent<MeshRenderer>() : null;
+                if (renderer != null) renderer.enabled = view.Rig.partNames[i] == partName;
+            }
+        }
+
+        /// <summary>Frame the enabled renderers of one rig part (close-up).</summary>
+        static void FramePart(Camera cam, AlphaActorView view, string partName)
+        {
+            int index = view.Rig.IndexOf(partName);
+            if (index < 0) return;
+            var bounds = new Bounds(view.Rig.meshes[index].position, Vector3.one * 0.1f);
+            bool first = true;
+            foreach (var renderer in view.Rig.meshes[index].GetComponentsInChildren<Renderer>())
+            {
+                if (renderer == null || !renderer.enabled) continue;
+                if (first) { bounds = renderer.bounds; first = false; }
+                else bounds.Encapsulate(renderer.bounds);
+            }
+            if (!first) FrameAt(cam, bounds);
         }
 
         static void MakeBox(GameObject root, Vector3 position, Vector3 scale, string name)

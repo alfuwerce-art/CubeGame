@@ -126,7 +126,9 @@ namespace CubeGame.AlphaModels.Tests.PlayMode
                     "held block uses the center anchor of the model grid");
                 Assert.Greater(mesh.vertexCount, 0);
 
-                Assert.IsTrue(AlphaHeldItemLayer.TryEquipFromItem(view.Rig, items, 24, 7, out var lampReason), lampReason);
+                Assert.IsFalse(AlphaHeldItemLayer.TryEquipFromItem(view.Rig, items, 24, 7, out var lampReason));
+                StringAssert.Contains("HELD_ITEM_LAW_NOT_IMPLEMENTED lamp", lampReason,
+                    "the lantern block law is not the held center law");
                 Assert.IsTrue(AlphaHeldItemLayer.TryEquipFromItem(view.Rig, items, 23, 0, out var gliderReason), gliderReason);
                 Assert.IsFalse(AlphaHeldItemLayer.TryEquipFromItem(view.Rig, items, 5, 0, out var bad));
                 StringAssert.Contains("HELD_ITEM_NO_MODEL", bad);

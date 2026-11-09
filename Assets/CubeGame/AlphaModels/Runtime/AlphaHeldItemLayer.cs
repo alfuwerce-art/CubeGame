@@ -27,6 +27,14 @@ namespace CubeGame.AlphaModels
                 reason = $"HELD_ITEM_NO_MODEL {type}/{subtype}";
                 return false;
             }
+            var law = AlphaHeldItemCatalog.LawOf(type);
+            if (law != "center")
+            {
+                // Lamp (lamp_item) and pet (pet_item) blocks use their own draw laws; drawing them with
+                // the held "center" law would be a silent invention, so they are refused explicitly.
+                reason = $"HELD_ITEM_LAW_NOT_IMPLEMENTED {law} type={type}";
+                return false;
+            }
             if (string.IsNullOrEmpty(itemsDirectory))
             {
                 reason = "HELD_ITEMS_DIRECTORY_MISSING";
