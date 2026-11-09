@@ -203,6 +203,38 @@ namespace CubeGame.Tests.Creatures.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator SpawnedDecorStaysStill()
+        {
+            if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");
+            var root = new GameObject("DecorTestRoot");
+            try
+            {
+                var go = new GameObject("DecorSpawner");
+                go.transform.SetParent(root.transform, false);
+                var spawner = go.AddComponent<CreatureSpawner>();
+                spawner.SpawnOnStart = false;
+                spawner.Seed = 9u;
+                spawner.MaxPerCell = 2;
+                spawner.DecorPerCell = 4;
+                spawner.AiFactory = () => new CreatureAi();
+                var plan = spawner.Spawn();
+                var decor = plan.FindAll(r => r.Faction == (int)CreatureFaction.Passive);
+                if (decor.Count == 0) Assert.Ignore("the tested seed produced no decor slots");
+                var agent = spawner.Spawned[decor[0].StableId];
+                Assert.IsTrue(agent.VisualAvailable, agent.VisualStatus);
+                var start = agent.transform.position;
+                spawner.TickAll(1f);
+                Assert.AreEqual(start, agent.transform.position, "decor never walks");
+                Assert.AreEqual("PASSIVE_OBJECT", agent.Ai.LastReason);
+                yield return null;
+            }
+            finally
+            {
+                Object.Destroy(root);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator PassiveObjectStaysStill()
         {
             if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");

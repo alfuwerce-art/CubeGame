@@ -370,6 +370,27 @@ namespace CubeGame.Tests.Creatures.EditMode
             StringAssert.Contains("UNKNOWN", CreaturePets.Status);
         }
         [Test]
+        public void DecorSlotsAreDeterministicPassiveAndSeparated()
+        {
+            var combat = new List<int> { 0x02, 0x20 };
+            var decor = new List<int> { 0x78, 0x79 };
+            var problems = new List<string>();
+            var a = CreatureSpawnPlanner.Plan(5u, 1, 2, 3, 4, 4, combat, decor, 3, problems);
+            var b = CreatureSpawnPlanner.Plan(5u, 1, 2, 3, 4, 4, combat, decor, 3, new List<string>());
+            Assert.IsEmpty(problems, string.Join("\n", problems));
+            var decorA = a.FindAll(r => r.Kind == 0x78 || r.Kind == 0x79);
+            Assert.Greater(decorA.Count, 0, "decor slots are planned from the staged passive kinds");
+            foreach (var d in decorA)
+            {
+                Assert.AreEqual((int)CreatureFaction.Passive, d.Faction);
+                var slot = int.Parse(d.StableId.Substring(d.StableId.LastIndexOf(':') + 1),
+                    System.Globalization.CultureInfo.InvariantCulture);
+                Assert.GreaterOrEqual(slot, CreatureSpawnPlanner.DecorSlotOffset, "decor ids never collide with creatures");
+            }
+            Assert.AreEqual(decorA.Count, b.FindAll(r => r.Kind == 0x78 || r.Kind == 0x79).Count);
+        }
+
+        [Test]
         public void AllStagedKindsResolveAgainstTheCache()
         {
             var source = AlphaContentSource.Resolve();

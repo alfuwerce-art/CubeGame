@@ -37,20 +37,52 @@ namespace CubeGame.Features.Creatures
         public static List<CreatureSpawnRequest> Plan(uint seed, int regionX, int regionZ, int cellX, int cellZ,
             int maxPerCell, IReadOnlyList<int> eligibleKinds, List<string> problems = null)
         {
-            var result = new List<CreatureSpawnRequest>();
-            if (eligibleKinds == null || eligibleKinds.Count == 0)
+            return Plan(seed, regionX, regionZ, cellX, cellZ, maxPerCell, eligibleKinds, null, 0, problems);
+        }
+
+        /// <summary>
+        /// Same deterministic plan plus passive decor slots (plants/ore/egg). Decor is a CubeGame
+        /// contract: Alpha's climate->object table (W-18) is not extracted, so the caller passes the
+        /// decor set explicitly and nothing is invented here.
+        /// </summary>
+        public static List<CreatureSpawnRequest> Plan(uint seed, int regionX, int regionZ, int cellX, int cellZ,
+            int maxPerCell, IReadOnlyList<int> eligibleKinds, IReadOnlyList<int> decorKinds, int decorPerCell,
+            List<string> problems = null)
+        {
+            var result = PlanSlots(seed, regionX, regionZ, cellX, cellZ, maxPerCell, eligibleKinds, 0, problems);
+            if (decorKinds != null && decorKinds.Count > 0 && decorPerCell > 0)
             {
-                problems?.Add("SPAWN_NO_ELIGIBLE_KINDS");
-                return result;
+                var decor = PlanSlots(seed ^ 0x5EEDu, regionX, regionZ, cellX, cellZ, decorPerCell, decorKinds,
+                    DecorSlotOffset, problems);
+                for (int i = 0; i < decor.Count; i++)
+                {
+                    var d = decor[i];
+                    if (!AlphaContentDatabase.TryCreatureKind(d.Kind, out var def) || !def.Passive)
+                        problems?.Add($"SPAWN_DECOR_NOT_PASSIVE 0x{d.Kind:x2}");
+                    d.Faction = (int)CreatureFaction.Passive;
+                    result.Add(d);
+                }
             }
-            if (maxPerCell < 0) throw new ArgumentOutOfRangeException(nameof(maxPerCell));
+            return result;
+        }
+
+        /// <summary>Stable ids of decor slots never collide with creature slots.</summary>
+        public const int DecorSlotOffset = 1000;
+
+        static List<CreatureSpawnRequest> PlanSlots(uint seed, int regionX, int regionZ, int cellX, int cellZ,
+            int slots, IReadOnlyList<int> kinds, int slotOffset, List<string> problems)
+        {
+            var result = new List<CreatureSpawnRequest>();
+            if (kinds == null || kinds.Count == 0) { problems?.Add("SPAWN_NO_ELIGIBLE_KINDS"); return result; }
+            if (slots < 0) throw new ArgumentOutOfRangeException(nameof(slots));
             int cells = AlphaContentTables.RegionCells;
             int cellSize = AlphaContentTables.RegionBlocks / cells;
-            for (int slot = 0; slot < maxPerCell; slot++)
+            for (int slot = 0; slot < slots; slot++)
             {
-                uint h = DeterministicHash.Combine((int)seed, regionX, regionZ, cellX, cellZ, slot);
+                int worldSlot = slotOffset + slot;
+                uint h = DeterministicHash.Combine((int)seed, regionX, regionZ, cellX, cellZ, worldSlot);
                 if (h % 100u >= OccupancyPercent) continue;
-                int kind = eligibleKinds[(int)((h >> 8) % (uint)eligibleKinds.Count)];
+                int kind = kinds[(int)((h >> 8) % (uint)kinds.Count)];
                 if (!AlphaContentDatabase.TryCreatureKind(kind, out var def))
                 {
                     problems?.Add($"SPAWN_UNKNOWN_KIND 0x{kind:x2}");
@@ -64,7 +96,7 @@ namespace CubeGame.Features.Creatures
                 double z = regionZ * AlphaContentTables.RegionBlocks + cellZ * cellSize + localZ + 0.5;
                 var request = new CreatureSpawnRequest
                 {
-                    StableId = SpawnTable.SpawnId(regionX, regionZ, cellX, cellZ, slot),
+                    StableId = SpawnTable.SpawnId(regionX, regionZ, cellX, cellZ, worldSlot),
                     Kind = kind,
                     Level = level,
                     Stars = stars,
@@ -90,6 +122,9 @@ namespace CubeGame.Features.Creatures
         public uint Seed = 1;
         public int RegionX, RegionZ, CellX, CellZ;
         public int MaxPerCell = 4;
+        /// <summary>Passive decor slots per cell (plants/ore/egg). W-18 climate table is UNKNOWN, so this
+        /// is a CubeGame contract and the decor set comes from the staged visuals.</summary>
+        public int DecorPerCell = 4;
         public float DespawnRadius = 90f;
         public bool SpawnOnStart = true;
 
@@ -118,7 +153,12 @@ namespace CubeGame.Features.Creatures
                 Status = "NO_STAGED_VISUALS " + (library != null ? library.Diagnosis : "NO_LIBRARY");
                 return new List<CreatureSpawnRequest>();
             }
-            var plan = CreatureSpawnPlanner.Plan(Seed, RegionX, RegionZ, CellX, CellZ, MaxPerCell, kinds, Problems);
+            var combat = new List<int>();
+            var decor = new List<int>();
+            foreach (var kind in kinds)
+                (CreatureKinds.IsPassiveObject(kind) ? decor : combat).Add(kind);
+            var primary = combat.Count > 0 ? combat : kinds;
+            var plan = CreatureSpawnPlanner.Plan(Seed, RegionX, RegionZ, CellX, CellZ, MaxPerCell, primary, decor, DecorPerCell, Problems);
             foreach (var request in plan) SpawnOne(request, library);
             Status = $"SPAWNED {Spawned.Count}/{plan.Count} " + (Problems.Count > 0 ? "problems=" + Problems.Count : "problems=0");
             return plan;
