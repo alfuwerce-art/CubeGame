@@ -9,6 +9,7 @@ using CubeGame.AlphaModels;
 using CubeGame.Content;
 using CubeGame.Features.AI;
 using CubeGame.Features.Creatures;
+using CubeGame.Content;
 using CubeGame.Presentation.Visual;
 using UnityEngine;
 
@@ -19,6 +20,8 @@ namespace CubeGame.Presentation.Showcase
         public uint Seed = 2024;
         public int CreatureCount = 6;
         public int StructureCount = 2;
+        public int DungeonRooms = 4;
+        public int ChestsPerDungeon = 2;
         public float Radius = 8f;
         public bool SpawnOnStart = true;
 
@@ -26,6 +29,8 @@ namespace CubeGame.Presentation.Showcase
         public CreatureSpawner Spawner { get; private set; }
         public int SpawnedCreatures => Spawner != null ? Spawner.SpawnedCount : 0;
         public int StructureObjects { get; private set; }
+        public int DungeonRoomObjects { get; private set; }
+        public int ChestObjects { get; private set; }
         public readonly List<string> Problems = new List<string>();
 
         readonly List<GameObject> _boxes = new List<GameObject>();
@@ -96,6 +101,23 @@ namespace CubeGame.Presentation.Showcase
                     MakeBox(new Vector3((float)p.X + p.Width * 0.5f, p.Height * 0.5f, (float)p.Z + p.Depth * 0.5f),
                         new Vector3(p.Width, p.Height, p.Depth), "ShowcaseHouse" + StructureObjects);
                     StructureObjects++;
+                }
+            }
+            var dungeon = AlphaDungeonLayoutPlanner.Plan(Seed, DungeonRooms, 0, 40, Problems);
+            if (dungeon != null)
+            {
+                foreach (var room in dungeon.Rooms)
+                {
+                    MakeBox(new Vector3(room.X + 1.5f, 1.5f, room.Z + 1.5f), new Vector3(3f, 3f, 3f),
+                        "ShowcaseDungeonRoom" + room.Index);
+                    DungeonRoomObjects++;
+                }
+                var chests = AlphaDungeonChests.Plan(dungeon, ChestsPerDungeon, Seed, 0, 0, Problems);
+                foreach (var chest in chests)
+                {
+                    MakeBox(new Vector3((float)chest.X, (float)chest.Y, (float)chest.Z), new Vector3(0.5f, 0.5f, 0.5f),
+                        "ShowcaseChest" + chest.RoomIndex);
+                    ChestObjects++;
                 }
             }
             _built = true;

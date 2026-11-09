@@ -187,6 +187,8 @@ namespace CubeGame.Tests.Visual.PlayMode
                 Assert.IsNotNull(showcase.Player, "player visual is assembled");
                 Assert.GreaterOrEqual(showcase.SpawnedCreatures, 4, "creatures are spawned from staged kinds");
                 Assert.GreaterOrEqual(showcase.StructureObjects, 2, "houses come from the structure planner");
+                Assert.GreaterOrEqual(showcase.DungeonRoomObjects, 4, "dungeon rooms come from the layout planner");
+                Assert.GreaterOrEqual(showcase.ChestObjects, 2, "chest anchors come from AlphaDungeonChests");
                 for (int i = 0; i < 60; i++) { showcase.Tick(1f / 60f); yield return null; }
             }
             finally

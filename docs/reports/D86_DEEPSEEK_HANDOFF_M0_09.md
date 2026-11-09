@@ -9,7 +9,8 @@
 
 - визуал игрока (человек 0x02) из `AlphaPlayerVisualBuilder`;
 - N существ из подготовленных видов с действиями (`CreatureSpawner` + `CreatureAi`), расставленных по кругу;
-- несколько домов из `AlphaStructurePlacementPlanner` (детерминированный контракт размещения).
+- несколько домов из `AlphaStructurePlacementPlanner` (детерминированный контракт размещения);
+- комнаты данжа и точки сундуков (`AlphaDungeonLayoutPlanner` + `AlphaDungeonChests`, якорь `CUBEGAME_CONTRACT`).
 
 Правил игры компонент не содержит: игрок — только визуал, существа живут на существующем AI, дома — кубы
 планировщика (не заменяют дома Claude).
@@ -21,6 +22,8 @@ var showcase = new GameObject("AlphaShowcase").AddComponent<AlphaContentShowcase
 showcase.Seed = 2024;            // детерминизм
 showcase.CreatureCount = 6;
 showcase.StructureCount = 2;
+showcase.DungeonRooms = 4;      // комнаты данжа
+showcase.ChestsPerDungeon = 2; // сундуки (правило «10 предметов»)
 showcase.Radius = 8f;
 showcase.SpawnOnStart = true;    // Build() в Start; в тестах можно вызвать Build/Tick вручную
 // Проблемы: showcase.Problems; готовность: showcase.Player != null, SpawnedCreatures, StructureObjects
@@ -38,5 +41,5 @@ showcase.SpawnOnStart = true;    // Build() в Start; в тестах можно
 
 ## 4. Проверки
 
-`AlphaOutput/playmode.xml` — 45/45 (витрина: игрок + 4 существа + 2 дома, 60 кадров без ошибок);
+`AlphaOutput/playmode.xml` — 46/46 (витрина: игрок + 4 существа + 2 дома + 4 комнаты данжа + 2 сундука, 60 кадров без ошибок);
 `AlphaOutput/editmode.xml` — 351/351.
