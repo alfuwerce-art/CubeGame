@@ -187,6 +187,7 @@ namespace CubeGame.AlphaModels.Tests.EditMode
             Assert.AreEqual(27, AlphaContentTables.Skills.Length);
             Assert.IsEmpty(AlphaWorldContent.Validate(), string.Join("\n", AlphaWorldContent.Validate()));
             Assert.IsEmpty(AlphaStructurePlacementPlanner.Validate(), string.Join("\n", AlphaStructurePlacementPlanner.Validate()));
+            Assert.IsEmpty(AlphaDungeonRules.Validate(), string.Join("\n", AlphaDungeonRules.Validate()));
         }
 
         [Test]
@@ -242,6 +243,53 @@ namespace CubeGame.AlphaModels.Tests.EditMode
             Assert.AreEqual("Forest", forest.Name);
             Assert.AreEqual(65536, AlphaContentTables.WorldBlocks);
             Assert.AreEqual(1024, AlphaContentTables.WorldRegionGrid);
+        }
+    }
+
+    public class AlphaDungeonContentTests
+    {
+        [Test]
+        public void DungeonRulesAndLayoutAreDeterministic()
+        {
+            Assert.IsEmpty(AlphaDungeonRules.Validate(), string.Join("\n", AlphaDungeonRules.Validate()));
+            Assert.AreEqual(10, AlphaDungeonRules.ChestItemCount, "a dungeon chest holds exactly 10 items");
+            CollectionAssert.Contains(AlphaDungeonRules.EntranceNames, "underground-dungeon01");
+
+            var problems = new List<string>();
+            var a = AlphaDungeonLayoutPlanner.Plan(11u, 6, 0, 0, problems);
+            var b = AlphaDungeonLayoutPlanner.Plan(11u, 6, 0, 0, new List<string>());
+            Assert.IsEmpty(problems, string.Join("\n", problems));
+            Assert.AreEqual(6, a.Rooms.Count);
+            Assert.AreEqual(5, a.Corridors.Count);
+            for (int i = 0; i < a.Rooms.Count; i++)
+            {
+                Assert.AreEqual(a.Rooms[i].X, b.Rooms[i].X);
+                Assert.AreEqual(a.Rooms[i].Z, b.Rooms[i].Z);
+            }
+            for (int i = 1; i < a.Rooms.Count; i++)
+            {
+                int dx = Math.Abs(a.Rooms[i].X - a.Rooms[i - 1].X);
+                int dz = Math.Abs(a.Rooms[i].Z - a.Rooms[i - 1].Z);
+                Assert.AreEqual(AlphaDungeonRules.RoomStep, dx + dz, "consecutive rooms are one step apart (Q-16)");
+                var corridor = a.Corridors[i - 1];
+                Assert.AreEqual(a.Rooms[i - 1].Index, corridor.FromIndex);
+                Assert.AreEqual(a.Rooms[i].Index, corridor.ToIndex);
+                Assert.IsNotEmpty(corridor.Cells);
+                var last = corridor.Cells[corridor.Cells.Count - 1];
+                Assert.AreEqual(a.Rooms[i].X, last.X);
+                Assert.AreEqual(a.Rooms[i].Z, last.Z);
+                var first = corridor.Cells[0];
+                Assert.AreEqual(1, Math.Abs(first.X - a.Rooms[i - 1].X) + Math.Abs(first.Z - a.Rooms[i - 1].Z),
+                    "the corridor starts on a cell adjacent to its room");
+            }
+
+            var c = AlphaDungeonLayoutPlanner.Plan(999u, 6, 0, 0, new List<string>());
+            Assert.AreNotEqual(string.Join(",", a.Rooms.ConvertAll(r => r.X + ":" + r.Z)),
+                string.Join(",", c.Rooms.ConvertAll(r => r.X + ":" + r.Z)), "the seed changes the layout");
+
+            var bad = new List<string>();
+            AlphaDungeonLayoutPlanner.Plan(1u, 0, 0, 0, bad);
+            Assert.That(bad, Has.Some.Contains("DUNGEON_ROOM_COUNT"));
         }
     }
 

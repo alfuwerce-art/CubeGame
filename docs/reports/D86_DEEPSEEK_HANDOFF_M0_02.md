@@ -31,6 +31,16 @@ foreach (var p in placements) InstantiateHouse(p.StableId, p.TemplateId, p.X, p.
 - Стабильный id: `structure:<region>:<cell>:<template>:<slot>` — годится для персистентности (сохраняйте в своём `WorldDeltaStore`).
 - Поворот 0…3, размеры берутся из шаблона; интерьер/расстановка мебели — **не** реализованы (`UNKNOWN`).
 
+### Данжи (M0-07B, PARTIAL)
+
+```csharp
+var layout = AlphaDungeonLayoutPlanner.Plan(worldSeed, roomCount: 6, originX, originZ, problems);
+// layout.Rooms (3x3x3, шаг 7), layout.Corridors (L-образные клетки), layout.Status = PARTIAL
+AlphaDungeonRules.ChestItemCount;   // 10 — сундук данжа по evidence
+AlphaDungeonRules.EntranceNames;    // overground-dungeon01 / underground-dungeon01
+```
+Порядок вырезания коридоров, содержимое комнат, свет/факелы и таблицы встреч — `UNKNOWN`; планировщик даёт связный скелет, а не «Alpha-данж».
+
 ## 3. Что нельзя утверждать
 
 - W-18 (климат→объекты) не выгружена: растительность и биомный спавн по-прежнему `UNKNOWN`; не подставляйте случайные объекты как «Alpha».

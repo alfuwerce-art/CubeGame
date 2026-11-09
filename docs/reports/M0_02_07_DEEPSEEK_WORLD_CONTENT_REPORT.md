@@ -16,7 +16,8 @@
 | Использование в игре | отсутствовало | `Assets/CubeGame/Content/AlphaWorldContent.cs`: lookup, категории (структура/мебель/контейнер/ловушка/сервис/декор) с явной пометкой `NAME_PREFIX_CUBEGAME_CONTRACT` |
 | Постройки | в реестре как «MISSING» | `AlphaStructureTemplates`: дом 3×3×4 (стили 1…5), комната данжа 3×3×3 (шаг 7); габариты `DIRECT`, интерьер `UNKNOWN` |
 | Размещение | алгоритм W-16 только описан | `AlphaStructurePlacementPlanner`: детерминированные кандидаты на клетку, 4 попытки, 4 поворота, проверка свободного футпринта через предикат мира; без свободного места — явная проблема, не принудительная постройка |
-| Тесты | — | +2 EditMode (337/337 всего); PlayMode без регрессий (26/26) |
+| Данжи (M0-07B) | только размеры комнат в evidence | `AlphaDungeonRules` (комната 3×3×3, шаг 7, сундук ровно 10 предметов, имена входов) + `AlphaDungeonLayoutPlanner`: детерминированный связный скелет на решётке 5×5 с L-коридорами; статус `PARTIAL` (порядок вырезания коридоров/содержимое комнат неизвестны) |
+| Тесты | — | +3 EditMode (340/340 всего); PlayMode без регрессий (30/30) |
 
 ---
 
@@ -30,6 +31,7 @@
 | `Assets/CubeGame/Content/Generated/AlphaContentTables.g.cs` | те же таблицы с SHA входных файлов |
 | `Assets/CubeGame/Content/AlphaWorldContent.cs` | lookup объектов/имён/навыков, категории объектов, сервисные объекты, валидация 67/133/27 |
 | `Assets/CubeGame/Content/AlphaStructures.cs` | `AlphaStructureTemplateDef`, `AlphaStructureTemplates` (дом 3×3×4, данж 3×3×3, шаг 7), `AlphaStructurePlacementPlanner` (детерминизм, повороты, свободный футпринт), валидация |
+| `Assets/CubeGame/Content/AlphaDungeons.cs` | `AlphaDungeonRules` (размер комнаты, шаг, 10 предметов в сундуке, входы), `AlphaDungeonLayoutPlanner` (связный скелет с L-коридорами, детерминизм по seed), статус `PARTIAL` |
 | `Assets/CubeGame/Tests/AlphaModels/EditMode/AlphaModelsEditModeTests.cs` | `AlphaWorldContentTests`: имена Door/Chest/Workbench/FireTrap, LifePotion (1,1), HangGlider (0x17/0), SkillClimbing, сервисы ≥8, шаблоны и размещение (детерминизм, отказ при занятом футпринте, неизвестный шаблон) |
 | `Assets/CubeGame/AlphaModels.Import/Editor/AlphaModelsImport.cs` | в проверку кэша добавлены отчёты мира/структур |
 
@@ -39,8 +41,8 @@
 
 | Прогон | Результат |
 |---|---|
-| EditMode | `total=337 passed=337 failed=0` (`AlphaOutput/editmode.xml`) |
-| PlayMode | `total=26 passed=26 failed=0` (`AlphaOutput/playmode.xml`) |
+| EditMode | `total=340 passed=340 failed=0` (`AlphaOutput/editmode.xml`) |
+| PlayMode | `total=30 passed=30 failed=0` (`AlphaOutput/playmode.xml`) |
 | Выгрузка таблиц мира | `WORLD_CTOR_EVIDENCE=PASS objects=67 items=133 skills=27` |
 | Генерация контента | `ALPHA_CONTENT_TABLES=PASS … worldObjects=67 itemNames=133 skills=27` |
 
