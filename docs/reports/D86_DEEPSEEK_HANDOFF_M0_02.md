@@ -41,13 +41,22 @@ AlphaDungeonRules.EntranceNames;    // overground-dungeon01 / underground-dungeo
 ```
 Порядок вырезания коридоров, содержимое комнат, свет/факелы и таблицы встреч — `UNKNOWN`; планировщик даёт связный скелет, а не «Alpha-данж».
 
-## 3. Что нельзя утверждать
+## 3. Сервисы и взаимодействия (M0-07C, данные)
+
+```csharp
+AlphaNpcServices.TryServiceFor(objectId, out var service);   // MarketStand1 → Trade, Anvil → Craft, Furnace → Smelt, BedTable → Rest, CustomizationBench → Customize
+AlphaNpcServices.All();                                      // все сервисные объекты с категорией
+AlphaNpcServices.Status;                                     // явно: категория — CUBEGAME_CONTRACT, торговые правила/цены UNKNOWN (F-U5)
+```
+Категория выведена из имён объектов Alpha (сами имена — доказательство), правила торговли/крафта не выдумываются.
+
+## 4. Что нельзя утверждать
 
 - W-18 (климат→объекты) не выгружена: растительность и биомный спавн по-прежнему `UNKNOWN`; не подставляйте случайные объекты как «Alpha».
 - Правила размещения W-16 не восстановлены: политика (равнина/уровень/расстояния) — ваша, документируйте как `CUBEGAME_CONTRACT`.
 - Сервисы торговцев: рабочие места известны, но ассортимент/наценки (`F-U5`) — `UNKNOWN`.
 - Категории объектов — CubeGame-контракт по именам, не поле Alpha.
 
-## 4. Проверки
+## 5. Проверки
 
-`AlphaOutput/editmode.xml` — 337/337 (+2 теста мира/структур); `AlphaOutput/playmode.xml` — 26/26. Таблицы воспроизводимы: `python -m tools.alpha_content.build_world_evidence --check` и `python -m tools.alpha_content.build_content_tables --check`.
+`AlphaOutput/editmode.xml` — 342/342 (+тест сервисных категорий); `AlphaOutput/playmode.xml` — 33/33 (включая сквозной контент-сценарий `WorldContentPlayModeTests`). Таблицы воспроизводимы: `python -m tools.alpha_content.build_world_evidence --check`, `build_content_tables --check`, `build_staged_visuals --check`.

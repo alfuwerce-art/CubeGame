@@ -32,6 +32,8 @@
 | `Assets/CubeGame/Content/AlphaWorldContent.cs` | lookup объектов/имён/навыков, категории объектов, сервисные объекты, валидация 67/133/27 |
 | `Assets/CubeGame/Content/AlphaStructures.cs` | `AlphaStructureTemplateDef`, `AlphaStructureTemplates` (дом 3×3×4, данж 3×3×3, шаг 7), `AlphaStructurePlacementPlanner` (детерминизм, повороты, свободный футпринт), валидация |
 | `Assets/CubeGame/Content/AlphaDungeons.cs` | `AlphaDungeonRules` (размер комнаты, шаг, 10 предметов в сундуке, входы), `AlphaDungeonLayoutPlanner` (связный скелет с L-коридорами, детерминизм по seed), статус `PARTIAL` |
+| `Assets/CubeGame/Content/AlphaNpcServices.cs` | `AlphaServiceKind` (Trade/Craft/Customize/Rest/Smelt) и `AlphaNpcServices`: сервисная мебель Alpha → категория взаимодействия; `Status` явно помечает `CUBEGAME_CONTRACT`, торговые правила F-U5 `UNKNOWN` |
+| `Assets/CubeGame/Tests/World/PlayMode/WorldContentPlayModeTests.cs` | сквозной контент-сценарий: размещение дома, план данжа, сервисы, спавн существ+декора с Alpha-визуалами, тик, despawn/respawn со стабильным id |
 | `Assets/CubeGame/Tests/AlphaModels/EditMode/AlphaModelsEditModeTests.cs` | `AlphaWorldContentTests`: имена Door/Chest/Workbench/FireTrap, LifePotion (1,1), HangGlider (0x17/0), SkillClimbing, сервисы ≥8, шаблоны и размещение (детерминизм, отказ при занятом футпринте, неизвестный шаблон) |
 | `Assets/CubeGame/AlphaModels.Import/Editor/AlphaModelsImport.cs` | в проверку кэша добавлены отчёты мира/структур |
 

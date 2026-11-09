@@ -244,6 +244,24 @@ namespace CubeGame.AlphaModels.Tests.EditMode
             Assert.AreEqual(65536, AlphaContentTables.WorldBlocks);
             Assert.AreEqual(1024, AlphaContentTables.WorldRegionGrid);
         }
+        [Test]
+        public void NpcServiceFurnitureMapsToContractKinds()
+        {
+            Assert.IsEmpty(AlphaNpcServices.Validate(), string.Join("\n", AlphaNpcServices.Validate()));
+            Assert.IsTrue(AlphaNpcServices.TryServiceFor(21, out var market), "MarketStand1");
+            Assert.AreEqual(AlphaServiceKind.Trade, market.Kind);
+            Assert.IsTrue(AlphaNpcServices.TryServiceFor(72, out var anvil), "Anvil");
+            Assert.AreEqual(AlphaServiceKind.Craft, anvil.Kind);
+            Assert.IsTrue(AlphaNpcServices.TryServiceFor(77, out var customize), "CustomizationBench");
+            Assert.AreEqual(AlphaServiceKind.Customize, customize.Kind);
+            Assert.IsTrue(AlphaNpcServices.TryServiceFor(20, out var bed), "BedTable");
+            Assert.AreEqual(AlphaServiceKind.Rest, bed.Kind);
+            Assert.IsTrue(AlphaNpcServices.TryServiceFor(71, out var furnace), "Furnace");
+            Assert.AreEqual(AlphaServiceKind.Smelt, furnace.Kind);
+            Assert.IsFalse(AlphaNpcServices.TryServiceFor(1, out _), "a door is not a service");
+            Assert.GreaterOrEqual(AlphaNpcServices.All().Count, 8);
+            StringAssert.Contains("UNKNOWN", AlphaNpcServices.Status);
+        }
     }
 
     public class AlphaDungeonContentTests
