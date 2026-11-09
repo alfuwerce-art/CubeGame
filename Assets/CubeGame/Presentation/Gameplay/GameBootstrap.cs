@@ -8,6 +8,7 @@ using CubeGame.Features.Items;
 using CubeGame.Core.Equipment;
 using CubeGame.Core.Items;
 using CubeGame.Features.Contracts;
+using CubeGame.Features.Creatures;
 using CubeGame.Features.Persistence;
 using CubeGame.Features.Session;
 using CubeGame.Features.World;
@@ -89,6 +90,7 @@ namespace CubeGame.Gameplay
         private GameVisualSink _visuals;
         private AlphaActionTimingSource _timings;
         private CreatureCombatDriver _creatures;
+        private WorldPopulation _population;
         private long _heroRespawnAtMs = -1;
         private bool _inventoryOpen;
         private Vector2 _inventoryScroll;
@@ -210,6 +212,7 @@ namespace CubeGame.Gameplay
                 RebaseIfFar();
                 SyncHeroFromView();
                 PublishHeroMovement();
+                _population?.Update(_session.Hero.Position);
                 if (_heroRespawnAtMs >= 0 && _session.Clock.TimeMs >= _heroRespawnAtMs)
                 {
                     RespawnHero();
@@ -577,6 +580,76 @@ namespace CubeGame.Gameplay
             {
                 _combatLog += $"  {_trainingTarget.Name} died";
             }
+
+            if (_population != null && _population.MarkKilled(died.Entity, died.TimeMs))
+            {
+                _combatLog += $"  {died.Entity} killed (stays dead)";
+            }
+        }
+
+        /// <summary>World population (C6): live spawns of the zones around the hero.</summary>
+        public WorldPopulation Population => _population;
+
+        private void StartPopulation()
+        {
+            IWorldGenerator generator = _worldState.Generator;
+            var source = new AlphaWorldPopulation(
+                _session.World.Seed,
+                zone => generator.Region(new RegionKey(zone.X >> 6, zone.Z >> 6)).Level,
+                (zone, lx, lz) => GroundAt(zone.X * (double)WorldLayout.ZoneSize + lx + 0.5, zone.Z * (double)WorldLayout.ZoneSize + lz + 0.5));
+            _population = new WorldPopulation(_session.WorldDeltas);
+            _population.AddSource(source, 0);
+            _population.Spawned += OnSpawnAppeared;
+            _population.Despawned += OnSpawnGone;
+            _population.Update(_session.Hero.Position);
+            Debug.Log($"[Game] population: {_population.LiveCount} creatures in {_population.ActiveZones.Count} zones");
+        }
+
+        private void StopPopulation()
+        {
+            if (_population == null)
+            {
+                return;
+            }
+
+            _population.Clear();
+            _population.Spawned -= OnSpawnAppeared;
+            _population.Despawned -= OnSpawnGone;
+            _population = null;
+        }
+
+        private void OnSpawnAppeared(LiveSpawn live)
+        {
+            SpawnDefinition def = live.Definition;
+            if (def.BehaviourKey != AlphaWorldPopulation.BehaviourKey || def.Faction == (int)CreatureFaction.Passive || _session.Combat == null)
+            {
+                return;   // passive objects and structures are zone content, not combatants
+            }
+
+            var creature = Combatant.CreateCreature(live.Id, def.Kind, $"Creature 0x{def.Kind.Value:x2}", def.Level, 0);
+            creature.Position = def.Position;
+            creature.Yaw = def.Yaw;
+            creature.Hostile = def.Faction == (int)CreatureFaction.Monster;
+            _session.Combat.Register(creature);
+            _creatures?.Add(creature, def.Level, 0, def.Faction, def.ClassId, def.SpecializationId);
+            _session.Events.Publish(new EntitySpawned
+            {
+                TimeMs = _session.Clock.TimeMs,
+                Entity = live.Id,
+                Kind = def.Kind,
+                Position = def.Position,
+                Yaw = def.Yaw,
+                AppearanceSeed = (uint)(live.Id.Value ^ (live.Id.Value >> 32)),
+            });
+        }
+
+        private void OnSpawnGone(LiveSpawn live)
+        {
+            if (_session.Combat != null && _session.Combat.Unregister(live.Id))
+            {
+                _creatures?.Remove(live.Id);
+                _session.Events.Publish(new EntityDespawned { TimeMs = _session.Clock?.TimeMs ?? 0, Entity = live.Id });
+            }
         }
 
         public GameVisualSink Visuals => _visuals;
@@ -696,6 +769,7 @@ namespace CubeGame.Gameplay
             PublishEquipment();
             _creatures = new CreatureCombatDriver(_session, GroundAt, kind => _timings.AttackActionsOf(kind), _session.World.Seed.Value);
             _session.Clock.Ticked += _creatures.Tick;
+            StartPopulation();
             // The target appears once the hero stands on the ground and the camera has a facing (see Update).
             _trainingTargetPending = true;
             return Report(true, description);
@@ -773,6 +847,7 @@ namespace CubeGame.Gameplay
         private void DestroyWorldViews()
         {
             DespawnTrainingTarget();
+            StopPopulation();
             foreach (GameObject ground in _groundItems.Values)
             {
                 if (ground != null)

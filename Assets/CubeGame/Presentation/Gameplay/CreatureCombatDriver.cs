@@ -47,13 +47,27 @@ namespace CubeGame.Gameplay
             return ai != null;
         }
 
+        /// <summary>Regeneration of faction 5 (Alpha N-12, DIRECT): HP += MaxHP · 0.10 per second.</summary>
+        public const double Faction5RegenPerSecond = 0.10;
+
         public void Add(Combatant combatant, int level, int stars)
+        {
+            Add(combatant, level, stars, (int)CreatureFaction.Monster, -1, -1);
+        }
+
+        /// <summary>
+        /// World spawn (C6): faction, class and specialisation come from the spawn record so that Alpha's attack
+        /// selection C-29 sees them (−1 = unknown → Alpha's unarmed branch).
+        /// </summary>
+        public void Add(Combatant combatant, int level, int stars, int faction, int classId, int specialisationId)
         {
             var state = new CreatureState
             {
                 StableId = combatant.Id.ToString(),
                 Kind = combatant.Kind.Value,
-                Faction = (int)CreatureFaction.Monster,
+                Faction = faction,
+                ClassId = classId,
+                SpecialisationId = specialisationId,
                 Level = level,
                 Stars = stars,
                 Health = combatant.Health.CurrentHealth,
@@ -88,6 +102,12 @@ namespace CubeGame.Gameplay
                 if (c.IsDead)
                 {
                     continue;
+                }
+
+                if (enemy.State.Faction == (int)CreatureFaction.Npc && c.Health.CurrentHealth < c.Health.MaxHealth)
+                {
+                    c.Health.Heal(c.Health.MaxHealth * Faction5RegenPerSecond * (elapsed / 1000.0));
+                    enemy.State.Health = c.Health.CurrentHealth;
                 }
 
                 enemy.Moved = 0.0;

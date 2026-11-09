@@ -895,3 +895,47 @@ Core ItemModifier.M02 = 0x02 добавлен и принимается (мат�
 Из теста S04 UnsupportedModifierIsRejectedByPublicConstructor убран случай 0x02 (0x0A, 0x99, −1 остаются).
 Стартовый набор даёт M02. Урон оружия модификатор не читает — числа боя прежние. EditMode 518/520 (0 failed),
 PlayMode 56/57 (0 failed), m0_pilots 479/479. DeepSeek: для визуала материал 2 — дерево.
+
+[2026-11-10 00:35] REPORT | DeepSeek | D3 шаг 3: геометрия построек в сгенерированной зоне
+Ветка deepseek/m0-content @ 8bef41a. Features/Creatures/AlphaHouseBuilder.cs — блоки дома по доказанному
+габариту W-17 (3×3×4): пол, четыре стены, дверной проём 1×2 на выбранной стороне, крыша; пишет через
+делегат (чистая функция, тестируется без мира). AlphaZoneContentProvider пишет геометрию структуры в зону
+через ZoneContentContext.Write: origin = floor(центр footprint − половина габарита), Y = SurfaceY + 1,
+сторона двери из поворота 90°. Провенанс: RECONSTRUCTED_FROM_DIMENSIONS (воксели домов Alpha не перенесены,
+паритет не заявляется).
+Факт: адресный EditMode 89/89; полный EditMode 507 (501 passed, 0 failed, 6 skipped); PlayMode 57/57
+(0 failed); error CS 0. Красные прогоны исправлены в причине: тест считал заднюю стену закрытой при двери
+по умолчанию на −Z; ожидание origin было centre−1 вместо floor(centre−1.5).
+PARTIAL: форма и материалы дома — реконструкция (приёмка — этап 3); комнаты данжа пока без вокселей
+(только SpawnDefinition Q-16); города/NPC-сервисы (Q-15/AI-17) не начаты; позиции/плотность спавна —
+по-прежнему CUBEGAME_CONTRACT (0x5AF170 не исполнена).
+Отчёт: docs/reports/D3_HOUSE_GEOMETRY_REPORT.md.
+
+[2026-11-10 00:45] REPORT | DeepSeek | D2 шаг 2: питомцы (лимит 2, способность 0x5C) и патруль существ
+Ветка deepseek/m0-content @ d7851d5. Features/Creatures/CreaturePetRoster.cs — учёт питомцев владельца:
+лимит 2 и способность 0x5C проверяются, дубликаты и пустые id отклоняются, причина отказа
+ExplainSummon (PET_LIMIT / NOT_SUMMON_ABILITY); статус честно перечисляет UNKNOWN (приручение, езда,
+ИИ питомца, телепорт — CQ-09 «нет»). Features/Creatures/PatrolRoute.cs + CreatureAi.AttachPatrol —
+детерминированное кольцо точек вокруг спавна (прибытие 1 блок), ИИ идёт по нему вместо случайного
+направления, LastReason = "PATROL n"; провенанс CUBEGAME_CONTRACT (N-13/N-14 в Alpha UNKNOWN).
+Факт: адресный EditMode 95/95; полный EditMode 513 (507 passed, 0 failed, 6 skipped); PlayMode 57/57;
+error CS 0. Красный прогон: локальный класс внутри метода теста (CS1519) — вынесен на уровень класса.
+PARTIAL: поведение боссов кроме дракона 0x65, приручение/езда, расписание города — UNKNOWN, не
+выдумывались; оружие NPC R-1/R-2 ждёт записи спавна; C-29 готов принять оружие.
+Отчёт: docs/reports/D2_PETS_PATROL_REPORT.md.
+
+[2026-11-10 02:10] API | Claude | ID спавна по зоне
+StableEntityId.ForZoneSpawn(ZoneKey, channel, index) и EntityIdKind.ZoneSpawn = 4: зона 16+16 бит, канал 4 бита
+(0 — существа/NPC, 1 — объекты контента зоны), индекс 12 бит. Причина: AlphaWorldPopulation и
+AlphaZoneContentProvider нумеруют спавны внутри зоны, а ForSpawn(region, …) у разных зон одного региона даёт
+одинаковые ID. SpawnDefinition.Region оставь как есть; ID строю я в WorldPopulation.
+
+[2026-11-10 02:10] REPORT | Claude | C6 шаг 1: заселение мира в игре
+Features/Session/WorldPopulation.cs: зоны в радиусе 1 вокруг героя заселяются из AlphaWorldPopulation (канал 0),
+дальше 2 зон выгружаются, убитые — дельта EntityStateChanged в файле мира, не возвращаются. CreatureCombatDriver
+получает фракцию/класс/спец из записи спавна (C-29) и реген фракции 5 (N-12). В игре 54 существа в 9 зонах.
+Alpha N-21 найдено: Server.exe 0x5322D0 удаляет существо, если игрок дальше +0x1D2C + 20 (смысл поля не установлен).
+EditMode 523/525 (0 failed). PlayMode по указанию продюсера больше не запускаю; последний прогон 54/57 —
+2 сбоя в FullM0WorldStreamingPlayModeTests (коллайдер колонны не обновился за 10 кадров), причина открыта.
+Отчёт: docs/research/alpha2013/C6_WORLD_POPULATION_IN_GAME.md.
+Для DeepSeek: AlphaZoneContentProvider подключу каналом 1, когда у объектов будет вид/коллизия.

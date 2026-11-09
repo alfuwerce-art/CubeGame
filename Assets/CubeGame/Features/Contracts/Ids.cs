@@ -132,6 +132,33 @@ namespace CubeGame.Features.Contracts
             return new StableEntityId(value);
         }
 
+        /// <summary>
+        /// World spawn keyed by zone (C6): 4-bit kind | 16-bit zone x | 16-bit zone z | 4-bit channel | 12-bit index.
+        /// Population sources number their spawns per zone, so the zone (not the region) must be part of the id.
+        /// Channel separates sources of the same zone (0 = creatures/NPCs, 1 = zone content objects).
+        /// </summary>
+        public static StableEntityId ForZoneSpawn(ZoneKey zone, int channel, int spawnIndex)
+        {
+            if (zone.X < 0 || zone.X > 0xFFFF || zone.Z < 0 || zone.Z > 0xFFFF)
+            {
+                throw new ArgumentOutOfRangeException(nameof(zone));
+            }
+
+            if (channel < 0 || channel > 0xF)
+            {
+                throw new ArgumentOutOfRangeException(nameof(channel));
+            }
+
+            if (spawnIndex < 0 || spawnIndex > 0xFFF)
+            {
+                throw new ArgumentOutOfRangeException(nameof(spawnIndex));
+            }
+
+            ulong value = ((ulong)EntityIdKind.ZoneSpawn << 60) | ((ulong)zone.X << 32) | ((ulong)zone.Z << 16)
+                | ((ulong)channel << 12) | (ulong)spawnIndex;
+            return new StableEntityId(value);
+        }
+
         public static StableEntityId ForRuntime(ulong sequence)
         {
             return new StableEntityId(((ulong)EntityIdKind.Runtime << 60) | (sequence & 0x0FFFFFFFFFFFFFFFUL));
@@ -152,6 +179,9 @@ namespace CubeGame.Features.Contracts
         Hero = 1,
         WorldSpawn = 2,
         Runtime = 3,
+
+        /// <summary>World spawn keyed by zone (C6): zone x/z, source channel, index inside the zone.</summary>
+        ZoneSpawn = 4,
     }
 
     /// <summary>Creature/NPC/object species. For Alpha species the number equals Alpha's kind byte (+0x64).</summary>
