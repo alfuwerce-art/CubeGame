@@ -38,7 +38,7 @@ namespace CubeGame.Gameplay
         /// World generator in use (M0-02): Alpha terrain reconstruction, see <see cref="AlphaTerrainGenerator"/>.
         /// Saves record the id; a save made by another generator (e.g. the M0-01 pilot height field) is refused.
         /// </summary>
-        public const string GeneratorId = AlphaTerrainGenerator.Id;
+        public const string GeneratorId = AlphaTerrainGenerator.ContentId;
 
         public const uint DefaultSeed = 666666u;
 
@@ -287,10 +287,16 @@ namespace CubeGame.Gameplay
 
         public bool LoadWorld(string slotKey)
         {
-            SlotLoadResult result = _slots.Load(slotKey, GeneratorId);
+            SlotLoadResult result = _slots.Load(slotKey, null);
             if (!result.IsSuccess)
             {
                 return Report(false, $"load {slotKey} failed: {result}");
+            }
+
+            string generatorId = result.World.GeneratorId;
+            if (generatorId != GeneratorId && generatorId != AlphaTerrainGenerator.Id)
+            {
+                return Report(false, $"load {slotKey} failed: unknown world generator '{generatorId}'");
             }
 
             if (!_session.BeginLoadedWorld(slotKey, result.World, result.Hero, result.ClockTick, result.WorldDeltas))
@@ -619,10 +625,14 @@ namespace CubeGame.Gameplay
                 (zone, lx, lz) => GroundAt(zone.X * (double)WorldLayout.ZoneSize + lx + 0.5, zone.Z * (double)WorldLayout.ZoneSize + lz + 0.5));
             _population = new WorldPopulation(_session.WorldDeltas);
             _population.AddSource(source, 0);
+            if (generator is AlphaTerrainGenerator terrain && terrain.GeneratorId == GeneratorId)
+            {
+                _population.AddSource(new D3ZonePopulation(terrain), 1);
+            }
             _population.Spawned += OnSpawnAppeared;
             _population.Despawned += OnSpawnGone;
             _population.Update(_session.Hero.Position);
-            Debug.Log($"[Game] population: {_population.LiveCount} creatures in {_population.ActiveZones.Count} zones");
+            Debug.Log($"[Game] population: {_population.LiveCount} entities in {_population.ActiveZones.Count} zones");
         }
 
         private void StopPopulation()
@@ -641,9 +651,15 @@ namespace CubeGame.Gameplay
         private void OnSpawnAppeared(LiveSpawn live)
         {
             SpawnDefinition def = live.Definition;
+            if (def.BehaviourKey == AlphaZoneContentProvider.PassiveBehaviourKey)
+            {
+                PublishSpawnVisual(live);
+                return;
+            }
+
             if (def.BehaviourKey != AlphaWorldPopulation.BehaviourKey || def.Faction == (int)CreatureFaction.Passive || _session.Combat == null)
             {
-                return;   // passive objects and structures are zone content, not combatants
+                return;
             }
 
             var creature = Combatant.CreateCreature(live.Id, def.Kind, $"Creature 0x{def.Kind.Value:x2}", def.Level, 0);
@@ -653,6 +669,12 @@ namespace CubeGame.Gameplay
             creature.IsBoss = CreatureKinds.IsBoss(def.Kind.Value);
             _session.Combat.Register(creature);
             _creatures?.Add(creature, def.Level, 0, def.Faction, def.ClassId, def.SpecializationId, def.MainHandWeapon);
+            PublishSpawnVisual(live);
+        }
+
+        private void PublishSpawnVisual(LiveSpawn live)
+        {
+            SpawnDefinition def = live.Definition;
             _session.Events.Publish(new EntitySpawned
             {
                 TimeMs = _session.Clock.TimeMs,
@@ -666,9 +688,14 @@ namespace CubeGame.Gameplay
 
         private void OnSpawnGone(LiveSpawn live)
         {
-            if (_session.Combat != null && _session.Combat.Unregister(live.Id))
+            bool combatantRemoved = _session.Combat != null && _session.Combat.Unregister(live.Id);
+            if (combatantRemoved)
             {
                 _creatures?.Remove(live.Id);
+            }
+
+            if (combatantRemoved || live.Definition.BehaviourKey == AlphaZoneContentProvider.PassiveBehaviourKey)
+            {
                 _session.Events.Publish(new EntityDespawned { TimeMs = _session.Clock?.TimeMs ?? 0, Entity = live.Id });
             }
         }
@@ -815,7 +842,7 @@ namespace CubeGame.Gameplay
             WorldInfo world = _session.World;
             HeroState hero = _session.Hero;
 
-            if (!WorldState.TryCreateGenerator(world.GeneratorId, world.Seed.Value, out IWorldGenerator generator))
+            if (!D3ZonePopulation.TryCreateGenerator(world.GeneratorId, world.Seed.Value, out IWorldGenerator generator))
             {
                 throw new InvalidOperationException($"unknown world generator '{world.GeneratorId}'");
             }

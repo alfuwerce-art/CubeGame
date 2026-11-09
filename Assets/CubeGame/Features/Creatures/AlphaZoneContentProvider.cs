@@ -185,6 +185,14 @@ namespace CubeGame.Features.Creatures
                 _cell = AlphaWorldScale.CellOf(zone);
                 int cx = zone.X * AlphaZone.Size + AlphaZone.Size / 2;
                 int cz = zone.Z * AlphaZone.Size + AlphaZone.Size / 2;
+                VoxelColumn column = context.Zone.Column(cx, cz);
+                // Cube.exe 0x5EB27B…0x5EB2B2 and 0x5EB46C: scan from the column base to first air/water.
+                int scatterHeight = column.Bottom;
+                while (Voxel.IsSolid(column.Read(scatterHeight)))
+                {
+                    scatterHeight++;
+                }
+
                 _climate = new ZoneClimate
                 {
                     Humidity = context.Terrain.Humidity(cx, cz),
@@ -194,6 +202,7 @@ namespace CubeGame.Features.Creatures
                     // (docs/reports/D86_W18_ADDRESS_VERIFICATION.md).
                     Spacing = context.Terrain.Mountain(cx, cz),
                     Level = AlphaTerrainGenerator.Level(zone.X >> 6, zone.Z >> 6),
+                    ScatterHeight = scatterHeight,
                     Mode = 0,
                     CellType = 0,
                 };

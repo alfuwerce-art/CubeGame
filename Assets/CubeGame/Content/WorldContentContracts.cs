@@ -37,6 +37,9 @@ namespace CubeGame.Content
     /// </summary>
     public struct ZoneClimate
     {
+        /// <summary>First air or water voxel above the column base at the W-18 sample point.</summary>
+        public int? ScatterHeight;
+
         public double Humidity;
         public double Temperature;
         public double CellValue;

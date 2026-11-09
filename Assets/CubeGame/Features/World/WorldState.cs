@@ -70,11 +70,18 @@ namespace CubeGame.Features.World
         }
 
         /// <summary>Creates the generator recorded in a world's id. Unknown ids are refused, never substituted.</summary>
-        public static bool TryCreateGenerator(string generatorId, uint seed, out IWorldGenerator generator)
+        public static bool TryCreateGenerator(string generatorId, uint seed, out IWorldGenerator generator,
+            IReadOnlyList<IZoneContentProvider> contentProviders = null)
         {
             if (generatorId == AlphaTerrainGenerator.Id)
             {
                 generator = new AlphaTerrainGenerator(seed, ZoneContentRegistry.Providers);
+                return true;
+            }
+
+            if (generatorId == AlphaTerrainGenerator.ContentId && contentProviders != null && contentProviders.Count > 0)
+            {
+                generator = new AlphaTerrainGenerator(seed, contentProviders, generatorId);
                 return true;
             }
 

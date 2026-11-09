@@ -96,7 +96,7 @@ namespace CubeGame.Features.Creatures
             {
                 var vegetation = AlphaVegetationPlanner.PlanZone(seed, zone.X, zone.Z,
                     climate.Humidity, climate.Temperature, climate.CellValue, climate.Spacing,
-                    climate.Level, climate.Mode, settings.StagedObjectKinds, problems, settings.VegetationPerZone);
+                    climate.ScatterHeight ?? climate.Level, climate.Mode, settings.StagedObjectKinds, problems, settings.VegetationPerZone);
                 foreach (var placement in vegetation)
                 {
                     var item = new ContentPlacement

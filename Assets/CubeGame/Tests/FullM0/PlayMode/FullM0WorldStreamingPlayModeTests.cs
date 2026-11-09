@@ -73,7 +73,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             yield return null;
 
             Assert.IsTrue(game.StartNewWorld("slot0", "Stream", 20131234u, "Walker", CharacterClass.Ranger), game.Status);
-            Assert.AreEqual(AlphaTerrainGenerator.Id, game.Session.World.GeneratorId);
+            Assert.AreEqual(AlphaTerrainGenerator.ContentId, game.Session.World.GeneratorId);
             Assert.AreEqual(WorldLayout.StartVoxel + 0.5, game.Session.Hero.Position.X, 1e-6);
             Assert.AreEqual(1, game.WorldState.Generator.Region(new RegionKey(512, 512)).Level, "start = centre region (Alpha level 1)");
 

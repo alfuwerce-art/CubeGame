@@ -86,6 +86,7 @@ namespace CubeGame.Features.World
     public sealed class AlphaTerrainGenerator : IWorldGenerator
     {
         public const string Id = "cubegame.alpha_terrain/4";
+        public const string ContentId = "cubegame.alpha_terrain/5";
 
         public const int DefaultWaterLevel = 0;
 
@@ -102,8 +103,14 @@ namespace CubeGame.Features.World
         private readonly object _zoneLock = new object();
 
         public AlphaTerrainGenerator(uint masterSeed, IReadOnlyList<IZoneContentProvider> contentProviders = null)
+            : this(masterSeed, contentProviders, Id)
+        {
+        }
+
+        internal AlphaTerrainGenerator(uint masterSeed, IReadOnlyList<IZoneContentProvider> contentProviders, string generatorId)
         {
             MasterSeed = masterSeed;
+            GeneratorId = generatorId;
             _seeds = new AlphaWorldSeeds(masterSeed);
             _climate = new AlphaClimateGrid(_seeds, WorldLayout.StartVoxel, WorldLayout.StartVoxel);
             ContentProviders = contentProviders ?? Array.Empty<IZoneContentProvider>();
@@ -112,7 +119,7 @@ namespace CubeGame.Features.World
         /// <summary>Content stage of every zone (<see cref="IZoneContentProvider"/>), in order; empty = terrain only.</summary>
         public IReadOnlyList<IZoneContentProvider> ContentProviders { get; }
 
-        public string GeneratorId => Id;
+        public string GeneratorId { get; }
 
         public uint MasterSeed { get; }
 

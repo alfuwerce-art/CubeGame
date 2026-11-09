@@ -7,6 +7,7 @@ using CubeGame.Features.Persistence;
 using CubeGame.Features.Session;
 using CubeGame.Features.World;
 using CubeGame.Gameplay;
+using CubeGame.Gameplay.Streaming;
 using CubeGame.Persistence;
 using NUnit.Framework;
 
@@ -41,6 +42,67 @@ namespace CubeGame.Tests.FullM0.EditMode
         }
 
         private static WorldPosition At(int zoneX, int zoneZ) => new WorldPosition(zoneX * 256 + 128, 30, zoneZ * 256 + 128);
+
+        [Test]
+        public void D3GeneratorPlacesHousesAndW18SpawnsWithoutChangingLegacyZones()
+        {
+            const uint seed = 20131234u;
+            const int zoneIndex = WorldLayout.StartVoxel / WorldLayout.ZoneSize;
+            Assert.IsTrue(D3ZonePopulation.TryCreateGenerator(AlphaTerrainGenerator.Id, seed, out IWorldGenerator legacy));
+            Assert.IsTrue(D3ZonePopulation.TryCreateGenerator(AlphaTerrainGenerator.ContentId, seed, out IWorldGenerator current));
+            Assert.AreEqual(AlphaTerrainGenerator.Id, legacy.GeneratorId);
+            Assert.AreEqual(AlphaTerrainGenerator.ContentId, current.GeneratorId);
+            Assert.IsFalse(D3ZonePopulation.TryCreateGenerator("cubegame.alpha_terrain/unknown", seed, out _));
+            Assert.IsEmpty(((AlphaTerrainGenerator)legacy).Zone(zoneIndex, zoneIndex).ContentSpawns);
+
+            var terrain = (AlphaTerrainGenerator)current;
+            AlphaZone generated = terrain.Zone(zoneIndex, zoneIndex);
+            SpawnDefinition house = generated.ContentSpawns.Single(s => s.BehaviourKey == AlphaZoneContentProvider.StructureBehaviourKey);
+            int x = (int)(house.Position.X - 1.5);
+            int z = (int)(house.Position.Z - 1.5);
+            int roofY = (int)house.Position.Y + 3;
+            Assert.IsTrue(Voxel.IsSolid(current.Voxels(x, z).Read(roofY)), "house geometry is in the streamed columns");
+            Assert.IsFalse(Voxel.IsSolid(legacy.Voxels(x, z).Read(roofY)), "legacy slot keeps its original terrain");
+
+            var population = new WorldPopulation(new WorldDeltaStore(), activeRadius: 0, keepRadius: 0);
+            population.AddSource(new FakeSource(), 0);
+            population.AddSource(new D3ZonePopulation(terrain), 1);
+            var center = new ZoneKey(zoneIndex, zoneIndex);
+            population.Update(At(center.X, center.Z));
+            LiveSpawn[] spawns = population.Live.Where(s => s.Channel == 1).ToArray();
+            Assert.IsNotEmpty(spawns);
+            Assert.AreEqual(generated.ContentSpawns.Count - 1, spawns.Length, "house stays geometry");
+            foreach (LiveSpawn spawn in spawns)
+            {
+                StringAssert.StartsWith("W-18", spawn.Definition.Provenance);
+                Assert.AreEqual(StableEntityId.ForZoneSpawn(center, 1, spawn.Definition.SpawnIndex), spawn.Id);
+            }
+
+            StableEntityId[] ids = spawns.Select(s => s.Id).ToArray();
+            var despawned = new List<StableEntityId>();
+            population.Despawned += s => despawned.Add(s.Id);
+            population.Clear();
+            Assert.AreEqual(0, population.LiveCount);
+            CollectionAssert.IsSubsetOf(ids, despawned);
+            population.Update(At(center.X, center.Z));
+            CollectionAssert.AreEquivalent(ids, population.Live.Where(s => s.Channel == 1).Select(s => s.Id));
+        }
+
+        [TestCase(AlphaTerrainGenerator.Id)]
+        [TestCase(AlphaTerrainGenerator.ContentId)]
+        public void CheckpointRetainsTheWorldGeneratorVersion(string generatorId)
+        {
+            var session = new GameSession();
+            session.EnterMainMenu();
+            Assert.IsTrue(session.BeginNewWorld("slot0", new NewWorldRequest { Seed = 9, GeneratorId = generatorId }, 0));
+            Assert.IsTrue(session.CompleteLoading());
+            var slots = new GameSlotStore(new MemoryStore(), new JsonSaveSerializer(), new JsonSessionSerializer(), new JsonWorldSerializer());
+            Assert.IsTrue(slots.Save(session, 1L).IsSuccess);
+            SlotLoadResult loaded = slots.Load("slot0", null);
+            Assert.IsTrue(loaded.IsSuccess, loaded.ToString());
+            Assert.IsTrue(D3ZonePopulation.TryCreateGenerator(loaded.World.GeneratorId, loaded.World.Seed.Value, out IWorldGenerator generator));
+            Assert.AreEqual(generatorId, generator.GeneratorId);
+        }
 
         [Test]
         public void ZoneSpawnIdsAreUniqueAcrossZonesOfOneRegion()
