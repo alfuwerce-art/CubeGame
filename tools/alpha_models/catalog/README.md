@@ -17,6 +17,8 @@
 | `walk_oracle.py` | формула ходьбы каждого вида против исполненного `drawModel` → `walk_oracle_evidence.json` | `Creature_drawModel` |
 | `anim_catalog.py` | все записи байта действия `creature+0x68` по `Cube.exe`, действие → состояние `drawModel`, все функции-рендереры моделей | резолвер состояний 0x4B4EF6 |
 | `static_export.py` + `run_catalog_import.ps1` + `unity/Editor/AlphaCatalogImport.cs` | статичная геометрия **любой** модели в изолированный Unity: `.cubdec` + манифест → Mesh + prefab, проверка размеров/вокселей/маркеров, возобновление по SHA256 | правило маркеров D61 (`VoxelMesh.cs`) |
+| `verify_catalog_import.py` | **проверка уже выполненного импорта** (2856 моделей) без повторной конвертации: SHA256 блоба, размеры, `faces`/`vertices`/`solid`/`markers` против `data1.db`, полнота (2857 блобов = 2856 импортированных + 1 Alpha-невидимая) | `voxel_markers.mesh_stats` (D61) |
+| `item_layer.py` | **предметный слой**: предмет → модель → слот → блок отрисовки → anchor → состояние «в руке/за спиной»; таблица 101 действия, расходник 80/81 + кулдаун, парное/двуручное, динамическая часть R-8 (камень голема) | `item_icon_id` 0x4EC400 + `drawModel` 0x4128F0 |
 
 Закоммиченные доказательства (только числа): `walk_oracle_evidence.json` (156/156 `ORACLE_VERIFIED`),
 `npc_trigger_evidence.json` (триггеры ИИ по видам с условиями; проверка дрейфа по SHA256 кода).
@@ -24,6 +26,9 @@
 Команды (по порядку, всё пишет в `.scratch/catalog`):
 
 ```powershell
+python -m tools.alpha_models.catalog.item_layer --out .scratch/catalog/item_layer.json --export-evidence
+python -m tools.alpha_models.catalog.item_layer --verify
+python -m tools.alpha_models.catalog.verify_catalog_import --manifest <catalog_import.json> --db "D:\Games\Cube world\data1.db"
 python -m tools.alpha_models.universal.pipeline scan --out .scratch/universal/static/alpha_static.json
 python -m tools.alpha_models.catalog.asset_catalog                       # + alpha_static, item_models, registry_sizes
 python -m tools.alpha_models.catalog.trigger_catalog --out .scratch/catalog/trigger_catalog.json   # ~3–4 ч, 10 процессов
