@@ -70,7 +70,8 @@ var chests = AlphaDungeonChests.Plan(layout, chestsPerDungeon, seed, regionX, re
 ```csharp
 var field = new AlphaScatterField(myClimateGrid, spacing);   // IAlphaClimateGrid: Humidity/Temperature/RegionCell
 // либо поставьте точную Alpha-функцию spacing: new AlphaScatterField(grid, (x,z) => ...)
-// World_placeObjectWithSpacing @ 0x005effa0 найден (noise + perlin), но ещё не портирован.
+// fVar6 = значение маски рельефа 0x005EFFA0 (исполнена Claude, 2.1·10⁻⁷). Это НЕ алгоритм размещения:
+// см. docs/reports/D86_W18_ADDRESS_VERIFICATION.md. Пока маска не подключена — значение задаёт вызывающий.
 var selection = field.SelectAt(x, z, level);                  // → AlphaScatterSelection (TRANSLATED_FROM_CODE)
 var placements = field.PlaceCell(seed, regionX, regionZ, cellX, cellZ, level, stagedKinds, problems);
 // AlphaScatterField(null, ...) бросает ArgumentNullException: отсутствие климата — ошибка, не «по умолчанию»

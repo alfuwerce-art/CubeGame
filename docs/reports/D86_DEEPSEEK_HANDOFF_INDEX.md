@@ -44,7 +44,7 @@ python -m tools.alpha_content.build_equipment_models --check
 
 ## 4. Известные пределы (честно)
 
-- W-18: код-происхождение, но **не** живая сверка с Alpha; `World_placeObjectWithSpacing` не портирован — позиции `CUBEGAME_CONTRACT`.
+- W-18: код-происхождение, но **не** живая сверка с Alpha; адрес `0x005EFFA0` проверен — это маска рельефа, а не алгоритм размещения ([отчёт](D86_W18_ADDRESS_VERIFICATION.md)); позиции `CUBEGAME_CONTRACT`.
 - Действия: библиотеки `EMULATED_ALPHA_CODE` (D65/S05A-2/S05B/D83), не live-захват; RuneGiant без действий (R-9).
 - Лампа (`lamp`), пет (`pet`), шея/плечо — законы не реализованы, API отказывает, а не рисует.
 - Аудио/VFX/снаряды — данных нет (R-3/R-8); торговые правила/задания — зона Claude (F-U5, J-U4/U5).

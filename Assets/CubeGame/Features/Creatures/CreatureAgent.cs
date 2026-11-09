@@ -94,12 +94,22 @@ namespace CubeGame.Features.Creatures
         uint _rng = 1u;
         float _lastDistance;
 
-        public bool Initialize(CreatureState state, ICreatureAi ai, AlphaActorDefinition actor, uint seed = 1u)
+        /// <summary>
+        /// Floating origin (absolute world voxels). The state keeps absolute `double` coordinates; the
+        /// Transform holds only the local difference so a 2^24-voxel world does not lose float precision.
+        /// </summary>
+        public double WorldOriginX { get; private set; }
+        public double WorldOriginZ { get; private set; }
+
+        public bool Initialize(CreatureState state, ICreatureAi ai, AlphaActorDefinition actor, uint seed = 1u,
+            double originX = 0.0, double originZ = 0.0)
         {
             State = state ?? throw new ArgumentNullException(nameof(state));
             Ai = ai;
             _rng = seed == 0 ? 1u : seed;
-            transform.position = new Vector3((float)state.X, (float)state.Y, (float)state.Z);
+            WorldOriginX = originX;
+            WorldOriginZ = originZ;
+            ApplyPosition();
             if (actor != null)
             {
                 var problems = new List<string>();
@@ -116,6 +126,21 @@ namespace CubeGame.Features.Creatures
             return true;
         }
 
+        /// <summary>Move the floating origin and put the transform at state − origin.</summary>
+        public void SetWorldOrigin(double originX, double originZ)
+        {
+            WorldOriginX = originX;
+            WorldOriginZ = originZ;
+            ApplyPosition();
+        }
+
+        void ApplyPosition()
+        {
+            if (State == null) return;
+            transform.position = new Vector3(
+                (float)(State.X - WorldOriginX), (float)State.Y, (float)(State.Z - WorldOriginZ));
+        }
+
         public void Tick(float deltaSeconds)
         {
             if (State == null || deltaSeconds < 0f) return;
@@ -129,7 +154,8 @@ namespace CubeGame.Features.Creatures
         {
             if (View == null || !View.Ready) return;
             var position = transform.position;
-            float moved = Vector3.Distance(position, new Vector3((float)State.X, (float)State.Y, (float)State.Z));
+            float moved = Vector3.Distance(position, new Vector3(
+                (float)(State.X - WorldOriginX), (float)State.Y, (float)(State.Z - WorldOriginZ)));
             _lastDistance = moved;
             var state = moved > 1e-4f
                 ? new AlphaLocomotionState { SpeedXY = (float)WalkSpeed, Amplitude = 0.19f, OnGround = true }
@@ -178,13 +204,13 @@ namespace CubeGame.Features.Creatures
         public void MoveTowards(CreatureState self, double targetX, double targetZ, double speed, int elapsedMs)
         {
             var p = transform.position;
-            var target = new Vector3((float)targetX, p.y, (float)targetZ);
+            var target = new Vector3((float)(targetX - WorldOriginX), p.y, (float)(targetZ - WorldOriginZ));
             float step = (float)(speed * (elapsedMs / 1000.0));
             var next = Vector3.MoveTowards(p, target, step);
             transform.position = next;
-            self.X = next.x;
+            self.X = next.x + WorldOriginX;
             self.Y = next.y;
-            self.Z = next.z;
+            self.Z = next.z + WorldOriginZ;
             LastMoveFrames++;
         }
 

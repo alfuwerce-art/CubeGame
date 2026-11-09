@@ -307,6 +307,16 @@ namespace CubeGame.Features.Creatures
                    + ":" + cellX.ToString(CultureInfo.InvariantCulture) + ":" + cellZ.ToString(CultureInfo.InvariantCulture)
                    + ":" + slot.ToString(CultureInfo.InvariantCulture);
         }
+
+        /// <summary>Stable zone-scoped spawn id (streaming unit = 256×256 voxels; M0-02b scale).</summary>
+        public static string ZoneSpawnId(int zoneX, int zoneZ, int slot)
+        {
+            if (zoneX < 0 || zoneX >= AlphaWorldScale.ZonesPerAxis || zoneZ < 0 || zoneZ >= AlphaWorldScale.ZonesPerAxis)
+                throw new ArgumentOutOfRangeException(nameof(zoneX), "Zone coordinate out of bounds.");
+            if (slot < 0) throw new ArgumentOutOfRangeException(nameof(slot), "Spawn slot cannot be negative.");
+            return "spawnz:" + zoneX.ToString(CultureInfo.InvariantCulture) + ":" + zoneZ.ToString(CultureInfo.InvariantCulture)
+                   + ":" + slot.ToString(CultureInfo.InvariantCulture);
+        }
     }
 
     /// <summary>

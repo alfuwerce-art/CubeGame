@@ -60,6 +60,8 @@ namespace CubeGame.Content
         public string StableId;
         public string TemplateId;
         public int RegionX, RegionZ, CellX, CellZ;
+        /// <summary>Zone the footprint starts in (zone-level planning); -1 for the legacy cell-level plan.</summary>
+        public int ZoneX, ZoneZ;
         public int X, Z, Rotation;
         public int Width, Depth, Height;
     }
@@ -81,7 +83,9 @@ namespace CubeGame.Content
         {
             var result = new List<AlphaStructurePlacement>();
             if (templateIds == null || templateIds.Count == 0) { problems?.Add("STRUCTURE_NO_TEMPLATES"); return result; }
-            int cellSize = AlphaContentTables.RegionBlocks / AlphaContentTables.RegionCells;
+            int cellSize = AlphaWorldScale.CellVoxels;
+            int cellOriginX = AlphaWorldScale.RegionOriginVoxel(regionX) + AlphaWorldScale.CellOriginVoxel(cellX);
+            int cellOriginZ = AlphaWorldScale.RegionOriginVoxel(regionZ) + AlphaWorldScale.CellOriginVoxel(cellZ);
             for (int slot = 0; slot < MaxStructuresPerCell; slot++)
             {
                 uint h = DeterministicHash.Combine((int)seed, regionX, regionZ, cellX, cellZ, slot);
@@ -104,14 +108,15 @@ namespace CubeGame.Content
                     int maxZ = cellSize - template.Depth;
                     int offsetX = maxX > 0 ? (int)((mix >> 3) % (uint)(maxX + 1)) : 0;
                     int offsetZ = maxZ > 0 ? (int)((mix >> 13) % (uint)(maxZ + 1)) : 0;
-                    int x = regionX * AlphaContentTables.RegionBlocks + cellX * cellSize + offsetX;
-                    int z = regionZ * AlphaContentTables.RegionBlocks + cellZ * cellSize + offsetZ;
+                    int x = cellOriginX + offsetX;
+                    int z = cellOriginZ + offsetZ;
                     if (isFootprintFree != null && !isFootprintFree(x, z, template.Width, template.Depth)) continue;
                     result.Add(new AlphaStructurePlacement
                     {
                         StableId = $"structure:{regionX}:{regionZ}:{cellX}:{cellZ}:{templateId}:{slot}",
                         TemplateId = templateId,
                         RegionX = regionX, RegionZ = regionZ, CellX = cellX, CellZ = cellZ,
+                        ZoneX = -1, ZoneZ = -1,
                         X = x, Z = z, Rotation = (int)((mix >> 24) & 3u),
                         Width = template.Width, Depth = template.Depth, Height = template.Height,
                     });
@@ -119,6 +124,63 @@ namespace CubeGame.Content
                 }
                 if (!placed) problems?.Add($"STRUCTURE_NO_FREE_FOOTPRINT {regionX}:{regionZ}:{cellX}:{cellZ} {templateId}");
             }
+            return result;
+        }
+
+        /// <summary>
+        /// Zone-level candidate (streaming unit = 256×256 voxels). The footprint is searched inside the zone,
+        /// so a structure belongs to exactly one zone and its stable id survives unload/reload. Alpha's own
+        /// town/house placement rules (W-16) are NOT recovered: the caller's predicate decides.
+        /// </summary>
+        public static List<AlphaStructurePlacement> PlanZone(uint seed, int zoneX, int zoneZ,
+            IReadOnlyList<string> templateIds, Func<int, int, int, int, bool> isFootprintFree,
+            List<string> problems = null, int attempts = PlacementAttempts)
+        {
+            var result = new List<AlphaStructurePlacement>();
+            var zone = new WorldZoneKey(zoneX, zoneZ);
+            if (!AlphaWorldScale.IsInsideWorld(zone))
+            {
+                problems?.Add($"STRUCTURE_ZONE_OUTSIDE_WORLD {zone}");
+                return result;
+            }
+            if (templateIds == null || templateIds.Count == 0) { problems?.Add("STRUCTURE_NO_TEMPLATES"); return result; }
+            uint h = DeterministicHash.Combine((int)seed, zoneX, zoneZ, 0x57, 0);
+            string templateId = templateIds[(int)(h % (uint)templateIds.Count)];
+            if (!AlphaStructureTemplates.TryGet(templateId, out var template))
+            {
+                problems?.Add($"STRUCTURE_TEMPLATE_UNKNOWN {templateId}");
+                return result;
+            }
+            int originX = AlphaWorldScale.ZoneOriginVoxel(zoneX);
+            int originZ = AlphaWorldScale.ZoneOriginVoxel(zoneZ);
+            int maxX = AlphaWorldScale.ZoneVoxels - template.Width;
+            int maxZ = AlphaWorldScale.ZoneVoxels - template.Depth;
+            if (maxX < 0 || maxZ < 0)
+            {
+                problems?.Add($"STRUCTURE_TOO_LARGE {templateId} {template.Width}x{template.Depth} > zone");
+                return result;
+            }
+            for (int attempt = 0; attempt < Math.Max(1, attempts); attempt++)
+            {
+                uint mix = DeterministicHash.Combine((int)h, attempt, template.Width, template.Depth);
+                int offsetX = (int)((mix >> 3) % (uint)(maxX + 1));
+                int offsetZ = (int)((mix >> 13) % (uint)(maxZ + 1));
+                int x = originX + offsetX;
+                int z = originZ + offsetZ;
+                if (isFootprintFree != null && !isFootprintFree(x, z, template.Width, template.Depth)) continue;
+                result.Add(new AlphaStructurePlacement
+                {
+                    StableId = $"structure:z:{zoneX}:{zoneZ}:{templateId}:0",
+                    TemplateId = templateId,
+                    RegionX = AlphaWorldScale.RegionOfZone(zoneX), RegionZ = AlphaWorldScale.RegionOfZone(zoneZ),
+                    CellX = AlphaWorldScale.CellOfZone(zoneX), CellZ = AlphaWorldScale.CellOfZone(zoneZ),
+                    ZoneX = zoneX, ZoneZ = zoneZ,
+                    X = x, Z = z, Rotation = (int)((mix >> 24) & 3u),
+                    Width = template.Width, Depth = template.Depth, Height = template.Height,
+                });
+                return result;
+            }
+            problems?.Add($"STRUCTURE_NO_FREE_FOOTPRINT z:{zoneX}:{zoneZ} {templateId}");
             return result;
         }
 
@@ -134,6 +196,29 @@ namespace CubeGame.Content
             }
             if (!AlphaStructureTemplates.TryGet(AlphaStructureTemplates.DungeonRoomId, out var room)) p.Add("STRUCTURE_DUNGEON_MISSING");
             else if (room.Width != 3 || room.Depth != 3 || room.Height != 3) p.Add("STRUCTURE_DUNGEON_SIZE");
+
+            var templates = new List<string> { AlphaStructureTemplates.HouseId };
+            var zoneProblems = new List<string>();
+            var room1 = AlphaStructurePlacementPlanner.PlanZone(7u, AlphaWorldScale.StartZoneX, AlphaWorldScale.StartZoneZ,
+                templates, (x, z, w, d) => true, zoneProblems);
+            var room2 = AlphaStructurePlacementPlanner.PlanZone(7u, AlphaWorldScale.StartZoneX, AlphaWorldScale.StartZoneZ,
+                templates, (x, z, w, d) => true, new List<string>());
+            if (room1.Count != 1 || room2.Count != 1) p.Add("STRUCTURE_ZONE_PLAN_MISSING");
+            if (room1.Count == 1 && room2.Count == 1 && (room1[0].X != room2[0].X || room1[0].StableId != room2[0].StableId))
+                p.Add("STRUCTURE_ZONE_PLAN_NON_DETERMINISTIC");
+            int zoneOrigin = AlphaWorldScale.ZoneOriginVoxel(AlphaWorldScale.StartZoneX);
+            if (room1.Count == 1 &&
+                (room1[0].X < zoneOrigin || room1[0].Z < zoneOrigin ||
+                 room1[0].X + room1[0].Width > zoneOrigin + AlphaWorldScale.ZoneVoxels ||
+                 room1[0].Z + room1[0].Depth > zoneOrigin + AlphaWorldScale.ZoneVoxels))
+                p.Add($"STRUCTURE_ZONE_PLAN_OUTSIDE_ZONE {room1[0].X},{room1[0].Z}");
+            var blockedProblems = new List<string>();
+            var blocked = AlphaStructurePlacementPlanner.PlanZone(7u, AlphaWorldScale.StartZoneX, AlphaWorldScale.StartZoneZ,
+                templates, (x, z, w, d) => false, blockedProblems);
+            if (blocked.Count != 0) p.Add("STRUCTURE_ZONE_PLAN_FORCED");
+            if (!blockedProblems.Contains($"STRUCTURE_NO_FREE_FOOTPRINT z:{AlphaWorldScale.StartZoneX}:{AlphaWorldScale.StartZoneZ} " +
+                                         AlphaStructureTemplates.HouseId))
+                p.Add("STRUCTURE_ZONE_PLAN_MUST_REPORT_BLOCKED");
             return p;
         }
     }
