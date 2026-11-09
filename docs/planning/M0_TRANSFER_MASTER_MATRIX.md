@@ -24,6 +24,7 @@
 | Claude-срез | `de62ec6` — M0-01 + M0-02 (a–d), EditMode 344 (2 skipped), PlayMode 22 |
 | DeepSeek-срез | `70b2326` — M0-01/02c/03c/04b/05c/06/07/08a/09c (контент и визуал), EditMode 356, PlayMode 46 |
 | Прогноз конфликта слияния | 1 файл: `Assets/CubeGame/Features.meta` (add/add, разные GUID папки) |
+| Проверка объединённого дерева | EditMode **419 / 417 passed / 0 failed / 2 skipped**, компиляция без `error CS` (`Logs/merge_compile.log`, `Logs/merge_editmode.xml`, прогон Claude 2026-11-09 21:06–21:08). PlayMode объединённого дерева на момент сверки не подтверждён |
 | Unity | 6000.3.27f2, `D:\Unity\Hub\Editor\6000.3.27f2` |
 | Приёмка S05B-2 / M0 | не выполнена; работа агентов = `READY_FOR_REVIEW` |
 

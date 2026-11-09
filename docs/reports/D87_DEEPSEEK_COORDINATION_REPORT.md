@@ -15,7 +15,7 @@
 | Фактическое сведение | выполнено в двух потоках одновременно: Claude — `integration/m0-team` (`66699aa`, + D86 из `planning/d85-direct-unity-two-agents`) и `integration/m0-all` (`93c31a6`, слияние с DeepSeek-срезом); DeepSeek — координационные документы поверх (`522b01b`, `4419fb9`) |
 | Объединённое дерево содержит обе стороны | да: `Features/Session/GameSession.cs`, `Features/World/AlphaZoneGenerator.cs`, `Presentation/Gameplay/GameBootstrap.cs` (Claude) и `AlphaModels/Runtime/AlphaActorView.cs`, `Content/AlphaContentDatabase.cs` (DeepSeek) — на месте |
 | Разрешённые конфликты | нет неразрешённых (`git ls-files --unmerged` пуст) |
-| Unity-прогон объединённого дерева | **НЕ ВЫПОЛНЕН**: `It looks like another Unity instance is running with this project open. Multiple Unity instances cannot open the same project. Project: D:/Projects/CubeGame` — слот занят другим агентом (см. журнал) |
+| Unity-прогон объединённого дерева | **выполнен не DeepSeek, а другим агентом (Claude) в 21:06–21:08**; DeepSeek's собственная попытка была отклонена: `It looks like another Unity instance is running with this project open. Project: D:/Projects/CubeGame`. Артефакты чужого прогона прочитаны: `Logs/merge_compile.log` — ни одного `error CS`, завершение `Exiting batchmode successfully now!`, return code 0; `Logs/merge_editmode.xml` — **total 419, passed 417, failed 0, skipped 2** (`Skipped:Ignored`). То есть объединённое дерево (Claude + DeepSeek) компилируется и проходит EditMode целиком. Это факт чужого прогона, а не самопроверка DeepSeek |
 | Процессы | в 21:05 Unity не запущен, но запущены процессы `codex` (несколько), значит в общем каталоге работают минимум три агента одновременно |
 
 ## 2. Что создано в этом пакете
@@ -48,7 +48,7 @@
 
 ## 5. Что осталось неподтверждённым
 
-- Компиляция объединённого дерева и объединённый набор EditMode/PlayMode-тестов (слот занят).
+- PlayMode объединённого дерева (EditMode подтверждён чужим прогоном: 417/419, 0 failed).
 - Что визуальный слой DeepSeek не тянет за собой решения боя/HP при подключении (проверяется только кодом, тест — после слота).
 - Полнота переноса M0 по подсистемам — это матрица, а не приёмка.
 
