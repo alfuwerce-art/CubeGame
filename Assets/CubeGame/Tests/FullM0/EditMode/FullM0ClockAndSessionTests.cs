@@ -85,6 +85,31 @@ namespace CubeGame.Tests.FullM0.EditMode
             clock.StepTicks(3);
             Assert.AreEqual(903L, clock.Tick);
         }
+
+        [TestCase(0L, 32_400_000)]
+        [TestCase(30L, 32_410_000)]
+        [TestCase(32_400L, 43_200_000)]
+        [TestCase(162_000L, 86_400_000)]
+        [TestCase(162_001L, 330)]
+        [TestCase(259_200L, 32_400_000)]
+        public void WorldTimeUsesAlphaRateAndRestoresFromTick(long savedTick, int expectedWorldTime)
+        {
+            var clock = new GameClock();
+            clock.Restore(savedTick);
+            Assert.AreEqual(expectedWorldTime, clock.WorldTimeMs);
+            clock.Paused = true;
+            clock.Advance(1.0);
+            Assert.AreEqual(expectedWorldTime, clock.WorldTimeMs);
+        }
+
+        [TestCase(0L, 0.9389496445655823)]
+        [TestCase(32_400L, 1.0)]
+        [TestCase(162_000L, 0.0)]
+        public void TerrainDaylightWeightFollowsAlphaCurve(long savedTick, double expectedWeight)
+        {
+            var clock = new GameClock(startTick: savedTick);
+            Assert.AreEqual(expectedWeight, clock.TerrainDaylightWeight, 1e-10);
+        }
     }
 
     public sealed class FullM0SessionTests

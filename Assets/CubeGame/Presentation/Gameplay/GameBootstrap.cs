@@ -81,6 +81,8 @@ namespace CubeGame.Gameplay
         private PlayerMotor _motor;
         private OrbitCameraController _orbitCamera;
         private Camera _camera;
+        private Light _sun;
+        private float _sunDayIntensity;
 
         private string _status = string.Empty;
         private string _combatLog = string.Empty;
@@ -211,6 +213,7 @@ namespace CubeGame.Gameplay
                 }
 
                 _session.AdvanceFrame(Time.deltaTime);
+                ApplyWorldLighting();
                 RebaseIfFar();
                 SyncHeroFromView();
                 PublishHeroMovement();
@@ -775,6 +778,7 @@ namespace CubeGame.Gameplay
             }
 
             SetGameplayInput(true);
+            ApplyWorldLighting();
             PublishHeroSpawn();
             _session.Events.Subscribe<HitResolved>(OnHitResolved);
             _session.Events.Subscribe<EntityDied>(OnEntityDied);
@@ -863,6 +867,11 @@ namespace CubeGame.Gameplay
 
         private void DestroyWorldViews()
         {
+            if (_sun != null)
+            {
+                _sun.intensity = _sunDayIntensity;
+            }
+
             DespawnTrainingTarget();
             StopPopulation();
             foreach (GameObject ground in _groundItems.Values)
@@ -1005,13 +1014,31 @@ namespace CubeGame.Gameplay
                 _orbitCamera = _camera.gameObject.AddComponent<OrbitCameraController>();
             }
 
-            if (FindFirstObjectByType<Light>() == null)
+            Light light = RenderSettings.sun != null ? RenderSettings.sun : FindFirstObjectByType<Light>();
+            if (light == null)
             {
                 var lightObject = new GameObject("Sun");
-                var light = lightObject.AddComponent<Light>();
+                light = lightObject.AddComponent<Light>();
                 light.type = LightType.Directional;
                 light.intensity = 1.1f;
                 lightObject.transform.rotation = Quaternion.Euler(50f, -35f, 0f);
+            }
+
+            if (light.type == LightType.Directional)
+            {
+                _sun = light;
+                _sunDayIntensity = light.intensity;
+            }
+        }
+
+        private void ApplyWorldLighting()
+        {
+            // CUBEGAME_CONTRACT: apply Alpha's time weight to Unity brightness with a visible night floor.
+            float brightness = Mathf.Lerp(0.4f, 1f, (float)_session.Clock.TerrainDaylightWeight);
+            _worldView?.SetDaylightBrightness(brightness);
+            if (_sun != null)
+            {
+                _sun.intensity = _sunDayIntensity * brightness;
             }
         }
 
@@ -1278,8 +1305,9 @@ namespace CubeGame.Gameplay
         private void DrawHud()
         {
             HeroState hero = _session.Hero;
+            int minutes = _session.Clock.WorldTimeMs / 60_000;
             GUI.Label(new Rect(10f, 10f, 700f, 22f),
-                $"{_session.World.Name}  seed {_session.World.Seed}  time {_session.Clock.TimeMs / 1000.0:F1}s  " +
+                $"{_session.World.Name}  seed {_session.World.Seed}  {minutes / 60:00}:{minutes % 60:00}  " +
                 $"{hero.Name} {hero.Sheet.Class} L{hero.Sheet.Progression.Level}  pos {hero.Position}  " +
                 $"{(_worldView != null ? _worldView.Center.ToString() : "-")} loaded {(_worldView != null ? _worldView.LoadedCount : 0)}  [Esc] menu");
             GUI.Label(new Rect(10f, 32f, 700f, 22f),

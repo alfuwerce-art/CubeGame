@@ -15,6 +15,10 @@ namespace CubeGame.Features.Session
     {
         public const int DefaultTicksPerSecond = 30;
 
+        private const int WorldDayMs = 86_400_000;
+        private const int InitialWorldTimeMs = 32_400_000;
+        private const int WorldTimeRate = 10;
+
         /// <summary>Upper bound of ticks executed for one frame (protects against spiral of death).</summary>
         public const int MaxTicksPerFrame = 8;
 
@@ -48,6 +52,30 @@ namespace CubeGame.Features.Session
 
         /// <summary>Game time in milliseconds (exact: tick * 1000 / rate, rounded down).</summary>
         public long TimeMs => Tick * 1000L / _ticksPerSecond;
+
+        /// <summary>Alpha world time at the normal rate (Cube.exe 0x60C678…0x60C6E2).</summary>
+        public int WorldTimeMs
+        {
+            get
+            {
+                long ticksPerWorldDay = WorldDayMs / (1000 * WorldTimeRate) * (long)_ticksPerSecond;
+                long elapsedMs = Tick % ticksPerWorldDay * 1000L / _ticksPerSecond;
+                int time = InitialWorldTimeMs + (int)(elapsedMs * WorldTimeRate);
+                return time > WorldDayMs ? time - WorldDayMs : time;
+            }
+        }
+
+        /// <summary>Time weight for terrain colour blending (Cube.exe 0x59D65B…0x59D6EB).</summary>
+        public double TerrainDaylightWeight
+        {
+            get
+            {
+                double distanceFromNoon = Math.Abs(2.0 * WorldTimeMs / WorldDayMs - 1.0);
+                double blend = 1.0 - distanceFromNoon * distanceFromNoon * distanceFromNoon;
+                double squared = blend * blend;
+                return squared * squared;
+            }
+        }
 
         public double TickSeconds => 1.0 / _ticksPerSecond;
 

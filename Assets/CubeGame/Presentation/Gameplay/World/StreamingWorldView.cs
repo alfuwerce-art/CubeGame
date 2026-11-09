@@ -22,6 +22,7 @@ namespace CubeGame.Gameplay.Streaming
     /// </summary>
     public sealed class StreamingWorldView : MonoBehaviour
     {
+        private static readonly int DaylightBrightness = Shader.PropertyToID("_DaylightBrightness");
         private readonly Dictionary<ChunkKey, ChunkView> _loaded = new Dictionary<ChunkKey, ChunkView>();
         private readonly HashSet<ChunkKey> _inFlight = new HashSet<ChunkKey>();
         private readonly ConcurrentQueue<ChunkVoxels> _ready = new ConcurrentQueue<ChunkVoxels>();
@@ -32,6 +33,7 @@ namespace CubeGame.Gameplay.Streaming
         private WorldState _world;
         private WorldStreamingPolicy _policy;
         private Material _terrainMaterial;
+        private bool _ownsTerrainMaterial;
         private ChunkKey _center;
         private bool _hasCenter;
         private int _generation;
@@ -83,10 +85,20 @@ namespace CubeGame.Gameplay.Streaming
             Clear();
             _world = world;
             _policy = policy;
-            _terrainMaterial = terrainMaterial;
+            Material source = PilotMaterials.Terrain(terrainMaterial);
+            _ownsTerrainMaterial = source.HasProperty(DaylightBrightness);
+            _terrainMaterial = _ownsTerrainMaterial ? new Material(source) : source;
             Origin = origin;
             _maxWorkers = Math.Max(1, Environment.ProcessorCount - 1);
             _world.Deltas.RegionChanged += OnRegionChanged;
+        }
+
+        public void SetDaylightBrightness(float brightness)
+        {
+            if (_ownsTerrainMaterial)
+            {
+                _terrainMaterial.SetFloat(DaylightBrightness, brightness);
+            }
         }
 
         public static Vector2Int OriginFor(double worldX, double worldZ)
@@ -208,6 +220,12 @@ namespace CubeGame.Gameplay.Streaming
             _heights.Clear();
             _hasCenter = false;
             _world = null;
+            if (_ownsTerrainMaterial)
+            {
+                Destroy(_terrainMaterial);
+                _ownsTerrainMaterial = false;
+            }
+            _terrainMaterial = null;
         }
 
         private void OnDestroy()
@@ -334,7 +352,7 @@ namespace CubeGame.Gameplay.Streaming
             Mesh terrain = UnityMeshFactory.Create(data.Terrain, $"ChunkMesh_{key.X}_{key.Z}");
             root.AddComponent<MeshFilter>().sharedMesh = terrain;
             var renderer = root.AddComponent<MeshRenderer>();
-            renderer.sharedMaterial = PilotMaterials.Terrain(_terrainMaterial);
+            renderer.sharedMaterial = _terrainMaterial;
             root.AddComponent<MeshCollider>().sharedMesh = terrain;
 
             Mesh water = null;

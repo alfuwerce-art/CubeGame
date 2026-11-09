@@ -6,6 +6,7 @@ Shader "CubeGame/PilotVertexColor"
     Properties
     {
         _Unused("Unused", Float) = 0
+        _DaylightBrightness("Daylight brightness", Range(0, 1)) = 1
     }
     SubShader
     {
@@ -17,6 +18,8 @@ Shader "CubeGame/PilotVertexColor"
             #pragma vertex vert
             #pragma fragment frag
             #include "UnityCG.cginc"
+
+            float _DaylightBrightness;
 
             struct appdata
             {
@@ -37,7 +40,7 @@ Shader "CubeGame/PilotVertexColor"
                 o.pos = UnityObjectToClipPos(v.vertex);
                 float3 n = UnityObjectToWorldNormal(v.normal);
                 float lambert = saturate(dot(n, normalize(float3(0.35, 0.80, 0.25))));
-                o.color = float4(v.color.rgb * (0.55 + 0.45 * lambert), 1.0);
+                o.color = float4(v.color.rgb * (0.55 + 0.45 * lambert) * _DaylightBrightness, 1.0);
                 return o;
             }
 
