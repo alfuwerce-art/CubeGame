@@ -609,7 +609,7 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         [Test]
         public void CreatureWithoutActionProfileIsLocomotionOnly()
         {
-            var def = Source().Load("whitecat_0x20_formula_vs_alpha");
+            var def = Source().Load("d86_kind_0x76_formula");   // the only kind without an action library (R-9)
             Assert.IsEmpty(def.Problems, string.Join("\n", def.Problems));
             Assert.AreEqual("LOCOMOTION_ONLY", def.ControllerMode);
             Assert.AreEqual(0, def.RequiredActions.Length);

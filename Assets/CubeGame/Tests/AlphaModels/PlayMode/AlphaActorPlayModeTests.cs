@@ -124,7 +124,7 @@ namespace CubeGame.AlphaModels.Tests.PlayMode
         [UnityTest]
         public IEnumerator CreatureWithoutActionProfileWalksAndRefusesActions()
         {
-            var view = Spawn("whitecat_0x20_formula_vs_alpha", out var def);
+            var view = Spawn("d86_kind_0x76_formula", out var def);   // RuneGiant: no action library (R-9)
             try
             {
                 Assert.IsTrue(view.Controller.locomotionOnly);

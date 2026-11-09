@@ -4,17 +4,17 @@
   {
    "kind": 0,
    "variant": "elf_male_0x00_no_alpha_run",
-   "mode": "LOCOMOTION_ONLY",
-   "parts": 8,
-   "clips": 3,
+   "mode": "ACTIONS",
+   "parts": 7,
+   "clips": 5,
    "rig": "alpha_creature/e66d96be5a"
   },
   {
    "kind": 1,
    "variant": "d86_kind_0x01_formula",
-   "mode": "LOCOMOTION_ONLY",
+   "mode": "ACTIONS",
    "parts": 7,
-   "clips": 1,
+   "clips": 5,
    "rig": "alpha_creature/e66d96be5a"
   },
   {
@@ -28,9 +28,9 @@
   {
    "kind": 3,
    "variant": "d86_kind_0x03_formula",
-   "mode": "LOCOMOTION_ONLY",
+   "mode": "ACTIONS",
    "parts": 7,
-   "clips": 1,
+   "clips": 5,
    "rig": "alpha_creature/e66d96be5a"
   },
   {
@@ -60,17 +60,17 @@
   {
    "kind": 7,
    "variant": "d86_kind_0x07_formula",
-   "mode": "LOCOMOTION_ONLY",
+   "mode": "ACTIONS",
    "parts": 7,
-   "clips": 1,
+   "clips": 5,
    "rig": "alpha_creature/e66d96be5a"
   },
   {
    "kind": 8,
    "variant": "d86_kind_0x08_formula",
-   "mode": "LOCOMOTION_ONLY",
+   "mode": "ACTIONS",
    "parts": 7,
-   "clips": 1,
+   "clips": 5,
    "rig": "alpha_creature/e66d96be5a"
   },
   {
@@ -108,17 +108,17 @@
   {
    "kind": 13,
    "variant": "d86_kind_0x0d_formula",
-   "mode": "LOCOMOTION_ONLY",
+   "mode": "ACTIONS",
    "parts": 7,
-   "clips": 1,
+   "clips": 5,
    "rig": "alpha_creature/e66d96be5a"
   },
   {
    "kind": 14,
    "variant": "d86_kind_0x0e_formula",
-   "mode": "LOCOMOTION_ONLY",
+   "mode": "ACTIONS",
    "parts": 7,
-   "clips": 1,
+   "clips": 5,
    "rig": "alpha_creature/e66d96be5a"
   },
   {
@@ -244,7 +244,7 @@
   {
    "kind": 30,
    "variant": "d86_kind_0x1e_formula",
-   "mode": "LOCOMOTION_ONLY",
+   "mode": "ACTIONS",
    "parts": 7,
    "clips": 2,
    "rig": "alpha_creature/ced63e5e96"
@@ -252,7 +252,7 @@
   {
    "kind": 31,
    "variant": "d86_kind_0x1f_formula",
-   "mode": "LOCOMOTION_ONLY",
+   "mode": "ACTIONS",
    "parts": 7,
    "clips": 2,
    "rig": "alpha_creature/ced63e5e96"
@@ -260,7 +260,7 @@
   {
    "kind": 32,
    "variant": "whitecat_0x20_formula_vs_alpha",
-   "mode": "LOCOMOTION_ONLY",
+   "mode": "ACTIONS",
    "parts": 7,
    "clips": 2,
    "rig": "alpha_creature/ced63e5e96"
@@ -508,7 +508,7 @@
   {
    "kind": 63,
    "variant": "plainrunner_0x3f_formula_vs_alpha",
-   "mode": "LOCOMOTION_ONLY",
+   "mode": "ACTIONS",
    "parts": 3,
    "clips": 2,
    "rig": "alpha_creature/51aeec9280"
@@ -516,7 +516,7 @@
   {
    "kind": 64,
    "variant": "d86_kind_0x40_formula",
-   "mode": "LOCOMOTION_ONLY",
+   "mode": "ACTIONS",
    "parts": 3,
    "clips": 2,
    "rig": "alpha_creature/51aeec9280"
@@ -524,7 +524,7 @@
   {
    "kind": 65,
    "variant": "d86_kind_0x41_formula",
-   "mode": "LOCOMOTION_ONLY",
+   "mode": "ACTIONS",
    "parts": 3,
    "clips": 2,
    "rig": "alpha_creature/51aeec9280"
@@ -532,7 +532,7 @@
   {
    "kind": 66,
    "variant": "d86_kind_0x42_formula",
-   "mode": "LOCOMOTION_ONLY",
+   "mode": "ACTIONS",
    "parts": 3,
    "clips": 2,
    "rig": "alpha_creature/51aeec9280"
