@@ -257,6 +257,28 @@ namespace CubeGame.AlphaModels.Tests.EditMode
         }
 
         [Test]
+        public void ScatterSelectorResolvesOnlyTheProvenBranches()
+        {
+            Assert.IsEmpty(AlphaScatterSelector.Validate(), string.Join("\n", AlphaScatterSelector.Validate()));
+
+            var underground = AlphaScatterSelector.Select(0.5, 0.5, -1, 0.0);
+            Assert.AreEqual(ScatterResolution.Resolved, underground.Resolution);
+            CollectionAssert.AreEquivalent(new[] { 0x91, 0x92, 0x93, 0x96, 0x98, 0x99, 0x9b, 0x9a }, underground.ObjectKinds);
+
+            var dry = AlphaScatterSelector.Select(0.05, 0.5, 5, 0.1);
+            Assert.AreEqual(ScatterResolution.Resolved, dry.Resolution);
+            CollectionAssert.AreEquivalent(new[] { 0x15, 0x2e }, dry.ObjectKinds);
+            var drySpaced = AlphaScatterSelector.Select(0.05, 0.5, 5, 0.5);
+            CollectionAssert.AreEquivalent(new[] { 0x15, 0x2e, 0x2f }, drySpaced.ObjectKinds);
+
+            var unknown = AlphaScatterSelector.Select(0.5, 0.5, 5, 0.0);
+            Assert.AreEqual(ScatterResolution.Unresolved, unknown.Resolution, "goto branches are not guessed");
+            Assert.IsEmpty(unknown.ObjectKinds, "UNRESOLVED must not invent vegetation");
+            StringAssert.Contains("AlphaScatterEvidence", unknown.Rule);
+            StringAssert.Contains("resolvedCases=", AlphaScatterSelector.Summary());
+        }
+
+        [Test]
         public void NpcServiceFurnitureMapsToContractKinds()
         {
             Assert.IsEmpty(AlphaNpcServices.Validate(), string.Join("\n", AlphaNpcServices.Validate()));

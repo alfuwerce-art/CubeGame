@@ -41,6 +41,18 @@ AlphaDungeonRules.EntranceNames;    // overground-dungeon01 / underground-dungeo
 ```
 Порядок вырезания коридоров, содержимое комнат, свет/факелы и таблицы встреч — `UNKNOWN`; планировщик даёт связный скелет, а не «Alpha-данж».
 
+### Климат → объекты (W-18, PARTIAL)
+
+```csharp
+var selection = AlphaScatterSelector.Select(humidity, temperature, level, spacing);
+if (selection.Resolution == ScatterResolution.Resolved)
+    PlaceObjects(selection.Rule, selection.ObjectKinds);   // underground(level<0) и dry(humidity<=0.1)
+else
+    SkipVegetation(selection.Rule);                         // UNRESOLVED: goto-ветки не портированы
+AlphaScatterEvidence.Groups;                                // сырые 6 групп/64 id с условиями декомпилятора
+```
+`UNRESOLVED` нельзя трактовать как «здесь ничего не растёт» — это «мы ещё не знаем»; полная таблица лежит в `AlphaScatterEvidence` для следующего порта.
+
 ## 3. Сервисы и взаимодействия (M0-07C, данные)
 
 ```csharp
