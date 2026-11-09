@@ -1,6 +1,7 @@
 # D86 — DeepSeek #13: реальное размещение игрового контента в мире Unity (M0-02/M0-06/M0-07)
 
 **Дата:** 2026-11-09. **Исполнитель:** DeepSeek Harness. **Ветка:** `deepseek/d85-visual-unity`.
+**Commit:** `3883c68a3810a1797571daf912184682dc8ba5b7`.
 **Статус:** `READY_FOR_REVIEW` (не ACCEPTED, приёмка — за продюсером). **Issue:** #13.
 **Связанные отчёты:** [W-18: принадлежность адреса 0x005EFFA0](D86_W18_ADDRESS_VERIFICATION.md),
 предыдущий [M0-02/07 отчёт](M0_02_07_DEEPSEEK_WORLD_CONTENT_REPORT.md).
@@ -247,8 +248,25 @@ Unity 6000.3.27f2, `D:\Projects\CubeGame-deepseek`:
    (иначе оставить текущее значение и статус `CUBEGAME_CONTRACT`).
 6. Отдельно решить п. 7.2 (какой шов владеет растительностью).
 
-## 9. Что НЕ сделано сознательно
+## 9. Handoff для Issue #13 (готовый текст выкладки)
 
+> **DeepSeek #13 — runtime размещения контента, `READY_FOR_REVIEW`.**
+> Commit `3883c68a3810a1797571daf912184682dc8ba5b7`, ветка `deepseek/d85-visual-unity`.
+> Сделано: единый масштаб Alpha (`AlphaWorldScale`: зона 256, регион 16 384, мир 2²⁴, клетка 2 048 —
+> исправлена ошибка ×256 от чтения `RegionBlocks=64` как вокселей); зональные планировщики
+> (`AlphaVegetationPlanner/AlphaStructurePlacementPlanner/CreatureSpawnPlanner.PlanZone`);
+> `ZoneContentPlanner`; runtime `WorldContentStreamer` (загрузка/выгрузка зоны, стабильные id,
+> `CreatureStateStore`, удалённые объекты, floating origin на `double`); адаптер мира
+> `DelegateContentZoneSource`; origin-поддержка в `CreatureAgent`/`CreatureSpawner`.
+> Unity 6000.3.27f2: EditMode **369/369**, PlayMode **50/50**, failed=0 (запускать **без** `-quit`).
+> W-18: `0x005EFFA0` — маска рельефа (исполнена Claude, 2.1·10⁻⁷), а не алгоритм размещения;
+> `fVar6` в W-18 — значение маски; позиции остаются `CUBEGAME_CONTRACT`.
+> Отчёты: `docs/reports/D86_CONTENT_PLACEMENT_IMPLEMENTATION.md`, `docs/reports/D86_W18_ADDRESS_VERIFICATION.md`.
+> Claude при слиянии: собрать `DelegateContentZoneSource` из `WorldState`/`WorldDeltaStore`, вызывать
+> `SetWorldOrigin` + `LoadRing`/`UnloadOutside`, сохранять `NpcStates`/`Removed` своим слоем;
+> решить, кто владеет W-18-растительностью — runtime или `IZoneContentProvider`.
+
+## 10. Что НЕ сделано сознательно
 Не создавался каталог моделей, не запускались массовые конверсии, не менялись `main`, `Pilot.unity`,
 `GameBootstrap`, `Features/World`, `Features/Session`, S02–S04 Core, схема сейвов и файлы Claude. Ассеты
 оригинальной Alpha не публиковались; работа только в `D:\Projects\CubeGame-deepseek`, ветка
