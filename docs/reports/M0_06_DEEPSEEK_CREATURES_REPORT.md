@@ -42,6 +42,7 @@
 |---|---|
 | EditMode (весь проект) | `total=333 passed=333 failed=0` — `AlphaOutput/editmode.xml` |
 | PlayMode (весь проект) | `total=25 passed=25 failed=0` — `AlphaOutput/playmode.xml` |
+| Кадры существа | `RunPreview` → `creature_0x20.png`: спавн через `CreatureSpawner`, цель рядом, AI `Attack`, визуал whitecat; `ALPHA_PREVIEW_RESULT=PASS images=13` |
 | Кэш контента | 5 акторов READY (human 94 клипа/93 действия, dragon 5/4, cat/runner/wolf formula-walk) |
 
 Команды — те же, что в [M0-01 отчёте](M0_01_DEEPSEEK_RUNTIME_REPORT.md) §3 (`-runTests -testPlatform EditMode|PlayMode`).

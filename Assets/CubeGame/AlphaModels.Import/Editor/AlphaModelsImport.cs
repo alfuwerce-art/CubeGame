@@ -17,6 +17,8 @@ using System.IO;
 using System.Text;
 using CubeGame.AlphaModels;
 using CubeGame.AlphaTransfer;
+using CubeGame.Features.AI;
+using CubeGame.Features.Creatures;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -142,6 +144,7 @@ namespace CubeGame.AlphaModels.Import
                 }
                 summary.AppendLine($"  {id}: parts={def.Rig.parts.Length} clips={def.Clips.Count} actions={def.RequiredActions.Length} mode={def.ControllerMode}");
             }
+            images += RenderCreatureEncounter(cam, summary, problems);
             summary.Append("ALPHA_PREVIEW_RESULT=").Append(problems.Count == 0 ? "PASS" : "FAIL")
                    .Append(" actors=").Append(report.Actors.Count).Append(" images=").Append(images)
                    .Append(" problems=").Append(problems.Count);
@@ -163,6 +166,104 @@ namespace CubeGame.AlphaModels.Import
             for (int i = 0; i < def.RequiredActions.Length; i++)
                 if (def.RequiredActions[i] != null && def.RequiredActions[i].StartsWith("action_")) return def.RequiredActions[i];
             return null;
+        }
+
+        /// <summary>Spawns a real creature encounter through the gameplay modules and renders it.</summary>
+        static int RenderCreatureEncounter(Camera cam, StringBuilder summary, List<string> problems)
+        {
+            var spawnerGo = new GameObject("PreviewSpawner");
+            var targetGo = new GameObject("PreviewTarget");
+            var target = targetGo.AddComponent<PreviewTarget>();
+            try
+            {
+                var spawner = spawnerGo.AddComponent<CreatureSpawner>();
+                spawner.SpawnOnStart = false;
+                spawner.Seed = 4242u;
+                spawner.RegionX = 0; spawner.RegionZ = 0; spawner.CellX = 0; spawner.CellZ = 0;
+                spawner.MaxPerCell = 4;
+                spawner.ActorLibrary = new AlphaActorLibrary(AlphaContentSource.Resolve());
+                spawner.AiFactory = () => new CreatureAi();
+                CreatureTargets.Register(target);
+                var plan = spawner.Spawn();
+                if (plan.Count == 0)
+                {
+                    problems.Add("CREATURE_PREVIEW_NO_SPAWN " + spawner.Status);
+                    return 0;
+                }
+                var agent = spawner.Spawned[plan[0].StableId];
+                if (agent == null || !agent.VisualAvailable)
+                {
+                    problems.Add("CREATURE_PREVIEW_NO_VISUAL " + agent?.VisualStatus);
+                    return 0;
+                }
+                targetGo.transform.position = agent.transform.position + new Vector3(1.5f, 0f, 0f);
+                for (int i = 0; i < 14; i++) agent.Tick(0.05f);
+                int images = RenderAgent(cam, agent, $"creature_0x{plan[0].Kind:x2}", problems);
+                summary.AppendLine($"  creature 0x{plan[0].Kind:x2}: {agent.VisualStatus} ai={agent.Ai.State} " +
+                                   $"clip={agent.View.Controller.CurrentAction ?? "none"} moved={agent.LastMoveFrames}");
+                return images;
+            }
+            finally
+            {
+                CreatureTargets.Clear();
+                UnityEngine.Object.DestroyImmediate(targetGo);
+                UnityEngine.Object.DestroyImmediate(spawnerGo);
+            }
+        }
+
+        sealed class PreviewTarget : MonoBehaviour, ICreatureTargetSource
+        {
+            public string TargetId => "player";
+            public int Faction => (int)CreatureFaction.Player;
+            public bool Alive => true;
+            public Vector3 Position => transform.position;
+        }
+
+        static int RenderAgent(Camera cam, CreatureAgent agent, string name, List<string> problems)
+        {
+            var bounds = new Bounds(agent.transform.position, Vector3.one);
+            bool first = true;
+            foreach (var filter in agent.GetComponentsInChildren<MeshFilter>())
+            {
+                var renderer = filter.GetComponent<Renderer>();
+                if (filter.sharedMesh == null || renderer == null) continue;
+                if (first) { bounds = renderer.bounds; first = false; }
+                else bounds.Encapsulate(renderer.bounds);
+            }
+            if (first) { problems.Add("CREATURE_PREVIEW_NO_MESH " + name); return 0; }
+            FrameAt(cam, bounds);
+            return SaveFrame(cam, name, problems);
+        }
+
+        static void FrameAt(Camera cam, Bounds bounds)
+        {
+            var center = bounds.center;
+            float radius = Mathf.Max(0.5f, bounds.extents.magnitude);
+            cam.transform.position = center + new Vector3(-radius * 2.4f, radius * 1.4f, -radius * 2.4f);
+            cam.transform.LookAt(center);
+            cam.nearClipPlane = 0.01f;
+            cam.farClipPlane = radius * 20f;
+        }
+
+        static int SaveFrame(Camera cam, string name, List<string> problems)
+        {
+            Directory.CreateDirectory(Path.Combine(OutDir, "preview"));
+            var file = Path.Combine(OutDir, "preview", name + ".png");
+            const int size = 640;
+            var rt = new RenderTexture(size, size, 24, RenderTextureFormat.ARGB32);
+            cam.targetTexture = rt;
+            cam.Render();
+            RenderTexture.active = rt;
+            var tex = new Texture2D(size, size, TextureFormat.RGB24, false);
+            tex.ReadPixels(new Rect(0, 0, size, size), 0, 0);
+            tex.Apply();
+            File.WriteAllBytes(file, tex.EncodeToPNG());
+            RenderTexture.active = null;
+            cam.targetTexture = null;
+            UnityEngine.Object.DestroyImmediate(rt);
+            UnityEngine.Object.DestroyImmediate(tex);
+            if (new FileInfo(file).Length < 1024) problems.Add(name + ": IMAGE_TOO_SMALL");
+            return 1;
         }
 
         static Camera CreateCamera()

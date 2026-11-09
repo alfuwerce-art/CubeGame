@@ -3,7 +3,9 @@
     "rootNamespace": "CubeGame.AlphaModels.Import",
     "references": [
         "CubeGame.AlphaModels",
-        "CubeGame.Content"
+        "CubeGame.Content",
+        "CubeGame.Features.Creatures",
+        "CubeGame.Features.AI"
     ],
     "includePlatforms": [
         "Editor"
