@@ -20,7 +20,7 @@ namespace CubeGame.Features.Creatures
     {
         public const string ProviderKey = "deepseek.dungeon-content.v1";
 
-        /// <summary>Rooms are static geometry; their carving is a separate world step (PENDING).</summary>
+        /// <summary>Room records describe the static geometry carved by this provider.</summary>
         public const string RoomBehaviourKey = AlphaZoneContentProvider.StructureBehaviourKey;
 
         /// <summary>Chest entity; opening/loot is gameplay (Claude, C5), this provider only places it.</summary>
@@ -37,10 +37,14 @@ namespace CubeGame.Features.Creatures
         readonly int _chests;
 
         /// <param name="isDungeonZone">World rule that decides which zones are dungeons (null → never runs).</param>
-        /// <param name="rooms">Rooms in the layout (5×5 lattice walk; default 27 as in the pilot).</param>
+        /// <param name="rooms">Maximum rooms requested from the 5×5 lattice walk.</param>
         /// <param name="chests">Chests in the dungeon.</param>
-        public AlphaDungeonContentProvider(Func<ZoneContentContext, bool> isDungeonZone, int rooms = 27, int chests = 3)
+        public AlphaDungeonContentProvider(Func<ZoneContentContext, bool> isDungeonZone,
+            int rooms = AlphaDungeonLayoutPlanner.MaxRooms, int chests = 3)
         {
+            if (rooms < 1 || rooms > AlphaDungeonLayoutPlanner.MaxRooms)
+                throw new ArgumentOutOfRangeException(nameof(rooms));
+            if (chests < 0) throw new ArgumentOutOfRangeException(nameof(chests));
             _isDungeonZone = isDungeonZone;
             _rooms = rooms;
             _chests = chests;
@@ -53,19 +57,26 @@ namespace CubeGame.Features.Creatures
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (_isDungeonZone == null || !_isDungeonZone(context)) return;
             var zone = new WorldZoneKey(context.Zone.Zx, context.Zone.Zz);
-            var spawns = BuildPlan(context.Terrain.MasterSeed, zone, _rooms, _chests, context.Spawns.Count,
-                out var layout, out var chestPlacements);
+            uint seed = context.Terrain.MasterSeed;
+            int extent = (AlphaDungeonLayoutPlanner.LatticeSize - 1) * AlphaDungeonRules.RoomStep
+                + AlphaDungeonRules.RoomSize;
+            int offset = (AlphaZone.Size - extent) / 2;
+            var layout = AlphaDungeonLayoutPlanner.Plan(seed, _rooms,
+                zone.X * AlphaZone.Size + offset, zone.Z * AlphaZone.Size + offset);
+
+            // CubeGame placement rule: keep a roof block below the lowest surface along the layout.
+            int lowestSurface = int.MaxValue;
+            foreach (var (x, _, z) in AlphaDungeonCarver.Cells(layout, 0))
+                lowestSurface = Math.Min(lowestSurface, context.Zone.Column(x, z).TopSolid());
+            int floorY = lowestSurface - AlphaDungeonRules.RoomSize - 1;
+            if (floorY < 1) return;
+
+            var spawns = BuildSpawns(seed, zone, layout, _chests, context.Spawns.Count, floorY + 1,
+                out var chestPlacements);
+            CarvedVoxels = AlphaDungeonCarver.Carve(layout, floorY, (x, y, z, voxel) => context.Write(x, y, z, voxel));
             LastLayout = layout;
             LastChests = chestPlacements;
-            // D3 step 5: the skeleton is carved into the zone (rooms 3×3×3, L-corridors) below the surface.
-            int baseY = context.Zone.Column(context.Zone.Zx * AlphaZone.Size + AlphaZone.Size / 2,
-                context.Zone.Zz * AlphaZone.Size + AlphaZone.Size / 2).TopSolid();
-            if (baseY > 0)
-            {
-                CarvedVoxels = AlphaDungeonCarver.Carve(layout, baseY, (x, y, z, voxel) => context.Write(x, y, z, voxel));
-            }
-
-            for (int i = 0; i < spawns.Count; i++) context.Spawns.Add(spawns[i]);
+            context.Spawns.AddRange(spawns);
         }
 
         /// <summary>Voxels the last populated dungeon zone cleared (diagnostics).</summary>
@@ -76,8 +87,8 @@ namespace CubeGame.Features.Creatures
         public IReadOnlyList<AlphaDungeonChestPlacement> LastChests { get; private set; }
 
         /// <summary>
-        /// Deterministic dungeon plan of one zone: room spawns then chest spawns, indices starting at
-        /// <paramref name="startIndex"/>. Pure: same seed and zone → same list.
+        /// Deterministic local plan for previews: room spawns then chest spawns, indices starting at
+        /// <paramref name="startIndex"/>. The terrain provider positions the plan in world coordinates.
         /// </summary>
         public static List<SpawnDefinition> BuildPlan(uint seed, WorldZoneKey zone, int rooms, int chests,
             int startIndex, out AlphaDungeonLayout layout, out IReadOnlyList<AlphaDungeonChestPlacement> chestPlacements)
@@ -85,12 +96,16 @@ namespace CubeGame.Features.Creatures
             if (rooms < 1) throw new ArgumentOutOfRangeException(nameof(rooms));
             if (chests < 0) throw new ArgumentOutOfRangeException(nameof(chests));
             layout = AlphaDungeonLayoutPlanner.Plan(seed, rooms);
+            return BuildSpawns(seed, zone, layout, chests, startIndex, 0, out chestPlacements);
+        }
+
+        static List<SpawnDefinition> BuildSpawns(uint seed, WorldZoneKey zone, AlphaDungeonLayout layout,
+            int chests, int startIndex, int walkY, out IReadOnlyList<AlphaDungeonChestPlacement> chestPlacements)
+        {
             var region = new RegionKey((int)Math.Floor(zone.X / (double)AlphaWorldScale.ZonesPerRegion),
                 (int)Math.Floor(zone.Z / (double)AlphaWorldScale.ZonesPerRegion));
-            chestPlacements = chests > 0
-                ? AlphaDungeonChests.Plan(layout, chests, seed, region.X, region.Z)
-                : (IReadOnlyList<AlphaDungeonChestPlacement>)Array.Empty<AlphaDungeonChestPlacement>();
-            var result = new List<SpawnDefinition>(layout.Rooms.Count + chestPlacements.Count);
+            var anchors = AlphaDungeonChests.Plan(layout, chests, seed, region.X, region.Z);
+            var result = new List<SpawnDefinition>(layout.Rooms.Count + anchors.Count);
             int index = startIndex;
             foreach (var room in layout.Rooms)
             {
@@ -99,7 +114,7 @@ namespace CubeGame.Features.Creatures
                     Region = region,
                     SpawnIndex = index++,
                     Kind = new KindId(0),
-                    Position = new WorldPosition(room.X, room.Y, room.Z),
+                    Position = new WorldPosition(room.X, room.Y + walkY, room.Z),
                     Faction = (int)CreatureFaction.Passive,
                     Level = 1,
                     ClassId = -1,
@@ -108,9 +123,11 @@ namespace CubeGame.Features.Creatures
                 });
             }
 
-            for (int i = 0; i < chestPlacements.Count; i++)
+            for (int i = 0; i < anchors.Count; i++)
             {
-                var chest = chestPlacements[i];
+                var chest = anchors[i];
+                chest.Y += walkY;
+                anchors[i] = chest;
                 result.Add(new SpawnDefinition
                 {
                     Region = region,
@@ -125,6 +142,7 @@ namespace CubeGame.Features.Creatures
                 });
             }
 
+            chestPlacements = anchors;
             return result;
         }
     }

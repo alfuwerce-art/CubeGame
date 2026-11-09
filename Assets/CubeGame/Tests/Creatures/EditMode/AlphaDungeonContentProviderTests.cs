@@ -2,6 +2,7 @@
 using CubeGame.Content;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.Creatures;
+using CubeGame.Features.World;
 using NUnit.Framework;
 
 namespace CubeGame.Tests.Creatures.EditMode
@@ -65,6 +66,35 @@ namespace CubeGame.Tests.Creatures.EditMode
             var provider = new AlphaDungeonContentProvider(null);
             Assert.AreEqual(AlphaDungeonContentProvider.ProviderKey, provider.Key);
             Assert.Throws<System.ArgumentNullException>(() => provider.Populate(null));
+        }
+
+        [Test]
+        public void GeneratedZoneCarvesRoomsAndPlacesChestAnchorsInTheSameVolume()
+        {
+            var original = AlphaZoneGenerator.Generate(new AlphaTerrainGenerator(Seed), Zone.X, Zone.Z);
+            var provider = new AlphaDungeonContentProvider(context => context.Zone.Zx == Zone.X && context.Zone.Zz == Zone.Z);
+            var terrain = new AlphaTerrainGenerator(Seed, new[] { provider });
+            var generated = AlphaZoneGenerator.Generate(terrain, Zone.X, Zone.Z);
+
+            Assert.That(provider.LastLayout, Is.Not.Null, "the default room count must yield a plan");
+            Assert.That(provider.LastChests, Has.Count.EqualTo(3));
+            int changed = 0;
+            foreach (var spawn in generated.ContentSpawns)
+            {
+                int x = (int)spawn.Position.X;
+                int y = (int)spawn.Position.Y;
+                int z = (int)spawn.Position.Z;
+                Assert.That(x, Is.InRange(Zone.X * AlphaZone.Size, (Zone.X + 1) * AlphaZone.Size - 1));
+                Assert.That(z, Is.InRange(Zone.Z * AlphaZone.Size, (Zone.Z + 1) * AlphaZone.Size - 1));
+                var column = generated.Column(x, z);
+                Assert.That(y, Is.GreaterThan(1));
+                Assert.That(column.Read(y), Is.EqualTo(Voxel.Air));
+                Assert.That(column.TopSolid(), Is.GreaterThan(y + AlphaDungeonRules.RoomSize - 1));
+                if (Voxel.IsSolid(original.Column(x, z).Read(y))) changed++;
+            }
+
+            Assert.That(generated.ContentSpawns, Has.Count.EqualTo(provider.LastLayout.Rooms.Count + 3));
+            Assert.That(changed, Is.GreaterThan(0), "the provider must clear actual terrain, not only emit records");
         }
 
         [Test]
