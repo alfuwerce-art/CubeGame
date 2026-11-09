@@ -1,7 +1,7 @@
 # D86 — DeepSeek #13: реальное размещение игрового контента в мире Unity (M0-02/M0-06/M0-07)
 
 **Дата:** 2026-11-09. **Исполнитель:** DeepSeek Harness. **Ветка:** `deepseek/d85-visual-unity`.
-**Commit:** `3883c68a3810a1797571daf912184682dc8ba5b7`.
+**Commit:** `86ef3756e48f59bea78f46e9b0c8af64c294578e` (`3883c68` — основная реализация, `86ef375` — ограничение диагностики и финальные прогоны).
 **Статус:** `READY_FOR_REVIEW` (не ACCEPTED, приёмка — за продюсером). **Issue:** #13.
 **Связанные отчёты:** [W-18: принадлежность адреса 0x005EFFA0](D86_W18_ADDRESS_VERIFICATION.md),
 предыдущий [M0-02/07 отчёт](M0_02_07_DEEPSEEK_WORLD_CONTENT_REPORT.md).
@@ -206,7 +206,7 @@ Unity 6000.3.27f2, `D:\Projects\CubeGame-deepseek`:
 | Повторное создание зоны без изменения состава/id | `ZonePlanIsDeterministicAndUnique`, `NeighbouringZonesDoNotShareIds`, повторный `LoadZone → false` |
 | Выгрузка/загрузка с удалёнными и состоянием NPC | `RemovedObjectsAreNotPlannedAgain`, `UnloadKeepsStateAndReloadRestoresTheSameIdentities` |
 | Отсутствие дубликатов | `ZoneLoadsRealObjectsOnTheReportedSurface` (второй `LoadZone`), `WorldContentStreamer` (`Spawned`/`Removed`) |
-| Стабильность памяти при многократной загрузке/выгрузке | `RepeatedLoadUnloadKeepsTheSceneStable` (10 циклов: 0 объектов, 0 построек, store не растёт) |
+| Стабильность памяти при многократной загрузке/выгрузке | `RepeatedLoadUnloadKeepsTheSceneStable` (10 циклов: 0 объектов, 0 построек, store и диагностика не растут — список `Problems` ограничен `MaxProblems = 512`) |
 | Работа при смещении floating origin | `FloatingOriginKeepsTransformsLocalAndWorldDataAbsolute` (±1 000 000 вокселей, абсолютные `double` не меняются) |
 
 Не подтверждено этими тестами: интеграция с живым `GameSession`/`WorldState` Claude (его ветка содержит код,
@@ -234,7 +234,8 @@ Unity 6000.3.27f2, `D:\Projects\CubeGame-deepseek`:
    нет объекта), но наполнение будет соответствовать текущему рельефу, а не финальному.
 7. **Сейв**: `NpcStates`/`Removed` — это `CreatureStateStore`-блоб и множество id; запись в общую схему сейвов
    НЕ добавлена (запрещено без решения продюсера) — интегратор должен сохранить их своим слоем.
-8. **Производительность**: план зоны ~десятки объектов, тесты быстрые; массовый прогон (сотни зон) не профилировался.
+8. **Производительность/память**: план зоны ~десятки объектов, тесты быстрые; массовый прогон (сотни зон) не
+   профилировался. «Стабильность памяти» доказана по счётчикам объектов/состояний/диагностики, не профайлером Unity.
 
 ## 8. Handoff Claude (что сделать при слиянии)
 
@@ -251,7 +252,7 @@ Unity 6000.3.27f2, `D:\Projects\CubeGame-deepseek`:
 ## 9. Handoff для Issue #13 (готовый текст выкладки)
 
 > **DeepSeek #13 — runtime размещения контента, `READY_FOR_REVIEW`.**
-> Commit `3883c68a3810a1797571daf912184682dc8ba5b7`, ветка `deepseek/d85-visual-unity`.
+> Commit `86ef3756e48f59bea78f46e9b0c8af64c294578e`, ветка `deepseek/d85-visual-unity`.
 > Сделано: единый масштаб Alpha (`AlphaWorldScale`: зона 256, регион 16 384, мир 2²⁴, клетка 2 048 —
 > исправлена ошибка ×256 от чтения `RegionBlocks=64` как вокселей); зональные планировщики
 > (`AlphaVegetationPlanner/AlphaStructurePlacementPlanner/CreatureSpawnPlanner.PlanZone`);
