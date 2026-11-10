@@ -174,7 +174,9 @@ recovery). Лог-метка `ANIM_MISSING` здесь вводит в забл�
    все 156 акторов разрешаются (file → rig → clips) в packaged Player; ~40 видов (humanoid/quadruped/
    cat/runner/деревья/декор) рендерятся реальными моделями (`REAL_ACTOR_VIEWS=74`). Mesh/render всех
    156 видов подтверждён Editor-тестами (S05). Полный рендер всех 156 в Player — остаточная проверка.
-4. **R7** — структуры/город/данж (отдельный conversion gap; сейчас reconstructed block house).
+4. **R7** — структуры/город/данж: геометрия дома Alpha **исследована** (`B_house_research.md`): сетка
+   3×3×4, типы частей 1/2/3, 5 стилей в `Chunk_generateObjects 0x5AF170`. Осталось: маппинг
+   типа→материал, полная выгрузка стилей и замена `AlphaHouseBuilder`.
 
 ## 6. Финальный статус
 
