@@ -164,4 +164,4 @@ ai.AttachAlphaMovement(AlphaNpcMovementDriver.ForTemplate(t.Data, () => clock.Wo
 ## 9. SHA
 
 - база: `integration/m0-all` @ `1c6560c8f3e28b4a49f9a435327cd3fcb6e767a5`;
-- результат: `claude/m0-f1-population-runtime` @ HEAD_PLACEHOLDER.
+- результат: `claude/m0-f1-population-runtime` @ `ac8b55494a402a0877d7d82cd5d5077213182c7b` (код, тесты, отчёт); следующий коммит ветки добавляет только эту строку.
