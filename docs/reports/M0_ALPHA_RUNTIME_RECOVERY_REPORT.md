@@ -164,23 +164,18 @@ recovery). Лог-метка `ANIM_MISSING` здесь вводит в забл�
    `KNOWN_LOOT_MODEL_VISIBLE`, `NO_PRIMITIVE_PLACEHOLDER_FOR_KNOWN_ASSET` (нужна сцена с NPC и лутом).
    Уже реализованы и PASS: `ALPHA_CONTENT_READY`, `PLAYER_MODEL_VISIBLE`, `PLAYER_NOT_PRIMITIVE`,
    `KNOWN_CREATURE_MODEL_VISIBLE`, `NO_MAGENTA`, `ANIMATION_RUNNING`, `COMBAT_ACTION_ANIMATION`.
-2. **R5 — полный vertical slice**: подтвердить визуально реального NPC, деревья/растительность,
-   звук, HUD/инвентарь/иконку и полный цикл `start→move→NPC→enemy→attack→death→loot→pickup→inventory→save→exit→load→continue`.
-   Герой (с оружием), враг и анимации уже подтверждены. Требует **визуальной приёмки продюсера**.
-   - **NPC/структуры — точный blocker**: контент-популяция работает, но герой спавнится вне Town-зоны.
-     Старт = зона 32800, Town-зона деревни = 32804. Телепорт в Town-зону даёт 44 реальных модели
-     (20+ гуманоидных NPC + существа). Нужно либо спавнить героя в Town-зоне, либо расширить радиус
-     населения — это вопрос стартовой позиции (world-gen/дизайн), не пакетирования.
-   - **Растительность — реализовано и проверено** (`bff0a67`): W-18 scatter `0x5F56C0` выбирает
-     существ, а не растительность; настоящая — `generateTreeRoot` (деревья, модели 0x6C–0x77) +
-     `serializeCellData` (декор). В Player: `population: 54 content` (было 0), `REAL_ACTOR_VIEWS=74`
-     (было 20) — деревья/декор реальными моделями, `MAGENTA_COUNT=0`.
-     См. [B_vegetation_research](../../research/alpha2013/B_vegetation_research.md).
+2. **R5 — вертикальный срез**: герой (с оружием), враг/существа, NPC города, анимации, террейн,
+   растительность и **полный цикл save→exit→load→continue** подтверждены в Windows Player. Осталось:
+   - **Стартовая позиция — blocker (дизайн)**: герой спавнится вне Town-зоны (зона 32800 vs Town 32804,
+     OQ-22 PARTIAL). Телепорт в город даёт 44 модели (20+ NPC). Нужно решение продюсера: спавнить ли
+     героя в Town-зоне.
+   - **Звук** — 93 WAV застейджены и код подключён (F4); «слышно ли» в Player — приёмка продюсера.
 3. **R6** — масштабирование каталога (после R5).
-4. **R7** — структуры/город/данж (отдельный conversion gap; сейчас только footprints).
+4. **R7** — структуры/город/данж (отдельный conversion gap; сейчас reconstructed block house).
 
 ## 6. Финальный статус
 
-`READY_FOR_PRODUCER_VISUAL_REVIEW` по R0–R3 + Player-side гейтам R4 (7/7 PASS); R5 — `PARTIAL`
-(герой с оружием, реальный враг, анимации, бой, террейн и no-magenta подтверждены в Windows Player;
-не подтверждены визуально NPC, растительность, звук и полный цикл). `R6`/`R7` — `NOT_STARTED`.
+`READY_FOR_PRODUCER_VISUAL_REVIEW` по R0–R4 (7/7 гейтов PASS) + ядро R5 в Windows Player:
+герой с оружием, реальный враг и 18–54 существ, NPC города, анимации (idle/move/combat), террейн,
+растительность, `MAGENTA_COUNT=0`, полный цикл `save→exit→load→continue` (saved/loaded tick=81).
+Осталось два пункта, требующих продюсера: стартовая позиция (дизайн) и звук (приёмка). `R6`/`R7` — `NOT_STARTED`.
