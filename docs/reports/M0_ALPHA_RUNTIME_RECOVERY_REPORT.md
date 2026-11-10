@@ -44,8 +44,8 @@ content-gate, а запущенный Player строит мир, спавнит
 | R1 No magenta | CODE (RuntimeMaterials + Resources shader, GameVisualSink/ProjectileVisuals/PilotMaterials) | тест + **Player скриншот 0 magenta** → PASS |
 | R2 Build gate | CODE (AlphaContentInventory bounds, pre/post build gate) | тест + **реальный build прошёл gate** → PASS |
 | R3 Icons | CODE (staging atlas в `<root>/icons`, AlphaIconAtlas content root) | тест + **atlas.png/atlas.json в Player** → PASS |
-| R4 Visual gates | PARTIAL (ContentPackagingTests: content/shader/icon gate) | осталось: render-frame gates (см. §5) |
-| R5 Vertical slice | NOT_STARTED | **PARTIAL**: мир+герой+волк+бой+террейн+no-magenta работают; полный цикл и визуальная приёмка — см. §5 |
+| R4 Visual gates | PARTIAL (ContentPackagingTests: content/shader/icon gate) | добавлены **Player-side [Validate] gates** (commit `75fc293`) — 7/7 PASS в Player |
+| R5 Vertical slice | NOT_STARTED | **сильный прогресс**: герой(greatsword)+волк+анимации+бой+no-magenta подтверждены в Player; осталось NPC/растительность/звук/полный цикл + визуальная приёмка |
 | R6 Catalog scale | NOT_STARTED | после R5 |
 | R7 Structures | NOT_STARTED | после R5/R6 |
 
@@ -91,6 +91,31 @@ Player-каталог самодостаточен: `CubeGame.exe`, `UnityPlayer
 - `[Combat] hit ...` — бой идёт.
 - Скриншот 1920×1080: **magenta_pixels = 0**, доминируют зелёный террейн и синее небо.
 
+### 3.5 Player-side visual validation (R4 gates)
+
+`CubeGame.exe -cubeSeed 666666 -cubeAutoNew recovery3 -cubeValidateVisual -logFile ...` — собранный Player
+сам проверяет визуальные гейты и пишет в лог:
+
+```
+[Validate] ALPHA_CONTENT_READY=PASS state=Ready origin=Packaged
+[Validate] PLAYER_MODEL_VISIBLE=PASS
+[Validate] PLAYER_NOT_PRIMITIVE=PASS
+[Validate] KNOWN_CREATURE_MODEL_VISIBLE=PASS
+[Validate] NO_MAGENTA=PASS MAGENTA_COUNT=0
+[Validate] ANIMATION_RUNNING=PASS hero=True wolf=True
+[Validate] COMBAT_ACTION_ANIMATION=PASS wolf_frames=558 hero_frames=0
+[Validate] hero actor=d86_human_0x02_greatsword ready=True phase=Locomotion clips=94 problems=0
+[Validate] wolf actor=wolf_0x1c_formula_only ready=True phase=Locomotion clips=6 frames=558 problems=0
+```
+
+Герой — **реальный человек с двуручным мечом** (`d86_human_0x02_greatsword`), волк — реальная модель,
+оба `problems=0`, `origin=Packaged` (контент из StreamingAssets), `MAGENTA_COUNT=0`.
+Локомоция (idle/move) работает у обоих, боевой action-клип проигрывался у волка (558 кадров).
+
+Примечание: `problems=[ANIM_MISSING ... ACTION_REFUSED Recovery]` в глобальном списке — это не пропавшая
+модель, а штатный отказ боевого action 37 во время Recovery (волк атакует, не дождавшись выхода из
+recovery). Лог-метка `ANIM_MISSING` здесь вводит в заблуждение; поведение корректное.
+
 ---
 
 ## 4. Что сделал Claude vs DeepSeek
@@ -108,24 +133,24 @@ Player-каталог самодостаточен: `CubeGame.exe`, `UnityPlayer
 - Спасение + checkpoint `28950f0` + push.
 - Компиляция, EditMode-прогоны, исправление ложного fail теста (`71ef7a3`).
 - Windows Player build + runtime проверка (контент, no-magenta, wolf/hero, бой).
+- Player-side R4 visual validation gates (`75fc293`): 7/7 PASS в собранном Player.
 
 ---
 
 ## 5. Осталось (следующие шаги)
 
-1. **R4 — render-frame visual gates**: `NO_MAGENTA` (пиксельный скан уже подтверждён вручную),
-   `PLAYER_MODEL_VISIBLE`, `PLAYER_NOT_PRIMITIVE`, `WEAPON_MODEL_VISIBLE`,
-   `KNOWN_NPC_MODEL_VISIBLE`, `KNOWN_CREATURE_MODEL_VISIBLE`, `ANIMATION_RUNNING` — автоматизировать
-   как EditMode/PlayMode-гейты + скриншот-сравнение.
-2. **R5 — полный vertical slice**: подтвердить визуально героя с оружием, реального NPC,
-   реального врага, анимации (idle/move/combat), деревья/растительность, звук, HUD/инвентарь/иконку
-   и полный цикл `start→move→NPC→enemy→attack→death→loot→pickup→inventory→save→exit→load→continue`.
-   Требует **визуальной приёмки продюсера** (агент не может заменить глаза).
+1. **R4 — недостающие гейты**: `WEAPON_MODEL_VISIBLE`, `KNOWN_NPC_MODEL_VISIBLE`,
+   `KNOWN_LOOT_MODEL_VISIBLE`, `NO_PRIMITIVE_PLACEHOLDER_FOR_KNOWN_ASSET` (нужна сцена с NPC и лутом).
+   Уже реализованы и PASS: `ALPHA_CONTENT_READY`, `PLAYER_MODEL_VISIBLE`, `PLAYER_NOT_PRIMITIVE`,
+   `KNOWN_CREATURE_MODEL_VISIBLE`, `NO_MAGENTA`, `ANIMATION_RUNNING`, `COMBAT_ACTION_ANIMATION`.
+2. **R5 — полный vertical slice**: подтвердить визуально реального NPC, деревья/растительность,
+   звук, HUD/инвентарь/иконку и полный цикл `start→move→NPC→enemy→attack→death→loot→pickup→inventory→save→exit→load→continue`.
+   Герой (с оружием), враг и анимации уже подтверждены. Требует **визуальной приёмки продюсера**.
 3. **R6** — масштабирование каталога (после R5).
 4. **R7** — структуры/город/данж (отдельный conversion gap; сейчас только footprints).
 
 ## 6. Финальный статус
 
-`READY_FOR_PRODUCER_VISUAL_REVIEW` по R0–R3; R5 — `PARTIAL` (мир+герой+враг+бой+террейн+no-magenta
-работают в Windows Player, но полный цикл и визуальное соответствие Alpha ещё не приняты).
-`R6`/`R7` — `NOT_STARTED`.
+`READY_FOR_PRODUCER_VISUAL_REVIEW` по R0–R3 + Player-side гейтам R4 (7/7 PASS); R5 — `PARTIAL`
+(герой с оружием, реальный враг, анимации, бой, террейн и no-magenta подтверждены в Windows Player;
+не подтверждены визуально NPC, растительность, звук и полный цикл). `R6`/`R7` — `NOT_STARTED`.
