@@ -39,6 +39,33 @@ namespace CubeGame.Tests.Recovery
             File.WriteAllText(path, text);
         }
 
+        /// <summary>Removes // line comments (covers /// doc comments) and /* */ block comments.</summary>
+        private static string StripComments(string source)
+        {
+            var result = new System.Text.StringBuilder();
+            int i = 0;
+            while (i < source.Length)
+            {
+                if (i + 1 < source.Length && source[i] == '/' && source[i + 1] == '/')
+                {
+                    while (i < source.Length && source[i] != '\n') i++;
+                }
+                else if (i + 1 < source.Length && source[i] == '/' && source[i + 1] == '*')
+                {
+                    i += 2;
+                    while (i + 1 < source.Length && !(source[i] == '*' && source[i + 1] == '/')) i++;
+                    i = Math.Min(i + 2, source.Length);
+                }
+                else
+                {
+                    result.Append(source[i]);
+                    i++;
+                }
+            }
+
+            return result.ToString();
+        }
+
         /// <summary>A tiny cache with every runtime category and the research clutter of the real one.</summary>
         private string FakeCache(out string icons)
         {
@@ -172,7 +199,9 @@ namespace CubeGame.Tests.Recovery
             {
                 string normalised = file.Replace('\\', '/');
                 if (normalised.Contains("/Tests/") || normalised.Contains("/Editor/")) continue;
-                string text = File.ReadAllText(file);
+                // Strip comments first: doc references such as <c>Shader.Find("Standard")</c> describe the
+                // bug being guarded against, they are not real built-in shader lookups.
+                string text = StripComments(File.ReadAllText(file));
                 foreach (string builtIn in new[]
                          {
                              "Shader.Find(\"Standard\")", "Shader.Find(\"Universal Render Pipeline", "Shader.Find(\"Unlit/",
