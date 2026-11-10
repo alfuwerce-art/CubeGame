@@ -1419,6 +1419,13 @@ namespace CubeGame.Gameplay
             foreach (AlphaActorView v in allViews) actorIds.Add(v.Ready ? v.ActorId : v.ActorId + "(not-ready)");
             Debug.Log($"[Validate] REAL_ACTOR_VIEWS={allViews.Length} [{string.Join(", ", actorIds)}]");
 
+            // R6: catalog scale — every staged actor resolves to a ready definition (file -> rig -> clips).
+            var catalogProblems = new List<string>();
+            var defs = library.LoadAll(catalogProblems);
+            int readyDefs = 0;
+            foreach (var def in defs) if (def.Ready) readyDefs++;
+            Debug.Log($"[Validate] CATALOG_RESOLVE ready={readyDefs}/{defs.Count} problems={catalogProblems.Count}");
+
             if (heroView != null) Debug.Log($"[Validate] hero {heroView.Status()}");
             if (wolfView != null) Debug.Log($"[Validate] wolf {wolfView.Status()}");
             Debug.Log($"[Validate] problems=[{(_visuals != null ? string.Join("; ", _visuals.Problems) : string.Empty)}]");
