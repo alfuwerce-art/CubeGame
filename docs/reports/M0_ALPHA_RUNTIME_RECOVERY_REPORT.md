@@ -154,6 +154,7 @@ recovery). Лог-метка `ANIM_MISSING` здесь вводит в забл�
 - Компиляция, EditMode-прогоны, исправление ложного fail теста (`71ef7a3`).
 - Windows Player build + runtime проверка (контент, no-magenta, wolf/hero, бой).
 - Player-side R4 visual validation gates (`75fc293`): 7/7 PASS в собранном Player.
+- Research + реализация растительности (`bff0a67`): деревья/декор Alpha вместо W-18-creature-scatter.
 
 ---
 
@@ -170,12 +171,11 @@ recovery). Лог-метка `ANIM_MISSING` здесь вводит в забл�
      Старт = зона 32800, Town-зона деревни = 32804. Телепорт в Town-зону даёт 44 реальных модели
      (20+ гуманоидных NPC + существа). Нужно либо спавнить героя в Town-зоне, либо расширить радиус
      населения — это вопрос стартовой позиции (world-gen/дизайн), не пакетирования.
-   - **Растительность — исследовано, реализация следующая**: W-18 scatter `0x5F56C0` выбирает
-     шаблоны существ, а **не** растительность. Настоящая растительность — `World_generateTreeRoot
-     0x5D9AD0` (деревья, вид 0x01–0x1E по климату) + `World_serializeCellData 0x5F6E20` (декор
-     0x20–0x2B / 0x0C–0x0F / 0x10–0x11 с масштабами). Все модели уже в кэше (`d86_kind_0xXX_formula`).
-     См. [B_vegetation_research](../../research/alpha2013/B_vegetation_research.md). Осталось
-     реализовать провайдер растительности и поднять `VegetationPerZone`.
+   - **Растительность — реализовано и проверено** (`bff0a67`): W-18 scatter `0x5F56C0` выбирает
+     существ, а не растительность; настоящая — `generateTreeRoot` (деревья, модели 0x6C–0x77) +
+     `serializeCellData` (декор). В Player: `population: 54 content` (было 0), `REAL_ACTOR_VIEWS=74`
+     (было 20) — деревья/декор реальными моделями, `MAGENTA_COUNT=0`.
+     См. [B_vegetation_research](../../research/alpha2013/B_vegetation_research.md).
 3. **R6** — масштабирование каталога (после R5).
 4. **R7** — структуры/город/данж (отдельный conversion gap; сейчас только footprints).
 
