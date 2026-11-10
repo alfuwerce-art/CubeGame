@@ -3,16 +3,20 @@
 **Status:** ACTIVE REFERENCE  
 **Purpose:** не потерять системы и детали Cube World Alpha 2013, которые в принятой M0-базе остаются `PARTIAL`, `UNKNOWN`, `PLACEHOLDER_NOT_ALPHA` или реализованы как `CUBEGAME_CONTRACT`.
 
-## Правило проекта
+## Правило проекта — D92
 
-M0 используется как **рабочий системный фундамент**, который затем будет эволюционно перерабатываться в CubeGame. Принятие этапа не означает 1:1-паритет со всеми деталями Alpha.
+Этот документ является **blocking registry** полного M0 Alpha→Unity port.
 
-Ни один пункт из этого документа нельзя молча удалить. При дальнейшей работе каждый долг получает одно из решений:
+Для обязательной одиночной Alpha-системы долг должен получить одно из решений:
 
-- `RESTORE_BEFORE_F5` — восстановить до финальной приёмки M0;
-- `DEFER_TO_EVOLUTION` — оставить рабочий контракт и переработать на M1/M2;
-- `SUPERSEDED_BY_APPROVED_REDESIGN` — исходное правило Alpha сознательно заменено утверждённым дизайном CubeGame;
-- `UNKNOWN_NEEDS_RESEARCH` — требуется дополнительное исследование оригинала.
+- `RESTORE_IN_M0` — восстановить оригинальную логику до закрытия системного блока;
+- `UNKNOWN_NEEDS_RESEARCH` — продолжить reverse engineering; блок остаётся открыт;
+- `EXPLICIT_PRODUCER_DEVIATION` — только прямое решение продюсера сознательно разрешает отличие от Alpha;
+- `OUT_OF_M0_SCOPE` — только функция, уже утверждённая вне одиночного M0 (например, multiplayer M3).
+
+`DEFER_TO_EVOLUTION` больше нельзя использовать как способ закрыть обязательную Alpha-функцию. M1/M2 начинаются после принятого M0.
+
+Наличие рабочего fallback или `CUBEGAME_CONTRACT` не снимает долг. Если он находится на основном runtime-path, системный блок остаётся `PARTIAL`.
 
 Если позже будет создан единый GDD, этот backlog является обязательным источником для раздела legacy/Alpha foundation и должен быть связан с соответствующими системами GDD.
 
@@ -61,6 +65,18 @@ M0 используется как **рабочий системный фунд�
 - Журнал показывает активные и завершённые региональные охоты F3. Перенос генерации миссий, других типов заданий и наград остаётся `PARTIAL/UNKNOWN`, как в F3.
 - Художественный редизайн UI — `DEFER_TO_EVOLUTION`.
 
-## Контроль перед F5
+## D92 — дополнительные blocking gaps, выявленные визуальной/кодовой проверкой
 
-Перед M0-F5 этот документ просматривается целиком. Для каждого остающегося пункта должно быть явно записано одно из четырёх решений: восстановить, отложить в эволюцию, заменить утверждённым дизайном или оставить на дополнительное исследование.
+- Streaming/render distance: priority восстановлен частично, реальные Alpha radii/двухуровневый tile path — `PARTIAL`.
+- Trees: selection частично исследован, density/placement/RNG всё ещё заменены hash + `MaxObjectsPerZone` — `CUBEGAME_CONTRACT/PARTIAL`.
+- Grass/flowers/world-object placement — `UNKNOWN/PARTIAL`.
+- World-object IDs ранее смешивались с actor KindId; требуется отдельный Alpha consumer/path — `PARTIAL`.
+- Structures/houses: доказаны части размеров, материалы/полная geometry остаются reconstructed — `PARTIAL/PLACEHOLDER_NOT_ALPHA`.
+- Creature/NPC AI: полный Alpha state machine не перенесён; текущее поведение упрощено — `PARTIAL`.
+- Combat synchronization: gameplay action timing и visual animation могут расходиться; fallback timing `400/600/800` = `PLACEHOLDER_NOT_ALPHA`.
+- HUD/menu/inventory/map presentation: текущий Unity UI является техническим baseline, не Alpha parity — `PARTIAL/CUBEGAME_CONTRACT`.
+- Full playable Alpha Windows baseline отсутствует — `PARTIAL`.
+
+## Контроль перед финальным M0
+
+Перед `M0 ALPHA FULL UNITY PORT` acceptance реестр просматривается целиком. Любой blocking debt на обязательном runtime-path должен быть закрыт либо иметь прямое `EXPLICIT_PRODUCER_DEVIATION`.
