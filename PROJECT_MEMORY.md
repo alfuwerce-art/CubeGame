@@ -1,22 +1,35 @@
 # CubeGame — PROJECT MEMORY
 
-**Updated:** 2026-11-10  
+**Updated:** 2026-11-11  
 **Canonical branch:** `integration/m0-all`  
-**Current plan:** [D90 — M0 five-stage finish](docs/decisions/D90-m0-five-stage-finish-plan.md)  
-**Current stage:** [M0-F4 PRESENTATION](docs/ACTIVE_STAGE.md) — `READY_FOR_PRODUCER_ACCEPTANCE` в `codex/m0-f4-presentation`
+**Current plan:** [D92 — full Alpha-to-Unity port](docs/decisions/D92-m0-full-alpha-unity-port.md)  
+**Current stage:** [M0 ALPHA FULL UNITY PORT](docs/ACTIVE_STAGE.md) — ACTIVE / REWORKED
 
-## 0. Alpha parity backlog
+## 0. D92 — переоценка M0
 
-Все неперенесённые, частично восстановленные и временно замещённые элементы Alpha фиксируются в [M0 Alpha Parity Backlog](docs/planning/M0_ALPHA_PARITY_BACKLOG.md). Они не блокируют эволюционную переработку игры, но не могут быть молча потеряны.
+Продюсер отклонил старый критерий, при котором наличие отдельных подсистем и зелёных тестов трактовалось как перенос игры. D90 как активная схема исполнения superseded.
+
+Прежние F1–F4 сохраняются как инженерные checkpoint'ы и полезный код, но не означают parity соответствующих Alpha-систем.
+
+Текущий implementation checkpoint: `codex/m0-alpha-code-parity-p1` @ `c1f9f758598d90d76974d352d1a3689ceb04c8cc` — `PARTIAL`.
 
 ## 1. Главная цель M0
 
-Собрать максимально близкий к Cube World Alpha 2013 одиночный игровой цикл в одной Unity-игре, а уже после закрытия M0 переходить к эволюционным улучшениям CubeGame.
+Полностью перенести одиночную Cube World Alpha 2013 на Unity как связанную игру. Исходный код недоступен, поэтому перенос выполняется через reverse engineering `Cube.exe` и данных Alpha.
 
-Финальный M0 loop:
-`new world → character → travel → combat → loot → city → trade → dungeon → boss → quest → save/load → continue`.
+Обязательная цепочка по системам:
+`original code/data → recovered behavior → Unity runtime → linked systems → Windows Player → comparison → producer review`.
 
-## 2. Последний сведённый результат
+Финальный loop:
+`launch → menu → character → world → movement/streaming → environment → NPC/creatures → combat → loot/items → city/services → dungeon/boss → quests/progression → HUD/inventory/map → audio/VFX → save/load/continue`.
+
+Непринятые `UNKNOWN/PARTIAL/PLACEHOLDER_NOT_ALPHA/CUBEGAME_CONTRACT` на обязательном основном пути блокируют закрытие соответствующей системы и M0.
+
+## 2. Alpha parity backlog
+
+[M0 Alpha Parity Backlog](docs/planning/M0_ALPHA_PARITY_BACKLOG.md) теперь является **blocking registry** для обязательного Alpha single-player baseline: долг нельзя просто отложить в M1/M2, если без него M0 перестаёт быть переносом оригинальной игры.
+
+## 3. Исторические инженерные checkpoint'ы
 
 ### M0-F4 PRESENTATION
 
@@ -53,7 +66,7 @@ Unity после merge:
 - Последний полный PlayMode Claude до merge: **57 total / 54 passed / 2 failed / 1 skipped**.
 - Два известных fail существовали до D1/D2: stale world collider после voxel edit/save/load.
 
-## 3. Ключевые новые факты D1/D2
+## 4. Ключевые факты D1/D2
 
 Claude review-fix: [D1_D2_SPAWN_PATROL_REVIEW_FIX](docs/reports/D1_D2_SPAWN_PATROL_REVIEW_FIX.md).
 
@@ -75,7 +88,7 @@ Claude review-fix: [D1_D2_SPAWN_PATROL_REVIEW_FIX](docs/reports/D1_D2_SPAWN_PATR
 
 Открыто: exact rand() stream, часть условий wild cells, 22 non-grid construction sites, NPC equipment R-1, spawn timer persistence.
 
-## 4. Ключевые факты D3–D6
+## 5. Ключевые факты D3–D6
 
 Codex audit: [CODEX_D3_D6_INDEPENDENT_AUDIT](docs/reports/CODEX_D3_D6_INDEPENDENT_AUDIT.md).
 
@@ -84,7 +97,13 @@ Codex audit: [CODEX_D3_D6_INDEPENDENT_AUDIT](docs/reports/CODEX_D3_D6_INDEPENDEN
 - D5: projectile models/flight data существуют, но `attack → projectile → collision → CombatSystem.ResolveHit` отсутствует.
 - D6: 93 sounds cataloged; playback отсутствует. WAV metadata parser ошибается на 32 файлах. Local map/item icons частично подключены.
 
-## 5. D90 — остаток M0
+## 6. D92 — активная структура M0
+
+См. [M0 ALPHA FULL UNITY PORT](docs/stages/M0_ALPHA_FULL_UNITY_PORT_STAGE.md).
+
+Системные контуры: boot/menu/input; world/streaming; environment/world objects/structures; population/AI; authoritative action/combat/animation; character/items/progression; UI; quests/cities/dungeons; audio/VFX/time; persistence; final parity run.
+
+## 7. D90 — исторический план
 
 1. **M0-F1 WORLD FIX** — D1/D2 runtime, collider, city/dungeon/chest, persistence.
 2. **M0-F2 CHARACTER & COMBAT** — appearance/equipment/loot visual, movement, ranged/projectiles/abilities/VFX.
@@ -94,7 +113,7 @@ Codex audit: [CODEX_D3_D6_INDEPENDENT_AUDIT](docs/reports/CODEX_D3_D6_INDEPENDEN
 
 Старые D71–D89 документы сохраняются как история, но их роли/ветки/очереди **SUPERSEDED BY D90**.
 
-## 6. Неизменные правила
+## 8. Неизменные правила
 
 - Alpha original read-only.
 - Не публиковать исходные/конвертированные Alpha assets.
