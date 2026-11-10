@@ -1,49 +1,42 @@
-// CubeGame.Features.Creatures — which zones carry Alpha's spawner objects (D1, static evidence).
+// CubeGame.Features.Creatures — the landmark gate on Alpha's spawner-object pass (D1).
 //
 // Decoded from Cube.exe: `WorldInfo_generateBiomeContent` (0x5E4850) calls `Chunk_generateObjects` (0x5AF170)
-// only when the zone record type is 1 or 7 (the call site at WorldInfo.cpp:3266 tests `local_1304[6]` against
-// 0x00000001 and 0x00000007). Chunk_generateObjects is the pass that reads the zone's spawn-point map and
-// creates the spawner objects 0x80…0x84, so EVERY other zone type carries no spawners in Alpha.
+// when the 0x68-byte landmark column's type at +0x18 is Village (1) or Ruins (5).
+// Cube.exe 0x5E4AAB–0x5E4AC0 selects the column; 0x5E9655–0x5E9672 tests it and calls the pass.
 //
-// What this rule does NOT say: which creatures those spawners create (the executed spawn table gives kinds and
-// levels, but the point positions come from the spawn-point map that is not dumped yet — D1 step 2 in progress).
+// Spawn-point locations, density and the contents of this pass are tracked separately in D1.
 using System.Collections.Generic;
+using CubeGame.Features.World;
 
 namespace CubeGame.Features.Creatures
 {
-    /// <summary>Zone-type rule for Alpha spawner objects (static decode, no execution).</summary>
+    /// <summary>Landmark gate for the Alpha spawner-object pass.</summary>
     public static class AlphaPopulationRules
     {
         public const string Status =
-            "ALPHA_CODE_STATIC: Chunk_generateObjects 0x5AF170 runs only for zone types 1 and 7 (WorldInfo.cpp:3266)";
+            "ALPHA_CODE_STATIC: Chunk_generateObjects 0x5AF170 is called for Village (1) and Ruins (5) at 0x5E9672";
 
-        /// <summary>Zone type 1 of the Alpha zone record (settlement/town).</summary>
-        public const int SettlementZoneType = 1;
+        public static bool CarriesSpawnerObjects(LandmarkType landmarkType) =>
+            landmarkType == LandmarkType.Village || landmarkType == LandmarkType.Ruins;
 
-        /// <summary>Zone type 7 — the second type that reaches Chunk_generateObjects; its meaning is UNKNOWN.</summary>
-        public const int UnknownSpawnerZoneType = 7;
-
-        public static bool CarriesSpawnerObjects(int zoneType) =>
-            zoneType == SettlementZoneType || zoneType == UnknownSpawnerZoneType;
-
-        /// <summary>All zone types that carry spawners, in Alpha's order.</summary>
-        public static IReadOnlyList<int> SpawnerZoneTypes { get; } =
-            new[] { SettlementZoneType, UnknownSpawnerZoneType };
+        /// <summary>Landmark types tested at the Alpha call site, in order.</summary>
+        public static IReadOnlyList<LandmarkType> SpawnerLandmarkTypes { get; } =
+            new[] { LandmarkType.Village, LandmarkType.Ruins };
 
         public static List<string> Validate()
         {
             var problems = new List<string>();
-            if (!CarriesSpawnerObjects(1)) problems.Add("SETTLEMENT_RULE_MISSING");
-            if (!CarriesSpawnerObjects(7)) problems.Add("TYPE7_RULE_MISSING");
-            if (CarriesSpawnerObjects(3)) problems.Add("TYPE3_MUST_NOT_CARRY_SPAWNERS");
-            if (CarriesSpawnerObjects(0)) problems.Add("TYPE0_MUST_NOT_CARRY_SPAWNERS");
+            if (!CarriesSpawnerObjects(LandmarkType.Village)) problems.Add("VILLAGE_RULE_MISSING");
+            if (!CarriesSpawnerObjects(LandmarkType.Ruins)) problems.Add("RUINS_RULE_MISSING");
+            if (CarriesSpawnerObjects(LandmarkType.Valley)) problems.Add("VALLEY_MUST_NOT_CARRY_SPAWNERS");
+            if (CarriesSpawnerObjects(LandmarkType.None)) problems.Add("NONE_MUST_NOT_CARRY_SPAWNERS");
             return problems;
         }
 
         /// <summary>Why a zone has no population from Alpha spawners (diagnostics for the game).</summary>
-        public static string ExplainEmptyZone(int zoneType) =>
-            CarriesSpawnerObjects(zoneType)
+        public static string ExplainEmptyZone(LandmarkType landmarkType) =>
+            CarriesSpawnerObjects(landmarkType)
                 ? string.Empty
-                : $"NO_ALPHA_SPAWNERS zone type {zoneType} (only 1 and 7 carry them)";
+                : $"NO_ALPHA_SPAWNERS landmark {landmarkType} (only Village and Ruins run this pass)";
     }
 }

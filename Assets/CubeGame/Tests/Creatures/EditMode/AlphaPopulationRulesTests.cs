@@ -1,5 +1,6 @@
-// D1 — EditMode checks of the zone-type rule for Alpha spawner objects (static decode of 0x5E4850/0x5AF170).
+// D1 — EditMode checks of the landmark gate for Alpha spawner objects.
 using CubeGame.Features.Creatures;
+using CubeGame.Features.World;
 using NUnit.Framework;
 
 namespace CubeGame.Tests.Creatures.EditMode
@@ -7,21 +8,22 @@ namespace CubeGame.Tests.Creatures.EditMode
     public class AlphaPopulationRulesTests
     {
         [Test]
-        public void OnlyZoneTypesOneAndSevenCarrySpawners()
+        public void OnlyVillageAndRuinsRunTheSpawnerPass()
         {
             CollectionAssert.IsEmpty(AlphaPopulationRules.Validate());
-            Assert.IsTrue(AlphaPopulationRules.CarriesSpawnerObjects(1));
-            Assert.IsTrue(AlphaPopulationRules.CarriesSpawnerObjects(7));
-            Assert.IsFalse(AlphaPopulationRules.CarriesSpawnerObjects(0));
-            Assert.IsFalse(AlphaPopulationRules.CarriesSpawnerObjects(3), "settlement type 3 has decorations, not spawners");
-            CollectionAssert.AreEqual(new[] { 1, 7 }, AlphaPopulationRules.SpawnerZoneTypes);
+            foreach (LandmarkType landmark in System.Enum.GetValues(typeof(LandmarkType)))
+            {
+                Assert.AreEqual((int)landmark == 1 || (int)landmark == 5,
+                    AlphaPopulationRules.CarriesSpawnerObjects(landmark), landmark.ToString());
+            }
+            CollectionAssert.AreEqual(new[] { LandmarkType.Village, LandmarkType.Ruins }, AlphaPopulationRules.SpawnerLandmarkTypes);
         }
 
         [Test]
         public void EmptyZoneIsExplained()
         {
-            Assert.IsEmpty(AlphaPopulationRules.ExplainEmptyZone(1));
-            StringAssert.Contains("NO_ALPHA_SPAWNERS", AlphaPopulationRules.ExplainEmptyZone(5));
+            Assert.IsEmpty(AlphaPopulationRules.ExplainEmptyZone(LandmarkType.Village));
+            StringAssert.Contains("NO_ALPHA_SPAWNERS", AlphaPopulationRules.ExplainEmptyZone(LandmarkType.Valley));
             StringAssert.Contains("Chunk_generateObjects", AlphaPopulationRules.Status);
         }
     }

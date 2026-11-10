@@ -18,8 +18,8 @@ namespace CubeGame.Features.Creatures
         public const string Notes =
             "order: vegetation/creatures/buildings → city (type 1) → dungeon (caller predicate); Alpha dungeon zone type UNKNOWN";
 
-        /// <summary>Alpha zone record type of a settlement/town (see AlphaPopulationRules).</summary>
-        public const int CityZoneType = AlphaPopulationRules.SettlementZoneType;
+        /// <summary>Alpha zone record type of a town. Distinct from the landmark column type.</summary>
+        public const int CityZoneType = 1;
 
         /// <summary>Predicate for Alpha town zones (zone record type 1).</summary>
         public static bool IsCityZone(ZoneContentContext context) =>

@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using CubeGame.Content;
 using CubeGame.Features.Contracts;
+using CubeGame.Features.World;
 
 namespace CubeGame.Features.Creatures
 {
@@ -33,38 +34,32 @@ namespace CubeGame.Features.Creatures
         readonly Func<ZoneKey, int> _zoneLevel;
         readonly Func<ZoneKey, int, int, double> _groundHeight;
         readonly bool _npcTable;
-        readonly Func<ZoneKey, int> _zoneType;
+        readonly Func<ZoneKey, LandmarkType> _landmarkType;
 
         /// <param name="seed">World seed; part of the deterministic pick.</param>
         /// <param name="zoneLevel">Region level of a zone (world generator); null → level 1.</param>
         /// <param name="groundHeight">zone + local x/z → world Y of the surface; null → 0.</param>
         /// <param name="npcTable">Use the executed NPC rows instead of the monster rows.</param>
-        /// <param name="zoneType">
-        /// Alpha zone record type. When supplied, zones that carry no spawners in Alpha (anything except types 1
-        /// and 7, see <see cref="AlphaPopulationRules"/>) produce an EMPTY list — the game then has no invented
-        /// population there. Null keeps the CUBEGAME_CONTRACT behaviour.
+        /// <param name="landmarkType">
+        /// Landmark column containing the zone. When supplied, only Village and Ruins can produce
+        /// entries from this source. Null keeps the CUBEGAME_CONTRACT behaviour.
         /// </param>
         public AlphaWorldPopulation(WorldSeed seed, Func<ZoneKey, int> zoneLevel = null,
             Func<ZoneKey, int, int, double> groundHeight = null, bool npcTable = false,
-            Func<ZoneKey, int> zoneType = null)
+            Func<ZoneKey, LandmarkType> landmarkType = null)
         {
             _seed = seed;
             _zoneLevel = zoneLevel;
             _groundHeight = groundHeight;
             _npcTable = npcTable;
-            _zoneType = zoneType;
+            _landmarkType = landmarkType;
         }
 
         public IReadOnlyList<SpawnDefinition> SpawnsForZone(ZoneKey zone)
         {
-            if (_zoneType != null)
+            if (_landmarkType != null && !AlphaPopulationRules.CarriesSpawnerObjects(_landmarkType(zone)))
             {
-                int type = _zoneType(zone);
-                if (!AlphaPopulationRules.CarriesSpawnerObjects(type))
-                {
-                    // Alpha spawns creatures only through Chunk_generateObjects (zone types 1 and 7).
-                    return Array.Empty<SpawnDefinition>();
-                }
+                return Array.Empty<SpawnDefinition>();
             }
 
             int level = 1;

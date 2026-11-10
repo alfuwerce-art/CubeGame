@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using CubeGame.Content;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.Creatures;
+using CubeGame.Features.World;
 using NUnit.Framework;
 
 namespace CubeGame.Tests.Creatures.EditMode
@@ -13,25 +14,23 @@ namespace CubeGame.Tests.Creatures.EditMode
         static readonly ZoneKey ZoneB = new ZoneKey(32801, 32800);
 
         static AlphaWorldPopulation Population(uint seed, int level = 5, bool npc = false, bool withGround = true,
-            int? zoneType = null)
+            LandmarkType? landmarkType = null)
         {
             return new AlphaWorldPopulation(new WorldSeed(seed),
                 z => level,
                 withGround ? (System.Func<ZoneKey, int, int, double>)((z, x, zz) => 64.0 + x * 0.0) : null,
                 npc,
-                zoneType.HasValue ? (System.Func<ZoneKey, int>)(z => zoneType.Value) : null);
+                landmarkType.HasValue ? (System.Func<ZoneKey, LandmarkType>)(z => landmarkType.Value) : null);
         }
 
         [Test]
         public void ZonesWithoutAlphaSpawnersStayEmpty()
         {
-            // Zone type 3 (settlement) carries decorations, not spawners — Alpha population must be empty there.
-            Assert.IsEmpty(Population(666666, zoneType: 3).SpawnsForZone(ZoneA));
-            Assert.IsEmpty(Population(666666, zoneType: 0).SpawnsForZone(ZoneA));
-            // Types 1 and 7 do carry spawners.
-            Assert.IsNotEmpty(Population(666666, zoneType: 1).SpawnsForZone(ZoneA));
-            Assert.IsNotEmpty(Population(666666, zoneType: 7).SpawnsForZone(ZoneA));
-            // Without the zone type the source keeps the CubeGame-contract behaviour.
+            Assert.IsEmpty(Population(666666, landmarkType: LandmarkType.Valley).SpawnsForZone(ZoneA));
+            Assert.IsEmpty(Population(666666, landmarkType: LandmarkType.None).SpawnsForZone(ZoneA));
+            Assert.IsNotEmpty(Population(666666, landmarkType: LandmarkType.Village).SpawnsForZone(ZoneA));
+            Assert.IsNotEmpty(Population(666666, landmarkType: LandmarkType.Ruins).SpawnsForZone(ZoneA));
+            // Without landmark data the source keeps the CubeGame-contract behaviour.
             Assert.IsNotEmpty(Population(666666).SpawnsForZone(ZoneA));
         }
 
