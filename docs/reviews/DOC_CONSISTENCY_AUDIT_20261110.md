@@ -8,7 +8,7 @@
 - D91 Q1=batch: model/animation exemplar + producer-approved batches, technical validation per Asset ID; D35 per-item manual art review superseded only in that respect.
 - D91 Q2=single: complete standalone public single-player release prior to multiplayer/server systems; M0-F5 is not public-release authorization.
 - D91 Q3=later: overseas continent and D60 four-act campaign form a later major product milestone after first public solo release.
-- D80/D82 rare Fildor NPCs remain planned; exact release package still OPEN, not inferred from Q3.
+- D92 producer approval: rare Fildor NPCs **required for first public solo release**; player-selectable race remains future DLC. D60 overseas campaign is still later under D91; origin lore does not move the continent into the first release.
 
 ## Cross-document checks
 | Area | Result |
@@ -32,7 +32,7 @@
 1. `docs/planning/ROADMAP_DRAFT.md` deliberately retained as historical; `ROADMAP_CONSOLIDATION_PROPOSAL.md` is the review candidate, not yet a newly accepted canonical roadmap.
 2. Earlier F1/F2 summaries inside PROJECT_MEMORY/ACTIVE_STAGE remain verbose/history-heavy; no destructive rewrite made to canonical current-status documents in this review.
 3. GDD still carries historic S05 references in body. Opening caveat says those are historical; deeper sentence-by-sentence editorial migration and heading renumbering remain pending, to avoid altering anchors/content without complete checks.
-4. Fildor NPC placement in a specific release package is OPEN, since D91 Q3 only explicitly reschedules the overseas continent and four-act campaign. Keep D80/D82 intact pending producer decision.
+4. Fildor NPC release placement is RESOLVED by D92 (first solo release); D80/D82 kept as historical original decisions, D91/Q3 remains later for overseas campaign. Detailed implementation, rarity, placement and gameplay integration remain OPEN for future stage design.
 5. Non-key historical decision/workshop links and external URLs were not exhaustively checked; a full repository-wide link checker remains recommended before final promotion.
 6. Removing/archive-deduplicating old source files remains pending after ensuring historical links and evidence are preserved.
 
