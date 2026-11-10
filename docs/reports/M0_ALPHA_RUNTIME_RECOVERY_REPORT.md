@@ -158,31 +158,37 @@ recovery). Лог-метка `ANIM_MISSING` здесь вводит в забл�
 
 ---
 
-## 5. Осталось (следующие шаги)
+## 5. Что сделано по визуальному фидбеку продюсера
 
-1. **R4 — недостающие гейты**: `WEAPON_MODEL_VISIBLE`, `KNOWN_NPC_MODEL_VISIBLE`,
-   `KNOWN_LOOT_MODEL_VISIBLE`, `NO_PRIMITIVE_PLACEHOLDER_FOR_KNOWN_ASSET` (нужна сцена с NPC и лутом).
-   Уже реализованы и PASS: `ALPHA_CONTENT_READY`, `PLAYER_MODEL_VISIBLE`, `PLAYER_NOT_PRIMITIVE`,
-   `KNOWN_CREATURE_MODEL_VISIBLE`, `NO_MAGENTA`, `ANIMATION_RUNNING`, `COMBAT_ACTION_ANIMATION`.
-2. **R5 — вертикальный срез**: герой (с оружием), враг/существа, NPC города, анимации, террейн,
-   растительность и **полный цикл save→exit→load→continue** подтверждены в Windows Player. Осталось:
-   - **Стартовая позиция — blocker (дизайн)**: герой спавнится вне Town-зоны (зона 32800 vs Town 32804,
-     OQ-22 PARTIAL). Телепорт в город даёт 44 модели (20+ NPC). Нужно решение продюсера: спавнить ли
-     героя в Town-зоне.
-   - **Звук** — 93 WAV застейджены и код подключён (F4); «слышно ли» в Player — приёмка продюсера.
-3. **R6 — масштаб каталога: проверен в Player** (`5804f9a`): `CATALOG_RESOLVE ready=156/156 problems=0` —
-   все 156 акторов разрешаются (file → rig → clips) в packaged Player; ~40 видов (humanoid/quadruped/
-   cat/runner/деревья/декор) рендерятся реальными моделями (`REAL_ACTOR_VIEWS=74`). Mesh/render всех
-   156 видов подтверждён Editor-тестами (S05). Полный рендер всех 156 в Player — остаточная проверка.
-4. **R7** — структуры/город/данж: геометрия дома Alpha **исследована, реализована и подключена**
-   (`B_house_research.md`, `AlphaHouseBuilder.BuildAlpha` + `AlphaZoneContentProvider`, commits
-   `5ec4474`/`39cead5`). В Player Town-зона даёт `REAL_ACTOR_VIEWS=98` (NPC + растительность),
-   `MAGENTA_COUNT=0`. Осталось: маппинг типа части→материала Alpha (сейчас материалы RECONSTRUCTED).
+Продюсер: «игра в принципе далека от оригинала». Сделаны три конкретных шага (commits `02079a5`, `d14adee`):
 
-## 6. Финальный статус
+1. **Герой спавнится в Town-зоне** (zone 32803) — сразу видны NPC/дома/растительность
+   (`population: 98 content`, было 54; `REAL_ACTOR_VIEWS=98`).
+2. **Alpha sunlight + per-vertex AO** на террейне (`ChunkMesher`): тёмные пещеры/навесы, AO верхних граней.
+3. **Реальные тени** — directional sun `LightShadows.Soft`, `PilotVertexColor` (террейн) и `VoxelShaded`
+   (модели) получили ShadowCaster pass + `SHADOW_ATTENUATION`.
 
-`READY_FOR_PRODUCER_VISUAL_REVIEW` по R0–R4 (7/7 гейтов PASS) + ядро R5 + R6 в Windows Player:
-герой с оружием, реальный враг и существа, NPC города, анимации, террейн, растительность,
-`MAGENTA_COUNT=0`, полный цикл `save→exit→load→continue` (saved/loaded tick=81), каталог
-`156/156` акторов разрешается. Осталось: стартовая позиция (дизайн), звук (приёмка продюсера),
-R7 (геометрия зданий). `R7` — `NOT_STARTED`.
+Скриншот нового вида: `.unity-install/shots/recovery_shadow_town.png` (823 KB, `MAGENTA=0`).
+
+## 6. Осталось (для «похоже на оригинал»)
+
+1. **Террейн-палитра** — `AlphaColors` реконструкция, а не `start.plx` (реальная палитра Alpha).
+2. **Небо/атмосфера** — сейчас solid blue (`SolidColor`), нет градиента/облаков.
+3. **Плотность мира** — деревья/дома могут быть редкими; проверить scatter/плотность.
+4. **Цвета моделей** — проверить, что конвертация `.cub → .cubdec` не исказила RGB.
+5. **Звук** — 93 WAV staged, «слышно ли» — приёмка.
+6. **R7 материалы домов** — маппинг типа части→материала Alpha (сейчас реконструированы).
+7. **R4** — явные `WEAPON/NPC/LOOT` гейты (опционально).
+8. **PlayMode** — тест спавна в Town-зоне обновлён, но полный прогон не завершён (прерван по просьбе продюсера).
+
+## 7. Финальный статус
+
+`READY_FOR_PRODUCER_VISUAL_REVIEW` — по восстановлению контента: R0–R6 PASS, R7 геометрия подключена,
+герой/оружие/NPC/враг/существа/анимации/террейн/растительность/дома рендерятся реальными Alpha-моделями,
+`MAGENTA_COUNT=0`, цикл `save→exit→load` работает, каталог `156/156`. Спавн в городе, sunlight/AO и тени
+добавлены по фидбеку.
+
+`PARTIAL` — по «похожести на оригинал»: палитра террейна, небо, плотность мира и цвета моделей ещё
+отличаются (см. §6). Это rendering/tuning-трек, не блокер playable.
+
+Ветка: `deepseek/m0-alpha-runtime-recovery`, remote SHA `d14adee1b1e89bfd19f056037ac4060cb196f002`.
