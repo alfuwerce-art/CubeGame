@@ -3,11 +3,11 @@
 **Статус:** REVIEW, не принятая навигация. Canonical: `integration/m0-all`.
 
 ## Что за игру создаём
-- [GDD — источник дизайн-требований (пока отдельная ветка)](https://github.com/alfuwerce-art/CubeGame/blob/docs/gdd-first-draft-20261106/docs/game-design/GDD_DRAFT.md)
-- [Дизайн-решения D59–D82 (исходная ветка)](https://github.com/alfuwerce-art/CubeGame/tree/docs/gdd-first-draft-20261106/docs/decisions)
+- [GDD — источник дизайн-требований (копия в ревью)](game-design/GDD_DRAFT.md)
+- [Дизайн-решения D59–D82 (копия в ревью)](decisions/)
 - [Утверждённые основы D01–D36](planning/DECISIONS_001-036.md)
-- [Art Direction — исходная ветка](https://github.com/alfuwerce-art/CubeGame/blob/docs/gdd-first-draft-20261106/docs/art/ART_DIRECTION_DRAFT.md)
-- [Production Pipeline — исходная ветка](https://github.com/alfuwerce-art/CubeGame/blob/docs/gdd-first-draft-20261106/docs/production/PRODUCTION_PIPELINE_DRAFT.md)
+- [Art Direction — исходная ветка](art/ART_DIRECTION_DRAFT.md)
+- [Production Pipeline — исходная ветка](production/PRODUCTION_PIPELINE_DRAFT.md)
 
 ## Что и когда делаем
 - [ACTIVE_STAGE — текущий M0-F4](ACTIVE_STAGE.md)
