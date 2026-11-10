@@ -375,6 +375,6 @@ namespace CubeGame.Features.Creatures
         }
 
         public static int Of(CubeGame.Features.Session.GameClock clock) =>
-            Of((clock ?? throw new ArgumentNullException(nameof(clock))).Tick, clock.TicksPerSecond);
+            (clock ?? throw new ArgumentNullException(nameof(clock))).WorldDay;
     }
 }

@@ -108,20 +108,29 @@ namespace CubeGame.Tests.FullM0.EditMode
         }
 
         [Test]
-        public void LegacySessionWithoutRanksLoadsWithZeroRanks()
+        public void LegacySessionWithoutProgressionFieldsLoadsWithDefaults()
         {
             var store = new MemoryStore();
             GameSlotStore slots = Slots(store);
             Assert.IsTrue(slots.Save(RunningSession(5u, CharacterClass.Warrior), 1L).IsSuccess);
             const string key = "slot0.session";
             Assert.IsTrue(GameSlotStore.TryUnframe(store.Files[key], SessionSaveFormat.Header, out int version, out string payload, out string error), error);
-            string legacy = payload.Replace(",\"heroSkillRanks\":[0,0,0,0,0,0,0,0,0,0,0]", string.Empty);
-            StringAssert.DoesNotContain("heroSkillRanks", legacy);
+            string legacy = payload.Replace(",\"heroSkillRanks\":[0,0,0,0,0,0,0,0,0,0,0]", string.Empty)
+                .Replace(",\"heroCopper\":0", string.Empty).Replace(",\"heroManaCubes\":0", string.Empty)
+                .Replace(",\"huntMissions\":[]", string.Empty).Replace(",\"worldTimeOffsetMs\":0", string.Empty);
+            foreach (string field in new[] { "heroSkillRanks", "heroCopper", "heroManaCubes", "huntMissions", "worldTimeOffsetMs" })
+            {
+                StringAssert.DoesNotContain(field, legacy);
+            }
             store.Files[key] = GameSlotStore.Frame(SessionSaveFormat.Header, version, legacy);
 
             SlotLoadResult loaded = slots.Load("slot0", Generator);
             Assert.IsTrue(loaded.IsSuccess, loaded.ToString());
             CollectionAssert.AreEqual(new int[11], loaded.Hero.SkillRanks.ToArray());
+            Assert.AreEqual(0, loaded.Hero.Copper);
+            Assert.AreEqual(0, loaded.Hero.ManaCubes);
+            Assert.IsEmpty(loaded.Hero.Missions.Hunts);
+            Assert.AreEqual(0L, loaded.WorldTimeOffsetMs);
         }
 
         [TestCase("[1]")]

@@ -18,6 +18,7 @@ namespace CubeGame.Features.Session
         private const int WorldDayMs = 86_400_000;
         private const int InitialWorldTimeMs = 32_400_000;
         private const int WorldTimeRate = 10;
+        public const int InnDawnMs = 25_200_000;
 
         /// <summary>Upper bound of ticks executed for one frame (protects against spiral of death).</summary>
         public const int MaxTicksPerFrame = 8;
@@ -25,7 +26,7 @@ namespace CubeGame.Features.Session
         private readonly int _ticksPerSecond;
         private double _accumulatorSeconds;
 
-        public GameClock(int ticksPerSecond = DefaultTicksPerSecond, long startTick = 0)
+        public GameClock(int ticksPerSecond = DefaultTicksPerSecond, long startTick = 0, long worldTimeOffsetMs = 0)
         {
             if (ticksPerSecond <= 0)
             {
@@ -39,6 +40,7 @@ namespace CubeGame.Features.Session
 
             _ticksPerSecond = ticksPerSecond;
             Tick = startTick;
+            WorldTimeOffsetMs = worldTimeOffsetMs;
         }
 
         /// <summary>Raised once per simulation tick, after <see cref="Tick"/> was incremented.</summary>
@@ -53,16 +55,34 @@ namespace CubeGame.Features.Session
         /// <summary>Game time in milliseconds (exact: tick * 1000 / rate, rounded down).</summary>
         public long TimeMs => Tick * 1000L / _ticksPerSecond;
 
+        public long WorldTimeOffsetMs { get; private set; }
+
+        private long TotalWorldTimeMs => InitialWorldTimeMs + TimeMs * WorldTimeRate + WorldTimeOffsetMs;
+
         /// <summary>Alpha world time at the normal rate (Cube.exe 0x60C678…0x60C6E2).</summary>
         public int WorldTimeMs
         {
             get
             {
-                long ticksPerWorldDay = WorldDayMs / (1000 * WorldTimeRate) * (long)_ticksPerSecond;
-                long elapsedMs = Tick % ticksPerWorldDay * 1000L / _ticksPerSecond;
-                int time = InitialWorldTimeMs + (int)(elapsedMs * WorldTimeRate);
-                return time > WorldDayMs ? time - WorldDayMs : time;
+                int time = (int)(TotalWorldTimeMs % WorldDayMs);
+                return time == 0 ? WorldDayMs : time;
             }
+        }
+
+        public int WorldDay => (int)(TotalWorldTimeMs / WorldDayMs);
+
+        public bool IsInnOpen => WorldTimeMs >= 64_800_000 || WorldTimeMs <= 21_600_000;
+
+        /// <summary>ALPHA_CODE_STATIC (0x610630): class 0x84 advances the calendar by a day and sets 07:00.</summary>
+        internal bool TryRestAtInn()
+        {
+            if (!IsInnOpen)
+            {
+                return false;
+            }
+
+            WorldTimeOffsetMs += WorldDayMs + InnDawnMs - TotalWorldTimeMs % WorldDayMs;
+            return true;
         }
 
         /// <summary>Time weight for terrain colour blending (Cube.exe 0x59D65B…0x59D6EB).</summary>

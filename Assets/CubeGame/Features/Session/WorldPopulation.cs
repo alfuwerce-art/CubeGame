@@ -79,6 +79,27 @@ namespace CubeGame.Features.Session
 
         public bool TryGet(StableEntityId id, out LiveSpawn spawn) => _live.TryGetValue(id, out spawn);
 
+        public void MarkContainerOpened(LiveSpawn spawn, long timeMs)
+        {
+            if (!_live.Remove(spawn.Id))
+            {
+                return;
+            }
+
+            _zones[spawn.Zone].Remove(spawn.Id);
+            _deltas.Record(new WorldDelta
+            {
+                Region = RegionOf(spawn.Zone),
+                Kind = WorldDeltaKind.ContainerOpened,
+                X = spawn.Zone.X,
+                Y = spawn.Channel * 4096 + spawn.Definition.SpawnIndex,
+                Z = spawn.Zone.Z,
+                Value = 1,
+                TimeMs = timeMs,
+            });
+            Despawned?.Invoke(spawn);
+        }
+
         /// <summary>Activates zones around the hero and releases far zones. Call when the hero moves.</summary>
         public void Update(WorldPosition hero)
         {

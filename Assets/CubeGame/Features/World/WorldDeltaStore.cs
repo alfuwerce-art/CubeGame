@@ -175,11 +175,17 @@ namespace CubeGame.Features.World
         }
 
         /// <summary>World-object removals use the same zone/channel/index coordinates as entity state.</summary>
-        public bool IsObjectRemoved(ZoneKey zone, int channel, int spawnIndex)
+        public bool IsObjectRemoved(ZoneKey zone, int channel, int spawnIndex) =>
+            HasSpawnDelta(zone, channel, spawnIndex, WorldDeltaKind.ObjectRemoved);
+
+        public bool IsContainerOpened(ZoneKey zone, int channel, int spawnIndex) =>
+            HasSpawnDelta(zone, channel, spawnIndex, WorldDeltaKind.ContainerOpened);
+
+        private bool HasSpawnDelta(ZoneKey zone, int channel, int spawnIndex, WorldDeltaKind kind)
         {
             var region = new RegionKey(zone.X >> 6, zone.Z >> 6);
             return _byRegion.TryGetValue(region, out var map)
-                && map.ContainsKey((WorldDeltaKind.ObjectRemoved, zone.X, channel * 4096 + spawnIndex, zone.Z));
+                && map.ContainsKey((kind, zone.X, channel * 4096 + spawnIndex, zone.Z));
         }
 
         /// <summary>Discards a completed entity state without touching terrain or object removals.</summary>

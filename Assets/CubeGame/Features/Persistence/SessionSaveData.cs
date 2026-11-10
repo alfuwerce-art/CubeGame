@@ -64,6 +64,16 @@ namespace CubeGame.Features.Persistence
         /// <summary>C3: eleven ranks in Alpha order. Slots without this field start with zero ranks.</summary>
         public int[] heroSkillRanks;
 
+        /// <summary>Optional M0-F3 fields. Pre-F3 slots start with zero copper and mana cubes and an empty journal.</summary>
+        public int heroCopper;
+
+        public int heroManaCubes;
+
+        public HuntMissionSaveData[] huntMissions;
+
+        /// <summary>Calendar advances from inn visits, separate from the combat and movement tick.</summary>
+        public long worldTimeOffsetMs;
+
         /// <summary>
         /// M0-04B, optional: placement of the Core items of the character save (same order): bag slot ≥ 0 or
         /// −(1+equipment slot). C5 extra slots use the Alpha creature offset instead of a Core slot index.
@@ -86,6 +96,14 @@ namespace CubeGame.Features.Persistence
 
         /// <summary>FNV-1a 64 (hex) of the framed world file of the same checkpoint; empty = slot written before M0-02 (no world file).</summary>
         public string worldChecksum = string.Empty;
+    }
+
+    [Serializable]
+    public sealed class HuntMissionSaveData
+    {
+        public long target;
+        public int kind;
+        public bool complete;
     }
 
     public static class SessionSaveFormat

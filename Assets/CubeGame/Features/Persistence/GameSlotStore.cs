@@ -35,6 +35,8 @@ namespace CubeGame.Features.Persistence
 
         public long ClockTick { get; set; }
 
+        public long WorldTimeOffsetMs { get; set; }
+
         public WorldDeltaStore WorldDeltas { get; set; }
 
         public bool IsSuccess => Status == SlotLoadStatus.Success;
@@ -151,6 +153,7 @@ namespace CubeGame.Features.Persistence
                 savedUtcTicks = nowUtcTicks,
                 ticksPerSecond = session.Clock.TicksPerSecond,
                 clockTick = session.Clock.Tick,
+                worldTimeOffsetMs = session.Clock.WorldTimeOffsetMs,
                 heroName = hero.Name,
                 raceId = hero.RaceId,
                 heroX = hero.Position.X,
@@ -165,6 +168,9 @@ namespace CubeGame.Features.Persistence
                 heroHairG = hero.Appearance.HairG,
                 heroHairB = hero.Appearance.HairB,
                 heroSkillRanks = hero.SkillRanks.ToArray(),
+                heroCopper = hero.Copper,
+                heroManaCubes = hero.ManaCubes,
+                huntMissions = WriteMissions(hero.Missions),
                 inventoryPlacement = hero.InventoryPlacement(),
                 characterChecksum = Checksum(characterText),
                 worldChecksum = worldChecksum,
@@ -291,6 +297,8 @@ namespace CubeGame.Features.Persistence
                 Position = new WorldPosition(data.heroX, data.heroY, data.heroZ),
                 Yaw = data.heroYaw,
                 NeedsGroundPlacement = false,
+                Copper = data.heroCopper,
+                ManaCubes = data.heroManaCubes,
             };
             if (data.heroGender >= 0)
             {
@@ -312,6 +320,17 @@ namespace CubeGame.Features.Persistence
 
             hero.RestoreInventory(data.inventoryPlacement);
             RestoreRawItems(hero, data);
+            if (data.huntMissions != null)
+            {
+                foreach (HuntMissionSaveData mission in data.huntMissions)
+                {
+                    if (mission == null || !hero.Missions.TryRestore(new HuntMission(
+                        new StableEntityId(unchecked((ulong)mission.target)), new KindId(mission.kind), mission.complete)))
+                    {
+                        return Fail(SlotLoadStatus.Corrupted, "invalid or duplicate hunt mission");
+                    }
+                }
+            }
             if (data.heroHealth >= 0.0)
             {
                 hero.RestoreHealth(data.heroHealth);
@@ -323,8 +342,26 @@ namespace CubeGame.Features.Persistence
                 World = new WorldInfo(data.worldName, new WorldSeed((uint)data.worldSeed), data.generatorId, data.createdUtcTicks),
                 Hero = hero,
                 ClockTick = data.clockTick,
+                WorldTimeOffsetMs = data.worldTimeOffsetMs,
                 WorldDeltas = deltas,
             };
+        }
+
+        private static HuntMissionSaveData[] WriteMissions(MissionJournal journal)
+        {
+            var result = new HuntMissionSaveData[journal.Hunts.Count];
+            int index = 0;
+            foreach (HuntMission mission in journal.Hunts)
+            {
+                result[index++] = new HuntMissionSaveData
+                {
+                    target = (long)mission.Target.Value,
+                    kind = mission.Kind.Value,
+                    complete = mission.Complete,
+                };
+            }
+
+            return result;
         }
 
         /// <summary>Returns null on success (deltas filled), otherwise the failure result.</summary>
@@ -511,6 +548,14 @@ namespace CubeGame.Features.Persistence
             if (data.heroSkillRanks != null && data.heroSkillRanks.Length != 0 && !HeroSkillRanks.IsValid(data.heroSkillRanks))
             {
                 error = "invalid hero skill ranks";
+                return false;
+            }
+
+            if (data.heroCopper < 0 || data.heroManaCubes < 0 || data.worldTimeOffsetMs < 0
+                || data.worldTimeOffsetMs > int.MaxValue * 86_400_000L
+                || (data.huntMissions?.Length ?? 0) > WorldSaveFormat.MaxDeltas)
+            {
+                error = "invalid gameplay progress";
                 return false;
             }
 

@@ -4,6 +4,7 @@ using CubeGame.Core.Characters;
 using CubeGame.Core.Combat;
 using CubeGame.Core.Equipment;
 using CubeGame.Core.Items;
+using CubeGame.Core.Progression;
 using CubeGame.Features.Combat;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.Items;
@@ -102,9 +103,29 @@ namespace CubeGame.Features.Session
         /// <summary>Alpha species of the hero (race + gender, creature +0x64) — what the hero looks like.</summary>
         public KindId Kind => AlphaHeroCreation.KindOf(Appearance);
 
-        public CharacterSheet Sheet { get; }
+        public CharacterSheet Sheet { get; private set; }
 
         public HeroSkillRanks SkillRanks { get; } = new HeroSkillRanks();
+
+        public int Copper { get; internal set; }
+
+        public int ManaCubes { get; internal set; }
+
+        public MissionJournal Missions { get; } = new MissionJournal();
+
+        internal void ChangeSpecialization(CharacterSpecialization specialization)
+        {
+            var previous = Sheet;
+            Sheet = new CharacterSheet(previous.Class, specialization, previous.BaseHealth, previous.WeaponBase)
+            {
+                EquipmentHealthBonus = previous.EquipmentHealthBonus,
+                WeaponUpgrades = previous.WeaponUpgrades,
+            };
+            Sheet.RestoreProgression(previous.Progression.Level, previous.Progression.Experience);
+            double current = Health.CurrentHealth;
+            Revive();
+            RestoreHealth(current);
+        }
 
         /// <summary>
         /// Core items the Core save v1 stores (bags + equipment). The live state is <see cref="Inventory"/>;
@@ -356,7 +377,8 @@ namespace CubeGame.Features.Session
         }
 
         /// <summary>MainMenu → LoadingWorld with state restored from a save slot.</summary>
-        public bool BeginLoadedWorld(string slotKey, WorldInfo world, HeroState hero, long clockTick, WorldDeltaStore deltas = null)
+        public bool BeginLoadedWorld(string slotKey, WorldInfo world, HeroState hero, long clockTick, WorldDeltaStore deltas = null,
+            long worldTimeOffsetMs = 0)
         {
             if (world == null || hero == null)
             {
@@ -368,7 +390,8 @@ namespace CubeGame.Features.Session
                 return Reject($"cannot load a world from {State}");
             }
 
-            return Attach(slotKey, world, hero, new GameClock(GameClock.DefaultTicksPerSecond, clockTick), deltas ?? new WorldDeltaStore());
+            return Attach(slotKey, world, hero, new GameClock(GameClock.DefaultTicksPerSecond, clockTick, worldTimeOffsetMs),
+                deltas ?? new WorldDeltaStore());
         }
 
         public bool CompleteLoading()
@@ -467,11 +490,7 @@ namespace CubeGame.Features.Session
             Clock = clock;
             WorldDeltas = deltas;
             Combat = new CombatSystem(Events, ActionTimings, unchecked((int)world.Seed.Value));
-            Combat.Register(new Combatant(hero.Id, HeroKind, hero.Name, hero.Sheet, hero.Loadout, hero.Health)
-            {
-                Position = hero.Position,
-                Yaw = hero.Yaw,
-            });
+            RegisterHeroCombatant();
             Clock.Ticked += OnClockTicked;
             WorldItems = new WorldItems(Events);
             _cooldownUntilMs.Clear();
@@ -505,11 +524,7 @@ namespace CubeGame.Features.Session
 
             Hero.Revive();
             Combat.Unregister(Hero.Id);
-            Combat.Register(new Combatant(Hero.Id, HeroKind, Hero.Name, Hero.Sheet, Hero.Loadout, Hero.Health)
-            {
-                Position = Hero.Position,
-                Yaw = Hero.Yaw,
-            });
+            RegisterHeroCombatant();
             return true;
         }
 
@@ -526,6 +541,10 @@ namespace CubeGame.Features.Session
                 heroCombatant.Yaw = Hero.Yaw;
             }
 
+            if (!Hero.Health.IsDead)
+            {
+                Hero.Missions.ActivateNear(Hero.Position, Combat.Combatants);
+            }
             Combat.Update(clock.TimeMs);
             if (_levelUpHealPending)
             {
@@ -534,17 +553,22 @@ namespace CubeGame.Features.Session
                 {
                     Hero.Revive();
                     Combat.Unregister(Hero.Id);
-                    Combat.Register(new Combatant(Hero.Id, HeroKind, Hero.Name, Hero.Sheet, Hero.Loadout, Hero.Health)
-                    {
-                        Position = Hero.Position,
-                        Yaw = Hero.Yaw,
-                    });
+                    RegisterHeroCombatant();
                 }
             }
             if (!Hero.Health.IsDead && WorldItems != null && WorldItems.Count > 0)
             {
                 WorldItems.PickupNear(Hero, clock.TimeMs);
             }
+        }
+
+        private void RegisterHeroCombatant()
+        {
+            Combat.Register(new Combatant(Hero.Id, HeroKind, Hero.Name, Hero.Sheet, Hero.Loadout, Hero.Health)
+            {
+                Position = Hero.Position,
+                Yaw = Hero.Yaw,
+            });
         }
 
         /// <summary>
@@ -576,6 +600,10 @@ namespace CubeGame.Features.Session
 
             if (Hero != null && died.Killer.Equals(Hero.Id) && dead.Hostile && !Hero.Health.IsDead)
             {
+                if (Hero.Missions.TryComplete(died.Entity) && Hero.ManaCubes < int.MaxValue)
+                {
+                    Hero.ManaCubes++;
+                }
                 long xp = KillExperience(dead.Sheet.Progression.Level, dead.Stars, dead.IsBoss);
                 int levels = Hero.Sheet.AddExperience(xp);
                 // xp_applyLevelUps 0x447B00: every level-up sets HP to the new maximum; the pool is rebuilt after the
@@ -611,7 +639,7 @@ namespace CubeGame.Features.Session
                 return Reject("skill changes require a living hero in a running world");
             }
 
-            if (!Hero.SkillRanks.TryApplyIncreases(draft, Hero.Sheet.Progression.Level))
+            if (!Hero.SkillRanks.TryApplyIncreases(draft, Hero.Sheet.Progression.Level, Hero.ManaCubes))
             {
                 return Reject("invalid skill increases or paid reset required");
             }
@@ -619,6 +647,109 @@ namespace CubeGame.Features.Session
             LastRejection = string.Empty;
             return true;
         }
+
+        public bool TryApplyProgression(HeroSkillRanks draft, CharacterSpecialization specialization, bool matchingTrainerNearby = false)
+        {
+            if (!CanUseServices || Combat.IsActing(Hero.Id) || !Enum.IsDefined(typeof(CharacterSpecialization), specialization))
+            {
+                return Reject("skill changes require an idle, living hero");
+            }
+
+            bool switchSpec = specialization != Hero.Sheet.Specialization;
+            int level = Hero.Sheet.Progression.Level;
+            if (!Hero.SkillRanks.TryPriceChange(draft, level, Hero.ManaCubes, switchSpec, out long price))
+            {
+                return Reject("skill prerequisites or rank budget not met");
+            }
+            if (price > Hero.Copper)
+            {
+                return Reject($"need {price} copper for these skill changes");
+            }
+            if (price > 0 && !matchingTrainerNearby)
+            {
+                return Reject("paid skill changes require a nearby class trainer");
+            }
+
+            if (switchSpec)
+            {
+                Hero.ChangeSpecialization(specialization);
+                RegisterHeroCombatant();
+            }
+            Hero.SkillRanks.TryReplace(draft.ToArray());
+            Hero.Copper -= (int)price;
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        public bool TryBuy(InventoryEntry offer)
+        {
+            if (!CanUseServices || offer == null || offer.Count != 1)
+            {
+                return Reject("buying requires a living hero and a single offered item");
+            }
+
+            int price = AlphaTradeValue.Of(offer);
+            if (Hero.Copper < price)
+            {
+                return Reject($"need {price} copper");
+            }
+            if (!Hero.Inventory.TryAdd(offer))
+            {
+                return Reject(Hero.Inventory.LastRejection);
+            }
+
+            Hero.Copper -= price;
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        public bool TrySell(int bagSlot)
+        {
+            InventoryEntry entry = CanUseServices ? Hero.Inventory[bagSlot] : null;
+            if (entry == null)
+            {
+                return Reject("selling requires a living hero and an item in the bags");
+            }
+
+            int price = AlphaTradeValue.Of(entry);
+            if (Hero.Copper > int.MaxValue - price)
+            {
+                return Reject("wallet is full");
+            }
+
+            Hero.Inventory.TakeFrom(bagSlot, 1);
+            Hero.Copper += price;
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        public bool TryRestAtInn()
+        {
+            if (!CanUseServices || !Clock.TryRestAtInn())
+            {
+                return Reject("the innkeeper offers rest from 18:00 to 06:00");
+            }
+
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        public bool TryBrewLifePotion()
+        {
+            if (!CanUseServices)
+            {
+                return Reject("crafting requires a living hero");
+            }
+            if (!Hero.Inventory.TryBrewLifePotion())
+            {
+                return Reject(Hero.Inventory.LastRejection);
+            }
+
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        private bool CanUseServices => State == SessionState.InGame && Hero != null && !Hero.Health.IsDead;
 
         /// <summary>
         /// Uses the item in a bag slot (M0-04B consumables): only Alpha consumables (type 1); refused while dead,
@@ -683,6 +814,7 @@ namespace CubeGame.Features.Session
             Clock = null;
             WorldDeltas = null;
             SlotKey = null;
+            _levelUpHealPending = false;
             Events.Clear();
         }
 

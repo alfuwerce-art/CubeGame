@@ -33,7 +33,7 @@ namespace CubeGame.Gameplay
     /// -cubeSeed &lt;uint&gt;, -cubeScreenshot &lt;png&gt; (+ -cubeFrames &lt;n&gt;): capture then quit;
     /// -cubeCamera &lt;yaw&gt; &lt;pitch&gt; &lt;distance&gt;: orbit camera at world entry; -cubeAttackFrame &lt;n&gt;: hero attacks once.
     /// </summary>
-    public sealed class GameBootstrap : MonoBehaviour
+    public sealed partial class GameBootstrap : MonoBehaviour
     {
         /// <summary>
         /// World generator in use (M0-02): Alpha terrain reconstruction, see <see cref="AlphaTerrainGenerator"/>.
@@ -200,7 +200,11 @@ namespace CubeGame.Gameplay
             _frames++;
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                if (_localMap != null)
+                if (GameplayPanelOpen)
+                {
+                    CloseGameplayPanel();
+                }
+                else if (_localMap != null)
                 {
                     ToggleLocalMap();
                 }
@@ -214,17 +218,17 @@ namespace CubeGame.Gameplay
                 }
             }
 
-            if (_session.State == SessionState.InGame && !_inventoryOpen && !HeroDead && Input.GetKeyDown(KeyCode.M))
+            if (_session.State == SessionState.InGame && !GameplayPanelOpen && !_inventoryOpen && !HeroDead && Input.GetKeyDown(KeyCode.M))
             {
                 ToggleLocalMap();
             }
 
-            if (_session.State == SessionState.InGame && _localMap == null && Input.GetKeyDown(KeyCode.I))
+            if (_session.State == SessionState.InGame && !GameplayPanelOpen && _localMap == null && Input.GetKeyDown(KeyCode.I))
             {
                 ToggleInventory();
             }
 
-            if (_session.State == SessionState.InGame && !_inventoryOpen && _localMap == null && Input.GetKeyDown(KeyCode.Q))
+            if (_session.State == SessionState.InGame && !GameplayPanelOpen && !_inventoryOpen && _localMap == null && Input.GetKeyDown(KeyCode.Q))
             {
                 UseFirst(LootRules.LifePotion);
             }
@@ -241,6 +245,7 @@ namespace CubeGame.Gameplay
                 SyncHeroFromView();
                 SyncHeroCombatant();
                 UpdatePopulationZones();
+                UpdateGameplayInteractions();
                 _session.AdvanceFrame(Time.deltaTime);
                 if (_projectileVisuals != null)
                 {
@@ -317,7 +322,7 @@ namespace CubeGame.Gameplay
                 return Report(false, $"load {slotKey} failed: unknown world generator '{generatorId}'");
             }
 
-            if (!_session.BeginLoadedWorld(slotKey, result.World, result.Hero, result.ClockTick, result.WorldDeltas))
+            if (!_session.BeginLoadedWorld(slotKey, result.World, result.Hero, result.ClockTick, result.WorldDeltas, result.WorldTimeOffsetMs))
             {
                 return Report(false, $"load refused: {_session.LastRejection}");
             }
@@ -677,6 +682,7 @@ namespace CubeGame.Gameplay
             {
                 _heroRespawnAtMs = died.TimeMs + HeroRespawnDelayMs;
                 CloseLocalMap();
+                CloseGameplayPanel();
                 SetGameplayInput(false);
                 _combatLog = $"you died - respawn in {HeroRespawnDelayMs / 1000} s";
                 return;
@@ -714,6 +720,7 @@ namespace CubeGame.Gameplay
                 _population.AddSource(new D3ZonePopulation(terrain, _worldState.Deltas), D3ZonePopulation.Channel);
                 if (terrain.GeneratorId == GeneratorId)
                 {
+                    _population.AddSource(new TownNpcPopulation(terrain), TownNpcPopulation.Channel);
                     var candidates = AlphaCreatureKindSelector.FromClimate(
                         (x, z) => new AlphaClimateSample(terrain.Humidity(x, z), terrain.Temperature(x, z),
                             terrain.RareCellTerm(x, z), terrain.Mountain(x, z)),
@@ -821,7 +828,7 @@ namespace CubeGame.Gameplay
 
         private void SpawnWorldEntity(StableEntityId id, SpawnDefinition def)
         {
-            if (D3ZonePopulation.IsStaticContent(def.BehaviourKey))
+            if (D3ZonePopulation.IsStaticContent(def.BehaviourKey) || def.BehaviourKey == TownNpcPopulation.BehaviourKey)
             {
                 PublishSpawnVisual(id, def);
                 return;
@@ -877,7 +884,8 @@ namespace CubeGame.Gameplay
                 _creatures?.Remove(id);
             }
 
-            if (combatantRemoved || D3ZonePopulation.IsStaticContent(definition.BehaviourKey))
+            if (combatantRemoved || D3ZonePopulation.IsStaticContent(definition.BehaviourKey)
+                || definition.BehaviourKey == TownNpcPopulation.BehaviourKey)
             {
                 _session.Events.Publish(new EntityDespawned { TimeMs = _session.Clock?.TimeMs ?? 0, Entity = id });
             }
@@ -1102,6 +1110,7 @@ namespace CubeGame.Gameplay
         private void DestroyWorldViews()
         {
             CloseLocalMap();
+            CloseGameplayPanel();
             if (_sun != null)
             {
                 _sun.intensity = _sunDayIntensity;
@@ -1417,6 +1426,10 @@ namespace CubeGame.Gameplay
                     {
                         DrawInventory();
                     }
+                    else if (GameplayPanelOpen)
+                    {
+                        DrawGameplayPanel();
+                    }
 
                     break;
             }
@@ -1656,6 +1669,8 @@ namespace CubeGame.Gameplay
             GUI.Label(new Rect(10f, 32f, 700f, 22f),
                 $"HP {hero.Health.CurrentHealth:F0}/{hero.Health.MaxHealth:F0}  weapon {hero.Loadout.GetEquipped(EquipmentSlot.MainHand)?.ToString() ?? "none"}  " +
                 $"potions {hero.Inventory.CountOf(LootRules.LifePotion)}  [LMB] attack  [Q] potion  [I] inventory  [M] map");
+            GUI.Label(new Rect(10f, 98f, 700f, 22f),
+                $"Copper {hero.Copper}  Mana cubes {hero.ManaCubes}  [E] interact  [J] journal");
             if (_trainingTarget != null)
             {
                 GUI.Label(new Rect(10f, 54f, 700f, 22f),
@@ -1686,9 +1701,13 @@ namespace CubeGame.Gameplay
             GUILayout.Label($"Inventory  {hero.Inventory.UsedSlots}/{HeroInventory.Capacity}  [I] close");
             if (GUILayout.Button("Skills"))
             {
-                _skillDraft = new HeroSkillRanks();
-                _skillDraft.TryReplace(hero.SkillRanks.ToArray());
+                BeginSkillDraft(hero);
             }
+            if (GUILayout.Button("Brew Life Potion (1 Heartflower + 1 Water Flask)"))
+            {
+                TryBrewLifePotion();
+            }
+            GUILayout.Label(_status);
 
             _inventoryScroll = GUILayout.BeginScrollView(_inventoryScroll);
             foreach (EquipmentSlot slot in EquipmentLoadout.Slots)
@@ -1790,26 +1809,44 @@ namespace CubeGame.Gameplay
         private void DrawSkillDraft(HeroState hero)
         {
             int level = hero.Sheet.Progression.Level;
-            GUILayout.Label($"Skills   Points: {Math.Max(0L, _skillDraft.UnspentLevelPoints(level))}");
+            GUILayout.Label($"Skills   Points: {Math.Max(0L, _skillDraft.UnspentLevelPoints(level, hero.ManaCubes))}");
+            if (GUILayout.Button($"Specialization: {SpecializationName(hero.Sheet.Class, _specializationDraft)}"))
+            {
+                _specializationDraft = _specializationDraft == CharacterSpecialization.Primary
+                    ? CharacterSpecialization.Secondary : CharacterSpecialization.Primary;
+            }
             for (int i = 0; i < HeroSkillRanks.Count; i++)
             {
                 var skill = (HeroSkill)i;
                 GUILayout.BeginHorizontal();
-                GUILayout.Label($"{skill}: {_skillDraft[skill]}", GUILayout.Width(340f));
+                GUILayout.Label($"{skill}: {_skillDraft[skill]}", GUILayout.Width(300f));
                 bool enabled = GUI.enabled;
-                GUI.enabled = enabled && _skillDraft.CanRaise(skill, level);
-                if (GUILayout.Button("+", GUILayout.Width(60f)))
+                if (GUILayout.Button("-", GUILayout.Width(55f)))
                 {
-                    _skillDraft.TryRaise(skill, level);
+                    _skillDraft.TryLower(skill);
+                }
+                GUI.enabled = enabled && _skillDraft.CanRaise(skill, level, hero.ManaCubes);
+                if (GUILayout.Button("+", GUILayout.Width(55f)))
+                {
+                    _skillDraft.TryRaise(skill, level, hero.ManaCubes);
                 }
                 GUI.enabled = enabled;
                 GUILayout.EndHorizontal();
             }
 
+            if (hero.SkillRanks.TryPriceChange(_skillDraft, level, hero.ManaCubes,
+                _specializationDraft != hero.Sheet.Specialization, out long price))
+            {
+                GUILayout.Label($"Apply cost {price} copper  |  Wallet {hero.Copper}");
+                if (price > 0)
+                {
+                    GUILayout.Label($"Requires a nearby {hero.Sheet.Class} trainer.");
+                }
+            }
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Apply"))
             {
-                if (_session.TryApplySkillRanks(_skillDraft))
+                if (TryApplyHeroProgression(_skillDraft, _specializationDraft))
                 {
                     ApplyHeroMovementState(hero);
                     _skillDraft = null;

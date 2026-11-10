@@ -282,6 +282,35 @@ namespace CubeGame.Features.Items
             return InventoryEntry.FromRaw(entry.Raw, amount);
         }
 
+        public bool TryBrewLifePotion()
+        {
+            int flower = FindFirst(AlphaLifePotionRecipe.Heartflower);
+            int flask = FindFirst(AlphaLifePotionRecipe.WaterFlask);
+            if (flower < 0 || flask < 0)
+            {
+                return Reject("a Life Potion needs one Heartflower and one Water Flask");
+            }
+
+            var potion = InventoryEntry.FromRaw(LootRules.LifePotion, 1);
+            // If the output fits now, reserve it before removing ingredients. With full bags it
+            // can also fit in a slot freed by consuming the last ingredient in a stack.
+            if (!TryAdd(potion))
+            {
+                if (_slots[flower].Count > 1 && _slots[flask].Count > 1)
+                {
+                    return false;
+                }
+
+                TakeFrom(flower, 1);
+                TakeFrom(flask, 1);
+                return TryAdd(potion);
+            }
+
+            TakeFrom(flower, 1);
+            TakeFrom(flask, 1);
+            return true;
+        }
+
         /// <summary>
         /// Equips the Core item of a bag slot into the first compatible equipment slot (weapons: main hand, then off
         /// hand when the main hand is taken). The previously equipped item returns to the same bag slot.

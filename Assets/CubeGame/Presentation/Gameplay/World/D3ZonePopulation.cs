@@ -58,6 +58,12 @@ namespace CubeGame.Gameplay.Streaming
             var spawns = new List<SpawnDefinition>();
             foreach (SpawnDefinition definition in _terrain.Zone(zone.X, zone.Z).ContentSpawns)
             {
+                if (definition.BehaviourKey == AlphaDungeonContentProvider.ChestBehaviourKey
+                    && _deltas?.IsContainerOpened(zone, Channel, definition.SpawnIndex) == true)
+                {
+                    continue;
+                }
+
                 if ((IsStaticContent(definition.BehaviourKey) && _deltas?.IsObjectRemoved(zone, Channel, definition.SpawnIndex) != true)
                     || (_terrain.GeneratorId == AlphaTerrainGenerator.ContentId
                     && definition.BehaviourKey == AlphaZoneContentProvider.CreatureBehaviourKey))
