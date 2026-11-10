@@ -161,6 +161,70 @@ namespace CubeGame.Content
             return result;
         }
 
+        /// <summary>
+        /// Zone-level real vegetation (trees + decor) per B_vegetation_research.md. Unlike
+        /// <see cref="PlanZone"/> (which selects creature templates through the W-18 scatter), this uses
+        /// <see cref="AlphaVegetationSelector"/> — tree model ids 0x6C..0x77 and decor ids — so the zone
+        /// receives static vegetation instead of fightable creatures. Positions stay deterministic and
+        /// zone-scoped; only staged kinds are placed.
+        /// </summary>
+        public static List<AlphaZoneScatterPlacement> PlanZoneVegetation(uint seed, int zoneX, int zoneZ,
+            double humidity, double temperature, int cellFlag, int biomeType,
+            IReadOnlyList<int> stagedKinds, List<string> problems, int maxPerZone)
+        {
+            var result = new List<AlphaZoneScatterPlacement>();
+            var zone = new WorldZoneKey(zoneX, zoneZ);
+            if (!AlphaWorldScale.IsInsideWorld(zone))
+            {
+                problems?.Add($"VEGETATION_ZONE_OUTSIDE_WORLD {zone}");
+                return result;
+            }
+
+            if (maxPerZone <= 0) return result;
+            int originX = AlphaWorldScale.ZoneOriginVoxel(zoneX);
+            int originZ = AlphaWorldScale.ZoneOriginVoxel(zoneZ);
+            bool cold = humidity < 0.2;
+            for (int i = 0; i < maxPerZone; i++)
+            {
+                uint rng = DeterministicHash.Combine((int)seed, zoneX, zoneZ, i, 0x5EED);
+                int kind;
+                string source;
+                if ((i & 1) == 0)
+                {
+                    int treeKind = AlphaVegetationSelector.TreeKind(humidity, temperature, cellFlag, rng);
+                    kind = AlphaVegetationSelector.TreeModel(treeKind, cold, rng >> 8);
+                    source = AlphaVegetationSelector.TreeProvenance;
+                }
+                else
+                {
+                    var decor = AlphaVegetationSelector.Decor(rng, biomeType);
+                    kind = decor.kind;
+                    source = AlphaVegetationSelector.DecorProvenance;
+                }
+
+                if (!Contains(stagedKinds, kind))
+                {
+                    problems?.Add($"VEGETATION_KIND_NOT_STAGED 0x{kind:x2}");
+                    continue;
+                }
+
+                uint h = DeterministicHash.Combine((int)seed, zoneX, zoneZ, kind, i, 0x5EED);
+                int localX = (int)(h % (uint)AlphaWorldScale.ZoneVoxels);
+                int localZ = (int)((h >> 8) % (uint)AlphaWorldScale.ZoneVoxels);
+                result.Add(new AlphaZoneScatterPlacement
+                {
+                    StableId = $"veg:z:{zoneX}:{zoneZ}:{kind}:{i}",
+                    Kind = kind,
+                    Zone = zone,
+                    X = originX + localX + 0.5,
+                    Z = originZ + localZ + 0.5,
+                    Source = source,
+                });
+            }
+
+            return result;
+        }
+
         static bool Contains(IReadOnlyList<int> list, int value)
         {
             if (list == null) return false;

@@ -40,7 +40,7 @@ namespace CubeGame.Tests.Creatures.EditMode
         {
             return new ContentPlanSettings
             {
-                StagedObjectKinds = new List<int> { 0x15, 0x2e, 0x2f },
+                StagedObjectKinds = new List<int> { 0x6c, 0x77, 0x23, 0x24, 0x25, 0xc, 0x10 },
                 CreatureKinds = new List<int> { 0x00, 0x1e },
                 DecorKinds = new List<int> { 0x15 },
                 StructureTemplates = new List<string> { AlphaStructureTemplates.HouseId },
@@ -234,7 +234,7 @@ namespace CubeGame.Tests.Creatures.EditMode
         }
 
         [Test]
-        public void VegetationUsesTheTranslatedW18SelectionAndCatalogFaction()
+        public void VegetationUsesAlphaTreeSelectionAndPassiveFaction()
         {
             var source = new FlatSource();
             var plan = ZoneContentPlanner.Plan(new WorldZoneKey(0, 0), source, Settings());
@@ -242,8 +242,8 @@ namespace CubeGame.Tests.Creatures.EditMode
             Assert.IsNotEmpty(vegetation, plan.Describe());
             foreach (var item in vegetation)
             {
-                Assert.That(item.Provenance, Does.Contain("TRANSLATED_FROM_CODE").Or.Contain("NOT_ALPHA"));
-                Assert.AreEqual(CreatureKinds.FactionOf(item.Species), item.Faction, item.StableId);
+                Assert.That(item.Provenance, Does.Contain("ALPHA_DECOMPILED"));
+                Assert.AreEqual((int)CreatureFaction.Passive, item.Faction, item.StableId);
             }
         }
 

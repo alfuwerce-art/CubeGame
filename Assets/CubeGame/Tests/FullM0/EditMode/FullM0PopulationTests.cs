@@ -44,7 +44,7 @@ namespace CubeGame.Tests.FullM0.EditMode
         private static WorldPosition At(int zoneX, int zoneZ) => new WorldPosition(zoneX * 256 + 128, 30, zoneZ * 256 + 128);
 
         [Test]
-        public void D3GeneratorPlacesHousesAndW18SpawnsWithoutChangingLegacyZones()
+        public void D3GeneratorPlacesHousesAndVegetationWithoutChangingLegacyZones()
         {
             const uint seed = 20131234u;
             const int zoneIndex = WorldLayout.StartVoxel / WorldLayout.ZoneSize;
@@ -74,7 +74,7 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.AreEqual(generated.ContentSpawns.Count - 1, spawns.Length, "house stays geometry");
             foreach (LiveSpawn spawn in spawns)
             {
-                StringAssert.StartsWith("W-18", spawn.Definition.Provenance);
+                StringAssert.StartsWith("ALPHA_DECOMPILED", spawn.Definition.Provenance);
                 Assert.AreEqual(StableEntityId.ForZoneSpawn(center, 1, spawn.Definition.SpawnIndex), spawn.Id);
             }
 

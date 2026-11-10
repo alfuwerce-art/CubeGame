@@ -37,8 +37,9 @@ namespace CubeGame.Gameplay.Streaming
             };
             if (id == AlphaTerrainGenerator.WorldRuntimeId)
             {
-                // F1A verified 0x5F56C0 selects creature templates. The legacy scatter is kept for /5 saves.
-                settings.VegetationPerZone = 0;
+                // Real vegetation (trees + decor, B_vegetation_research.md) replaces the W-18 creature
+                // scatter that F1A showed selects creature templates — so vegetation is enabled again.
+                settings.VegetationPerZone = AlphaVegetationPlanner.MaxObjectsPerZone;
             }
             IZoneContentProvider[] providers = id == AlphaTerrainGenerator.WorldRuntimeId
                 ? AlphaContentProviders.CreateDefault(context => AlphaContentProviders.IsDungeonRecord(context.Record.Type),
