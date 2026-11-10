@@ -1,11 +1,23 @@
-# ACTIVE STAGE — M0-F3 GAMEPLAY LOOP
+# ACTIVE STAGE — M0-F4 PRESENTATION
 
-**Ветка ревью:** `codex/m0-f3-gameplay-loop` · **База:** `4b9480836beeba859340938486f4200d16c1549e` · **Статус:** `READY_FOR_PRODUCER_ACCEPTANCE`
+**Canonical branch:** `integration/m0-all` · **Status:** `ACTIVE`
 
-- [D90](decisions/D90-m0-five-stage-finish-plan.md) · [Матрица работ и отчёт F3](reports/M0_F3_GAMEPLAY_LOOP_REPORT.md).
-- F3-A–F3-E сведены в Pilot. Сквозной тест подтверждает охоту, бой, лут, развитие, сделку, крафт, отдых, сундук и save → exit → load → продолжение.
-- Проверены маршруты стрелы и магического снаряда для подтверждённого выбора ИИ. Генератор реестра проходит с нормализованным статусом P-01.
-- Unity 6000.3.27f2. EditMode 754 PASS, 0 FAIL, 2 SKIP. PlayMode 70 PASS, 0 FAIL. Ошибок компиляции 0.
+- M0-F3 принят продюсером и включён в canonical на `3cd79b4366dda4ff0d2410be22ee11d084eefaf1`.
+- ТЗ этапа: [M0-F4 PRESENTATION](stages/M0_F4_PRESENTATION_STAGE.md).
+- Все хвосты неполного переноса Alpha: [M0 Alpha Parity Backlog](planning/M0_ALPHA_PARITY_BACKLOG.md).
+- Приоритет F4: WAV/RIFF + runtime audio → HUD → inventory/skills/services → map/journal/icons → полная Unity-регрессия.
+- Художественный редизайн интерфейса не входит в F4; здесь нужен рабочий presentation baseline поверх систем F1–F3.
+
+## Предыдущий этап — M0-F3 GAMEPLAY LOOP
+
+**Status:** `ACCEPTED` 10 ноября 2026 · **Commit:** `3cd79b4366dda4ff0d2410be22ee11d084eefaf1`
+
+- Развитие, бой/лут, торговля/услуги, Life Potion, охота, сундуки и persistence работают в одном игровом сеансе.
+- EditMode 754 PASS / 0 FAIL / 2 SKIP; PlayMode 70/70; compilation errors 0.
+- Известные `PARTIAL/UNKNOWN/CUBEGAME_CONTRACT/PLACEHOLDER` перенесены в parity backlog и не считаются забытыми.
+- [Отчёт F3](reports/M0_F3_GAMEPLAY_LOOP_REPORT.md)
+
+---
 
 ## Предыдущий этап — M0-F2 INTEGRATION CHECKPOINT
 
