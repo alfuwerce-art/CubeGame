@@ -1,4 +1,15 @@
-# ACTIVE STAGE — M0-F2B COMBAT RUNTIME
+# ACTIVE STAGE — M0-F2 INTEGRATION CHECKPOINT
+
+**Review branch:** `integration/m0-f2-final-review` (canonical `d21e5fa` + F2B `9857b2e` ⊃ F1 `748d650`, F2A `5f197f9`, DeepSeek `28fa7a3`) · **Status:** `READY_FOR_PRODUCER_ACCEPTANCE`
+
+- Одна ветка: мир F1, персонаж F2A и бой F2B поверх актуального canonical. Конфликтов не было, документы M1/S06 сохранены.
+- Генераторы `--check` чистые. `build_transfer_registry` падает ещё до merge — статус в исследовательской матрице.
+- EditMode 746/744/0/2, PlayMode 69/69, `error CS = 0`. Новый сквозной сценарий F1+F2 через save → exit → load.
+- Следующий этап после приёмки: **M0-F3 GAMEPLAY LOOP** (не начат). `integration/m0-all` двигается только решением продюсера. [Отчёт интеграции](reports/M0_F2_INTEGRATION_REPORT.md)
+
+---
+
+# Предыдущий этап — M0-F2B COMBAT RUNTIME
 
 **Review branch:** `claude/m0-f2b-combat-runtime` (база F2A `5f197f9` + DeepSeek evidence `08ae4e3`) · **Status:** `READY_FOR_REVIEW`
 
