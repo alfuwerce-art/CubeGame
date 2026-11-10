@@ -112,6 +112,15 @@ Player-каталог самодостаточен: `CubeGame.exe`, `UnityPlayer
 оба `problems=0`, `origin=Packaged` (контент из StreamingAssets), `MAGENTA_COUNT=0`.
 Локомоция (idle/move) работает у обоих, боевой action-клип проигрывался у волка (558 кадров).
 
+Позднее в валидацию добавлен счётчик `REAL_ACTOR_VIEWS`: в Player-сцене **20 реальных `AlphaActorView`**
+(герой + волк + **18 recovered диких существ**), все `ready=True`, **ни одного куба/капсулы**:
+`d86_kind_0x5b/0x1e/0x58/0x4a/0x19/0x38/0x57/0x5a/0x43/0x1b/0x35_formula`, `whitecat_0x20`,
+`plainrunner_0x3f`. Это прямо опровергает «существа = cube» из аудита.
+
+**Content-популяция = 0** (`[Game] population: 0 content, 18 recovered`): городские NPC
+(`TownNpcPopulation`, спавнит 6 NPC у town service objects) и структуры не спавнятся, т.к. зависят от
+`ContentSpawns` зон, которых в Player-прогоне нет. Это отдельный content-stage gap, не связанный с R0-пакетированием.
+
 Примечание: `problems=[ANIM_MISSING ... ACTION_REFUSED Recovery]` в глобальном списке — это не пропавшая
 модель, а штатный отказ боевого action 37 во время Recovery (волк атакует, не дождавшись выхода из
 recovery). Лог-метка `ANIM_MISSING` здесь вводит в заблуждение; поведение корректное.
@@ -146,6 +155,10 @@ recovery). Лог-метка `ANIM_MISSING` здесь вводит в забл�
 2. **R5 — полный vertical slice**: подтвердить визуально реального NPC, деревья/растительность,
    звук, HUD/инвентарь/иконку и полный цикл `start→move→NPC→enemy→attack→death→loot→pickup→inventory→save→exit→load→continue`.
    Герой (с оружием), враг и анимации уже подтверждены. Требует **визуальной приёмки продюсера**.
+   - **NPC/структуры — точный blocker**: content-популяция = 0 в Player (`population: 0 content`).
+     `TownNpcPopulation` спавнит 6 городских NPC у town service objects, но те зависят от `ContentSpawns`
+     зон, которых нет. Это отдельный content-stage gap (город/сервисы не генерируют спавны), не связанный
+     с R0-пакетированием; recovered wild-существа (18) при этом рендерятся реальными моделями.
    - **Растительность — точный blocker**: `D3ZonePopulation.cs:41` ставит `VegetationPerZone = 0` в
      генераторе `/6`; комментарий — F1A подтвердил, что W-18 scatter `0x5F56C0` выбирает шаблоны
      существ, а не растительность. Т.е. семантика размещения растительности `PARTIAL/TRANSLATED_FROM_CODE`,
