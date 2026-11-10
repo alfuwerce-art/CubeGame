@@ -21,6 +21,12 @@
 
 ---
 
+# D1/D2 REVIEW-FIX — спавн и патруль (2026-11-10)
+
+Модель спавна Alpha и движение NPC — [D1_D2_SPAWN_PATROL_REVIEW_FIX](docs/reports/D1_D2_SPAWN_PATROL_REVIEW_FIX.md) (`READY_FOR_REVIEW`). `AlphaSpawnTable` — записи товаров торговцев, как источник видов существ не использовать. Правила Alpha — `AlphaRecoveredPopulation`, `AlphaSpawnLifecycle`, `AlphaWildSpawnRules`, `AlphaNpcMovement`; заглушки — только `FallbackPopulationPolicy` и `PatrolRoute` (`CUBEGAME_CONTRACT`/`CUBEGAME_FALLBACK`), статусы `ALPHA_*` им не присваивать. Исследование Alpha вести по байтам и декомпиляции; игру запускать только после отдельного явного «да» продюсера.
+
+---
+
 # CubeGame — правила для AI-агентов
 
 **CubeGame — рабочее название проекта, а не утверждённое название игры.**

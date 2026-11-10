@@ -1,4 +1,4 @@
-// D2 — EditMode checks of pets (proven limit/ability) and patrol (CUBEGAME_CONTRACT, N-14 unknown).
+// D2 — EditMode checks of pets (proven limit/ability) and the fallback patrol ring (CUBEGAME_FALLBACK; Alpha rules are tested in AlphaNpcMovementTests).
 using CubeGame.Features.AI;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.Creatures;

@@ -197,7 +197,8 @@ namespace CubeGame.Tests.FullM0.EditMode
         [Test]
         public void AlphaPopulationGivesDistinctIdsInEveryZone()
         {
-            var source = new AlphaWorldPopulation(new WorldSeed(666666), _ => 3, (_, __, ___) => 40.0);
+            var source = new AlphaWorldPopulation(new WorldSeed(666666), _ => 3, (_, __, ___) => 40.0,
+                kindSelector: (_, __, ___) => 0x13);
             var population = new WorldPopulation(new WorldDeltaStore());
             population.AddSource(source, 0);
             population.Update(At(32800, 32800));

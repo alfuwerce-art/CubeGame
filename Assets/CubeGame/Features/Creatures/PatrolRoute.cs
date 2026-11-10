@@ -1,19 +1,19 @@
 // CubeGame.Features.Creatures — patrol route of a creature/NPC (D2, N-14).
 //
-// Alpha's own NPC schedule/patrol semantics are not recovered (N-13/N-14 UNKNOWN): no table of waypoints,
-// no day/night rule and no city schedule were proven. What exists is the observation that Alpha creatures
-// walk (RandomWalkBehaviour) and that some NPCs keep to an area. This route is therefore a
-// CUBEGAME_CONTRACT: a deterministic ring of waypoints around the spawn point, used by the AI instead of a
-// random direction when the game attaches one. Nothing here claims Alpha parity.
+// CUBEGAME_FALLBACK, not Alpha. A deterministic ring of waypoints around the spawn point, used by the AI
+// instead of a random direction when the game attaches one and has no Alpha data for the creature.
+// Alpha's own mechanics ARE recovered and live in AlphaNpcMovement.cs: SpawnLocationBehavior (daily schedule
+// of positions) and WalkPathBehavior (ordered points, pause rand()%4000+2000 ms). The earlier header of this
+// file ("Alpha patrol/schedule UNKNOWN, N-13/N-14") was wrong and is withdrawn by the D1/D2 review-fix.
 using System;
 using CubeGame.Features.Contracts;
 
 namespace CubeGame.Features.Creatures
 {
-    /// <summary>Deterministic patrol route (ring of waypoints) for one creature.</summary>
+    /// <summary>CUBEGAME_FALLBACK patrol route (ring of waypoints) for one creature; not an Alpha mechanic.</summary>
     public sealed class PatrolRoute
     {
-        public const string Provenance = "CUBEGAME_CONTRACT: waypoints around the spawn point; Alpha patrol/schedule UNKNOWN (N-13/N-14)";
+        public const string Provenance = "CUBEGAME_FALLBACK: ring of waypoints around the spawn point; not Alpha (Alpha: AlphaWalkPath / AlphaSpawnLocationSchedule)";
 
         /// <summary>Arrival radius used by the AI to advance to the next waypoint (CUBEGAME_CONTRACT).</summary>
         public const double ArrivalRadius = 1.0;

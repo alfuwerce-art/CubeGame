@@ -174,10 +174,10 @@ namespace CubeGame.Features.AI
             return nearest;
         }
 
-        /// <summary>Optional patrol route (D2/N-14); null → the creature wanders the way it did before.</summary>
+        /// <summary>Optional CUBEGAME_FALLBACK patrol ring; null → the creature wanders the way it did before.</summary>
         public PatrolRoute Patrol { get; private set; }
 
-        /// <summary>Attaches a patrol route; the AI walks it while it has no target (CUBEGAME_CONTRACT, N-14 UNKNOWN).</summary>
+        /// <summary>Attaches the fallback ring; the AI walks it while it has no target (CUBEGAME_FALLBACK; Alpha rules: AlphaNpcMovement.cs).</summary>
         public void AttachPatrol(PatrolRoute patrol) => Patrol = patrol;
 
         void Wander(CreatureState self, ICreatureAiWorld world, int elapsedMs)
