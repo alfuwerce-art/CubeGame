@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using CubeGame.AlphaModels;
 using CubeGame.Core.Characters;
@@ -38,11 +39,14 @@ namespace CubeGame.Gameplay
         /// World generator in use (M0-02): Alpha terrain reconstruction, see <see cref="AlphaTerrainGenerator"/>.
         /// Saves record the id; a save made by another generator (e.g. the M0-01 pilot height field) is refused.
         /// </summary>
-        public const string GeneratorId = AlphaTerrainGenerator.ContentId;
+        public const string GeneratorId = AlphaTerrainGenerator.WorldRuntimeId;
 
         public const uint DefaultSeed = 666666u;
 
-        /// <summary>Hero primary attack: Alpha action 57 (two-handed greatsword attack, S05A-2 / C-31).</summary>
+        /// <summary>
+        /// Alpha action 57 (two-handed attack, S05A-2 / C-31): what <see cref="AlphaAttackRoute"/> selects for the
+        /// starting two-handed weapon. No longer a fallback for ranged/magic input (M0-F2B).
+        /// </summary>
         public static readonly ActionId HeroAttackAction = new ActionId(57);
 
         /// <summary>Training enemy species: Alpha Wolf 0x1c (staged S05 visual with actions).</summary>
@@ -93,7 +97,15 @@ namespace CubeGame.Gameplay
         private GameVisualSink _visuals;
         private AlphaActionTimingSource _timings;
         private CreatureCombatDriver _creatures;
+        private ProjectileVisuals _projectileVisuals;
+        private VoxelColumn _terrainColumn;
+        private int _terrainColumnX = int.MinValue, _terrainColumnZ = int.MinValue;
         private WorldPopulation _population;
+        private AlphaSpawnRuntime _recoveredPopulation;
+        private GameClock _populationClock;
+        private ZoneKey? _populationCenter;
+        private readonly WorldPosition[] _populationPlayers = new WorldPosition[1];
+        private readonly Dictionary<StableEntityId, ZoneKey> _recoveredCorpses = new Dictionary<StableEntityId, ZoneKey>();
         private long _heroRespawnAtMs = -1;
         private bool _inventoryOpen;
         private Vector2 _inventoryScroll;
@@ -103,8 +115,6 @@ namespace CubeGame.Gameplay
         private Texture2D _localMap;
         private Vector2Int _localMapOrigin;
         private const int LocalMapZoneSpan = 3;
-        private readonly System.Collections.Generic.Dictionary<StableEntityId, GameObject> _groundItems =
-            new System.Collections.Generic.Dictionary<StableEntityId, GameObject>();
         private Vector3 _lastHeroScenePosition;
         private int _frames;
         private string _screenshotPath;
@@ -227,12 +237,18 @@ namespace CubeGame.Gameplay
                     HeroAttack();
                 }
 
-                _session.AdvanceFrame(Time.deltaTime);
-                ApplyWorldLighting();
                 RebaseIfFar();
                 SyncHeroFromView();
+                SyncHeroCombatant();
+                UpdatePopulationZones();
+                _session.AdvanceFrame(Time.deltaTime);
+                if (_projectileVisuals != null)
+                {
+                    _projectileVisuals.Sync();
+                }
+
+                ApplyWorldLighting();
                 PublishHeroMovement();
-                _population?.Update(_session.Hero.Position);
                 if (_heroRespawnAtMs >= 0 && _session.Clock.TimeMs >= _heroRespawnAtMs)
                 {
                     RespawnHero();
@@ -296,7 +312,7 @@ namespace CubeGame.Gameplay
             }
 
             string generatorId = result.World.GeneratorId;
-            if (generatorId != GeneratorId && generatorId != AlphaTerrainGenerator.Id)
+            if (!D3ZonePopulation.Supports(generatorId) && generatorId != AlphaTerrainGenerator.Id)
             {
                 return Report(false, $"load {slotKey} failed: unknown world generator '{generatorId}'");
             }
@@ -322,6 +338,10 @@ namespace CubeGame.Gameplay
                 return Report(false, $"save refused: {_session.LastRejection}");
             }
 
+            if (_recoveredPopulation != null)
+            {
+                RecoveredSpawnPersistence.PrepareSave(_session.WorldDeltas, _recoveredPopulation, AlphaGameDay.Of(_session.Clock));
+            }
             SaveResult result = _slots.Save(_session, DateTime.UtcNow.Ticks);
             _session.EndSave();
             return Report(result.IsSuccess, result.IsSuccess
@@ -334,6 +354,11 @@ namespace CubeGame.Gameplay
             if (saveFirst && !SaveCheckpoint())
             {
                 return false;
+            }
+
+            if (_session.Combat != null)
+            {
+                _session.Combat.Projectiles.Clear(_session.Clock?.TimeMs ?? 0);
             }
 
             if (!_session.ExitToMenu())
@@ -385,11 +410,14 @@ namespace CubeGame.Gameplay
             }
 
             SyncHeroFromView();
+            SyncHeroCombatant();
             HeroState hero = _session.Hero;
-            ActionId action = AlphaPrimaryAttack.SelectMelee(hero.Sheet.Class,
-                hero.Loadout.GetEquipped(EquipmentSlot.MainHand), hero.Loadout.GetEquipped(EquipmentSlot.OffHand))
-                ?? HeroAttackAction; // Legacy placeholder for ranged and casting input (C4/D5).
-            if (!_session.Combat.TryStartAttack(hero.Id, action, _session.Clock.TimeMs, $"action_{action.Value:000}"))
+            // M0-F2B: weapon state -> one attack path (melee / projectile / staff volume). An unknown Alpha rule is
+            // refused with its reason; ranged and magic input never fall back to a melee swing.
+            AttackPlan plan = AlphaAttackRoute.Select(hero.Sheet.Class,
+                hero.Loadout.GetEquipped(EquipmentSlot.MainHand), hero.Loadout.GetEquipped(EquipmentSlot.OffHand));
+            LastAttackPlan = plan;
+            if (!_session.Combat.TryStartAttack(hero.Id, plan, _session.Clock.TimeMs))
             {
                 _combatLog = $"attack refused: {_session.Combat.LastRejection}";
                 return false;
@@ -398,11 +426,75 @@ namespace CubeGame.Gameplay
             return true;
         }
 
+        /// <summary>Path chosen by the last <see cref="HeroAttack"/> (tests/diagnostics).</summary>
+        public AttackPlan LastAttackPlan { get; private set; }
+
+        public ProjectileVisuals ProjectileVisuals => _projectileVisuals;
+
+        /// <summary>
+        /// Hero combatant from the view: Alpha size of the hero's species as the hit box, and the camera look direction
+        /// as the aim (Alpha creature +0x160; its writer for the player is not decoded - CUBEGAME_CONTRACT).
+        /// </summary>
+        private void SyncHeroCombatant()
+        {
+            if (_session.Combat == null || _session.Hero == null || !_session.Combat.TryGet(_session.Hero.Id, out Combatant hero))
+            {
+                return;
+            }
+
+            ApplyAlphaSize(hero, _session.Hero.Kind);
+            if (_camera != null)
+            {
+                Vector3 look = _camera.transform.forward;
+                hero.SetAim(look.x, look.y, look.z);
+            }
+        }
+
+        /// <summary>Alpha species size (appearance +0x08, <see cref="Content.AlphaCreatureSizes"/>) as the combat box of any creature or the hero.</summary>
+        public static void ApplyAlphaSize(Combatant combatant, KindId kind)
+        {
+            if (combatant != null && Content.AlphaCreatureSizes.TryGet(kind.Value, out double width, out double height, out double depth))
+            {
+                combatant.HitWidth = width;
+                combatant.HitHeight = height;
+                combatant.HitDepth = depth;
+            }
+        }
+
+        /// <summary>
+        /// Projectile terrain query: solid voxels of the effective world (edits included); a block whose chunk is not
+        /// streamed in reports <see cref="TerrainCell.NotLoaded"/> (the projectile is removed - CUBEGAME_CONTRACT).
+        /// </summary>
+        private TerrainCell ProjectileTerrainAt(int x, int y, int z)
+        {
+            if (_worldView == null || _worldState == null || !_worldView.IsLoaded(WorldLayout.ChunkOf(x, z)))
+            {
+                return TerrainCell.NotLoaded;
+            }
+
+            if (_session.WorldDeltas != null && _session.WorldDeltas.TryGetVoxel(x, y, z, out uint edited))
+            {
+                return Voxel.IsSolid(edited) ? TerrainCell.Solid : TerrainCell.Air;
+            }
+
+            if (x != _terrainColumnX || z != _terrainColumnZ || _terrainColumn == null)
+            {
+                _terrainColumn = _worldState.EffectiveColumn(x, z);
+                _terrainColumnX = x;
+                _terrainColumnZ = z;
+            }
+
+            return _terrainColumn != null && Voxel.IsSolid(_terrainColumn.Read(y)) ? TerrainCell.Solid : TerrainCell.Air;
+        }
+
         /// <summary>
         /// Spawns a hostile training target in front of the hero (runtime entity, not saved; M0-06 replaces it with
         /// world spawns). HP from Core for a level-1 Warrior sheet: PLACEHOLDER_NOT_ALPHA for creature HP.
         /// </summary>
-        public Combatant SpawnTrainingTarget()
+        public Combatant SpawnTrainingTarget() => SpawnTrainingTargetAt(TrainingTargetDistance, TrainingTargetBearing);
+
+        /// <summary>Automation/tests: the training target at <paramref name="distance"/> blocks, <paramref name="bearing"/>° from the hero's facing.</summary>
+        public Combatant SpawnTrainingTargetAt(double distance, double bearing)
         {
             if (_session.State != SessionState.InGame || _session.Combat == null || _worldState == null)
             {
@@ -414,13 +506,14 @@ namespace CubeGame.Gameplay
             DespawnTrainingTarget();
             SyncHeroFromView();
             HeroState hero = _session.Hero;
-            double yaw = (hero.Yaw + TrainingTargetBearing) * Math.PI / 180.0;
-            double x = hero.Position.X + Math.Sin(yaw) * TrainingTargetDistance;
-            double z = hero.Position.Z + Math.Cos(yaw) * TrainingTargetDistance;
+            double yaw = (hero.Yaw + bearing) * Math.PI / 180.0;
+            double x = hero.Position.X + Math.Sin(yaw) * distance;
+            double z = hero.Position.Z + Math.Cos(yaw) * distance;
             int ground = Math.Max(_worldState.SurfaceAt((int)Math.Floor(x), (int)Math.Floor(z)), _worldState.Generator.WaterLevel);
             double y = Math.Abs(ground + 1 - hero.Position.Y) <= 2.0 ? ground + 1 : hero.Position.Y;
 
             var target = Combatant.CreateCreature(StableEntityId.ForRuntime(++_runtimeSerial), TrainingTargetKind, "Wolf", 1, 0);
+            ApplyAlphaSize(target, TrainingTargetKind);
             target.Position = new WorldPosition(x, y, z);
             target.Yaw = hero.Yaw + 180f;
             _session.Combat.Register(target);
@@ -501,6 +594,10 @@ namespace CubeGame.Gameplay
                 Entity = StableEntityId.Hero,
                 Slot = VisualSlotOf(slot, item),
                 Item = item != null ? new RawAlphaItemId((int)item.Type, item.Subtype) : (RawAlphaItemId?)null,
+                // M0-F2A: the bytes that select the drawn model (item_icon_id 0x4EC400).
+                Material = item != null ? (int)item.Modifier : 0,
+                Rarity = item?.Rarity ?? 0,
+                Seed = item?.Seed ?? 0,
             });
         }
 
@@ -531,32 +628,9 @@ namespace CubeGame.Gameplay
             }
         }
 
-        private void OnWorldItemDropped(WorldItemDropped dropped)
-        {
-            if (_worldView == null)
-            {
-                return;
-            }
-
-            // Ground item placeholder until the visual layer shows item models (D88: DeepSeek).
-            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube.name = "GroundItem_PLACEHOLDER";
-            Destroy(cube.GetComponent<Collider>());
-            cube.transform.SetParent(_worldRoot.transform, true);
-            cube.transform.localScale = Vector3.one * 0.35f;
-            cube.transform.position = _worldView.ToScene(dropped.Position.X, dropped.Position.Y + 0.2, dropped.Position.Z);
-            cube.GetComponent<Renderer>().material.color = dropped.Raw.Type == 1 ? Color.red : new Color(0.9f, 0.8f, 0.2f);
-            _groundItems[dropped.Item] = cube;
-        }
-
+        // M0-F2A: ground items are drawn only by GameVisualSink (one owner, origin-safe); the bootstrap keeps the log.
         private void OnWorldItemRemoved(WorldItemRemoved removed)
         {
-            if (_groundItems.TryGetValue(removed.Item, out GameObject cube))
-            {
-                Destroy(cube);
-                _groundItems.Remove(removed.Item);
-            }
-
             _combatLog = "picked up an item";
         }
 
@@ -613,7 +687,16 @@ namespace CubeGame.Gameplay
                 _combatLog += $"  {_trainingTarget.Name} died";
             }
 
-            if (_population != null && _population.MarkKilled(died.Entity, died.TimeMs))
+            if (_recoveredPopulation != null && _recoveredPopulation.NotifyDeath(died.Entity, AlphaGameDay.Of(_session.Clock)))
+            {
+                _recoveredPopulation.TryGet(died.Entity, out AlphaSpawnTemplate template);
+                RecoveredSpawnPersistence.RecordDeath(_session.WorldDeltas, template, _session.Clock.TimeMs);
+                _recoveredCorpses[died.Entity] = template.Zone;
+                _session.Combat.Unregister(died.Entity);
+                _creatures?.Remove(died.Entity);
+                _combatLog += $"  {died.Entity} killed (respawn pending)";
+            }
+            else if (_population != null && _population.MarkKilled(died.Entity, died.TimeMs))
             {
                 _combatLog += $"  {died.Entity} killed (stays dead)";
             }
@@ -621,28 +704,98 @@ namespace CubeGame.Gameplay
 
         /// <summary>World population (C6): live spawns of the zones around the hero.</summary>
         public WorldPopulation Population => _population;
+        public AlphaSpawnRuntime RecoveredPopulation => _recoveredPopulation;
 
         private void StartPopulation()
         {
-            IWorldGenerator generator = _worldState.Generator;
-            var source = new AlphaWorldPopulation(
-                _session.World.Seed,
-                zone => generator.Region(new RegionKey(zone.X >> 6, zone.Z >> 6)).Level,
-                (zone, lx, lz) => GroundAt(zone.X * (double)WorldLayout.ZoneSize + lx + 0.5, zone.Z * (double)WorldLayout.ZoneSize + lz + 0.5));
             _population = new WorldPopulation(_session.WorldDeltas);
-            _population.AddSource(source, 0);
-            if (generator is AlphaTerrainGenerator terrain && terrain.GeneratorId == GeneratorId)
+            if (_worldState.Generator is AlphaTerrainGenerator terrain && D3ZonePopulation.Supports(terrain.GeneratorId))
             {
-                _population.AddSource(new D3ZonePopulation(terrain), 1);
+                _population.AddSource(new D3ZonePopulation(terrain, _worldState.Deltas), D3ZonePopulation.Channel);
+                if (terrain.GeneratorId == GeneratorId)
+                {
+                    var candidates = AlphaCreatureKindSelector.FromClimate(
+                        (x, z) => new AlphaClimateSample(terrain.Humidity(x, z), terrain.Temperature(x, z),
+                            terrain.RareCellTerm(x, z), terrain.Mountain(x, z)),
+                        (x, z) => FirstNonSolid(terrain.Voxels(x, z)));
+                    var source = AlphaRecoveredPopulation.WithKindSelector(_session.World.Seed, candidates,
+                        (zone, lx, lz) => GroundAt(zone.X * (double)WorldLayout.ZoneSize + lx, zone.Z * (double)WorldLayout.ZoneSize + lz));
+                    _recoveredPopulation = new AlphaSpawnRuntime();
+                    _recoveredPopulation.AddSource(source);
+                    RecoveredSpawnPersistence.Restore(_worldState.Deltas, _recoveredPopulation);
+                    _recoveredPopulation.Created += OnRecoveredSpawned;
+                    _recoveredPopulation.Despawned += OnRecoveredDespawned;
+                    _populationClock = _session.Clock;
+                    _populationClock.Ticked += TickRecoveredPopulation;
+                }
             }
             _population.Spawned += OnSpawnAppeared;
             _population.Despawned += OnSpawnGone;
-            _population.Update(_session.Hero.Position);
-            Debug.Log($"[Game] population: {_population.LiveCount} entities in {_population.ActiveZones.Count} zones");
+            UpdatePopulationZones();
+            if (_recoveredPopulation != null)
+            {
+                AdvanceRecoveredPopulation(_populationClock, 0);
+            }
+            Debug.Log($"[Game] population: {_population.LiveCount} content, {_recoveredPopulation?.LiveCount ?? 0} recovered in {_population.ActiveZones.Count} zones");
+        }
+
+        private static int FirstNonSolid(VoxelColumn column)
+        {
+            int height = column.Bottom;
+            while (Voxel.IsSolid(column.Read(height))) height++;
+            return height;
+        }
+
+        private void UpdatePopulationZones()
+        {
+            WorldPosition hero = _session.Hero.Position;
+            ZoneKey zone = WorldLayout.ZoneOf((int)Math.Floor(hero.X), (int)Math.Floor(hero.Z));
+            if (_populationCenter.HasValue && _populationCenter.Value.Equals(zone)) return;
+
+            _populationCenter = zone;
+            _population.Update(hero);
+            if (_recoveredPopulation == null) return;
+            _recoveredPopulation.SetLoadedZones(_population.ActiveZones);
+            if (_recoveredCorpses.Count == 0) return;
+
+            foreach (var corpse in new List<KeyValuePair<StableEntityId, ZoneKey>>(_recoveredCorpses))
+            {
+                if (_recoveredPopulation.IsLoaded(corpse.Value)) continue;
+                _recoveredCorpses.Remove(corpse.Key);
+                _session.Events.Publish(new EntityDespawned { TimeMs = _session.Clock.TimeMs, Entity = corpse.Key });
+            }
+        }
+
+        private void TickRecoveredPopulation(GameClock clock)
+        {
+            long previousTime = (clock.Tick - 1) * 1000L / clock.TicksPerSecond;
+            AdvanceRecoveredPopulation(clock, (int)(clock.TimeMs - previousTime));
+        }
+
+        private void AdvanceRecoveredPopulation(GameClock clock, int elapsedMs)
+        {
+            _populationPlayers[0] = _session.Hero.Position;
+            _recoveredPopulation.Tick(elapsedMs, clock.WorldTimeMs, AlphaGameDay.Of(clock), _populationPlayers, RecoveredPosition);
+        }
+
+        private WorldPosition RecoveredPosition(StableEntityId id)
+        {
+            if (_session.Combat.TryGet(id, out Combatant creature)) return creature.Position;
+            _recoveredPopulation.TryGet(id, out AlphaSpawnTemplate template);
+            return template.Definition.Position;
         }
 
         private void StopPopulation()
         {
+            if (_recoveredPopulation != null)
+            {
+                _populationClock.Ticked -= TickRecoveredPopulation;
+                _recoveredPopulation.Clear();
+                _recoveredPopulation = null;
+                _populationClock = null;
+                _recoveredCorpses.Clear();
+            }
+            _populationCenter = null;
             if (_population == null)
             {
                 return;
@@ -654,55 +807,79 @@ namespace CubeGame.Gameplay
             _population = null;
         }
 
-        private void OnSpawnAppeared(LiveSpawn live)
+        private void OnSpawnAppeared(LiveSpawn live) => SpawnWorldEntity(live.Id, live.Definition);
+
+        private void OnRecoveredSpawned(AlphaSpawnTemplate template)
         {
-            SpawnDefinition def = live.Definition;
-            if (def.BehaviourKey == AlphaZoneContentProvider.PassiveBehaviourKey)
+            _recoveredCorpses.Remove(template.Id);
+            SpawnWorldEntity(template.Id, template.Definition);
+            if (_creatures != null && _creatures.TryGetAi(template.Id, out var ai))
             {
-                PublishSpawnVisual(live);
+                ai.AttachAlphaMovement(AlphaNpcMovementDriver.ForTemplate(template.Data, () => _populationClock.WorldTimeMs));
+            }
+        }
+
+        private void SpawnWorldEntity(StableEntityId id, SpawnDefinition def)
+        {
+            if (D3ZonePopulation.IsStaticContent(def.BehaviourKey))
+            {
+                PublishSpawnVisual(id, def);
                 return;
             }
 
-            if (def.BehaviourKey != AlphaWorldPopulation.BehaviourKey || def.Faction == (int)CreatureFaction.Passive || _session.Combat == null)
+            if (def.BehaviourKey != AlphaRecoveredPopulation.BehaviourKey || def.Faction == (int)CreatureFaction.Passive || _session.Combat == null)
             {
                 return;
             }
 
-            var creature = Combatant.CreateCreature(live.Id, def.Kind, $"Creature 0x{def.Kind.Value:x2}", def.Level, 0);
+            var creature = Combatant.CreateCreature(id, def.Kind, $"Creature 0x{def.Kind.Value:x2}", def.Level, 0);
+            ApplyAlphaSize(creature, def.Kind);
             creature.Position = def.Position;
             creature.Yaw = def.Yaw;
             creature.Hostile = def.Faction == (int)CreatureFaction.Monster;
             creature.IsBoss = CreatureKinds.IsBoss(def.Kind.Value);
             _session.Combat.Register(creature);
             _creatures?.Add(creature, def.Level, 0, def.Faction, def.ClassId, def.SpecializationId, def.MainHandWeapon);
-            PublishSpawnVisual(live);
+            PublishSpawnVisual(id, def);
         }
 
-        private void PublishSpawnVisual(LiveSpawn live)
+        private void PublishSpawnVisual(StableEntityId id, SpawnDefinition def)
         {
-            SpawnDefinition def = live.Definition;
+            string worldObjectName = null;
+            if (def.BehaviourKey == AlphaCityContentProvider.ServiceBehaviourKey
+                && Content.AlphaWorldContent.TryObject(def.Kind.Value, out var worldObject))
+            {
+                worldObjectName = worldObject.Name;
+            }
+
             _session.Events.Publish(new EntitySpawned
             {
                 TimeMs = _session.Clock.TimeMs,
-                Entity = live.Id,
+                Entity = id,
                 Kind = def.Kind,
+                WorldObjectName = worldObjectName,
                 Position = def.Position,
                 Yaw = def.Yaw,
-                AppearanceSeed = (uint)(live.Id.Value ^ (live.Id.Value >> 32)),
+                AppearanceSeed = (uint)(id.Value ^ (id.Value >> 32)),
             });
         }
 
-        private void OnSpawnGone(LiveSpawn live)
+        private void OnSpawnGone(LiveSpawn live) => DespawnWorldEntity(live.Id, live.Definition);
+
+        private void OnRecoveredDespawned(AlphaSpawnTemplate template, AlphaDespawnReason reason) =>
+            DespawnWorldEntity(template.Id, template.Definition);
+
+        private void DespawnWorldEntity(StableEntityId id, SpawnDefinition definition)
         {
-            bool combatantRemoved = _session.Combat != null && _session.Combat.Unregister(live.Id);
+            bool combatantRemoved = _session.Combat != null && _session.Combat.Unregister(id);
             if (combatantRemoved)
             {
-                _creatures?.Remove(live.Id);
+                _creatures?.Remove(id);
             }
 
-            if (combatantRemoved || live.Definition.BehaviourKey == AlphaZoneContentProvider.PassiveBehaviourKey)
+            if (combatantRemoved || D3ZonePopulation.IsStaticContent(definition.BehaviourKey))
             {
-                _session.Events.Publish(new EntityDespawned { TimeMs = _session.Clock?.TimeMs ?? 0, Entity = live.Id });
+                _session.Events.Publish(new EntityDespawned { TimeMs = _session.Clock?.TimeMs ?? 0, Entity = id });
             }
         }
 
@@ -831,7 +1008,6 @@ namespace CubeGame.Gameplay
             _session.Events.Subscribe<HitResolved>(OnHitResolved);
             _session.Events.Subscribe<EntityDied>(OnEntityDied);
             _heroRespawnAtMs = -1;
-            _session.Events.Subscribe<WorldItemDropped>(OnWorldItemDropped);
             _session.Events.Subscribe<WorldItemRemoved>(OnWorldItemRemoved);
             _session.Hero.Inventory.EquipmentChanged += OnEquipmentChanged;
             PublishEquipment();
@@ -888,6 +1064,16 @@ namespace CubeGame.Gameplay
             _visuals.Initialise(AlphaActorLibrary.Shared, p => view.ToScene(p.X, p.Y, p.Z), _player.transform);
             _session.Events.AddVisualSink(_visuals);
             _visuals.BindItems(_session.Events);   // D4: Alpha models of items on the ground
+
+            // M0-F2B: projectiles - gameplay state in CombatSystem, one visual owner, terrain from the streamed world.
+            _terrainColumn = null;
+            _terrainColumnX = _terrainColumnZ = int.MinValue;
+            _session.Combat.Projectiles.TerrainAt = ProjectileTerrainAt;
+            GameVisualSink sink = _visuals;
+            _projectileVisuals = visualObject.AddComponent<ProjectileVisuals>();
+            _projectileVisuals.Initialise(_session.Events, _session.Combat.Projectiles, p => view.ToScene(p.X, p.Y, p.Z),
+                () => sink != null ? sink.ModelScale : 0f,
+                AlphaActorLibrary.Shared.State == AlphaContentState.Ready ? AlphaActorLibrary.Shared.Source?.Root : null);
             _lastHeroScenePosition = heroPoint;
 
             _motor = _player.AddComponent<PlayerMotor>();
@@ -923,15 +1109,13 @@ namespace CubeGame.Gameplay
 
             DespawnTrainingTarget();
             StopPopulation();
-            foreach (GameObject ground in _groundItems.Values)
+            if (_session?.Combat != null)
             {
-                if (ground != null)
-                {
-                    Destroy(ground);
-                }
+                // Projectiles are runtime-only: never saved, never carried into another world.
+                _session.Combat.Projectiles.Clear(_session.Clock?.TimeMs ?? 0);
+                _session.Combat.Projectiles.TerrainAt = null;
             }
 
-            _groundItems.Clear();
             if (_session?.Hero != null)
             {
                 _session.Hero.Inventory.EquipmentChanged -= OnEquipmentChanged;
@@ -966,6 +1150,8 @@ namespace CubeGame.Gameplay
             _worldRoot = null;
             _worldView = null;
             _visuals = null;
+            _projectileVisuals = null;
+            _terrainColumn = null;
             _worldState = null;
             _player = null;
             _motor = null;
@@ -1002,9 +1188,35 @@ namespace CubeGame.Gameplay
             }
 
             _worldView.ToWorld(p, out double x, out _, out double z);
-            Vector3 shift = _worldView.Rebase(StreamingWorldView.OriginFor(x, z));
+            ApplyRebase(StreamingWorldView.OriginFor(x, z));
+        }
+
+        /// <summary>
+        /// Automation/tests: moves the floating origin by (<paramref name="dx"/>, <paramref name="dz"/>) blocks while the
+        /// hero, creatures and projectiles keep their game positions.
+        /// </summary>
+        public void ShiftOrigin(int dx, int dz)
+        {
+            if (_worldView == null || _player == null)
+            {
+                return;
+            }
+
+            _worldView.ToWorld(_player.transform.position, out double x, out _, out double z);
+            ApplyRebase(StreamingWorldView.OriginFor(x + dx, z + dz));
+        }
+
+        private void ApplyRebase(Vector2Int origin)
+        {
+            Vector3 p = _player.transform.position;
+            Vector3 shift = _worldView.Rebase(origin);
             _player.transform.position = p + shift;
             _lastHeroScenePosition += shift;
+            if (_projectileVisuals != null)
+            {
+                _projectileVisuals.Sync();
+            }
+
             if (_camera != null)
             {
                 _camera.transform.position += shift;

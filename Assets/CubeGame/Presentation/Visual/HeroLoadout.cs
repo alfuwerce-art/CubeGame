@@ -1,5 +1,8 @@
 // CubeGame.Presentation.Visual — hero loadout → character visual descriptor (D4).
 //
+// M0-F2A: no longer on the runtime path. The game composes the hero visual with HeroVisualComposer (appearance +
+// all equipped items, item model by the executed selector); this per-event mapping is kept for its D4 tests only.
+//
 // The gameplay side (Claude, M0-04) publishes EquipmentVisualChanged with raw Alpha item ids; this mapping
 // turns such an event into the descriptor AlphaPlayerVisualBuilder consumes, so armour, weapons and the
 // off-hand appear on the hero model. Alpha evidence: item type 3 = weapon (subtype = Alpha weapon subtype,

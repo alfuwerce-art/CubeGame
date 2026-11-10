@@ -25,12 +25,13 @@ namespace CubeGame.Features.Creatures
 
         /// <summary>Chest entity; opening/loot is gameplay (Claude, C5), this provider only places it.</summary>
         public const string ChestBehaviourKey = "chest_static";
+        public const int ChestKind = 0x8F;
 
         public const string RoomProvenance =
-            "PARTIAL: Q-16 room size 3, step 7, L-corridors; carving order/contents UNKNOWN";
+            "CUBEGAME_CONTRACT: reconstructed layout/carving using Q-16 room spacing and L-corridors";
 
         public const string ChestProvenance =
-            "Q-17: dungeon chest holds 10 items; loot table OQ-11 (contents come from gameplay)";
+            "CUBEGAME_CONTRACT: room-centre anchor; Alpha kind 0x8F and 10 items (Q-17); loot table UNKNOWN";
 
         readonly Func<ZoneContentContext, bool> _isDungeonZone;
         readonly int _rooms;
@@ -132,7 +133,7 @@ namespace CubeGame.Features.Creatures
                 {
                     Region = region,
                     SpawnIndex = index++,
-                    Kind = new KindId(0),
+                    Kind = new KindId(ChestKind),
                     Position = new WorldPosition(chest.X, chest.Y, chest.Z),
                     Faction = (int)CreatureFaction.Passive,
                     Level = 1,

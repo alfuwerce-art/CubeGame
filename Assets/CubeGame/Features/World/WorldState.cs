@@ -79,7 +79,8 @@ namespace CubeGame.Features.World
                 return true;
             }
 
-            if (generatorId == AlphaTerrainGenerator.ContentId && contentProviders != null && contentProviders.Count > 0)
+            if ((generatorId == AlphaTerrainGenerator.ContentId || generatorId == AlphaTerrainGenerator.WorldRuntimeId)
+                && contentProviders != null && contentProviders.Count > 0)
             {
                 generator = new AlphaTerrainGenerator(seed, contentProviders, generatorId);
                 return true;

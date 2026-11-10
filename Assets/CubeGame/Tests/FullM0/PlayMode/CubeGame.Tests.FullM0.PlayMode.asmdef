@@ -6,8 +6,12 @@
         "CubeGame.Persistence",
         "CubeGame.Presentation",
         "CubeGame.Features",
+        "CubeGame.Features.AI",
+        "CubeGame.Features.Creatures",
         "CubeGame.Gameplay",
         "CubeGame.AlphaModels",
+        "CubeGame.Presentation.Visual",
+        "CubeGame.Content",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

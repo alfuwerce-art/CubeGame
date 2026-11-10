@@ -51,7 +51,7 @@ namespace CubeGame.Features.World
 
         public AlphaZone Zone { get; }
 
-        /// <summary>Zone grid record (type 1 town / 3 settlement / 4 type-10 zone, level, class).</summary>
+        /// <summary>Zone grid record (type, subtype, level and class). Separate from the landmark column.</summary>
         public AlphaZoneRecord Record { get; }
 
         public AlphaRegion Region { get; }

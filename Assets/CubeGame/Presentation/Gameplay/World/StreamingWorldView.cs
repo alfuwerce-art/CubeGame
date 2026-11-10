@@ -26,9 +26,10 @@ namespace CubeGame.Gameplay.Streaming
         private static readonly int DaylightBrightness = Shader.PropertyToID("_DaylightBrightness");
         private readonly Dictionary<ChunkKey, ChunkView> _loaded = new Dictionary<ChunkKey, ChunkView>();
         private readonly HashSet<ChunkKey> _inFlight = new HashSet<ChunkKey>();
-        private readonly ConcurrentQueue<ChunkVoxels> _ready = new ConcurrentQueue<ChunkVoxels>();
+        private ConcurrentQueue<ChunkVoxels> _ready = new ConcurrentQueue<ChunkVoxels>();
         private readonly List<ChunkKey> _wanted = new List<ChunkKey>();
         private readonly HashSet<ChunkKey> _dirty = new HashSet<ChunkKey>();
+        private readonly Queue<ChunkKey> _dirtyOrder = new Queue<ChunkKey>();
         private readonly Dictionary<ChunkKey, ChunkVoxels> _heights = new Dictionary<ChunkKey, ChunkVoxels>();
 
         private WorldState _world;
@@ -38,7 +39,6 @@ namespace CubeGame.Gameplay.Streaming
         private bool _ownsTerrainMaterial;
         private ChunkKey _center;
         private bool _hasCenter;
-        private int _generation;
         private int _maxWorkers;
 
         private sealed class ChunkView
@@ -56,7 +56,8 @@ namespace CubeGame.Gameplay.Streaming
 
         public int LoadedCount => _loaded.Count;
 
-        public int PendingCount => _wanted.Count + _inFlight.Count + _ready.Count;
+        public int PendingCount => _wanted.Count + _inFlight.Count + _dirty.Count;
+        public int ReadyCount => _ready.Count;
 
         public long TotalBuilt { get; private set; }
 
@@ -101,7 +102,7 @@ namespace CubeGame.Gameplay.Streaming
             }
             Origin = origin;
             _maxWorkers = Math.Max(1, Environment.ProcessorCount - 1);
-            _world.Deltas.RegionChanged += OnRegionChanged;
+            _world.Deltas.TerrainColumnChanged += OnTerrainColumnChanged;
         }
 
         public void SetDaylightBrightness(float brightness)
@@ -217,22 +218,21 @@ namespace CubeGame.Gameplay.Streaming
         {
             if (_world != null)
             {
-                _world.Deltas.RegionChanged -= OnRegionChanged;
+                _world.Deltas.TerrainColumnChanged -= OnTerrainColumnChanged;
             }
 
-            _generation++;
             foreach (ChunkKey key in new List<ChunkKey>(_loaded.Keys))
             {
                 Release(key, false);
             }
 
-            while (_ready.TryDequeue(out _))
-            {
-            }
+            // Finishing workers can only enqueue into the queue of their original world.
+            _ready = new ConcurrentQueue<ChunkVoxels>();
 
             _inFlight.Clear();
             _wanted.Clear();
             _dirty.Clear();
+            _dirtyOrder.Clear();
             _heights.Clear();
             _hasCenter = false;
             _world = null;
@@ -287,19 +287,25 @@ namespace CubeGame.Gameplay.Streaming
                 }
 
                 _inFlight.Add(key);
-                int generation = _generation;
+                ConcurrentQueue<ChunkVoxels> ready = _ready;
                 IWorldGenerator generator = _world.Generator;
-                Task.Run(() =>
-                {
-                    ChunkVoxels heights = ChunkVoxels.Sample(generator, key);
-                    if (generation == _generation)
-                    {
-                        _ready.Enqueue(heights);
-                    }
-                });
+                Task.Run(() => ready.Enqueue(ChunkVoxels.Sample(generator, key)));
             }
 
             int budget = BuildsPerFrame;
+            // A ready backlog must not delay edits to colliders already used by gameplay.
+            while (budget > 0 && _dirtyOrder.Count > 0)
+            {
+                ChunkKey dirty = _dirtyOrder.Dequeue();
+                _dirty.Remove(dirty);
+                if (_heights.TryGetValue(dirty, out ChunkVoxels generated))
+                {
+                    Release(dirty, false);
+                    Install(generated);
+                    budget--;
+                }
+            }
+
             while (budget > 0 && _ready.TryDequeue(out ChunkVoxels heights))
             {
                 _inFlight.Remove(heights.Key);
@@ -311,43 +317,19 @@ namespace CubeGame.Gameplay.Streaming
                 Install(heights);
                 budget--;
             }
-
-            foreach (ChunkKey dirty in new List<ChunkKey>(_dirty))
-            {
-                if (budget <= 0)
-                {
-                    break;
-                }
-
-                _dirty.Remove(dirty);
-                if (_heights.TryGetValue(dirty, out ChunkVoxels generated))
-                {
-                    Release(dirty, false);
-                    Install(generated);
-                    budget--;
-                }
-            }
         }
 
-        private void OnRegionChanged(RegionKey region)
+        private void OnTerrainColumnChanged(int x, int z)
         {
-            // Deltas carry their own column; rebuild every loaded chunk whose 1-column border touches an edited column.
-            foreach (WorldDelta delta in _world.Deltas.DeltasOf(region))
+            // A chunk mesh also reads the one-column border around its own columns.
+            for (int dx = -1; dx <= 1; dx++)
             {
-                if (delta.Kind != WorldDeltaKind.ColumnSurfaceSet && delta.Kind != WorldDeltaKind.BlockSet)
+                for (int dz = -1; dz <= 1; dz++)
                 {
-                    continue;
-                }
-
-                for (int dx = -1; dx <= 1; dx++)
-                {
-                    for (int dz = -1; dz <= 1; dz++)
+                    ChunkKey key = WorldLayout.ChunkOf(x + dx, z + dz);
+                    if (_loaded.ContainsKey(key) && _dirty.Add(key))
                     {
-                        ChunkKey key = WorldLayout.ChunkOf(delta.X + dx, delta.Z + dz);
-                        if (_loaded.ContainsKey(key))
-                        {
-                            _dirty.Add(key);
-                        }
+                        _dirtyOrder.Enqueue(key);
                     }
                 }
             }
@@ -414,6 +396,7 @@ namespace CubeGame.Gameplay.Streaming
 
             if (view.Root != null)
             {
+                view.Root.SetActive(false);
                 Destroy(view.Root);
             }
 

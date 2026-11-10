@@ -44,14 +44,16 @@ namespace CubeGame.Features.Creatures
             "CUBEGAME_CONTRACT: structure template footprint; geometry PENDING (Alpha house templates not ported)";
 
         readonly ContentPlanSettings _settings;
+        readonly Func<ZoneContentContext, bool> _allowsStructures;
 
         /// <param name="settings">
         /// Kind lists and density. Null → built once from the staged Alpha actor library
         /// (<see cref="ContentPlanSettings.FromLibrary"/>), so only kinds whose visuals exist are placed.
         /// </param>
-        public AlphaZoneContentProvider(ContentPlanSettings settings = null)
+        public AlphaZoneContentProvider(ContentPlanSettings settings = null, Func<ZoneContentContext, bool> allowsStructures = null)
         {
             _settings = settings;
+            _allowsStructures = allowsStructures;
         }
 
         public string Key => ProviderKey;
@@ -64,7 +66,7 @@ namespace CubeGame.Features.Creatures
             if (context == null) throw new ArgumentNullException(nameof(context));
             var zone = new WorldZoneKey(context.Zone.Zx, context.Zone.Zz);
             var settings = ResolveSettings();
-            var source = new ContextZoneSource(context, zone);
+            var source = new ContextZoneSource(context, zone, _allowsStructures == null || _allowsStructures(context));
             var plan = ZoneContentPlanner.Plan(zone, source, settings);
             int index = 0;
             for (int i = 0; i < plan.Items.Count; i++)
@@ -178,10 +180,12 @@ namespace CubeGame.Features.Creatures
             readonly ZoneContentContext _context;
             readonly ZoneClimate _climate;
             readonly WorldCellKey _cell;
+            readonly bool _allowsStructures;
 
-            public ContextZoneSource(ZoneContentContext context, WorldZoneKey zone)
+            public ContextZoneSource(ZoneContentContext context, WorldZoneKey zone, bool allowsStructures)
             {
                 _context = context;
+                _allowsStructures = allowsStructures;
                 _cell = AlphaWorldScale.CellOf(zone);
                 int cx = zone.X * AlphaZone.Size + AlphaZone.Size / 2;
                 int cz = zone.Z * AlphaZone.Size + AlphaZone.Size / 2;
@@ -222,7 +226,7 @@ namespace CubeGame.Features.Creatures
 
             public bool IsFlatAndFree(int voxelX, int voxelZ, int width, int depth)
             {
-                if (width <= 0 || depth <= 0) return false;
+                if (!_allowsStructures || width <= 0 || depth <= 0) return false;
                 int min = int.MaxValue;
                 int max = int.MinValue;
                 for (int i = 0; i < 4; i++)

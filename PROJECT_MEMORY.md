@@ -3,7 +3,7 @@
 **Updated:** 2026-11-10  
 **Canonical branch:** `integration/m0-all`  
 **Current plan:** [D90 — M0 five-stage finish](docs/decisions/D90-m0-five-stage-finish-plan.md)  
-**Current stage:** [M0-F1 WORLD FIX](docs/ACTIVE_STAGE.md)
+**Current stage:** [M0-F2B COMBAT RUNTIME](docs/ACTIVE_STAGE.md) (F1, F2A и F2B — на ревью)
 
 ## 1. Главная цель M0
 
@@ -13,6 +13,18 @@
 `new world → character → travel → combat → loot → city → trade → dungeon → boss → quest → save/load → continue`.
 
 ## 2. Последний сведённый результат
+
+M0-F1 `READY_FOR_REVIEW` в `codex/m0-f1-world-runtime`, база canonical `1c6560c`, F1A Claude `9e50915`. Подключены recovered population, игровое время, респаун и драйвер движения, единый D3-маршрут `/6`, город, данжи и сундуки. Существующие форматы сейва читаются. Коллайдер следует voxel edit при очереди новых чанков. В PlayMode проверены stable ID и дельты через unload/reload и save/exit/load. Полный EditMode 664 passed / 0 failed / 2 skipped, PlayMode 60 passed / 0 failed / 0 skipped, `error CS = 0`. Каноническое слияние после ревью продюсера. [Отчёт M0-F1](docs/reports/M0_F1_WORLD_FIX_REPORT.md)
+
+### M0-F2A CHARACTER RUNTIME
+
+`READY_FOR_REVIEW` в `claude/m0-f2a-character-runtime`, база F1 `748d650` (canonical `integration/m0-all` = `1c6560c` ещё не содержит F1). Один runtime-путь героя: сохранённые внешность и экипировка → `HeroVisualComposer` → `AlphaPlayerVisualBuilder` → `GameVisualSink` (единственный владелец). Раса/пол/лицо/причёска/цвет волос видны в сцене; лицо и причёска разрешаются через реестр Alpha, модель предмета — исполненным селектором `item_icon_id` по материалу/редкости/seed. 15 видов рисуются общим гуманоидным ригом 0x02 по блоку внешности Alpha; OrcFemale 0x0C — собственным актором (`PARTIAL`). Лут на земле — один владелец, без дрейфа при смене начала координат. Формат сейва не менялся. EditMode 679/677/0/2, PlayMode 62/62, `error CS = 0`. [Отчёт M0-F2A](docs/reports/M0_F2A_CHARACTER_RUNTIME_REPORT.md)
+
+### M0-F2B COMBAT RUNTIME
+
+`READY_FOR_REVIEW` в `claude/m0-f2b-combat-runtime`, база F2A `5f197f9`, сведён evidence DeepSeek `08ae4e3`. Атака героя: оружие → действие → путь по группе обработчика Alpha, без fallback в melee (неизвестное правило — отказ `UNKNOWN`). По байтам `Cube.exe`: лук/арбалет/бумеранг/жезл/браслет выпускают **летящий снаряд** (список `[world]+0x14`, 100/50 бл/с, g 7.5, 5000 мс, бокс `size/2+0.5`) — поправка к выводу DeepSeek «снаряда нет»; луч ≤200 блоков до стены — для `0x1C/0x5E/0x5F`, бомба 0x68 — 10 блоков; посох — объём перед героем. Всё через `CombatSystem.ResolveHit`, один визуальный владелец (`ProjectileVisuals`), снаряды не сохраняются. Масштаб вида: эмулированный `Creature_drawModel` — матрица размещения масштабируется по виду, S05 её вычитал; теперь `ModelScale(эталон 0x02) × placement(kind)/placement(0x02)` для героя и NPC, hit box = размер Alpha 156 видов. EditMode 746/744/0/2, PlayMode 68/68, `error CS = 0`. [Отчёт M0-F2B](docs/reports/M0_F2B_COMBAT_RUNTIME_REPORT.md)
+
+### База до M0-F1
 
 До D90-cleanup canonical HEAD был `fce38e0`, объединяющий:
 - Codex D3–D6 audit `762ac5d`;
@@ -42,7 +54,7 @@ Claude review-fix: [D1_D2_SPAWN_PATROL_REVIEW_FIX](docs/reports/D1_D2_SPAWN_PATR
 
 Код разделён на recovered Alpha path и `FallbackPopulationPolicy`.
 
-**Важно:** recovered population/schedule ещё не подключены в `GameBootstrap`. Без kind selector `AlphaWorldPopulation` пуст; ошибочные «расы игрока как существа» больше не спавнятся.
+На базе D90 `AlphaWorldPopulation` без селектора был пуст. В кандидате M0-F1 источник `/6` использует проверенный `0x5F56C0`. Драйвер NPC получает реальное время `GameClock`, а данные расписаний деревень остаются `PARTIAL`.
 
 Открыто: exact rand() stream, часть условий wild cells, 22 non-grid construction sites, NPC equipment R-1, spawn timer persistence.
 
@@ -50,7 +62,7 @@ Claude review-fix: [D1_D2_SPAWN_PATROL_REVIEW_FIX](docs/reports/D1_D2_SPAWN_PATR
 
 Codex audit: [CODEX_D3_D6_INDEPENDENT_AUDIT](docs/reports/CODEX_D3_D6_INDEPENDENT_AUDIT.md).
 
-- D3: дома/W-18 частично подключены; города, данжи и сундуки отсутствуют в основном gameplay route. Dungeon carver — реконструкция CubeGame, не Alpha parity.
+- D3 на входе D90: дома/W-18 частично подключены. Кандидат M0-F1 добавляет город, данжи и сундуки в gameplay route `/6`. Dungeon carver остаётся реконструкцией CubeGame.
 - D4: equipment events работают частично; race/sex/appearance не применяются к runtime hero. Ground loot имеет два визуальных владельца и не следует floating origin.
 - D5: projectile models/flight data существуют, но `attack → projectile → collision → CombatSystem.ResolveHit` отсутствует.
 - D6: 93 sounds cataloged; playback отсутствует. WAV metadata parser ошибается на 32 файлах. Local map/item icons частично подключены.

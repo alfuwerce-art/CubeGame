@@ -65,8 +65,11 @@ namespace CubeGame.Features.World
         /// <summary>One of the four town zones nearest a Village centre (Sub = 1…4).</summary>
         public const int Town = 1;
 
-        /// <summary>Settlement zone of a 0xE column (Sub = zone subtype, Id/LevelClass set).</summary>
-        public const int Settlement = 3;
+        /// <summary>Record written for a 0xE landmark column (Sub = zone subtype, Id/LevelClass set).</summary>
+        public const int Type3 = 3;
+
+        /// <summary>Record accepted by Alpha's alternate dungeon call. Generation of this record is unported.</summary>
+        public const int Type5 = 5;
 
         /// <summary>Zone of a type-10 column (Id = the column id).</summary>
         public const int Special10 = 4;
@@ -256,7 +259,7 @@ namespace CubeGame.Features.World
                     }
 
                     AlphaZoneRecord zone = region.Zone((zx >> 8) & 63, (zz >> 8) & 63);
-                    zone.Type = AlphaZoneRecord.Settlement;
+                    zone.Type = AlphaZoneRecord.Type3;
                     zone.Sub = zoneSub;
                     zone.Id = rng.Next() % 10000000 + 1;
                     col.Id = nextId;

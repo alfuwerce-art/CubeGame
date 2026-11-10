@@ -57,6 +57,67 @@ namespace CubeGame.Features.Combat
 
         public bool IsDead => Health.IsDead;
 
+        /// <summary>
+        /// Hit box in blocks (Unity axes: width X, height Y, depth Z). The game sets the Alpha species size
+        /// (<c>creature_generateAppearance</c> appearance +0x08, emulated — <c>AlphaCreatureSizes</c>); the default is the
+        /// HumanMale 0x02 size 0.96 × 2.16 × 0.96.
+        /// </summary>
+        public double HitWidth { get; set; } = 0.96;
+
+        public double HitHeight { get; set; } = 2.16;
+
+        public double HitDepth { get; set; } = 0.96;
+
+        /// <summary>Aim direction (Alpha creature +0x160); unset means "horizontal along <see cref="Yaw"/>".</summary>
+        public bool HasAim { get; private set; }
+
+        private double _aimX, _aimY, _aimZ;
+
+        public void SetAim(double x, double y, double z)
+        {
+            double length = Math.Sqrt(x * x + y * y + z * z);
+            if (length < 1e-9)
+            {
+                HasAim = false;
+                return;
+            }
+
+            _aimX = x / length;
+            _aimY = y / length;
+            _aimZ = z / length;
+            HasAim = true;
+        }
+
+        public void ClearAim() => HasAim = false;
+
+        /// <summary>Unit aim vector: the set aim, else the horizontal facing of <see cref="Yaw"/>.</summary>
+        public void GetAim(out double x, out double y, out double z)
+        {
+            if (HasAim)
+            {
+                x = _aimX;
+                y = _aimY;
+                z = _aimZ;
+                return;
+            }
+
+            double yaw = Yaw * Math.PI / 180.0;
+            x = Math.Sin(yaw);
+            y = 0.0;
+            z = Math.Cos(yaw);
+        }
+
+        /// <summary>Off-hand subtype 0x0C (bracelet): Alpha doubles the wand projectile speed (0x617C88).</summary>
+        public bool BraceletOffHand
+        {
+            get
+            {
+                CubeGame.Core.Items.ItemInstance off = Loadout.GetEquipped(EquipmentSlot.OffHand);
+                return off != null && off.Type == CubeGame.Core.Items.ItemType.Weapon
+                    && off.Subtype == (byte)CubeGame.Core.Items.WeaponSubtype.Bracelet;
+            }
+        }
+
         /// <summary>Creates a combatant with a fresh Core sheet at the given level (used for training targets and spawned enemies).</summary>
         public static Combatant Create(StableEntityId id, KindId kind, string name, CharacterClass characterClass, int level)
         {

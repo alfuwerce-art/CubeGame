@@ -75,7 +75,7 @@ namespace CubeGame.Features.World
                 rng.Next();
                 zone.Spawns.Add(new ZoneSpawnCandidate("landmark_giant_tree", x0 + 128, Top(zone, x0 + 128, z0 + 128), z0 + 128, 0));
             }
-            else if (record.Type != AlphaZoneRecord.Special10 && record.Type != AlphaZoneRecord.Town && record.Type != AlphaZoneRecord.Settlement)
+            else if (record.Type != AlphaZoneRecord.Special10 && record.Type != AlphaZoneRecord.Town && record.Type != AlphaZoneRecord.Type3)
             {
                 int n = rng.Next() & 3;
                 if ((humidity > 0.6f || humidity < 0.3f) && (temperature > 0.7f || (temperature < 0.4f && (temperature > 0.2f || humidity < 0.8f))))

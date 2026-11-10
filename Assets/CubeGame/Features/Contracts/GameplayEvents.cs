@@ -67,6 +67,9 @@ namespace CubeGame.Features.Contracts
 
         public KindId Kind { get; set; }
 
+        /// <summary>Optional world object name. Its table ID is separate from the creature kind namespace.</summary>
+        public string WorldObjectName { get; set; }
+
         public WorldPosition Position { get; set; }
 
         public float Yaw { get; set; }
@@ -111,6 +114,15 @@ namespace CubeGame.Features.Contracts
 
         /// <summary>Item shown in the slot; null when the slot became empty.</summary>
         public RawAlphaItemId? Item { get; set; }
+
+        /// <summary>Alpha material byte +0x0D of the item (selects the model, item_icon_id 0x4EC400).</summary>
+        public int Material { get; set; }
+
+        /// <summary>Alpha byte +0x0C of the item (rarity; read by the model selector).</summary>
+        public int Rarity { get; set; }
+
+        /// <summary>Alpha item seed +0x04 (picks the random model variant).</summary>
+        public int Seed { get; set; }
     }
 
     public sealed class ActionStarted : IGameEvent
@@ -171,6 +183,84 @@ namespace CubeGame.Features.Contracts
         public bool Killed { get; set; }
 
         public double TargetHealthAfter { get; set; }
+
+        /// <summary>Serial of the attack (swing or released projectile) that produced the hit (M0-F2B).</summary>
+        public long AttackSerial { get; set; }
+    }
+
+    /// <summary>
+    /// A projectile (or the staff hit volume) entered the game (M0-F2B). Game-space position and velocity in
+    /// blocks / blocks per second; <see cref="Kind"/> is the Alpha projectile type byte (0 arrow, 1 magic,
+    /// 2 boomerang; 100 = CubeGame staff volume).
+    /// </summary>
+    public sealed class ProjectileSpawned : IGameEvent
+    {
+        public long TimeMs { get; set; }
+
+        public long Projectile { get; set; }
+
+        public StableEntityId Owner { get; set; }
+
+        public int Kind { get; set; }
+
+        public ActionId Action { get; set; }
+
+        public long AttackSerial { get; set; }
+
+        public WorldPosition Position { get; set; }
+
+        public double VelocityX { get; set; }
+
+        public double VelocityY { get; set; }
+
+        public double VelocityZ { get; set; }
+
+        public double Scale { get; set; }
+    }
+
+    /// <summary>
+    /// A hitscan attack was resolved (M0-F2B): the ray from <see cref="Origin"/> to <see cref="End"/> (stopped by a wall
+    /// or at the range). <see cref="Trail"/> is true only for the action ids whose muzzle/trail path is byte-verified.
+    /// </summary>
+    public sealed class HitscanFired : IGameEvent
+    {
+        public long TimeMs { get; set; }
+
+        public StableEntityId Owner { get; set; }
+
+        public ActionId Action { get; set; }
+
+        public long AttackSerial { get; set; }
+
+        public WorldPosition Origin { get; set; }
+
+        public WorldPosition End { get; set; }
+
+        public bool HitWall { get; set; }
+
+        public int Hits { get; set; }
+
+        public bool Trail { get; set; }
+    }
+
+    /// <summary>A projectile left the game; published exactly once per projectile.</summary>
+    public sealed class ProjectileRemoved : IGameEvent
+    {
+        public long TimeMs { get; set; }
+
+        public long Projectile { get; set; }
+
+        public StableEntityId Owner { get; set; }
+
+        public int Kind { get; set; }
+
+        /// <summary><c>CubeGame.Features.Combat.ProjectileEndReason</c> as an int.</summary>
+        public int Reason { get; set; }
+
+        /// <summary>The creature hit when <see cref="Reason"/> is a target hit; None otherwise.</summary>
+        public StableEntityId Target { get; set; }
+
+        public WorldPosition Position { get; set; }
     }
 
     /// <summary>The hero gained experience (C3, Alpha kill reward 0x595A60) and possibly levels.</summary>
@@ -209,6 +299,15 @@ namespace CubeGame.Features.Contracts
         public int Count { get; set; } = 1;
 
         public WorldPosition Position { get; set; }
+
+        /// <summary>Alpha material byte +0x0D (0 for raw-only items).</summary>
+        public int Material { get; set; }
+
+        /// <summary>Alpha byte +0x0C (rarity).</summary>
+        public int Rarity { get; set; }
+
+        /// <summary>Alpha item seed +0x04.</summary>
+        public int Seed { get; set; }
     }
 
     /// <summary>An item left the world (picked up or expired).</summary>

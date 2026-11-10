@@ -4,7 +4,9 @@
 // for addresses. What is NOT Alpha here and is labelled so in every definition:
 //   * the random numbers: Alpha draws CRT rand() in the order of the whole zone generator, which is not
 //     reproduced; this source draws from its own deterministic stream (CUBEGAME_CONTRACT);
-//   * the kind: supplied by the caller (Alpha calls 0x5F56C0 with the climate of the spot);
+//   * the kind: either a caller function (old constructor), or — M0-F1A — the candidate list of the recovered
+//     selector AlphaCreatureKindSelector (0x5F56C0, EMULATED_ALPHA_CODE) picked with list[rand() % n] from this
+//     source's own stream (the pick rule is Alpha's, the rand() value is not);
 //   * the generator conditions listed as NOT MODELLED in AlphaWildSpawnRules.
 // So the STRUCTURE of the population follows Alpha; exact Alpha coordinates are not claimed.
 using System;
@@ -16,10 +18,14 @@ using CubeGame.Features.World;
 namespace CubeGame.Features.Creatures
 {
     /// <summary>Zone → wild creature templates by Alpha's grid rules.</summary>
-    public sealed class AlphaRecoveredPopulation : IWorldPopulationSource
+    public sealed class AlphaRecoveredPopulation : IWorldPopulationSource, IAlphaSpawnTemplateSource
     {
         public const string Provenance =
             "grid/level/pack=ALPHA_CODE_STATIC (Cube.exe 0x5EAE6A-0x5EBBB1); random stream/kind source=CUBEGAME_CONTRACT";
+
+        /// <summary>Provenance when the kind comes from the recovered selector 0x5F56C0.</summary>
+        public const string RecoveredKindProvenance =
+            "grid/level/pack=ALPHA_CODE_STATIC (Cube.exe 0x5EAE6A-0x5EBBB1); kind=EMULATED_ALPHA_CODE 0x5F56C0; random stream=CUBEGAME_CONTRACT";
 
         public const string BehaviourKey = "creature_ai";
 
@@ -29,6 +35,26 @@ namespace CubeGame.Features.Creatures
         readonly WorldSeed _seed;
         readonly Func<ZoneKey, int, int, int> _kindAt;
         readonly Func<ZoneKey, int, int, double> _groundHeight;
+        readonly Func<int, int, int[]> _candidatesAt;
+
+        /// <param name="candidatesAt">absolute voxel x/z → candidate kinds of 0x5F56C0
+        /// (<see cref="AlphaCreatureKindSelector.FromClimate"/>); the kind is list[rand() % n], 0x3C when empty.</param>
+        /// <param name="groundHeight">zone + local x/z → world Y of the surface; null → 0.</param>
+        public static AlphaRecoveredPopulation WithKindSelector(WorldSeed seed, Func<int, int, int[]> candidatesAt,
+            Func<ZoneKey, int, int, double> groundHeight = null) =>
+            new AlphaRecoveredPopulation(seed, candidatesAt ?? throw new ArgumentNullException(nameof(candidatesAt)),
+                groundHeight, true);
+
+        AlphaRecoveredPopulation(WorldSeed seed, Func<int, int, int[]> candidatesAt,
+            Func<ZoneKey, int, int, double> groundHeight, bool recoveredKind)
+        {
+            _seed = seed;
+            _candidatesAt = candidatesAt;
+            _groundHeight = groundHeight;
+        }
+
+        /// <summary>True when kinds come from the recovered selector 0x5F56C0.</summary>
+        public bool UsesRecoveredKindSelector => _candidatesAt != null;
 
         /// <param name="kindAt">zone + local x/z → Alpha kind (the 0x5F56C0 choice), or −1 for "nothing here".</param>
         /// <param name="groundHeight">zone + local x/z → world Y of the surface; null → 0.</param>
@@ -54,8 +80,19 @@ namespace CubeGame.Features.Creatures
                     if (AlphaWildSpawnRules.CellSkipped(stream.Next())) continue;
                     int localX = AlphaWildSpawnRules.CellCoordinate(cx, stream.Next());
                     int localZ = AlphaWildSpawnRules.CellCoordinate(cz, stream.Next());
-                    int kind = _kindAt(zone, localX, localZ);
-                    if (kind < 0) continue;
+                    int kind;
+                    if (_candidatesAt != null)
+                    {
+                        int[] candidates = _candidatesAt(zone.X * AlphaWorldScale.ZoneVoxels + localX,
+                            zone.Z * AlphaWorldScale.ZoneVoxels + localZ);
+                        kind = AlphaCreatureKindSelector.Pick(candidates, stream.Next());
+                    }
+                    else
+                    {
+                        kind = _kindAt(zone, localX, localZ);
+                        if (kind < 0) continue;
+                    }
+
                     double leaderX = zone.X * (double)AlphaWorldScale.ZoneVoxels + localX;
                     double leaderZ = zone.Z * (double)AlphaWorldScale.ZoneVoxels + localZ;
                     bool passive = CreatureKinds.IsPassiveObject(kind);
@@ -100,8 +137,29 @@ namespace CubeGame.Features.Creatures
                 SpecializationId = 0,
                 Equipment = Array.Empty<RawAlphaItemId>(),
                 BehaviourKey = passive ? "static_object" : BehaviourKey,
-                Provenance = Provenance,
+                Provenance = _candidatesAt != null ? RecoveredKindProvenance : Provenance,
             };
+        }
+
+        /// <summary>
+        /// Runtime templates of a zone (M0-F1A): the definitions plus Alpha's per-template fields. A hostile template
+        /// of the grid gets the window 06:00…24:00 (0x5EB838…0x5EB845); every template keeps the constructor's
+        /// activation radius 200 (0x5ADB29) — the wild grid does not overwrite it.
+        /// </summary>
+        public IReadOnlyList<AlphaSpawnTemplateData> TemplatesForZone(ZoneKey zone)
+        {
+            IReadOnlyList<SpawnDefinition> definitions = SpawnsForZone(zone);
+            var list = new List<AlphaSpawnTemplateData>(definitions.Count);
+            foreach (SpawnDefinition definition in definitions)
+            {
+                bool hostile = definition.Faction == AlphaWildSpawnRules.FactionHostile;
+                list.Add(new AlphaSpawnTemplateData(definition,
+                    hostile ? AlphaWildSpawnRules.HostileWindowStartMs : 0,
+                    hostile ? AlphaWildSpawnRules.HostileWindowEndMs : 0,
+                    AlphaSpawnLifecycle.DefaultActivationRadius));
+            }
+
+            return list;
         }
 
         /// <summary>CUBEGAME_CONTRACT: deterministic stand-in for CRT rand() (15-bit values, like MSVC).</summary>
