@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using CubeGame.AlphaModels;
 using CubeGame.EditorTools;
+using CubeGame.Features.Creatures;
 using CubeGame.Presentation.Rendering;
 using CubeGame.Presentation.Visual;
 using NUnit.Framework;
@@ -213,6 +214,22 @@ namespace CubeGame.Tests.Recovery
             }
 
             Assert.IsEmpty(offenders, string.Join("\n", offenders));
+        }
+
+        [Test]
+        public void AlphaHouseBuilderUsesTheAlphaFootprint()
+        {
+            // R7 (B_house_research.md): style 1 = 3x3 footprint, styles 2..5 = 2x2 footprint.
+            var style1 = new List<(int X, int Y, int Z, uint V)>();
+            AlphaHouseBuilder.BuildAlpha(0, 0, 0, 1, 0, (x, y, z, v) => style1.Add((x, y, z, v)));
+            Assert.IsNotEmpty(style1);
+            Assert.That(style1.Any(v => v.Y == 3), "style 1 has a roof layer at y=3");
+
+            var style2 = new List<(int X, int Y, int Z, uint V)>();
+            AlphaHouseBuilder.BuildAlpha(0, 0, 0, 2, 0, (x, y, z, v) => style2.Add((x, y, z, v)));
+            Assert.IsNotEmpty(style2);
+            Assert.That(style2.All(v => v.X < 2 && v.Z < 2), "style 2 uses a 2x2 footprint");
+            Assert.That(style2.Any(v => v.Y == 2), "style 2 has a roof layer at y=2");
         }
 
         [Test]

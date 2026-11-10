@@ -89,5 +89,57 @@ namespace CubeGame.Features.Creatures
                 (x, y, z, v) => result.Add((x, y, z, v)), doorSide);
             return result;
         }
+
+        /// <summary>
+        /// Alpha house geometry (R7, B_house_research.md): a 3x3x4 grid whose cells carry part types
+        /// (1 wall / 2 floor / 3 roof) plus door flags. Styles 1..5 fill different footprints
+        /// (Chunk_generateObjects 0x5AF170): style 1 = 3x3, styles 2..5 = 2x2. The layout is
+        /// ALPHA_DECOMPILED; the voxel materials remain RECONSTRUCTED (Alpha's part->material map is
+        /// not ported yet), so this is honest geometry parity with partial materials.
+        /// </summary>
+        public const string AlphaProvenance =
+            "ALPHA_DECOMPILED: house 3x3x4 part grid from Chunk_generateObjects 0x5AF170; materials RECONSTRUCTED";
+
+        public static int BuildAlpha(int originX, int originY, int originZ, int style, int doorSide,
+            Action<int, int, int, uint> write)
+        {
+            if (write == null) throw new ArgumentNullException(nameof(write));
+            int footprint = style == 1 ? 3 : 2;   // style 1 = 3x3, styles 2..5 = 2x2
+            int roofY = style == 1 ? 3 : 2;       // style 1 = 4 layers, styles 2..5 = 3 layers
+            int count = 0;
+
+            // Floor (part type 2) at y=0.
+            for (int x = 0; x < footprint; x++)
+            for (int z = 0; z < footprint; z++)
+                count += Write(write, originX + x, originY, originZ + z, FloorVoxel);
+
+            // Walls (part type 1) at y=1..roofY-1; the door flag renders as a doorway (no wall).
+            int doorX = footprint / 2;
+            for (int y = 1; y < roofY; y++)
+            {
+                for (int x = 0; x < footprint; x++)
+                {
+                    if (!(y <= DoorHeight && IsDoorway(doorSide, 0, x, y, doorX)))
+                        count += Write(write, originX + x, originY + y, originZ, WallVoxel);
+                    if (!(y <= DoorHeight && IsDoorway(doorSide, 2, x, y, doorX)))
+                        count += Write(write, originX + x, originY + y, originZ + footprint - 1, WallVoxel);
+                }
+
+                for (int z = 1; z < footprint - 1; z++)
+                {
+                    if (!(y <= DoorHeight && IsDoorway(doorSide, 3, z, y, doorX)))
+                        count += Write(write, originX, originY + y, originZ + z, WallVoxel);
+                    if (!(y <= DoorHeight && IsDoorway(doorSide, 1, z, y, doorX)))
+                        count += Write(write, originX + footprint - 1, originY + y, originZ + z, WallVoxel);
+                }
+            }
+
+            // Roof (part type 3) at y=roofY.
+            for (int x = 0; x < footprint; x++)
+            for (int z = 0; z < footprint; z++)
+                count += Write(write, originX + x, originY + roofY, originZ + z, RoofVoxel);
+
+            return count;
+        }
     }
 }
