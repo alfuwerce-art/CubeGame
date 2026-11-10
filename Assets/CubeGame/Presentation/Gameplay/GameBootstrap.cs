@@ -33,6 +33,7 @@ namespace CubeGame.Gameplay
     /// -cubeSeed &lt;uint&gt;, -cubeScreenshot &lt;png&gt; (+ -cubeFrames &lt;n&gt;): capture then quit;
     /// -cubeCamera &lt;yaw&gt; &lt;pitch&gt; &lt;distance&gt;: orbit camera at world entry; -cubeAttackFrame &lt;n&gt;: hero attacks once.
     /// </summary>
+    [DefaultExecutionOrder(-100)]
     public sealed partial class GameBootstrap : MonoBehaviour
     {
         /// <summary>
@@ -131,7 +132,6 @@ namespace CubeGame.Gameplay
         private string _formSeed = DefaultSeed.ToString(CultureInfo.InvariantCulture);
         private string _formHeroName = "Hero";
         private int _formClass;
-        private int _formSlot;
         private HeroAppearance _formLook = AlphaHeroCreation.Default;
 
         public GameSession Session => _session;
@@ -199,7 +199,7 @@ namespace CubeGame.Gameplay
             if (_session.State == SessionState.InGame)
             {
                 ApplyHeroMovementState(_session.Hero);
-                if (_motor != null && _motor.enabled && Input.GetMouseButtonDown(0) && !PointerOverInterface())
+                if (AcceptsGameplayInput() && Input.GetMouseButtonDown(0) && !PointerOverInterface())
                 {
                     HeroAttack();
                 }
@@ -342,6 +342,9 @@ namespace CubeGame.Gameplay
             }
 
             DestroyWorldViews();
+            _selectedCheckpoint = null;
+            _selectedSlot = null;
+            ShowStartupScreen(StartupScreen.Start);
             return Report(true, "returned to main menu");
         }
 
@@ -922,11 +925,13 @@ namespace CubeGame.Gameplay
         {
             if (_session.State == SessionState.InGame)
             {
+                _contextChangedFrame = Time.frameCount;
                 _session.Pause();
                 SetGameplayInput(false);
             }
             else if (_session.State == SessionState.Paused)
             {
+                _contextChangedFrame = Time.frameCount;
                 _session.Resume();
                 SetGameplayInput(true);
             }
@@ -1048,6 +1053,7 @@ namespace CubeGame.Gameplay
             _lastHeroScenePosition = heroPoint;
 
             _motor = _player.AddComponent<PlayerMotor>();
+            _motor.AcceptsInput = AcceptsGameplayInput;
             ApplyHeroMovementState(hero);
             _motor.SetCamera(_camera.transform);
             WorldState waterWorld = _worldState;
@@ -1057,6 +1063,7 @@ namespace CubeGame.Gameplay
                 return Voxel.IsWater(waterWorld.VoxelAt((int)Math.Floor(wx), (int)Math.Floor(wy), (int)Math.Floor(wz)));
             };
             _orbitCamera.Target = _player.transform;
+            _orbitCamera.AcceptsInput = AcceptsGameplayInput;
             _orbitCamera.Distance = OrbitCameraController.DefaultDistance;
             if (_cameraOverride)
             {
@@ -1100,6 +1107,7 @@ namespace CubeGame.Gameplay
             if (_orbitCamera != null)
             {
                 _orbitCamera.Target = null;
+                _orbitCamera.AcceptsInput = null;
             }
 
             if (_worldView != null)

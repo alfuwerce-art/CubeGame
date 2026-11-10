@@ -27,6 +27,7 @@ namespace CubeGame.Gameplay
         private SessionState? _drawnState;
         private GamePanel _drawnPanel;
         private bool _panelDirty;
+        private int _contextChangedFrame = -1;
         private string _panelMessage = string.Empty;
         private PanelSettings _panelSettings;
         private VisualElement _interface;
@@ -146,17 +147,22 @@ namespace CubeGame.Gameplay
             {
                 return;
             }
-            if (Input.GetKeyDown(KeyCode.I)) ToggleInventory();
-            if (Input.GetKeyDown(KeyCode.K)) TogglePanel(GamePanel.Skills);
-            if (Input.GetKeyDown(KeyCode.M)) TogglePanel(GamePanel.Map);
-            if (Input.GetKeyDown(KeyCode.J)) TogglePanel(GamePanel.Journal);
-            if (_panel != GamePanel.None)
+            // Cube.exe 0x47E1B0 dispatches B/I to 0x488C00 and M to the map flag.
+            // Resolve one UI transition before allowing gameplay to read the same frame.
+            if (Input.GetKeyDown(KeyCode.B) || Input.GetKeyDown(KeyCode.I)) ToggleInventory();
+            else if (Input.GetKeyDown(KeyCode.M)) TogglePanel(GamePanel.Map);
+            else if (Input.GetKeyDown(KeyCode.K)) TogglePanel(GamePanel.Skills);
+            else if (Input.GetKeyDown(KeyCode.J)) TogglePanel(GamePanel.Journal);
+            if (!AcceptsGameplayInput())
             {
                 return;
             }
             if (Input.GetKeyDown(KeyCode.Q)) UsePotionShortcut();
             if (Input.GetKeyDown(KeyCode.E)) InteractFromInterface();
         }
+
+        private bool AcceptsGameplayInput() => _session.State == SessionState.InGame && !HeroDead
+            && _panel == GamePanel.None && _contextChangedFrame != Time.frameCount;
 
         private bool PointerOverInterface()
         {
@@ -171,7 +177,7 @@ namespace CubeGame.Gameplay
             return hit != null && _interface.Contains(hit);
         }
 
-        public void ToggleInventory() => TogglePanel(InventoryOpen ? GamePanel.None : GamePanel.Inventory);
+        public void ToggleInventory() => TogglePanel(GamePanel.Inventory);
 
         private void TogglePanel(GamePanel panel) => ShowPanel(_panel == panel ? GamePanel.None : panel);
 
@@ -185,6 +191,7 @@ namespace CubeGame.Gameplay
             if (_panel == GamePanel.Town) _townNpc = default;
             if (_panel == GamePanel.Map) ReleaseMap();
             _panel = panel;
+            _contextChangedFrame = Time.frameCount;
             _panelMessage = string.Empty;
             _skillDraft = null;
             if (panel == GamePanel.Skills) BeginSkillDraft(_session.Hero);
@@ -294,7 +301,7 @@ namespace CubeGame.Gameplay
             _feedbackLabel = Text(_interface, "", "game-feedback", "feedback");
             _feedbackLabel.pickingMode = PickingMode.Ignore;
             var actions = Row(_interface, "action-bar");
-            ButtonOf(actions, "Inventory [I]", "open-inventory", ToggleInventory);
+            ButtonOf(actions, "Inventory [B/I]", "open-inventory", ToggleInventory);
             ButtonOf(actions, "Skills [K]", "open-skills", () => TogglePanel(GamePanel.Skills));
             ButtonOf(actions, "Journal [J]", "open-journal", () => TogglePanel(GamePanel.Journal));
             ButtonOf(actions, "Map [M]", "open-map", () => TogglePanel(GamePanel.Map));

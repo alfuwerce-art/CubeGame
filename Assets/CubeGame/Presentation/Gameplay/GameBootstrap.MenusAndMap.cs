@@ -4,6 +4,7 @@ using System.Globalization;
 using CubeGame.Core.Characters;
 using CubeGame.Features.Combat;
 using CubeGame.Features.Contracts;
+using CubeGame.Features.Persistence;
 using CubeGame.Features.Session;
 using CubeGame.Features.World;
 using CubeGame.Presentation.Visual;
@@ -14,6 +15,12 @@ namespace CubeGame.Gameplay
 {
     public sealed partial class GameBootstrap
     {
+        private enum StartupScreen { Start, Characters, CreateCharacter, Worlds, CreateWorld }
+
+        private StartupScreen _startupScreen;
+        private SlotLoadResult _selectedCheckpoint;
+        private string _selectedSlot;
+
         private const int LocalMapZoneSpan = 3;
         private Texture2D _localMap;
         private Vector2Int _localMapOrigin;
@@ -25,36 +32,141 @@ namespace CubeGame.Gameplay
         {
             var panel = Surface("main-menu", "main-menu");
             _interface.Add(panel);
-            Text(panel, "CubeGame", null, "heading");
+            string title = _startupScreen switch
+            {
+                StartupScreen.Characters => "Select character",
+                StartupScreen.CreateCharacter => "Create character",
+                StartupScreen.Worlds => "Select world",
+                StartupScreen.CreateWorld => "Create world",
+                _ => "CubeGame",
+            };
+            Text(panel, title, null, "heading");
             _statusLabel = Text(panel, "", "menu-status", "muted");
             var body = new ScrollView();
             panel.Add(body);
-            Text(body, "New world", null, "section");
-            AddField(body, "World name", "world-name", _formWorldName, value => _formWorldName = value);
-            AddField(body, "Seed", "world-seed", _formSeed, value => _formSeed = value);
-            AddChoice(body, "Slot", "world-slot", SlotKeys, _formSlot, index => _formSlot = index);
 
-            Text(body, "Create hero", null, "section");
+            // Cube.exe 0x483E70, 0x4821A0, 0x484170 and 0x4814F0 switch these screens
+            // by writing Plasma visibility flags. The save choices use CubeGame's existing paired slots.
+            switch (_startupScreen)
+            {
+                case StartupScreen.Start:
+                    ButtonOf(body, "Start Game", "start-game", () => ShowStartupScreen(StartupScreen.Characters));
+                    ButtonOf(body, "Quit", "quit", QuitGame);
+                    break;
+                case StartupScreen.Characters:
+                    BuildCharacterSelection(body);
+                    AddBack(StartupScreen.Start);
+                    break;
+                case StartupScreen.CreateCharacter:
+                    BuildCharacterCreation(body);
+                    AddBack(StartupScreen.Characters);
+                    break;
+                case StartupScreen.Worlds:
+                    BuildWorldSelection(body);
+                    AddBack(StartupScreen.Characters);
+                    break;
+                case StartupScreen.CreateWorld:
+                    BuildWorldCreation(body);
+                    AddBack(StartupScreen.Worlds);
+                    break;
+            }
+
+            void AddBack(StartupScreen screen) => ButtonOf(body, "Back", "menu-back", () => ShowStartupScreen(screen));
+        }
+
+        private void ShowStartupScreen(StartupScreen screen)
+        {
+            _startupScreen = screen;
+            _status = string.Empty;
+            _drawnState = null;
+        }
+
+        private void BuildCharacterSelection(VisualElement body)
+        {
+            foreach (string slot in SlotKeys)
+            {
+                if (!_slots.Exists(slot)) continue;
+                SlotLoadResult checkpoint = _slots.Load(slot, null);
+                if (!checkpoint.IsSuccess)
+                {
+                    Text(body, $"{slot}: {checkpoint.Message}", null, "muted");
+                    continue;
+                }
+
+                ButtonOf(body, $"{checkpoint.Hero.Name} · {checkpoint.Hero.Sheet.Class} · {checkpoint.World.Name}",
+                    $"select-character-{slot}", () =>
+                    {
+                        _selectedSlot = slot;
+                        _selectedCheckpoint = checkpoint;
+                        ShowStartupScreen(StartupScreen.Worlds);
+                    });
+            }
+
+            ButtonOf(body, "New character", "new-character", () =>
+            {
+                _selectedSlot = null;
+                _selectedCheckpoint = null;
+                _formHeroName = string.Empty;
+                _formClass = 0;
+                _formLook = AlphaHeroCreation.Default;
+                ShowStartupScreen(StartupScreen.CreateCharacter);
+            });
+        }
+
+        private void BuildCharacterCreation(VisualElement body)
+        {
             var name = AddField(body, "Hero name", "hero-name", _formHeroName, value => _formHeroName = value);
             name.maxLength = AlphaHeroCreation.MaxNameLength;
             AddChoice(body, "Class", "hero-class", Enum.GetNames(typeof(CharacterClass)), _formClass, index => _formClass = index);
-            var look = new VisualElement();
-            body.Add(look);
-            BuildAppearance(look);
-            ButtonOf(body, "Create world", "create-world", () =>
+            BuildAppearance(body);
+            ButtonOf(body, "Create character", "create-character", () => ShowStartupScreen(StartupScreen.Worlds));
+        }
+
+        private void BuildWorldSelection(VisualElement body)
+        {
+            if (_selectedCheckpoint != null)
             {
-                uint seed = uint.TryParse(_formSeed, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint parsed)
-                    ? parsed : DefaultSeed;
-                StartNewWorld(SlotKeys[_formSlot], _formWorldName, seed, _formHeroName, CharacterClasses.FromId(_formClass), _formLook);
-            });
-            Text(body, "Saved worlds", null, "section");
-            var loads = Row(body);
+                string slot = _selectedSlot;
+                Text(body, _selectedCheckpoint.Hero.Name, null, "muted");
+                ButtonOf(body, $"Enter {_selectedCheckpoint.World.Name}", $"load-{slot}", () => LoadWorld(slot));
+                return;
+            }
+
+            Text(body, AlphaHeroCreation.NormalizeName(_formHeroName), null, "muted");
+            ButtonOf(body, "New world", "new-world", () => ShowStartupScreen(StartupScreen.CreateWorld));
+        }
+
+        private void BuildWorldCreation(VisualElement body)
+        {
+            var freeSlots = new List<string>();
             foreach (string slot in SlotKeys)
             {
-                bool exists = _slots.Exists(slot);
-                ButtonOf(loads, exists ? $"Load {slot}" : $"{slot} empty", $"load-{slot}", () => LoadWorld(slot)).SetEnabled(exists);
+                if (!_slots.Exists(slot)) freeSlots.Add(slot);
             }
-            ButtonOf(body, "Quit", "quit", QuitGame);
+            if (freeSlots.Count == 0)
+            {
+                Text(body, "All save slots are in use.", null, "muted");
+                return;
+            }
+
+            string selectedSlot = freeSlots[0];
+            AddField(body, "World name", "world-name", _formWorldName, value => _formWorldName = value);
+            AddField(body, "Seed", "world-seed", _formSeed, value => _formSeed = value);
+            AddChoice(body, "Save slot", "world-slot", freeSlots, 0, index => selectedSlot = freeSlots[index]);
+            ButtonOf(body, "Create world", "create-world", () =>
+            {
+                if (_slots.Exists(selectedSlot))
+                {
+                    Report(false, "The selected save slot is already in use.");
+                    return;
+                }
+                if (!uint.TryParse(_formSeed, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint seed))
+                {
+                    Report(false, "Enter a seed between 0 and 4294967295.");
+                    return;
+                }
+                StartNewWorld(selectedSlot, _formWorldName, seed, _formHeroName, CharacterClasses.FromId(_formClass), _formLook);
+            });
         }
 
         private void BuildAppearance(VisualElement body)

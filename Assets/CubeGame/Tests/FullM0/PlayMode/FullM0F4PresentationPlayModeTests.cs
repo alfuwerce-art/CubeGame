@@ -111,8 +111,22 @@ namespace CubeGame.Tests.FullM0.PlayMode
             game.SoundContentRoot = string.IsNullOrEmpty(localCorpus) ? _directory : Directory.GetParent(localCorpus).FullName;
             yield return null;
             yield return null;
-            Root(game).Q<TextField>("world-name").value = "F4 world";
+            Press(game, "start-game");
+            yield return null;
+            Assert.IsNull(Root(game).Q("world-name"));
+            Press(game, "new-character");
+            yield return null;
+            Press(game, "menu-back");
+            yield return null;
+            Assert.IsNull(Root(game).Q("hero-name"));
+            Press(game, "new-character");
+            yield return null;
             Root(game).Q<TextField>("hero-name").value = "Brena";
+            Press(game, "create-character");
+            yield return null;
+            Press(game, "new-world");
+            yield return null;
+            Root(game).Q<TextField>("world-name").value = "F4 world";
             yield return Capture(game, "menu");
             Press(game, "create-world");
             yield return null;
@@ -309,6 +323,10 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.IsTrue(game.GetComponentsInChildren<AudioSource>().All(voice => voice.clip == null));
             Assert.AreEqual(0, CountNamed("Player"));
 
+            Press(game, "start-game");
+            yield return null;
+            Press(game, "select-character-slot0");
+            yield return null;
             Press(game, "load-slot0");
             yield return null;
             hero = game.Session.Hero;

@@ -23,6 +23,8 @@ namespace CubeGame.Presentation.CameraRig
         private float _yaw;
         private float _pitch = 20f;
 
+        public System.Func<bool> AcceptsInput { get; set; }
+
         public Transform Target
         {
             get => target;
@@ -59,7 +61,8 @@ namespace CubeGame.Presentation.CameraRig
                 return;
             }
 
-            if (Input.GetMouseButton(1) || Cursor.lockState == CursorLockMode.Locked)
+            if ((AcceptsInput == null || AcceptsInput()) &&
+                (Input.GetMouseButton(1) || Cursor.lockState == CursorLockMode.Locked))
             {
                 _yaw += Input.GetAxis("Mouse X") * MouseSensitivity;
                 _pitch -= Input.GetAxis("Mouse Y") * MouseSensitivity;
