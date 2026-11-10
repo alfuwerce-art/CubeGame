@@ -94,6 +94,21 @@ namespace CubeGame.Features.World
         {
             int x = WorldLayout.StartVoxel;
             int z = WorldLayout.StartVoxel;
+            // Spawn in the start village's Town zone (nearest generated town to the climate anchor), so the
+            // hero sees NPCs and houses immediately instead of four zones away (OQ-22 note).
+            if (generator is AlphaTerrainGenerator terrain)
+            {
+                AlphaRegion region = terrain.RegionRecord(WorldLayout.CenterRegion, WorldLayout.CenterRegion);
+                int slot = region != null ? Array.FindIndex(region.Zones, r => r.Type == AlphaZoneRecord.Town) : -1;
+                if (slot >= 0)
+                {
+                    int lx = slot / WorldLayout.ZonesPerRegion;
+                    int lz = slot % WorldLayout.ZonesPerRegion;
+                    x = (WorldLayout.CenterRegion * WorldLayout.ZonesPerRegion + lx) * WorldLayout.ZoneSize + WorldLayout.ZoneSize / 2;
+                    z = (WorldLayout.CenterRegion * WorldLayout.ZonesPerRegion + lz) * WorldLayout.ZoneSize + WorldLayout.ZoneSize / 2;
+                }
+            }
+
             int surface = Apply(generator.Voxels(x, z), deltas, x, z).TopSolid();
             int top = Math.Max(surface, generator.WaterLevel);
             return new WorldPosition(x + 0.5, top + 1.2, z + 0.5);

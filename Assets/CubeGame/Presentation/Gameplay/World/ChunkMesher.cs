@@ -109,6 +109,7 @@ namespace CubeGame.Gameplay.Streaming
                         }
                     }
 
+                    int top = c.TopSolid();
                     int yMax = c.TopStored > 0 ? c.TopStored : 0;
                     for (int y = yMin; y <= yMax; y++)
                     {
@@ -118,9 +119,21 @@ namespace CubeGame.Gameplay.Streaming
                             float r = Voxel.R(v) / 255f;
                             float g = Voxel.G(v) / 255f;
                             float b = Voxel.B(v) / 255f;
+                            // Alpha sunlight fill (ChunkBuffer): sky-exposed voxels are full-bright, voxels under
+                            // an overhang / inside a cave fade with depth instead of looking flat.
+                            float sun = y >= top ? 1f : System.MathF.Max(0.35f, 1f - (top - y) * 0.07f);
+                            r *= sun;
+                            g *= sun;
+                            b *= sun;
                             if (!Voxel.IsSolid(c.Read(y + 1)))
                             {
-                                Top(terrain, lx, y + 1, lz, r, g, b, 1f);
+                                // Standard voxel AO on the top face vertices: each vertex sees its two edge
+                                // neighbours and the corner at the face level.
+                                float a0 = VertexAo(chunk, lx, lz, y + 1, -1, -1);
+                                float a1 = VertexAo(chunk, lx, lz, y + 1, -1, 1);
+                                float a2 = VertexAo(chunk, lx, lz, y + 1, 1, 1);
+                                float a3 = VertexAo(chunk, lx, lz, y + 1, 1, -1);
+                                TopWithAo(terrain, lx, y + 1, lz, r, g, b, a0, a1, a2, a3);
                             }
 
                             if (y >= c.Bottom && !Voxel.IsSolid(c.Read(y - 1)))
@@ -167,6 +180,34 @@ namespace CubeGame.Gameplay.Streaming
             }
 
             return new Result { Terrain = terrain, Water = water };
+        }
+
+        /// <summary>Standard voxel AO for one top-face vertex (dx, dz are the corner direction, ±1).</summary>
+        private static float VertexAo(ChunkVoxels chunk, int x, int z, int y, int dx, int dz)
+        {
+            bool sideX = SolidAt(chunk, x + dx, z, y);
+            bool sideZ = SolidAt(chunk, x, z + dz, y);
+            bool corner = SolidAt(chunk, x + dx, z + dz, y);
+            if (sideX && sideZ) return 0.55f;
+            int count = (sideX ? 1 : 0) + (sideZ ? 1 : 0) + (corner ? 1 : 0);
+            return 1f - count * 0.15f;
+        }
+
+        private static bool SolidAt(ChunkVoxels chunk, int x, int z, int y)
+        {
+            VoxelColumn c = chunk.At(x, z);
+            return c != null && Voxel.IsSolid(c.Read(y));
+        }
+
+        private static void TopWithAo(MeshData mesh, float x, float y, float z, float r, float g, float b,
+            float a0, float a1, float a2, float a3)
+        {
+            int s = mesh.VertexCount;
+            mesh.AddVertex(x, y, z, 0f, 1f, 0f, r * a0, g * a0, b * a0, 1f);
+            mesh.AddVertex(x, y, z + 1, 0f, 1f, 0f, r * a1, g * a1, b * a1, 1f);
+            mesh.AddVertex(x + 1, y, z + 1, 0f, 1f, 0f, r * a2, g * a2, b * a2, 1f);
+            mesh.AddVertex(x + 1, y, z, 0f, 1f, 0f, r * a3, g * a3, b * a3, 1f);
+            mesh.AddQuad(s, s + 1, s + 2, s + 3);
         }
 
         private static void Top(MeshData mesh, float x, float y, float z, float r, float g, float b, float a)
