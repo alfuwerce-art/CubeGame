@@ -144,7 +144,8 @@ namespace CubeGame.Gameplay
 
         public string FindNearestHostile(CreatureState self, double radius)
         {
-            if (!TryGetTarget(HeroTargetId, out CreatureTarget hero))
+            if (!_enemies.TryGetValue(self.StableId, out Enemy enemy) || !enemy.Combatant.Hostile
+                || !TryGetTarget(HeroTargetId, out CreatureTarget hero))
             {
                 return null;
             }
@@ -163,12 +164,35 @@ namespace CubeGame.Gameplay
                 return false;
             }
 
-            if (TryGetTarget(HeroTargetId, out CreatureTarget hero))
+            Combatant attacker = enemy.Combatant;
+            AttackPlan plan = AlphaAttackRoute.ForAction(actionCode);
+            // A timed clip offered by the library does not prove that this spawn launches it in Alpha.
+            // C-29 or an equipped weapon plus its weapon-action gate can establish a routed attack.
+            bool provenSelection = enemy.Ai.LastSelectedAttack == actionCode
+                || (AlphaNpcWeaponActions.HasWeapon(self) && AlphaNpcWeaponActions.IsWeaponOnly(actionCode));
+            if (!provenSelection && plan.Path != AttackPath.Melee)
             {
-                enemy.Combatant.Yaw = YawTowards(enemy.Combatant.Position.X, enemy.Combatant.Position.Z, hero.X, hero.Z);
+                plan = new AttackPlan(plan.Action, AttackPath.Melee, ProjectileKind.Arrow,
+                    "PLACEHOLDER_NOT_ALPHA: timed creature clip without a proven launch");
             }
 
-            if (!_session.Combat.TryStartAttack(enemy.Combatant.Id, new ActionId(actionCode), _session.Clock.TimeMs, $"action_{actionCode:000}"))
+            attacker.ClearAim();
+            if (TryGetTarget(HeroTargetId, out CreatureTarget hero))
+            {
+                attacker.Yaw = YawTowards(attacker.Position.X, attacker.Position.Z, hero.X, hero.Z);
+                if (plan.Path != AttackPath.Melee && _session.Combat.TryGet(StableEntityId.Hero, out Combatant target))
+                {
+                    // CUBEGAME_CONTRACT: aim at the centre of the target box in world coordinates.
+                    attacker.SetAim(hero.X - attacker.Position.X,
+                        _session.Hero.Position.Y + (target.HitHeight - attacker.HitHeight) * 0.5 - attacker.Position.Y,
+                        hero.Z - attacker.Position.Z);
+                }
+            }
+
+            bool started = actionCode == CreatureRules.PotionActionId
+                ? _session.Combat.TryStartAction(attacker.Id, plan.Action, _session.Clock.TimeMs, $"action_{actionCode:000}", false)
+                : _session.Combat.TryStartAttack(attacker.Id, plan, _session.Clock.TimeMs);
+            if (!started)
             {
                 reason = _session.Combat.LastRejection;
                 return false;

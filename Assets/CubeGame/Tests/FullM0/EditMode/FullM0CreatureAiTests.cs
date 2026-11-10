@@ -94,6 +94,32 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.Less(_session.Hero.Health.CurrentHealth, heroMax);
         }
 
+        [TestCase(0, 6, 0x17, ProjectileKind.Arrow)]
+        [TestCase(3, -1, 0x25, ProjectileKind.Magic)]
+        public void C29SelectedAttackReleasesAlphaProjectile(int classId, int subtype, int code, ProjectileKind kind)
+        {
+            var action = new ActionId(code);
+            ((ActionTimingTable)_session.ActionTimings).Add(Wolf, action, ActionTiming.FromAlpha(100, 200, 300));
+            _session.Clock.Ticked -= _driver.Tick;
+            _driver = new CreatureCombatDriver(_session, null, _ => new[] { code }, 11u);
+            _session.Clock.Ticked += _driver.Tick;
+            _wolf.Position = new WorldPosition(1.8, 5, 0);
+            RawAlphaItemId? weapon = subtype < 0 ? (RawAlphaItemId?)null : new RawAlphaItemId(3, subtype);
+            _driver.Add(_wolf, 1, 0, (int)CreatureFaction.Monster, classId, 0, weapon);
+            ProjectileSpawned released = null;
+            _session.Events.Subscribe<ProjectileSpawned>(e => released = e);
+
+            _session.Clock.StepTicks(6);
+
+            Assert.IsTrue(_driver.TryGetAi(_wolf.Id, out var ai));
+            Assert.AreEqual(code, ai.LastSelectedAttack);
+            Assert.IsNotNull(released, ai.LastReason);
+            Assert.AreEqual(_wolf.Id, released.Owner);
+            Assert.AreEqual((int)kind, released.Kind);
+            Assert.Less(released.VelocityX, 0, "the creature aims toward the hero");
+            Assert.Less(_session.Hero.Health.CurrentHealth, _session.Hero.Health.MaxHealth);
+        }
+
         [Test]
         public void PauseStopsCreatures()
         {

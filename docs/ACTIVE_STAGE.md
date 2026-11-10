@@ -2,7 +2,7 @@
 
 **Рабочая ветка:** `codex/m0-f3-gameplay-loop` · **База:** `4b9480836beeba859340938486f4200d16c1549e` · **Статус:** `IN_PROGRESS`
 
-- [D90](decisions/D90-m0-five-stage-finish-plan.md) · F3-A progression, F3-B items/equipment, F3-C NPC/economy, F3-D quests, F3-E integration/persistence.
+- [D90](decisions/D90-m0-five-stage-finish-plan.md) · [Матрица работ и отчёт F3](reports/M0_F3_GAMEPLAY_LOOP_REPORT.md).
 - Обязательные проверки входной базы — фактический маршрут атак существ и статус P-01 в генераторе реестра.
 - К сдаче требуются полный EditMode, полный PlayMode и сквозной сценарий через save → exit → load → продолжение.
 

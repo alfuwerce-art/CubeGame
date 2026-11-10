@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "source": "docs/research/alpha2013/M0_00B_ALPHA_GAMEPLAY_COVERAGE_MATRIX.md",
-  "sourceSha256": "20a3c1f74a3fd9688197255869258303a5ebf58c52b3549b9a3bff089d5ec198",
-  "entriesHash": "552a12f30465ced1ef87a478dc4935fc1e159b12cdb1957d235b984325927986",
+  "sourceSha256": "c272d7dfd5b64621c09e8ccf6649d8d77ed579dc81990874e26ccaba3794c455",
+  "entriesHash": "c4a909cda750c97b8391036aa63f11a1fe0300d07f51dec44fa484de269c26c4",
   "count": 176,
   "domains": [
     "world",
@@ -28,16 +28,16 @@
     "byConfidence": {
       "BLOCKED": 2,
       "DEFERRED_TO_M0": 1,
-      "DIRECT": 118,
-      "PARTIAL": 30,
-      "UNKNOWN": 25
+      "DIRECT": 122,
+      "PARTIAL": 29,
+      "UNKNOWN": 22
     },
     "byStatus": {
       "IMPLEMENTED_CORE": 15,
-      "IMPLEMENTED_PILOT": 9,
-      "MISSING": 110,
+      "IMPLEMENTED_PILOT": 15,
+      "MISSING": 97,
       "N/A": 4,
-      "PARTIAL": 37,
+      "PARTIAL": 44,
       "TEST_ONLY": 1
     }
   },
@@ -206,7 +206,7 @@
       "id": "P-01",
       "domain": "movement",
       "confidence": "DIRECT",
-      "status": "MISSING",
+      "status": "IMPLEMENTED_PILOT",
       "substage": "M0-03A",
       "line": 109
     },
@@ -222,7 +222,7 @@
       "id": "P-03",
       "domain": "movement",
       "confidence": "DIRECT",
-      "status": "MISSING",
+      "status": "IMPLEMENTED_PILOT",
       "substage": "M0-03A",
       "line": 111
     },
@@ -230,7 +230,7 @@
       "id": "P-04",
       "domain": "movement",
       "confidence": "DIRECT",
-      "status": "MISSING",
+      "status": "IMPLEMENTED_PILOT",
       "substage": "M0-03A",
       "line": 112
     },
@@ -238,7 +238,7 @@
       "id": "P-05",
       "domain": "movement",
       "confidence": "DIRECT",
-      "status": "PARTIAL",
+      "status": "IMPLEMENTED_PILOT",
       "substage": "M0-03A",
       "line": 113
     },
@@ -246,7 +246,7 @@
       "id": "P-06",
       "domain": "movement",
       "confidence": "DIRECT",
-      "status": "MISSING",
+      "status": "IMPLEMENTED_PILOT",
       "substage": "M0-03A",
       "line": 114
     },
@@ -254,7 +254,7 @@
       "id": "P-07",
       "domain": "movement",
       "confidence": "DIRECT",
-      "status": "IMPLEMENTED_PILOT",
+      "status": "PARTIAL",
       "substage": "M0-03A",
       "line": 115
     },
@@ -262,7 +262,7 @@
       "id": "P-08",
       "domain": "movement",
       "confidence": "DIRECT",
-      "status": "MISSING",
+      "status": "IMPLEMENTED_PILOT",
       "substage": "M0-04A",
       "line": 116
     },
@@ -342,7 +342,7 @@
       "id": "P-18",
       "domain": "movement",
       "confidence": "DIRECT",
-      "status": "MISSING",
+      "status": "PARTIAL",
       "substage": "M0-03B",
       "line": 126
     },
@@ -357,8 +357,8 @@
     {
       "id": "P-20",
       "domain": "movement",
-      "confidence": "UNKNOWN",
-      "status": "IMPLEMENTED_PILOT",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
       "substage": "M0-03B",
       "line": 128
     },
@@ -366,7 +366,7 @@
       "id": "P-21",
       "domain": "movement",
       "confidence": "DIRECT",
-      "status": "IMPLEMENTED_PILOT",
+      "status": "PARTIAL",
       "substage": "M0-03B",
       "line": 129
     },
@@ -374,7 +374,7 @@
       "id": "P-22",
       "domain": "movement",
       "confidence": "DIRECT",
-      "status": "IMPLEMENTED_PILOT",
+      "status": "PARTIAL",
       "substage": "M0-03B",
       "line": 130
     },
@@ -390,7 +390,7 @@
       "id": "P-24",
       "domain": "movement",
       "confidence": "DIRECT",
-      "status": "MISSING",
+      "status": "IMPLEMENTED_PILOT",
       "substage": "M0-03B",
       "line": 132
     },
@@ -398,7 +398,7 @@
       "id": "P-25",
       "domain": "movement",
       "confidence": "DIRECT",
-      "status": "MISSING",
+      "status": "IMPLEMENTED_PILOT",
       "substage": "M0-03B",
       "line": 133
     },
@@ -406,14 +406,14 @@
       "id": "P-26",
       "domain": "movement",
       "confidence": "DIRECT",
-      "status": "MISSING",
+      "status": "PARTIAL",
       "substage": "M0-03B",
       "line": 134
     },
     {
       "id": "P-27",
       "domain": "movement",
-      "confidence": "UNKNOWN",
+      "confidence": "DIRECT",
       "status": "MISSING",
       "substage": "M0-03B",
       "line": 135
@@ -541,7 +541,7 @@
     {
       "id": "C-16",
       "domain": "combat",
-      "confidence": "PARTIAL",
+      "confidence": "DIRECT",
       "status": "PARTIAL",
       "substage": "M0-05D",
       "line": 158
@@ -806,7 +806,7 @@
       "id": "N-12",
       "domain": "npc",
       "confidence": "DIRECT",
-      "status": "MISSING",
+      "status": "IMPLEMENTED_PILOT",
       "substage": "M0-06C",
       "line": 198
     },
@@ -870,15 +870,15 @@
       "id": "N-20",
       "domain": "npc",
       "confidence": "UNKNOWN",
-      "status": "MISSING",
+      "status": "PARTIAL",
       "substage": "M0-06D",
       "line": 206
     },
     {
       "id": "N-21",
       "domain": "npc",
-      "confidence": "UNKNOWN",
-      "status": "MISSING",
+      "confidence": "DIRECT",
+      "status": "PARTIAL",
       "substage": "M0-06D",
       "line": 207
     },
@@ -1102,7 +1102,7 @@
       "id": "Q-01",
       "domain": "content_ui",
       "confidence": "DIRECT",
-      "status": "MISSING",
+      "status": "IMPLEMENTED_PILOT",
       "substage": "M0-03A",
       "line": 249
     },
