@@ -1405,6 +1405,11 @@ namespace CubeGame.Gameplay
             bool combatActionSeen = wolfView != null && wolfView.Clips != null && wolfView.Clips.FramesApplied > 0;
             Debug.Log($"[Validate] COMBAT_ACTION_ANIMATION={(combatActionSeen ? "PASS" : "NOT_TRIGGERED")} wolf_frames={wolfView?.Clips?.FramesApplied ?? 0} hero_frames={heroView?.Clips?.FramesApplied ?? 0}");
 
+            AlphaActorView[] allViews = FindObjectsByType<AlphaActorView>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            var actorIds = new List<string>();
+            foreach (AlphaActorView v in allViews) actorIds.Add(v.Ready ? v.ActorId : v.ActorId + "(not-ready)");
+            Debug.Log($"[Validate] REAL_ACTOR_VIEWS={allViews.Length} [{string.Join(", ", actorIds)}]");
+
             if (heroView != null) Debug.Log($"[Validate] hero {heroView.Status()}");
             if (wolfView != null) Debug.Log($"[Validate] wolf {wolfView.Status()}");
             Debug.Log($"[Validate] problems=[{(_visuals != null ? string.Join("; ", _visuals.Problems) : string.Empty)}]");
