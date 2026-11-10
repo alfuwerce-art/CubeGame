@@ -1,8 +1,8 @@
 # M0 REMAINING PLAN — D90
 
-**Status:** APPROVED PLAN / READY_TO_ASSIGN  
+**Status:** HISTORICAL / SUPERSEDED BY D92  
 **Canonical branch:** `integration/m0-all`  
-**Source:** D90.
+**Source:** D90. Активный план: [D92](../decisions/D92-m0-full-alpha-unity-port.md) / [M0 ALPHA FULL UNITY PORT](../stages/M0_ALPHA_FULL_UNITY_PORT_STAGE.md).
 
 | Stage | Scope | Exit criterion |
 |---|---|---|
