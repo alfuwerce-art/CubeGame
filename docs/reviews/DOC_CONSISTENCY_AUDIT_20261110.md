@@ -1,0 +1,40 @@
+# CubeGame — аудит согласованности документации, 2026-11-10
+
+**Status:** REVIEW VALIDATION / NO MERGE.
+**Review branch:** `review/docs-consolidation-20261110` at `725c30862669477d3ad81399413126e1abbb0296`.
+**Canonical:** `integration/m0-all` kept unchanged during this review (baseline `05336984ea48925a957a518ae1ee059be8299768`).
+
+## Approved resolution
+- D91 Q1=batch: model/animation exemplar + producer-approved batches, technical validation per Asset ID; D35 per-item manual art review superseded only in that respect.
+- D91 Q2=single: complete standalone public single-player release prior to multiplayer/server systems; M0-F5 is not public-release authorization.
+- D91 Q3=later: overseas continent and D60 four-act campaign form a later major product milestone after first public solo release.
+- D80/D82 rare Fildor NPCs remain planned; exact release package still OPEN, not inferred from Q3.
+
+## Cross-document checks
+| Area | Result |
+|---|---|
+| GDD | D91 release boundaries and batch review added; historic S05 status caveat added; existing draft mechanics remain draft |
+| Master Roadmap proposal | M0 D90, M1/S06 future stages, public solo milestone, later campaign, later multiplayer, postlaunch biome/season catalog distinguished |
+| Art Direction | D67 + D91 explicit batch review, per-ID technical validation |
+| Production Pipeline | D91 references, staged artistic acceptance, active AGENTS priority |
+| AGENTS | Reads GDD/decision/roadmap for design tasks; executable authority remains ACTIVE_STAGE and D90 |
+| M1/S06 | Updated Roadmap references; concepts remain NOT_AUTHORIZED; seasons remain postlaunch |
+| Decision history | D59–D82 source text retained; D91 recorded as later explicit decision rather than retroactive rewriting |
+| Alpha parity | Backlog unchanged; missing Alpha features remain tracked |
+
+## Technical checks
+- Compared review branch vs `integration/m0-all`: **39 modified/added files; 0 Unity or other non-documentation changes** (only `AGENTS.md` outside `docs/`).
+- Across 12 key documents checked **125 Markdown links**: **0 broken repository-relative destinations**; external URLs were not checked for HTTP health.
+- Not a Unity test run: documentation-only change, so no new Unity parity or build result is claimed.
+- No wholesale merge of old docs branch. No deletions of historical files.
+
+## Known editorial follow-ups / remaining limitations
+1. `docs/planning/ROADMAP_DRAFT.md` deliberately retained as historical; `ROADMAP_CONSOLIDATION_PROPOSAL.md` is the review candidate, not yet a newly accepted canonical roadmap.
+2. Earlier F1/F2 summaries inside PROJECT_MEMORY/ACTIVE_STAGE remain verbose/history-heavy; no destructive rewrite made to canonical current-status documents in this review.
+3. GDD still carries historic S05 references in body. Opening caveat says those are historical; deeper sentence-by-sentence editorial migration and heading renumbering remain pending, to avoid altering anchors/content without complete checks.
+4. Fildor NPC placement in a specific release package is OPEN, since D91 Q3 only explicitly reschedules the overseas continent and four-act campaign. Keep D80/D82 intact pending producer decision.
+5. Non-key historical decision/workshop links and external URLs were not exhaustively checked; a full repository-wide link checker remains recommended before final promotion.
+6. Removing/archive-deduplicating old source files remains pending after ensuring historical links and evidence are preserved.
+
+## Gate for promotion
+Review product decisions [D91](../decisions/D91-document-consolidation-release-batches.md), [GDD](../game-design/GDD_DRAFT.md), [Roadmap proposal](../planning/ROADMAP_CONSOLIDATION_PROPOSAL.md), and [conflict record](DOC_CONFLICTS_FOR_PRODUCER.md). Producer approval explicitly required before canonical integration.
