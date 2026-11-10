@@ -47,5 +47,7 @@ GitHub — основной источник актуального состоя
 
 ## Текущий приоритет
 
-D90 / `M0-F3 GAMEPLAY LOOP`:
-progression → items/equipment → NPC/economy → quests → persistence и полная Unity-регрессия.
+D90 / `M0-F4 PRESENTATION`:
+RIFF/WAV и runtime audio → HUD → inventory/skills/services UI → map/journal/icons → presentation integration и полная Unity-регрессия.
+
+Обязательный reference: `docs/planning/M0_ALPHA_PARITY_BACKLOG.md`. Неполные элементы Alpha нельзя молча считать закрытыми только потому, что соответствующий этап принят.
