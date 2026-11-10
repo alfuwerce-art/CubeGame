@@ -203,4 +203,4 @@ BLOCKERS / QUESTIONS:
 END STATUS = READY_FOR_REVIEW (not ACCEPTED):
 ```
 
-**Критерий качества пайплайна:** по этому шаблону новый агент должен **повторить проверку без переписки прежнего чата**. См. [SESSION_CONTEXT_PLAN](../agents/SESSION_CONTEXT_PLAN.md).
+**Критерий качества пайплайна:** по этому шаблону новый агент должен **повторить проверку без переписки прежнего чата**. См. [SESSION_CONTEXT_PLAN](https://github.com/alfuwerce-art/CubeGame/blob/docs/gdd-first-draft-20261106/docs/agents/SESSION_CONTEXT_PLAN.md).

@@ -1,6 +1,7 @@
 # M1 — эволюция моделей, ригов и анимаций CubeGame
 
 **Статус:** `APPROVED CONCEPT / FUTURE STAGE / NOT_AUTHORIZED`  
+**Регламент художественной приёмки:** [D67](../decisions/D67-art-direction-progressive-batch-review.md) + [D91](../decisions/D91-document-consolidation-release-batches.md): утверждение эталона семейства и партий продюсером; техническая проверка каждого Asset ID; ручная поштучная художественная приёмка не обязательна.  
 **Направление roadmap:** M1 — модели, анимации и визуал.  
 **Концептуальные решения утверждены продюсером:** 2026-11-10.  
 **Начало исполнения:** только после закрытия M0 и отдельного решения продюсера.  
@@ -1936,7 +1937,7 @@ NEW ORIGINAL CONTENT THROUGH THE SAME FACTORY
 
 # 50. Связанные документы
 
-- [ROADMAP_DRAFT](../planning/ROADMAP_DRAFT.md)
+- [Master Roadmap (review)](../planning/ROADMAP_CONSOLIDATION_PROPOSAL.md)
 - [S05_ASSET_CONVERSION_PLAN](S05_ASSET_CONVERSION_PLAN.md)
 - [D65 — full catalog run](../decisions/D65-d64-result-approved-deepseek-full-catalog-run.md)
 - [D67 — original game first visual audit](../decisions/D67-original-game-first-visual-audit.md)

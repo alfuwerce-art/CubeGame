@@ -1,6 +1,7 @@
 # S06 — эволюция материалов, рендера, окружения и погоды CubeGame
 
 **Статус:** `APPROVED CONCEPT / FUTURE STAGE / NOT_AUTHORIZED`  
+**Граница по D82/D91:** погодные эффекты и задел под Season System в S06, настоящая сезонная смена — в postlaunch-контуре; сроки и порядок будущих релизных этапов см. в [Master Roadmap (review)](../planning/ROADMAP_CONSOLIDATION_PROPOSAL.md).  
 **Направление roadmap:** M1 — модели, анимации и визуал.  
 **Концептуальные решения утверждены продюсером:** 2026-11-10.  
 **Начало исполнения:** только после закрытия M0 и отдельного решения продюсера.  
@@ -1078,7 +1079,7 @@ SPRING / SUMMER / AUTUMN / WINTER
 
 # 32. Связанные документы
 
-- [ROADMAP_DRAFT](../planning/ROADMAP_DRAFT.md)
+- [Master Roadmap (review)](../planning/ROADMAP_CONSOLIDATION_PROPOSAL.md)
 - [M1 — модели, риги и анимации](M1_MODEL_ANIMATION_EVOLUTION_STAGE.md)
 - [ACTIVE_STAGE](../ACTIVE_STAGE.md)
 - [PROJECT_MEMORY](../../PROJECT_MEMORY.md)
