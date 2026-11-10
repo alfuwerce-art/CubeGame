@@ -143,6 +143,13 @@ namespace CubeGame.Tests.FullM0.EditMode
             List<ChunkKey> wanted = policy.Wanted(center);
             Assert.AreEqual(25, wanted.Count);
             Assert.AreEqual(center, wanted[0]);
+            CollectionAssert.AreEqual(new[]
+            {
+                new ChunkKey(center.X - 1, center.Z),
+                new ChunkKey(center.X, center.Z - 1),
+                new ChunkKey(center.X, center.Z + 1),
+                new ChunkKey(center.X + 1, center.Z),
+            }, wanted.GetRange(1, 4), "axial neighbors precede diagonals and ties use X then Z");
             Assert.AreEqual(25, new HashSet<ChunkKey>(wanted).Count, "no duplicates");
             Assert.IsFalse(policy.ShouldRelease(new ChunkKey(center.X + 3, center.Z), center));
             Assert.IsTrue(policy.ShouldRelease(new ChunkKey(center.X + 4, center.Z), center));

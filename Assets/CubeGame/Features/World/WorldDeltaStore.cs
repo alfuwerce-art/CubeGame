@@ -227,10 +227,9 @@ namespace CubeGame.Features.World
     }
 
     /// <summary>
-    /// Pure streaming decision (C_streaming §C2: Alpha keeps zone data within 8 zones and frees view tiles past 10).
-    /// CubeGame separates the same two levels: <see cref="ViewRadius"/> (meshes/colliders) and a larger
-    /// <see cref="KeepRadius"/> before a view is released (hysteresis). Radii are CubeGame decisions
-    /// (PLACEHOLDER until profiling, C6.4), measured in 32-voxel chunks (Chebyshev distance).
+    /// Streaming policy for Unity's 32-voxel render chunks. The view and retention bounds are CubeGame
+    /// budgets. Cube.exe 0x469590 prioritizes its 256-voxel ZoneTiles by squared distance, with ties
+    /// resolved by X then Z. The same priority is used here on the Unity mesh grid.
     /// </summary>
     public sealed class WorldStreamingPolicy
     {
@@ -253,27 +252,36 @@ namespace CubeGame.Features.World
         public List<ChunkKey> Wanted(ChunkKey center)
         {
             var result = new List<ChunkKey>();
-            for (int ring = 0; ring <= ViewRadius; ring++)
+            for (int dx = -ViewRadius; dx <= ViewRadius; dx++)
             {
-                for (int dx = -ring; dx <= ring; dx++)
+                for (int dz = -ViewRadius; dz <= ViewRadius; dz++)
                 {
-                    for (int dz = -ring; dz <= ring; dz++)
+                    var key = new ChunkKey(center.X + dx, center.Z + dz);
+                    if (WorldLayout.IsInside(key))
                     {
-                        if (Math.Max(Math.Abs(dx), Math.Abs(dz)) != ring)
-                        {
-                            continue;
-                        }
-
-                        var key = new ChunkKey(center.X + dx, center.Z + dz);
-                        if (WorldLayout.IsInside(key))
-                        {
-                            result.Add(key);
-                        }
+                        result.Add(key);
                     }
                 }
             }
 
+            result.Sort((a, b) => CompareLoadPriority(a, b, center));
             return result;
+        }
+
+        public static int CompareLoadPriority(ChunkKey a, ChunkKey b, ChunkKey center)
+        {
+            int distanceOrder = DistanceSquared(a, center).CompareTo(DistanceSquared(b, center));
+            if (distanceOrder != 0) return distanceOrder;
+
+            int xOrder = a.X.CompareTo(b.X);
+            return xOrder != 0 ? xOrder : a.Z.CompareTo(b.Z);
+        }
+
+        private static long DistanceSquared(ChunkKey key, ChunkKey center)
+        {
+            long dx = (long)key.X - center.X;
+            long dz = (long)key.Z - center.Z;
+            return dx * dx + dz * dz;
         }
 
         public bool ShouldRelease(ChunkKey loaded, ChunkKey center)

@@ -27,6 +27,7 @@ namespace CubeGame.Gameplay.Streaming
         private readonly Dictionary<ChunkKey, ChunkView> _loaded = new Dictionary<ChunkKey, ChunkView>();
         private readonly HashSet<ChunkKey> _inFlight = new HashSet<ChunkKey>();
         private ConcurrentQueue<ChunkVoxels> _ready = new ConcurrentQueue<ChunkVoxels>();
+        private readonly List<ChunkVoxels> _completed = new List<ChunkVoxels>();
         private readonly List<ChunkKey> _wanted = new List<ChunkKey>();
         private readonly HashSet<ChunkKey> _dirty = new HashSet<ChunkKey>();
         private readonly Queue<ChunkKey> _dirtyOrder = new Queue<ChunkKey>();
@@ -57,7 +58,7 @@ namespace CubeGame.Gameplay.Streaming
         public int LoadedCount => _loaded.Count;
 
         public int PendingCount => _wanted.Count + _inFlight.Count + _dirty.Count;
-        public int ReadyCount => _ready.Count;
+        public int ReadyCount => _ready.Count + _completed.Count;
 
         public long TotalBuilt { get; private set; }
 
@@ -228,6 +229,7 @@ namespace CubeGame.Gameplay.Streaming
 
             // Finishing workers can only enqueue into the queue of their original world.
             _ready = new ConcurrentQueue<ChunkVoxels>();
+            _completed.Clear();
 
             _inFlight.Clear();
             _wanted.Clear();
@@ -306,8 +308,21 @@ namespace CubeGame.Gameplay.Streaming
                 }
             }
 
-            while (budget > 0 && _ready.TryDequeue(out ChunkVoxels heights))
+            if (budget <= 0) return;
+
+            while (_ready.TryDequeue(out ChunkVoxels ready))
             {
+                _completed.Add(ready);
+            }
+
+            // Worker completion order is nondeterministic. Spend the main-thread budget on the nearest
+            // completed mesh for the current focus, including after a move or teleport.
+            _completed.Sort((a, b) => WorldStreamingPolicy.CompareLoadPriority(b.Key, a.Key, _center));
+            while (budget > 0 && _completed.Count > 0)
+            {
+                int next = _completed.Count - 1;
+                ChunkVoxels heights = _completed[next];
+                _completed.RemoveAt(next);
                 _inFlight.Remove(heights.Key);
                 if (_policy.ShouldRelease(heights.Key, _center) || _loaded.ContainsKey(heights.Key))
                 {
