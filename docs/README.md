@@ -12,7 +12,7 @@
 ## Что и когда делаем
 - [ACTIVE_STAGE — текущий M0-F4](ACTIVE_STAGE.md)
 - [D90 — текущий план M0](decisions/D90-m0-five-stage-finish-plan.md)
-- [Master Roadmap — новая редакция на ревью](planning/ROADMAP_CONSOLIDATION_PROPOSAL.md)
+- [Master Roadmap — единый план на ревью](planning/ROADMAP_CONSOLIDATION_PROPOSAL.md)
 - [Исторический Roadmap — ещё не удалён](planning/ROADMAP_DRAFT.md)
 - [M1 — модели, риги, анимации (будущий)](stages/M1_MODEL_ANIMATION_EVOLUTION_STAGE.md)
 - [S06 — материалы, окружение, погода (будущий)](stages/S06_RENDER_ENVIRONMENT_EVOLUTION_STAGE.md)

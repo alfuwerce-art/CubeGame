@@ -38,3 +38,9 @@
 
 ## Gate for promotion
 Review product decisions [D91](../decisions/D91-document-consolidation-release-batches.md), [GDD](../game-design/GDD_DRAFT.md), [Roadmap proposal](../planning/ROADMAP_CONSOLIDATION_PROPOSAL.md), and [conflict record](DOC_CONFLICTS_FOR_PRODUCER.md). Producer approval explicitly required before canonical integration.
+
+## Редакционная сверка 2026-11-10 (дополнение)
+
+- Устранено утверждение GDD, что каталог девяти биомов ещё DRAFT: D82 приоритетен, утверждено 9/41 по составу, но реализация postlaunch.
+- Заголовки GDD «3.21/3.22» под разделом 5 и «3.7.1» под разделом 6 исправлены на 5.1/5.2 и 6.1. При наличии внешних ссылок на прежние якоря потребуется их обновить; content rule не менялся.
+- Привязка D92 уточнена в дорожной карте: Фильдор-NPC в первом solo-релизе, Фильдор playable — future DLC.
