@@ -51,11 +51,15 @@ namespace CubeGame.Tests.Creatures.EditMode
             }
         }
 
-        [Test]
-        public void NotesNameTheUnknownDungeonRule()
+        [TestCase(0, false)]
+        [TestCase(1, false)]
+        [TestCase(3, true)]
+        [TestCase(4, false)]
+        [TestCase(5, true)]
+        [TestCase(7, false)]
+        public void DungeonCallUsesOnlyTheRecoveredRecordTypes(int type, bool expected)
         {
-            StringAssert.Contains("UNKNOWN", AlphaContentProviders.Notes);
-            StringAssert.Contains("type 1", AlphaContentProviders.Notes);
+            Assert.AreEqual(expected, AlphaContentProviders.IsDungeonRecord(type));
         }
     }
 }

@@ -90,6 +90,7 @@ namespace CubeGame.Tests.FullM0.EditMode
 
         [TestCase(AlphaTerrainGenerator.Id)]
         [TestCase(AlphaTerrainGenerator.ContentId)]
+        [TestCase(AlphaTerrainGenerator.WorldRuntimeId)]
         public void CheckpointRetainsTheWorldGeneratorVersion(string generatorId)
         {
             var session = new GameSession();

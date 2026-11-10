@@ -99,13 +99,17 @@ namespace CubeGame.Gameplay
             }
             else
             {
-                entry.Root = new GameObject($"Entity_{e.Kind.Value:x2}_{e.Entity.Value:x}").transform;
+                string name = e.WorldObjectName ?? $"Entity_{e.Kind.Value:x2}";
+                entry.Root = new GameObject($"{name}_{e.Entity.Value:x}").transform;
                 entry.Root.SetParent(transform, false);
                 entry.Root.position = _toScene != null ? _toScene(e.Position) : Vector3.zero;
             }
 
             entry.Root.rotation = Quaternion.Euler(0f, e.Yaw, 0f);
-            entry.View = isHero ? BuildHero(entry.Root) : BuildCreature(e.Kind, entry.Root);
+            if (e.WorldObjectName == null)
+            {
+                entry.View = isHero ? BuildHero(entry.Root) : BuildCreature(e.Kind, entry.Root);
+            }
             if (entry.View == null)
             {
                 entry.Placeholder = MakePlaceholder(entry.Root, isHero);
@@ -120,6 +124,7 @@ namespace CubeGame.Gameplay
             {
                 if (entry.Root != null)
                 {
+                    entry.Root.gameObject.SetActive(false);
                     Destroy(entry.Root.gameObject);
                 }
 

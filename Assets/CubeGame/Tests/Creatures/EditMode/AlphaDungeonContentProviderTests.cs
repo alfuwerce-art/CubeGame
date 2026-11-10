@@ -33,6 +33,7 @@ namespace CubeGame.Tests.Creatures.EditMode
             {
                 var spawn = spawns[layout.Rooms.Count + i];
                 Assert.AreEqual(AlphaDungeonContentProvider.ChestBehaviourKey, spawn.BehaviourKey);
+                Assert.AreEqual(0x8F, spawn.Kind.Value);
                 StringAssert.Contains("10 items", spawn.Provenance);
                 Assert.AreEqual(chests[i].X, spawn.Position.X);
                 Assert.AreEqual(chests[i].Y, spawn.Position.Y);

@@ -27,6 +27,9 @@ namespace CubeGame.Features.World
         /// <summary>Raised after a change was recorded (presentation rebuilds the region view).</summary>
         public event Action<RegionKey> RegionChanged;
 
+        /// <summary>Raised for the column of a newly recorded terrain edit.</summary>
+        public event Action<int, int> TerrainColumnChanged;
+
         public int Count
         {
             get
@@ -143,6 +146,10 @@ namespace CubeGame.Features.World
 
                 column[delta.Y] = delta;
             }
+            if (delta.Kind == WorldDeltaKind.BlockSet || delta.Kind == WorldDeltaKind.ColumnSurfaceSet)
+            {
+                TerrainColumnChanged?.Invoke(delta.X, delta.Z);
+            }
             RegionChanged?.Invoke(delta.Region);
         }
 
@@ -165,6 +172,23 @@ namespace CubeGame.Features.World
             return _byRegion.TryGetValue(region, out Dictionary<(WorldDeltaKind, int, int, int), WorldDelta> map)
                 ? (IReadOnlyCollection<WorldDelta>)map.Values
                 : Array.Empty<WorldDelta>();
+        }
+
+        /// <summary>World-object removals use the same zone/channel/index coordinates as entity state.</summary>
+        public bool IsObjectRemoved(ZoneKey zone, int channel, int spawnIndex)
+        {
+            var region = new RegionKey(zone.X >> 6, zone.Z >> 6);
+            return _byRegion.TryGetValue(region, out var map)
+                && map.ContainsKey((WorldDeltaKind.ObjectRemoved, zone.X, channel * 4096 + spawnIndex, zone.Z));
+        }
+
+        /// <summary>Discards a completed entity state without touching terrain or object removals.</summary>
+        public void RemoveEntityState(WorldDelta delta)
+        {
+            if (delta.Kind == WorldDeltaKind.EntityStateChanged && _byRegion.TryGetValue(delta.Region, out var map))
+            {
+                map.Remove(KeyOf(delta));
+            }
         }
 
         public IEnumerable<WorldDelta> All()

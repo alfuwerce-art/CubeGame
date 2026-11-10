@@ -14,6 +14,10 @@
 
 ## 2. Последний сведённый результат
 
+M0-F1 `READY_FOR_REVIEW` в `codex/m0-f1-world-runtime`, база canonical `1c6560c`, F1A Claude `9e50915`. Подключены recovered population, игровое время, респаун и драйвер движения, единый D3-маршрут `/6`, город, данжи и сундуки. Существующие форматы сейва читаются. Коллайдер следует voxel edit при очереди новых чанков. В PlayMode проверены stable ID и дельты через unload/reload и save/exit/load. Полный EditMode 664 passed / 0 failed / 2 skipped, PlayMode 60 passed / 0 failed / 0 skipped, `error CS = 0`. Каноническое слияние после ревью продюсера. [Отчёт M0-F1](docs/reports/M0_F1_WORLD_FIX_REPORT.md)
+
+### База до M0-F1
+
 До D90-cleanup canonical HEAD был `fce38e0`, объединяющий:
 - Codex D3–D6 audit `762ac5d`;
 - Claude D1/D2 review-fix code `47c5b1a` и его последующее сведение.
@@ -42,7 +46,7 @@ Claude review-fix: [D1_D2_SPAWN_PATROL_REVIEW_FIX](docs/reports/D1_D2_SPAWN_PATR
 
 Код разделён на recovered Alpha path и `FallbackPopulationPolicy`.
 
-**Важно:** recovered population/schedule ещё не подключены в `GameBootstrap`. Без kind selector `AlphaWorldPopulation` пуст; ошибочные «расы игрока как существа» больше не спавнятся.
+На базе D90 `AlphaWorldPopulation` без селектора был пуст. В кандидате M0-F1 источник `/6` использует проверенный `0x5F56C0`. Драйвер NPC получает реальное время `GameClock`, а данные расписаний деревень остаются `PARTIAL`.
 
 Открыто: exact rand() stream, часть условий wild cells, 22 non-grid construction sites, NPC equipment R-1, spawn timer persistence.
 
@@ -50,7 +54,7 @@ Claude review-fix: [D1_D2_SPAWN_PATROL_REVIEW_FIX](docs/reports/D1_D2_SPAWN_PATR
 
 Codex audit: [CODEX_D3_D6_INDEPENDENT_AUDIT](docs/reports/CODEX_D3_D6_INDEPENDENT_AUDIT.md).
 
-- D3: дома/W-18 частично подключены; города, данжи и сундуки отсутствуют в основном gameplay route. Dungeon carver — реконструкция CubeGame, не Alpha parity.
+- D3 на входе D90: дома/W-18 частично подключены. Кандидат M0-F1 добавляет город, данжи и сундуки в gameplay route `/6`. Dungeon carver остаётся реконструкцией CubeGame.
 - D4: equipment events работают частично; race/sex/appearance не применяются к runtime hero. Ground loot имеет два визуальных владельца и не следует floating origin.
 - D5: projectile models/flight data существуют, но `attack → projectile → collision → CombatSystem.ResolveHit` отсутствует.
 - D6: 93 sounds cataloged; playback отсутствует. WAV metadata parser ошибается на 32 файлах. Local map/item icons частично подключены.

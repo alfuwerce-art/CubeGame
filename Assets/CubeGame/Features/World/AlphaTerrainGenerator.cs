@@ -87,6 +87,7 @@ namespace CubeGame.Features.World
     {
         public const string Id = "cubegame.alpha_terrain/4";
         public const string ContentId = "cubegame.alpha_terrain/5";
+        public const string WorldRuntimeId = "cubegame.alpha_terrain/6";
 
         public const int DefaultWaterLevel = 0;
 

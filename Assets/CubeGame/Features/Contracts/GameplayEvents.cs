@@ -67,6 +67,9 @@ namespace CubeGame.Features.Contracts
 
         public KindId Kind { get; set; }
 
+        /// <summary>Optional world object name. Its table ID is separate from the creature kind namespace.</summary>
+        public string WorldObjectName { get; set; }
+
         public WorldPosition Position { get; set; }
 
         public float Yaw { get; set; }

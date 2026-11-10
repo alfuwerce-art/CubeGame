@@ -2,9 +2,18 @@
 
 **Canonical plan:** [D90](decisions/D90-m0-five-stage-finish-plan.md) / [M0 remaining plan](planning/M0_REMAINING_PLAN_D90.md)  
 **Branch:** `integration/m0-all`  
-**Status:** `READY_TO_ASSIGN` — план утверждён, результат не ACCEPTED.
+**Review branch:** `codex/m0-f1-world-runtime`
 
-## Текущее состояние
+**Status:** `READY_FOR_REVIEW` в ветке ревью. Каноническое слияние следует за проверкой продюсера.
+
+## Результат M0-F1
+
+- В Pilot подключены recovered population, жизненный цикл, игровое время и драйвер движения из F1A Claude `9e50915`.
+- В новом генераторе `/6` единый D3-маршрут формирует город и данжи с сундуками. Коллайдер перестраивается при voxel edit. Дельты объектов, вокселей и таймер респауна прошли streaming и save/exit/load.
+- Полный EditMode **664 passed, 0 failed, 2 skipped**. Полный PlayMode **60 passed, 0 failed, 0 skipped**. `error CS = 0`. Оба прежних падения коллайдера исправлены.
+- Расписания естественных городских NPC и часть генерации Alpha остаются `PARTIAL`. [Отчёт M0-F1](reports/M0_F1_WORLD_FIX_REPORT.md)
+
+## Входное состояние D90
 
 Последний сведённый код до D90-cleanup: `fce38e0`.
 
@@ -21,7 +30,7 @@ Codex D3–D6 audit — `READY_FOR_REVIEW`:
 - 93 sounds cataloged, playback отсутствует;
 - 32 WAV metadata entries parsed неверно.
 
-## M0-F1 задачи
+## Поставленные задачи M0-F1
 
 1. Подключить recovered D1/D2 к реальному миру и игровому времени.
 2. Исправить два известных PlayMode world-collider fail.
@@ -29,7 +38,7 @@ Codex D3–D6 audit — `READY_FOR_REVIEW`:
 4. Проверить unload/reload, stable IDs, persistence и отсутствие дублей.
 5. Прогнать полный EditMode + PlayMode и оформить `M0_F1_WORLD_FIX_REPORT.md`.
 
-## Тестовая база
+## Тестовая база до M0-F1
 
 После merge Claude+Codex:
 - EditMode: **639 total / 637 passed / 0 failed / 2 skipped / error CS 0**.
