@@ -111,6 +111,8 @@ namespace CubeGame.Gameplay
         private int _frames;
         private string _screenshotPath;
         private int _screenshotFrame = -1;
+        private bool _validateVisual;
+        private int _validateFrame = 600;
         private string _autoNewSlot;
         private string _autoLoadSlot;
         private uint _commandLineSeed = DefaultSeed;
@@ -241,6 +243,13 @@ namespace CubeGame.Gameplay
                 _screenshotFrame = -1;
                 ScreenCapture.CaptureScreenshot(_screenshotPath);
                 Debug.Log($"[Game] screenshot -> {_screenshotPath} state={_session.State} tick={_session.Clock?.Tick}");
+                StartCoroutine(QuitAfterFrames(3));
+            }
+
+            if (_validateVisual && _frames >= _validateFrame && _session.State == SessionState.InGame)
+            {
+                _validateVisual = false;
+                RunVisualValidation();
                 StartCoroutine(QuitAfterFrames(3));
             }
         }
@@ -1340,6 +1349,17 @@ namespace CubeGame.Gameplay
                         }
 
                         break;
+                    case "-cubeValidateVisual":
+                        _validateVisual = true;
+                        _validateFrame = 600;
+                        break;
+                    case "-cubeValidateFrame":
+                        if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int vframes) && vframes > 0)
+                        {
+                            _validateFrame = vframes;
+                        }
+
+                        break;
                 }
             }
         }
@@ -1352,6 +1372,53 @@ namespace CubeGame.Gameplay
             }
 
             QuitGame();
+        }
+
+        /// <summary>R4/R5 visual self-check: writes [Validate] PASS/FAIL markers readable from a Player log.</summary>
+        private void RunVisualValidation()
+        {
+            AlphaActorLibrary library = AlphaActorLibrary.Shared;
+            bool contentReady = library != null && library.State == AlphaContentState.Ready;
+            Debug.Log($"[Validate] ALPHA_CONTENT_READY={(contentReady ? "PASS" : "FAIL")} state={library?.State} origin={library?.Source?.Origin}");
+
+            AlphaActorView heroView = null;
+            bool heroVisible = _visuals != null && _visuals.TryGetView(StableEntityId.Hero, out heroView) && heroView != null;
+            bool heroNotPrimitive = heroVisible && heroView.Rig != null;
+            Debug.Log($"[Validate] PLAYER_MODEL_VISIBLE={(heroVisible ? "PASS" : "FAIL")}");
+            Debug.Log($"[Validate] PLAYER_NOT_PRIMITIVE={(heroNotPrimitive ? "PASS" : "FAIL")}");
+
+            AlphaActorView wolfView = null;
+            bool wolfVisible = _trainingTarget != null && _visuals != null &&
+                               _visuals.TryGetView(_trainingTarget.Id, out wolfView) && wolfView != null;
+            Debug.Log($"[Validate] KNOWN_CREATURE_MODEL_VISIBLE={(wolfVisible ? "PASS" : "FAIL")}");
+
+            int magenta = 0;
+            if (heroView != null) magenta += CountErrorMaterials(heroView);
+            if (wolfView != null) magenta += CountErrorMaterials(wolfView);
+            Debug.Log($"[Validate] NO_MAGENTA={(magenta == 0 ? "PASS" : "FAIL")} MAGENTA_COUNT={magenta}");
+
+            bool heroAnimating = heroView != null && heroView.Ready && heroView.Controller != null && heroView.Controller.Initialized;
+            bool wolfAnimating = wolfView != null && wolfView.Ready && wolfView.Controller != null && wolfView.Controller.Initialized;
+            bool animRunning = heroAnimating && wolfAnimating;
+            Debug.Log($"[Validate] ANIMATION_RUNNING={(animRunning ? "PASS" : "FAIL")} hero={heroAnimating} wolf={wolfAnimating}");
+
+            bool combatActionSeen = wolfView != null && wolfView.Clips != null && wolfView.Clips.FramesApplied > 0;
+            Debug.Log($"[Validate] COMBAT_ACTION_ANIMATION={(combatActionSeen ? "PASS" : "NOT_TRIGGERED")} wolf_frames={wolfView?.Clips?.FramesApplied ?? 0} hero_frames={heroView?.Clips?.FramesApplied ?? 0}");
+
+            if (heroView != null) Debug.Log($"[Validate] hero {heroView.Status()}");
+            if (wolfView != null) Debug.Log($"[Validate] wolf {wolfView.Status()}");
+            Debug.Log($"[Validate] problems=[{(_visuals != null ? string.Join("; ", _visuals.Problems) : string.Empty)}]");
+        }
+
+        private static int CountErrorMaterials(AlphaActorView view)
+        {
+            int count = 0;
+            foreach (Renderer renderer in view.GetComponentsInChildren<Renderer>(true))
+            {
+                if (RuntimeMaterials.IsErrorMaterial(renderer.sharedMaterial)) count++;
+            }
+
+            return count;
         }
 
         // ----- Temporary IMGUI menus (M0-08 replaces them with the final UI; the game API above stays) -----
