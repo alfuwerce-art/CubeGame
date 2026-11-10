@@ -51,3 +51,11 @@ Review product decisions [D91](../decisions/D91-document-consolidation-release-b
 - Старый `ROADMAP_DRAFT.md` помечен `HISTORICAL / SUPERSEDED`; новый master Roadmap остаётся ревью-кандидатом.
 - Полный каталог D82 в GDD приведён к `ACCEPTED catalog 9/41`, а не DRAFT; сами системы остаются postlaunch по плану.
 - 8 ключевых файлов после этой очистки: 109 markdown-ссылок, 0 битых внутренних путей; старые статусы S05 в GDD помечены историческими. Это не проверка всех 282 markdown-файлов репозитория.
+
+## Link audit of the complete review diff — final pass
+
+- Review comparison initially contained **45 changed documentation files**. Checked **270 repository-relative Markdown links** across all 45: three missing paths, all from `docs/production/ANIMATION_COMBAT_AND_LOCOMOTION_TZ_DRAFT.md` pointing to older combat review drafts.
+- The three cited drafts were retrieved unchanged from `docs/gdd-first-draft-20261106` into `docs/reviews/` in review commit `c84ee0a`. They remain **DRAFT**, not authoritative design or authorized tasks.
+- Checked **12 additional repository-relative links** inside those three imported drafts: none broken. **Total 48 changed files / 282 checked repository-relative Markdown references; 0 unresolved missing paths** at this review checkpoint.
+- Static relative-path validation only. Does not certify external HTTP links, Markdown fragment anchors, or the remaining untouched repository documents. Unity not run; no Unity/code files changed.
+- Any new change after this checkpoint requires another diff/link audit before canonical promotion.

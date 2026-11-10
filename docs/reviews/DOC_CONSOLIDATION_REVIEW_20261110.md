@@ -50,3 +50,7 @@ Q1=batch, Q2=single, Q3=later утверждены продюсером и оф�
 2. Оставить исходные design D59–D82 неизменными и использовать D91/D92 как уточнения. Старый `ROADMAP_DRAFT.md` оставлять как явно архивный до проверки потребителей ссылок; позже допустимо объединить и удалить дубликат.
 3. `PROJECT_MEMORY.md` и `ACTIVE_STAGE.md` сокращены только в review; исторические детали по F1–F3 доступны через [индекс](../history/M0_F1_F3_HISTORY_INDEX.md) и исходные коммиты.
 4. Не сливать review в canonical автоматически; продюсер должен явно принять итоговый комплект.
+
+## Full review diff link validation
+
+Static check covered all initially changed 45 files plus three restored combat review drafts: 48 files, 282 repository-relative Markdown references, **0 unresolved missing paths**. Three missing references were fixed by importing the original drafts (without approving their contents). This is not an external URL or anchor check. See [consistency audit](DOC_CONSISTENCY_AUDIT_20261110.md).
