@@ -253,8 +253,8 @@ namespace CubeGame.Gameplay
         {
             if (_placeholderMaterial == null)
             {
-                Shader shader = Shader.Find("Standard") ?? Shader.Find("Universal Render Pipeline/Lit");
-                _placeholderMaterial = new Material(shader) { name = "Projectile_PLACEHOLDER", color = new Color(0.4f, 0.6f, 1f) };
+                _placeholderMaterial = CubeGame.Presentation.Rendering.RuntimeMaterials.Solid(
+                    "Projectile_PLACEHOLDER", new Color(0.4f, 0.6f, 1f));
             }
 
             return _placeholderMaterial;

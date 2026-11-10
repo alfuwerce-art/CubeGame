@@ -5,11 +5,15 @@
 // a precise status when it is absent, so the game can run (and say why visuals are missing)
 // instead of failing silently.
 //
-// Search order:
-//   1. explicit root passed by the bootstrap/tests (CUBEGAME_ALPHA_CONTENT may also be used),
-//   2. CUBEGAME_ALPHA_CONTENT environment variable,
-//   3. <project>/.scratch/content       — the developer cache next to the Unity project,
-//   4. <persistentDataPath>/CubeGame/AlphaContent — a player build with a shipped local cache.
+// Search order (M0 runtime recovery R0):
+//   0. explicit root passed by code (tests, tools),
+//   1. <streamingAssetsPath>/CubeGame/AlphaContent — content packaged into the Player by the build
+//      (AlphaContentStaging); the standard path of a Windows build, it moves with the build folder,
+//   2. CUBEGAME_ALPHA_CONTENT environment variable — explicit developer override,
+//   3. <project>/.scratch/content — the developer cache next to the Unity project (Editor only:
+//      a Player never reads the repository or .scratch),
+//   4. <persistentDataPath>/CubeGame/AlphaContent — a cache unpacked next to the saves,
+//   5. otherwise NotConfigured with a diagnosis that names the expected packaged path.
 //
 // Layout: <root>/actors/<actorId>/ with rig.json, models/*.cubdec, clips/*.json and optional
 // contract.json, locomotion.json, actions.json (written by tools/alpha_models/universal/pipeline).
@@ -29,6 +33,17 @@ namespace CubeGame.AlphaModels
         NotConfigured = 1,
         /// <summary>A cache exists but an actor inside it is incomplete or invalid.</summary>
         Incomplete = 2,
+    }
+
+    /// <summary>Where the resolved content root came from (diagnostics and the release gates).</summary>
+    public enum AlphaContentOrigin
+    {
+        None = 0,
+        Explicit = 1,
+        Packaged = 2,
+        Override = 3,
+        EditorCache = 4,
+        UserCache = 5,
     }
 
     /// <summary>Only the field the visual layer needs; the manifest's blocked-action records are evidence
@@ -95,43 +110,66 @@ namespace CubeGame.AlphaModels
         public const string EnvVar = "CUBEGAME_ALPHA_CONTENT";
         public const string ActorsFolder = "actors";
 
+        /// <summary>Folder under StreamingAssets that holds the packaged content of a Player build.</summary>
+        public const string PackagedFolder = "CubeGame/AlphaContent";
+
         public string Root { get; }
+        public AlphaContentOrigin Origin { get; }
         public AlphaContentState State { get; private set; }
         public string Diagnosis { get; private set; } = "";
         public string ActorsRoot => string.IsNullOrEmpty(Root) ? null : Path.Combine(Root, ActorsFolder);
 
-        AlphaContentSource(string root)
+        AlphaContentSource(string root, AlphaContentOrigin origin)
         {
             Root = root;
+            Origin = root == null ? AlphaContentOrigin.None : origin;
             Refresh();
         }
 
         public static AlphaContentSource Resolve(string explicitRoot = null)
         {
-            var root = FindRoot(explicitRoot);
-            return new AlphaContentSource(root);
+            var root = FindRoot(explicitRoot, out var origin);
+            return new AlphaContentSource(root, origin);
         }
 
-        public static string FindRoot(string explicitRoot)
+        /// <summary>Content packaged into this Player (or staged under Assets/StreamingAssets in the Editor).</summary>
+        public static string PackagedRoot =>
+            Path.Combine(Application.streamingAssetsPath, "CubeGame", "AlphaContent");
+
+        /// <summary>The developer cache next to the Unity project; never consulted by a Player.</summary>
+        public static string EditorCacheRoot =>
+            Path.Combine(Path.GetFullPath(Path.Combine(Application.dataPath, "..")), ".scratch", "content");
+
+        public static string FindRoot(string explicitRoot) => FindRoot(explicitRoot, out _);
+
+        public static string FindRoot(string explicitRoot, out AlphaContentOrigin origin)
         {
-            var candidates = new List<string>();
-            if (!string.IsNullOrEmpty(explicitRoot)) candidates.Add(explicitRoot);
-            var env = Environment.GetEnvironmentVariable(EnvVar);
-            if (!string.IsNullOrEmpty(env)) candidates.Add(env);
-            var projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
-            candidates.Add(Path.Combine(projectRoot, ".scratch", "content"));
-            candidates.Add(Path.Combine(Application.persistentDataPath, "CubeGame", "AlphaContent"));
+            var candidates = new List<KeyValuePair<AlphaContentOrigin, string>>();
+            void Add(AlphaContentOrigin o, string path)
+            {
+                if (!string.IsNullOrEmpty(path)) candidates.Add(new KeyValuePair<AlphaContentOrigin, string>(o, path));
+            }
+            Add(AlphaContentOrigin.Explicit, explicitRoot);
+            Add(AlphaContentOrigin.Packaged, PackagedRoot);
+            Add(AlphaContentOrigin.Override, Environment.GetEnvironmentVariable(EnvVar));
+            if (Application.isEditor) Add(AlphaContentOrigin.EditorCache, EditorCacheRoot);
+            Add(AlphaContentOrigin.UserCache, Path.Combine(Application.persistentDataPath, "CubeGame", "AlphaContent"));
             foreach (var c in candidates)
             {
                 try
                 {
-                    if (Directory.Exists(Path.Combine(c, ActorsFolder))) return Path.GetFullPath(c);
+                    if (Directory.Exists(Path.Combine(c.Value, ActorsFolder)))
+                    {
+                        origin = c.Key;
+                        return Path.GetFullPath(c.Value);
+                    }
                 }
                 catch (Exception)
                 {
                     // an unreadable candidate is skipped, not fatal: the next one may be valid
                 }
             }
+            origin = AlphaContentOrigin.None;
             return null;
         }
 
@@ -140,7 +178,10 @@ namespace CubeGame.AlphaModels
             if (string.IsNullOrEmpty(Root) || !Directory.Exists(Root))
             {
                 State = AlphaContentState.NotConfigured;
-                Diagnosis = $"ALPHA_CONTENT_NOT_CONFIGURED (set {EnvVar} or place the cache at <project>/.scratch/content)";
+                Diagnosis = Application.isEditor
+                    ? $"ALPHA_CONTENT_NOT_CONFIGURED (set {EnvVar} or place the cache at <project>/.scratch/content)"
+                    : $"ALPHA_CONTENT_NOT_PACKAGED (expected {PackagedRoot}; this Player was built without Alpha content — " +
+                      $"rebuild with the release build, or set {EnvVar})";
                 return;
             }
             if (!Directory.Exists(ActorsRoot))
@@ -157,7 +198,7 @@ namespace CubeGame.AlphaModels
                 return;
             }
             State = AlphaContentState.Ready;
-            Diagnosis = $"ALPHA_CONTENT_READY {ActorsRoot} actors={ids.Count}";
+            Diagnosis = $"ALPHA_CONTENT_READY {ActorsRoot} actors={ids.Count} origin={Origin}";
         }
 
         public IReadOnlyList<string> ActorIds

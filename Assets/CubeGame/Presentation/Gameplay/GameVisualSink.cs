@@ -49,6 +49,7 @@ namespace CubeGame.Gameplay
         private string _heroBuiltSignature;
         private Features.Session.GameEventBus _bus;
         private static Material _placeholderMaterial;
+        private static Material _bodyPlaceholderMaterial;
 
         /// <summary>Last composed hero visual (what the hero state asks for).</summary>
         public HeroVisualSpec HeroSpec { get; private set; }
@@ -380,8 +381,8 @@ namespace CubeGame.Gameplay
             cube.transform.localPosition = new Vector3(0f, 0.2f, 0f);
             if (_placeholderMaterial == null)
             {
-                Shader shader = Shader.Find("Standard") ?? Shader.Find("Universal Render Pipeline/Lit");
-                _placeholderMaterial = new Material(shader) { name = "GroundItem_PLACEHOLDER", color = new Color(0.9f, 0.8f, 0.2f) };
+                _placeholderMaterial = CubeGame.Presentation.Rendering.RuntimeMaterials.Solid(
+                    "GroundItem_PLACEHOLDER", new Color(0.9f, 0.8f, 0.2f));
             }
 
             cube.GetComponent<Renderer>().sharedMaterial = _placeholderMaterial;
@@ -764,6 +765,14 @@ namespace CubeGame.Gameplay
             body.transform.SetParent(root, false);
             body.transform.localScale = hero ? new Vector3(0.8f, 0.9f, 0.8f) : new Vector3(0.9f, 0.9f, 1.4f);
             body.transform.localPosition = new Vector3(0f, hero ? 0.9f : 0.45f, 0f);
+            // Explicit committed material: the primitive's built-in default material is not relied on in a Player.
+            if (_bodyPlaceholderMaterial == null)
+            {
+                _bodyPlaceholderMaterial = CubeGame.Presentation.Rendering.RuntimeMaterials.Solid(
+                    "Body_PLACEHOLDER", new Color(0.6f, 0.6f, 0.6f));
+            }
+
+            body.GetComponent<Renderer>().sharedMaterial = _bodyPlaceholderMaterial;
             return body;
         }
 

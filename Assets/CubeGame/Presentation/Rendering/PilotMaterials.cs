@@ -17,12 +17,10 @@ namespace CubeGame.Presentation.Rendering
             if (_fallback == null)
             {
                 Shader shader = Shader.Find("CubeGame/PilotVertexColor");
-                if (shader == null)
-                {
-                    shader = Shader.Find("Unlit/Color");
-                }
-
-                _fallback = new Material(shader) { name = "PilotTerrainFallback" };
+                // Never new Material(null): a stripped shader falls back to the committed Resources shader.
+                _fallback = shader != null
+                    ? new Material(shader) { name = "PilotTerrainFallback" }
+                    : RuntimeMaterials.Solid("PilotTerrainFallback", new Color(0.45f, 0.6f, 0.35f));
             }
 
             return _fallback;

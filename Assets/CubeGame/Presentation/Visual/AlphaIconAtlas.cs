@@ -111,7 +111,30 @@ namespace CubeGame.Presentation.Visual
             return true;
         }
 
-        public static string DefaultDirectory =>
+        /// <summary>
+        /// The atlas of the resolved content root (&lt;root&gt;/icons — how a Player build receives it), else the
+        /// Editor's local artifact AlphaOutput/icons.
+        /// </summary>
+        public static string DefaultDirectory
+        {
+            get
+            {
+                string root = CubeGame.AlphaModels.AlphaActorLibrary.Shared.Source.Root;
+                if (!string.IsNullOrEmpty(root))
+                {
+                    string packaged = Path.Combine(root, CubeGame.AlphaModels.AlphaContentInventory.IconsFolder);
+                    if (File.Exists(Path.Combine(packaged, CubeGame.AlphaModels.AlphaContentInventory.IconAtlasImage)))
+                    {
+                        return packaged;
+                    }
+                }
+
+                return EditorArtifactDirectory;
+            }
+        }
+
+        /// <summary>Where the Editor atlas builder writes (local, not in Git, never read by a Player).</summary>
+        public static string EditorArtifactDirectory =>
             Path.GetFullPath(Path.Combine(Application.dataPath, "..", "AlphaOutput", "icons"));
 
         public static List<string> Validate(AlphaIconAtlas atlas)
