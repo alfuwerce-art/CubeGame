@@ -41,7 +41,13 @@ namespace CubeGame.Features.Items
         {
             var ground = new Ground { Id = StableEntityId.ForRuntime(++_serial), Entry = entry, Position = position };
             _items.Add(ground);
-            _events.Publish(new WorldItemDropped { TimeMs = nowMs, Item = ground.Id, Raw = entry.Raw, Count = entry.Count, Position = position });
+            _events.Publish(new WorldItemDropped
+            {
+                TimeMs = nowMs, Item = ground.Id, Raw = entry.Raw, Count = entry.Count, Position = position,
+                Material = entry.Core != null ? (int)entry.Core.Modifier : 0,
+                Rarity = entry.Core?.Rarity ?? 0,
+                Seed = entry.Core?.Seed ?? 0,
+            });
             return ground.Id;
         }
 

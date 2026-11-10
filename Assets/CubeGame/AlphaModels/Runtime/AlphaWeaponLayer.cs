@@ -53,6 +53,36 @@ namespace CubeGame.AlphaModels
             return true;
         }
 
+        /// <summary>
+        /// M0-F2A: an empty main hand draws nothing. The humanoid action rig is captured with a weapon block, so
+        /// its mesh is removed (and destroyed) instead of leaving the captured weapon visible.
+        /// </summary>
+        public static void Clear(AlphaRig rig)
+        {
+            if (rig == null) return;
+            int part = rig.IndexOf("weapon");
+            if (part < 0) return;
+            var filter = rig.meshes[part] != null ? rig.meshes[part].GetComponent<MeshFilter>() : null;
+            if (filter != null && filter.sharedMesh != null)
+            {
+                var old = filter.sharedMesh;
+                filter.sharedMesh = null;
+                if (Application.isPlaying) UnityEngine.Object.Destroy(old);
+                else UnityEngine.Object.DestroyImmediate(old);
+            }
+            rig.weaponSubtype = -1;
+            rig.weaponAnchorInHand = Vector3.zero;
+            rig.weaponAnchorOnBack = Vector3.zero;
+            rig.weaponScale = 1f;
+        }
+
+        public static bool HasWeapon(AlphaRig rig)
+        {
+            int part = rig != null ? rig.IndexOf("weapon") : -1;
+            var filter = part >= 0 && rig.meshes[part] != null ? rig.meshes[part].GetComponent<MeshFilter>() : null;
+            return filter != null && filter.sharedMesh != null;
+        }
+
         public static bool TryEquipFromFile(AlphaRig rig, string cubdecPath, int subtype, out string reason)
         {
             reason = null;

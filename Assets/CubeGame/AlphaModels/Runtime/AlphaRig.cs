@@ -92,12 +92,42 @@ namespace CubeGame.AlphaTransfer
             return Anchor(anchors[part], sizes[part], _weaponOnBack);
         }
 
+        /// <summary>
+        /// M0-F2A: uniform scale of a part's mesh around its anchor (1 when unset). Used by the hero appearance
+        /// for the per-species head/hair scale of the shared humanoid skeleton (Alpha: same pose, 3x3 scaled).
+        /// </summary>
+        public float[] partScales = new float[0];
+
+        public float ScaleOf(int part) => partScales != null && part < partScales.Length && partScales[part] > 0f ? partScales[part] : 1f;
+
+        public void SetPartScale(int part, float scale)
+        {
+            if (partScales == null || partScales.Length != parts.Length)
+            {
+                var s = new float[parts.Length];
+                for (int i = 0; i < s.Length; i++) s[i] = partScales != null && i < partScales.Length && partScales[i] > 0f ? partScales[i] : 1f;
+                partScales = s;
+            }
+            partScales[part] = scale;
+            PlaceMesh(part);
+        }
+
+        void PlaceMesh(int i)
+        {
+            if (meshes[i] == null) return;
+            float s = ScaleOf(i);
+            meshes[i].localScale = Vector3.one * s;
+            meshes[i].localPosition = -AlphaSpace.GridToUnity(AnchorOf(i)) * s;
+        }
+
+        /// <summary>Re-applies the anchor offset of one part (after its mesh/size was replaced).</summary>
+        public void RefreshAnchor(int part) => PlaceMesh(part);
+
         /// <summary>Switch the weapon anchor (hand / back) — clips declare which one they need.</summary>
         public void SetWeaponOnBack(bool onBack)
         {
             _weaponOnBack = onBack;
-            for (int i = 0; i < meshes.Length; i++)
-                if (meshes[i] != null) meshes[i].localPosition = -AlphaSpace.GridToUnity(AnchorOf(i));
+            for (int i = 0; i < meshes.Length; i++) PlaceMesh(i);
         }
 
         public bool WeaponOnBack => _weaponOnBack;

@@ -109,8 +109,6 @@ namespace CubeGame.Gameplay
         private Texture2D _localMap;
         private Vector2Int _localMapOrigin;
         private const int LocalMapZoneSpan = 3;
-        private readonly System.Collections.Generic.Dictionary<StableEntityId, GameObject> _groundItems =
-            new System.Collections.Generic.Dictionary<StableEntityId, GameObject>();
         private Vector3 _lastHeroScenePosition;
         private int _frames;
         private string _screenshotPath;
@@ -511,6 +509,10 @@ namespace CubeGame.Gameplay
                 Entity = StableEntityId.Hero,
                 Slot = VisualSlotOf(slot, item),
                 Item = item != null ? new RawAlphaItemId((int)item.Type, item.Subtype) : (RawAlphaItemId?)null,
+                // M0-F2A: the bytes that select the drawn model (item_icon_id 0x4EC400).
+                Material = item != null ? (int)item.Modifier : 0,
+                Rarity = item?.Rarity ?? 0,
+                Seed = item?.Seed ?? 0,
             });
         }
 
@@ -541,32 +543,9 @@ namespace CubeGame.Gameplay
             }
         }
 
-        private void OnWorldItemDropped(WorldItemDropped dropped)
-        {
-            if (_worldView == null)
-            {
-                return;
-            }
-
-            // Ground item placeholder until the visual layer shows item models (D88: DeepSeek).
-            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube.name = "GroundItem_PLACEHOLDER";
-            Destroy(cube.GetComponent<Collider>());
-            cube.transform.SetParent(_worldRoot.transform, true);
-            cube.transform.localScale = Vector3.one * 0.35f;
-            cube.transform.position = _worldView.ToScene(dropped.Position.X, dropped.Position.Y + 0.2, dropped.Position.Z);
-            cube.GetComponent<Renderer>().material.color = dropped.Raw.Type == 1 ? Color.red : new Color(0.9f, 0.8f, 0.2f);
-            _groundItems[dropped.Item] = cube;
-        }
-
+        // M0-F2A: ground items are drawn only by GameVisualSink (one owner, origin-safe); the bootstrap keeps the log.
         private void OnWorldItemRemoved(WorldItemRemoved removed)
         {
-            if (_groundItems.TryGetValue(removed.Item, out GameObject cube))
-            {
-                Destroy(cube);
-                _groundItems.Remove(removed.Item);
-            }
-
             _combatLog = "picked up an item";
         }
 
@@ -943,7 +922,6 @@ namespace CubeGame.Gameplay
             _session.Events.Subscribe<HitResolved>(OnHitResolved);
             _session.Events.Subscribe<EntityDied>(OnEntityDied);
             _heroRespawnAtMs = -1;
-            _session.Events.Subscribe<WorldItemDropped>(OnWorldItemDropped);
             _session.Events.Subscribe<WorldItemRemoved>(OnWorldItemRemoved);
             _session.Hero.Inventory.EquipmentChanged += OnEquipmentChanged;
             PublishEquipment();
@@ -1035,15 +1013,6 @@ namespace CubeGame.Gameplay
 
             DespawnTrainingTarget();
             StopPopulation();
-            foreach (GameObject ground in _groundItems.Values)
-            {
-                if (ground != null)
-                {
-                    Destroy(ground);
-                }
-            }
-
-            _groundItems.Clear();
             if (_session?.Hero != null)
             {
                 _session.Hero.Inventory.EquipmentChanged -= OnEquipmentChanged;

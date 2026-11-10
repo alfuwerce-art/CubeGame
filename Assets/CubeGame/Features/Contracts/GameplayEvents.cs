@@ -114,6 +114,15 @@ namespace CubeGame.Features.Contracts
 
         /// <summary>Item shown in the slot; null when the slot became empty.</summary>
         public RawAlphaItemId? Item { get; set; }
+
+        /// <summary>Alpha material byte +0x0D of the item (selects the model, item_icon_id 0x4EC400).</summary>
+        public int Material { get; set; }
+
+        /// <summary>Alpha byte +0x0C of the item (rarity; read by the model selector).</summary>
+        public int Rarity { get; set; }
+
+        /// <summary>Alpha item seed +0x04 (picks the random model variant).</summary>
+        public int Seed { get; set; }
     }
 
     public sealed class ActionStarted : IGameEvent
@@ -212,6 +221,15 @@ namespace CubeGame.Features.Contracts
         public int Count { get; set; } = 1;
 
         public WorldPosition Position { get; set; }
+
+        /// <summary>Alpha material byte +0x0D (0 for raw-only items).</summary>
+        public int Material { get; set; }
+
+        /// <summary>Alpha byte +0x0C (rarity).</summary>
+        public int Rarity { get; set; }
+
+        /// <summary>Alpha item seed +0x04.</summary>
+        public int Seed { get; set; }
     }
 
     /// <summary>An item left the world (picked up or expired).</summary>

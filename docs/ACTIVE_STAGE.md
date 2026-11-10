@@ -1,4 +1,15 @@
-# ACTIVE STAGE — M0-F1 WORLD FIX
+# ACTIVE STAGE — M0-F2A CHARACTER RUNTIME
+
+**Review branch:** `claude/m0-f2a-character-runtime` (база M0-F1 `748d650`) · **Status:** `READY_FOR_REVIEW`
+
+- Внешность героя из сейва (раса, пол, лицо, причёска, цвет волос) определяет модель в сцене; экипировка рисуется моделями, выбранными по байтам предмета.
+- Один владелец визуала героя и один владелец лута; лут и герой корректны после смены начала координат; визуал восстанавливается после save → exit → load.
+- EditMode 679/677/0/2, PlayMode 62/62, `error CS = 0`. `PARTIAL`: OrcFemale, блоки наплечников/амулета/лампы, относительный рост видов. [Отчёт M0-F2A](reports/M0_F2A_CHARACTER_RUNTIME_REPORT.md)
+- Параллельно (Codex, F2B): ranged/projectiles/abilities — вне F2A.
+
+---
+
+# Предыдущий этап — M0-F1 WORLD FIX
 
 **Canonical plan:** [D90](decisions/D90-m0-five-stage-finish-plan.md) / [M0 remaining plan](planning/M0_REMAINING_PLAN_D90.md)  
 **Branch:** `integration/m0-all`  

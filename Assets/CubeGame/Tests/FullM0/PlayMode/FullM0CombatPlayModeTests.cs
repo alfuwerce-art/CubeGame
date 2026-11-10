@@ -84,8 +84,9 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.IsTrue(visuals.TryGetView(game.TrainingTarget.Id, out AlphaActorView wolf), string.Join("; ", visuals.Problems));
             Assert.IsTrue(wolf.Ready, wolf.Status());
 
-            Bounds heroBounds = BoundsOf(hero.transform);
-            Assert.AreEqual(GameVisualSink.HeroVisualHeight, heroBounds.size.y, 0.25f, "hero model fitted to the controller height");
+            // M0-F2A: the body (without the weapon block, which may stick out on the back) is fitted to the controller.
+            Bounds heroBounds = BoundsOf(hero.transform, hero.Rig.meshes[hero.Rig.IndexOf("weapon")]);
+            Assert.AreEqual(GameVisualSink.HeroVisualHeight, heroBounds.size.y, 0.25f, "hero body fitted to the controller height");
 
             Assert.IsTrue(game.HeroAttack(), game.CombatLog);
             for (int i = 0; i < 5; i++)
@@ -102,13 +103,16 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Debug.Log($"[FullM0Visual] scale {visuals.ModelScale:F4} hero {hero.Status()} wolf {wolf.Status()} problems [{string.Join("; ", visuals.Problems)}]");
         }
 
-        private static Bounds BoundsOf(Transform root)
+        private static Bounds BoundsOf(Transform root, Transform exclude = null)
         {
             Renderer[] renderers = root.GetComponentsInChildren<Renderer>();
-            Bounds bounds = renderers[0].bounds;
+            Bounds bounds = default;
+            bool first = true;
             foreach (Renderer renderer in renderers)
             {
-                bounds.Encapsulate(renderer.bounds);
+                if (exclude != null && renderer.transform.IsChildOf(exclude)) continue;
+                if (first) { bounds = renderer.bounds; first = false; }
+                else bounds.Encapsulate(renderer.bounds);
             }
 
             return bounds;

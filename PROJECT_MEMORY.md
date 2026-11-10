@@ -3,7 +3,7 @@
 **Updated:** 2026-11-10  
 **Canonical branch:** `integration/m0-all`  
 **Current plan:** [D90 — M0 five-stage finish](docs/decisions/D90-m0-five-stage-finish-plan.md)  
-**Current stage:** [M0-F1 WORLD FIX](docs/ACTIVE_STAGE.md)
+**Current stage:** [M0-F2A CHARACTER RUNTIME](docs/ACTIVE_STAGE.md) (F1 и F2A — на ревью)
 
 ## 1. Главная цель M0
 
@@ -15,6 +15,10 @@
 ## 2. Последний сведённый результат
 
 M0-F1 `READY_FOR_REVIEW` в `codex/m0-f1-world-runtime`, база canonical `1c6560c`, F1A Claude `9e50915`. Подключены recovered population, игровое время, респаун и драйвер движения, единый D3-маршрут `/6`, город, данжи и сундуки. Существующие форматы сейва читаются. Коллайдер следует voxel edit при очереди новых чанков. В PlayMode проверены stable ID и дельты через unload/reload и save/exit/load. Полный EditMode 664 passed / 0 failed / 2 skipped, PlayMode 60 passed / 0 failed / 0 skipped, `error CS = 0`. Каноническое слияние после ревью продюсера. [Отчёт M0-F1](docs/reports/M0_F1_WORLD_FIX_REPORT.md)
+
+### M0-F2A CHARACTER RUNTIME
+
+`READY_FOR_REVIEW` в `claude/m0-f2a-character-runtime`, база F1 `748d650` (canonical `integration/m0-all` = `1c6560c` ещё не содержит F1). Один runtime-путь героя: сохранённые внешность и экипировка → `HeroVisualComposer` → `AlphaPlayerVisualBuilder` → `GameVisualSink` (единственный владелец). Раса/пол/лицо/причёска/цвет волос видны в сцене; лицо и причёска разрешаются через реестр Alpha, модель предмета — исполненным селектором `item_icon_id` по материалу/редкости/seed. 15 видов рисуются общим гуманоидным ригом 0x02 по блоку внешности Alpha; OrcFemale 0x0C — собственным актором (`PARTIAL`). Лут на земле — один владелец, без дрейфа при смене начала координат. Формат сейва не менялся. EditMode 679/677/0/2, PlayMode 62/62, `error CS = 0`. [Отчёт M0-F2A](docs/reports/M0_F2A_CHARACTER_RUNTIME_REPORT.md)
 
 ### База до M0-F1
 

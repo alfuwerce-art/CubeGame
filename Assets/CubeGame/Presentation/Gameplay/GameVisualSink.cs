@@ -6,6 +6,7 @@ using CubeGame.Content;
 using CubeGame.Core.Items;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.Creatures;
+using CubeGame.Features.Session;
 using CubeGame.Presentation.Visual;
 using UnityEngine;
 
@@ -19,6 +20,12 @@ namespace CubeGame.Gameplay
     /// Model scale: S05 models are in Alpha model voxels; the factor to world voxels is not restored
     /// (PLACEHOLDER_NOT_ALPHA). The hero model is fitted to the hero controller height and the same factor is used
     /// for every creature, so relative sizes stay those of Alpha.
+    ///
+    /// M0-F2A ownership: this sink is the only owner of (1) the hero visual — composed from the hero's appearance
+    /// and equipped items by <see cref="HeroVisualComposer"/> and rebuilt only when that composition changes — and
+    /// (2) the visual of every item on the ground (one item → exactly one object, Alpha model or a marked
+    /// placeholder). Scene positions are recomputed from world positions every frame, so a floating-origin shift
+    /// moves creatures and ground items with the terrain. Generated meshes are destroyed with their object.
     /// </summary>
     public sealed class GameVisualSink : MonoBehaviour, IEntityVisualSink
     {
@@ -29,14 +36,25 @@ namespace CubeGame.Gameplay
         public const float WalkAmplitude = 0.19f;
 
         private readonly Dictionary<StableEntityId, Entry> _entries = new Dictionary<StableEntityId, Entry>();
-        private readonly Dictionary<StableEntityId, GameObject> _groundItems = new Dictionary<StableEntityId, GameObject>();
+        private readonly Dictionary<StableEntityId, GroundItem> _groundItems = new Dictionary<StableEntityId, GroundItem>();
+        private readonly Dictionary<VisualEquipmentSlot, HeroVisualItem> _heroEquipment = new Dictionary<VisualEquipmentSlot, HeroVisualItem>();
         private AlphaActorLibrary _library;
         private Func<WorldPosition, Vector3> _toScene;
         private Transform _heroRoot;
         private string _itemsDirectory;
+        private string _contentRoot;
         private long _lastTimeMs = -1;
-        private CharacterVisualRequest _heroRequest;
+        private HeroAppearance _heroAppearance = AlphaHeroCreation.Default;
+        private bool _heroDirty;
+        private string _heroBuiltSignature;
         private Features.Session.GameEventBus _bus;
+        private static Material _placeholderMaterial;
+
+        /// <summary>Last composed hero visual (what the hero state asks for).</summary>
+        public HeroVisualSpec HeroSpec { get; private set; }
+
+        /// <summary>Number of hero model builds (tests: an unchanged state must not rebuild).</summary>
+        public int HeroBuildCount { get; private set; }
 
         /// <summary>Alpha model voxel → world block factor, measured on the hero model (0 until the hero model exists).</summary>
         public float ModelScale { get; private set; }
@@ -67,6 +85,7 @@ namespace CubeGame.Gameplay
             _heroRoot = heroRoot;
             if (library != null && library.State == AlphaContentState.Ready && library.Source != null)
             {
+                _contentRoot = library.Source.Root;
                 _itemsDirectory = Path.Combine(library.Source.Root, "items");
             }
             else
@@ -77,6 +96,7 @@ namespace CubeGame.Gameplay
 
         public bool TryGetView(StableEntityId entity, out AlphaActorView view)
         {
+            if (entity.Equals(StableEntityId.Hero)) FlushHero();
             view = _entries.TryGetValue(entity, out Entry entry) ? entry.View : null;
             return view != null;
         }
@@ -106,16 +126,34 @@ namespace CubeGame.Gameplay
             }
 
             entry.Root.rotation = Quaternion.Euler(0f, e.Yaw, 0f);
-            if (e.WorldObjectName == null)
+            _entries[e.Entity] = entry;
+            if (isHero)
             {
-                entry.View = isHero ? BuildHero(entry.Root) : BuildCreature(e.Kind, entry.Root);
-            }
-            if (entry.View == null)
-            {
-                entry.Placeholder = MakePlaceholder(entry.Root, isHero);
+                // The hero visual follows the saved character: appearance from the spawn, items from the equipment events.
+                if (e.Appearance.HasValue)
+                {
+                    _heroAppearance = e.Appearance.Value;
+                }
+                else
+                {
+                    Problems.Add("HERO_APPEARANCE_MISSING spawn without appearance; Alpha editor defaults used");
+                }
+
+                _heroBuiltSignature = null;
+                _heroDirty = true;
+                FlushHero();
+                return;
             }
 
-            _entries[e.Entity] = entry;
+            if (e.WorldObjectName == null)
+            {
+                entry.View = BuildCreature(e.Kind, entry.Root);
+            }
+
+            if (entry.View == null)
+            {
+                entry.Placeholder = MakePlaceholder(entry.Root, false);
+            }
         }
 
         public void OnEntityDespawned(EntityDespawned e)
@@ -125,6 +163,7 @@ namespace CubeGame.Gameplay
                 if (entry.Root != null)
                 {
                     entry.Root.gameObject.SetActive(false);
+                    DestroyView(entry.View);
                     Destroy(entry.Root.gameObject);
                 }
 
@@ -147,22 +186,76 @@ namespace CubeGame.Gameplay
 
         public void OnEquipmentChanged(EquipmentVisualChanged e)
         {
-            // D4: the loadout UI publishes raw Alpha item ids; the hero model is rebuilt with the new armour,
-            // weapon or off-hand. Slots this layer cannot show (neck/rings/lamp/pet/back) are reported, not faked.
+            // M0-F2A: the sink keeps the hero's equipped items (with material/rarity/seed) and recomposes the whole
+            // visual from them; a slot that cannot be drawn is reported by the composer, never left stale.
             if (!e.Entity.Equals(StableEntityId.Hero))
             {
                 return;
             }
 
-            if (!HeroLoadout.TryApply(_heroRequest, e.Slot, e.Item, _itemsDirectory, out CharacterVisualRequest updated,
-                    out string problem))
+            HeroVisualItem? item = HeroVisualItem.FromEvent(e);
+            if (item.HasValue)
             {
-                Problems.Add($"EQUIP_SLOT {e.Slot}: {problem}");
+                _heroEquipment[e.Slot] = item.Value;
+            }
+            else
+            {
+                _heroEquipment.Remove(e.Slot);
+            }
+
+            _heroDirty = true;
+        }
+
+        /// <summary>Equipped items the hero visual is composed from (tests/diagnostics).</summary>
+        public IReadOnlyDictionary<VisualEquipmentSlot, HeroVisualItem> HeroEquipment => _heroEquipment;
+
+        /// <summary>
+        /// Recomposes the hero visual and rebuilds the model only when the composition changed. Called every frame
+        /// and before the hero view is handed out, so several equipment events of one frame cause one rebuild.
+        /// </summary>
+        public void FlushHero()
+        {
+            if (!_heroDirty)
+            {
                 return;
             }
 
-            _heroRequest = updated;
-            RebuildHero();
+            _heroDirty = false;
+            HeroVisualSpec spec = HeroVisualComposer.Compose(_heroAppearance, _heroEquipment);
+            HeroSpec = spec;
+            if (!_entries.TryGetValue(StableEntityId.Hero, out Entry entry) || entry.Root == null)
+            {
+                return;
+            }
+
+            string signature = spec.Signature;
+            if (signature == _heroBuiltSignature && (entry.View != null || entry.Placeholder != null))
+            {
+                return;
+            }
+
+            foreach (string problem in spec.Problems)
+            {
+                Problems.Add("HERO_VISUAL " + problem);
+            }
+
+            DestroyView(entry.View);
+            entry.View = null;
+            if (entry.Placeholder != null)
+            {
+                entry.Placeholder.SetActive(false);
+                Destroy(entry.Placeholder);
+                entry.Placeholder = null;
+            }
+
+            entry.View = BuildHero(entry.Root, spec);
+            if (entry.View == null)
+            {
+                entry.Placeholder = MakePlaceholder(entry.Root, true);
+            }
+
+            _heroBuiltSignature = signature;
+            HeroBuildCount++;
         }
 
         /// <summary>
@@ -183,22 +276,28 @@ namespace CubeGame.Gameplay
             _bus.Subscribe<WorldItemRemoved>(OnWorldItemRemoved);
         }
 
-        /// <summary>Visual of one item on the ground: the Alpha model staged for that raw item id.</summary>
+        /// <summary>
+        /// Visual of one item on the ground: the Alpha model the item selector picks for its bytes, or a marked
+        /// placeholder cube when that model is not staged — always exactly one object per item.
+        /// </summary>
         public void OnWorldItemDropped(WorldItemDropped e)
         {
             OnWorldItemRemoved(new WorldItemRemoved { Item = e.Item });
-            GameObject visual = BuildGroundItem(e.Raw, e.Item);
-            if (visual == null) return;
-            visual.transform.SetParent(transform, false);
-            if (_toScene != null) visual.transform.position = _toScene(e.Position);
-            _groundItems[e.Item] = visual;
+            var ground = new GroundItem { Position = e.Position };
+            ground.Root = new GameObject($"GroundItem_{e.Item.Value:x}");
+            ground.Root.transform.SetParent(transform, false);
+            ground.Model = BuildGroundModel(e, ground.Root.transform);
+            ground.Model = ground.Model ?? GroundPlaceholder(e.Raw, ground.Root.transform);
+            ground.ModelName = ground.Model.name;
+            _groundItems[e.Item] = ground;
+            PlaceGroundItem(ground);
         }
 
         public void OnWorldItemRemoved(WorldItemRemoved e)
         {
-            if (_groundItems.TryGetValue(e.Item, out GameObject visual))
+            if (_groundItems.TryGetValue(e.Item, out GroundItem ground))
             {
-                Destroy(visual);
+                DestroyGroundItem(ground);
                 _groundItems.Remove(e.Item);
             }
         }
@@ -206,7 +305,18 @@ namespace CubeGame.Gameplay
         /// <summary>Number of item visuals currently shown (tests/diagnostics).</summary>
         public int GroundItemCount => _groundItems.Count;
 
-        GameObject BuildGroundItem(RawAlphaItemId raw, StableEntityId item)
+        /// <summary>Scene object of a ground item (tests/diagnostics).</summary>
+        public bool TryGetGroundItem(StableEntityId item, out Transform root, out string model)
+        {
+            root = null;
+            model = null;
+            if (!_groundItems.TryGetValue(item, out GroundItem ground) || ground.Root == null) return false;
+            root = ground.Root.transform;
+            model = ground.ModelName;
+            return true;
+        }
+
+        GameObject BuildGroundModel(WorldItemDropped e, Transform parent)
         {
             if (_itemsDirectory == null)
             {
@@ -214,77 +324,124 @@ namespace CubeGame.Gameplay
                 return null;
             }
 
-            string modelName = GroundItemModelName(raw);
+            string modelName = GroundItemModelName(e.Raw, e.Material, e.Rarity, e.Seed);
             if (string.IsNullOrEmpty(modelName))
             {
-                Problems.Add($"DATA_MISSING item model {raw}");
+                Problems.Add($"DATA_MISSING item model {e.Raw} material {e.Material}");
                 return null;
             }
 
-            string path = HeroLoadout.ModelFile(_itemsDirectory, modelName);
-            if (path == null || !File.Exists(path))
+            string path = Path.Combine(_itemsDirectory, AlphaCharacterModels.PayloadName(modelName));
+            if (!File.Exists(path))
             {
                 Problems.Add("DATA_MISSING item model file " + path);
                 return null;
             }
 
             CubeGame.AlphaTransfer.VoxelMesh.Result result =
-                CubeGame.AlphaTransfer.VoxelMesh.Build(File.ReadAllBytes(path), "ground_" + item.Value.ToString("x"));
+                CubeGame.AlphaTransfer.VoxelMesh.Build(File.ReadAllBytes(path), "ground_" + Path.GetFileNameWithoutExtension(path));
             if (result.mesh == null)
             {
-                Problems.Add($"ITEM_MESH {raw}: {result.problem}");
+                Problems.Add($"ITEM_MESH {e.Raw}: {result.problem}");
                 return null;
             }
 
-            var go = new GameObject($"GroundItem_{item.Value:x}");
-            go.AddComponent<MeshFilter>().sharedMesh = result.mesh;
-            var renderer = go.AddComponent<MeshRenderer>();
-            renderer.sharedMaterial = new Material(Shader.Find("Standard"));
-            go.transform.localScale = Vector3.one * (ModelScale > 0f ? ModelScale : 1f);
+            Material material = AlphaVisualResources.Base;
+            if (material == null)
+            {
+                Destroy(result.mesh);
+                Problems.Add("ITEM_MATERIAL_MISSING " + AlphaVisualResources.ShaderName);
+                return null;
+            }
+
+            // CUBEGAME_CONTRACT: the model lies centred on its drop point, bottom on the ground, turned 45°; Alpha's
+            // ground item pose (spin/bob) is not restored. Scale = the hero model factor (Alpha voxel → block).
+            var go = new GameObject(Path.GetFileNameWithoutExtension(path));
+            go.transform.SetParent(parent, false);
+            var mesh = new GameObject("mesh");
+            mesh.transform.SetParent(go.transform, false);
+            Bounds bounds = result.mesh.bounds;
+            mesh.transform.localPosition = new Vector3(-bounds.center.x, -bounds.min.y, -bounds.center.z);
+            mesh.AddComponent<MeshFilter>().sharedMesh = result.mesh;
+            mesh.AddComponent<MeshRenderer>().sharedMaterial = material;
+            go.transform.localScale = Vector3.one * (ModelScale > 0f ? ModelScale : CubeGame.AlphaModels.AlphaRigBuilder.RootScale);
             go.transform.localRotation = Quaternion.Euler(0f, 45f, 0f);
             return go;
         }
 
-        /// <summary>Alpha model of a ground item: consumables/held items first, then weapon subtypes.</summary>
-        public static string GroundItemModelName(RawAlphaItemId raw)
+        /// <summary>PLACEHOLDER_NOT_ALPHA: visible cube for an item whose model is not staged (one shared material).</summary>
+        static GameObject GroundPlaceholder(RawAlphaItemId raw, Transform parent)
         {
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.name = "GroundItem_PLACEHOLDER";
+            Destroy(cube.GetComponent<Collider>());
+            cube.transform.SetParent(parent, false);
+            cube.transform.localScale = Vector3.one * 0.35f;
+            cube.transform.localPosition = new Vector3(0f, 0.2f, 0f);
+            if (_placeholderMaterial == null)
+            {
+                Shader shader = Shader.Find("Standard") ?? Shader.Find("Universal Render Pipeline/Lit");
+                _placeholderMaterial = new Material(shader) { name = "GroundItem_PLACEHOLDER", color = new Color(0.9f, 0.8f, 0.2f) };
+            }
+
+            cube.GetComponent<Renderer>().sharedMaterial = _placeholderMaterial;
+            return cube;
+        }
+
+        void PlaceGroundItem(GroundItem ground)
+        {
+            if (ground.Root != null && _toScene != null)
+            {
+                ground.Root.transform.position = _toScene(ground.Position);
+            }
+        }
+
+        static void DestroyGroundItem(GroundItem ground)
+        {
+            if (ground.Root == null) return;
+            ground.Root.SetActive(false);
+            foreach (MeshFilter filter in ground.Root.GetComponentsInChildren<MeshFilter>(true))
+            {
+                // Only meshes this sink generated; the placeholder cube shares Unity's built-in mesh.
+                if (filter.sharedMesh != null && filter.sharedMesh.name.StartsWith("ground_", StringComparison.Ordinal))
+                {
+                    Destroy(filter.sharedMesh);
+                }
+            }
+
+            Destroy(ground.Root);
+        }
+
+        /// <summary>
+        /// Alpha model of a ground item: the executed item_icon_id selector over its bytes; raw-only consumables
+        /// fall back to the held-item catalogue when the selector has no entry.
+        /// </summary>
+        public static string GroundItemModelName(RawAlphaItemId raw, int material = 0, int rarity = 0, int seed = 0)
+        {
+            if (AlphaCharacterModels.TrySelectItemModel(raw.Type, raw.Subtype, material, rarity, seed, out string model, out _))
+            {
+                return model;
+            }
+
             if (AlphaHeldItemCatalog.TryModel(raw.Type, raw.Subtype, out AlphaHeldItemDef held))
             {
                 return held.Model;
             }
 
-            if (raw.Type == 3 && AlphaItemRules.TryWeaponSubtype(raw.Subtype, out AlphaWeaponSubtypeDef weapon))
-            {
-                return weapon.DefaultModel;
-            }
-
-            if (AlphaEquipmentCatalog.TryModel(raw.Type, raw.Subtype, out AlphaEquipmentDef armour))
-            {
-                return armour.Model;
-            }
-
             return null;
         }
 
-        void RebuildHero()
+        /// <summary>Destroys a view together with the meshes its rig generated (shared materials stay).</summary>
+        static void DestroyView(AlphaActorView view)
         {
-            if (!_entries.TryGetValue(StableEntityId.Hero, out Entry entry) || entry.Root == null) return;
-            if (entry.View != null)
+            if (view == null) return;
+            view.gameObject.SetActive(false);
+            foreach (MeshFilter filter in view.GetComponentsInChildren<MeshFilter>(true))
             {
-                Destroy(entry.View.gameObject);
+                if (filter.sharedMesh != null) Destroy(filter.sharedMesh);
             }
 
-            if (entry.Placeholder != null)
-            {
-                Destroy(entry.Placeholder);
-                entry.Placeholder = null;
-            }
-
-            entry.View = BuildHero(entry.Root);
-            if (entry.View == null)
-            {
-                entry.Placeholder = MakePlaceholder(entry.Root, true);
-            }
+            Destroy(view.gameObject);
         }
 
         public void OnActionStarted(ActionStarted e)
@@ -331,6 +488,12 @@ namespace CubeGame.Gameplay
         {
             float dt = _lastTimeMs < 0 ? 0f : Mathf.Max(0f, (gameTimeMs - _lastTimeMs) / 1000f);
             _lastTimeMs = gameTimeMs;
+            FlushHero();
+            foreach (GroundItem ground in _groundItems.Values)
+            {
+                PlaceGroundItem(ground);
+            }
+
             foreach (Entry entry in _entries.Values)
             {
                 if (entry.Root == null)
@@ -345,9 +508,17 @@ namespace CubeGame.Gameplay
 
                 if (entry.Dead)
                 {
-                    // CubeGame corpse: lies on its side (set at death) and sinks; hidden when fully sunk.
+                    // CubeGame corpse: lies on its side (set at death) and sinks; hidden when fully sunk. The hero
+                    // visual is a child of the player, so its sink is a local offset (not accumulated per frame).
                     float sink = CombatFeedback.DeathSink(gameTimeMs - entry.DeathTimeMs);
-                    entry.Root.position += Vector3.down * sink;
+                    if (entry.IsHero)
+                    {
+                        entry.Root.localPosition = Vector3.down * sink;
+                    }
+                    else
+                    {
+                        entry.Root.position += Vector3.down * sink;
+                    }
                     if (CombatFeedback.CorpseFinished(gameTimeMs - entry.DeathTimeMs))
                     {
                         foreach (Renderer renderer in entry.Root.GetComponentsInChildren<Renderer>()) renderer.enabled = false;
@@ -384,65 +555,90 @@ namespace CubeGame.Gameplay
             {
                 if (entry.Root != null)
                 {
+                    DestroyView(entry.View);
                     Destroy(entry.Root.gameObject);
                 }
             }
 
             _entries.Clear();
-            foreach (GameObject visual in _groundItems.Values)
+            foreach (GroundItem ground in _groundItems.Values)
             {
-                if (visual != null) Destroy(visual);
+                DestroyGroundItem(ground);
             }
 
             _groundItems.Clear();
             BindItems(null);
         }
 
-        private AlphaActorView BuildHero(Transform root)
+        private AlphaActorView BuildHero(Transform root, HeroVisualSpec spec)
         {
             if (_library == null || _library.State != AlphaContentState.Ready)
             {
                 return null;
             }
 
-            CharacterVisualRequest request = _heroRequest;
-            if (request.Kind == 0)
+            CharacterVisualRequest request = spec.ToRequest(_contentRoot);
+            CharacterVisualResult result = AlphaPlayerVisualBuilder.Build(request, root, _library, _itemsDirectory);
+            foreach (string problem in result.Problems)
             {
-                request = CharacterVisualRequest.Default;
-                request.Kind = Features.Session.GameSession.HeroKind.Value;
-                string weapon = _itemsDirectory != null ? Path.Combine(_itemsDirectory, WeaponModelFile(WeaponSubtype.Greatsword)) : null;
-                if (weapon != null && File.Exists(weapon))
-                {
-                    request.WeaponSubtype = (int)WeaponSubtype.Greatsword;
-                    request.WeaponModelPath = weapon;
-                }
-                else
-                {
-                    Problems.Add("DATA_MISSING hero weapon model " + weapon);
-                }
-
-                _heroRequest = request;
+                Problems.Add("HERO_VISUAL " + problem);
             }
 
-            CharacterVisualResult result = AlphaPlayerVisualBuilder.Build(request, root, _library, _itemsDirectory);
-            Problems.AddRange(result.Problems);
             if (result.View == null || !result.View.Ready)
             {
+                // A view that failed to initialise is removed, never left under the placeholder.
+                DestroyView(result.View);
                 Problems.Add("DATA_MISSING hero model: " + result.Status);
                 return null;
             }
 
             result.View.Tick(0f);
-            float height = MeasureHeight(result.View.transform, out float minY);
+            float height = MeasureBodyHeight(result.View, out float minY);
             if (height <= 0.01f)
             {
                 Problems.Add("DATA_MISSING hero model has no renderers");
                 return result.View;
             }
 
-            ModelScale = HeroVisualHeight / height;
+            // PLACEHOLDER_NOT_ALPHA: the Alpha voxel → block factor is fitted once per world on the hero body (the
+            // weapon and off-hand do not count), so equipment changes never rescale creatures or ground items.
+            if (ModelScale <= 0f)
+            {
+                ModelScale = HeroVisualHeight / height;
+            }
+
             Fit(result.View.transform, minY);
             return result.View;
+        }
+
+        /// <summary>Height of the rig parts without the weapon block and the off-hand (mesh bounds, renderer state ignored).</summary>
+        private static float MeasureBodyHeight(AlphaActorView view, out float minY)
+        {
+            minY = 0f;
+            CubeGame.AlphaTransfer.AlphaRig rig = view.Rig;
+            if (rig == null) return MeasureHeight(view.transform, out minY);
+            bool any = false;
+            float lo = float.MaxValue, hi = float.MinValue;
+            for (int i = 0; i < rig.meshes.Length; i++)
+            {
+                if (rig.partNames[i] == "weapon" || rig.meshes[i] == null) continue;
+                MeshFilter filter = rig.meshes[i].GetComponent<MeshFilter>();
+                if (filter == null || filter.sharedMesh == null) continue;
+                Bounds b = filter.sharedMesh.bounds;
+                Matrix4x4 m = rig.meshes[i].localToWorldMatrix;
+                for (int c = 0; c < 8; c++)
+                {
+                    var corner = new Vector3((c & 1) == 0 ? b.min.x : b.max.x, (c & 2) == 0 ? b.min.y : b.max.y, (c & 4) == 0 ? b.min.z : b.max.z);
+                    float y = m.MultiplyPoint3x4(corner).y;
+                    lo = Mathf.Min(lo, y);
+                    hi = Mathf.Max(hi, y);
+                    any = true;
+                }
+            }
+
+            if (!any) return 0f;
+            minY = lo;
+            return hi - lo;
         }
 
         private AlphaActorView BuildCreature(KindId kind, Transform root)
@@ -469,6 +665,7 @@ namespace CubeGame.Gameplay
             Problems.AddRange(problems);
             if (view == null || !view.Ready)
             {
+                DestroyView(view);
                 return null;
             }
 
@@ -505,27 +702,6 @@ namespace CubeGame.Gameplay
             return bounds.size.y;
         }
 
-        /// <summary>
-        /// Weapon model file of the staged item payloads. Alpha picks the model by material/rarity (item_icon_id);
-        /// the iron variant is a CubeGame choice (PLACEHOLDER_NOT_ALPHA) until M0-04B maps items to models.
-        /// </summary>
-        public static string WeaponModelFile(WeaponSubtype subtype)
-        {
-            switch (subtype)
-            {
-                case WeaponSubtype.Sword: return "iron-sword1.cubdec";
-                case WeaponSubtype.Axe: return "iron-axe1.cubdec";
-                case WeaponSubtype.Mace: return "iron-mace1.cubdec";
-                case WeaponSubtype.Dagger: return "iron-dagger1.cubdec";
-                case WeaponSubtype.Fist: return "iron-fist1.cubdec";
-                case WeaponSubtype.Longsword: return "iron-longsword1.cubdec";
-                case WeaponSubtype.Greatsword: return "iron-greatsword1.cubdec";
-                case WeaponSubtype.Greataxe: return "iron-greataxe1.cubdec";
-                case WeaponSubtype.Greatmace: return "iron-greatmace1.cubdec";
-                default: return string.Empty;
-            }
-        }
-
         private static GameObject MakePlaceholder(Transform root, bool hero)
         {
             GameObject body = GameObject.CreatePrimitive(hero ? PrimitiveType.Capsule : PrimitiveType.Cube);
@@ -535,6 +711,14 @@ namespace CubeGame.Gameplay
             body.transform.localScale = hero ? new Vector3(0.8f, 0.9f, 0.8f) : new Vector3(0.9f, 0.9f, 1.4f);
             body.transform.localPosition = new Vector3(0f, hero ? 0.9f : 0.45f, 0f);
             return body;
+        }
+
+        private sealed class GroundItem
+        {
+            public GameObject Root;
+            public GameObject Model;
+            public string ModelName;
+            public WorldPosition Position;
         }
 
         private sealed class Entry

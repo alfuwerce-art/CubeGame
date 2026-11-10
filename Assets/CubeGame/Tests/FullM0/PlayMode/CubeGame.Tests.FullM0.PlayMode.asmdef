@@ -10,6 +10,8 @@
         "CubeGame.Features.Creatures",
         "CubeGame.Gameplay",
         "CubeGame.AlphaModels",
+        "CubeGame.Presentation.Visual",
+        "CubeGame.Content",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
