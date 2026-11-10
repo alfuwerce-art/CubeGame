@@ -11,7 +11,7 @@ namespace CubeGame.Tests.Creatures.EditMode
         const int Width = 3, Depth = 3, Height = 4;
 
         [Test]
-        public void HouseHasFloorRoofAndWallsOfTheProvenFootprint()
+        public void ReconstructedHouseHasFloorRoofAndWallsWithinGivenDimensions()
         {
             // Door on +X, so the -Z/+Z walls and the -X wall are complete.
             var voxels = AlphaHouseBuilder.Voxels(0, 10, 0, Width, Depth, Height, doorSide: 1);
