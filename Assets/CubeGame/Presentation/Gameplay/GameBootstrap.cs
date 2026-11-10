@@ -113,6 +113,7 @@ namespace CubeGame.Gameplay
         private int _screenshotFrame = -1;
         private bool _validateVisual;
         private int _validateFrame = 600;
+        private bool _saveCheckpoint;
         private string _autoNewSlot;
         private string _autoLoadSlot;
         private uint _commandLineSeed = DefaultSeed;
@@ -933,6 +934,11 @@ namespace CubeGame.Gameplay
 
         public void QuitGame()
         {
+            if (_saveCheckpoint && _session != null && _session.State == SessionState.InGame)
+            {
+                SaveCheckpoint();
+            }
+
             _session.Quit();
             DestroyWorldViews();
             Debug.Log("[Game] quit");
@@ -1359,6 +1365,9 @@ namespace CubeGame.Gameplay
                             _validateFrame = vframes;
                         }
 
+                        break;
+                    case "-cubeSaveCheckpoint":
+                        _saveCheckpoint = true;
                         break;
                 }
             }
