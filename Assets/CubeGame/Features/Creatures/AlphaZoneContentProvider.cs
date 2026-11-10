@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using CubeGame.AlphaModels;
 using CubeGame.Content;
+using CubeGame.Core.Generation;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.World;
 
@@ -74,10 +75,12 @@ namespace CubeGame.Features.Creatures
                 var item = plan.Items[i];
                 if (item.Kind == ContentPlacementKind.Structure)
                 {
-                    // D3 step 3: the footprint gets real voxels (reconstructed block house of the proven size).
+                    // D3 step 3: the footprint gets real voxels — the Alpha house part grid (R7), not the
+                    // old reconstructed block house. Style 1 = 3x3, styles 2..5 = 2x2 (Chunk_generateObjects).
                     var origin = HouseOrigin(item);
-                    AlphaHouseBuilder.Build(origin.X, origin.Y, origin.Z, item.Width, item.Depth, item.Height,
-                        (x, y, z, voxel) => context.Write(x, y, z, voxel), DoorSide(item));
+                    int style = 1 + (int)(DeterministicHash.Combine((int)item.X, (int)item.Z) % 5);
+                    AlphaHouseBuilder.BuildAlpha(origin.X, origin.Y, origin.Z, style, DoorSide(item),
+                        (x, y, z, voxel) => context.Write(x, y, z, voxel));
                 }
 
                 var spawn = ToSpawn(item, zone, index);

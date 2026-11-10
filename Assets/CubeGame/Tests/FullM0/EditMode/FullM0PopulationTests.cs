@@ -58,9 +58,10 @@ namespace CubeGame.Tests.FullM0.EditMode
             var terrain = (AlphaTerrainGenerator)current;
             AlphaZone generated = terrain.Zone(zoneIndex, zoneIndex);
             SpawnDefinition house = generated.ContentSpawns.Single(s => s.BehaviourKey == AlphaZoneContentProvider.StructureBehaviourKey);
+            int style = 1 + (int)(CubeGame.Core.Generation.DeterministicHash.Combine((int)house.Position.X, (int)house.Position.Z) % 5);
             int x = (int)(house.Position.X - 1.5);
             int z = (int)(house.Position.Z - 1.5);
-            int roofY = (int)house.Position.Y + 3;
+            int roofY = (int)house.Position.Y + (style == 1 ? 3 : 2);
             Assert.IsTrue(Voxel.IsSolid(current.Voxels(x, z).Read(roofY)), "house geometry is in the streamed columns");
             Assert.IsFalse(Voxel.IsSolid(legacy.Voxels(x, z).Read(roofY)), "legacy slot keeps its original terrain");
 
