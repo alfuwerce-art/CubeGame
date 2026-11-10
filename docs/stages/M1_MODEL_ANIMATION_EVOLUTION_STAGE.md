@@ -1,461 +1,1027 @@
 # M1 — эволюция моделей, ригов и анимаций CubeGame
 
-**Статус:** `DRAFT / FUTURE STAGE / NOT_AUTHORIZED`  
+**Статус:** `APPROVED CONCEPT / FUTURE STAGE / NOT_AUTHORIZED`  
 **Направление roadmap:** M1 — модели, анимации и визуал.  
+**Концептуальные решения утверждены продюсером:** 2026-11-10.  
 **Начало исполнения:** только после закрытия M0 и отдельного решения продюсера.  
-**Назначение документа:** заранее определить экспериментальный контур, по которому CubeGame получает собственный визуальный язык моделей, собственные риги и собственную масштабируемую систему анимаций.
+**Назначение документа:** зафиксировать утверждённую архитектурную концепцию создания моделей, модульных персонажей/существ, ригов, анимаций, оружия и производственного конвейера CubeGame. Детальная техническая реализация, конкретные классы, форматы данных и инструменты будут дополнительно спроектированы при фактическом открытии M1.
 
 ---
 
-## 1. Главная цель этапа
+# 1. Главная цель этапа
 
-Цель M1 — не косметически улучшить импортированные модели Alpha и не сохранить исходный визуальный набор в качестве финального контента.
+M1 не должен сводиться к ручному созданию большого каталога красивых моделей и последующей попытке отдельно анимировать каждую из них.
 
-Alpha используется как исследовательская база: роли существ, категории контента, исходные пропорции, составные части, поведение, движение, экипировка и игровые функции уже каталогизированы и дают нам структурную карту того, что должна уметь новая производственная система.
+Главная цель — построить **CubeGame Character / Creature / Asset & Animation Factory**: единую систему, которая позволяет создавать, собирать, оснащать и анимировать большое число игровых персонажей и существ через повторно используемые анатомические архетипы, модульные части тела, риги, animation packages, оружейные наборы и procedural/IK-слои.
 
-Финальный результат M1 должен быть **собственным набором ассетов CubeGame**, выполненным в новом визуальном языке:
+Alpha используется как исследовательская база:
+
+- роли существ;
+- категории контента;
+- исходные пропорции;
+- составные части моделей;
+- поведение;
+- движение;
+- экипировка;
+- игровые функции.
+
+Финальный контент M1 должен быть собственным контентом CubeGame:
 
 - сохраняется voxel/cubic-ДНК;
 - повышается детализация и качество силуэта;
 - перерабатываются пропорции;
 - создаётся собственная система лиц;
 - перерабатываются материалы и цвета;
-- создаются новые конструкции тел;
-- вводятся новые риги;
+- создаются собственные конструкции тел;
+- вводятся собственные риги;
 - создаются новые анимации под новую боевую систему;
-- новые существа, NPC, предметы, оружие и растения должны производиться тем же конвейером, что и новый основной каталог.
+- персонажи, NPC, противники и существа собираются общей фабрикой;
+- новые модели и новые виды должны подключаться к существующей системе без отдельной технологии для каждого объекта.
 
-Главная инженерная цель этапа — получить не одну красивую модель, а **CubeGame Asset & Animation Factory**, способную масштабировать утверждённый эталон без потери стиля.
+Главная инженерная цель:
+
+> **не создать одну модель орка, волка или призрака, а создать систему, способную собрать множество разных орков, волков, призраков и других существ и автоматически назначить им совместимые риги, анимации, оружие и procedural-слои.**
 
 ---
 
-## 2. Что уже имеется к началу этапа
+# 2. Утверждённые фундаментальные решения
 
-К моменту открытия M1 проект должен иметь техническую базу, полученную на M0 и предыдущем исследовательском контуре:
+Следующие решения считаются утверждёнными концептуально.
+
+## 2.1. Не выбирать между двумя плохими крайностями
+
+Запрещён подход:
+
+```text
+сначала сделать все модели
+→ потом начинать думать, как их ригать и анимировать
+```
+
+Так же не является правильным подход:
+
+```text
+сделать одного персонажа
+→ сначала вручную создать ему весь возможный каталог анимаций
+→ только потом переходить к другим моделям
+```
+
+Правильная единица разработки — **вертикальный Archetype Package**:
+
+```text
+REFERENCE MODEL
+↓
+ANATOMY / RIG ARCHETYPE
+↓
+MODULAR PART CONTRACT
+↓
+MINIMUM COMPLETE ANIMATION PACKAGE
+↓
+WEAPON / ACTION INTERACTION
+↓
+IK / PROCEDURAL CORRECTIONS
+↓
+SECOND MODEL OF SAME ARCHETYPE
+↓
+REUSE TEST
+↓
+2 → 5 → 10
+↓
+CONTROLLED BATCH
+```
+
+## 2.2. Модель не владеет собственной полной библиотекой анимаций
+
+Главный принцип:
+
+> **анимация принадлежит skeleton/anatomy archetype, классу оружия, типу действия или уникальному поведению — а не конкретной модели.**
+
+Следовательно:
+
+- `Orc_Walk` не создаётся только потому, что персонаж — орк;
+- `Human_Walk` не создаётся только потому, что персонаж — человек;
+- `Wolf_Run` не должен появляться, если общий quadruped run подходит этому волку;
+- уникальная анимация создаётся только когда действие действительно уникально.
+
+## 2.3. Тело строится как LEGO, но риг не дробится на независимые риги каждой детали
+
+Утверждён модульный принцип сборки:
+
+- голова;
+- торс;
+- руки;
+- ноги;
+- волосы;
+- борода;
+- рога;
+- клыки;
+- хвост;
+- крылья;
+- дополнительные части;
+- экипировка.
+
+Но каждая часть не должна иметь полностью независимую несовместимую риг-систему.
+
+Правильная схема:
+
+```text
+RIG ARCHETYPE / BONE CONTRACT
+        ↓
+STANDARD ATTACHMENT / BINDING POINTS
+        ↓
+MODULAR BODY PARTS
+        ↓
+ASSEMBLED ENTITY
+```
+
+Модульная деталь знает:
+
+- к какому archetype она относится;
+- к каким костям привязана;
+- какие body profiles поддерживает;
+- какие другие части совместимы;
+- какие материалы использует;
+- какие sockets и equipment zones затрагивает.
+
+## 2.4. Character Creator, NPC Generator и Enemy Generator не должны быть тремя разными системами
+
+Они являются разными клиентами одной фабрики.
+
+```text
+PLAYER CHARACTER CREATOR ─┐
+NPC GENERATOR             ├→ ENTITY RECIPE → CHARACTER / CREATURE FACTORY
+ENEMY GENERATOR           ┘
+```
+
+Игрок выбирает параметры вручную.
+
+NPC и противники получают те же параметры из:
+
+- seed;
+- правил вида;
+- биома;
+- фракции;
+- роли;
+- уровня;
+- экипировки;
+- генератора мира.
+
+## 2.5. Производственная единица — Archetype Package
+
+Вместо мышления:
+
+> «сделать модель»
+
+M1 должен мыслить:
+
+> **«доказать Archetype Package»**
+
+Archetype Package включает:
+
+- reference model;
+- anatomy contract;
+- skeleton/rig;
+- modular body parts;
+- proportion rules;
+- sockets;
+- locomotion package;
+- reactions;
+- combat/action packages;
+- weapon interactions;
+- IK;
+- procedural corrections;
+- validation;
+- editor preview;
+- правила повторного использования.
+
+---
+
+# 3. Что уже имеется к началу M1
+
+К фактическому открытию M1 проект должен использовать результаты M0 и исследовательского контура:
 
 1. Каталог исходной геометрии и категорий контента.
 2. Каталог существ и составных частей.
 3. Исследованные планы тела и семейства движения.
 4. Восстановленные сведения о поведении и анимациях Alpha.
 5. Импорт и отображение моделей в Unity.
-6. Игровой runtime, в котором модель можно проверять не в пустом viewer, а непосредственно в реальном gameplay.
-7. Существующие проверки масштаба, pivot, крепления оружия, ориентации и анимаций.
+6. Runtime, где модель проверяется в настоящем gameplay.
+7. Проверки масштаба, pivot, ориентации, крепления оружия и анимаций.
 8. Каталог экипировки, оружия, предметов, растений и статических объектов.
-9. Доказанный принцип переиспользования движения между родственными моделями.
+9. Исследования по повторному использованию движения между родственными моделями.
 
-Важно: каталог включает более 2800 геометрических ресурсов разных категорий, а не 2800 независимых существ. Поэтому производственная задача должна решаться через **семейства, архетипы и повторно используемые системы**, а не через ручной отдельный pipeline для каждого объекта.
-
-Связанные исследовательские решения и отчёты должны оставаться источником фактов о структуре Alpha, но не ограничивать будущий художественный язык CubeGame.
+Важно: каталог Alpha содержит тысячи геометрических ресурсов, но это не означает тысячи независимых существ и не требует тысячи отдельных animation pipelines.
 
 ---
 
-## 3. Что должно быть получено на выходе
+# 4. Что должно существовать на выходе M1
 
-Этап считается успешным не тогда, когда сделано несколько красивых моделей, а когда доказана следующая цепочка:
-
-```text
-STYLE TARGET
-    ↓
-REFERENCE MODEL
-    ↓
-REFERENCE RIG
-    ↓
-REFERENCE ANIMATION SET
-    ↓
-SECOND MODEL OF SAME FAMILY
-    ↓
-REUSE / ADAPT
-    ↓
-5 MODELS
-    ↓
-10 MODELS
-    ↓
-25 / 50 MODELS
-    ↓
-CONTROLLED BATCH
-```
-
-На выходе M1 должны существовать:
+На выходе должны существовать:
 
 - утверждённый визуальный язык CubeGame;
-- эталоны основных семейств;
-- библиотека skeleton archetypes;
-- правила телосложения и пропорций;
+- Style Anchors;
+- библиотека anatomy/skeleton archetypes;
+- библиотека модульных частей тела;
+- `EntityRecipe / CharacterRecipe`-подобное описание сущности;
+- общая Character / Creature Factory;
+- система телосложений и пропорций;
 - система лиц;
-- система креплений и сокетов;
-- правила экипировки;
-- библиотека базовых locomotion-анимаций;
-- библиотека боевых наборов;
-- система переиспользования анимаций;
-- правила уникальных анимаций;
+- Character Creator поверх той же фабрики;
+- генерация NPC и противников через ту же фабрику;
+- система sockets;
+- система экипировки;
+- Weapon Definitions;
+- библиотека базовой locomotion;
+- combat/action packages;
+- Animation Resolver;
 - procedural/IK/additive-слои;
-- автоматическая техническая валидация;
-- визуальная приёмка человеком;
-- воспроизводимый пакетный pipeline;
-- возможность создавать полностью новые модели без отдельного производственного процесса.
+- signature animations;
+- техническая валидация;
+- визуальная приёмка;
+- editor preview;
+- воспроизводимый batch pipeline;
+- возможность создавать новые виды существ без переписывания всей системы.
 
 ---
 
-## 4. Основной принцип: сначала эталон, потом масштабирование
+# ЧАСТЬ I — ENTITY RECIPE И МОДУЛЬНАЯ СБОРКА
 
-Массовая работа запрещена, пока система не доказана на минимальном количестве ассетов.
+# 5. EntityRecipe / CharacterRecipe
 
-Порядок всегда один:
+Конкретное имя структуры будет принято при открытии M1, но концепция утверждена.
+
+Персонаж или существо не должны существовать в производственной системе только как заранее собранный prefab.
+
+Они должны описываться данными.
+
+Пример гуманоида:
 
 ```text
-1 эталон
-→ 2
-→ 5
-→ 10
-→ 25
-→ 50
-→ следующая контролируемая партия
+Race = Orc
+Sex = Male
+
+Anatomy = Humanoid
+RigArchetype = CG_Humanoid_v1
+BodyProfile = Heavy
+
+Head = OrcHead_03
+Torso = OrcTorso_02
+Arms = OrcArms_04
+Legs = OrcLegs_01
+
+Height = 1.06
+ShoulderScale = 1.18
+ArmScale = 1.08
+
+Hair = Hair_07
+Beard = Beard_02
+Tusks = Tusks_04
+
+ChestArmor = IronChest
+Weapon = Greatsword
+
+CombatStyle = Warrior
 ```
 
-Переход на следующий размер партии разрешён только если:
+Рецепт должен быть пригоден для:
 
-- стиль сохраняется;
-- ручные исправления не растут непропорционально;
-- риги работают;
-- анимации не ломаются;
-- экипировка садится;
-- нет массового clipping;
-- Unity import воспроизводим;
-- производительность укладывается в бюджет;
-- продюсер визуально принимает результат.
-
-Если качество начинает падать на пяти моделях, нет смысла запускать пятьсот. Сначала чинится конвейер.
+- игрока;
+- NPC;
+- противника;
+- процедурной генерации;
+- сохранения/загрузки;
+- editor preview;
+- тестовой генерации.
 
 ---
 
-# ЧАСТЬ I — МОДЕЛИ
+# 6. BodyPartDefinition
 
-## 5. Экспериментальный контур №1 — один эталонный гуманоид
+Каждая модульная часть тела должна иметь машинно-читаемое назначение.
 
-Первой целью M1 является **один полностью новый эталонный гуманоид CubeGame**.
-
-Это не финальная раса и не массовый каталог. Это испытательный стенд для всего будущего направления.
-
-На нём проверяются одновременно:
-
-- новый силуэт;
-- уровень детализации;
-- размер и характер voxel-элементов;
-- лицо;
-- руки;
-- ноги;
-- телосложение;
-- одежда/броня;
-- оружие;
-- rig;
-- skin/binding;
-- locomotion;
-- базовая новая боевая анимация;
-- работа камеры;
-- освещение;
-- читаемость на реальной игровой дистанции.
-
-### 5.1. Конструкция рук
-
-Рабочая гипотеза для нового гуманоида:
+Рабочая структура концептуально включает:
 
 ```text
-shoulder / upper arm
-→ forearm
-→ hand
+ID
+Category
+
+Species / Race compatibility
+Anatomy compatibility
+RigArchetype compatibility
+BodyProfile compatibility
+
+Bone bindings
+Attachment points
+Material profile
+
+Equipment compatibility
+Exclusion rules
+Optional tags
 ```
 
-Цель — не получить реалистичного человека, а добавить достаточную артикуляцию для:
-
-- одноручного хвата;
-- двуручного хвата;
-- замаха;
-- сильной атаки;
-- заряженной атаки;
-- блока;
-- парирования;
-- лука;
-- посоха;
-- топоров;
-- специальных атак.
-
-### 5.2. Конструкция ног
-
-Не требуется переход к полноценной реалистичной анатомии.
-
-Эксперимент должен сравнить упрощённые варианты, например:
+Пример:
 
 ```text
-pelvis
-→ short stylized leg
-→ foot
+Orc_Torso_03
+
+Category: Torso
+Species: Orc
+RigArchetype: CG_Humanoid_v1
+
+BoneBindings:
+- Spine
+- Chest
+- Shoulder_L
+- Shoulder_R
+
+CompatibleBodyProfiles:
+- Standard
+- Heavy
 ```
 
-Главный критерий — способность качественно показать:
+Это превращает детали в настоящие LEGO-компоненты, а не просто в произвольные meshes.
 
-- шаг;
-- бег;
-- перенос веса;
-- боевую стойку;
-- уклонение;
-- подготовку удара;
-- остановку;
-- hit reaction.
+---
 
-### 5.3. Лица
+# 7. Humanoid Factory
 
-CubeGame должен сохранить voxel-лицо, но уйти от двух крайностей:
+Для гуманоидов утверждена модульная фабрика.
 
-- чрезмерно мультяшного / toy-like;
-- чрезмерно жёсткого, безжизненного grim voxel.
+Один humanoid может состоять из:
 
-Цель — **выразительное stylized voxel fantasy лицо среднего тона**.
+```text
+Humanoid
+│
+├── Species / Race
+├── Sex / variation rules
+├── BodyProfile
+│
+├── Head
+├── Face components
+├── Torso
+├── Arms
+├── Legs
+│
+├── Hair
+├── Beard
+├── Horns / Tusks / Ears / other species parts
+│
+└── Equipment
+    ├── Head
+    ├── Chest
+    ├── Hands
+    ├── Legs
+    ├── Feet
+    └── Weapons
+```
 
-Экспериментируется:
+Разные виды получают собственные пропорции, геометрию и допустимые части, но по возможности используют один стабильный humanoid rig contract.
 
-- размером лицевой сетки;
-- формой глаз;
-- бровями;
-- носом;
-- челюстью;
-- ртом;
-- ушами;
-- бородами;
-- волосами;
-- расовыми особенностями.
+---
 
-Допускается более мелкая voxel-детализация лица, чем крупных частей тела, если в игровой камере это визуально работает и не разрушает общий стиль.
+# 8. Телосложения и пропорции гуманоидов
 
-### 5.4. Телосложения
+Утверждён принцип:
 
-После утверждения основной конструкции гуманоида проверяются минимум три профиля на одном skeleton topology:
+> **одинаковая skeleton topology внутри совместимого семейства + разные bone/body proportions + общие animation packages.**
+
+Минимальные профили для эксперимента:
 
 - `LIGHT`;
 - `STANDARD`;
 - `HEAVY`.
 
-Это не три независимых рига.
-
-По возможности сохраняются:
-
-- одинаковая hierarchy;
-- одинаковые имена костей;
-- одинаковые sockets;
-- совместимые animation clips.
-
-Меняются пропорции и геометрия.
-
-Задача эксперимента — определить, насколько далеко можно менять телосложение без создания отдельной анимационной библиотеки и без ручной переделки всей экипировки.
-
----
-
-## 6. Экспериментальный контур №2 — все эталонные гуманоидные виды
-
-После утверждения одного гуманоида начинается не массовое производство, а создание **эталонов гуманоидных семейств/видов**.
-
-Для каждого вида определяется:
-
-- какие пропорции он наследует;
-- какие facial rules использует;
-- какие части тела отличаются;
-- к какому skeleton archetype относится;
-- какие body profiles допустимы;
-- какие animations переиспользуются полностью;
-- какие требуют поправок;
-- какие являются уникальными.
-
-Цель данного подэтапа — доказать, что один утверждённый визуальный язык способен порождать несколько разных рас/видов без ощущения, что они сделаны разными генераторами или художниками.
-
-Каждый новый вид сначала появляется как **один эталон**.
-
-Только после утверждения эталона разрешается выпускать его варианты.
-
----
-
-## 7. Экспериментальный контур №3 — существа
-
-После гуманоидов тот же принцип переносится на существ.
-
-Необходимо сначала построить карту **body / skeleton archetypes**, например:
-
-- humanoid;
-- heavy humanoid / giant;
-- small quadruped;
-- large quadruped;
-- flying;
-- serpent / segmented;
-- insect / spider;
-- floating / spectral;
-- amorphous;
-- custom boss.
-
-Это предварительная классификация. Финальный список определяется экспериментами.
-
-Для каждого архетипа:
-
-1. создаётся один сложный эталон;
-2. создаётся rig;
-3. создаётся минимальный animation set;
-4. проверяется второй представитель;
-5. затем 5;
-6. затем 10;
-7. только потом начинается batch.
-
-Редкий босс не обязан вписываться в общий skeleton archetype. Для него допускается `CUSTOM`, но это должно оставаться исключением.
-
----
-
-## 8. Новые модели
-
-После утверждения Style Anchors новая модель не должна требовать отдельной технологии.
-
-Вход может быть разным:
-
-- текстовое описание;
-- 2D concept;
-- несколько ракурсов;
-- ручной blockout;
-- параметрический генератор;
-- AI-assisted geometry;
-- полностью ручная модель.
-
-Но после получения формы всё должно сходиться в общий pipeline:
+Пример направления, а не финальных чисел:
 
 ```text
-CONCEPT / ROLE
-↓
-BASE GEOMETRY
-↓
-CUBEGAME STYLE OPS
-↓
-MODEL IR
-↓
-ARCHETYPE
-↓
-RIG
-↓
-ANIMATION ASSIGNMENT
-↓
-UNITY VALIDATION
-↓
-HUMAN REVIEW
+Human
+Shoulders = 1.00
+Chest = 1.00
+ArmsLength = 1.00
+LegLength = 1.00
+
+Orc
+Shoulders = wider
+Chest = wider
+ArmsLength = longer
+LegLength = shorter
+
+Elf
+Shoulders = narrower
+Chest = narrower
+ArmsLength = slightly longer
+LegLength = longer
 ```
 
-AI не является хозяином стиля. Он может ускорять получение формы или варианта, но финальный ассет проходит те же правила, что и любой другой.
+Конкретные коэффициенты будут определяться экспериментально в M1.
+
+Новый body profile не должен автоматически создавать новый полный набор animations.
+
+Сначала используются:
+
+- общий clip;
+- retargeting;
+- IK;
+- procedural corrections;
+- body correction profile.
+
+Только принципиально несовместимое движение получает специализированный вариант.
 
 ---
 
-## 9. Процедурные категории
+# 9. Character Creator
 
-Для части контента выгоднее строить собственные параметрические генераторы, а не генерировать каждую модель AI.
+Редактор персонажа не создаёт отдельную систему сборки.
 
-Приоритетные кандидаты:
+Он является UI поверх EntityRecipe/CharacterRecipe и общей Factory.
 
-- мечи;
-- топоры;
-- посохи;
-- луки;
-- щиты;
-- простые предметы;
-- деревья;
-- кусты;
-- трава;
-- цветы;
-- грибы;
-- скалы;
-- повторяемые декоративные props.
+Пример:
 
-Параметрический ассет должен использовать seed и всегда выдавать воспроизводимый результат.
+```text
+Race → Orc
+Body → Heavy
+Head → 4
+Hair → 8
+Height → 107%
+Tusks → 3
+```
+
+После изменения параметра:
+
+```text
+Character Creator UI
+↓
+Recipe update
+↓
+Humanoid Builder
+↓
+Character rebuilt / updated
+```
+
+Таким образом визуальный редактор игрока автоматически проверяет ту же систему, которой потом пользуется мир.
 
 ---
 
-# ЧАСТЬ II — РИГИ
+# 10. Генерация гуманоидных NPC и противников
 
-## 10. Skeleton Archetype Library
+NPC Generator и Enemy Generator должны формировать тот же recipe.
 
-Ключевой принцип масштабирования:
+Пример:
 
-**риг создаётся не для каждой модели, а для класса строения тела.**
+```text
+WORLD SEED
+↓
+SETTLEMENT / FACTION RULES
+↓
+ROLE
+↓
+SPECIES RULES
+↓
+BODY / FACE / PART VARIATION
+↓
+EQUIPMENT
+↓
+ENTITY RECIPE
+↓
+HUMANOID FACTORY
+```
 
-Каждый archetype фиксирует:
+Пример результата:
+
+```text
+Orc Warrior #1849
+
+Species = Orc
+Body = Heavy
+Height = 1.07
+Torso = 03
+Arms = 02
+Head = 09
+Tusks = 04
+Hair = None
+
+Weapon = Axe
+Armor = Medium
+```
+
+Именно эта система должна позволить создавать в мире множество визуально отличающихся гуманоидов без хранения отдельной полной модели и анимационной библиотеки для каждого.
+
+---
+
+# ЧАСТЬ II — НЕГУМАНОИДНЫЕ СУЩЕСТВА
+
+# 11. Общая Creature Factory
+
+Humanoid Factory является частным случаем более общей Character / Creature Factory.
+
+Утверждённый принцип:
+
+```text
+ENTITY RECIPE
+↓
+ANATOMY CLASS
+↓
+RIG ARCHETYPE
+↓
+BODY PARTS
+↓
+PROPORTION PROFILE
+↓
+CREATURE BUILDER
+↓
+ANIMATION RESOLVER
+↓
+ACTION RESOLVER
+↓
+IK / PROCEDURAL
+↓
+GAME ENTITY
+```
+
+Нельзя пытаться привести всех существ к одному humanoid skeleton.
+
+Система должна поддерживать несколько anatomy/rig archetypes.
+
+Рабочая карта:
+
+- Humanoid;
+- Heavy Humanoid / Giant;
+- Quadruped;
+- Avian;
+- Flying;
+- Floating / Spectral;
+- Insect;
+- Arachnid;
+- Serpent / Segmented;
+- Amorphous;
+- Custom Boss.
+
+Точный набор уточняется при открытии M1 по реальному каталогу существ.
+
+---
+
+# 12. Quadruped
+
+Для четвероногих нужен собственный rig contract.
+
+Пример:
+
+```text
+CG_Quadruped_v1
+
+Root
+Pelvis
+Spine
+Chest
+Neck
+Head
+
+FrontLeg_L
+FrontLeg_R
+
+BackLeg_L
+BackLeg_R
+
+Tail...
+```
+
+Волк, кабан, кошкоподобное существо и другие совместимые существа могут иметь разные:
+
+- головы;
+- корпуса;
+- лапы;
+- хвосты;
+- размеры;
+- материалы;
+
+но использовать общий locomotion package, если анатомия совместима.
+
+Пример базового package:
+
+- Idle;
+- Walk;
+- Run / Trot;
+- Sprint;
+- Turn;
+- Leap;
+- Hit;
+- Knockback;
+- Death.
+
+Действия сверху:
+
+- Bite;
+- Claw;
+- Charge;
+- Howl;
+- другие species/signature actions.
+
+---
+
+# 13. Floating / Spectral
+
+Призраки и другие существа без ног не должны получать ложный humanoid locomotion.
+
+Пример rig:
+
+```text
+CG_Floating_v1
+
+Root
+Body
+Chest
+Head
+Arm_L
+Arm_R
+optional tail / spectral chain
+```
+
+Вместо walk/run:
+
+- FloatIdle;
+- FloatMove;
+- FloatFast;
+- HoverTurn;
+- Rise;
+- Descend.
+
+Procedural layer может отвечать за:
+
+- vertical bob;
+- body sway;
+- trailing motion;
+- look-at;
+- secondary motion.
+
+Для такого archetype:
+
+```text
+FootIK = OFF
+GroundFootPlacement = OFF
+FloatingProcedural = ON
+```
+
+---
+
+# 14. Avian
+
+Для обычных птиц предполагается отдельный avian contract.
+
+Пример:
+
+```text
+CG_Avian_v1
+
+Root
+Body
+Neck
+Head
+
+Wing_L
+Wing_R
+
+Leg_L
+Leg_R
+
+Tail
+```
+
+Возможные animation packages:
+
+### Ground
+
+- GroundIdle;
+- Walk;
+- Run;
+- Peck;
+- GroundTurn.
+
+### Flight
+
+- TakeOff;
+- FlightIdle;
+- FlightForward;
+- FlightTurn;
+- Dive;
+- Landing.
+
+### Actions
+
+- Peck;
+- WingAttack;
+- Hit;
+- Death.
+
+---
+
+# 15. Необычные птицеподобные / Head-Body creatures
+
+Существа, у которых большая голова фактически заменяет обычное туловище, не должны насильно подгоняться под стандартную птицу.
+
+Для повторяющегося семейства допускается отдельный archetype, например концептуально:
+
+```text
+CG_AvianHeadBody_v1
+
+Root
+HeadBody
+Beak
+
+Leg_L
+Leg_R
+
+Wing_L optional
+Wing_R optional
+```
+
+Если такой anatomy type представлен несколькими существами, он становится полноценным reusable archetype.
+
+Если существует только один уникальный представитель, допускается специализированный archetype, но не отдельная новая производственная система.
+
+---
+
+# 16. Insect
+
+Для шестиногих существ предполагается отдельный anatomy contract.
+
+Пример:
+
+```text
+CG_Insect6_v1
+
+Root
+Thorax
+Abdomen
+Head
+
+Leg1_L / Leg1_R
+Leg2_L / Leg2_R
+Leg3_L / Leg3_R
+
+Wing_L / Wing_R optional
+Mandible_L / Mandible_R optional
+```
+
+Модульность остаётся:
+
+```text
+Head_04
+Thorax_02
+Abdomen_07
+LegSet_Long_03
+Mandibles_02
+Wings_None
+```
+
+другое существо:
+
+```text
+Head_01
+Thorax_05
+Abdomen_02
+LegSet_Short_01
+Mandibles_05
+Wings_Transparent_02
+```
+
+Оба могут использовать один `CG_Insect6_v1` и общий базовый locomotion package.
+
+Пример action package:
+
+- InsectIdle;
+- InsectWalk;
+- InsectRun;
+- Turn;
+- Bite;
+- Sting;
+- Hit;
+- Death.
+
+---
+
+# 17. Arachnid и другие количества конечностей
+
+Паук не должен искусственно использовать шестиногий insect rig.
+
+Для восьминогого семейства создаётся отдельный contract, например:
+
+`CG_Arachnid8_v1`.
+
+То же правило распространяется на:
+
+- четырёхруких существ;
+- существ с дополнительными конечностями;
+- необычные крылатые конструкции;
+- segmented creatures;
+- другие устойчиво повторяющиеся anatomy patterns.
+
+Новый archetype дешевле долгосрочного набора костылей вокруг несовместимого skeleton.
+
+---
+
+# 18. Custom и боссы
+
+Не каждое существо обязано войти в массовый archetype.
+
+Если анатомия принципиально уникальна:
+
+- custom boss;
+- уникальная многосегментная форма;
+- особая трансформация;
+- существо с уникальной механикой тела;
+
+допускается `CUSTOM` rig/archetype.
+
+Но CUSTOM должен оставаться исключением.
+
+Даже custom entity должна использовать общие части Factory там, где это возможно:
+
+- EntityRecipe;
+- validation;
+- sockets;
+- action contracts;
+- event system;
+- VFX/SFX hooks;
+- review pipeline.
+
+---
+
+# ЧАСТЬ III — RIG ARCHETYPE LIBRARY
+
+# 19. RigArchetypeDefinition
+
+Конкретное имя структуры будет принято в M1.
+
+Каждый archetype должен фиксировать контракт:
 
 - hierarchy;
 - стабильные bone names;
+- обязательные bones;
+- optional bones;
 - sockets;
 - weapon grips;
 - FX sockets;
 - head/eye targets;
 - foot targets;
-- допустимые пропорции;
-- правила binding;
-- совместимые animation sets.
-
-### 10.1. Humanoid
-
-Для гуманоида первым создаётся единый CubeGame humanoid skeleton.
-
-Он должен поддерживать:
-
-- плечи;
-- предплечья;
-- кисти;
-- короткую стилизованную систему ног;
-- стопы;
-- голову;
-- корпус;
-- оружейные sockets;
-- дополнительные sockets под экипировку и VFX.
-
-### 10.2. Rigid + controlled deformation
-
-CubeGame не обязан выбирать только один способ деформации для всей игры.
-
-Допускается гибрид:
-
-- жёсткие voxel-части там, где они дают лучший стиль;
-- controlled skinning там, где он улучшает движение;
-- segmented chains для хвостов/змей;
-- procedural/IK corrections поверх базового клипа.
-
-Запрещается мягкая деформация, если она визуально превращает кубические части в «резину».
-
----
-
-# ЧАСТЬ III — ГЛАВНАЯ ПРОБЛЕМА: АНИМАЦИИ
-
-## 11. Почему нельзя делать уникальные анимации для каждой модели
-
-При сотнях существ и тысячах ассетов схема:
-
-```text
-MODEL
-→ собственный idle
-→ собственный walk
-→ собственный run
-→ собственные attacks
-→ собственный hit
-→ собственный death
-```
-
-не масштабируется.
-
-Количество моделей не должно определять количество базовых анимаций.
+- wing targets;
+- tail/segment rules;
+- допустимые proportion ranges;
+- binding rules;
+- compatible animation sets;
+- compatible procedural layers.
 
 Главный принцип:
 
-> **анимация принадлежит архетипу, оружейному классу или уникальному действию, а не конкретной модели.**
+> **риг создаётся не для каждой модели, а для класса строения тела.**
 
 ---
 
-## 12. Иерархия анимационной системы
+# 20. Humanoid rig contract
 
-Каждая модель получает движение из нескольких слоёв.
+Рабочая схема:
 
-### Layer A — Base Locomotion Set
+```text
+CG_Humanoid_v1
 
-Принадлежит skeleton archetype.
+Root
+Pelvis
 
-Пример Humanoid:
+Spine
+Chest
+Head
+
+UpperArm_L
+Forearm_L
+Hand_L
+
+UpperArm_R
+Forearm_R
+Hand_R
+
+Thigh_L
+Leg_L
+Foot_L
+
+Thigh_R
+Leg_R
+Foot_R
+```
+
+Плюс стандартные sockets:
+
+- RightHand;
+- LeftHand;
+- Back;
+- HipLeft;
+- HipRight;
+- Head;
+- Chest;
+- FX_Weapon;
+- FX_Hand_L;
+- FX_Hand_R.
+
+Финальная hierarchy определяется экспериментом, но принцип стабильного контракта утверждён.
+
+---
+
+# 21. Rigid + controlled deformation
+
+CubeGame не обязан использовать один способ деформации везде.
+
+Допускается гибрид:
+
+- жёсткие voxel-части там, где это лучше сохраняет стиль;
+- controlled skinning для суставов и нужной пластики;
+- segmented chains для хвостов, змей и других секций;
+- procedural/IK corrections поверх базовой анимации.
+
+Запрещается мягкая деформация, если она делает кубические формы визуально «резиновыми».
+
+---
+
+# ЧАСТЬ IV — ANIMATION FACTORY
+
+# 22. Animation Resolver
+
+Персонажу или существу не нужно вручную назначать десятки конкретных clips.
+
+Animation Resolver получает характеристики entity.
+
+Пример гуманоида:
+
+```text
+Skeleton = Humanoid_v1
+BodyProfile = Heavy
+WeaponClass = TwoHandedSword
+CombatStyle = Warrior
+MovementStyle = GroundHumanoid
+```
+
+и собирает animation loadout:
+
+```text
+Humanoid_Locomotion
++
+Humanoid_Reactions
++
+Humanoid_Death
++
+TwoHandSword_Combat
++
+HeavyBody_Corrections
++
+FootIK
++
+TwoHandGripIK
++
+LookAt
+```
+
+Пример призрака:
+
+```text
+Anatomy = Floating
+Movement = Floating
+Combat = Magic
+```
+
+получает:
+
+```text
+Floating_Locomotion
+Floating_Reactions
+FloatingCaster_Combat
+HoverProcedural
+LookAt
+
+FootIK = OFF
+```
+
+Пример волка:
+
+```text
+Anatomy = Quadruped
+Movement = GroundQuadruped
+Combat = BiteClaw
+```
+
+получает:
+
+```text
+Quadruped_Locomotion
+Quadruped_Reactions
+BiteClaw_ActionSet
+QuadrupedGroundCorrection
+```
+
+---
+
+# 23. Иерархия animation packages
+
+## Layer A — Base Locomotion
+
+Принадлежит anatomy/skeleton archetype.
+
+Humanoid:
 
 - idle;
 - walk;
@@ -472,7 +1038,7 @@ MODEL
 - knockback;
 - death variants.
 
-Пример Quadruped:
+Quadruped:
 
 - idle;
 - walk;
@@ -484,19 +1050,37 @@ MODEL
 - knockback;
 - death.
 
-Один такой набор должен обслуживать максимально возможное число моделей семейства.
+Floating:
 
-### Layer B — Weapon / Combat Set
+- hover idle;
+- move;
+- fast move;
+- turn;
+- rise;
+- descend;
+- hit;
+- death.
 
-Боевые клипы создаются не под каждую модель, а как:
+Avian:
+
+- ground locomotion;
+- takeoff;
+- flight;
+- turn;
+- dive;
+- landing.
+
+## Layer B — Weapon / Combat Set
+
+Создаётся по формуле:
 
 ```text
-SKELETON ARCHETYPE
+SKELETON / ANATOMY ARCHETYPE
 ×
 WEAPON / COMBAT CLASS
 ```
 
-Например для Humanoid:
+Humanoid examples:
 
 - one-handed sword;
 - two-handed sword;
@@ -505,26 +1089,24 @@ WEAPON / COMBAT CLASS
 - monk staff;
 - bow;
 - unarmed / claws;
-- future weapon classes.
+- future classes.
 
-Для каждого класса создаётся общий набор:
+Общий package может включать:
 
 - combat idle;
 - light chain;
-- heavy attack;
+- heavy;
 - charged heavy;
 - special;
 - block;
-- parry, если применимо;
+- parry;
 - dodge attack;
 - recovery;
 - weapon-specific transitions.
 
-Одни и те же клипы используются разными расами и body profiles, пока тесты не докажут необходимость варианта.
+## Layer C — Creature Action Set
 
-### Layer C — Creature Action Set
-
-Существа получают набор по своему архетипу:
+Пример:
 
 ```text
 QuadrupedMedium:
@@ -532,264 +1114,390 @@ bite
 claw
 leap
 charge
-hurt
-death
 ```
 
-Конкретному волку не нужны отдельные walk/run только потому, что он волк.
+## Layer D — Signature Animations
 
-### Layer D — Signature Animations
+Только для действительно уникального поведения:
 
-Уникальные анимации создаются только тогда, когда действие действительно определяет конкретное существо или босса.
+- boss slam;
+- phase transition;
+- unique roar;
+- grab;
+- magic attack;
+- unusual body action;
+- unique species action.
 
-Например:
+## Layer E — Procedural / Additive
 
-- уникальный slam;
-- boss phase transition;
-- специальный roar;
-- захват игрока;
-- уникальная магическая атака;
-- необычное движение тела.
+Не должно плодить отдельные clips без необходимости:
 
-Это исключения поверх общей библиотеки, а не фундамент всей системы.
-
-### Layer E — Procedural / Additive
-
-Часть движения вообще не должна плодить отдельные clips.
-
-Через Unity Animation Rigging / constraints / procedural systems решаются:
-
-- IK стоп;
-- точный хват оружия;
-- второй хват;
+- FootIK;
+- HandIK;
+- secondary hand grip;
 - look-at;
 - aim;
-- наклон на поверхности;
-- небольшая коррекция позы;
-- additive recoil;
-- дыхание;
+- ground alignment;
+- body lean;
+- recoil;
+- breathing;
 - head tracking;
-- корректировка кистей.
-
-Это резко уменьшает количество ручных вариантов.
-
----
-
-## 13. Решение проблемы разных пропорций
-
-Главная гипотеза для масштабирования:
-
-**одинаковый skeleton topology + разные bone proportions + общий clip.**
-
-Порядок проверки:
-
-1. `STANDARD` humanoid получает эталонный clip.
-2. Тот же clip запускается на `LIGHT`.
-3. Тот же clip запускается на `HEAVY`.
-4. Измеряются:
-   - положение стоп;
-   - хват;
-   - clipping;
-   - reach;
-   - weapon arc;
-   - root motion;
-   - silhouette.
-5. Ошибки сначала исправляются procedural/IK слоями.
-6. Только если общий clip принципиально не работает, создаётся специализированный вариант.
-
-Таким образом новые body types не должны автоматически утраивать animation library.
+- wing/tail secondary adjustments;
+- weapon alignment.
 
 ---
 
-## 14. Создание собственных анимаций
+# 24. Минимальный полный animation slice для первого гуманоида
 
-Новые анимации CubeGame создаются как отдельный производственный pipeline.
+До массового производства первый humanoid archetype должен доказать полный рабочий срез.
 
-Возможные источники чернового движения:
+Locomotion / reactions:
+
+- Idle;
+- Walk;
+- Run;
+- Sprint;
+- Turn;
+- Stop;
+- Dodge;
+- Jump/Land;
+- Hit;
+- Death.
+
+Первое оружие должно доказать боевой контур.
+
+Рабочий первый кандидат — двуручный меч.
+
+Минимальный combat slice:
+
+- CombatIdle;
+- Light 1;
+- Light 2;
+- Light 3;
+- Heavy;
+- Charged Heavy;
+- Block;
+- Parry, если применимо;
+- Special;
+- Recovery.
+
+Точное финальное число clips будет определено при M1.
+
+Смысл эксперимента — доказать всю архитектуру от model/rig до gameplay interaction, а не заранее создать сотни clips.
+
+---
+
+# 25. WeaponDefinition и взаимодействие с оружием
+
+Оружие является частью общей data-driven системы.
+
+Концептуально WeaponDefinition должен описывать:
+
+```text
+WeaponClass
+CompatibleRigArchetypes
+
+MainGrip
+SecondaryGrip
+
+CombatAnimationSet
+IKProfile
+
+HitGeometry
+Reach
+
+TrailSocket
+VFX / SFX hooks
+```
+
+Пример двуручного меча:
+
+```text
+WeaponClass = TwoHandedSword
+
+MainGrip = RightHand
+SecondaryGrip = LeftHand
+
+CombatSet = Humanoid_2HSword
+IKProfile = TwoHandGrip_Long
+```
+
+Это позволяет одному weapon/combat package работать на нескольких compatible humanoids.
+
+Не должны автоматически появляться:
+
+- `OrcGreatswordAnimation`;
+- `HumanGreatswordAnimation`;
+- `ElfGreatswordAnimation`;
+
+если один `Humanoid_2HSword` с коррекциями работает на всех.
+
+---
+
+# 26. IK / Procedural как обязательный слой масштабирования
+
+IK и procedural corrections не являются декоративным дополнением.
+
+Они являются одним из основных механизмов повторного использования анимаций между разными пропорциями.
+
+Приоритетные задачи:
+
+- стопы на рельефе;
+- main hand weapon alignment;
+- secondary hand grip;
+- точный хват двуручного оружия;
+- look-at;
+- aim;
+- ground alignment;
+- body lean;
+- небольшие body proportion corrections;
+- secondary motion;
+- recoil.
+
+Пример проблемы:
+
+```text
+один GreatswordHeavy clip
+↓
+Human Standard
+Orc Heavy
+Elf Light
+↓
+разные длины рук и ширина плеч
+↓
+IK / correction profiles
+↓
+единый читаемый удар без трёх новых clips
+```
+
+---
+
+# 27. Gameplay contract отделён от animation clip
+
+Animation clip не является хозяином боевой механики.
+
+Для атаки хранится отдельный combat/action contract.
+
+Он может содержать:
+
+- total duration;
+- windup;
+- active window;
+- recovery;
+- input buffer;
+- combo open;
+- combo close;
+- dodge cancel;
+- movement cancel;
+- rotation allowance;
+- turn speed;
+- root movement;
+- hitbox start;
+- hitbox end;
+- i-frames, если применимо;
+- parry window, если применимо;
+- hit stop;
+- animation playback rate;
+- blend in/out;
+- weapon trail;
+- sound/VFX events.
+
+Концептуальный пример:
+
+```text
+TwoHandSword_Heavy_01
+
+Duration
+Windup
+Active
+Recovery
+
+Rotation windows
+Dodge cancel windows
+Hitbox window
+Trail window
+```
+
+Конкретные числа не фиксируются данным документом.
+
+Они будут определяться на основании gameplay design и измеримых референсов при открытии анимационного подэтапа.
+
+---
+
+# 28. Источники и референсы движения
+
+Для создания собственных анимаций допускается гибрид:
 
 - ручная keyframe-анимация;
-- собственные procedural tools;
-- mocap как референс;
-- AI/motion-generation как черновой источник;
-- перенесённое/изученное движение Alpha только как reference поведения;
+- mocap как черновая база;
+- video mocap;
+- AI/text-to-motion как черновая база;
+- procedural animation;
+- изучение Alpha как reference;
+- технические референсы других игр;
 - комбинация методов.
 
-Но финальная боевая анимация должна контролироваться в нашей системе.
+Финальная анимация CubeGame должна контролироваться нашей системой.
 
 Особенно вручную проверяются:
 
 - key poses;
 - anticipation;
-- active attack window;
 - impact;
+- follow-through;
 - recovery;
-- траектория оружия;
-- положение ног;
-- центр массы;
-- читаемость;
-- ощущение силы;
-- соответствие gameplay timing.
+- weapon trajectory;
+- foot placement;
+- center of mass;
+- gameplay readability;
+- timing.
 
-AI-generated motion не получает автоматический статус финальной анимации.
+Ранее выбранный принцип технических референсов сохраняется:
 
----
+- Souls / Elden Ring / Sekiro — combat timing, attack phases, windows;
+- Hades / Hades II — responsiveness, combo/charge/cancel flow;
+- For Honor — production animation/event philosophy;
+- Unity sample code / Animation Jobs — Unity animation architecture и IK;
+- Unreal Game Animation Sample — advanced locomotion, warping, pose selection ideas.
 
-## 15. Боевая анимация и gameplay должны быть связаны контрактом
-
-Клип не должен сам определять игровую механику.
-
-Для каждой атаки хранится отдельный combat contract:
-
-- windup;
-- active frame/window;
-- recovery;
-- cancel windows;
-- dodge cancel;
-- stamina/resource cost;
-- movement allowance;
-- rotation allowance;
-- hitbox activation;
-- weapon trail;
-- sound/VFX events.
-
-Анимация визуализирует этот контракт.
-
-Это позволяет менять красивую анимацию без разрушения боевой логики и наоборот.
+Референсы используются для понимания технических принципов, кода, событий и числовых профилей, а не для копирования чужих ассетов.
 
 ---
 
-## 16. Animation Retargeting
+# ЧАСТЬ V — FACTORY ARCHITECTURE
 
-Для CubeGame основной путь — переиспользование между моделями одного archetype.
+# 29. Общая схема
 
-Предпочтительный подход для эксперимента:
+Утверждённая концептуальная архитектура:
 
-- Unity `Generic` skeleton;
-- одинаковые bone names/hierarchy внутри архетипа;
-- Animation Rigging для процедурных поправок;
-- собственные правила масштабирования пропорций;
-- Humanoid retargeting проверяется только как эксперимент, если он реально даёт преимущество.
-
-Не требуется насильно переводить всех существ в Unity Humanoid.
-
----
-
-# ЧАСТЬ IV — ПРОИЗВОДСТВЕННЫЙ КОНВЕЙЕР
-
-## 17. CubeGame Asset & Animation Factory
-
-Минимальная архитектура будущего конвейера:
-
-### F1 — Catalog & Classification
-
-Определяет:
-
-- категорию;
-- семейство;
-- archetype;
-- пропорции;
-- slots;
-- требуемые animations.
-
-### F2 — Style Anchors
-
-Хранит утверждённые эталоны:
-
-- humanoid;
-- humanoid species;
-- creature families;
-- weapons;
-- vegetation;
-- props.
-
-Также должны существовать отрицательные эталоны: что считается выходом из стиля.
-
-### F3 — Style Spec
-
-Фиксирует измеримые правила после экспериментов:
-
-- размер voxel/detail levels;
-- silhouette rules;
-- face rules;
-- material rules;
-- proportion envelopes;
-- palette/material ranges;
-- detail density;
-- bevel/edge rules;
-- LOD rules.
-
-### F4 — Model Processing
-
-Обрабатывает новую форму до общего CubeGame representation.
-
-### F5 — Archetype & Rig Binding
-
-Назначает skeleton archetype, sockets и binding.
-
-### F6 — Animation Assignment
-
-Определяет:
-
-- locomotion set;
-- combat set;
-- creature action set;
-- procedural layers;
-- список необходимых signature clips.
-
-### F7 — Equipment Fit
-
-Проверяет:
-
-- броню;
-- оружие;
-- grips;
-- sockets;
-- body profiles;
-- clipping.
-
-### F8 — Unity Validation
-
-Автоматически проверяет:
-
-- import;
-- scale;
-- pivot;
-- bones;
-- missing clips;
-- animation events;
-- bounds;
-- clipping candidates;
-- performance budgets.
-
-### F9 — Visual Review
-
-Генерирует единый материал для приёмки:
-
-- front;
-- side;
-- back;
-- 3/4;
-- turntable;
-- idle;
-- walk;
-- run;
-- attacks;
-- equipment;
-- gameplay camera.
-
-### F10 — Batch Orchestrator
-
-Запускает только утверждённые партии:
-
-`1 → 2 → 5 → 10 → 25 → 50 → batch`.
+```text
+                    ENTITY DATABASE
+                          │
+       ┌──────────────────┼──────────────────┐
+       ↓                  ↓                  ↓
+   BODY PARTS        RIG ARCHETYPES      EQUIPMENT
+       │                  │                  │
+       └──────────────────┼──────────────────┘
+                          ↓
+                      ENTITY RECIPE
+                          ↓
+                CHARACTER / CREATURE BUILDER
+                          ↓
+                   ASSEMBLED ENTITY
+                          │
+             ┌────────────┴────────────┐
+             ↓                         ↓
+      ANIMATION RESOLVER         EQUIPMENT RESOLVER
+             ↓                         ↓
+   locomotion / combat              weapon
+   actions / reactions              armor
+             │                         │
+             └────────────┬────────────┘
+                          ↓
+                    IK / PROCEDURAL
+                          ↓
+                     GAME ENTITY
+```
 
 ---
 
-## 18. Неразрушающая работа
+# 30. Основные логические компоненты
 
-Автоматизация не должна уничтожать ручные правки.
+Имена здесь рабочие и не фиксируют финальную C# API.
 
-Предпочтительная схема:
+M1 должен спроектировать эквиваленты следующих ролей:
+
+- `EntityRecipe / CharacterRecipe`;
+- `BodyPartDefinition`;
+- `RigArchetypeDefinition`;
+- `BodyProfileDefinition`;
+- `WeaponDefinition`;
+- `EquipmentDefinition`;
+- `AnimationPackageDefinition`;
+- `CombatActionDefinition`;
+- `CharacterBuilder / CreatureBuilder`;
+- `AnimationResolver`;
+- `EquipmentResolver`;
+- `IKProfile`;
+- `ProceduralProfile`;
+- `EntityValidator`.
+
+При открытии M1 эти роли будут разложены на реальные Unity/C# структуры после отдельного проектирования.
+
+---
+
+# 31. CubeGame Factory Editor
+
+Нужен editor-инструмент для ручной проверки Factory.
+
+Минимальные возможности концептуально:
+
+- выбрать species/race;
+- выбрать anatomy;
+- выбрать body profile;
+- менять голову;
+- менять торс;
+- менять руки;
+- менять ноги;
+- менять волосы/бороду/особые детали;
+- менять пропорции;
+- ставить экипировку;
+- ставить оружие;
+- выбирать animation package;
+- randomize;
+- save recipe;
+- spawn entity.
+
+Preview должен позволять быстро проверять:
+
+- Idle;
+- Walk;
+- Run;
+- Dodge;
+- Attack;
+- Heavy;
+- Block;
+- Hit;
+- Death;
+- хват оружия;
+- clipping;
+- IK.
+
+Для летающих и floating archetypes preview должен переключаться на их соответствующий movement package.
+
+---
+
+# 32. Автоматическая валидация
+
+До batch Factory обязана уметь автоматически выявлять хотя бы основные классы ошибок:
+
+- missing bone;
+- invalid bone name;
+- wrong rig archetype;
+- unsupported body part;
+- missing socket;
+- invalid weapon grip;
+- missing IK target;
+- incompatible equipment;
+- missing required animation package;
+- duplicate ID;
+- invalid attachment;
+- invalid bounds;
+- invalid scale;
+- invalid pivot/orientation;
+- likely clipping candidates;
+- broken import;
+- performance budget violation.
+
+На сотнях моделей ручной поиск таких ошибок недопустим.
+
+---
+
+# 33. Неразрушающий pipeline
+
+Автоматизация не должна стирать утверждённые ручные правки.
+
+Предпочтительная модель:
 
 ```text
 SOURCE / GENERATED BASE
@@ -803,299 +1511,397 @@ MANUAL DELTA
 APPROVED ASSET
 ```
 
-При обновлении Style Spec автоматические слои пересчитываются отдельно.
+При изменении автоматических правил ручные правки не перезаписываются молча.
 
-Ручные изменения не перезаписываются молча.
-
-Если автоматическое изменение конфликтует с ручной правкой, ассет уходит на повторный review.
+Конфликт отправляет asset на review.
 
 ---
 
-# ЧАСТЬ V — ПЛАН ЭКСПЕРИМЕНТАЛЬНОГО ЭТАПА
+# ЧАСТЬ VI — ПОРЯДОК ЭКСПЕРИМЕНТА
 
-## 19. Фаза E0 — подготовка эксперимента
+# 34. E0 — подготовка
 
-До создания ассетов:
+До производства:
 
-- выбрать один representative humanoid;
-- определить Unity test scene;
-- определить игровую дистанцию камеры;
-- определить формат сравнения;
-- определить технические бюджеты;
+- выбрать test scene;
+- определить gameplay camera distance;
+- определить формат visual review;
 - подготовить animation test harness;
 - подготовить combat dummy;
-- подготовить тест оружия и экипировки.
+- подготовить equipment/weapon test;
+- подготовить debug отображение bones/sockets/IK;
+- подготовить validation harness.
 
-**Результат:** один воспроизводимый стенд.
+Результат: один воспроизводимый испытательный стенд.
 
 ---
 
-## 20. Фаза E1 — один humanoid benchmark
+# 35. E1 — первый humanoid vertical slice
 
-Создать **одного** эталонного гуманоида.
-
-Проверить:
+Первый humanoid должен доказать:
 
 - новый стиль;
-- лицо;
-- конечности;
-- `STANDARD` body;
-- rig;
-- idle;
-- walk;
-- run;
-- dodge;
-- hit;
-- death;
-- один оружейный класс;
-- light combo;
-- heavy attack;
-- charged attack;
-- хват;
-- Unity gameplay.
+- modular body parts;
+- humanoid rig;
+- body profile;
+- CharacterRecipe;
+- builder;
+- locomotion;
+- reactions;
+- один weapon class;
+- combat package;
+- grips;
+- IK;
+- gameplay contract;
+- Unity runtime.
 
-**Стоп-критерий:** пока один humanoid не утверждён визуально и анимационно, второй не создаётся как production batch.
+Это первый полноценный Archetype Package.
 
 ---
 
-## 21. Фаза E2 — масштаб 2
+# 36. E2 — Human Standard + Orc Heavy
 
-Создать второй гуманоид того же skeleton archetype, но существенно другой внешности/пропорций.
+Критически важный экзамен.
 
-Главный тест:
+Берутся два заметно разных гуманоида:
 
-> действительно ли новый asset использует тот же rig и большую часть animation library?
+- Human Standard;
+- Orc Heavy.
 
-Если требуется заново делать почти все clips — архитектура не масштабируется и возвращается на доработку.
+Они должны использовать:
 
----
+- один humanoid rig contract;
+- один базовый locomotion package;
+- один reaction/death package;
+- одно оружие — например Greatsword;
+- один `Humanoid_2HSword` combat package;
+- procedural/IK corrections вместо отдельной полной библиотеки орка.
 
-## 22. Фаза E3 — масштаб 5
+Оба должны корректно:
 
-Пять моделей должны проверить:
+- стоять;
+- ходить;
+- бегать;
+- поворачиваться;
+- уклоняться;
+- держать одно и то же оружие;
+- использовать secondary grip;
+- выполнять light attacks;
+- выполнять heavy;
+- выполнять charged attack;
+- получать hit reaction;
+- умирать.
 
-- разные лица;
-- разные телосложения;
-- разные humanoid species;
-- экипировку;
-- минимум два weapon/combat sets.
-
-Измеряется **ручное время на один approved asset**.
-
----
-
-## 23. Фаза E4 — масштаб 10
-
-На десяти моделях проверяется уже сам pipeline:
-
-- автоматическая классификация;
-- binding;
-- animation assignment;
-- Unity validation;
-- review package;
-- повторяемость.
-
-Если десять моделей требуют десяти разных ручных процессов — batch запрещён.
+Если Orc Heavy требует заново создавать значительную часть общей библиотеки, architecture package возвращается на доработку.
 
 ---
 
-## 24. Фаза E5 — эталоны всех humanoid families
+# 37. E3 — доказательство общей Creature Factory на разных anatomy classes
 
-После успешной десятки создаётся **по одному эталону на каждое необходимое гуманоидное семейство/вид**.
+После доказательства базового humanoid package Factory должна быть проверена на принципиально разных строениях тела.
 
-Эти модели образуют Humanoid Style Bible.
+Минимальный исследовательский набор:
 
-После этого допускается производство вариантов.
+1. Humanoid — Human/Orc.
+2. Quadruped — например wolf-type.
+3. Floating — ghost/spectral-type.
+4. Insect либо unusual Avian.
 
----
+Цель не в том, чтобы сразу закончить все их animation libraries.
 
-## 25. Фаза E6 — creature archetypes
-
-Повторить тот же цикл для существ:
+Цель — доказать, что одна общая Factory умеет:
 
 ```text
-1 reference
+Recipe
+→ Anatomy classification
+→ Rig assignment
+→ Body assembly
+→ Movement package assignment
+→ Action package assignment
+→ Procedural profile
+→ Validation
+```
+
+для принципиально разных типов тела.
+
+---
+
+# 38. E4 — масштабирование внутри каждого archetype
+
+После доказательства archetype:
+
+```text
+1
 → 2
 → 5
 → 10
-→ family anchors
+→ 25
+→ 50
 → controlled batch
 ```
 
-Не запускать все creature families одновременно.
+Каждый новый размер партии проверяет:
+
+- reuse;
+- compatibility;
+- manual correction cost;
+- animation reuse;
+- equipment fit;
+- clipping;
+- import stability;
+- performance;
+- visual consistency.
+
+Нельзя компенсировать плохую архитектуру ручной работой на каждой новой модели.
 
 ---
 
-## 26. Фаза E7 — 25 / 50 / batch
+# 39. E5 — все humanoid family anchors
 
-Только после доказанного pipeline:
+После доказанной humanoid Factory создаётся по одному эталону каждого необходимого humanoid species/family.
+
+Для каждого фиксируются:
+
+- anatomy compatibility;
+- allowed parts;
+- proportion ranges;
+- face rules;
+- body profiles;
+- equipment rules;
+- animation reuse;
+- corrections;
+- signature actions.
+
+После принятия family anchor можно выпускать варианты.
+
+---
+
+# 40. E6 — creature archetypes
+
+Для каждого необходимого creature archetype повторяется:
+
+```text
+REFERENCE CREATURE
+↓
+RIG / ANATOMY CONTRACT
+↓
+BASE MOVEMENT
+↓
+BASE ACTIONS
+↓
+SECOND CREATURE
+↓
+REUSE
+↓
+5
+↓
+10
+↓
+CONTROLLED BATCH
+```
+
+Не запускать сразу все families.
+
+---
+
+# 41. E7 — production batches
+
+Только после доказанного Factory pipeline:
 
 - 25;
 - 50;
-- следующая партия по принятому лимиту.
+- следующая утверждённая партия.
 
-Batch — это не отсутствие визуального контроля.
+Batch не отменяет human visual review.
 
-Автоматика фильтрует очевидные технические проблемы, а человек проверяет художественный результат и сложные случаи.
+Автоматика отвечает за технический отсев.
+
+Человек отвечает за:
+
+- стиль;
+- силуэт;
+- читаемость;
+- качество движения;
+- художественную целостность;
+- сложные clipping/interaction cases.
 
 ---
 
-# ЧАСТЬ VI — МЕТРИКИ
+# ЧАСТЬ VII — МЕТРИКИ
 
-## 27. Главная производственная метрика
+# 42. Главная производственная метрика
 
-Количество сгенерированных моделей в час само по себе не важно.
+Не количество «созданных моделей в час».
 
 Главная метрика:
 
-> **человеко-минуты на один APPROVED игровой asset.**
+> **человеко-минуты на один APPROVED игровой asset/entity.**
 
-Для анимаций аналогично:
+Для animation packages:
 
-> **человеко-минуты на один APPROVED reusable animation set / signature clip.**
-
-Автоматизация считается оправданной, если она реально снижает эту стоимость и не ухудшает качество.
+> **человеко-минуты на один APPROVED reusable animation package / signature clip.**
 
 ---
 
-## 28. Дополнительные метрики
+# 43. Метрики моделей и Factory
 
-Для моделей:
-
-- процент ассетов, прошедших technical validation с первого раза;
-- среднее количество ручных исправлений;
+- процент assets, прошедших validation с первого раза;
+- среднее число ручных исправлений;
 - время до approved;
-- процент переиспользуемого rig;
+- процент reusable rig assignment;
 - процент автоматически назначенных sockets;
-- процент оборудования без ручной подгонки.
+- процент compatible equipment без ручной подгонки;
+- процент entities, собираемых Recipe → Factory без bespoke code;
+- количество custom exceptions.
 
-Для анимаций:
+---
 
-- процент моделей archetype, использующих общий locomotion без отдельного clip;
-- процент body profiles, работающих на одном clip;
-- количество уникальных clips на семейство;
-- количество procedural fixes;
+# 44. Метрики анимаций
+
+- процент моделей archetype, использующих общий locomotion;
+- процент body profiles, работающих на одном clip set;
+- процент weapon users, использующих общий combat package;
 - количество specialized variants;
 - количество signature animations;
-- clipping / foot sliding / grip errors;
-- gameplay timing regressions.
+- количество procedural fixes;
+- foot sliding;
+- grip errors;
+- clipping;
+- timing regressions;
+- число случаев, где новая модель потребовала новую полную animation library.
+
+Последняя метрика должна стремиться к нулю внутри совместимого archetype.
 
 ---
 
-# ЧАСТЬ VII — КРИТЕРИИ УСПЕХА
+# ЧАСТЬ VIII — КРИТЕРИИ УСПЕХА
 
-## 29. Модельный pipeline считается доказанным, если
+# 45. Humanoid Factory считается доказанной, если
 
-1. Один эталон утверждён.
-2. Второй asset успешно использует тот же pipeline.
-3. Пять моделей сохраняют единый стиль.
-4. Десять моделей не требуют десяти отдельных ручных процессов.
-5. Body profiles работают без создания независимого skeleton на каждый.
-6. Новая модель, которой не существовало в Alpha, выглядит частью той же игры.
-7. Pipeline воспроизводим.
-8. Unity validation работает автоматически.
-9. Ручная работа остаётся главным образом художественной, а не исправлением однотипных технических ошибок.
-
----
-
-## 30. Анимационный pipeline считается доказанным, если
-
-1. Один humanoid rig обслуживает несколько humanoid моделей.
-2. Один locomotion set обслуживает несколько видов и body profiles.
-3. Один weapon combat set обслуживает несколько humanoid моделей.
-4. Различия пропорций исправляются в основном retarget/procedural слоями.
-5. Новая модель не требует полного нового набора animations.
-6. Уникальные clips создаются только для уникального поведения.
-7. Gameplay timings отделены от визуального clip.
-8. Анимации проверены в реальном бою, а не только в viewer.
-9. Расширение с 1 до 10 моделей не приводит к линейному умножению ручной анимационной работы.
+1. Human Standard и Orc Heavy собираются одной Factory.
+2. Они используют один humanoid rig contract.
+3. Они используют общую locomotion.
+4. Они используют один weapon combat package.
+5. Один Greatsword корректно работает на обоих.
+6. Различия хвата компенсируются IK/correction profiles.
+7. Character Creator работает через тот же recipe/builder.
+8. Случайный NPC может быть собран тем же builder.
+9. Переход 2 → 5 → 10 не требует отдельных ручных pipelines.
+10. Различные humanoid species сохраняют визуальную индивидуальность.
 
 ---
 
-# ЧАСТЬ VIII — РЕШЕНИЕ ПРОБЛЕМЫ МНОЖЕСТВА АНИМАЦИЙ
+# 46. Creature Factory считается доказанной, если
 
-## 31. Базовый ответ
-
-Проблема не решается генерацией десятков тысяч индивидуальных clips.
-
-Она решается архитектурой:
-
-```text
-SKELETON ARCHETYPE
-    ↓
-BASE LOCOMOTION LIBRARY
-    ↓
-COMBAT LIBRARY BY WEAPON / CREATURE CLASS
-    ↓
-PROCEDURAL + IK LAYERS
-    ↓
-SIGNATURE CLIPS ONLY WHEN NEEDED
-```
-
-Поэтому рост числа моделей **не должен означать такой же рост числа анимаций**.
-
-Например:
-
-- 50 humanoid моделей могут использовать один humanoid locomotion set;
-- 50 humanoid моделей с мечом могут использовать один sword combat family;
-- light/standard/heavy должны сначала пытаться использовать те же clips;
-- только визуально или механически необходимое отличие получает отдельный variant;
-- уникальный босс получает собственные signature clips поверх базового движения.
-
-Это является главным условием масштабируемости всего M1.
+1. Factory не привязана только к Humanoid.
+2. Quadruped получает собственный reusable rig/action package.
+3. Floating entity не получает ненужную foot locomotion/FootIK.
+4. Avian получает ground/flight movement по своему archetype.
+5. Insect/Arachnid используют правильное количество и назначение конечностей.
+6. Необычные anatomy classes могут получить новый reusable archetype без новой отдельной Factory.
+7. Custom остаётся исключением.
+8. Общие validation/editor/review systems работают на всех archetypes.
 
 ---
 
-## 32. Что требуется выяснить экспериментально
+# 47. Animation Factory считается доказанной, если
 
-До начала массового производства нельзя заранее считать доказанными:
+1. Один rig archetype обслуживает несколько моделей.
+2. Один locomotion package обслуживает несколько compatible entities.
+3. Один combat/action package обслуживает несколько compatible entities.
+4. Разные body proportions исправляются преимущественно procedural/IK слоями.
+5. Новая модель не требует полного набора новых animations.
+6. Signature clips появляются только из-за реального уникального поведения.
+7. Gameplay timing существует отдельно от visual clip.
+8. Анимации проверены в реальном gameplay.
+9. Рост количества моделей не вызывает линейный рост animation production.
 
-- точное число skeleton archetypes;
+---
+
+# ЧАСТЬ IX — ЧТО НЕ ФИКСИРУЕТСЯ ДО ОТКРЫТИЯ M1
+
+# 48. Детальная реализация будет спроектирована при начале этапа
+
+Архитектурная концепция этого документа утверждена.
+
+Но данный документ **намеренно не фиксирует окончательно**:
+
+- точные названия C# классов;
+- ScriptableObject vs другие форматы для каждого типа данных;
+- точную hierarchy каждой кости;
+- точное число rig archetypes;
 - точное число body profiles;
-- необходимость soft skinning;
-- объём rigid binding;
-- лучший способ создания новых clips;
-- полезность AI motion;
-- полезность mocap;
-- необходимость Blender как основного animation editor;
-- предел retargeting между пропорциями;
-- точное количество combat sets;
-- уровень автоматизации equipment fitting.
+- окончательные proportion coefficients;
+- Generic vs смешанный путь для отдельных humanoid cases;
+- точный animation runtime graph;
+- Animator Controller vs Playables vs hybrid;
+- точную систему retargeting;
+- точные IK constraints;
+- конкретный authoring tool;
+- Blender/Cascadeur/mocap/AI доли production pipeline;
+- точный формат animation/action contracts;
+- точные combat timing numbers;
+- точный Editor UI;
+- конкретную автоматизацию batch;
+- performance budgets;
+- final folder/API architecture.
 
-Эти решения принимаются по результатам эталона и последовательности `1 → 2 → 5 → 10`, а не предположениями.
+Это будет обсуждаться и проектироваться **непосредственно перед началом M1**, когда:
+
+- M0 будет закрыт;
+- текущий Unity runtime будет известен;
+- будут доступны финальные требования к моделям;
+- будет выбран первый реальный representative set;
+- можно будет проверить решения экспериментом, а не предположением.
+
+До этого момента текущий документ является **утверждённой архитектурной целью и экспериментальным планом**, а не разрешением преждевременно писать production-реализацию M1.
 
 ---
 
-# 33. Итоговая последовательность M1
+# 49. Итоговая последовательность M1
 
 ```text
 M0 CLOSED
 ↓
+M1 DESIGN REVIEW
+↓
+DETAILED FACTORY IMPLEMENTATION PLAN
+↓
 EXPERIMENT HARNESS
 ↓
-ONE HUMANOID STYLE TARGET
+FIRST HUMANOID MODULAR MODEL
 ↓
-HUMANOID RIG
+CG_HUMANOID RIG CONTRACT
+↓
+ENTITY RECIPE
+↓
+HUMANOID BUILDER
 ↓
 BASE LOCOMOTION
 ↓
-FIRST COMBAT SET
+FIRST WEAPON / COMBAT PACKAGE
 ↓
-2 HUMANOIDS
+IK / PROCEDURAL
 ↓
-5 HUMANOIDS
+HUMAN STANDARD + ORC HEAVY
 ↓
-10 HUMANOIDS
+REUSE PROVEN
+↓
+2 → 5 → 10 HUMANOIDS
 ↓
 HUMANOID FAMILY ANCHORS
 ↓
-CREATURE ARCHETYPE #1
+QUADRUPED
 ↓
-1 → 2 → 5 → 10
+FLOATING
 ↓
-OTHER CREATURE ARCHETYPES
+AVIAN / UNUSUAL AVIAN
 ↓
-PROCEDURAL WEAPONS / VEGETATION / PROPS
+INSECT / ARACHNID
+↓
+OTHER REQUIRED ARCHETYPES
+↓
+1 → 2 → 5 → 10 FOR EACH FAMILY
 ↓
 25
 ↓
@@ -1103,20 +1909,32 @@ PROCEDURAL WEAPONS / VEGETATION / PROPS
 ↓
 CONTROLLED PRODUCTION BATCHES
 ↓
-NEW ORIGINAL CONTENT USING THE SAME FACTORY
+NEW ORIGINAL CONTENT THROUGH THE SAME FACTORY
 ```
 
-Главный принцип этапа:
+Главный принцип моделей:
 
-> **Сначала доказать качество на одном эталоне. Затем доказать переиспользование. Только после этого доказывать масштабирование.**
+> **не создавать каталог несвязанных моделей — создавать модульные entities, совместимые с утверждёнными anatomy/rig contracts.**
 
 Главный принцип анимаций:
 
-> **Не создавать анимацию на каждую модель. Создавать библиотеки движения для skeleton archetypes и классов действий, а уникальные анимации оставлять только для действительно уникального поведения.**
+> **не создавать полную animation library для каждой модели — создавать reusable animation packages для archetypes, оружия и действий.**
+
+Главный принцип генерации мира:
+
+> **Character Creator, NPC Generator и Enemy Generator должны использовать один и тот же EntityRecipe и одну и ту же Character / Creature Factory.**
+
+Главный принцип существ:
+
+> **не загонять всё в один skeleton — создавать ограниченное число хорошо доказанных anatomy/rig archetypes и использовать общую Factory поверх них.**
+
+Главный принцип масштабирования:
+
+> **сначала доказать качество на одном эталоне, затем доказать повторное использование, затем масштабировать 2 → 5 → 10 → 25 → 50 → batch.**
 
 ---
 
-## 34. Связанные документы
+# 50. Связанные документы
 
 - [ROADMAP_DRAFT](../planning/ROADMAP_DRAFT.md)
 - [S05_ASSET_CONVERSION_PLAN](S05_ASSET_CONVERSION_PLAN.md)
@@ -1126,4 +1944,4 @@ NEW ORIGINAL CONTENT USING THE SAME FACTORY
 
 ---
 
-_Этот документ определяет будущий экспериментальный контур M1 и не является разрешением начать художественную переработку до закрытия M0._
+_Концепция Character / Creature Factory, модульной LEGO-сборки, Rig Archetypes, EntityRecipe, Animation Resolver, weapon/action packages, IK/procedural layers и масштабирования по archetypes утверждена продюсером 2026-11-10. Детальная техническая реализация будет отдельно спроектирована при фактическом открытии M1. Документ не разрешает начинать M1 до закрытия M0 и отдельного решения продюсера._
