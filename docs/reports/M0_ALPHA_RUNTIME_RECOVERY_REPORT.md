@@ -119,7 +119,10 @@ Player-каталог самодостаточен: `CubeGame.exe`, `UnityPlayer
 
 **Content-популяция = 0** (`[Game] population: 0 content, 18 recovered`): городские NPC
 (`TownNpcPopulation`, спавнит 6 NPC у town service objects) и структуры не спавнятся, т.к. зависят от
-`ContentSpawns` зон, которых в Player-прогоне нет. Это отдельный content-stage gap, не связанный с R0-пакетированием.
+`ContentSpawns` зон, которых в Player-прогоне нет. Подтверждено на 3000 кадрах (`REAL_ACTOR_VIEWS`
+остаётся 20) — это **не тайминг**, а отдельный content-stage gap. Настройки `/6`:
+`CreatureSlots=0`, `DecorSlots=0`, `VegetationPerZone=0`, поэтому контент-провайдеры почти пусты,
+а структуры/городские сервисы в стартовых зонах не размещаются. Не связано с R0-пакетированием.
 
 Примечание: `problems=[ANIM_MISSING ... ACTION_REFUSED Recovery]` в глобальном списке — это не пропавшая
 модель, а штатный отказ боевого action 37 во время Recovery (волк атакует, не дождавшись выхода из
