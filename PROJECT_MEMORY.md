@@ -3,7 +3,7 @@
 **Updated:** 2026-11-10  
 **Canonical branch:** `integration/m0-all`  
 **Current plan:** [D90 — M0 five-stage finish](docs/decisions/D90-m0-five-stage-finish-plan.md)  
-**Current stage:** [M0-F2 INTEGRATION CHECKPOINT](docs/ACTIVE_STAGE.md) — `READY_FOR_PRODUCER_ACCEPTANCE` в `integration/m0-f2-final-review`; M0-F3 не начат
+**Current stage:** [M0-F3 GAMEPLAY LOOP](docs/ACTIVE_STAGE.md) — `IN_PROGRESS` в `codex/m0-f3-gameplay-loop`
 
 ## 1. Главная цель M0
 
@@ -16,7 +16,7 @@
 
 ### M0-F2 INTEGRATION CHECKPOINT
 
-`READY_FOR_PRODUCER_ACCEPTANCE` в `integration/m0-f2-final-review` (canonical `d21e5fa` + F2B `9857b2e`, содержащий F1 `748d650`, F2A `5f197f9`, DeepSeek `08ae4e3`→`28fa7a3`). Merge без конфликтов: canonical менял только документы M1/S06. Генераторы чистые. `build_transfer_registry` падает ещё до merge (статус в матрице M0_00B). EditMode 746/744/0/2, PlayMode 69/69 (68 прежних + 1 новый), `error CS = 0`. Новый сквозной PlayMode-сценарий F1+F2: мир → внешность → движение → melee → лут → стрела → луч → origin shift → стриминг → save/exit/load → продолжение. Открыто: атаки существ идут через перегрузку `TryStartAttack(ActionId)` = melee (`CreatureCombatDriver`), кандидат в F3. `integration/m0-all` не двигался до решения продюсера. [Отчёт](docs/reports/M0_F2_INTEGRATION_REPORT.md)
+`ACCEPTED` продюсером 10 ноября 2026 на `4b9480836beeba859340938486f4200d16c1549e`. GitHub подтвердил fast-forward `integration/m0-all` с `d21e5fa` на этот коммит. EditMode 744 PASS, 0 FAIL, 2 SKIP. PlayMode 69 PASS, 0 FAIL. Ошибок компиляции 0. Сквозной PlayMode-сценарий F1+F2 проверяет мир, внешность, движение, бой, лут, streaming и save → exit → load. Маршрут атак существ и статус P-01 переданы в F3. [Отчёт](docs/reports/M0_F2_INTEGRATION_REPORT.md)
 
 
 M0-F1 `READY_FOR_REVIEW` в `codex/m0-f1-world-runtime`, база canonical `1c6560c`, F1A Claude `9e50915`. Подключены recovered population, игровое время, респаун и драйвер движения, единый D3-маршрут `/6`, город, данжи и сундуки. Существующие форматы сейва читаются. Коллайдер следует voxel edit при очереди новых чанков. В PlayMode проверены stable ID и дельты через unload/reload и save/exit/load. Полный EditMode 664 passed / 0 failed / 2 skipped, PlayMode 60 passed / 0 failed / 0 skipped, `error CS = 0`. Каноническое слияние после ревью продюсера. [Отчёт M0-F1](docs/reports/M0_F1_WORLD_FIX_REPORT.md)

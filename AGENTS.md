@@ -47,5 +47,5 @@ GitHub — основной источник актуального состоя
 
 ## Текущий приоритет
 
-D90 / `M0-F1 WORLD FIX`:
-recovered spawn + NPC schedule runtime → collider fix → city/dungeon/chest runtime → persistence/unload/reload → full Unity regression.
+D90 / `M0-F3 GAMEPLAY LOOP`:
+progression → items/equipment → NPC/economy → quests → persistence и полная Unity-регрессия.

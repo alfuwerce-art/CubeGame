@@ -1,8 +1,8 @@
 # M0-F2 INTEGRATION CHECKPOINT
 
-10 ноября 2026 · ветка `integration/m0-f2-final-review` · **`READY_FOR_PRODUCER_ACCEPTANCE`**
+10 ноября 2026 · **`ACCEPTED` продюсером** · `4b9480836beeba859340938486f4200d16c1549e`
 
-Цель: одна проверенная ветка, где мир M0-F1, персонаж M0-F2A и боевой runtime M0-F2B собраны поверх актуального canonical и работают в одном runtime. Это база для M0-F3. `ACCEPTED` ставит продюсер. `integration/m0-all` и `main` не двигались.
+Продюсер принял объединённый runtime мира M0-F1, персонажа M0-F2A и боя M0-F2B. GitHub подтвердил fast-forward `integration/m0-all` с `d21e5fa` на утверждённый SHA.
 
 ## 1. Исходные ветки
 
@@ -115,7 +115,7 @@ Unity `6000.3.27f2`. XML и логи лежат в `AlphaOutput/` (вне git).
 
 ## 8. Готовность к M0-F3
 
-Ветка `integration/m0-f2-final-review` содержит F1 + F2A + DeepSeek evidence + F2B поверх `d21e5fa`. Генераторы чистые, регрессия зелёная, сквозной сценарий F1+F2 проходит. После приёмки продюсером ветку можно сделать новой canonical базой (fast-forward `integration/m0-all` до этого SHA). M0-F3 не начинался.
+M0-F3 открыт от принятого коммита. Замечание по маршрутам атак существ (§7) и ошибка реестра P-01 (§4) переданы в M0-F3.
 
 ## 9. Файлы этого шага
 

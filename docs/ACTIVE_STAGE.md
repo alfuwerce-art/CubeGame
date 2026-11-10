@@ -1,11 +1,14 @@
-# ACTIVE STAGE — M0-F2 INTEGRATION CHECKPOINT
+# ACTIVE STAGE — M0-F3 GAMEPLAY LOOP
 
-**Review branch:** `integration/m0-f2-final-review` (canonical `d21e5fa` + F2B `9857b2e` ⊃ F1 `748d650`, F2A `5f197f9`, DeepSeek `28fa7a3`) · **Status:** `READY_FOR_PRODUCER_ACCEPTANCE`
+**Рабочая ветка:** `codex/m0-f3-gameplay-loop` · **База:** `4b9480836beeba859340938486f4200d16c1549e` · **Статус:** `IN_PROGRESS`
 
-- Одна ветка: мир F1, персонаж F2A и бой F2B поверх актуального canonical. Конфликтов не было, документы M1/S06 сохранены.
-- Генераторы `--check` чистые. `build_transfer_registry` падает ещё до merge — статус в исследовательской матрице.
-- EditMode 746/744/0/2, PlayMode 69/69, `error CS = 0`. Новый сквозной сценарий F1+F2 через save → exit → load.
-- Следующий этап после приёмки: **M0-F3 GAMEPLAY LOOP** (не начат). `integration/m0-all` двигается только решением продюсера. [Отчёт интеграции](reports/M0_F2_INTEGRATION_REPORT.md)
+- [D90](decisions/D90-m0-five-stage-finish-plan.md) · F3-A progression, F3-B items/equipment, F3-C NPC/economy, F3-D quests, F3-E integration/persistence.
+- Обязательные проверки входной базы — фактический маршрут атак существ и статус P-01 в генераторе реестра.
+- К сдаче требуются полный EditMode, полный PlayMode и сквозной сценарий через save → exit → load → продолжение.
+
+## Предыдущий этап — M0-F2 INTEGRATION CHECKPOINT
+
+Продюсер присвоил `ACCEPTED` коммиту `4b9480836beeba859340938486f4200d16c1549e` 10 ноября 2026. `integration/m0-all` переведена на этот коммит fast-forward. EditMode 744 PASS, 0 FAIL, 2 SKIP. PlayMode 69 PASS, 0 FAIL. Ошибок компиляции 0. [Отчёт интеграции](reports/M0_F2_INTEGRATION_REPORT.md)
 
 ---
 
