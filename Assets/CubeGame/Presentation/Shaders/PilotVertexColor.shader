@@ -1,8 +1,7 @@
 Shader "CubeGame/PilotVertexColor"
 {
-    // Built-in render pipeline variant of the pilot terrain shader.
-    // The URP variant is added in a separate commit once the URP package is confirmed installed
-    // (see docs/stages/S01_PILOT_REPORT.md). No Alpha 2013 shaders or textures are used.
+    // Built-in render pipeline variant of the pilot terrain shader with real-time sun shadows.
+    // No Alpha 2013 shaders or textures are used.
     Properties
     {
         _Unused("Unused", Float) = 0
@@ -18,13 +17,16 @@ Shader "CubeGame/PilotVertexColor"
 
         Pass
         {
+            Tags { "LightMode" = "ForwardBase" }
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
 
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_fwdbase
             #include "UnityCG.cginc"
+            #include "AutoLight.cginc"
 
             float _DaylightBrightness;
             float _UseVertexAlpha;
@@ -40,6 +42,7 @@ Shader "CubeGame/PilotVertexColor"
             {
                 float4 pos : SV_POSITION;
                 float4 color : COLOR;
+                SHADOW_COORDS(1)
             };
 
             v2f vert(appdata v)
@@ -50,12 +53,39 @@ Shader "CubeGame/PilotVertexColor"
                 float lambert = saturate(dot(n, normalize(float3(0.35, 0.80, 0.25))));
                 o.color = float4(v.color.rgb * (0.55 + 0.45 * lambert) * _DaylightBrightness,
                     lerp(1.0, v.color.a, _UseVertexAlpha));
+                TRANSFER_SHADOW(o);
                 return o;
             }
 
             float4 frag(v2f i) : SV_Target
             {
-                return i.color;
+                fixed shadow = SHADOW_ATTENUATION(i);
+                return i.color * shadow;
+            }
+            ENDCG
+        }
+
+        Pass
+        {
+            Tags { "LightMode" = "ShadowCaster" }
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #pragma multi_compile_shadowcaster
+            #include "UnityCG.cginc"
+
+            struct v2f { V2F_SHADOW_CASTER; };
+
+            v2f vert(appdata_base v)
+            {
+                v2f o;
+                TRANSFER_SHADOW_CASTER(o);
+                return o;
+            }
+
+            float4 frag(v2f i) : SV_Target
+            {
+                SHADOW_CASTER_FRAGMENT(i);
             }
             ENDCG
         }

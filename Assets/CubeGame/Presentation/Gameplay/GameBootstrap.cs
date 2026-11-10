@@ -1259,6 +1259,10 @@ namespace CubeGame.Gameplay
             {
                 _sun = light;
                 _sunDayIntensity = light.intensity;
+                // Alpha draws with real-time sun shadows; a new directional light defaults to none.
+                light.shadows = LightShadows.Soft;
+                light.shadowStrength = 0.8f;
+                light.shadowBias = 0.02f;
             }
         }
 
