@@ -174,10 +174,10 @@ recovery). Лог-метка `ANIM_MISSING` здесь вводит в забл�
    все 156 акторов разрешаются (file → rig → clips) в packaged Player; ~40 видов (humanoid/quadruped/
    cat/runner/деревья/декор) рендерятся реальными моделями (`REAL_ACTOR_VIEWS=74`). Mesh/render всех
    156 видов подтверждён Editor-тестами (S05). Полный рендер всех 156 в Player — остаточная проверка.
-4. **R7** — структуры/город/данж: геометрия дома Alpha **исследована и реализована** (`B_house_research.md`,
-   `AlphaHouseBuilder.BuildAlpha` — сетка 3×3×4, типы 1/2/3, 5 стилей, commit `5ec4474`). Осталось:
-   подключить `BuildAlpha` в провайдер (с обновлением теста геометрии дома) и маппинг
-   типа→материала Alpha (сейчас материалы RECONSTRUCTED).
+4. **R7** — структуры/город/данж: геометрия дома Alpha **исследована, реализована и подключена**
+   (`B_house_research.md`, `AlphaHouseBuilder.BuildAlpha` + `AlphaZoneContentProvider`, commits
+   `5ec4474`/`39cead5`). В Player Town-зона даёт `REAL_ACTOR_VIEWS=98` (NPC + растительность),
+   `MAGENTA_COUNT=0`. Осталось: маппинг типа части→материала Alpha (сейчас материалы RECONSTRUCTED).
 
 ## 6. Финальный статус
 
