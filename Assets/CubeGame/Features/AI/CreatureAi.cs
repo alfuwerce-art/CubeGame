@@ -180,8 +180,31 @@ namespace CubeGame.Features.AI
         /// <summary>Attaches the fallback ring; the AI walks it while it has no target (CUBEGAME_FALLBACK; Alpha rules: AlphaNpcMovement.cs).</summary>
         public void AttachPatrol(PatrolRoute patrol) => Patrol = patrol;
 
+        /// <summary>
+        /// Recovered Alpha movement without a target (SpawnLocation / WalkPath / RandomWalk, M0-F1A). When attached it
+        /// takes precedence over the CUBEGAME_FALLBACK <see cref="Patrol"/> ring and the CubeGame wander.
+        /// </summary>
+        public AlphaNpcMovementDriver AlphaMovement { get; private set; }
+
+        public void AttachAlphaMovement(AlphaNpcMovementDriver driver) => AlphaMovement = driver;
+
         void Wander(CreatureState self, ICreatureAiWorld world, int elapsedMs)
         {
+            if (AlphaMovement != null)
+            {
+                AlphaNpcMovementStep step = AlphaMovement.Tick(self.X, self.Y, self.Z, elapsedMs,
+                    () => (int)(world.NextRoll() & 0x7FFFu));
+                State = step.Move ? CreatureAiState.Wander : CreatureAiState.Idle;
+                LastReason = step.Reason;
+                if (step.Move)
+                {
+                    world.MoveTowards(self, step.TargetX, step.TargetZ,
+                        world.WalkSpeed > 0 ? world.WalkSpeed : DefaultWalkSpeed, elapsedMs);
+                }
+
+                return;
+            }
+
             if (Patrol != null)
             {
                 Patrol.AdvanceIfArrived(self.X, self.Z);
