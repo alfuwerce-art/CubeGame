@@ -170,12 +170,16 @@ recovery). Лог-метка `ANIM_MISSING` здесь вводит в забл�
      OQ-22 PARTIAL). Телепорт в город даёт 44 модели (20+ NPC). Нужно решение продюсера: спавнить ли
      героя в Town-зоне.
    - **Звук** — 93 WAV застейджены и код подключён (F4); «слышно ли» в Player — приёмка продюсера.
-3. **R6** — масштабирование каталога (после R5).
+3. **R6 — масштаб каталога: проверен в Player** (`5804f9a`): `CATALOG_RESOLVE ready=156/156 problems=0` —
+   все 156 акторов разрешаются (file → rig → clips) в packaged Player; ~40 видов (humanoid/quadruped/
+   cat/runner/деревья/декор) рендерятся реальными моделями (`REAL_ACTOR_VIEWS=74`). Mesh/render всех
+   156 видов подтверждён Editor-тестами (S05). Полный рендер всех 156 в Player — остаточная проверка.
 4. **R7** — структуры/город/данж (отдельный conversion gap; сейчас reconstructed block house).
 
 ## 6. Финальный статус
 
-`READY_FOR_PRODUCER_VISUAL_REVIEW` по R0–R4 (7/7 гейтов PASS) + ядро R5 в Windows Player:
-герой с оружием, реальный враг и 18–54 существ, NPC города, анимации (idle/move/combat), террейн,
-растительность, `MAGENTA_COUNT=0`, полный цикл `save→exit→load→continue` (saved/loaded tick=81).
-Осталось два пункта, требующих продюсера: стартовая позиция (дизайн) и звук (приёмка). `R6`/`R7` — `NOT_STARTED`.
+`READY_FOR_PRODUCER_VISUAL_REVIEW` по R0–R4 (7/7 гейтов PASS) + ядро R5 + R6 в Windows Player:
+герой с оружием, реальный враг и существа, NPC города, анимации, террейн, растительность,
+`MAGENTA_COUNT=0`, полный цикл `save→exit→load→continue` (saved/loaded tick=81), каталог
+`156/156` акторов разрешается. Осталось: стартовая позиция (дизайн), звук (приёмка продюсера),
+R7 (геометрия зданий). `R7` — `NOT_STARTED`.
