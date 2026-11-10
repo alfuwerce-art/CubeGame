@@ -1,12 +1,14 @@
 # ACTIVE STAGE — M0-F4 PRESENTATION
 
-**Canonical branch:** `integration/m0-all` · **Status:** `ACTIVE`
+**Canonical branch:** `integration/m0-all` · **База:** `05336984`
+
+**Review branch:** `codex/m0-f4-presentation` · **Status:** `READY_FOR_PRODUCER_ACCEPTANCE`
 
 - M0-F3 принят продюсером и включён в canonical на `3cd79b4366dda4ff0d2410be22ee11d084eefaf1`.
 - ТЗ этапа: [M0-F4 PRESENTATION](stages/M0_F4_PRESENTATION_STAGE.md).
 - Все хвосты неполного переноса Alpha: [M0 Alpha Parity Backlog](planning/M0_ALPHA_PARITY_BACKLOG.md).
-- Приоритет F4: WAV/RIFF + runtime audio → HUD → inventory/skills/services → map/journal/icons → полная Unity-регрессия.
-- Художественный редизайн интерфейса не входит в F4; здесь нужен рабочий presentation baseline поверх систем F1–F3.
+- Подключены декодирование и воспроизведение локального аудио, HUD, инвентарь, навыки, услуги, карта, журнал и уведомления поверх F1–F3.
+- Unity 6000.3.27f2. EditMode 755 PASS / 0 FAIL / 2 прежних SKIP. PlayMode 73 PASS / 0 FAIL / 0 SKIP, сквозной F4 PASS. Ошибок компиляции 0. [Отчёт F4](reports/M0_F4_PRESENTATION_REPORT.md)
 
 ## Предыдущий этап — M0-F3 GAMEPLAY LOOP
 

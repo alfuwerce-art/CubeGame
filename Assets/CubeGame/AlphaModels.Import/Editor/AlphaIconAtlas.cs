@@ -19,6 +19,12 @@ namespace CubeGame.AlphaModels.Import
         [MenuItem("CubeGame/Alpha Models/Build Item Icon Atlas")]
         public static void BuildIconAtlas()
         {
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+            {
+                Write("icons_atlas.txt", "ICON_ATLAS_RESULT=NOT_CONFIGURED a graphics device is required");
+                return;
+            }
+
             var problems = new List<string>();
             var source = AlphaContentSource.Resolve();
             var items = source.Root != null ? Path.Combine(source.Root, "items") : null;
@@ -29,8 +35,14 @@ namespace CubeGame.AlphaModels.Import
             }
             var files = new List<string>(Directory.GetFiles(items, "*.cubdec"));
             files.Sort(StringComparer.OrdinalIgnoreCase);
-            const int cell = 64, cols = 8;
+            const int cell = 64;
+            int cols = Mathf.Max(8, Mathf.CeilToInt(Mathf.Sqrt(files.Count)));
             int rows = Mathf.CeilToInt(files.Count / (float)cols);
+            if (Mathf.Max(cols, rows) * cell > SystemInfo.maxTextureSize)
+            {
+                Write("icons_atlas.txt", $"ICON_ATLAS_RESULT=FAIL dimensions exceed {SystemInfo.maxTextureSize}");
+                return;
+            }
             var atlas = new Texture2D(cols * cell, Mathf.Max(1, rows) * cell, TextureFormat.RGBA32, false);
             var clear = new Color32[atlas.width * atlas.height];
             atlas.SetPixels32(clear);
@@ -52,7 +64,7 @@ namespace CubeGame.AlphaModels.Import
                 UnityEngine.Object.DestroyImmediate(sprite);
                 placed++;
             }
-            atlas.Apply(false, false);
+            // Encoding uses the CPU pixel buffer. The atlas itself is never rendered by this generator.
             var outDir = Path.Combine(OutDir, "icons");
             Directory.CreateDirectory(outDir);
             File.WriteAllBytes(Path.Combine(outDir, "atlas.png"), atlas.EncodeToPNG());

@@ -34,7 +34,7 @@ namespace CubeGame.Features.Session
 
         public IReadOnlyCollection<HuntMission> Hunts => _hunts.Values;
 
-        internal void ActivateNear(WorldPosition hero, IReadOnlyCollection<Combatant> combatants)
+        internal bool TryActivateNear(WorldPosition hero, IReadOnlyCollection<Combatant> combatants, out HuntMission activated)
         {
             Combatant nearest = null;
             double nearestSquared = ActivationRadius * ActivationRadius;
@@ -63,10 +63,8 @@ namespace CubeGame.Features.Session
                 }
             }
 
-            if (nearest != null)
-            {
-                TryRestore(new HuntMission(nearest.Id, nearest.Kind, false));
-            }
+            activated = nearest == null ? default : new HuntMission(nearest.Id, nearest.Kind, false);
+            return nearest != null && TryRestore(activated);
         }
 
         internal bool TryComplete(StableEntityId target)

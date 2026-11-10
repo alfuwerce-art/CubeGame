@@ -6,7 +6,6 @@ using CubeGame.Features.Creatures;
 using CubeGame.Features.Items;
 using CubeGame.Features.Session;
 using CubeGame.Gameplay.Streaming;
-using UnityEngine;
 
 namespace CubeGame.Gameplay
 {
@@ -26,45 +25,8 @@ namespace CubeGame.Gameplay
         };
 
         private StableEntityId _townNpc;
-        private bool _journalOpen;
-        private Vector2 _gameplayPanelScroll;
-        private CharacterSpecialization _specializationDraft;
 
-        private bool GameplayPanelOpen => !_townNpc.IsNone || _journalOpen;
-
-        private void UpdateGameplayInteractions()
-        {
-            if (HeroDead || _inventoryOpen || _localMap != null)
-            {
-                return;
-            }
-
-            if (!_townNpc.IsNone && !TryTownNpcInReach(_townNpc, out _))
-            {
-                CloseGameplayPanel();
-            }
-
-            if (Input.GetKeyDown(KeyCode.J))
-            {
-                if (_journalOpen)
-                {
-                    CloseGameplayPanel();
-                }
-                else
-                {
-                    _townNpc = default;
-                    _journalOpen = true;
-                    _gameplayPanelScroll = Vector2.zero;
-                    SetGameplayInput(false);
-                }
-            }
-            if (!GameplayPanelOpen && Input.GetKeyDown(KeyCode.E))
-            {
-                InteractNearest();
-            }
-        }
-
-        private void InteractNearest()
+        private StableEntityId NearestInteraction()
         {
             StableEntityId nearest = default;
             double bestDistance = InteractionRadius * InteractionRadius;
@@ -85,10 +47,7 @@ namespace CubeGame.Gameplay
                 }
             }
 
-            if (!nearest.IsNone)
-            {
-                TryInteract(nearest);
-            }
+            return nearest;
 
             void Consider(StableEntityId id, WorldPosition position)
             {
@@ -113,9 +72,8 @@ namespace CubeGame.Gameplay
             if (TryTownNpcInReach(id, out _))
             {
                 _townNpc = id;
-                _journalOpen = false;
-                _gameplayPanelScroll = Vector2.zero;
-                SetGameplayInput(false);
+                ShowPanel(GamePanel.Town);
+                _panelDirty = true;
                 return true;
             }
 
@@ -165,13 +123,19 @@ namespace CubeGame.Gameplay
                 return Report(false, _session.LastRejection);
             }
 
-            CloseGameplayPanel();
+            ShowPanel(GamePanel.None);
+            Notify("Rested until 07:00");
             return Report(true, "rested until 07:00");
         }
 
         public bool TryBrewLifePotion()
         {
             bool brewed = _session.TryBrewLifePotion();
+            if (brewed)
+            {
+                _audio.Play("craft.wav");
+                Notify("Crafted one Life Potion");
+            }
             return Report(brewed, brewed ? "crafted one Life Potion" : _session.LastRejection);
         }
 
@@ -260,98 +224,6 @@ namespace CubeGame.Gameplay
             double dy = position.Y - hero.Y;
             double dz = position.Z - hero.Z;
             return dx * dx + dy * dy + dz * dz;
-        }
-
-        private void CloseGameplayPanel()
-        {
-            if (!GameplayPanelOpen)
-            {
-                return;
-            }
-
-            _townNpc = default;
-            _journalOpen = false;
-            SetGameplayInput(_session.State == SessionState.InGame && !HeroDead && !_inventoryOpen && _localMap == null);
-        }
-
-        private void DrawGameplayPanel()
-        {
-            GUILayout.BeginArea(new Rect(Screen.width - 470f, 40f, 450f, Screen.height - 80f), GUI.skin.box);
-            if (GUILayout.Button("Close [Esc]"))
-            {
-                CloseGameplayPanel();
-                GUILayout.EndArea();
-                return;
-            }
-
-            _gameplayPanelScroll = GUILayout.BeginScrollView(_gameplayPanelScroll);
-            if (_journalOpen)
-            {
-                GUILayout.Label("Mission journal");
-                if (_session.Hero.Missions.Hunts.Count == 0)
-                {
-                    GUILayout.Label("Approach a hostile creature to discover a regional hunt.");
-                }
-                foreach (HuntMission hunt in _session.Hero.Missions.Hunts)
-                {
-                    string name = AlphaCreatureCatalog.TryKind(hunt.Kind.Value, out var kind) && !string.IsNullOrEmpty(kind.NameHint)
-                        ? kind.NameHint : hunt.Kind.ToString();
-                    GUILayout.Label($"Cell {hunt.CellX}, {hunt.CellZ}  |  {name}  |  {(hunt.Complete ? "Completed (+1 mana cube)" : "Active")}");
-                }
-            }
-            else if (TryTownNpcInReach(_townNpc, out int role))
-            {
-                if (role == TownNpcPopulation.MerchantClass)
-                {
-                    DrawVendor();
-                }
-                else if (role == TownNpcPopulation.InnkeeperClass)
-                {
-                    GUILayout.Label("Innkeeper  |  Rest from 18:00 to 06:00");
-                    if (GUILayout.Button("Rest until 07:00"))
-                    {
-                        TryRestAtInn();
-                    }
-                }
-                else
-                {
-                    CharacterClass trainerClass = CharacterClasses.FromId(role - 1);
-                    GUILayout.Label($"{trainerClass} trainer");
-                    if (trainerClass == _session.Hero.Sheet.Class && GUILayout.Button("Open Skills"))
-                    {
-                        CloseGameplayPanel();
-                        ToggleInventory();
-                        BeginSkillDraft(_session.Hero);
-                    }
-                }
-            }
-            GUILayout.Label(_status);
-            GUILayout.EndScrollView();
-            GUILayout.EndArea();
-        }
-
-        private void DrawVendor()
-        {
-            GUILayout.Label($"Merchant  |  Wallet {_session.Hero.Copper} copper");
-            for (int i = 0; i < ShopStock.Length; i++)
-            {
-                var offer = ShopStock[i];
-                int price = AlphaTradeValue.Of(InventoryEntry.FromRaw(offer.Item, 1));
-                if (GUILayout.Button($"Buy {offer.Label} ({price} copper)"))
-                {
-                    TryBuyFromVendor(i);
-                }
-            }
-
-            GUILayout.Label("Sell one item");
-            for (int slot = 0; slot < HeroInventory.Capacity; slot++)
-            {
-                InventoryEntry item = _session.Hero.Inventory[slot];
-                if (item != null && GUILayout.Button($"{item} (+{AlphaTradeValue.Of(item)} copper)"))
-                {
-                    TrySellToVendor(slot);
-                }
-            }
         }
 
         private static string SpecializationName(CharacterClass heroClass, CharacterSpecialization specialization) =>

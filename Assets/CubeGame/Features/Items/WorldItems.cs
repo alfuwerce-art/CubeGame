@@ -73,7 +73,10 @@ namespace CubeGame.Features.Items
 
                 _items.RemoveAt(i);
                 picked++;
-                _events.Publish(new WorldItemRemoved { TimeMs = nowMs, Item = g.Id, PickedBy = hero.Id });
+                _events.Publish(new WorldItemRemoved
+                {
+                    TimeMs = nowMs, Item = g.Id, PickedBy = hero.Id, Raw = g.Entry.Raw, Count = g.Entry.Count,
+                });
             }
 
             return picked;

@@ -107,14 +107,6 @@ namespace CubeGame.Gameplay
         private readonly WorldPosition[] _populationPlayers = new WorldPosition[1];
         private readonly Dictionary<StableEntityId, ZoneKey> _recoveredCorpses = new Dictionary<StableEntityId, ZoneKey>();
         private long _heroRespawnAtMs = -1;
-        private bool _inventoryOpen;
-        private Vector2 _inventoryScroll;
-        private bool _itemIconsChecked;
-        private AlphaIconAtlas _itemIcons;
-        private HeroSkillRanks _skillDraft;
-        private Texture2D _localMap;
-        private Vector2Int _localMapOrigin;
-        private const int LocalMapZoneSpan = 3;
         private Vector3 _lastHeroScenePosition;
         private int _frames;
         private string _screenshotPath;
@@ -173,6 +165,7 @@ namespace CubeGame.Gameplay
             _session = new GameSession(_timings) { ConsumableCooldownMs = CubeGame.Content.AlphaConsumableRules.CooldownMs };
             _session.EnterMainMenu();
             EnsureCameraAndLight();
+            CreateInterface();
             _formSeed = _commandLineSeed.ToString(CultureInfo.InvariantCulture);
             Debug.Log($"[Game] boot -> {_session.State}; saves={DescribeSaveDirectory()}");
         }
@@ -198,45 +191,12 @@ namespace CubeGame.Gameplay
         private void Update()
         {
             _frames++;
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                if (GameplayPanelOpen)
-                {
-                    CloseGameplayPanel();
-                }
-                else if (_localMap != null)
-                {
-                    ToggleLocalMap();
-                }
-                else if (_inventoryOpen)
-                {
-                    ToggleInventory();
-                }
-                else
-                {
-                    TogglePause();
-                }
-            }
-
-            if (_session.State == SessionState.InGame && !GameplayPanelOpen && !_inventoryOpen && !HeroDead && Input.GetKeyDown(KeyCode.M))
-            {
-                ToggleLocalMap();
-            }
-
-            if (_session.State == SessionState.InGame && !GameplayPanelOpen && _localMap == null && Input.GetKeyDown(KeyCode.I))
-            {
-                ToggleInventory();
-            }
-
-            if (_session.State == SessionState.InGame && !GameplayPanelOpen && !_inventoryOpen && _localMap == null && Input.GetKeyDown(KeyCode.Q))
-            {
-                UseFirst(LootRules.LifePotion);
-            }
+            UpdateInterfaceInput();
 
             if (_session.State == SessionState.InGame)
             {
                 ApplyHeroMovementState(_session.Hero);
-                if (_motor != null && _motor.enabled && Input.GetMouseButtonDown(0) && GUIUtility.hotControl == 0)
+                if (_motor != null && _motor.enabled && Input.GetMouseButtonDown(0) && !PointerOverInterface())
                 {
                     HeroAttack();
                 }
@@ -245,7 +205,7 @@ namespace CubeGame.Gameplay
                 SyncHeroFromView();
                 SyncHeroCombatant();
                 UpdatePopulationZones();
-                UpdateGameplayInteractions();
+                UpdateInteractionTarget();
                 _session.AdvanceFrame(Time.deltaTime);
                 if (_projectileVisuals != null)
                 {
@@ -579,18 +539,6 @@ namespace CubeGame.Gameplay
             return used;
         }
 
-        public void ToggleInventory()
-        {
-            _inventoryOpen = !_inventoryOpen;
-            _skillDraft = null;
-            if (_motor != null)
-            {
-                _motor.enabled = !_inventoryOpen && !HeroDead;
-            }
-        }
-
-        public bool InventoryOpen => _inventoryOpen;
-
         private void OnEquipmentChanged(EquipmentSlot slot, ItemInstance item)
         {
             _session.Events.Publish(new EquipmentVisualChanged
@@ -681,8 +629,7 @@ namespace CubeGame.Gameplay
             if (died.Entity.Equals(StableEntityId.Hero))
             {
                 _heroRespawnAtMs = died.TimeMs + HeroRespawnDelayMs;
-                CloseLocalMap();
-                CloseGameplayPanel();
+                ShowPanel(GamePanel.None, false);
                 SetGameplayInput(false);
                 _combatLog = $"you died - respawn in {HeroRespawnDelayMs / 1000} s";
                 return;
@@ -1017,6 +964,7 @@ namespace CubeGame.Gameplay
             _session.Events.Subscribe<EntityDied>(OnEntityDied);
             _heroRespawnAtMs = -1;
             _session.Events.Subscribe<WorldItemRemoved>(OnWorldItemRemoved);
+            BindWorldPresentation();
             _session.Hero.Inventory.EquipmentChanged += OnEquipmentChanged;
             PublishEquipment();
             _creatures = new CreatureCombatDriver(_session, GroundAt, kind => _timings.AttackActionsOf(kind), _session.World.Seed.Value);
@@ -1109,8 +1057,8 @@ namespace CubeGame.Gameplay
 
         private void DestroyWorldViews()
         {
-            CloseLocalMap();
-            CloseGameplayPanel();
+            UnbindWorldPresentation();
+            ShowPanel(GamePanel.None, false);
             if (_sun != null)
             {
                 _sun.intensity = _sunDayIntensity;
@@ -1130,8 +1078,6 @@ namespace CubeGame.Gameplay
                 _session.Hero.Inventory.EquipmentChanged -= OnEquipmentChanged;
             }
 
-            _inventoryOpen = false;
-            _skillDraft = null;
             _trainingTargetPending = false;
             _heroRespawnAtMs = -1;
             _creatures = null;
@@ -1253,7 +1199,7 @@ namespace CubeGame.Gameplay
         {
             if (_motor != null)
             {
-                _motor.enabled = enabled;
+                _motor.enabled = enabled && _panel == GamePanel.None && !HeroDead;
             }
 
             SetCursorLocked(false);
@@ -1325,6 +1271,10 @@ namespace CubeGame.Gameplay
         private bool Report(bool success, string message)
         {
             _status = message;
+            if (_panel != GamePanel.None && _session.State == SessionState.InGame)
+            {
+                _panelMessage = message;
+            }
             if (success)
             {
                 Debug.Log($"[Game] {message}");
@@ -1406,471 +1356,5 @@ namespace CubeGame.Gameplay
 
         // ----- Temporary IMGUI menus (M0-08 replaces them with the final UI; the game API above stays) -----
 
-        private void OnGUI()
-        {
-            switch (_session.State)
-            {
-                case SessionState.MainMenu:
-                    DrawMainMenu();
-                    break;
-                case SessionState.Paused:
-                    DrawPauseMenu();
-                    break;
-                case SessionState.InGame:
-                    DrawHud();
-                    if (_localMap != null)
-                    {
-                        DrawLocalMap();
-                    }
-                    else if (_inventoryOpen)
-                    {
-                        DrawInventory();
-                    }
-                    else if (GameplayPanelOpen)
-                    {
-                        DrawGameplayPanel();
-                    }
-
-                    break;
-            }
-        }
-
-        private void ToggleLocalMap()
-        {
-            if (_localMap != null)
-            {
-                CloseLocalMap();
-                SetGameplayInput(!HeroDead);
-                return;
-            }
-
-            // W-14 partial: the temporary map shows the current and explored neighbouring zones.
-            // D6 supplies the texture layout and colour sampling. Discovery is already part of the world save.
-            WorldPosition position = _session.Hero.Position;
-            ZoneKey center = WorldLayout.ZoneOf((int)Math.Floor(position.X), (int)Math.Floor(position.Z));
-            int halfSpan = LocalMapZoneSpan / 2;
-            _localMapOrigin = new Vector2Int((center.X - halfSpan) * WorldLayout.ZoneSize, (center.Z - halfSpan) * WorldLayout.ZoneSize);
-            int size = LocalMapZoneSpan * MapTileBuilder.DefaultTileSize;
-            int step = WorldLayout.ZoneSize / MapTileBuilder.DefaultTileSize;
-            byte[] pixels = MapTileBuilder.Render(size, (px, pz) =>
-            {
-                int x = _localMapOrigin.x + px * step + step / 2;
-                int z = _localMapOrigin.y + pz * step + step / 2;
-                ZoneKey zone = WorldLayout.ZoneOf(x, z);
-                if (!zone.Equals(center) && !_session.WorldDeltas.IsDiscovered(zone))
-                {
-                    return default;
-                }
-
-                VoxelColumn column = _worldState.EffectiveColumn(x, z);
-                return column != null ? MapTileBuilder.FromColumn(column) : default;
-            });
-
-            _localMap = new Texture2D(size, size, TextureFormat.RGBA32, false) { name = "Local world map", filterMode = FilterMode.Point };
-            _localMap.LoadRawTextureData(pixels);
-            _localMap.Apply(false, true);
-            SetGameplayInput(false);
-        }
-
-        private void CloseLocalMap()
-        {
-            if (_localMap != null)
-            {
-                Destroy(_localMap);
-                _localMap = null;
-            }
-        }
-
-        private void OnDestroy()
-        {
-            CloseLocalMap();
-            if (_itemIcons != null)
-            {
-                Destroy(_itemIcons.Texture);
-            }
-        }
-
-        private void DrawLocalMap()
-        {
-            float edge = Mathf.Min(_localMap.width * 2, Screen.width - 32, Screen.height - 112);
-            if (edge <= 0f)
-            {
-                return;
-            }
-
-            var rect = new Rect((Screen.width - edge) / 2f, (Screen.height - edge) / 2f, edge, edge);
-            GUI.Box(rect, GUIContent.none);
-            GUI.DrawTexture(rect, _localMap);
-
-            WorldPosition position = _session.Hero.Position;
-            double worldEdge = LocalMapZoneSpan * WorldLayout.ZoneSize;
-            float heroX = rect.x + edge * (float)((position.X - _localMapOrigin.x) / worldEdge);
-            float heroY = rect.yMax - edge * (float)((position.Z - _localMapOrigin.y) / worldEdge);
-            Color previous = GUI.color;
-            GUI.color = Color.yellow;
-            GUI.DrawTexture(new Rect(heroX - 3f, heroY - 3f, 6f, 6f), Texture2D.whiteTexture);
-            GUI.color = previous;
-            GUI.Label(new Rect(rect.x, rect.y - 24f, rect.width, 22f), "Local map  [M] close");
-        }
-
-        /// <summary>
-        /// Hero editor (C1, Alpha fields of drawCharacterAppearancePanel 0x428E40): race, gender, face, haircut, hair colour
-        /// palette 16×7, class, name. Temporary IMGUI; the final interface is C10.
-        /// </summary>
-        private void DrawHeroEditor()
-        {
-            GUILayout.Label("Hero");
-            _formHeroName = LabeledField("Name", _formHeroName);
-            if (_formHeroName.Length > AlphaHeroCreation.MaxNameLength)
-            {
-                _formHeroName = _formHeroName.Substring(0, AlphaHeroCreation.MaxNameLength);
-            }
-
-            HeroAppearance a = _formLook;
-            int race = GUILayout.SelectionGrid(a.Race, AlphaHeroCreation.Races, 4);
-            int gender = GUILayout.Toolbar(a.Gender, new[] { "Male", "Female" });
-            KindId kind = AlphaHeroCreation.KindOf(race, gender);
-            int face = a.Face;
-            int hair = a.Haircut;
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("<", GUILayout.Width(30f)))
-            {
-                face--;
-            }
-
-            GUILayout.Label($"Face {AlphaHeroCreation.Wrap(face, AlphaHeroCreation.FaceCount(kind)) + 1}/{AlphaHeroCreation.FaceCount(kind)}", GUILayout.Width(110f));
-            if (GUILayout.Button(">", GUILayout.Width(30f)))
-            {
-                face++;
-            }
-
-            if (GUILayout.Button("<", GUILayout.Width(30f)))
-            {
-                hair--;
-            }
-
-            GUILayout.Label($"Haircut {AlphaHeroCreation.Wrap(hair, AlphaHeroCreation.HaircutCount(kind)) + 1}/{AlphaHeroCreation.HaircutCount(kind)}", GUILayout.Width(110f));
-            if (GUILayout.Button(">", GUILayout.Width(30f)))
-            {
-                hair++;
-            }
-
-            GUILayout.EndHorizontal();
-
-            byte r = a.HairR;
-            byte g = a.HairG;
-            byte b = a.HairB;
-            GUILayout.Label($"Hair colour ({r}, {g}, {b})");
-            Color saved = GUI.backgroundColor;
-            for (int row = 0; row < AlphaHeroCreation.PaletteRows; row++)
-            {
-                GUILayout.BeginHorizontal();
-                for (int column = 0; column < AlphaHeroCreation.PaletteColumns; column++)
-                {
-                    var c = AlphaHeroCreation.PaletteColor(column, row);
-                    GUI.backgroundColor = new Color32(c.R, c.G, c.B, 255);
-                    if (GUILayout.Button(GUIContent.none, GUILayout.Width(22f), GUILayout.Height(14f)))
-                    {
-                        (r, g, b) = c;
-                    }
-                }
-
-                GUILayout.EndHorizontal();
-            }
-
-            GUI.backgroundColor = saved;
-            _formLook = AlphaHeroCreation.Normalize(new HeroAppearance(race, gender, face, hair, r, g, b));
-            _formClass = GUILayout.Toolbar(_formClass, new[] { "Warrior", "Ranger", "Mage", "Rogue" });
-        }
-
-        private void DrawMainMenu()
-        {
-            GUILayout.BeginArea(new Rect(Screen.width / 2f - 220f, 60f, 440f, Screen.height - 120f), GUI.skin.box);
-            GUILayout.Label("CubeGame — main menu (M0-01)");
-            GUILayout.Space(8f);
-            GUILayout.Label("New world");
-            _formWorldName = LabeledField("World name", _formWorldName);
-            _formSeed = LabeledField("Seed", _formSeed);
-            DrawHeroEditor();
-            _formSlot = GUILayout.Toolbar(_formSlot, SlotKeys);
-            if (GUILayout.Button("Create world"))
-            {
-                uint seed = uint.TryParse(_formSeed, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint parsed) ? parsed : DefaultSeed;
-                StartNewWorld(SlotKeys[_formSlot], _formWorldName, seed, _formHeroName, CharacterClasses.FromId(_formClass), _formLook);
-            }
-
-            GUILayout.Space(12f);
-            GUILayout.Label("Load");
-            foreach (string slot in SlotKeys)
-            {
-                GUI.enabled = _slots.Exists(slot);
-                if (GUILayout.Button(_slots.Exists(slot) ? $"Load {slot}" : $"{slot} (empty)"))
-                {
-                    LoadWorld(slot);
-                }
-            }
-
-            GUI.enabled = true;
-            GUILayout.Space(12f);
-            if (GUILayout.Button("Quit"))
-            {
-                QuitGame();
-            }
-
-            if (!string.IsNullOrEmpty(_status))
-            {
-                GUILayout.Label(_status);
-            }
-
-            GUILayout.EndArea();
-        }
-
-        private void DrawPauseMenu()
-        {
-            GUILayout.BeginArea(new Rect(Screen.width / 2f - 160f, Screen.height / 2f - 140f, 320f, 280f), GUI.skin.box);
-            GUILayout.Label($"Paused — {_session.World?.Name}");
-            if (GUILayout.Button("Resume"))
-            {
-                TogglePause();
-            }
-
-            if (GUILayout.Button("Save"))
-            {
-                SaveCheckpoint();
-            }
-
-            if (GUILayout.Button("Save and exit to menu"))
-            {
-                ExitToMenu(true);
-            }
-
-            if (GUILayout.Button("Exit to menu without saving"))
-            {
-                ExitToMenu(false);
-            }
-
-            if (GUILayout.Button("Quit game"))
-            {
-                QuitGame();
-            }
-
-            GUILayout.Label(_status);
-            GUILayout.EndArea();
-        }
-
-        private void DrawHud()
-        {
-            HeroState hero = _session.Hero;
-            int minutes = _session.Clock.WorldTimeMs / 60_000;
-            GUI.Label(new Rect(10f, 10f, 700f, 22f),
-                $"{_session.World.Name}  seed {_session.World.Seed}  {minutes / 60:00}:{minutes % 60:00}  " +
-                $"{hero.Name} {hero.Sheet.Class} L{hero.Sheet.Progression.Level}  pos {hero.Position}  " +
-                $"{(_worldView != null ? _worldView.Center.ToString() : "-")} loaded {(_worldView != null ? _worldView.LoadedCount : 0)}  [Esc] menu");
-            GUI.Label(new Rect(10f, 32f, 700f, 22f),
-                $"HP {hero.Health.CurrentHealth:F0}/{hero.Health.MaxHealth:F0}  weapon {hero.Loadout.GetEquipped(EquipmentSlot.MainHand)?.ToString() ?? "none"}  " +
-                $"potions {hero.Inventory.CountOf(LootRules.LifePotion)}  [LMB] attack  [Q] potion  [I] inventory  [M] map");
-            GUI.Label(new Rect(10f, 98f, 700f, 22f),
-                $"Copper {hero.Copper}  Mana cubes {hero.ManaCubes}  [E] interact  [J] journal");
-            if (_trainingTarget != null)
-            {
-                GUI.Label(new Rect(10f, 54f, 700f, 22f),
-                    $"{_trainingTarget.Name}: HP {_trainingTarget.Health.CurrentHealth:F0}/{_trainingTarget.Health.MaxHealth:F0}{(_trainingTarget.IsDead ? " (dead)" : string.Empty)}");
-            }
-
-            GUI.Label(new Rect(10f, 76f, 700f, 22f), _combatLog);
-        }
-
-        /// <summary>Temporary inventory window (M0-08 replaces it): equipment, bags, equip/unequip/use.</summary>
-        private void DrawInventory()
-        {
-            HeroState hero = _session.Hero;
-            GUILayout.BeginArea(new Rect(Screen.width - 470f, 40f, 450f, Screen.height - 80f), GUI.skin.box);
-            if (_skillDraft != null)
-            {
-                DrawSkillDraft(hero);
-                GUILayout.EndArea();
-                return;
-            }
-
-            if (!_itemIconsChecked)
-            {
-                _itemIconsChecked = true;
-                AlphaIconAtlas.TryLoad(AlphaIconAtlas.DefaultDirectory, out _itemIcons, null);
-            }
-
-            GUILayout.Label($"Inventory  {hero.Inventory.UsedSlots}/{HeroInventory.Capacity}  [I] close");
-            if (GUILayout.Button("Skills"))
-            {
-                BeginSkillDraft(hero);
-            }
-            if (GUILayout.Button("Brew Life Potion (1 Heartflower + 1 Water Flask)"))
-            {
-                TryBrewLifePotion();
-            }
-            GUILayout.Label(_status);
-
-            _inventoryScroll = GUILayout.BeginScrollView(_inventoryScroll);
-            foreach (EquipmentSlot slot in EquipmentLoadout.Slots)
-            {
-                ItemInstance item = hero.Loadout.GetEquipped(slot);
-                GUILayout.BeginHorizontal();
-                GUILayout.Label($"{slot}: {(item != null ? item.ToString() : "-")}", GUILayout.Width(360f));
-                if (item != null && GUILayout.Button("Off", GUILayout.Width(60f)) && !hero.Inventory.TryUnequip(slot))
-                {
-                    _combatLog = hero.Inventory.LastRejection;
-                }
-
-                GUILayout.EndHorizontal();
-            }
-
-            foreach (ExtraEquipmentSlot slot in HeroInventory.ExtraSlots)
-            {
-                InventoryEntry entry = hero.Inventory.GetExtra(slot);
-                GUILayout.BeginHorizontal();
-                DrawInventoryLabel(entry, $"{slot}: {(entry != null ? entry.ToString() : "-")}", 360f);
-                if (entry != null && GUILayout.Button("Off", GUILayout.Width(60f)) && !hero.Inventory.TryUnequipExtra(slot))
-                {
-                    _combatLog = hero.Inventory.LastRejection;
-                }
-                GUILayout.EndHorizontal();
-            }
-
-            GUILayout.Space(6f);
-            for (int i = 0; i < HeroInventory.Capacity; i++)
-            {
-                InventoryEntry entry = hero.Inventory[i];
-                if (entry == null)
-                {
-                    continue;
-                }
-
-                GUILayout.BeginHorizontal();
-                DrawInventoryLabel(entry, $"[{i / HeroInventory.SlotsPerBag}:{i % HeroInventory.SlotsPerBag}] {entry}", 302f);
-                if (!DrawExtraEquipActions(hero.Inventory, i, entry) && entry.IsCore
-                    && GUILayout.Button("Equip", GUILayout.Width(80f)) && !hero.Inventory.TryEquip(i, out _))
-                {
-                    _combatLog = hero.Inventory.LastRejection;
-                }
-                else if (!entry.IsCore && entry.Raw.Type == 1 && GUILayout.Button("Use", GUILayout.Width(80f)) && !_session.TryUseItem(i))
-                {
-                    _combatLog = _session.LastRejection;
-                }
-
-                GUILayout.EndHorizontal();
-            }
-
-            GUILayout.EndScrollView();
-            GUILayout.EndArea();
-        }
-
-        private void DrawInventoryLabel(InventoryEntry entry, string label, float width)
-        {
-            if (_itemIcons != null && entry != null && AlphaItemIcons.TryEntry(entry.Raw, out string key)
-                && _itemIcons.TryGetRect(key, out Rect pixels))
-            {
-                const float iconSize = 24f;
-                Rect icon = GUILayoutUtility.GetRect(iconSize, iconSize);
-                Texture2D atlas = _itemIcons.Texture;
-                var uv = new Rect(pixels.x / atlas.width, pixels.y / atlas.height,
-                    pixels.width / atlas.width, pixels.height / atlas.height);
-                GUI.DrawTextureWithTexCoords(icon, atlas, uv);
-                width -= iconSize + 4f;
-            }
-
-            GUILayout.Label(label, GUILayout.Width(width));
-        }
-
-        private bool DrawExtraEquipActions(HeroInventory inventory, int bagSlot, InventoryEntry entry)
-        {
-            bool hasExtraSlot = false;
-            foreach (ExtraEquipmentSlot slot in HeroInventory.ExtraSlots)
-            {
-                if (!HeroInventory.CanEquipExtra(slot, entry))
-                {
-                    continue;
-                }
-
-                hasExtraSlot = true;
-                string label = slot switch
-                {
-                    ExtraEquipmentSlot.LeftRing => "L ring",
-                    ExtraEquipmentSlot.RightRing => "R ring",
-                    _ => "Equip",
-                };
-                if (GUILayout.Button(label, GUILayout.Width(54f)) && !inventory.TryEquipExtra(bagSlot, slot))
-                {
-                    _combatLog = inventory.LastRejection;
-                }
-            }
-
-            return hasExtraSlot;
-        }
-
-        private void DrawSkillDraft(HeroState hero)
-        {
-            int level = hero.Sheet.Progression.Level;
-            GUILayout.Label($"Skills   Points: {Math.Max(0L, _skillDraft.UnspentLevelPoints(level, hero.ManaCubes))}");
-            if (GUILayout.Button($"Specialization: {SpecializationName(hero.Sheet.Class, _specializationDraft)}"))
-            {
-                _specializationDraft = _specializationDraft == CharacterSpecialization.Primary
-                    ? CharacterSpecialization.Secondary : CharacterSpecialization.Primary;
-            }
-            for (int i = 0; i < HeroSkillRanks.Count; i++)
-            {
-                var skill = (HeroSkill)i;
-                GUILayout.BeginHorizontal();
-                GUILayout.Label($"{skill}: {_skillDraft[skill]}", GUILayout.Width(300f));
-                bool enabled = GUI.enabled;
-                if (GUILayout.Button("-", GUILayout.Width(55f)))
-                {
-                    _skillDraft.TryLower(skill);
-                }
-                GUI.enabled = enabled && _skillDraft.CanRaise(skill, level, hero.ManaCubes);
-                if (GUILayout.Button("+", GUILayout.Width(55f)))
-                {
-                    _skillDraft.TryRaise(skill, level, hero.ManaCubes);
-                }
-                GUI.enabled = enabled;
-                GUILayout.EndHorizontal();
-            }
-
-            if (hero.SkillRanks.TryPriceChange(_skillDraft, level, hero.ManaCubes,
-                _specializationDraft != hero.Sheet.Specialization, out long price))
-            {
-                GUILayout.Label($"Apply cost {price} copper  |  Wallet {hero.Copper}");
-                if (price > 0)
-                {
-                    GUILayout.Label($"Requires a nearby {hero.Sheet.Class} trainer.");
-                }
-            }
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Apply"))
-            {
-                if (TryApplyHeroProgression(_skillDraft, _specializationDraft))
-                {
-                    ApplyHeroMovementState(hero);
-                    _skillDraft = null;
-                }
-                else
-                {
-                    _combatLog = _session.LastRejection;
-                }
-            }
-
-            if (GUILayout.Button("Cancel"))
-            {
-                _skillDraft = null;
-            }
-            GUILayout.EndHorizontal();
-        }
-
-        private static string LabeledField(string label, string value)
-        {
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(label, GUILayout.Width(100f));
-            string result = GUILayout.TextField(value ?? string.Empty);
-            GUILayout.EndHorizontal();
-            return result;
-        }
     }
 }

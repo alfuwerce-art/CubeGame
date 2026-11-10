@@ -3,7 +3,7 @@
 **Updated:** 2026-11-10  
 **Canonical branch:** `integration/m0-all`  
 **Current plan:** [D90 — M0 five-stage finish](docs/decisions/D90-m0-five-stage-finish-plan.md)  
-**Current stage:** [M0-F4 PRESENTATION](docs/ACTIVE_STAGE.md) — ACTIVE на canonical после принятого F3
+**Current stage:** [M0-F4 PRESENTATION](docs/ACTIVE_STAGE.md) — `READY_FOR_PRODUCER_ACCEPTANCE` в `codex/m0-f4-presentation`
 
 ## 0. Alpha parity backlog
 
@@ -17,6 +17,10 @@
 `new world → character → travel → combat → loot → city → trade → dungeon → boss → quest → save/load → continue`.
 
 ## 2. Последний сведённый результат
+
+### M0-F4 PRESENTATION
+
+Кандидат на базе canonical `05336984`. Основной `GameBootstrap` использует UI Toolkit для создания мира и героя, HUD, экипировки, навыков, услуг, карты и журнала. Панели читают состояние сеанса и вызывают операции F1–F3. Исправлены метаданные 32 WAV, Unity декодировала все 93 локальных WAV. Воспроизведение подключено к живым событиям и освобождает клипы при выходе. Полный EditMode 755 PASS / 0 FAIL / 2 прежних SKIP. Полный PlayMode 73 PASS / 0 FAIL / 0 SKIP, включая сквозной F4. Ошибок компиляции 0. Точные условия части звуков, оригинальные маркеры и полный Alpha-журнал остаются в parity backlog. [Отчёт F4](docs/reports/M0_F4_PRESENTATION_REPORT.md)
 
 ### M0-F3 GAMEPLAY LOOP
 

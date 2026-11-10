@@ -1,9 +1,8 @@
 // CubeGame.Presentation.Visual — Alpha sound library of the game (D6, Q-09).
 //
 // Inventory (93 names) is Alpha data extracted from data2.db (tools/alpha_content/extract_sounds.py); the audio
-// files themselves are staged in the local content cache and never committed. Which sound belongs to which game
-// event is UNKNOWN except the mission-complete sound (Q-09); Alpha's numeric sound ids are not its data2.db
-// rowids, so no id table is invented here — sounds are addressed by name.
+// files themselves are staged in the local content cache and never committed. The F4 report describes which event
+// bindings are recovered. Alpha's numeric sound IDs are independent of its data2.db rowids.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,12 +14,12 @@ namespace CubeGame.Presentation.Visual
     public sealed class AlphaSoundLibrary
     {
         public const string Status =
-            "ALPHA_DATA: 93 sounds from data2.db; event->sound mapping UNKNOWN except mission complete (Q-09)";
+            "ALPHA_DATA: 93 sounds from data2.db; event mapping PARTIAL (see F4 report)";
 
         /// <summary>Directory name inside the staged content cache.</summary>
         public const string DirectoryName = "sounds";
 
-        /// <summary>The only event whose sound is proven.</summary>
+        /// <summary>The original D6 event lookup key for Q-09.</summary>
         public const string MissionCompleteEvent = "mission_complete";
 
         readonly string _directory;
@@ -52,8 +51,7 @@ namespace CubeGame.Presentation.Visual
         }
 
         /// <summary>
-        /// Sound of a game event. Only <see cref="MissionCompleteEvent"/> is mapped (Q-09); every other event
-        /// returns false instead of borrowing a random sound.
+        /// Original D6 event lookup for Q-09. Gameplay F4 binds its additional cues at their event handlers.
         /// </summary>
         public bool TryResolveEvent(string eventKey, out string path, out string reason)
         {
@@ -70,7 +68,7 @@ namespace CubeGame.Presentation.Visual
                 return false;
             }
 
-            reason = $"EVENT_SOUND_UNKNOWN {eventKey} (Q-09: only mission complete is mapped)";
+            reason = $"EVENT_SOUND_UNKNOWN {eventKey}";
             return false;
         }
     }

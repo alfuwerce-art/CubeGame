@@ -319,6 +319,24 @@ namespace CubeGame.Features.Contracts
 
         /// <summary>Who picked it up; None when it expired.</summary>
         public StableEntityId PickedBy { get; set; }
+
+        public RawAlphaItemId Raw { get; set; }
+        public int Count { get; set; }
+    }
+
+    public sealed class HeroItemUsed : IGameEvent
+    {
+        public long TimeMs { get; set; }
+        public RawAlphaItemId Raw { get; set; }
+        public double HealthRestored { get; set; }
+    }
+
+    /// <summary>Live hunt transition. Rehydrating a saved journal emits no transition.</summary>
+    public sealed class HuntChanged : IGameEvent
+    {
+        public long TimeMs { get; set; }
+        public KindId Kind { get; set; }
+        public bool Complete { get; set; }
     }
 
     public sealed class SessionStateChanged : IGameEvent

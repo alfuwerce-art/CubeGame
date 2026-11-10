@@ -541,9 +541,9 @@ namespace CubeGame.Features.Session
                 heroCombatant.Yaw = Hero.Yaw;
             }
 
-            if (!Hero.Health.IsDead)
+            if (!Hero.Health.IsDead && Hero.Missions.TryActivateNear(Hero.Position, Combat.Combatants, out HuntMission hunt))
             {
-                Hero.Missions.ActivateNear(Hero.Position, Combat.Combatants);
+                Events.Publish(new HuntChanged { TimeMs = clock.TimeMs, Kind = hunt.Kind });
             }
             Combat.Update(clock.TimeMs);
             if (_levelUpHealPending)
@@ -600,9 +600,13 @@ namespace CubeGame.Features.Session
 
             if (Hero != null && died.Killer.Equals(Hero.Id) && dead.Hostile && !Hero.Health.IsDead)
             {
-                if (Hero.Missions.TryComplete(died.Entity) && Hero.ManaCubes < int.MaxValue)
+                if (Hero.Missions.TryComplete(died.Entity))
                 {
-                    Hero.ManaCubes++;
+                    if (Hero.ManaCubes < int.MaxValue)
+                    {
+                        Hero.ManaCubes++;
+                    }
+                    Events.Publish(new HuntChanged { TimeMs = died.TimeMs, Kind = dead.Kind, Complete = true });
                 }
                 long xp = KillExperience(dead.Sheet.Progression.Level, dead.Stars, dead.IsBoss);
                 int levels = Hero.Sheet.AddExperience(xp);
@@ -791,12 +795,17 @@ namespace CubeGame.Features.Session
             Hero.Inventory.TakeFrom(bagSlot, 1);
             int cooldown = ConsumableCooldownMs?.Invoke(entry.Raw.Type, entry.Raw.Subtype) ?? 0;
             _cooldownUntilMs[entry.Raw] = Clock.TimeMs + cooldown;
+            double healthBefore = Hero.Health.CurrentHealth;
             if (entry.Raw.Equals(LootRules.LifePotion))
             {
                 Hero.Health.Heal(Hero.Health.MaxHealth * LifePotionHealShare);
             }
 
             LastRejection = string.Empty;
+            Events.Publish(new HeroItemUsed
+            {
+                TimeMs = Clock.TimeMs, Raw = entry.Raw, HealthRestored = Hero.Health.CurrentHealth - healthBefore,
+            });
             return true;
         }
 

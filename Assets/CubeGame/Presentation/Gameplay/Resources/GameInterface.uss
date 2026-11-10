@@ -1,0 +1,218 @@
+#game-interface {
+    flex-grow: 1;
+    color: rgb(236, 242, 245);
+    font-size: 15px;
+}
+.surface {
+    background-color: rgba(18, 27, 35, 0.97);
+    border-color: rgb(71, 96, 112);
+    border-width: 1px;
+    border-radius: 6px;
+    padding: 12px 14px;
+}
+.heading {
+    font-size: 22px;
+    -unity-font-style: bold;
+    margin-bottom: 5px;
+}
+.section {
+    font-size: 16px;
+    color: rgb(192, 225, 242);
+    -unity-font-style: bold;
+    margin-top: 8px;
+    margin-bottom: 4px;
+}
+.muted {
+    color: rgb(171, 196, 209);
+    font-size: 13px;
+    white-space: normal;
+}
+Button {
+    color: rgb(237, 246, 250);
+    background-color: rgb(42, 66, 82);
+    border-color: rgb(90, 120, 137);
+    padding: 4px 9px;
+    min-height: 28px;
+    margin: 2px;
+}
+Button:hover {
+    background-color: rgb(59, 92, 110);
+}
+Button:active {
+    background-color: rgb(77, 117, 135);
+}
+Button:disabled {
+    opacity: 0.45;
+}
+.row {
+    flex-direction: row;
+    align-items: center;
+}
+.grow {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+}
+.main-menu {
+    align-self: center;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    width: 490px;
+    max-width: 96%;
+    flex-shrink: 1;
+}
+.main-menu ScrollView, .game-panel ScrollView {
+    flex-shrink: 1;
+    min-height: 0;
+}
+.pause-menu {
+    align-self: center;
+    margin-top: 14%;
+    width: 340px;
+    max-width: 92%;
+}
+.form-row > DropdownField {
+    flex-grow: 1;
+    flex-basis: 0;
+}
+.unity-base-field__label {
+    min-width: 76px;
+    color: rgb(201, 222, 233);
+}
+.unity-base-field__input {
+    background-color: rgb(33, 54, 68);
+    color: rgb(236, 242, 245);
+    border-color: rgb(90, 120, 137);
+    min-height: 28px;
+}
+.unity-base-popup-field__text {
+    color: rgb(236, 242, 245);
+}
+.unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: rgb(201, 222, 233);
+}
+.unity-progress-bar__background {
+    background-color: rgb(42, 62, 75);
+    border-color: rgb(113, 135, 149);
+}
+.palette {
+    margin-left: 4px;
+}
+.swatch {
+    width: 20px;
+    height: 15px;
+    min-height: 15px;
+    padding: 0;
+    border-radius: 2px;
+    margin: 1px;
+}
+.selected-swatch {
+    border-width: 2px;
+    border-color: white;
+}
+.hero-hud {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    width: 352px;
+    max-width: 39%;
+}
+.hero-hud .heading {
+    font-size: 17px;
+}
+.hero-hud ProgressBar {
+    height: 21px;
+    margin-bottom: 3px;
+}
+.health-bar .unity-progress-bar__progress {
+    background-color: rgb(163, 51, 63);
+}
+.experience-bar .unity-progress-bar__progress {
+    background-color: rgb(47, 113, 157);
+}
+.panel-host {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    bottom: 70px;
+    left: 42%;
+    align-items: flex-end;
+}
+.game-panel {
+    width: 530px;
+    max-width: 100%;
+    max-height: 100%;
+    flex-shrink: 1;
+}
+.panel-title {
+    justify-content: space-between;
+}
+.item-row {
+    min-height: 36px;
+    padding: 3px 5px;
+    background-color: rgba(49, 75, 92, 0.44);
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+.item-icon {
+    width: 33px;
+    height: 33px;
+    margin-right: 5px;
+}
+.item-name {
+    white-space: normal;
+}
+.hunt-active {
+    color: rgb(255, 221, 150);
+    white-space: normal;
+}
+.hunt-complete {
+    color: rgb(165, 229, 193);
+    white-space: normal;
+}
+.feedback {
+    position: absolute;
+    left: 14px;
+    right: 62%;
+    bottom: 72px;
+    background-color: rgba(18, 27, 35, 0.94);
+    padding: 7px 10px;
+    white-space: normal;
+    color: rgb(255, 225, 163);
+}
+.action-bar {
+    position: absolute;
+    bottom: 12px;
+    left: 14px;
+    right: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 3px;
+    background-color: rgba(18, 27, 35, 0.93);
+    border-radius: 6px;
+}
+.map-panel {
+    width: 458px;
+}
+.map-image {
+    width: 390px;
+    max-width: 100%;
+    height: 390px;
+    flex-shrink: 1;
+    align-self: center;
+    background-color: rgb(10, 20, 30);
+}
+.map-marker {
+    position: absolute;
+    translate: -50% -50%;
+    padding: 1px 4px;
+    color: rgb(255, 227, 145);
+    background-color: rgb(23, 35, 45);
+    -unity-font-style: bold;
+}
+.map-player {
+    color: rgb(171, 238, 255);
+}
+.map-landmark {
+    translate: -50% -125%;
+}
