@@ -67,6 +67,8 @@ content-gate, а запущенный Player строит мир, спавнит
 - DeepSeek исправил тест (strip `//` и `/* */` комментариев перед сканом) — commit `71ef7a3`.
 - После фикса recovery-сборка: **8/8 PASS, 0 FAIL**.
 - Полный повторный прогон EditMode после фикса: **765 total / 763 passed / 0 failed / 2 skipped** (2 прежних SKIP).
+- Повторный полный EditMode после добавления Player-side валидатора (R4): **763 passed / 0 failed / 2 skipped** — регрессий нет.
+- Полный PlayMode после всех правок (R0-R3 Claude + R4 валидатор DeepSeek): **73 passed / 0 failed / 0 skipped** — игровой цикл не сломан.
 
 ### 3.3 Windows Player build
 `ReleaseBuild.BuildWindows64` (`-executeMethod`), `CUBEGAME_RELEASE_DIR=.unity-install\build\Recovery`:
