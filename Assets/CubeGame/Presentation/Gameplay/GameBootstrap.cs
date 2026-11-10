@@ -97,6 +97,8 @@ namespace CubeGame.Gameplay
         private long _heroRespawnAtMs = -1;
         private bool _inventoryOpen;
         private Vector2 _inventoryScroll;
+        private bool _itemIconsChecked;
+        private AlphaIconAtlas _itemIcons;
         private HeroSkillRanks _skillDraft;
         private Texture2D _localMap;
         private Vector2Int _localMapOrigin;
@@ -1257,6 +1259,10 @@ namespace CubeGame.Gameplay
         private void OnDestroy()
         {
             CloseLocalMap();
+            if (_itemIcons != null)
+            {
+                Destroy(_itemIcons.Texture);
+            }
         }
 
         private void DrawLocalMap()
@@ -1459,6 +1465,12 @@ namespace CubeGame.Gameplay
                 return;
             }
 
+            if (!_itemIconsChecked)
+            {
+                _itemIconsChecked = true;
+                AlphaIconAtlas.TryLoad(AlphaIconAtlas.DefaultDirectory, out _itemIcons, null);
+            }
+
             GUILayout.Label($"Inventory  {hero.Inventory.UsedSlots}/{HeroInventory.Capacity}  [I] close");
             if (GUILayout.Button("Skills"))
             {
@@ -1484,7 +1496,7 @@ namespace CubeGame.Gameplay
             {
                 InventoryEntry entry = hero.Inventory.GetExtra(slot);
                 GUILayout.BeginHorizontal();
-                GUILayout.Label($"{slot}: {(entry != null ? entry.ToString() : "-")}", GUILayout.Width(360f));
+                DrawInventoryLabel(entry, $"{slot}: {(entry != null ? entry.ToString() : "-")}", 360f);
                 if (entry != null && GUILayout.Button("Off", GUILayout.Width(60f)) && !hero.Inventory.TryUnequipExtra(slot))
                 {
                     _combatLog = hero.Inventory.LastRejection;
@@ -1502,7 +1514,7 @@ namespace CubeGame.Gameplay
                 }
 
                 GUILayout.BeginHorizontal();
-                GUILayout.Label($"[{i / HeroInventory.SlotsPerBag}:{i % HeroInventory.SlotsPerBag}] {entry}", GUILayout.Width(302f));
+                DrawInventoryLabel(entry, $"[{i / HeroInventory.SlotsPerBag}:{i % HeroInventory.SlotsPerBag}] {entry}", 302f);
                 if (!DrawExtraEquipActions(hero.Inventory, i, entry) && entry.IsCore
                     && GUILayout.Button("Equip", GUILayout.Width(80f)) && !hero.Inventory.TryEquip(i, out _))
                 {
@@ -1518,6 +1530,23 @@ namespace CubeGame.Gameplay
 
             GUILayout.EndScrollView();
             GUILayout.EndArea();
+        }
+
+        private void DrawInventoryLabel(InventoryEntry entry, string label, float width)
+        {
+            if (_itemIcons != null && entry != null && AlphaItemIcons.TryEntry(entry.Raw, out string key)
+                && _itemIcons.TryGetRect(key, out Rect pixels))
+            {
+                const float iconSize = 24f;
+                Rect icon = GUILayoutUtility.GetRect(iconSize, iconSize);
+                Texture2D atlas = _itemIcons.Texture;
+                var uv = new Rect(pixels.x / atlas.width, pixels.y / atlas.height,
+                    pixels.width / atlas.width, pixels.height / atlas.height);
+                GUI.DrawTextureWithTexCoords(icon, atlas, uv);
+                width -= iconSize + 4f;
+            }
+
+            GUILayout.Label(label, GUILayout.Width(width));
         }
 
         private bool DrawExtraEquipActions(HeroInventory inventory, int bagSlot, InventoryEntry entry)
