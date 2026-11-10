@@ -1,6 +1,6 @@
 # M0-F3 GAMEPLAY LOOP
 
-10 ноября 2026 · `codex/m0-f3-gameplay-loop` · база `4b9480836beeba859340938486f4200d16c1549e` · `READY_FOR_PRODUCER_ACCEPTANCE`
+10 ноября 2026 · `codex/m0-f3-gameplay-loop` · база `4b9480836beeba859340938486f4200d16c1549e` · `ACCEPTED`
 
 ## SCAN → PLAN
 
@@ -49,3 +49,8 @@
 | Сквозной F3 внутри полного PlayMode | 1 | 1 | 0 | 0 | 0 |
 
 Два пропуска EditMode унаследованы от F2. Для `FullM0ZoneOracleTests` отсутствуют локальные `zone_lake.json` и `zone_carves.json`. XML и логи лежат в локальном `AlphaOutput`.
+
+
+## PRODUCER ACCEPTANCE
+
+10 ноября 2026 продюсер принял M0-F3 как рабочий системный фундамент для дальнейшей эволюции CubeGame. Известные неполные элементы не блокируют переход к F4, но не считаются исчезнувшими: они вынесены в [M0 Alpha Parity Backlog](../planning/M0_ALPHA_PARITY_BACKLOG.md) и должны получить явное решение до/при дальнейшей переработке.
