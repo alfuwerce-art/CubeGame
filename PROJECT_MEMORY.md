@@ -3,7 +3,11 @@
 **Updated:** 2026-11-10  
 **Canonical branch:** `integration/m0-all`  
 **Current plan:** [D90 — M0 five-stage finish](docs/decisions/D90-m0-five-stage-finish-plan.md)  
-**Current stage:** [M0-F3 GAMEPLAY LOOP](docs/ACTIVE_STAGE.md) — `READY_FOR_PRODUCER_ACCEPTANCE` в `codex/m0-f3-gameplay-loop`
+**Current stage:** [M0-F4 PRESENTATION](docs/ACTIVE_STAGE.md) — ACTIVE на canonical после принятого F3
+
+## 0. Alpha parity backlog
+
+Все неперенесённые, частично восстановленные и временно замещённые элементы Alpha фиксируются в [M0 Alpha Parity Backlog](docs/planning/M0_ALPHA_PARITY_BACKLOG.md). Они не блокируют эволюционную переработку игры, но не могут быть молча потеряны.
 
 ## 1. Главная цель M0
 
@@ -16,7 +20,7 @@
 
 ### M0-F3 GAMEPLAY LOOP
 
-`READY_FOR_PRODUCER_ACCEPTANCE` на базе принятого F2 `4b94808`. Pilot связывает развитие и экипировку, бой и лут, городские сделки и услуги, рецепт Life Potion, региональную охоту и сундуки в одной сессии. Кошелёк, кубы маны, журнал и смещение календаря сохраняются в разрешённых необязательных полях `.session` v1. Открытие сундука использует существующую `.world` дельту. C-29 подключён к маршрутам снарядов существ, реестр P-01 собирается. EditMode 754 PASS, 0 FAIL, 2 SKIP. PlayMode 70 PASS, 0 FAIL, сквозной сценарий F3 PASS. Ошибок компиляции 0. Полный ассортимент, генерация NPC и миссий, формулы наград и состав сундуков остаются `PARTIAL` / `UNKNOWN`. [Отчёт F3](docs/reports/M0_F3_GAMEPLAY_LOOP_REPORT.md)
+`ACCEPTED` продюсером 10 ноября 2026. Canonical `integration/m0-all` переведён fast-forward на `3cd79b4366dda4ff0d2410be22ee11d084eefaf1`. Результат до приёмки был  на базе принятого F2 `4b94808`. Pilot связывает развитие и экипировку, бой и лут, городские сделки и услуги, рецепт Life Potion, региональную охоту и сундуки в одной сессии. Кошелёк, кубы маны, журнал и смещение календаря сохраняются в разрешённых необязательных полях `.session` v1. Открытие сундука использует существующую `.world` дельту. C-29 подключён к маршрутам снарядов существ, реестр P-01 собирается. EditMode 754 PASS, 0 FAIL, 2 SKIP. PlayMode 70 PASS, 0 FAIL, сквозной сценарий F3 PASS. Ошибок компиляции 0. Полный ассортимент, генерация NPC и миссий, формулы наград и состав сундуков остаются `PARTIAL` / `UNKNOWN`. [Отчёт F3](docs/reports/M0_F3_GAMEPLAY_LOOP_REPORT.md)
 
 ### M0-F2 INTEGRATION CHECKPOINT
 
