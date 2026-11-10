@@ -43,7 +43,10 @@ namespace CubeGame.Gameplay
 
         public const uint DefaultSeed = 666666u;
 
-        /// <summary>Hero primary attack: Alpha action 57 (two-handed greatsword attack, S05A-2 / C-31).</summary>
+        /// <summary>
+        /// Alpha action 57 (two-handed attack, S05A-2 / C-31): what <see cref="AlphaAttackRoute"/> selects for the
+        /// starting two-handed weapon. No longer a fallback for ranged/magic input (M0-F2B).
+        /// </summary>
         public static readonly ActionId HeroAttackAction = new ActionId(57);
 
         /// <summary>Training enemy species: Alpha Wolf 0x1c (staged S05 visual with actions).</summary>
@@ -94,6 +97,9 @@ namespace CubeGame.Gameplay
         private GameVisualSink _visuals;
         private AlphaActionTimingSource _timings;
         private CreatureCombatDriver _creatures;
+        private ProjectileVisuals _projectileVisuals;
+        private VoxelColumn _terrainColumn;
+        private int _terrainColumnX = int.MinValue, _terrainColumnZ = int.MinValue;
         private WorldPopulation _population;
         private AlphaSpawnRuntime _recoveredPopulation;
         private GameClock _populationClock;
@@ -233,8 +239,14 @@ namespace CubeGame.Gameplay
 
                 RebaseIfFar();
                 SyncHeroFromView();
+                SyncHeroCombatant();
                 UpdatePopulationZones();
                 _session.AdvanceFrame(Time.deltaTime);
+                if (_projectileVisuals != null)
+                {
+                    _projectileVisuals.Sync();
+                }
+
                 ApplyWorldLighting();
                 PublishHeroMovement();
                 if (_heroRespawnAtMs >= 0 && _session.Clock.TimeMs >= _heroRespawnAtMs)
@@ -344,6 +356,11 @@ namespace CubeGame.Gameplay
                 return false;
             }
 
+            if (_session.Combat != null)
+            {
+                _session.Combat.Projectiles.Clear(_session.Clock?.TimeMs ?? 0);
+            }
+
             if (!_session.ExitToMenu())
             {
                 return Report(false, $"exit refused: {_session.LastRejection}");
@@ -393,11 +410,14 @@ namespace CubeGame.Gameplay
             }
 
             SyncHeroFromView();
+            SyncHeroCombatant();
             HeroState hero = _session.Hero;
-            ActionId action = AlphaPrimaryAttack.SelectMelee(hero.Sheet.Class,
-                hero.Loadout.GetEquipped(EquipmentSlot.MainHand), hero.Loadout.GetEquipped(EquipmentSlot.OffHand))
-                ?? HeroAttackAction; // Legacy placeholder for ranged and casting input (C4/D5).
-            if (!_session.Combat.TryStartAttack(hero.Id, action, _session.Clock.TimeMs, $"action_{action.Value:000}"))
+            // M0-F2B: weapon state -> one attack path (melee / projectile / staff volume). An unknown Alpha rule is
+            // refused with its reason; ranged and magic input never fall back to a melee swing.
+            AttackPlan plan = AlphaAttackRoute.Select(hero.Sheet.Class,
+                hero.Loadout.GetEquipped(EquipmentSlot.MainHand), hero.Loadout.GetEquipped(EquipmentSlot.OffHand));
+            LastAttackPlan = plan;
+            if (!_session.Combat.TryStartAttack(hero.Id, plan, _session.Clock.TimeMs))
             {
                 _combatLog = $"attack refused: {_session.Combat.LastRejection}";
                 return false;
@@ -406,11 +426,75 @@ namespace CubeGame.Gameplay
             return true;
         }
 
+        /// <summary>Path chosen by the last <see cref="HeroAttack"/> (tests/diagnostics).</summary>
+        public AttackPlan LastAttackPlan { get; private set; }
+
+        public ProjectileVisuals ProjectileVisuals => _projectileVisuals;
+
+        /// <summary>
+        /// Hero combatant from the view: Alpha size of the hero's species as the hit box, and the camera look direction
+        /// as the aim (Alpha creature +0x160; its writer for the player is not decoded - CUBEGAME_CONTRACT).
+        /// </summary>
+        private void SyncHeroCombatant()
+        {
+            if (_session.Combat == null || _session.Hero == null || !_session.Combat.TryGet(_session.Hero.Id, out Combatant hero))
+            {
+                return;
+            }
+
+            ApplyAlphaSize(hero, _session.Hero.Kind);
+            if (_camera != null)
+            {
+                Vector3 look = _camera.transform.forward;
+                hero.SetAim(look.x, look.y, look.z);
+            }
+        }
+
+        /// <summary>Alpha species size (appearance +0x08, <see cref="Content.AlphaCreatureSizes"/>) as the combat box of any creature or the hero.</summary>
+        public static void ApplyAlphaSize(Combatant combatant, KindId kind)
+        {
+            if (combatant != null && Content.AlphaCreatureSizes.TryGet(kind.Value, out double width, out double height, out double depth))
+            {
+                combatant.HitWidth = width;
+                combatant.HitHeight = height;
+                combatant.HitDepth = depth;
+            }
+        }
+
+        /// <summary>
+        /// Projectile terrain query: solid voxels of the effective world (edits included); a block whose chunk is not
+        /// streamed in reports <see cref="TerrainCell.NotLoaded"/> (the projectile is removed - CUBEGAME_CONTRACT).
+        /// </summary>
+        private TerrainCell ProjectileTerrainAt(int x, int y, int z)
+        {
+            if (_worldView == null || _worldState == null || !_worldView.IsLoaded(WorldLayout.ChunkOf(x, z)))
+            {
+                return TerrainCell.NotLoaded;
+            }
+
+            if (_session.WorldDeltas != null && _session.WorldDeltas.TryGetVoxel(x, y, z, out uint edited))
+            {
+                return Voxel.IsSolid(edited) ? TerrainCell.Solid : TerrainCell.Air;
+            }
+
+            if (x != _terrainColumnX || z != _terrainColumnZ || _terrainColumn == null)
+            {
+                _terrainColumn = _worldState.EffectiveColumn(x, z);
+                _terrainColumnX = x;
+                _terrainColumnZ = z;
+            }
+
+            return _terrainColumn != null && Voxel.IsSolid(_terrainColumn.Read(y)) ? TerrainCell.Solid : TerrainCell.Air;
+        }
+
         /// <summary>
         /// Spawns a hostile training target in front of the hero (runtime entity, not saved; M0-06 replaces it with
         /// world spawns). HP from Core for a level-1 Warrior sheet: PLACEHOLDER_NOT_ALPHA for creature HP.
         /// </summary>
-        public Combatant SpawnTrainingTarget()
+        public Combatant SpawnTrainingTarget() => SpawnTrainingTargetAt(TrainingTargetDistance, TrainingTargetBearing);
+
+        /// <summary>Automation/tests: the training target at <paramref name="distance"/> blocks, <paramref name="bearing"/>° from the hero's facing.</summary>
+        public Combatant SpawnTrainingTargetAt(double distance, double bearing)
         {
             if (_session.State != SessionState.InGame || _session.Combat == null || _worldState == null)
             {
@@ -422,13 +506,14 @@ namespace CubeGame.Gameplay
             DespawnTrainingTarget();
             SyncHeroFromView();
             HeroState hero = _session.Hero;
-            double yaw = (hero.Yaw + TrainingTargetBearing) * Math.PI / 180.0;
-            double x = hero.Position.X + Math.Sin(yaw) * TrainingTargetDistance;
-            double z = hero.Position.Z + Math.Cos(yaw) * TrainingTargetDistance;
+            double yaw = (hero.Yaw + bearing) * Math.PI / 180.0;
+            double x = hero.Position.X + Math.Sin(yaw) * distance;
+            double z = hero.Position.Z + Math.Cos(yaw) * distance;
             int ground = Math.Max(_worldState.SurfaceAt((int)Math.Floor(x), (int)Math.Floor(z)), _worldState.Generator.WaterLevel);
             double y = Math.Abs(ground + 1 - hero.Position.Y) <= 2.0 ? ground + 1 : hero.Position.Y;
 
             var target = Combatant.CreateCreature(StableEntityId.ForRuntime(++_runtimeSerial), TrainingTargetKind, "Wolf", 1, 0);
+            ApplyAlphaSize(target, TrainingTargetKind);
             target.Position = new WorldPosition(x, y, z);
             target.Yaw = hero.Yaw + 180f;
             _session.Combat.Register(target);
@@ -748,6 +833,7 @@ namespace CubeGame.Gameplay
             }
 
             var creature = Combatant.CreateCreature(id, def.Kind, $"Creature 0x{def.Kind.Value:x2}", def.Level, 0);
+            ApplyAlphaSize(creature, def.Kind);
             creature.Position = def.Position;
             creature.Yaw = def.Yaw;
             creature.Hostile = def.Faction == (int)CreatureFaction.Monster;
@@ -978,6 +1064,16 @@ namespace CubeGame.Gameplay
             _visuals.Initialise(AlphaActorLibrary.Shared, p => view.ToScene(p.X, p.Y, p.Z), _player.transform);
             _session.Events.AddVisualSink(_visuals);
             _visuals.BindItems(_session.Events);   // D4: Alpha models of items on the ground
+
+            // M0-F2B: projectiles - gameplay state in CombatSystem, one visual owner, terrain from the streamed world.
+            _terrainColumn = null;
+            _terrainColumnX = _terrainColumnZ = int.MinValue;
+            _session.Combat.Projectiles.TerrainAt = ProjectileTerrainAt;
+            GameVisualSink sink = _visuals;
+            _projectileVisuals = visualObject.AddComponent<ProjectileVisuals>();
+            _projectileVisuals.Initialise(_session.Events, _session.Combat.Projectiles, p => view.ToScene(p.X, p.Y, p.Z),
+                () => sink != null ? sink.ModelScale : 0f,
+                AlphaActorLibrary.Shared.State == AlphaContentState.Ready ? AlphaActorLibrary.Shared.Source?.Root : null);
             _lastHeroScenePosition = heroPoint;
 
             _motor = _player.AddComponent<PlayerMotor>();
@@ -1013,6 +1109,13 @@ namespace CubeGame.Gameplay
 
             DespawnTrainingTarget();
             StopPopulation();
+            if (_session?.Combat != null)
+            {
+                // Projectiles are runtime-only: never saved, never carried into another world.
+                _session.Combat.Projectiles.Clear(_session.Clock?.TimeMs ?? 0);
+                _session.Combat.Projectiles.TerrainAt = null;
+            }
+
             if (_session?.Hero != null)
             {
                 _session.Hero.Inventory.EquipmentChanged -= OnEquipmentChanged;
@@ -1047,6 +1150,8 @@ namespace CubeGame.Gameplay
             _worldRoot = null;
             _worldView = null;
             _visuals = null;
+            _projectileVisuals = null;
+            _terrainColumn = null;
             _worldState = null;
             _player = null;
             _motor = null;
@@ -1083,9 +1188,35 @@ namespace CubeGame.Gameplay
             }
 
             _worldView.ToWorld(p, out double x, out _, out double z);
-            Vector3 shift = _worldView.Rebase(StreamingWorldView.OriginFor(x, z));
+            ApplyRebase(StreamingWorldView.OriginFor(x, z));
+        }
+
+        /// <summary>
+        /// Automation/tests: moves the floating origin by (<paramref name="dx"/>, <paramref name="dz"/>) blocks while the
+        /// hero, creatures and projectiles keep their game positions.
+        /// </summary>
+        public void ShiftOrigin(int dx, int dz)
+        {
+            if (_worldView == null || _player == null)
+            {
+                return;
+            }
+
+            _worldView.ToWorld(_player.transform.position, out double x, out _, out double z);
+            ApplyRebase(StreamingWorldView.OriginFor(x + dx, z + dz));
+        }
+
+        private void ApplyRebase(Vector2Int origin)
+        {
+            Vector3 p = _player.transform.position;
+            Vector3 shift = _worldView.Rebase(origin);
             _player.transform.position = p + shift;
             _lastHeroScenePosition += shift;
+            if (_projectileVisuals != null)
+            {
+                _projectileVisuals.Sync();
+            }
+
             if (_camera != null)
             {
                 _camera.transform.position += shift;

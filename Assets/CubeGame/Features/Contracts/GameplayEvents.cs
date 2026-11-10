@@ -183,6 +183,84 @@ namespace CubeGame.Features.Contracts
         public bool Killed { get; set; }
 
         public double TargetHealthAfter { get; set; }
+
+        /// <summary>Serial of the attack (swing or released projectile) that produced the hit (M0-F2B).</summary>
+        public long AttackSerial { get; set; }
+    }
+
+    /// <summary>
+    /// A projectile (or the staff hit volume) entered the game (M0-F2B). Game-space position and velocity in
+    /// blocks / blocks per second; <see cref="Kind"/> is the Alpha projectile type byte (0 arrow, 1 magic,
+    /// 2 boomerang; 100 = CubeGame staff volume).
+    /// </summary>
+    public sealed class ProjectileSpawned : IGameEvent
+    {
+        public long TimeMs { get; set; }
+
+        public long Projectile { get; set; }
+
+        public StableEntityId Owner { get; set; }
+
+        public int Kind { get; set; }
+
+        public ActionId Action { get; set; }
+
+        public long AttackSerial { get; set; }
+
+        public WorldPosition Position { get; set; }
+
+        public double VelocityX { get; set; }
+
+        public double VelocityY { get; set; }
+
+        public double VelocityZ { get; set; }
+
+        public double Scale { get; set; }
+    }
+
+    /// <summary>
+    /// A hitscan attack was resolved (M0-F2B): the ray from <see cref="Origin"/> to <see cref="End"/> (stopped by a wall
+    /// or at the range). <see cref="Trail"/> is true only for the action ids whose muzzle/trail path is byte-verified.
+    /// </summary>
+    public sealed class HitscanFired : IGameEvent
+    {
+        public long TimeMs { get; set; }
+
+        public StableEntityId Owner { get; set; }
+
+        public ActionId Action { get; set; }
+
+        public long AttackSerial { get; set; }
+
+        public WorldPosition Origin { get; set; }
+
+        public WorldPosition End { get; set; }
+
+        public bool HitWall { get; set; }
+
+        public int Hits { get; set; }
+
+        public bool Trail { get; set; }
+    }
+
+    /// <summary>A projectile left the game; published exactly once per projectile.</summary>
+    public sealed class ProjectileRemoved : IGameEvent
+    {
+        public long TimeMs { get; set; }
+
+        public long Projectile { get; set; }
+
+        public StableEntityId Owner { get; set; }
+
+        public int Kind { get; set; }
+
+        /// <summary><c>CubeGame.Features.Combat.ProjectileEndReason</c> as an int.</summary>
+        public int Reason { get; set; }
+
+        /// <summary>The creature hit when <see cref="Reason"/> is a target hit; None otherwise.</summary>
+        public StableEntityId Target { get; set; }
+
+        public WorldPosition Position { get; set; }
     }
 
     /// <summary>The hero gained experience (C3, Alpha kill reward 0x595A60) and possibly levels.</summary>

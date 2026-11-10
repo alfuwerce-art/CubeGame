@@ -600,15 +600,66 @@ namespace CubeGame.Gameplay
                 return result.View;
             }
 
-            // PLACEHOLDER_NOT_ALPHA: the Alpha voxel → block factor is fitted once per world on the hero body (the
-            // weapon and off-hand do not count), so equipment changes never rescale creatures or ground items.
+            // PLACEHOLDER_NOT_ALPHA: the Alpha voxel → block factor is fitted once per world so that the reference
+            // species HumanMale 0x02 body (no weapon, no off-hand) is HeroVisualHeight tall. M0-F2B species-scale rule:
+            // Alpha draws every creature at one voxel scale (creature_getScaleVec4 = 1, CHARACTER_PROPORTIONS_PILOT), so the
+            // factor never depends on the hero's own race — a dwarf hero and a dwarf NPC are drawn at the same scale, and
+            // relative species size comes from the species' Alpha models only.
             if (ModelScale <= 0f)
             {
-                ModelScale = HeroVisualHeight / height;
+                float reference = MeasureReferenceBodyHeight(root);
+                ModelScale = HeroVisualHeight / (reference > 0.01f ? reference : height);
+                if (reference <= 0.01f)
+                {
+                    Problems.Add("SCALE_REFERENCE_MISSING HumanMale 0x02 body; fitted on the hero body");
+                }
             }
 
-            Fit(result.View.transform, minY);
+            Fit(result.View.transform, minY, spec.Kind);
             return result.View;
+        }
+
+        /// <summary>
+        /// M0-F2B species scale of a kind: Alpha draws each creature through a placement matrix scaled per kind (emulated
+        /// <c>Creature_drawModel</c>, <see cref="AlphaCreatureSizes.TryGetSpeciesScale"/>); the captured actors have it divided
+        /// out, so it is re-applied here, relative to the HumanMale reference. 1 for a kind without data.
+        /// </summary>
+        public static float SpeciesScale(int kind) => AlphaCreatureSizes.TryGetSpeciesScale(kind, out float factor) ? factor : 1f;
+
+        /// <summary>Kind whose body defines <see cref="ModelScale"/> (HumanMale, the shared humanoid action rig).</summary>
+        public const int ScaleReferenceKind = HeroVisualComposer.ActionRigKind;
+
+        /// <summary>Body height (voxel units) of the reference HumanMale with the default appearance and no items; 0 if unavailable.</summary>
+        private float MeasureReferenceBodyHeight(Transform near)
+        {
+            var temp = new GameObject("ScaleReference");
+            temp.transform.SetParent(near, false);
+            try
+            {
+                var empty = new Dictionary<VisualEquipmentSlot, HeroVisualItem>();
+                HeroVisualSpec spec = HeroVisualComposer.Compose(AlphaHeroCreation.Default, empty);
+                if (spec.Kind != ScaleReferenceKind)
+                {
+                    return 0f;
+                }
+
+                CharacterVisualResult result = AlphaPlayerVisualBuilder.Build(spec.ToRequest(_contentRoot), temp.transform, _library, _itemsDirectory);
+                if (result.View == null || !result.View.Ready)
+                {
+                    DestroyView(result.View);
+                    return 0f;
+                }
+
+                result.View.Tick(0f);
+                float height = MeasureBodyHeight(result.View, out _);
+                DestroyView(result.View);
+                return height;
+            }
+            finally
+            {
+                temp.SetActive(false);
+                Destroy(temp);
+            }
         }
 
         /// <summary>Height of the rig parts without the weapon block and the off-hand (mesh bounds, renderer state ignored).</summary>
@@ -671,14 +722,17 @@ namespace CubeGame.Gameplay
 
             view.Tick(0f);
             MeasureHeight(view.transform, out float minY);
-            Fit(view.transform, minY);
+            Fit(view.transform, minY, kind.Value);
             return view;
         }
 
-        /// <summary>Scales the model by <see cref="ModelScale"/> and puts its lowest point on the entity root (feet on ground).</summary>
-        private void Fit(Transform model, float minY)
+        /// <summary>
+        /// Scales the model by <see cref="ModelScale"/> × the species scale of <paramref name="kind"/> (one rule for the hero
+        /// and every creature, <see cref="SpeciesScale"/>) and puts its lowest point on the entity root (feet on ground).
+        /// </summary>
+        private void Fit(Transform model, float minY, int kind)
         {
-            float scale = ModelScale > 0f ? ModelScale : 1f;
+            float scale = (ModelScale > 0f ? ModelScale : 1f) * SpeciesScale(kind);
             model.localScale = Vector3.one * scale;
             model.localPosition = new Vector3(0f, -(minY - model.parent.position.y) * scale, 0f);
         }

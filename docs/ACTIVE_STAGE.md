@@ -1,4 +1,15 @@
-# ACTIVE STAGE — M0-F2A CHARACTER RUNTIME
+# ACTIVE STAGE — M0-F2B COMBAT RUNTIME
+
+**Review branch:** `claude/m0-f2b-combat-runtime` (база F2A `5f197f9` + DeepSeek evidence `08ae4e3`) · **Status:** `READY_FOR_REVIEW`
+
+- Атака героя выбирает один путь по оружию и действию Alpha: melee, летящий снаряд (лук/арбалет/бумеранг/жезл/браслет — числа из байтов), объём посоха или луч до 200 блоков (`0x1C/0x5E/0x5F`, бомба 10). Fallback в melee нет.
+- Попадание всегда через `CombatSystem.ResolveHit`: владелец не поражается, один hit на снаряд/взмах, удаление ровно один раз, корректно через смену начала координат и save/load (снаряды не сохраняются).
+- Масштаб вида — одно правило для героя и NPC (эмулированная матрица размещения `Creature_drawModel`); hit box — размер вида Alpha.
+- EditMode 746/744/0/2, PlayMode 68/68, `error CS = 0`. `PARTIAL`: формулы урона Alpha для дальнего боя, подруливание бумеранга, способности/бомба без ввода, dodge `UNKNOWN`. [Отчёт M0-F2B](reports/M0_F2B_COMBAT_RUNTIME_REPORT.md)
+
+---
+
+# Предыдущий этап — M0-F2A CHARACTER RUNTIME
 
 **Review branch:** `claude/m0-f2a-character-runtime` (база M0-F1 `748d650`) · **Status:** `READY_FOR_REVIEW`
 

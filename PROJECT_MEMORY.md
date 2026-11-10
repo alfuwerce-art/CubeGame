@@ -3,7 +3,7 @@
 **Updated:** 2026-11-10  
 **Canonical branch:** `integration/m0-all`  
 **Current plan:** [D90 — M0 five-stage finish](docs/decisions/D90-m0-five-stage-finish-plan.md)  
-**Current stage:** [M0-F2A CHARACTER RUNTIME](docs/ACTIVE_STAGE.md) (F1 и F2A — на ревью)
+**Current stage:** [M0-F2B COMBAT RUNTIME](docs/ACTIVE_STAGE.md) (F1, F2A и F2B — на ревью)
 
 ## 1. Главная цель M0
 
@@ -19,6 +19,10 @@ M0-F1 `READY_FOR_REVIEW` в `codex/m0-f1-world-runtime`, база canonical `1c6
 ### M0-F2A CHARACTER RUNTIME
 
 `READY_FOR_REVIEW` в `claude/m0-f2a-character-runtime`, база F1 `748d650` (canonical `integration/m0-all` = `1c6560c` ещё не содержит F1). Один runtime-путь героя: сохранённые внешность и экипировка → `HeroVisualComposer` → `AlphaPlayerVisualBuilder` → `GameVisualSink` (единственный владелец). Раса/пол/лицо/причёска/цвет волос видны в сцене; лицо и причёска разрешаются через реестр Alpha, модель предмета — исполненным селектором `item_icon_id` по материалу/редкости/seed. 15 видов рисуются общим гуманоидным ригом 0x02 по блоку внешности Alpha; OrcFemale 0x0C — собственным актором (`PARTIAL`). Лут на земле — один владелец, без дрейфа при смене начала координат. Формат сейва не менялся. EditMode 679/677/0/2, PlayMode 62/62, `error CS = 0`. [Отчёт M0-F2A](docs/reports/M0_F2A_CHARACTER_RUNTIME_REPORT.md)
+
+### M0-F2B COMBAT RUNTIME
+
+`READY_FOR_REVIEW` в `claude/m0-f2b-combat-runtime`, база F2A `5f197f9`, сведён evidence DeepSeek `08ae4e3`. Атака героя: оружие → действие → путь по группе обработчика Alpha, без fallback в melee (неизвестное правило — отказ `UNKNOWN`). По байтам `Cube.exe`: лук/арбалет/бумеранг/жезл/браслет выпускают **летящий снаряд** (список `[world]+0x14`, 100/50 бл/с, g 7.5, 5000 мс, бокс `size/2+0.5`) — поправка к выводу DeepSeek «снаряда нет»; луч ≤200 блоков до стены — для `0x1C/0x5E/0x5F`, бомба 0x68 — 10 блоков; посох — объём перед героем. Всё через `CombatSystem.ResolveHit`, один визуальный владелец (`ProjectileVisuals`), снаряды не сохраняются. Масштаб вида: эмулированный `Creature_drawModel` — матрица размещения масштабируется по виду, S05 её вычитал; теперь `ModelScale(эталон 0x02) × placement(kind)/placement(0x02)` для героя и NPC, hit box = размер Alpha 156 видов. EditMode 746/744/0/2, PlayMode 68/68, `error CS = 0`. [Отчёт M0-F2B](docs/reports/M0_F2B_COMBAT_RUNTIME_REPORT.md)
 
 ### База до M0-F1
 

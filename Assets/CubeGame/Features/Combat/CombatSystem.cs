@@ -52,7 +52,11 @@ namespace CubeGame.Features.Combat
             _timings = timings;
             _seed = seed;
             Rules = rules ?? new CombatRules();
+            Projectiles = new ProjectileSystem(this, events);
         }
+
+        /// <summary>Projectiles and hit volumes released by ranged/magic attacks (M0-F2B); advanced by <see cref="Update"/>.</summary>
+        public ProjectileSystem Projectiles { get; }
 
         public CombatRules Rules { get; }
 
@@ -103,6 +107,30 @@ namespace CubeGame.Features.Combat
         {
             return TryStartAction(attackerId, action, nowMs, animationKey, true);
         }
+
+        /// <summary>
+        /// Starts an attack along a selected path (M0-F2B, <see cref="AlphaAttackRoute"/>): melee resolves the frontal
+        /// sector at the strike moment, projectile/area attacks release their projectile then. An unsupported plan is
+        /// refused with its reason — it is never turned into a melee swing.
+        /// </summary>
+        public bool TryStartAttack(StableEntityId attackerId, AttackPlan plan, long nowMs)
+        {
+            if (!plan.IsSupported)
+            {
+                return Reject(plan.Reason);
+            }
+
+            if (!TryStartAction(attackerId, plan.Action, nowMs, $"action_{plan.Action.Value:000}", true))
+            {
+                return false;
+            }
+
+            _actions[attackerId].Plan = plan;
+            return true;
+        }
+
+        /// <summary>Serial of the running action of <paramref name="id"/> (stable attack id), or -1.</summary>
+        public long ActionSerialOf(StableEntityId id) => _actions.TryGetValue(id, out ActiveAction action) ? action.Serial : -1;
 
         /// <summary>
         /// Starts an action with the same phases and refusals as an attack. Non-attack actions (item use, emotes)
@@ -164,7 +192,7 @@ namespace CubeGame.Features.Combat
                     SetPhase(action, ActionPhase.Strike, action.StartMs + action.Timing.StrikeAtMs);
                     if (action.IsAttack)
                     {
-                        ResolveMelee(action, action.StartMs + action.Timing.StrikeAtMs);
+                        Strike(action, action.StartMs + action.Timing.StrikeAtMs);
                     }
                 }
 
@@ -183,6 +211,11 @@ namespace CubeGame.Features.Combat
 
             foreach (StableEntityId id in _finished)
             {
+                if (!_actions.ContainsKey(id))
+                {
+                    continue;
+                }
+
                 ActiveAction action = _actions[id];
                 _actions.Remove(id);
                 _events.Publish(new ActionResolved
@@ -191,8 +224,38 @@ namespace CubeGame.Features.Combat
                     Entity = id,
                     Action = action.Action,
                     Outcome = ActionOutcome.Completed,
-                    Reason = action.HitCount > 0 ? $"hits={action.HitCount}" : "no target in reach",
+                    Reason = action.Plan.Path == AttackPath.Melee
+                        ? (action.HitCount > 0 ? $"hits={action.HitCount}" : "no target in reach")
+                        : action.Plan.Path == AttackPath.Hitscan ? $"ray hits={action.HitCount}" : $"released {action.Plan.Projectile}",
                 });
+            }
+
+            Projectiles.Update(nowMs);
+        }
+
+        /// <summary>The strike moment of an attack: one melee resolution or one projectile release (never both).</summary>
+        private void Strike(ActiveAction action, long nowMs)
+        {
+            switch (action.Plan.Path)
+            {
+                case AttackPath.Projectile:
+                case AttackPath.AreaEffect:
+                    if (_combatants.TryGetValue(action.Attacker, out Combatant attacker) && !attacker.IsDead)
+                    {
+                        Projectiles.Launch(attacker, action.Plan.Projectile, action.Action, action.Serial, nowMs);
+                    }
+
+                    break;
+                case AttackPath.Hitscan:
+                    if (_combatants.TryGetValue(action.Attacker, out Combatant shooter) && !shooter.IsDead)
+                    {
+                        action.HitCount += Projectiles.FireRay(shooter, action.Action, action.Serial, nowMs);
+                    }
+
+                    break;
+                default:
+                    ResolveMelee(action, nowMs);
+                    break;
             }
         }
 
@@ -204,6 +267,12 @@ namespace CubeGame.Features.Combat
         {
             Combatant attacker = _combatants[attackerId];
             Combatant target = _combatants[targetId];
+            if (target.IsDead)
+            {
+                // A dead target gets no further hits, events or effects (M0-F2B).
+                return CombatOutcome.TargetAlreadyDead(target.Health.CurrentHealth);
+            }
+
             double armor = EquipmentCombatAdapter.ComputeTargetArmor(target.Loadout);
             CombatAttack attack = _adapter.BuildAttack(attacker.Sheet, attacker.Loadout, Rules.HitChance, armor, Rules.BlockFraction);
             var resolver = new DamageResolver(new SeededCombatRandom(StrikeSeed(attackerId, targetId, actionSerial)));
@@ -220,6 +289,7 @@ namespace CubeGame.Features.Combat
                 Critical = false,
                 Killed = outcome.KilledTarget,
                 TargetHealthAfter = target.Health.CurrentHealth,
+                AttackSerial = actionSerial,
             });
 
             if (outcome.KilledTarget)
@@ -346,6 +416,9 @@ namespace CubeGame.Features.Combat
             public int HitCount { get; set; }
 
             public bool IsAttack { get; set; } = true;
+
+            /// <summary>Path chosen at the start; default = melee (creature AI and the legacy overload).</summary>
+            public AttackPlan Plan { get; set; } = AttackPlan.Melee(default);
         }
     }
 }

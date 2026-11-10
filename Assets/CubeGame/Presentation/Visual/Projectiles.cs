@@ -7,6 +7,10 @@
 //
 // Flight itself is a CubeGame contract: straight motion with optional gravity, a lifetime and no collision
 // (hits are resolved by gameplay through CombatSystem.ResolveHit). Nothing here claims Alpha ballistics.
+//
+// M0-F2B: NOT the runtime path. Gameplay projectiles live in Features/Combat/ProjectileSystem (numbers read from the
+// Cube.exe bytes); only ModelOf (item model names) is used, by Gameplay/ProjectileVisuals. Launch/Step stay a
+// DATA_IMPLEMENTED contract library with no game callers.
 using System;
 using CubeGame.Content;
 
