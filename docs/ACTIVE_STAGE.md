@@ -1,10 +1,11 @@
 # ACTIVE STAGE — M0-F3 GAMEPLAY LOOP
 
-**Рабочая ветка:** `codex/m0-f3-gameplay-loop` · **База:** `4b9480836beeba859340938486f4200d16c1549e` · **Статус:** `IN_PROGRESS`
+**Ветка ревью:** `codex/m0-f3-gameplay-loop` · **База:** `4b9480836beeba859340938486f4200d16c1549e` · **Статус:** `READY_FOR_PRODUCER_ACCEPTANCE`
 
 - [D90](decisions/D90-m0-five-stage-finish-plan.md) · [Матрица работ и отчёт F3](reports/M0_F3_GAMEPLAY_LOOP_REPORT.md).
-- Обязательные проверки входной базы — фактический маршрут атак существ и статус P-01 в генераторе реестра.
-- К сдаче требуются полный EditMode, полный PlayMode и сквозной сценарий через save → exit → load → продолжение.
+- F3-A–F3-E сведены в Pilot. Сквозной тест подтверждает охоту, бой, лут, развитие, сделку, крафт, отдых, сундук и save → exit → load → продолжение.
+- Проверены маршруты стрелы и магического снаряда для подтверждённого выбора ИИ. Генератор реестра проходит с нормализованным статусом P-01.
+- Unity 6000.3.27f2. EditMode 754 PASS, 0 FAIL, 2 SKIP. PlayMode 70 PASS, 0 FAIL. Ошибок компиляции 0.
 
 ## Предыдущий этап — M0-F2 INTEGRATION CHECKPOINT
 

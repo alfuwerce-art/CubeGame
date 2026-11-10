@@ -1,6 +1,6 @@
 # M0-F3 GAMEPLAY LOOP
 
-10 ноября 2026 · `codex/m0-f3-gameplay-loop` · база `4b9480836beeba859340938486f4200d16c1549e` · `IN_PROGRESS`
+10 ноября 2026 · `codex/m0-f3-gameplay-loop` · база `4b9480836beeba859340938486f4200d16c1549e` · `READY_FOR_PRODUCER_ACCEPTANCE`
 
 ## SCAN → PLAN
 
@@ -40,4 +40,12 @@
 
 ## REGRESSION
 
-Окончательные полные прогоны Unity 6000.3.27f2 идут последовательно в одном слоте. Результаты будут зафиксированы перед публикацией.
+Окончательные прогоны Unity 6000.3.27f2 выполнены последовательно в одном слоте. Проверенный пакет кода — `c060544`.
+
+| Прогон | Total | PASS | FAIL | SKIP | Ошибки компиляции |
+|---|---:|---:|---:|---:|---:|
+| Полный EditMode, `AlphaOutput/f3_final_edit.xml` | 756 | 754 | 0 | 2 | 0 |
+| Полный PlayMode, `AlphaOutput/f3_final_play.xml` | 70 | 70 | 0 | 0 | 0 |
+| Сквозной F3 внутри полного PlayMode | 1 | 1 | 0 | 0 | 0 |
+
+Два пропуска EditMode унаследованы от F2. Для `FullM0ZoneOracleTests` отсутствуют локальные `zone_lake.json` и `zone_carves.json`. XML и логи лежат в локальном `AlphaOutput`.
