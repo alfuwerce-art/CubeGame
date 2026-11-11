@@ -30,9 +30,9 @@ EDITMODE=772 total / 770 passed / 0 failed / 2 skipped
 PLAYMODE=74 total / 74 passed / 0 failed / 0 skipped
 WINDOWS_BUILD=PASS
 WINDOWS_P0_FLOW=PASS
-LIVE_GAME_UPDATED=YES
+LIVE_GAME_UPDATED=YES (game\ заменён; launcher/current.txt/launcher.sha256 не тронуты)
 BRANCH=deepseek/m0-full-port-p0
-REMOTE_SHA=<заполняется после push>
+REMOTE_SHA=0fefb7e0a91159ae46b4c6012f752cdc888febb8 (implementation commit; этот отчёт — следующий коммит той же ветки)
 ```
 
 ## Что это
@@ -339,6 +339,10 @@ Connect → Worlds. Esc в стартовых экранах не являетс
 11. `Exit Game` закрывает Player.
 
 Скриншоты: `.unity-install/shots/p0/01_boot.png … 13_after_space.png` (локально, в git не входят).
+
+Launcher smoke test: `Desktop\CubeGame.lnk → D:\Games\CubeGame\CubeGameLauncher.exe → game\CubeGame.exe`
+запустил живой билд, стартовый экран появился, каталог прочитан (`characters=1; worlds=1`) — старый парный слот
+пользователя перенесён миграцией; `launcher.sha256` совпадает, бинарник launcher не изменялся.
 
 ## Изменённые файлы
 
