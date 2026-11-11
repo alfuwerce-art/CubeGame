@@ -217,117 +217,391 @@ Button:disabled {
     translate: -50% -125%;
 }
 
-/* ----- M0 P0 Alpha start screens ----- */
-.screen-title {
-    font-size: 22px;
-    -unity-font-style: bold;
-    margin-bottom: 6px;
-}
-.main-menu > Button {
-    align-self: flex-start;
-    min-width: 220px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-.entry-row {
-    min-height: 58px;
-    background-color: rgba(49, 75, 92, 0.35);
-    margin-top: 4px;
-    margin-bottom: 4px;
-    padding: 6px 8px;
-}
-.entry-text {
-    flex-grow: 1;
-    flex-shrink: 1;
-    min-width: 0;
-}
-.entry-title {
-    font-size: 17px;
-    -unity-font-style: bold;
-    white-space: normal;
-}
-.carousel {
-    margin-top: 2px;
-    margin-bottom: 2px;
-}
-.carousel-label {
-    min-width: 76px;
-    color: rgb(201, 222, 233);
-}
-.carousel-value {
-    flex-grow: 1;
-    text-align: center;
-}
-.option-row {
-    margin-top: 1px;
-    margin-bottom: 1px;
-}
-.option-label {
-    min-width: 170px;
-    color: rgb(201, 222, 233);
-}
-.option-value {
-    flex-grow: 1;
-    text-align: center;
-}
-.options-buttons {
-    justify-content: flex-end;
-    margin-top: 8px;
-}
-.preview-panel {
-    align-self: center;
-    margin-top: 6px;
-    margin-bottom: 6px;
-}
-.preview-image {
-    width: 260px;
-    height: 340px;
-    background-color: rgb(40, 46, 56);
-}
-.system-menu {
-    position: absolute;
-    left: 16px;
-    top: 16px;
-    width: 230px;
-}.menu-body {
-    flex-shrink: 1;
-    min-height: 0;
-}.menu-footer {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    margin-top: 8px;
-    padding-top: 6px;
-    border-top-width: 1px;
-    border-color: rgb(71, 96, 112);
-}
-.menu-body Button {
-    align-self: flex-start;
-    min-width: 30px;
-}
-.menu-footer Button {
-    min-width: 150px;
-}.menu-backdrop {
+/* ----- M0 P0 Alpha start screens -----
+   Geometry and colours: AlphaStartupPresentation (StartMenuWidget 0x583320, SystemWidget 0x587710,
+   GameController_buildCharacterList 0x49D650, GameController_buildWorldList 0x4A23D0). The Alpha font
+   (resource1.dat) is applied at runtime by GameBootstrap.ApplyAlphaFont, so text below only sets size,
+   colour and the outline pass of 0x583320. */
+.alpha-screen {
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(10, 16, 24, 0.88);
+    background-color: rgb(0, 0, 0);
 }
-.start-title {
-    font-size: 34px;
-    -unity-font-style: bold;
-    margin-bottom: 10px;
-    color: rgb(235, 244, 250);
-}/* Alpha draws the start menu as text over the world, not as a panel. */
-.main-menu.start-screen {
-    width: 360px;
-    align-self: center;
-    background-color: rgba(10, 16, 24, 0);
+
+.alpha-overlay {
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+.alpha-center {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Every Alpha text run has the 4 px black outline pass drawn behind it. */
+.alpha-line {
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: rgb(0, 0, 0);
+    -unity-text-align: middle-left;
+    white-space: normal;
+}
+
+/* Start menu of 0x583320: three centred entries, y = 30 / 80 / 130 from the widget anchor, size 18, no frame. */
+.alpha-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 56.6%;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.alpha-menu-item {
+    background-color: rgba(0, 0, 0, 0);
     border-width: 0;
-    padding: 18px 20px;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    min-height: 0;
+    height: 50px;
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: rgb(0, 0, 0);
+    -unity-text-align: middle-center;
 }
-.main-menu.start-screen .menu-backdrop {
-    background-color: rgba(10, 16, 24, 0);
+
+.alpha-menu-item:hover {
+    /* 0x3E4CCCCD, 1.0, 1.0 — the hover colour of 0x583320 */
+    color: rgb(51, 255, 255);
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.alpha-menu-item:active {
+    background-color: rgba(0, 0, 0, 0);
+    color: rgb(51, 255, 255);
+}
+
+/* SystemWidget 0x587710: 14 px text, 30 px pitch, centred in the 350 px wide in-game widget. */
+.alpha-menu-small {
+    top: 50%;
+}
+
+.alpha-menu-small .alpha-menu-item {
+    height: 30px;
+    font-size: 14px;
+}
+
+/* Rows of 0x49D650 / 0x4A23D0: 230 px pitch (220 px frame + 10 px gap), centred, 600 px wide. */
+.alpha-rows {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.alpha-row {
+    width: 600px;
+    height: 220px;
+    margin-bottom: 10px;
+    padding: 0;
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    border-radius: 0;
+    background-color: rgba(26, 26, 26, 0.62);
+    flex-direction: row;
+    align-items: flex-start;
+    -unity-text-align: middle-left;
+}
+
+.alpha-row:hover {
+    background-color: rgba(38, 38, 38, 0.66);
+}
+
+.alpha-row-empty {
+    justify-content: center;
+    align-items: center;
+    -unity-text-align: middle-center;
+}
+
+.alpha-row-preview {
+    width: 200px;
+    height: 216px;
+    flex-shrink: 0;
+}
+
+.alpha-row-preview-image {
+    width: 200px;
+    height: 216px;
+}
+
+.alpha-row-preview-empty {
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+.alpha-row-info {
+    flex-grow: 1;
+    flex-direction: column;
+    padding: 22px 12px 0 0;
+}
+
+/* Alpha reveals the row action only while the row is hovered. */
+.alpha-row-action {
+    display: none;
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    width: 198px;
+    height: 66px;
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    background-color: rgba(10, 16, 22, 0.72);
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: rgb(0, 0, 0);
+}
+
+.alpha-row:hover .alpha-row-action {
+    display: flex;
+}
+
+/* Framed Alpha buttons: 198x66 (Back / Select) and 298x66 (wide). */
+.alpha-button {
+    width: 198px;
+    height: 66px;
+    margin: 0;
+    padding: 0;
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    border-radius: 0;
+    background-color: rgba(10, 16, 22, 0.72);
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: rgb(0, 0, 0);
+}
+
+.alpha-button-wide {
+    width: 298px;
+}
+
+.alpha-button:hover {
+    background-color: rgba(56, 78, 98, 0.82);
+    color: rgb(51, 255, 255);
+}
+
+.alpha-button:active {
+    background-color: rgba(28, 44, 58, 0.9);
+}
+
+.alpha-back-slot {
+    position: absolute;
+    left: 30px;
+    top: 51px;
+}
+
+.alpha-top-right {
+    position: absolute;
+    right: 28px;
+    top: 51px;
+}
+
+.alpha-bottom-right {
+    position: absolute;
+    right: 28px;
+    bottom: 28px;
+}
+
+.alpha-status {
+    position: absolute;
+    left: 30px;
+    bottom: 22px;
+    max-width: 60%;
+    font-size: 13px;
+}
+
+.alpha-wait {
+    background-color: rgb(0, 0, 0);
+}
+
+/* ----- Alpha character editor / world creation ----- */
+.alpha-editor {
+    flex-direction: column;
+}
+
+.alpha-editor-body {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.alpha-editor-preview {
+    width: 280px;
+    margin-right: 24px;
+    align-items: center;
+}
+
+.alpha-editor-fields {
+    width: 420px;
+}
+
+.alpha-editor-actions {
+    margin-top: 14px;
+    justify-content: center;
+}
+
+.alpha-creation {
+    flex-direction: column;
+    align-items: center;
+    width: 520px;
+}
+
+.alpha-field {
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.alpha-field .unity-base-field__label {
+    color: rgb(127, 127, 255);
+    min-width: 180px;
+}
+
+.alpha-field .unity-base-text-field__input {
+    background-color: rgba(10, 16, 22, 0.72);
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+}
+
+.alpha-arrow {
+    width: 34px;
+    height: 30px;
+    min-height: 0;
+    margin: 0 6px 0 6px;
+    padding: 0;
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    border-radius: 0;
+    background-color: rgba(10, 16, 22, 0.72);
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    -unity-text-align: middle-center;
+}
+
+.alpha-arrow:hover {
+    color: rgb(51, 255, 255);
+}
+
+.alpha-carousel-label {
+    min-width: 110px;
+}
+
+.alpha-carousel-value {
+    width: 150px;
+    -unity-text-align: middle-center;
+}
+
+.alpha-options {
+    width: 450px;
+}
+
+/* Carousels, preview panel and option rows of the Alpha screens. */
+.carousel {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    align-items: center;
+}
+
+/* OptionsWidget 0x4CF3C0 / vfunc_10 0x4D46D0: 11 rows on a 30 px pitch, label at x = 15 size 12, value centred,
+   Apply / OK / Cancel in one row (widget content 450x440). */
+.option-row {
+    margin: 0;
+    height: 30px;
+    align-items: center;
+}
+
+.option-label {
+    min-width: 210px;
+    color: rgb(255, 255, 255);
+    font-size: 12px;
+    margin-left: 15px;
+}
+
+.option-value {
+    width: 180px;
+    -unity-text-align: middle-center;
+    color: rgb(255, 255, 255);
+    font-size: 12px;
+}
+
+.option-row Button {
+    width: 26px;
+    height: 22px;
+    min-height: 0;
+    margin: 0 4px 0 4px;
+    padding: 0;
+    border-width: 1px;
+    border-color: rgb(255, 255, 255);
+    border-radius: 0;
+    background-color: rgba(10, 16, 22, 0.72);
+    color: rgb(255, 255, 255);
+    font-size: 12px;
+    -unity-text-align: middle-center;
+}
+
+.option-row Button:hover {
+    color: rgb(51, 255, 255);
+}
+
+.options-buttons {
+    justify-content: center;
+    margin-top: 14px;
+}
+
+.options-buttons Button {
+    width: 110px;
+    height: 30px;
+    margin: 0 6px 0 6px;
+    border-width: 1px;
+    border-color: rgb(255, 255, 255);
+    border-radius: 0;
+    background-color: rgba(10, 16, 22, 0.72);
+    color: rgb(255, 255, 255);
+    font-size: 12px;
+    -unity-text-align: middle-center;
+}
+
+.options-buttons Button:hover {
+    color: rgb(51, 255, 255);
+    background-color: rgba(56, 78, 98, 0.82);
+}
+
+.preview-panel {
+    align-items: center;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.preview-image {
+    width: 260px;
+    height: 340px;
+}
+
+.unity-base-field__label {
+    min-width: 76px;
+    color: rgb(201, 222, 233);
 }

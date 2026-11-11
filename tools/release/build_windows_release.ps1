@@ -43,9 +43,31 @@ if ($projectVersion -ne $EditorVersion) {
 $cli = Join-Path $env:LOCALAPPDATA 'Unity\bin\unity.exe'
 if (-not (Test-Path $cli)) { throw "Unity CLI not found: $cli" }
 $editorRoot = (& $cli editors path $EditorVersion --no-banner | Where-Object { $_.Trim() } | Select-Object -Last 1)
-if (-not $editorRoot) { throw "Unity CLI does not know Editor $EditorVersion" }
-$editorExe = Join-Path $editorRoot.Trim() 'Editor\Unity.exe'
-if (-not (Test-Path $editorExe)) { throw "Unity Editor not found: $editorExe" }
+$editorExe = if ($editorRoot) { Join-Path $editorRoot.Trim() 'Editor\Unity.exe' } else { '' }
+if (-not $editorExe -or -not (Test-Path $editorExe)) {
+    # The hub CLI only reports editors it installed itself; a hub moved to another drive is not in that list.
+    $candidates = @()
+    if ($env:CUBEGAME_UNITY_EDITOR) { $candidates += $env:CUBEGAME_UNITY_EDITOR }
+    $candidates += @(
+        (Join-Path (Join-Path (Join-Path 'D:\Unity\Hub\Editor' $EditorVersion) 'Editor') 'Unity.exe'),
+        (Join-Path (Join-Path (Join-Path 'C:\Program Files\Unity\Hub\Editor' $EditorVersion) 'Editor') 'Unity.exe'),
+        (Join-Path (Join-Path (Join-Path 'D:\Program Files\Unity\Hub\Editor' $EditorVersion) 'Editor') 'Unity.exe')
+    )
+    $found = $candidates | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+    if (-not $found) {
+        throw "Unity Editor not found for $EditorVersion (CLI list is empty; checked CUBEGAME_UNITY_EDITOR and the hub folders on C: and D:)"
+    }
+    $editorExe = $found
+    Write-Host "BUILD editor_source=fallback"
+}
+
+# The Alpha interface font is a closed local asset (resource1.dat): stage it into Resources before the import so
+# the Player keeps the Alpha typography. A missing local installation must not break the build, but it must be
+# visible in the output and in the Player log (ALPHA_FONT=ABSENT).
+$fontStage = Join-Path $repoRoot 'tools\alpha_content\stage_alpha_ui_font.ps1'
+if (Test-Path $fontStage) {
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $fontStage -AllowAbsent | ForEach-Object { Write-Host "BUILD font $_" }
+}
 
 if (-not $BuildId) {
     $BuildId = (& git -C $repoRoot rev-parse --short=7 HEAD).Trim()

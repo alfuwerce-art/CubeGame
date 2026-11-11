@@ -183,6 +183,10 @@ namespace CubeGame.Gameplay
             LoadOptions();
             ReloadProfiles();
             Debug.Log($"[Game] boot -> {_session.State}; saves={DescribeSaveDirectory()}");
+            if (!string.IsNullOrEmpty(_captureDir))
+            {
+                StartCoroutine(CaptureStartupScreens());
+            }
         }
 
         private void Start()
@@ -1472,6 +1476,9 @@ namespace CubeGame.Gameplay
                         break;
                     case "-cubeUiProbe":
                         _uiProbePath = value;
+                        break;
+                    case "-cubeCapture":
+                        _captureDir = value;
                         break;
                     case "-cubeSaveCheckpoint":
                         _saveCheckpoint = true;

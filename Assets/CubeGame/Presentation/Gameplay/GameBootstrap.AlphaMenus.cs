@@ -24,6 +24,10 @@ namespace CubeGame.Gameplay
     ///             → CreateWorld (0x800890, confirm 0x482530)
     ///             → world load request (0x484170 → 0x46F620 → world worker 0x46A8A0)
     ///   Back (0x4814F0): CreateWorld→Worlds, Worlds→Characters, Editor→Characters, Characters→Start.
+    ///
+    /// Presentation follows the Alpha widgets: centred small-caps entries for the start menu (0x583320), 230 px rows
+    /// from y = 50 with the Alpha colours for the two lists (0x49D650 / 0x4A23D0), and flat 198x66 / 298x66 framed
+    /// buttons for Back / Select / Create (complete list of measured values in <see cref="AlphaStartupPresentation"/>).
     /// </summary>
     public sealed partial class GameBootstrap
     {
@@ -97,97 +101,115 @@ namespace CubeGame.Gameplay
             _startupScreen = screen;
             _status = string.Empty;
             RequestRedraw();
+            Debug.Log($"[UI] screen {screen}");
         }
 
         /// <summary>Rebuilds the visible screen on the next LateUpdate without touching the state machine.</summary>
         private void RequestRedraw() => _redraw = true;
 
-        // ----- Start menu (StartMenuWidget 0x583320) -----
+        // ----- Screen frame -----
 
         private void BuildStartupScreen()
         {
+            ReleaseRowPreviews();
+            SetPixelScaleUi(true);
+            var screen = new VisualElement { name = "main-menu" };
+            screen.AddToClassList("alpha-screen");
+
             if (_enteringWorld)
             {
                 // Alpha shows the start.plx "Please wait..." node while the world is opened.
-                var wait = Surface("wait-screen", "main-menu");
-                Text(wait, "Please wait...", "wait-label", "heading");
-                _statusLabel = Text(wait, _status, "wait-status", "muted");
-                _interface.Add(wait);
+                screen.AddToClassList("alpha-wait");
+                var wait = new VisualElement { name = "wait-screen" };
+                wait.AddToClassList("alpha-center");
+                AlphaStartupPresentation.Line(wait, "Please wait...", "wait-label",
+                    AlphaStartupPresentation.TitleColor, AlphaStartupPresentation.TextSize);
+                AlphaStartupPresentation.Line(wait, _status, "wait-status", AlphaStartupPresentation.DetailColor,
+                    AlphaStartupPresentation.DetailSize);
+                screen.Add(wait);
+                _interface.Add(screen);
                 return;
             }
 
-            var backdrop = new VisualElement { name = "menu-backdrop", pickingMode = PickingMode.Ignore };
-            backdrop.AddToClassList("menu-backdrop");
-            _interface.Add(backdrop);
-            var panel = Surface("main-menu", "main-menu");
-            if (_startupScreen == StartupScreen.Start) panel.AddToClassList("start-screen");
-            var body = new ScrollView { horizontalScrollerVisibility = ScrollerVisibility.Hidden };
-            body.AddToClassList("menu-body");
-            panel.Add(body);
-            VisualElement footer = null;
             switch (_startupScreen)
             {
                 case StartupScreen.Options:
-                    panel.name = "options-screen";
-                    footer = Row(panel, "menu-footer");
-                    BuildOptionsScreen(body, footer, false);
+                    var optionsPage = new VisualElement { name = "options-page" };
+                    optionsPage.AddToClassList("alpha-center");
+                    optionsPage.AddToClassList("alpha-options");
+                    screen.Add(optionsPage);
+                    BuildOptionsScreen(optionsPage, null, false);
                     break;
                 case StartupScreen.Characters:
-                    footer = Row(panel, "menu-footer");
-                    BuildCharacterList(body, footer);
+                    BuildCharacterList(screen);
                     break;
                 case StartupScreen.Editor:
-                    footer = Row(panel, "menu-footer");
-                    BuildCharacterEditor(body, footer);
+                    BuildCharacterEditor(screen);
                     break;
                 case StartupScreen.Worlds:
-                    footer = Row(panel, "menu-footer");
-                    BuildWorldList(body, footer);
+                    BuildWorldList(screen);
                     break;
                 case StartupScreen.CreateWorld:
-                    footer = Row(panel, "menu-footer");
-                    BuildWorldCreation(body, footer);
+                    BuildWorldCreation(screen);
                     break;
                 default:
-                    BuildStartMenu(body);
+                    BuildStartMenu(screen);
                     break;
             }
 
-            if (footer != null && footer.childCount > 0) panel.Add(footer);
-            _interface.Add(panel);
+            _statusLabel = AlphaStartupPresentation.Line(screen, _status, "menu-status",
+                AlphaStartupPresentation.DetailColor, AlphaStartupPresentation.DetailSize);
+            _statusLabel.AddToClassList("alpha-status");
+            _interface.Add(screen);
         }
 
-        private void BuildStartMenu(VisualElement panel)
+        /// <summary>
+        /// Start menu of 0x583320: exactly three centred entries (Start Game / Options / Exit), text size 18 with the
+        /// 4 px outline pass, cyan on hover. Alpha has no title, no logo box and no frame here — the 3D scene and the
+        /// logo texture of start.plx carry the identity.
+        /// </summary>
+        private void BuildStartMenu(VisualElement screen)
         {
-            Text(panel, "CubeGame", "start-title", "heading");
-            _statusLabel = Text(panel, "", "menu-status", "muted");
-            // StartMenuWidget 0x583320 lists exactly three entries; item 0 opens the character list (0x47B600).
-            ButtonOf(panel, "Start Game", "start-game", () => ShowStartupScreen(StartupScreen.Characters));
-            ButtonOf(panel, "Options", "menu-options", () => ShowStartupScreen(StartupScreen.Options));
-            ButtonOf(panel, "Exit", "menu-exit", QuitGame);
+            var menu = new VisualElement { name = "start-menu" };
+            menu.AddToClassList("alpha-menu");
+            screen.Add(menu);
+            AlphaStartupPresentation.MenuItem(menu, "Start Game", "start-game",
+                () => ShowStartupScreen(StartupScreen.Characters));
+            AlphaStartupPresentation.MenuItem(menu, "Options", "menu-options",
+                () => ShowStartupScreen(StartupScreen.Options));
+            AlphaStartupPresentation.MenuItem(menu, "Exit", "menu-exit", QuitGame);
         }
 
-        // ----- Character list (0x49D650, rows 230 px from y=50 + the extra "Create Character" row) -----
+        // ----- Character list (0x49D650: rows 230 px from y = 50 + the extra "Create Character" row) -----
 
-        private void BuildCharacterList(VisualElement panel, VisualElement footer)
+        private void BuildCharacterList(VisualElement screen)
         {
-            Text(panel, "Characters", "screen-title", "heading");
-            _statusLabel = Text(panel, "", "menu-status", "muted");
+            AddBackButton(screen, () => ShowStartupScreen(StartupScreen.Start));
+            var rows = RowsHost(screen);
             foreach (AlphaCharacterRecord record in _profiles.Characters)
             {
                 AlphaCharacterRecord selected = record;
-                Button row = ButtonOf(panel, $"{record.Name}\n{record.Class}  ·  Level {record.Level}",
-                    $"character-{record.Id}", () => SelectCharacter(selected.Id));
-                row.AddToClassList("entry-row");
+                Button row = AlphaRow(rows, $"character-{record.Id}", () => SelectCharacter(selected.Id));
+                AddCharacterPreviewSlot(row, record.Appearance);
+                VisualElement info = RowInfo(row);
+                string race = AlphaHeroCreation.Races[
+                    Mathf.Clamp(record.Appearance.Race, 0, AlphaHeroCreation.Races.Length - 1)];
+                // Text calls of Interface::drawCharacterCreation 0x425450: name at (200,30) size 14,
+                // "LVL <n> <race> <class>" at (200,55) size 12, "Specialization: <x>" at (200,75) size 10.
+                AlphaStartupPresentation.Line(info, record.Name, null, AlphaStartupPresentation.NameColor,
+                    AlphaStartupPresentation.NameSize);
+                AlphaStartupPresentation.Line(info, $"Lvl {record.Level} {race} {record.Class}",
+                    name: null, color: AlphaStartupPresentation.TitleColor, size: AlphaStartupPresentation.TitleSize);
+                // The specialization line of Alpha needs the creature specialization, which the character record of this
+                // port does not store yet (report: CHARACTER_LIST_VISUAL=PARTIAL).
+                AddRowAction(row, "Select");
             }
 
-            if (_profiles.Characters.Count == 0)
-            {
-                Text(panel, "No characters", "no-characters", "muted");
-            }
-
-            ButtonOf(footer, "Create Character", "new-character", BeginCharacterCreation);
-            ButtonOf(footer, "Back", "menu-back", () => ShowStartupScreen(StartupScreen.Start));
+            Button newRow = AlphaRow(rows, "new-character", BeginCharacterCreation);
+            newRow.AddToClassList("alpha-row-empty");
+            AlphaStartupPresentation.Line(newRow, "New character", null, AlphaStartupPresentation.TitleColor,
+                AlphaStartupPresentation.NameSize);
+            AddRowAction(newRow, "Create");
         }
 
         /// <summary>Character row select: load the record and open the world list (0x483E70).</summary>
@@ -223,37 +245,56 @@ namespace CubeGame.Gameplay
 
         // ----- Character editor (0x42BD90 defaults, 0x42C080 model refresh, 0x4821A0 confirm) -----
 
-        private void BuildCharacterEditor(VisualElement panel, VisualElement footer)
+        private void BuildCharacterEditor(VisualElement screen)
         {
-            Text(panel, "Create Character", "screen-title", "heading");
-            _statusLabel = Text(panel, "", "menu-status", "muted");
+            AddBackButton(screen, () => ShowStartupScreen(StartupScreen.Characters));
+            var page = new VisualElement { name = "character-editor" };
+            page.AddToClassList("alpha-center");
+            page.AddToClassList("alpha-editor");
+            screen.Add(page);
 
-            var name = AddField(panel, "Name", "hero-name", _formHeroName, value => _formHeroName = value);
-            name.maxLength = AlphaHeroCreation.MaxNameLength;
+            var body = new VisualElement();
+            body.AddToClassList("alpha-editor-body");
+            page.Add(body);
 
+            var left = new VisualElement();
+            left.AddToClassList("alpha-editor-preview");
             // Alpha previews the creature model while the editor is open (CharacterPreviewWidget 0x424E80).
-            VisualElement preview = PreviewPanel(panel);
+            VisualElement preview = PreviewPanel(left);
+            body.Add(left);
             CreatePreviewStage(preview, _formLook);
 
-            AddCarousel(panel, "Class", "hero-class", Enum.GetNames(typeof(CharacterClass)), _formClass, index =>
+            var fields = new VisualElement();
+            fields.AddToClassList("alpha-editor-fields");
+            body.Add(fields);
+
+            TextField name = AddField(fields, "Name", "hero-name", _formHeroName, value => _formHeroName = value);
+            name.maxLength = AlphaHeroCreation.MaxNameLength;
+
+            AddCarousel(fields, "Class", "hero-class", Enum.GetNames(typeof(CharacterClass)), _formClass, index =>
             {
                 _formClass = index;
                 RefreshEditorPreview();
             });
-            AddCarousel(panel, "Race", "hero-race", AlphaHeroCreation.Races, _formLook.Race,
+            AddCarousel(fields, "Race", "hero-race", AlphaHeroCreation.Races, _formLook.Race,
                 index => SetEditorAppearance(index, _formLook.Gender, _formLook.Face, _formLook.Haircut));
-            AddCarousel(panel, "Sex", "hero-sex", new[] { "Male", "Female" }, _formLook.Gender,
+            AddCarousel(fields, "Sex", "hero-sex", new[] { "Male", "Female" }, _formLook.Gender,
                 index => SetEditorAppearance(_formLook.Race, index, _formLook.Face, _formLook.Haircut));
-            AddCarousel(panel, "Face", "hero-face", NumberedChoices(AlphaHeroCreation.FaceCount(AlphaHeroCreation.KindOf(_formLook))),
+            AddCarousel(fields, "Face", "hero-face",
+                NumberedChoices(AlphaHeroCreation.FaceCount(AlphaHeroCreation.KindOf(_formLook))),
                 _formLook.Face, index => SetEditorAppearance(_formLook.Race, _formLook.Gender, index, _formLook.Haircut));
-            AddCarousel(panel, "Hair", "hero-hair", NumberedChoices(AlphaHeroCreation.HaircutCount(AlphaHeroCreation.KindOf(_formLook))),
+            AddCarousel(fields, "Hair", "hero-hair",
+                NumberedChoices(AlphaHeroCreation.HaircutCount(AlphaHeroCreation.KindOf(_formLook))),
                 _formLook.Haircut, index => SetEditorAppearance(_formLook.Race, _formLook.Gender, _formLook.Face, index));
 
             // Alpha palette: 16 hues × 7 rows of shadings (drawCharacterAppearancePanel 0x428E40).
             var swatches = new List<Button>();
             for (int rowIndex = 0; rowIndex < AlphaHeroCreation.PaletteRows; rowIndex++)
             {
-                var palette = Row(panel, "palette");
+                var palette = new VisualElement();
+                palette.AddToClassList("row");
+                palette.AddToClassList("palette");
+                fields.Add(palette);
                 for (int column = 0; column < AlphaHeroCreation.PaletteColumns; column++)
                 {
                     (byte R, byte G, byte B) color = AlphaHeroCreation.PaletteColor(column, rowIndex);
@@ -275,8 +316,14 @@ namespace CubeGame.Gameplay
 
             RefreshPalette();
 
-            ButtonOf(footer, "Create Character", "create-character", () => ConfirmCharacterEditor());
-            ButtonOf(footer, "Back", "menu-back", () => ShowStartupScreen(StartupScreen.Characters));
+            var actions = new VisualElement();
+            actions.AddToClassList("row");
+            actions.AddToClassList("alpha-editor-actions");
+            page.Add(actions);
+            AlphaStartupPresentation.Button(actions, "Create Character", "create-character", true,
+                () => ConfirmCharacterEditor());
+            AlphaStartupPresentation.Button(actions, "Back", "menu-back", false,
+                () => ShowStartupScreen(StartupScreen.Characters));
 
             void RefreshPalette()
             {
@@ -358,46 +405,67 @@ namespace CubeGame.Gameplay
 
         // ----- World list (0x4A23D0) and creation (0x482530) -----
 
-        private void BuildWorldList(VisualElement panel, VisualElement footer)
+        private void BuildWorldList(VisualElement screen)
         {
-            Text(panel, "Select World", "screen-title", "heading");
-            _statusLabel = Text(panel, "", "menu-status", "muted");
-            if (_selectedCharacter != null)
-            {
-                Text(panel, _selectedCharacter.Name, "worlds-character", "muted");
-            }
+            AddBackButton(screen, () => ShowStartupScreen(StartupScreen.Characters));
+            // 0x4A23D0 keeps a separate singleplayer / multiplayer mode; the single player M0 renders no switcher.
+            AlphaStartupPresentation.Button(screen, "Multiplayer Worlds...", "worlds-mode", true, () =>
+                Report(false, "multiplayer is outside the single player M0")).AddToClassList("alpha-top-right");
 
+            var rows = RowsHost(screen);
             foreach (AlphaWorldRecord world in _profiles.Worlds)
             {
                 AlphaWorldRecord selected = world;
-                Button row = ButtonOf(panel,
-                    $"{(string.IsNullOrEmpty(world.Name) ? " " : world.Name)}\nSeed {world.Seed}",
-                    $"world-{world.Id}", () => EnterWorld(selected));
-                row.AddToClassList("entry-row");
+                Button row = AlphaRow(rows, $"world-{world.Id}", () => EnterWorld(selected));
+                AddWorldPreviewSlot(row);
+                VisualElement info = RowInfo(row);
+                // Text calls of GameController::drawWorldSelectEntry 0x605AE0: name at (200,30) size 14,
+                // "Explored: <WorldInfo+0x24>" at (200,55) size 10, "Seed: <WorldInfo+0x20>" at (200,80) size 10.
+                AlphaStartupPresentation.Line(info, string.IsNullOrEmpty(world.Name) ? " " : world.Name, null,
+                    AlphaStartupPresentation.NameColor, AlphaStartupPresentation.NameSize);
+                AlphaStartupPresentation.Line(info, $"Explored: {world.LegacyField24}", null,
+                    AlphaStartupPresentation.TitleColor, AlphaStartupPresentation.DetailSize);
+                AlphaStartupPresentation.Line(info, $"Seed: {world.Seed}", null,
+                    AlphaStartupPresentation.DetailColor, AlphaStartupPresentation.DetailSize);
+                AddRowAction(row, "Select");
             }
 
-            if (_profiles.Worlds.Count == 0)
-            {
-                Text(panel, "No worlds", "no-worlds", "muted");
-            }
-
-            ButtonOf(footer, "Create World", "new-world", () =>
+            Button newRow = AlphaRow(rows, "new-world", () =>
             {
                 _formWorldName = string.Empty;
                 _formSeed = string.Empty;
                 ShowStartupScreen(StartupScreen.CreateWorld);
             });
-            ButtonOf(footer, "Back", "menu-back", () => ShowStartupScreen(StartupScreen.Characters));
+            newRow.AddToClassList("alpha-row-empty");
+            AlphaStartupPresentation.Line(newRow, "New world", null, AlphaStartupPresentation.TitleColor,
+                AlphaStartupPresentation.NameSize);
+            AddRowAction(newRow, "Create");
+
+            AlphaStartupPresentation.Button(screen, "Connect to Server", "worlds-connect", true, () =>
+                Report(false, "multiplayer is outside the single player M0")).AddToClassList("alpha-bottom-right");
         }
 
-        private void BuildWorldCreation(VisualElement panel, VisualElement footer)
+        private void BuildWorldCreation(VisualElement screen)
         {
-            Text(panel, "Create World", "screen-title", "heading");
-            _statusLabel = Text(panel, "", "menu-status", "muted");
-            AddField(panel, "Name", "world-name", _formWorldName, value => _formWorldName = value);
-            AddField(panel, "Seed (must be a number)", "world-seed", _formSeed, value => _formSeed = value);
-            ButtonOf(footer, "Create World", "create-world", () => ConfirmWorldCreation());
-            ButtonOf(footer, "Back", "menu-back", () => ShowStartupScreen(StartupScreen.Worlds));
+            AddBackButton(screen, () => ShowStartupScreen(StartupScreen.Worlds));
+            var page = new VisualElement { name = "world-creation" };
+            page.AddToClassList("alpha-center");
+            page.AddToClassList("alpha-creation");
+            screen.Add(page);
+
+            AlphaStartupPresentation.Line(page, "Create World", null, AlphaStartupPresentation.TitleColor,
+                AlphaStartupPresentation.TextSize);
+            AddField(page, "Name", "world-name", _formWorldName, value => _formWorldName = value);
+            AddField(page, "Seed (must be a number)", "world-seed", _formSeed, value => _formSeed = value);
+
+            var actions = new VisualElement();
+            actions.AddToClassList("row");
+            actions.AddToClassList("alpha-editor-actions");
+            page.Add(actions);
+            AlphaStartupPresentation.Button(actions, "Create World", "create-world", true,
+                () => ConfirmWorldCreation());
+            AlphaStartupPresentation.Button(actions, "Back", "menu-back", false,
+                () => ShowStartupScreen(StartupScreen.Worlds));
         }
 
         /// <summary>
@@ -549,20 +617,45 @@ namespace CubeGame.Gameplay
             SetGameplayInput(true);
         }
 
+        /// <summary>
+        /// Alpha draws its interface 1:1 in pixels (the start menu is 18 px text in a 1936 px window and in a 1280 px
+        /// window alike), so the startup screens switch the panel to constant pixel size. The in-game HUD keeps the
+        /// scalable panel it was reviewed with.
+        /// </summary>
+        private void SetPixelScaleUi(bool startup)
+        {
+            if (_panelSettings == null) return;
+            PanelScaleMode mode = startup ? PanelScaleMode.ConstantPixelSize : PanelScaleMode.ScaleWithScreenSize;
+            if (_panelSettings.scaleMode != mode) _panelSettings.scaleMode = mode;
+        }
+
         private VisualElement BuildOverlayMenu()
         {
-            var panel = Surface("system-menu", "system-menu");
+            SetPixelScaleUi(false);
+            var panel = new VisualElement { name = "system-menu" };
+            panel.AddToClassList("alpha-screen");
+            panel.AddToClassList("alpha-overlay");
             switch (_overlay)
             {
                 case GameOverlay.Options:
                     panel.name = "options-screen";
-                    BuildOptionsScreen(panel, null, true);
+                    var optionsPage = new VisualElement { name = "options-page" };
+                    optionsPage.AddToClassList("alpha-center");
+                    optionsPage.AddToClassList("alpha-options");
+                    panel.Add(optionsPage);
+                    BuildOptionsScreen(optionsPage, null, true);
                     break;
                 default:
-                    // SystemWidget 0x587710: Options / Start Menu / Exit Game.
-                    ButtonOf(panel, "Options", "system-options", () => OpenOverlayOptions());
-                    ButtonOf(panel, "Start Menu", "system-start-menu", () => ExitToStartMenu());
-                    ButtonOf(panel, "Exit Game", "system-exit", QuitGame);
+                    // SystemWidget 0x587710: Options / Start Menu / Exit Game — same three-entry layout as 0x583320 but
+                    // 14 px text on a 30 px pitch (y = 30 / 60 / 90 inside the 350 px wide widget).
+                    var menu = new VisualElement { name = "system-menu-items" };
+                    menu.AddToClassList("alpha-menu");
+                    menu.AddToClassList("alpha-menu-small");
+                    panel.Add(menu);
+                    AlphaStartupPresentation.MenuItem(menu, "Options", "system-options", OpenOverlayOptions);
+                    AlphaStartupPresentation.MenuItem(menu, "Start Menu", "system-start-menu",
+                        () => ExitToStartMenu());
+                    AlphaStartupPresentation.MenuItem(menu, "Exit Game", "system-exit", QuitGame);
                     break;
             }
 
@@ -603,12 +696,59 @@ namespace CubeGame.Gameplay
             return true;
         }
 
+        // ----- Alpha row / button helpers (shared by the start screens) -----
+
+        /// <summary>Back button of 0x4814F0 in the Alpha position: top-left, 198x66, flat frame.</summary>
+        private void AddBackButton(VisualElement screen, Action action)
+        {
+            AlphaStartupPresentation.Button(screen, "Back", "menu-back", false, action)
+                .AddToClassList("alpha-back-slot");
+        }
+
+        /// <summary>Vertical, centred host of the 230 px rows (0x49D650 / 0x4A23D0).</summary>
+        private static VisualElement RowsHost(VisualElement screen)
+        {
+            var host = new VisualElement { name = "alpha-rows" };
+            host.AddToClassList("alpha-rows");
+            screen.Add(host);
+            return host;
+        }
+
+        private static Button AlphaRow(VisualElement parent, string name, Action action)
+        {
+            var row = new Button(action) { name = name, text = string.Empty };
+            row.AddToClassList("alpha-row");
+            parent.Add(row);
+            return row;
+        }
+
+        private static VisualElement RowInfo(VisualElement row)
+        {
+            var info = new VisualElement();
+            info.AddToClassList("alpha-row-info");
+            row.Add(info);
+            return info;
+        }
+
+        /// <summary>
+        /// Alpha shows the row action (Select / Create) as a 198x66 framed button only while the row is hovered;
+        /// the button is part of the row subtree, so the visibility rule lives in USS and the click still reaches
+        /// the row handler.
+        /// </summary>
+        private static void AddRowAction(VisualElement row, string label)
+        {
+            var action = new Label(label) { pickingMode = PickingMode.Ignore };
+            action.AddToClassList("alpha-row-action");
+            row.Add(action);
+        }
+
         // ----- Shared UI helpers of the start screens -----
 
         private TextField AddField(VisualElement parent, string label, string name, string value,
             Action<string> changed)
         {
             var field = new TextField(label) { name = name, value = value };
+            field.AddToClassList("alpha-field");
             field.RegisterValueChangedCallback(evt => changed(evt.newValue));
             parent.Add(field);
             return field;
@@ -621,19 +761,41 @@ namespace CubeGame.Gameplay
         private void AddCarousel(VisualElement parent, string label, string name, IReadOnlyList<string> values, int index,
             Action<int> changed)
         {
-            var row = Row(parent, "carousel");
-            ButtonOf(row, "<", name + "-prev", () =>
+            var row = new VisualElement();
+            row.AddToClassList("row");
+            row.AddToClassList("carousel");
+            parent.Add(row);
+            var previous = new Button(() =>
             {
                 changed(Cycle(index - 1, values.Count));
                 _audio.Play("menu-select.wav");
-            });
-            Text(row, label, name + "-label", "carousel-label");
-            Text(row, values[Mathf.Clamp(index, 0, values.Count - 1)], name, "carousel-value");
-            ButtonOf(row, ">", name + "-next", () =>
+            })
+            {
+                name = name + "-prev",
+                text = "<",
+            };
+            previous.AddToClassList("alpha-arrow");
+            row.Add(previous);
+
+            Label caption = AlphaStartupPresentation.Line(row, label, name + "-label",
+                AlphaStartupPresentation.DetailColor, AlphaStartupPresentation.TextSize);
+            caption.AddToClassList("alpha-carousel-label");
+            Label valueLabel = AlphaStartupPresentation.Line(row,
+                values[Mathf.Clamp(index, 0, values.Count - 1)], name, AlphaStartupPresentation.TitleColor,
+                AlphaStartupPresentation.TextSize);
+            valueLabel.AddToClassList("alpha-carousel-value");
+
+            var next = new Button(() =>
             {
                 changed(Cycle(index + 1, values.Count));
                 _audio.Play("menu-select.wav");
-            });
+            })
+            {
+                name = name + "-next",
+                text = ">",
+            };
+            next.AddToClassList("alpha-arrow");
+            row.Add(next);
         }
 
         private static int Cycle(int index, int count) => count <= 0 ? 0 : ((index % count) + count) % count;

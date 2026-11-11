@@ -18,6 +18,68 @@ namespace CubeGame.Gameplay
     {
         private string _uiProbePath;
         private int _uiProbeFrame = -1;
+        private string _captureDir;
+
+        /// <summary>
+        /// Presentation capture for the producer review (<c>-cubeCapture &lt;dir&gt;</c>): walks the startup screens by
+        /// calling the very same handlers the widgets invoke and writes one PNG per screen. This is a diagnostic for
+        /// visual validation only — it changes no state machine rule and is never active without the flag.
+        /// </summary>
+        private System.Collections.IEnumerator CaptureStartupScreens()
+        {
+            if (string.IsNullOrEmpty(_captureDir)) yield break;
+            System.IO.Directory.CreateDirectory(_captureDir);
+            yield return new WaitForSecondsRealtime(1.5f);
+
+            yield return CaptureShot("01_start");
+            ShowStartupScreen(StartupScreen.Options);
+            yield return CaptureShot("02_options");
+            ShowStartupScreen(StartupScreen.Start);
+            yield return CaptureShot("03_start_again");
+
+            ShowStartupScreen(StartupScreen.Characters);
+            yield return CaptureShot("04_characters");
+            BeginCharacterCreation();
+            yield return CaptureShot("05_editor");
+            ShowStartupScreen(StartupScreen.Characters);
+            yield return CaptureShot("06_characters_again");
+
+            if (_profiles.Characters.Count > 0)
+            {
+                SelectCharacter(_profiles.Characters[0].Id);
+                yield return CaptureShot("07_worlds");
+            }
+
+            ShowStartupScreen(StartupScreen.CreateWorld);
+            yield return CaptureShot("08_create_world");
+
+            _status = "Opening the world";
+            _enteringWorld = true;
+            RequestRedraw();
+            yield return CaptureShot("09_wait");
+            _enteringWorld = false;
+            ShowStartupScreen(StartupScreen.Start);
+            yield return CaptureShot("10_start_after");
+            Debug.Log("[Capture] CAPTURE_DONE");
+        }
+
+        private System.Collections.IEnumerator CaptureShot(string name)
+        {
+            yield return new WaitForEndOfFrame();
+            string path = Path.Combine(_captureDir, name + ".png");
+            try
+            {
+                ScreenCapture.CaptureScreenshot(path);
+                Debug.Log($"[Capture] SHOT {name} {Screen.width}x{Screen.height}");
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"[Capture] {name}: {exception.Message}");
+            }
+
+            yield return null;
+            yield return new WaitForSecondsRealtime(0.6f);
+        }
 
         private void WriteUiProbe()
         {

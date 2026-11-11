@@ -69,11 +69,13 @@ namespace CubeGame.Gameplay
             _interface.name = "game-interface";
             _interface.pickingMode = PickingMode.Ignore;
             _interface.styleSheets.Add(Resources.Load<StyleSheet>("GameInterface"));
+            ApplyAlphaFont();
             _audio = view.AddComponent<GameAudio>();
         }
 
         private void BindWorldPresentation()
         {
+            SetPixelScaleUi(false);
             _audio.Release();
             BindLocalAudio();
             _observedInventory = _session.Hero.Inventory;

@@ -179,5 +179,147 @@ namespace CubeGame.Gameplay
             _previewImage = null;
             _previewPanel = null;
         }
+
+        // ----- Row previews of the start-screen lists (CharacterPreviewWidget 0x424E80 per row) -----
+
+        /// <summary>One row preview: its own far-away stage, camera and render texture.</summary>
+        private sealed class RowPreview
+        {
+            public GameObject Stage;
+            public RenderTexture Texture;
+            public AlphaActorView View;
+        }
+
+        private readonly List<RowPreview> _rowPreviews = new List<RowPreview>();
+
+        /// <summary>
+        /// Row preview of one character (Alpha draws a live creature model inside every list row, not a text row).
+        /// A preview that cannot be built must never break the list, so failures fall back to the empty slot.
+        /// </summary>
+        private void AddCharacterPreviewSlot(VisualElement row, HeroAppearance appearance)
+        {
+            var slot = new VisualElement { name = "row-preview" };
+            slot.AddToClassList("alpha-row-preview");
+            row.Add(slot);
+            try
+            {
+                RowPreview preview = CreateRowPreview(appearance);
+                if (preview == null) return;
+                _rowPreviews.Add(preview);
+                var image = new Image { image = preview.Texture, scaleMode = ScaleMode.ScaleToFit };
+                image.AddToClassList("alpha-row-preview-image");
+                slot.Add(image);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"[Preview] row preview unavailable: {exception.Message}");
+            }
+        }
+
+        /// <summary>
+        /// World row preview (WorldPreviewWidget). Alpha renders the world map preview stored inside worlds.db
+        /// (a 32x32x12 voxel model); this port does not persist that blob yet, so the slot stays empty and the report
+        /// keeps WORLD_LIST_VISUAL as PARTIAL.
+        /// </summary>
+        private static void AddWorldPreviewSlot(VisualElement row)
+        {
+            var slot = new VisualElement { name = "row-world-preview" };
+            slot.AddToClassList("alpha-row-preview");
+            slot.AddToClassList("alpha-row-preview-empty");
+            row.Add(slot);
+        }
+
+        private RowPreview CreateRowPreview(HeroAppearance appearance)
+        {
+            AlphaActorLibrary library = AlphaActorLibrary.Shared;
+            if (library == null || library.State != AlphaContentState.Ready) return null;
+
+            const int size = 220;
+            var texture = new RenderTexture(size, size, 24, RenderTextureFormat.ARGB32)
+            {
+                name = "Row character preview",
+                antiAliasing = 1,
+            };
+            texture.Create();
+
+            int index = _rowPreviews.Count;
+            var stage = new GameObject($"Row Preview Stage {index}");
+            stage.transform.position = new Vector3(index * 40f, PreviewFarmY, 0f);
+
+            var cameraObject = new GameObject("Row Preview Camera");
+            cameraObject.transform.SetParent(stage.transform, false);
+            cameraObject.transform.localPosition = new Vector3(0f, 1.0f, 4.4f);
+            cameraObject.transform.localRotation = Quaternion.Euler(6f, 180f, 0f);
+            var camera = cameraObject.AddComponent<Camera>();
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(0f, 0f, 0f, 0f);
+            camera.fieldOfView = 30f;
+            camera.nearClipPlane = 0.05f;
+            camera.farClipPlane = 20f;
+            camera.targetTexture = texture;
+            camera.enabled = true;
+
+            var lightObject = new GameObject("Row Preview Light");
+            lightObject.transform.SetParent(stage.transform, false);
+            lightObject.transform.localRotation = Quaternion.Euler(20f, 160f, 0f);
+            Light light = lightObject.AddComponent<Light>();
+            light.type = LightType.Directional;
+            light.intensity = 2.1f;
+            light.shadows = LightShadows.None;
+
+            var fillObject = new GameObject("Row Preview Fill");
+            fillObject.transform.SetParent(stage.transform, false);
+            fillObject.transform.localRotation = Quaternion.Euler(10f, -60f, 0f);
+            Light fill = fillObject.AddComponent<Light>();
+            fill.type = LightType.Directional;
+            fill.intensity = 1.0f;
+            fill.shadows = LightShadows.None;
+
+            var empty = new Dictionary<VisualEquipmentSlot, HeroVisualItem>();
+            HeroVisualSpec spec = HeroVisualComposer.Compose(appearance, empty);
+            string root = library.Source != null ? library.Source.Root : null;
+            string items = root != null ? System.IO.Path.Combine(root, "items") : null;
+            CharacterVisualResult result = AlphaPlayerVisualBuilder.Build(spec.ToRequest(root), stage.transform,
+                library, items);
+            if (result.View == null || !result.View.Ready)
+            {
+                if (result.View != null) Destroy(result.View.gameObject);
+                Destroy(stage);
+                texture.Release();
+                Destroy(texture);
+                return null;
+            }
+
+            result.View.Tick(0f);
+            FitPreview(result.View);
+            return new RowPreview { Stage = stage, Texture = texture, View = result.View };
+        }
+
+        /// <summary>Releases every row preview; called whenever the start screens are rebuilt.</summary>
+        private void ReleaseRowPreviews()
+        {
+            foreach (RowPreview preview in _rowPreviews)
+            {
+                if (preview?.View != null)
+                {
+                    preview.View.gameObject.SetActive(false);
+                    foreach (MeshFilter filter in preview.View.GetComponentsInChildren<MeshFilter>(true))
+                    {
+                        if (filter.sharedMesh != null) Destroy(filter.sharedMesh);
+                    }
+
+                    Destroy(preview.View.gameObject);
+                }
+
+                if (preview?.Stage != null) Destroy(preview.Stage);
+                if (preview?.Texture != null)
+                {
+                    preview.Texture.Release();
+                    Destroy(preview.Texture);
+                }
+            }
+
+            _rowPreviews.Clear();
+        }
     }
 }

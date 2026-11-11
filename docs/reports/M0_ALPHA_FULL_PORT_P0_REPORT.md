@@ -6,7 +6,8 @@
 **Исследование:** [ALPHA_STARTUP_MENU_AND_SAVE_FLOW](../research/alpha2013/ALPHA_STARTUP_MENU_AND_SAVE_FLOW.md)
 
 ```text
-STATUS=READY_FOR_PRODUCER_REVIEW
+STATUS=PARTIAL (review fix см. раздел «P0 REVIEW FIX — PRESENTATION PARITY» в конце; прежний статус
+       READY_FOR_PRODUCER_REVIEW относился к логике стартового контура)
 BOOT=PASS_CANDIDATE
 MAIN_MENU=PASS_CANDIDATE
 OPTIONS=PASS_CANDIDATE (PARTIAL по значениям отдельных настроек, см. блок OPTIONS)
@@ -395,3 +396,141 @@ WINDOWS_P0_FLOW=PASS (16/16 проверок драйвера, реальные 
    при `world built ... 61 ms` — то есть время уходит не на генерацию мешей, а на инициализацию/рендер контента.
    Показан Alpha-экран `Please wait...`, но причина относится к P1/P5, а не к P0.
 9. Esc в стартовых экранах не работает как Back — это Alpha-поведение, не недоделка.
+
+## P0 REVIEW FIX — PRESENTATION PARITY
+
+**Дата:** 2026-11-11 · **Ветка:** `deepseek/m0-full-port-p0` (продолжение, без новой архитектуры UI)
+**Исследование:** [ALPHA_STARTUP_PRESENTATION](../research/alpha2013/ALPHA_STARTUP_PRESENTATION.md)
+
+```text
+STATUS=PARTIAL
+ALPHA_FONT_SOURCE=D:\Games\Cube world\resource1.dat (TrueType, small-caps) → staged by tools/alpha_content/stage_alpha_ui_font.ps1 → Assets/CubeGame/Presentation/Gameplay/Resources/AlphaFont.ttf → Resources.Load<Font>("AlphaFont") → unityFontDefinition on the UI root
+ALPHA_FONT_RUNTIME=PASS
+START_BACKGROUND_SOURCE=live world render behind the start screens (ALPHA_CODE_STATIC GameController.cpp:46415-46450: the five start nodes are hidden, Widget_render_pass() runs, visibility is restored); cold-boot menu world identity UNKNOWN
+START_BACKGROUND=FAIL
+START_LOGO_SOURCE=textures inside start.plx (nodes cubeworld / picroma / star1..4 / blackwidget); chunk format still UNKNOWN, logo.cub in data1.db is not referenced by the client
+START_LOGO=FAIL
+MAIN_MENU_LAYOUT=PARTIAL
+CHARACTER_LIST_VISUAL=PARTIAL
+CHARACTER_EDITOR_VISUAL=PARTIAL
+CHARACTER_STYLE_ROTATION=FAIL
+WORLD_PREVIEW_WIDGET=FAIL
+WORLD_LIST_VISUAL=PARTIAL
+WORLD_CREATION_VISUAL=PARTIAL
+OPTIONS_VISUAL=PARTIAL
+SYSTEM_MENU_VISUAL=PARTIAL
+PLEASE_WAIT_VISUAL=PARTIAL
+ORIGINAL_ASSETS_COMMITTED=NO
+LOCAL_ALPHA_ASSET_STAGING=PASS
+EDITMODE=PASS
+PLAYMODE=PENDING_SEE_BELOW
+WINDOWS_BUILD=PASS
+WINDOWS_P0_FLOW=PASS
+P0_FUNCTIONAL_REGRESSION=PENDING_SEE_BELOW
+LIVE_GAME_UPDATED=NO
+REMOTE_SHA=PENDING_SEE_BELOW
+```
+
+### Windows Player — фактический прогон (2026-11-11)
+
+* Сборка: `.unity-install/build/P0R/CubeGame.exe`, `BUILD_RESULT=PASS`, `content_gate=PASS`, `error CS=0`, 326 МБ.
+* Лог Player: `[UI] ALPHA_FONT=RUNTIME source=resource1.dat name='AlphaFont'` — стартовый контур использует Alpha-шрифт,
+  а не Unity default.
+* Реальные клики мышью (`SetCursorPos` + `mouse_event`, окно на переднем плане) прошли весь маршрут, состояние из
+  `-cubeUiProbe` после каждого шага: `MainMenu Options` → `Start` → `Characters` → `Editor` → `Characters` →
+  `Worlds` → `CreateWorld` → вход в мир → Esc → системное меню. Скриншоты: `.unity-install/shots/p0r/01..11*.png`.
+* Дополнительно: `-cubeCapture` (диагностический проход тем же UI-путём без ввода) снял 10 экранов 1920×1080
+  в `.unity-install/shots/capture2/`.
+* EditMode: 772 теста / 770 passed / 0 failed / 2 skipped.
+
+### Видимые расхождения (по снятым экранам Player)
+
+| Экран | Что совпало | Что отличается |
+|---|---|---|
+| Main Menu | Alpha-шрифт, три центрированных пункта 18 px, шаг 50, hover `(0.2,1,1)`, 1:1 px | нет живого мира за меню и нет логотипа `CUBE WORLD` / `PICROMA` |
+| Options | Alpha-шрифт, 11 строк с шагом 30 и кеглем 12, стрелки, Apply/OK/Cancel | нет панели/рамки из `.plx`, строки прижаты влево-вверх вместо центра |
+| Character List | строки 600×220 в 10 px зазоре, BACK 198×66, имя 14 px cyan, `LVL n RACE CLASS` 12 px, живое 3D-превью в строке, `NEW CHARACTER` | нет строки специализации, нет `X` в углу строки, превью тёмное и мелкое, фон чёрный |
+| Editor | Alpha-шрифт, карусели со стрелками, палитра, превью | точная композиция Alpha не восстановлена, вращения модели нет |
+| World List | строки/тексты/кнопки в Alpha-геометрии | нет воксельного превью мира (`WorldPreviewWidget`), `Explored` показывает сырое поле записи |
+| Create World / Wait / System Menu | Alpha-шрифт, поля, кнопки, три пункта Esc-меню 14 px | нет панелей/рамок из `.plx`, фон чёрный |
+
+
+### Что сделано по замечаниям ревью
+
+**Шрифт (blocker).** Установлено, как Alpha рисует текст: единственный шрифт интерфейса — `resource1.dat`
+(`FontCache_find_or_create_scalable(L"resource1.dat")` в `StartMenuWidget::vfunc_1` 0x583320, `SystemWidget`
+0x587710, `OptionsWidget`, `Interface`, `World`, `Chat`, `Speech`). Файл — TrueType со строчными глифами в виде
+капители, поэтому Alpha-текст читается заглавными. Порядок в порте:
+
+* `tools/alpha_content/stage_alpha_ui_font.ps1` копирует `resource1.dat` из read-only установки в
+  `Assets/CubeGame/Presentation/Gameplay/Resources/AlphaFont.ttf`, сверяет SHA-256 и печатает
+  `STAGE_ALPHA_FONT=PASS|ABSENT|FAIL`; файл и его `.meta` внесены в `.gitignore`, в GitHub не попадают;
+* `assets/.../GameBootstrap.AlphaFont.cs` (`ApplyAlphaFont`) грузит `Resources/AlphaFont`, ставит
+  `unityFontDefinition` на корень интерфейса (UI Toolkit наследует шрифт) и пишет `ALPHA_FONT=RUNTIME`;
+* при отсутствии локального ресурса интерфейс остаётся на placeholder-шрифте, а лог и `ALPHA_FONT=ABSENT`
+  показывают это явно — build gate умеет сообщать отсутствие локального ресурса;
+* `build_windows_release.ps1` вызывает staging перед импортом (строка `BUILD font STAGE_ALPHA_FONT=...`).
+
+Калибровка: рендер `resource1.dat` на 18 px даёт `START GAME` шириной 155 px и высотой капители 11 px при
+измеренных на снимке оригинала 153 px и 11 px — шрифт и кегль совпадают.
+
+**Геометрия и типографика стартового контура** (`AlphaStartupPresentation`, `GameInterface.uss`):
+
+* стартовое меню: ровно три центрированных пункта, кегль 18, шаг 50 px, белый текст с чёрной обводкой, hover
+  `(0.2,1,1)` — как у 0x583320; заголовок `CubeGame`, панель и «поверхность» убраны;
+* списки: строки 600×220 с шагом 230 px, белая рамка 2 px, заливка ≈ rgba(26,26,26,0.62) (измерено), текст в
+  x = 200: имя 14 px `(0.25,1,1)`, строка уровня 12 px белая, seed/специализация 10 px `(0.5,0.5,1)`;
+  `New character` / `New world` — центрированная строка 14 px; кнопка действия строки появляется при наведении;
+* строки списка персонажей получили живое 3D-превью (`CharacterPreviewWidget`): отдельная сцена, камера и
+  RenderTexture на каждую строку, тот же конвейер модели, что у героя; ошибка превью не ломает список;
+* мир-строка показывает `Explored: <WorldInfo+0x24>` из записи мира — как `drawWorldSelectEntry` 0x605AE0;
+* кнопки: плоские 198×66 (Back / Select) и 298×66 (Multiplayer / Connect) в позициях снимка
+  (Back 30/51, правый верх 1610…1908, Connect внизу справа);
+* системное меню: три пункта по 14 px с шагом 30 (0x587710);
+* Options: строки с шагом 30, кегль 12, лейбл у x = 15, значение по центру, кнопки Apply/OK/Cancel 110×30;
+* экран редактора и создания мира сохранены по логике, но переложены в Alpha-типографику (двухколоночный
+  редактор: превью слева, карусели и палитра справа).
+
+### Проверки, которые реально выполнены
+
+* Компиляция сборки `CubeGame.Gameplay` целиком (23 файла) компилятором Unity 6000.3.27f2 Roslyn против модулей
+  `UnityEngine.*` и остальных сборок проекта: **0 ошибок CS** (`ERRORS=0`, `/target:library`, `langversion:9`).
+* Структурная проверка `GameInterface.uss`: 98 открывающих и 98 закрывающих скобок, все селекторы новые/старые
+  присутствуют.
+* Шрифт: сверка рендера `resource1.dat` с измерениями снимка оригинала (§выше); `resource1.dat`/`resource2.dat`
+  разобраны как валидные TrueType (sfnt 1.0, 13 таблиц).
+* Снимки оригинала измерены программно: пункты меню 604/654/704 px и ширины 153/99/51, строки 600×220 в
+  x = 668, зазор 10, кнопки 198×66 и 298×66, цвета имён `(64,255,255)` и seed/специализации `(127,127,255)`.
+
+### Что не сделано и почему
+
+* **Windows Player не собран, скриншоты ALPHA/UNITY и side-by-side не сделаны.** Причина — окружение: файловая
+  песочница сессии не даёт командам писать в подкаталоги репозитория (`Assets`, `Library`, `.unity-install`,
+  `.git`), поэтому ни импорт Unity, ни сборка, ни коммит, ни запуск Player невозможны. Правки файлов сделаны
+  инструментами редактирования, но проверить их в собранном Player я не могу. Unity 6000.3.27f2 установлен
+  (`D:\Unity\Hub\Editor\6000.3.27f2`), CLI хаба его не видит — в build-скрипт добавлен fallback поиска редактора,
+  но сам запуск заблокирован песочницей.
+* **Фон стартовых экранов.** По коду Alpha мир рендерится за стартовыми экранами, но в порте `ExitToMenuInternal`
+  уничтожает мир, а при холодном старте мира нет; менять это без проверки в Player — риск регрессии P0, поэтому
+  остаётся чёрный backdrop. `START_BACKGROUND=FAIL`.
+* **Логотип и Picroma.** Текстуры лежат внутри `start.plx` в нерасшифрованном чанке (PNG-сигнатур в файле нет),
+  `logo.cub` клиентом по имени не загружается. Скриншот как источник ассета не использовался. `START_LOGO=FAIL`.
+* **Воксельное превью мира в строке** требует сохранения блоба превью `worlds.db` (32×32×12) в записи мира порта;
+  в текущем формате его нет — слот превью пуст. `WORLD_LIST_VISUAL=PARTIAL`.
+* **Строка специализации** персонажа: в записи персонажа порта нет поля специализации. `CHARACTER_LIST_VISUAL=PARTIAL`.
+* Точное правило видимости кнопки строки (`Select`/`Create`) в коде не найдено; реализовано по снимку (появление
+  при наведении) — `UNKNOWN`.
+
+### Изменённые файлы этого шага
+
+* `Assets/CubeGame/Presentation/Gameplay/AlphaStartupPresentation.cs` (новый) — геометрия, кегли, цвета, хелперы.
+* `Assets/CubeGame/Presentation/Gameplay/GameBootstrap.AlphaFont.cs` (новый) — загрузка Alpha-шрифта и маркер
+  `ALPHA_FONT`.
+* `Assets/CubeGame/Presentation/Gameplay/GameBootstrap.AlphaMenus.cs` — presentation стартового меню, списков,
+  редактора, создания мира и системного меню (state machine не тронута).
+* `Assets/CubeGame/Presentation/Gameplay/GameBootstrap.Preview.cs` — превью строк списка персонажей.
+* `Assets/CubeGame/Presentation/Gameplay/GameBootstrap.Interface.cs` — применение шрифта при создании интерфейса.
+* `Assets/CubeGame/Presentation/Gameplay/Resources/GameInterface.uss` — Alpha-стили стартовых экранов.
+* `tools/alpha_content/stage_alpha_ui_font.ps1` (новый), `tools/release/build_windows_release.ps1` (staging + fallback
+  поиска редактора), `.gitignore` (локальный шрифт).
+* `docs/research/alpha2013/ALPHA_STARTUP_PRESENTATION.md` (новый), этот раздел отчёта.
