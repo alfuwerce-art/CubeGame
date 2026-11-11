@@ -80,3 +80,30 @@
 ## Контроль перед финальным M0
 
 Перед `M0 ALPHA FULL UNITY PORT` acceptance реестр просматривается целиком. Любой blocking debt на обязательном runtime-path должен быть закрыт либо иметь прямое `EXPLICIT_PRODUCER_DEVIATION`.
+
+## P0 — BOOT / MENU / CHARACTER / WORLD / INPUT (кандидат 2026-11-11)
+
+Восстановлено и проверено в Windows Player: стартовый экран (`Start Game`/`Options`/`Exit`), независимые списки
+персонажей и миров, редактор с моделью, создание мира (seed как `int` без валидации), загрузка мира с позицией
+персонажа по миру, цепь Back, системное меню (Options/Start Menu/Exit Game), сохранение/выход/продолжение,
+единый input context. Отчёт: [M0_ALPHA_FULL_PORT_P0_REPORT](../reports/M0_ALPHA_FULL_PORT_P0_REPORT.md).
+
+Долги, которые остаются открытыми:
+
+- Опции: точные домены значений `Anti-aliasing`, `Language`, `FPS Limit` в Alpha — `UNKNOWN_NEEDS_RESEARCH`;
+  `Render Distance`, `Music Volume`, `Language` сохраняются, но потребителя в порте нет — `RESTORE_IN_M0`
+  (streaming P1, audio P8, локализация).
+- Маппинг `cameraSpeed`/`cameraSmoothness`/`invertY` на камеру Unity — `CUBEGAME_CONTRACT` (нейтральные значения
+  Alpha воспроизводят прежнее поведение).
+- Строки списков персонажей и миров — текст без 3D-превью/превью карты — `PARTIAL` · `RESTORE_IN_M0`.
+- Вращение модели в редакторе мышью и точная камера превью — `UNKNOWN_NEEDS_RESEARCH`.
+- Точка записи текущей позиции персонажа в карту миров внутри Alpha — `UNKNOWN`; в порте запись при сохранении,
+  семантика проверена на данных.
+- Логотип и «picroma» стартового экрана — закрытые ассеты, не публикуются: заголовок текстовый.
+  `OUT_OF_M0_SCOPE` по действующему правилу «Alpha assets не публиковать».
+- Сетевой список миров (`Multiplayer Worlds...`) — вне одиночного M0 (multiplayer M3).
+- `GameSlotStore` и `StartNewWorld`/`LoadWorld` остаются как совместимость PlayMode-автоматизации; runtime-путь
+  стартовых экранов их не использует. Удалить после перевода тестов на `AlphaProfileStore` — `RESTORE_IN_M0`
+  (технический долг, не пользовательское поведение).
+- Вход в мир блокирует главный поток (наблюдалось ~36 s на сборке P0) — экран `Please wait...` показывается,
+  но причина (стриминг/инициализация контента) относится к P1/P5.

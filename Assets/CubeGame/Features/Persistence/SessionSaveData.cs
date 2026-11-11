@@ -153,6 +153,23 @@ namespace CubeGame.Features.Persistence
 
         /// <summary>Explored zones (256×256 voxels) as flat pairs (x0, z0, x1, z1, …) — Alpha "discovered" blob, own format.</summary>
         public List<int> discovered = new List<int>();
+
+        /// <summary>World identity of this file (Alpha <c>worlds.db</c> record: name + seed; the state file is <c>world_&lt;name&gt;.db</c>).</summary>
+        public string worldName = string.Empty;
+
+        public long createdUtcTicks;
+
+        public long savedUtcTicks;
+
+        /// <summary>
+        /// World time. Alpha stores it inside the world blob (<c>world_&lt;name&gt;.db</c> key <c>time</c>),
+        /// so the clock belongs to the world, not to a character/world pair.
+        /// </summary>
+        public long clockTick;
+
+        public int ticksPerSecond;
+
+        public long worldTimeOffsetMs;
     }
 
     public interface IWorldSaveSerializer

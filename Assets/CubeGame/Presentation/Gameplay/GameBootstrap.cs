@@ -20,6 +20,7 @@ using CubeGame.Presentation.Player;
 using CubeGame.Presentation.Rendering;
 using CubeGame.Presentation.Visual;
 using UnityEngine;
+using TextField = UnityEngine.UIElements.TextField;
 
 namespace CubeGame.Gameplay
 {
@@ -80,6 +81,13 @@ namespace CubeGame.Gameplay
         private GameSlotStore _slots;
         private string _saveDirectory;
 
+        /// <summary>
+        /// True when the running session was entered through the legacy paired-slot API
+        /// (<see cref="StartNewWorld"/>/<see cref="LoadWorld"/>), which PlayMode automation and the command line still
+        /// use. The Alpha start screen never sets it: it saves through <see cref="AlphaProfileStore"/>.
+        /// </summary>
+        private bool _legacySlots;
+
         private GameObject _worldRoot;
         private StreamingWorldView _worldView;
         private WorldState _worldState;
@@ -127,12 +135,7 @@ namespace CubeGame.Gameplay
         private int _teleportDx;
         private int _teleportDz;
 
-        // Main menu form state.
-        private string _formWorldName = "New World";
-        private string _formSeed = DefaultSeed.ToString(CultureInfo.InvariantCulture);
-        private string _formHeroName = "Hero";
-        private int _formClass;
-        private HeroAppearance _formLook = AlphaHeroCreation.Default;
+        // Main menu form state lives in GameBootstrap.AlphaMenus.cs (_formHeroName / _formWorldName / _formSeed).
 
         public GameSession Session => _session;
 
@@ -151,6 +154,9 @@ namespace CubeGame.Gameplay
             {
                 _saveDirectory = value;
                 _slots = CreateSlots(value);
+                _profiles = CreateProfiles(value);
+                _optionsLoaded = false;
+                ReloadProfiles();
             }
         }
 
@@ -164,12 +170,18 @@ namespace CubeGame.Gameplay
                 _slots = CreateSlots(_saveDirectory);
             }
 
+            if (_profiles == null)
+            {
+                _profiles = CreateProfiles(_saveDirectory);
+            }
+
             _timings = new AlphaActionTimingSource(AlphaActorLibrary.Shared);
             _session = new GameSession(_timings) { ConsumableCooldownMs = CubeGame.Content.AlphaConsumableRules.CooldownMs };
             _session.EnterMainMenu();
             EnsureCameraAndLight();
             CreateInterface();
-            _formSeed = _commandLineSeed.ToString(CultureInfo.InvariantCulture);
+            LoadOptions();
+            ReloadProfiles();
             Debug.Log($"[Game] boot -> {_session.State}; saves={DescribeSaveDirectory()}");
         }
 
@@ -191,9 +203,23 @@ namespace CubeGame.Gameplay
             }
         }
 
+        /// <summary>
+        /// True while a start screen, the Esc system menu, an options screen or any gameplay panel owns the input.
+        /// Alpha <c>GameController::vfunc_1</c> 0x47F1D0 returns "GUI active" for exactly this set of visible nodes.
+        /// </summary>
+        public bool GuiActive => _session.State == SessionState.MainMenu || _overlay != GameOverlay.None ||
+                                 _panel != GamePanel.None || TextInputFocused();
+
+        private bool TextInputFocused()
+        {
+            if (_interface?.focusController == null) return false;
+            return _interface.focusController.focusedElement is TextField;
+        }
+
         private void Update()
         {
             _frames++;
+            WriteUiProbe();
             UpdateInterfaceInput();
 
             if (_session.State == SessionState.InGame)
@@ -275,6 +301,10 @@ namespace CubeGame.Gameplay
                 return Report(false, $"new world refused: {_session.LastRejection}");
             }
 
+            _legacySlots = true;
+            _profileFlow = false;
+            _selectedCharacter = null;
+            _selectedWorld = null;
             return EnterLoadedWorld($"new world '{worldName}' seed={seed} in {slotKey}");
         }
 
@@ -297,6 +327,10 @@ namespace CubeGame.Gameplay
                 return Report(false, $"load refused: {_session.LastRejection}");
             }
 
+            _legacySlots = true;
+            _profileFlow = false;
+            _selectedCharacter = null;
+            _selectedWorld = null;
             return EnterLoadedWorld($"loaded {slotKey}: '{result.World.Name}' tick={result.ClockTick}");
         }
 
@@ -317,11 +351,51 @@ namespace CubeGame.Gameplay
             {
                 RecoveredSpawnPersistence.PrepareSave(_session.WorldDeltas, _recoveredPopulation, AlphaGameDay.Of(_session.Clock));
             }
-            SaveResult result = _slots.Save(_session, DateTime.UtcNow.Ticks);
+
+            SaveResult result = _legacySlots || _selectedCharacter == null || _selectedWorld == null
+                ? _slots.Save(_session, DateTime.UtcNow.Ticks)
+                : SaveAlphaCheckpoint();
             _session.EndSave();
             return Report(result.IsSuccess, result.IsSuccess
                 ? $"saved {_session.SlotKey} tick={_session.Clock.Tick}"
                 : $"save failed: {result}");
+        }
+
+        /// <summary>
+        /// Alpha save on leaving a world (system menu "Start Menu" 0x47E0BC): saveEntityBlob writes the character
+        /// with its per-world position map, saveStructureBlob writes the world record. The world state file keeps the
+        /// deltas, explored zones and the world clock.
+        /// </summary>
+        private SaveResult SaveAlphaCheckpoint()
+        {
+            long now = DateTime.UtcNow.Ticks;
+            HeroState hero = _session.Hero;
+            _selectedCharacter.Remember(_selectedWorld, hero.Position, hero.Yaw, now);
+
+            SessionSaveData session = _runningSession ?? new SessionSaveData();
+            session.clockTick = _session.Clock.Tick;
+            session.ticksPerSecond = _session.Clock.TicksPerSecond;
+            session.worldTimeOffsetMs = _session.Clock.WorldTimeOffsetMs;
+            session.heroX = hero.Position.X;
+            session.heroY = hero.Position.Y;
+            session.heroZ = hero.Position.Z;
+            session.heroYaw = hero.Yaw;
+
+            SaveResult result = _profiles.SaveCharacter(_selectedCharacter, hero, session, now);
+            if (!result.IsSuccess) return result;
+
+            WorldSaveData world = GameSlotStore.ToWorldSave(_session);
+            world.clockTick = session.clockTick;
+            world.ticksPerSecond = session.ticksPerSecond;
+            world.worldTimeOffsetMs = session.worldTimeOffsetMs;
+            result = _profiles.SaveWorld(_selectedWorld, world, now);
+            if (result.IsSuccess)
+            {
+                Debug.Log($"[Game] saved character {_selectedCharacter.Id} and world {_selectedWorld.Id} " +
+                          $"tick={session.clockTick} position={hero.Position}");
+            }
+
+            return result;
         }
 
         public bool ExitToMenu(bool saveFirst)
@@ -331,6 +405,25 @@ namespace CubeGame.Gameplay
                 return false;
             }
 
+            if (!ExitToMenuInternal())
+            {
+                return false;
+            }
+
+            ShowStartupScreen(StartupScreen.Start);
+            _selectedCharacter = null;
+            _selectedWorld = null;
+            _pendingHero = null;
+            _pendingSession = null;
+            _runningSession = null;
+            _profileFlow = false;
+            _legacySlots = false;
+            ReloadProfiles();
+            return true;
+        }
+
+        private bool ExitToMenuInternal()
+        {
             if (_session.Combat != null)
             {
                 _session.Combat.Projectiles.Clear(_session.Clock?.TimeMs ?? 0);
@@ -341,10 +434,9 @@ namespace CubeGame.Gameplay
                 return Report(false, $"exit refused: {_session.LastRejection}");
             }
 
+            DestroyPreviewStage();
             DestroyWorldViews();
-            _selectedCheckpoint = null;
-            _selectedSlot = null;
-            ShowStartupScreen(StartupScreen.Start);
+            _overlay = GameOverlay.None;
             return Report(true, "returned to main menu");
         }
 
@@ -1222,7 +1314,7 @@ namespace CubeGame.Gameplay
         {
             if (_motor != null)
             {
-                _motor.enabled = enabled && _panel == GamePanel.None && !HeroDead;
+                _motor.enabled = enabled && _panel == GamePanel.None && _overlay == GameOverlay.None && !HeroDead;
             }
 
             SetCursorLocked(false);
@@ -1377,6 +1469,9 @@ namespace CubeGame.Gameplay
                             _validateFrame = vframes;
                         }
 
+                        break;
+                    case "-cubeUiProbe":
+                        _uiProbePath = value;
                         break;
                     case "-cubeSaveCheckpoint":
                         _saveCheckpoint = true;

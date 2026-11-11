@@ -127,8 +127,12 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Press(game, "new-world");
             yield return null;
             Root(game).Q<TextField>("world-name").value = "F4 world";
+            // Alpha has no default seed (0x482530 parses the field as typed); the fixture keeps its known world.
+            Root(game).Q<TextField>("world-seed").value = "666666";
             yield return Capture(game, "menu");
             Press(game, "create-world");
+            yield return null;
+            for (int i = 0; i < 300 && game.Session.State != SessionState.InGame; i++) yield return null;
             yield return null;
             Assert.AreEqual(SessionState.InGame, game.Session.State, game.Status);
             Assert.AreEqual("Brena", game.Session.Hero.Name);
@@ -310,9 +314,9 @@ namespace CubeGame.Tests.FullM0.PlayMode
             int bagSlots = hero.Inventory.UsedSlots;
             long calendarOffset = clock.WorldTimeOffsetMs;
 
-            Press(game, "pause");
+            Press(game, "system-menu");
             yield return null;
-            Press(game, "save-exit");
+            Press(game, "system-start-menu");
             yield return null;
             yield return null;
             Assert.AreEqual(SessionState.MainMenu, game.Session.State, game.Status);
@@ -325,9 +329,11 @@ namespace CubeGame.Tests.FullM0.PlayMode
 
             Press(game, "start-game");
             yield return null;
-            Press(game, "select-character-slot0");
+            Press(game, "character-0");
             yield return null;
-            Press(game, "load-slot0");
+            Press(game, "world-0");
+            yield return null;
+            for (int i = 0; i < 300 && game.Session.State != SessionState.InGame; i++) yield return null;
             yield return null;
             hero = game.Session.Hero;
             Assert.AreEqual(SessionState.InGame, game.Session.State, game.Status);
@@ -416,6 +422,9 @@ namespace CubeGame.Tests.FullM0.PlayMode
             var button = Root(game).Q<Button>(name);
             Assert.IsNotNull(button, name);
             Assert.IsTrue(button.enabledInHierarchy, name);
+            // UI Toolkit dispatches navigation events from the focused element; focusing the target first keeps the
+            // press on the intended button instead of whichever element focused earlier.
+            button.Focus();
             using var evt = NavigationSubmitEvent.GetPooled();
             evt.target = button;
             button.SendEvent(evt);

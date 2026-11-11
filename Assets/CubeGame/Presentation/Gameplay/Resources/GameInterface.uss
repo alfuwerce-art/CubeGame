@@ -216,3 +216,118 @@ Button:disabled {
 .map-landmark {
     translate: -50% -125%;
 }
+
+/* ----- M0 P0 Alpha start screens ----- */
+.screen-title {
+    font-size: 22px;
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+.main-menu > Button {
+    align-self: flex-start;
+    min-width: 220px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.entry-row {
+    min-height: 58px;
+    background-color: rgba(49, 75, 92, 0.35);
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding: 6px 8px;
+}
+.entry-text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+}
+.entry-title {
+    font-size: 17px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+.carousel {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+.carousel-label {
+    min-width: 76px;
+    color: rgb(201, 222, 233);
+}
+.carousel-value {
+    flex-grow: 1;
+    text-align: center;
+}
+.option-row {
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+.option-label {
+    min-width: 170px;
+    color: rgb(201, 222, 233);
+}
+.option-value {
+    flex-grow: 1;
+    text-align: center;
+}
+.options-buttons {
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+.preview-panel {
+    align-self: center;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+.preview-image {
+    width: 260px;
+    height: 340px;
+    background-color: rgb(40, 46, 56);
+}
+.system-menu {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    width: 230px;
+}.menu-body {
+    flex-shrink: 1;
+    min-height: 0;
+}.menu-footer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top-width: 1px;
+    border-color: rgb(71, 96, 112);
+}
+.menu-body Button {
+    align-self: flex-start;
+    min-width: 30px;
+}
+.menu-footer Button {
+    min-width: 150px;
+}.menu-backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(10, 16, 24, 0.88);
+}
+.start-title {
+    font-size: 34px;
+    -unity-font-style: bold;
+    margin-bottom: 10px;
+    color: rgb(235, 244, 250);
+}/* Alpha draws the start menu as text over the world, not as a panel. */
+.main-menu.start-screen {
+    width: 360px;
+    align-self: center;
+    background-color: rgba(10, 16, 24, 0);
+    border-width: 0;
+    padding: 18px 20px;
+}
+.main-menu.start-screen .menu-backdrop {
+    background-color: rgba(10, 16, 24, 0);
+}

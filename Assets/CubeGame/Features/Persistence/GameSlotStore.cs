@@ -347,7 +347,7 @@ namespace CubeGame.Features.Persistence
             };
         }
 
-        private static HuntMissionSaveData[] WriteMissions(MissionJournal journal)
+        public static HuntMissionSaveData[] WriteMissions(MissionJournal journal)
         {
             var result = new HuntMissionSaveData[journal.Hunts.Count];
             int index = 0;
@@ -455,7 +455,7 @@ namespace CubeGame.Features.Persistence
             return null;
         }
 
-        private static WorldSaveData ToWorldSave(GameSession session)
+        public static WorldSaveData ToWorldSave(GameSession session)
         {
             var data = new WorldSaveData
             {
@@ -626,7 +626,7 @@ namespace CubeGame.Features.Persistence
             return SaveService.Fnv1a64(text).ToString("x16", CultureInfo.InvariantCulture);
         }
 
-        private static void WriteRawItems(HeroState hero, SessionSaveData data)
+        public static void WriteRawItems(HeroState hero, SessionSaveData data)
         {
             var types = new List<int>();
             var subtypes = new List<int>();

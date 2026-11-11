@@ -18,6 +18,24 @@ namespace CubeGame.Gameplay
 
         public void Bind(string contentRoot) => _library = new AlphaSoundLibrary(contentRoot);
 
+        /// <summary>options.cfg soundVolume (0..100) applied to every voice; the port's base gain is 0.65.</summary>
+        public float Volume
+        {
+            get => _volume;
+            set
+            {
+                _volume = Mathf.Clamp01(value);
+                for (int i = Mathf.Max(0, _voices.Count - MaxVoices); i < _voices.Count; i++)
+                {
+                    if (_voices[i] != null) _voices[i].volume = VoiceGain;
+                }
+            }
+        }
+
+        private float _volume = 1f;
+
+        private float VoiceGain => 0.65f * _volume;
+
         public bool Play(string sound)
         {
             if (_frame != Time.frameCount)
@@ -57,7 +75,7 @@ namespace CubeGame.Gameplay
                 voice = gameObject.AddComponent<AudioSource>();
                 voice.playOnAwake = false;
                 voice.spatialBlend = 0f;
-                voice.volume = 0.65f;
+                voice.volume = VoiceGain;
                 _voices.Add(voice);
             }
             if (voice == null)

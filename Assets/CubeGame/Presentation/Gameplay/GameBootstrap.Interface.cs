@@ -136,17 +136,39 @@ namespace CubeGame.Gameplay
 
         private void UpdateInterfaceInput()
         {
+            // One frame owns one input context. Alpha GameController::vfunc_1 0x47F1D0 makes the whole GUI "active"
+            // while any screen, panel or text field is up, and 0x47E1B0 returns before the gameplay key switch while
+            // a start screen is visible.
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                if (_panel != GamePanel.None && _session.State == SessionState.InGame) ShowPanel(GamePanel.None);
-                else TogglePause();
+                if (_session.State != SessionState.InGame) return;
+                if (TextInputFocused())
+                {
+                    (_interface.focusController.focusedElement as VisualElement)?.Blur();
+                    return;
+                }
+
+                if (_panel != GamePanel.None)
+                {
+                    ShowPanel(GamePanel.None);
+                    return;
+                }
+
+                if (_overlay == GameOverlay.Options)
+                {
+                    CloseOptions();
+                    return;
+                }
+
+                ToggleSystemMenu();
                 return;
             }
 
-            if (_session.State != SessionState.InGame || HeroDead)
+            if (_session.State != SessionState.InGame || HeroDead || _overlay != GameOverlay.None || TextInputFocused())
             {
                 return;
             }
+
             // Cube.exe 0x47E1B0 dispatches B/I to 0x488C00 and M to the map flag.
             // Resolve one UI transition before allowing gameplay to read the same frame.
             if (Input.GetKeyDown(KeyCode.B) || Input.GetKeyDown(KeyCode.I)) ToggleInventory();
@@ -162,7 +184,8 @@ namespace CubeGame.Gameplay
         }
 
         private bool AcceptsGameplayInput() => _session.State == SessionState.InGame && !HeroDead
-            && _panel == GamePanel.None && _contextChangedFrame != Time.frameCount;
+            && _panel == GamePanel.None && _overlay == GameOverlay.None && !TextInputFocused()
+            && _contextChangedFrame != Time.frameCount;
 
         private bool PointerOverInterface()
         {
@@ -178,7 +201,6 @@ namespace CubeGame.Gameplay
         }
 
         public void ToggleInventory() => TogglePanel(GamePanel.Inventory);
-
         private void TogglePanel(GamePanel panel) => ShowPanel(_panel == panel ? GamePanel.None : panel);
 
         private void ShowPanel(GamePanel panel, bool playCue = true)
@@ -237,24 +259,38 @@ namespace CubeGame.Gameplay
             }
 
             SessionState state = _session.State;
-            if (_drawnState != state)
+            GameOverlay overlay = state == SessionState.InGame ? _overlay : GameOverlay.None;
+            if (_drawnState != state || _drawnOverlay != overlay || _redraw)
             {
+                _redraw = false;
                 _interface.Clear();
                 _statusLabel = null;
                 _drawnState = state;
+                _drawnOverlay = overlay;
                 _drawnPanel = GamePanel.None;
                 switch (state)
                 {
                     case SessionState.MainMenu:
                         BindLocalAudio();
-                        BuildMainMenu();
+                        DestroyPreviewStage();
+                        _previewPanel = null;
+                        BuildStartupScreen();
                         break;
                     case SessionState.Paused:
-                        BuildPauseMenu();
+                        BuildHud();
                         break;
                     case SessionState.InGame:
                         BuildHud();
                         InvalidatePanel();
+                        if (overlay != GameOverlay.None)
+                        {
+                            _interface.Add(BuildOverlayMenu());
+                        }
+                        else
+                        {
+                            DestroyPreviewStage();
+                            _previewPanel = null;
+                        }
                         break;
                 }
             }
@@ -262,7 +298,7 @@ namespace CubeGame.Gameplay
             if (state == SessionState.InGame)
             {
                 RefreshHud();
-                if (_panelDirty || _panel != _drawnPanel)
+                if (overlay == GameOverlay.None && (_panelDirty || _panel != _drawnPanel))
                 {
                     bool preserveScroll = _panel == _drawnPanel;
                     BuildPanel(preserveScroll);
@@ -307,7 +343,7 @@ namespace CubeGame.Gameplay
             ButtonOf(actions, "Map [M]", "open-map", () => TogglePanel(GamePanel.Map));
             _potionButton = ButtonOf(actions, "Potion [Q]", "use-potion", UsePotionShortcut);
             _interactButton = ButtonOf(actions, "Interact [E]", "interact", InteractFromInterface);
-            ButtonOf(actions, "Pause [Esc]", "pause", TogglePause);
+            ButtonOf(actions, "Menu [Esc]", "system-menu", ToggleSystemMenu);
         }
 
         private void RefreshHud()

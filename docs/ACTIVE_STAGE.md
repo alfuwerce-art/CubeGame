@@ -47,3 +47,12 @@ D90 F1–F5 и прежние F1–F4 результаты сохраняютс�
 - [P1 code-parity report](reports/M0_ALPHA_CODE_PARITY_P1_REPORT.md)
 - [Runtime recovery report](reports/M0_ALPHA_RUNTIME_RECOVERY_REPORT.md)
 - [Root-cause audit](reports/M0_ALPHA_TO_UNITY_ROOT_CAUSE_AUDIT.md)
+
+## P0 — состояние на 2026-11-11
+
+`deepseek/m0-full-port-p0`: стартовый контур Alpha восстановлен по коду и проверен в Windows Player
+(мышь/клавиатура): стартовый экран → персонажи → редактор → миры → создание мира → игра → системное меню →
+сохранение/выход → продолжение с позицией персонажа по миру; input context единый, Space не конфликтует с UI.
+Статус — `READY_FOR_PRODUCER_REVIEW`, не PASS. Отчёт:
+[M0_ALPHA_FULL_PORT_P0_REPORT](reports/M0_ALPHA_FULL_PORT_P0_REPORT.md); открытые долги —
+[parity backlog](planning/M0_ALPHA_PARITY_BACKLOG.md#p0--boot--menu--character--world--input-кандидат-2026-11-11).

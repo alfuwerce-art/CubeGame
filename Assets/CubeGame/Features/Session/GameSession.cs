@@ -345,6 +345,28 @@ namespace CubeGame.Features.Session
             return TryTransition(SessionState.MainMenu);
         }
 
+        /// <summary>
+        /// Builds the hero of an editor decision exactly as <see cref="BeginNewWorld"/> does, without attaching a world.
+        /// Alpha confirms the character in the editor (0x4821A0 saves the creature) before a world is chosen.
+        /// </summary>
+        public static HeroState CreateHero(NewWorldRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var sheet = new CharacterSheet(request.Class, request.Specialization);
+            var hero = new HeroState(AlphaHeroCreation.NormalizeName(request.HeroName), 0, sheet)
+            {
+                Position = request.Spawn,
+                NeedsGroundPlacement = true,
+                Appearance = AlphaHeroCreation.Normalize(request.Appearance),
+            };
+            hero.GiveStarterKit();
+            return hero;
+        }
+
         /// <summary>MainMenu → LoadingWorld with a freshly created world and hero.</summary>
         public bool BeginNewWorld(string slotKey, NewWorldRequest request, long nowUtcTicks)
         {
@@ -363,15 +385,7 @@ namespace CubeGame.Features.Session
                 return Reject($"cannot start a new world from {State}");
             }
 
-            var sheet = new CharacterSheet(request.Class, request.Specialization);
-            var hero = new HeroState(AlphaHeroCreation.NormalizeName(request.HeroName), 0, sheet)
-            {
-                Position = request.Spawn,
-                NeedsGroundPlacement = true,
-                Appearance = AlphaHeroCreation.Normalize(request.Appearance),
-            };
-            hero.GiveStarterKit();
-
+            HeroState hero = CreateHero(request);
             var world = new WorldInfo(request.WorldName, new WorldSeed(request.Seed), request.GeneratorId, nowUtcTicks);
             return Attach(slotKey, world, hero, new GameClock(), new WorldDeltaStore());
         }
