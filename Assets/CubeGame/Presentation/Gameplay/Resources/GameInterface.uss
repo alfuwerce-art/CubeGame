@@ -318,7 +318,7 @@ Button:disabled {
     border-width: 2px;
     border-color: rgb(255, 255, 255);
     border-radius: 0;
-    background-color: rgba(26, 26, 26, 0.62);
+    background-color: rgba(12, 24, 44, 0.62);
     flex-direction: row;
     align-items: flex-start;
     -unity-text-align: middle-left;
@@ -352,7 +352,18 @@ Button:disabled {
 .alpha-row-info {
     flex-grow: 1;
     flex-direction: column;
-    padding: 22px 12px 0 0;
+    padding: 40px 12px 0 0;
+}
+
+/* Row text origin of 0x425450 / 0x605AE0: name y=30, title y=55, detail y=75/80 inside the 220 px row frame;
+   a Label's ink starts ~10 px below its top at 14 px, so the block starts at y≈40. */
+.alpha-row-info .alpha-line {
+    margin: 0;
+    padding: 0;
+}
+
+.alpha-row-info .alpha-line + .alpha-line {
+    margin-top: 5px;
 }
 
 /* Alpha reveals the row action only while the row is hovered. */
@@ -437,30 +448,122 @@ Button:disabled {
     background-color: rgb(0, 0, 0);
 }
 
-/* ----- Alpha character editor / world creation ----- */
+/* ----- Alpha character editor (CharCreation panel 300x330; rows every 30 px) ----- */
 .alpha-editor {
-    flex-direction: column;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 }
 
 .alpha-editor-body {
     flex-direction: row;
-    align-items: flex-start;
-    justify-content: center;
-}
-
-.alpha-editor-preview {
-    width: 280px;
-    margin-right: 24px;
     align-items: center;
 }
 
-.alpha-editor-fields {
-    width: 420px;
+.alpha-editor-preview {
+    width: 260px;
+    height: 340px;
+    margin-right: 24px;
+    align-items: center;
+    justify-content: center;
+}
+
+.alpha-character-panel {
+    width: 300px;
+    height: 330px;
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    background-color: rgba(12, 24, 44, 0.62);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.alpha-editor-row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 30px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.alpha-editor-label {
+    position: absolute;
+    left: 15px;
+    font-size: 12px;
+}
+
+.alpha-editor-arrow-left {
+    position: absolute;
+    left: 100px;
+}
+
+.alpha-editor-value {
+    position: absolute;
+    left: 135px;
+    width: 110px;
+    font-size: 12px;
+    -unity-text-align: middle-center;
+}
+
+.alpha-editor-arrow-right {
+    position: absolute;
+    right: 8px;
+}
+
+.alpha-hair-color-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 182px;
+    font-size: 12px;
+    -unity-text-align: middle-center;
+}
+
+.alpha-palette {
+    position: absolute;
+    left: 13px;
+    top: 197px;
+}
+
+.alpha-palette-row {
+    flex-direction: row;
+    height: 17px;
+}
+
+.alpha-palette .swatch {
+    width: 15px;
+    height: 15px;
+    min-height: 0;
+    margin: 1px;
+    padding: 0;
+    border-width: 0;
+    border-radius: 0;
+}
+
+.alpha-name-field {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 30px;
+    width: 300px;
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .alpha-editor-actions {
     margin-top: 14px;
     justify-content: center;
+}
+
+.alpha-editor-fields {
+    width: 420px;
 }
 
 .alpha-creation {
