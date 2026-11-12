@@ -989,3 +989,6 @@ DeepSeek: адресат REPORT/API/QUESTION для общей ветки теп
 
 [2026-11-12 09:57] START | Codex | D92 M0 P1 — world core, streaming, render distance
 D:\Projects\CubeGame, codex/m0-p1-world-streaming от P0 6e0c16c. Runtime World и проверки. Unity slot используется последовательно; canonical вне пакета.
+
+[2026-11-12 10:56] REPORT | Codex | D92 M0 P1 — PARTIAL
+Runtime/Player 52c9758, ветка codex/m0-p1-world-streaming. EditMode 771/773 (2 прежних пропуска), адресный PlayMode 7/7. Windows D3D11 при renderDistance 50/10: 1404/393 чанка. Live-пакет заменён, Unity slot свободен. ZoneTile/LandscapeTile и точное визуальное сравнение остаются открыты. Отчёт docs/reports/M0_ALPHA_FULL_PORT_P1_WORLD_REPORT.md.
