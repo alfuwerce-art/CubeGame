@@ -361,7 +361,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             AlphaSpawnRuntime runtime = game.RecoveredPopulation;
             Assert.IsNotNull(runtime);
             AlphaSpawnTemplate target = runtime.Templates.FirstOrDefault(t => t.Live
-                && t.Definition.Faction == AlphaWildSpawnRules.FactionHostile && t.WindowStartMs > 0);
+                && t.Definition.Faction == AlphaWildSpawnRules.FactionHostile && t.Data.WindowStartMs > 0);
             Assert.IsNotNull(target, "a recovered wild template near the hero became live");
             ZoneKey home = target.Zone;
             int startX = home.X * WorldLayout.ZoneSize + 128;
