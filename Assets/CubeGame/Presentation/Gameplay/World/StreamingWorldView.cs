@@ -93,6 +93,7 @@ namespace CubeGame.Gameplay.Streaming
 
         public int LoadedVertices => _vertices;
         public long VertexBudget => _vertexBudget;
+        public float HorizonRange => _horizonRange;
 
         public bool IsLoaded(ChunkKey chunk) => _loaded.ContainsKey(chunk);
 

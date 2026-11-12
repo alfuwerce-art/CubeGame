@@ -20,6 +20,33 @@ namespace CubeGame.Gameplay
         private int _uiProbeFrame = -1;
         private string _captureDir;
 
+        // The Windows Player can initialize Direct3D in batch mode without presenting a back buffer.
+        // Capture the gameplay camera itself in that mode for terrain and horizon checks.
+        private void CaptureWorldCamera(string path)
+        {
+            int width = Mathf.Max(1, _options.ResolutionX);
+            int height = Mathf.Max(1, _options.ResolutionY);
+            RenderTexture target = RenderTexture.GetTemporary(width, height, 24);
+            RenderTexture previousTarget = _camera.targetTexture;
+            RenderTexture previousActive = RenderTexture.active;
+            var pixels = new Texture2D(width, height, TextureFormat.RGB24, false);
+            try
+            {
+                _camera.targetTexture = target;
+                _camera.Render();
+                RenderTexture.active = target;
+                pixels.ReadPixels(new Rect(0, 0, width, height), 0, 0, false);
+                File.WriteAllBytes(path, pixels.EncodeToPNG());
+            }
+            finally
+            {
+                _camera.targetTexture = previousTarget;
+                RenderTexture.active = previousActive;
+                RenderTexture.ReleaseTemporary(target);
+                Destroy(pixels);
+            }
+        }
+
         /// <summary>
         /// Presentation capture for the producer review (<c>-cubeCapture &lt;dir&gt;</c>): walks the startup screens by
         /// calling the very same handlers the widgets invoke and writes one PNG per screen. This is a diagnostic for

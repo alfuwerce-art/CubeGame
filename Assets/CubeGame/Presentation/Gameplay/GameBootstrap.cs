@@ -270,10 +270,17 @@ namespace CubeGame.Gameplay
             if (_screenshotFrame >= 0 && _frames >= _screenshotFrame)
             {
                 _screenshotFrame = -1;
-                ScreenCapture.CaptureScreenshot(_screenshotPath);
+                if (Application.isBatchMode)
+                {
+                    CaptureWorldCamera(_screenshotPath);
+                }
+                else
+                {
+                    ScreenCapture.CaptureScreenshot(_screenshotPath);
+                }
                 Debug.Log($"[Game] screenshot -> {_screenshotPath} state={_session.State} tick={_session.Clock?.Tick} " +
                           $"chunks={_worldView?.LoadedCount} pending={_worldView?.PendingCount} released={_worldView?.TotalReleased} " +
-                          $"vertices={_worldView?.LoadedVertices}/{_worldView?.VertexBudget}");
+                          $"vertices={_worldView?.LoadedVertices}/{_worldView?.VertexBudget} horizon={_worldView?.HorizonRange:F1}");
                 StartCoroutine(QuitAfterFrames(3));
             }
 
