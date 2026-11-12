@@ -91,6 +91,12 @@ namespace CubeGame.Tests.FullM0.PlayMode
             yield return null;
             LiveSpawn vendor = TownNpc(game, city, TownNpcPopulation.MerchantClass);
             Assert.IsTrue(game.Visuals.TryGetRoot(vendor.Id, out _));
+            if (game.Visuals.TryGetView(vendor.Id, out var vendorView))
+            {
+                int weaponPart = vendorView.Rig.IndexOf("weapon");
+                Assert.GreaterOrEqual(weaponPart, 0);
+                Assert.IsFalse(vendorView.Rig.meshes[weaponPart].gameObject.activeSelf, "a staged sword is not NPC equipment");
+            }
             PlaceHero(game, vendor.Definition.Position);
             yield return null;
             game.Session.Clock.StepTicks(2);

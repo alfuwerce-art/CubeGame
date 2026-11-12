@@ -150,7 +150,7 @@ namespace CubeGame.Gameplay
 
             if (!e.WorldObjectId.HasValue && e.WorldObjectName == null)
             {
-                entry.View = BuildCreature(e.Kind, entry.Root);
+                entry.View = BuildCreature(e.Kind, entry.Root, e.Entity.Kind == EntityIdKind.ZoneSpawn);
             }
 
             if (entry.View == null)
@@ -695,7 +695,7 @@ namespace CubeGame.Gameplay
             return hi - lo;
         }
 
-        private AlphaActorView BuildCreature(KindId kind, Transform root)
+        private AlphaActorView BuildCreature(KindId kind, Transform root, bool worldSpawn)
         {
             if (_library == null || _library.State != AlphaContentState.Ready)
             {
@@ -721,6 +721,19 @@ namespace CubeGame.Gameplay
             {
                 DestroyView(view);
                 return null;
+            }
+
+            if (worldSpawn && definition.Contract?.parts != null)
+            {
+                // The staged rig can contain equipment from its reference actor. World spawn gear
+                // needs its own template-to-item mapping (R-1); keep the rig joints for animation.
+                foreach (var part in definition.Contract.parts)
+                {
+                    if (part.role != "equipment") continue;
+                    int index = view.Rig.IndexOf(part.name);
+                    if (index >= 0 && view.Rig.meshes[index] != null)
+                        view.Rig.meshes[index].gameObject.SetActive(false);
+                }
             }
 
             view.Tick(0f);
