@@ -46,6 +46,7 @@ namespace CubeGame.Gameplay.Streaming
         private List<ChunkKey> _window = new List<ChunkKey>();
         private Material _terrainMaterial;
         private Material _waterMaterial;
+        private AlphaVegetationMeshes _vegetation;
         private bool _ownsTerrainMaterial;
         private ChunkKey _center;
         private bool _hasCenter;
@@ -62,6 +63,8 @@ namespace CubeGame.Gameplay.Streaming
             public GameObject Root;
             public Mesh Terrain;
             public Mesh Water;
+            public Mesh Vegetation;
+            public int PlantCount;
             public int Vertices;
         }
 
@@ -92,6 +95,7 @@ namespace CubeGame.Gameplay.Streaming
         public WorldState World => _world;
 
         public int LoadedVertices => _vertices;
+        public int LoadedPlants { get; private set; }
         public long VertexBudget => _vertexBudget;
         public float HorizonRange => _horizonRange;
 
@@ -104,6 +108,7 @@ namespace CubeGame.Gameplay.Streaming
             _world = world;
             _policy = policy;
             _terrain = policy.UsesAlphaWindow ? world.Generator as AlphaTerrainGenerator : null;
+            _vegetation = new AlphaVegetationMeshes();
             _camera = camera;
             _horizonRange = 0.0001f;
             _terrain?.UseStreamingRetention();
@@ -295,6 +300,8 @@ namespace CubeGame.Gameplay.Streaming
             _ready = new ConcurrentQueue<ChunkBuild>();
             _completed.Clear();
             _terrain = null;
+            _vegetation?.Clear();
+            _vegetation = null;
             _camera = null;
             _zoneWorker = null;
             _zoneOrder.Clear();
@@ -507,10 +514,11 @@ namespace CubeGame.Gameplay.Streaming
         private void Install(ChunkVoxels generated, ChunkMesher.Result data)
         {
             ChunkKey key = generated.Key;
+            ChunkVoxels heights = generated;
             if (_edited.Contains(key))
             {
                 // Apply the current deltas even if an edit arrived while the worker was meshing.
-                ChunkVoxels heights = generated.Copy();
+                heights = generated.Copy();
                 heights.ApplyDeltas(_world.Deltas);
                 data = ChunkMesher.Build(heights);
             }
@@ -536,11 +544,23 @@ namespace CubeGame.Gameplay.Streaming
                 waterObject.AddComponent<MeshRenderer>().sharedMaterial = _waterMaterial ?? _terrainMaterial;
             }
 
+            Mesh vegetation = _vegetation.Build(heights, out int plantCount);
+            if (vegetation != null)
+            {
+                var plants = new GameObject("Vegetation");
+                plants.transform.SetParent(root.transform, false);
+                plants.AddComponent<MeshFilter>().sharedMesh = vegetation;
+                plants.AddComponent<MeshRenderer>().sharedMaterial = _terrainMaterial;
+                LoadedPlants += plantCount;
+            }
+
             _loaded[key] = new ChunkView
             {
                 Root = root,
                 Terrain = terrain,
                 Water = water,
+                Vegetation = vegetation,
+                PlantCount = plantCount,
                 Vertices = data.Terrain.VertexCount + data.Water.VertexCount,
             };
             _heights[key] = generated;
@@ -558,6 +578,7 @@ namespace CubeGame.Gameplay.Streaming
             _loaded.Remove(key);
             _heights.Remove(key);
             _vertices -= view.Vertices;
+            LoadedPlants -= view.PlantCount;
             if (countAsUnload)
             {
                 TotalReleased++;
@@ -581,6 +602,10 @@ namespace CubeGame.Gameplay.Streaming
             if (view.Water != null)
             {
                 Destroy(view.Water);
+            }
+            if (view.Vegetation != null)
+            {
+                Destroy(view.Vegetation);
             }
         }
     }

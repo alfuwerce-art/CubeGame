@@ -24,8 +24,9 @@ namespace CubeGame.Tests.Creatures.EditMode
                 Assert.AreEqual(AlphaCityContentProvider.ServiceBehaviourKey, spawns[i].BehaviourKey);
                 Assert.AreEqual((int)CreatureFaction.Passive, spawns[i].Faction);
                 Assert.AreEqual(71.0, spawns[i].Position.Y, "furniture stands on the voxel above the ground");
-                Assert.IsTrue(AlphaNpcServices.TryServiceFor(spawns[i].Kind.Value, out var service),
-                    $"kind {spawns[i].Kind.Value} is a mapped service object");
+                Assert.IsTrue(spawns[i].WorldObjectId.HasValue);
+                Assert.IsTrue(AlphaNpcServices.TryServiceFor(spawns[i].WorldObjectId.Value, out var service),
+                    $"object {spawns[i].WorldObjectId} is a mapped service object");
                 StringAssert.Contains(service.ObjectName, spawns[i].Provenance);
                 StringAssert.Contains("F-U5", spawns[i].Provenance);
             }
@@ -40,7 +41,7 @@ namespace CubeGame.Tests.Creatures.EditMode
             for (int i = 0; i < a.Count; i++)
             {
                 Assert.AreEqual(a[i].Position, b[i].Position);
-                Assert.AreEqual(a[i].Kind.Value, b[i].Kind.Value);
+                Assert.AreEqual(a[i].WorldObjectId, b[i].WorldObjectId);
                 Assert.AreEqual(12 + i, a[i].SpawnIndex);
             }
         }
@@ -52,7 +53,7 @@ namespace CubeGame.Tests.Creatures.EditMode
             var b = AlphaCityContentProvider.Plan(Seed + 1, Zone, Flat, 5, 0);
             bool differs = a.Count != b.Count;
             for (int i = 0; !differs && i < a.Count; i++)
-                differs = a[i].Kind.Value != b[i].Kind.Value || !a[i].Position.Equals(b[i].Position);
+                differs = a[i].WorldObjectId != b[i].WorldObjectId || !a[i].Position.Equals(b[i].Position);
             Assert.IsTrue(differs);
         }
 

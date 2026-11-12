@@ -17,6 +17,8 @@ namespace CubeGame.Features.Contracts
 
         public KindId Kind { get; set; }
 
+        public int? WorldObjectId { get; set; }
+
         public WorldPosition Position { get; set; }
 
         public float Yaw { get; set; }

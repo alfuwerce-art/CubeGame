@@ -257,6 +257,8 @@ namespace CubeGame.Features.World
     public sealed class AlphaZone
     {
         public const int Size = WorldLayout.ZoneSize;
+        private readonly Dictionary<Contracts.ChunkKey, List<AlphaPlantPlacement>> _plants =
+            new Dictionary<Contracts.ChunkKey, List<AlphaPlantPlacement>>();
 
         public AlphaZone(int zx, int zz)
         {
@@ -277,6 +279,20 @@ namespace CubeGame.Features.World
 
         /// <summary>Spawns created by the content providers (<see cref="IZoneContentProvider"/>).</summary>
         public List<Contracts.SpawnDefinition> ContentSpawns { get; } = new List<Contracts.SpawnDefinition>();
+
+        internal void AddPlant(AlphaPlantPlacement plant)
+        {
+            var key = WorldLayout.ChunkOf(plant.X, plant.Z);
+            if (!_plants.TryGetValue(key, out var plants))
+            {
+                plants = new List<AlphaPlantPlacement>();
+                _plants.Add(key, plants);
+            }
+            plants.Add(plant);
+        }
+
+        public IReadOnlyList<AlphaPlantPlacement> PlantsIn(Contracts.ChunkKey chunk) =>
+            _plants.TryGetValue(chunk, out var plants) ? plants : (IReadOnlyList<AlphaPlantPlacement>)Array.Empty<AlphaPlantPlacement>();
 
         public VoxelColumn Column(int x, int z) => Columns[(x - Zx * Size) + (z - Zz * Size) * Size];
     }

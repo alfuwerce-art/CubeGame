@@ -280,7 +280,7 @@ namespace CubeGame.Gameplay
                 }
                 Debug.Log($"[Game] screenshot -> {_screenshotPath} state={_session.State} tick={_session.Clock?.Tick} " +
                           $"chunks={_worldView?.LoadedCount} pending={_worldView?.PendingCount} released={_worldView?.TotalReleased} " +
-                          $"vertices={_worldView?.LoadedVertices}/{_worldView?.VertexBudget} horizon={_worldView?.HorizonRange:F1}");
+                          $"vertices={_worldView?.LoadedVertices}/{_worldView?.VertexBudget} plants={_worldView?.LoadedPlants} horizon={_worldView?.HorizonRange:F1}");
                 StartCoroutine(QuitAfterFrames(3));
             }
 
@@ -916,8 +916,8 @@ namespace CubeGame.Gameplay
         private void PublishSpawnVisual(StableEntityId id, SpawnDefinition def)
         {
             string worldObjectName = null;
-            if (def.BehaviourKey == AlphaCityContentProvider.ServiceBehaviourKey
-                && Content.AlphaWorldContent.TryObject(def.Kind.Value, out var worldObject))
+            if (def.WorldObjectId.HasValue &&
+                Content.AlphaWorldContent.TryObject(def.WorldObjectId.Value, out var worldObject))
             {
                 worldObjectName = worldObject.Name;
             }
@@ -927,6 +927,7 @@ namespace CubeGame.Gameplay
                 TimeMs = _session.Clock.TimeMs,
                 Entity = id,
                 Kind = def.Kind,
+                WorldObjectId = def.WorldObjectId,
                 WorldObjectName = worldObjectName,
                 Position = def.Position,
                 Yaw = def.Yaw,

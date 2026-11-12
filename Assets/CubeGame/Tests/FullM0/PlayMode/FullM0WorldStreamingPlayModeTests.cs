@@ -101,6 +101,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
 
             game.WorldView.CompletePending();
             ChunkKey focus = game.WorldView.Center;
+            Assert.Greater(game.WorldView.LoadedPlants, 0, "AlphaContent vegetation was installed with the chunks");
             Assert.AreEqual(0, game.WorldView.PendingCount, "eligible chunks finish streaming");
             Assert.IsTrue(game.WorldView.IsLoaded(new ChunkKey(focus.X - 18, focus.Z)));
             Assert.IsTrue(game.WorldView.IsLoaded(new ChunkKey(focus.X + 18, focus.Z)));
@@ -139,6 +140,66 @@ namespace CubeGame.Tests.FullM0.PlayMode
             }
 
             Assert.AreEqual(targetSurface + 1, terrainHit, 0.01f);
+            Assert.IsTrue(game.ExitToMenu(false));
+        }
+
+        [UnityTest]
+        public IEnumerator PlantSupportEditSurvivesChunkReloadAndSaveLoad()
+        {
+            GameBootstrap game = NewGame();
+            yield return null;
+            Assert.IsTrue(game.StartNewWorld("slot0", "Vegetation", 666666u, "Walker", CharacterClass.Ranger), game.Status);
+            StreamingWorldView view = game.WorldView;
+            ChunkKey center = view.Center;
+            AlphaPlantPlacement plant = default;
+            ChunkKey chosen = default;
+            bool found = false;
+            for (int x = -2; x <= 2 && !found; x++)
+            {
+                for (int z = -2; z <= 2 && !found; z++)
+                {
+                    var chunk = new ChunkKey(center.X + x, center.Z + z);
+                    var placements = ChunkVoxels.Sample(game.WorldState.Generator, chunk).Plants;
+                    if (placements.Count == 0) continue;
+                    plant = placements[0];
+                    chosen = chunk;
+                    found = true;
+                }
+            }
+            Assert.IsTrue(found, "a loaded starting chunk owns a generated plant");
+            string root = $"Chunk_{chosen.X}_{chosen.Z}";
+            GameObject plants = GameObject.Find(root + "/Vegetation");
+            Assert.IsNotNull(plants);
+            int originalVertices = plants.GetComponent<MeshFilter>().sharedMesh.vertexCount;
+            Vector3 local = plants.transform.localPosition;
+            Vector3 scene = plants.transform.position;
+            Vector2Int origin = view.Origin;
+            Vector3 shift = view.Rebase(origin + new Vector2Int(512, 0));
+            Assert.AreEqual(-512f, shift.x);
+            Assert.AreEqual(local, plants.transform.localPosition);
+            Assert.AreEqual(scene + shift, plants.transform.position);
+            view.Rebase(origin);
+            Assert.IsTrue(game.WorldState.Deltas.SetVoxel(plant.X, plant.Y - 1, plant.Z, Voxel.Air, game.Session.Clock.TimeMs));
+            view.SetFocus(game.PlayerTransform.position);
+            GameObject edited = GameObject.Find(root + "/Vegetation");
+            int editedVertices = edited != null ? edited.GetComponent<MeshFilter>().sharedMesh.vertexCount : 0;
+            Assert.Less(editedVertices, originalVertices);
+
+            view.SetFocus(view.ToScene(plant.X + 1280, plant.Y + 2, plant.Z));
+            Assert.IsFalse(view.IsLoaded(chosen));
+            view.LoadAround(view.ToScene(plant.X + 0.5, plant.Y + 2, plant.Z + 0.5), 0);
+            Assert.IsTrue(view.IsLoaded(chosen));
+            GameObject reloaded = GameObject.Find(root + "/Vegetation");
+            Assert.AreEqual(editedVertices, reloaded != null ? reloaded.GetComponent<MeshFilter>().sharedMesh.vertexCount : 0);
+
+            Assert.IsTrue(game.ExitToMenu(true), game.Status);
+            yield return null;
+            Assert.IsTrue(game.LoadWorld("slot0"), game.Status);
+            Assert.IsTrue(game.WorldState.Deltas.TryGetVoxel(plant.X, plant.Y - 1, plant.Z, out uint saved));
+            Assert.AreEqual(Voxel.Air, saved);
+            Assert.IsTrue(game.WorldView.IsLoaded(chosen));
+            GameObject savedPlants = GameObject.Find(root + "/Vegetation");
+            Assert.AreEqual(editedVertices, savedPlants != null ? savedPlants.GetComponent<MeshFilter>().sharedMesh.vertexCount : 0);
             Assert.IsTrue(game.ExitToMenu(false));
         }
 

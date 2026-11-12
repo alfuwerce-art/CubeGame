@@ -120,7 +120,9 @@ namespace CubeGame.Gameplay
             }
             else
             {
-                string name = e.WorldObjectName ?? $"Entity_{e.Kind.Value:x2}";
+                string name = e.WorldObjectId.HasValue
+                    ? e.WorldObjectName ?? $"WorldObject_{e.WorldObjectId:x2}"
+                    : $"Entity_{e.Kind.Value:x2}";
                 entry.Root = new GameObject($"{name}_{e.Entity.Value:x}").transform;
                 entry.Root.SetParent(transform, false);
                 entry.Root.position = _toScene != null ? _toScene(e.Position) : Vector3.zero;
@@ -146,7 +148,7 @@ namespace CubeGame.Gameplay
                 return;
             }
 
-            if (e.WorldObjectName == null)
+            if (!e.WorldObjectId.HasValue && e.WorldObjectName == null)
             {
                 entry.View = BuildCreature(e.Kind, entry.Root);
             }

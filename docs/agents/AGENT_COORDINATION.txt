@@ -992,3 +992,6 @@ D:\Projects\CubeGame, codex/m0-p1-world-streaming от P0 6e0c16c. Runtime World
 
 [2026-11-12 10:56] REPORT | Codex | D92 M0 P1 — PARTIAL
 Runtime/Player 52c9758, ветка codex/m0-p1-world-streaming. EditMode 771/773 (2 прежних пропуска), адресный PlayMode 7/7. Windows D3D11 при renderDistance 50/10: 1404/393 чанка. Live-пакет заменён, Unity slot свободен. ZoneTile/LandscapeTile и точное визуальное сравнение остаются открыты. Отчёт docs/reports/M0_ALPHA_FULL_PORT_P1_WORLD_REPORT.md.
+
+[2026-11-12 23:45] CLAIM | Codex | D92 M0 P2 — окружение и Unity slot
+Ветка codex/m0-p2-environment от 0763c83. Общие runtime-файлы World/Contracts, упаковка AlphaContent и тесты P2. Проверки Unity последовательно в D:\Projects\CubeGame.

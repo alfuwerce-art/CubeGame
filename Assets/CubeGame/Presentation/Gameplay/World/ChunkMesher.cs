@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using CubeGame.Core.Rendering;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.World;
@@ -17,6 +19,7 @@ namespace CubeGame.Gameplay.Streaming
 
         public ChunkKey Key;
         public VoxelColumn[] Columns = new VoxelColumn[Span * Span];
+        public IReadOnlyList<AlphaPlantPlacement> Plants { get; private set; } = Array.Empty<AlphaPlantPlacement>();
 
         public static ChunkVoxels Sample(IWorldGenerator generator, ChunkKey key)
         {
@@ -35,6 +38,8 @@ namespace CubeGame.Gameplay.Streaming
                         if (!WorldLayout.IsInside(new ZoneKey(zx, zz))) continue;
 
                         AlphaZone zone = terrain.Zone(zx, zz);
+                        if (zx == originX / WorldLayout.ZoneSize && zz == originZ / WorldLayout.ZoneSize)
+                            result.Plants = zone.PlantsIn(key);
                         int x0 = System.Math.Max(-1, zx * WorldLayout.ZoneSize - originX);
                         int x1 = System.Math.Min(Size + 1, (zx + 1) * WorldLayout.ZoneSize - originX);
                         int z0 = System.Math.Max(-1, zz * WorldLayout.ZoneSize - originZ);
@@ -81,7 +86,7 @@ namespace CubeGame.Gameplay.Streaming
 
         public ChunkVoxels Copy()
         {
-            return new ChunkVoxels { Key = Key, Columns = (VoxelColumn[])Columns.Clone() };
+            return new ChunkVoxels { Key = Key, Columns = (VoxelColumn[])Columns.Clone(), Plants = Plants };
         }
     }
 

@@ -89,6 +89,15 @@ namespace CubeGame.Features.World
                 {
                     provider.Populate(context);
                 }
+
+                if (terrain.GeneratorId == AlphaTerrainGenerator.WorldRuntimeId)
+                {
+                    AlphaZoneFeatures.PlaceRiverStones(context, colors);
+                    AlphaZoneTrees.Populate(context);
+                }
+                if (terrain.GeneratorId == AlphaTerrainGenerator.WorldRuntimeId ||
+                    terrain.GeneratorId == AlphaTerrainGenerator.PreviousWorldRuntimeId)
+                    AlphaGroundVegetation.Populate(context);
             }
 
             return zone;

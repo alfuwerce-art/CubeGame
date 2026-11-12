@@ -68,10 +68,10 @@
 ## D92 — дополнительные blocking gaps, выявленные визуальной/кодовой проверкой
 
 - P1 Streaming/render distance — `PARTIAL`. Игровой runtime использует восстановленные 40×40 чанков, границы генерации и выгрузки, бюджет вершин и кривые тумана. Открыты 3D-пути карты `ZoneTile` / `LandscapeTile`, точный порядок RNG после речного прохода и визуальное совпадение горизонта. [Отчёт P1](../reports/M0_ALPHA_FULL_PORT_P1_WORLD_REPORT.md)
-- Trees: selection частично исследован, density/placement/RNG всё ещё заменены hash + `MaxObjectsPerZone` — `CUBEGAME_CONTRACT/PARTIAL`.
-- Grass/flowers/world-object placement — `UNKNOWN/PARTIAL`.
-- World-object IDs ранее смешивались с actor KindId; требуется отдельный Alpha consumer/path — `PARTIAL`.
-- Structures/houses: доказаны части размеров, материалы/полная geometry остаются reconstructed — `PARTIAL/PLACEHOLDER_NOT_ALPHA`.
+- P2 Trees — `PARTIAL`. В новом `/7` подключены зонная сетка, климат, допуск поверхности и воксельные ветки 0, 1, 2, 4. Открыты ветки 3, 5 и гигантский ориентир 6, полная последовательность CRT и межзонные записи.
+- P2 Grass/flowers — `PARTIAL`. Игровой чанк использует Alpha-ветки декоративной травы, цветов и водных растений. Открыты собираемые растения, затухание и ветер, точное сравнение плотности по биомам.
+- P2 World objects — `PARTIAL`. Удалён игровой путь из декора в каталог акторов, объекты города и точка сундука имеют отдельный ID, подключены речные камни. Зонные объекты и декор данжей требуют восстановления постановки, моделей и состояния. [Отчёт P2](../reports/M0_ALPHA_FULL_PORT_P2_ENVIRONMENT_REPORT.md)
+- P2 Structures — `PARTIAL / PLACEHOLDER_NOT_ALPHA`. Сетка частей дома и проходы оригинала изучены. Геометрия, городская раскладка и входы в подземелья остаются открыты.
 - Creature/NPC AI: полный Alpha state machine не перенесён; текущее поведение упрощено — `PARTIAL`.
 - Combat synchronization: gameplay action timing и visual animation могут расходиться; fallback timing `400/600/800` = `PLACEHOLDER_NOT_ALPHA`.
 - HUD/menu/inventory/map presentation: текущий Unity UI является техническим baseline, не Alpha parity — `PARTIAL/CUBEGAME_CONTRACT`.

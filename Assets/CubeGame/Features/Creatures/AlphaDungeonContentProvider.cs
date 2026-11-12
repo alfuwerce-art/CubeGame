@@ -25,7 +25,7 @@ namespace CubeGame.Features.Creatures
 
         /// <summary>Chest entity; opening/loot is gameplay (Claude, C5), this provider only places it.</summary>
         public const string ChestBehaviourKey = "chest_static";
-        public const int ChestKind = 0x8F;
+        public const int ChestObjectId = 10;
 
         public const string RoomProvenance =
             "CUBEGAME_CONTRACT: reconstructed layout/carving using Q-16 room spacing and L-corridors";
@@ -133,7 +133,7 @@ namespace CubeGame.Features.Creatures
                 {
                     Region = region,
                     SpawnIndex = index++,
-                    Kind = new KindId(ChestKind),
+                    WorldObjectId = ChestObjectId,
                     Position = new WorldPosition(chest.X, chest.Y, chest.Z),
                     Faction = (int)CreatureFaction.Passive,
                     Level = 1,

@@ -38,6 +38,7 @@ namespace CubeGame.EditorTools
             AlphaContentInventory.ItemsFolder,
             AlphaContentInventory.AppearanceFolder,
             AlphaContentInventory.SoundsFolder,
+            AlphaContentSource.EnvironmentFolder,
         };
 
         static readonly HashSet<string> RuntimeExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)

@@ -35,20 +35,17 @@ namespace CubeGame.Gameplay.Streaming
                 CreatureSlots = 0,
                 DecorSlots = 0,
             };
-            if (id == AlphaTerrainGenerator.WorldRuntimeId)
-            {
-                // Real vegetation (trees + decor, B_vegetation_research.md) replaces the W-18 creature
-                // scatter that F1A showed selects creature templates — so vegetation is enabled again.
-                settings.VegetationPerZone = AlphaVegetationPlanner.MaxObjectsPerZone;
-            }
-            IZoneContentProvider[] providers = id == AlphaTerrainGenerator.WorldRuntimeId
+            // /5 and /6 retain their historical plans so old removal/container indices keep their meaning.
+            if (id == AlphaTerrainGenerator.WorldRuntimeId) settings.VegetationPerZone = 0;
+            IZoneContentProvider[] providers = id != AlphaTerrainGenerator.ContentId
                 ? AlphaContentProviders.CreateDefault(context => AlphaContentProviders.IsDungeonRecord(context.Record.Type),
                     settings, AlphaContentProviders.IsCityZone)
                 : new IZoneContentProvider[] { new AlphaZoneContentProvider(settings) };
             return WorldState.TryCreateGenerator(id, seed, out generator, providers);
         }
 
-        public static bool Supports(string id) => id == AlphaTerrainGenerator.ContentId || id == AlphaTerrainGenerator.WorldRuntimeId;
+        public static bool Supports(string id) => id == AlphaTerrainGenerator.ContentId ||
+            id == AlphaTerrainGenerator.PreviousWorldRuntimeId || id == AlphaTerrainGenerator.WorldRuntimeId;
 
         public static bool IsStaticContent(string behaviourKey) => behaviourKey == AlphaZoneContentProvider.PassiveBehaviourKey
             || behaviourKey == AlphaCityContentProvider.ServiceBehaviourKey
@@ -59,6 +56,9 @@ namespace CubeGame.Gameplay.Streaming
             var spawns = new List<SpawnDefinition>();
             foreach (SpawnDefinition definition in _terrain.Zone(zone.X, zone.Z).ContentSpawns)
             {
+                // This channel's old static_object records are the retired actor-based vegetation plan.
+                if (definition.BehaviourKey == AlphaZoneContentProvider.PassiveBehaviourKey) continue;
+
                 if (definition.BehaviourKey == AlphaDungeonContentProvider.ChestBehaviourKey
                     && _deltas?.IsContainerOpened(zone, Channel, definition.SpawnIndex) == true)
                 {

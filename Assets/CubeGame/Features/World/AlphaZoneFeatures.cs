@@ -146,6 +146,37 @@ namespace CubeGame.Features.World
 
         private static int Byte(float v) => (int)v & 0xFF;
 
+        // The list built by rand()%200 in the river pass is consumed after the dungeon calls in 0x5E4850.
+        internal static void PlaceRiverStones(ZoneContentContext context, AlphaColors colors)
+        {
+            foreach (ZoneSpawnCandidate candidate in context.Candidates)
+            {
+                if (candidate.Kind != "river_object") continue;
+                int rx = context.Random.Next() % 3 + 2;
+                int rz = context.Random.Next() % 3 + 2;
+                int ry = context.Random.Next() % 3 + 2;
+                for (int x = candidate.X - rx; x <= candidate.X + rx; x++)
+                {
+                    for (int z = candidate.Z - rz; z <= candidate.Z + rz; z++)
+                    {
+                        if (!context.Contains(x, z)) continue;
+                        float dx = (x - candidate.X) / (float)rx;
+                        float dz = (z - candidate.Z) / (float)rz;
+                        float horizontal = dx * dx + dz * dz;
+                        float noise = N(x * 0.05, z * 0.05) * 0.8f;
+                        VoxelColumn column = context.Zone.Column(x, z);
+                        for (int y = candidate.Y + 2 * ry; y >= candidate.Y - 2 * ry; y--)
+                        {
+                            float dy = (y - candidate.Y) / (float)ry + noise;
+                            if (horizontal + dy * dy > 1f || (Voxel.Flags(column.Read(y)) & 0xC0) != 0) continue;
+                            colors.SoilColor(x, z, y, column.Humidity, 0f, out float r, out float g, out float b);
+                            context.Write(x, y, z, Voxel.Pack(Byte(r), Byte(g), Byte(b), 6));
+                        }
+                    }
+                }
+            }
+        }
+
         private static void CarveOrRecord(System.Collections.Generic.List<CarveCall> record, AlphaTerrainGenerator terrain, AlphaColors colors, AlphaZone zone,
             int cx, int cz, int baseH, int rx, int rz, int height, bool mesa)
         {

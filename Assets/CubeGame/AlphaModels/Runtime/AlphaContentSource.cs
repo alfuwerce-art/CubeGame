@@ -109,6 +109,7 @@ namespace CubeGame.AlphaModels
     {
         public const string EnvVar = "CUBEGAME_ALPHA_CONTENT";
         public const string ActorsFolder = "actors";
+        public const string EnvironmentFolder = "environment";
 
         /// <summary>Folder under StreamingAssets that holds the packaged content of a Player build.</summary>
         public const string PackagedFolder = "CubeGame/AlphaContent";
