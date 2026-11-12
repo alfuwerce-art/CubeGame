@@ -281,6 +281,7 @@ namespace CubeGame.Gameplay
                 Debug.Log($"[Game] screenshot -> {_screenshotPath} state={_session.State} tick={_session.Clock?.Tick} " +
                           $"chunks={_worldView?.LoadedCount} pending={_worldView?.PendingCount} released={_worldView?.TotalReleased} " +
                           $"vertices={_worldView?.LoadedVertices}/{_worldView?.VertexBudget} plants={_worldView?.LoadedPlants} horizon={_worldView?.HorizonRange:F1}");
+                LogPopulationSnapshot();
                 StartCoroutine(QuitAfterFrames(3));
             }
 
@@ -781,15 +782,16 @@ namespace CubeGame.Gameplay
             if (_worldState.Generator is AlphaTerrainGenerator terrain && D3ZonePopulation.Supports(terrain.GeneratorId))
             {
                 _population.AddSource(new D3ZonePopulation(terrain, _worldState.Deltas), D3ZonePopulation.Channel);
-                if (terrain.GeneratorId == GeneratorId)
+                if (AlphaTerrainGenerator.UsesP2Environment(terrain.GeneratorId))
                 {
                     _population.AddSource(new TownNpcPopulation(terrain), TownNpcPopulation.Channel);
                     var candidates = AlphaCreatureKindSelector.FromClimate(
                         (x, z) => new AlphaClimateSample(terrain.Humidity(x, z), terrain.Temperature(x, z),
                             terrain.RareCellTerm(x, z), terrain.Mountain(x, z)),
                         (x, z) => FirstNonSolid(terrain.Voxels(x, z)));
-                    var source = AlphaRecoveredPopulation.WithKindSelector(_session.World.Seed, candidates,
-                        (zone, lx, lz) => GroundAt(zone.X * (double)WorldLayout.ZoneSize + lx, zone.Z * (double)WorldLayout.ZoneSize + lz));
+                    var source = terrain.GeneratorId == GeneratorId ? new AlphaRecoveredPopulation(terrain)
+                        : AlphaRecoveredPopulation.WithKindSelector(_session.World.Seed, candidates,
+                            (zone, lx, lz) => GroundAt(zone.X * (double)WorldLayout.ZoneSize + lx, zone.Z * (double)WorldLayout.ZoneSize + lz));
                     _recoveredPopulation = new AlphaSpawnRuntime();
                     _recoveredPopulation.AddSource(source);
                     RecoveredSpawnPersistence.Restore(_worldState.Deltas, _recoveredPopulation);
@@ -891,13 +893,15 @@ namespace CubeGame.Gameplay
 
         private void SpawnWorldEntity(StableEntityId id, SpawnDefinition def)
         {
-            if (D3ZonePopulation.IsStaticContent(def.BehaviourKey) || def.BehaviourKey == TownNpcPopulation.BehaviourKey)
+            if (D3ZonePopulation.IsStaticContent(def.BehaviourKey))
             {
                 PublishSpawnVisual(id, def);
                 return;
             }
 
-            if (def.BehaviourKey != AlphaRecoveredPopulation.BehaviourKey || def.Faction == (int)CreatureFaction.Passive || _session.Combat == null)
+            bool actor = def.BehaviourKey == AlphaRecoveredPopulation.BehaviourKey ||
+                def.BehaviourKey == TownNpcPopulation.BehaviourKey;
+            if (!actor || def.Faction == (int)CreatureFaction.Passive || _session.Combat == null)
             {
                 return;
             }
@@ -909,7 +913,8 @@ namespace CubeGame.Gameplay
             creature.Hostile = def.Faction == (int)CreatureFaction.Monster;
             creature.IsBoss = CreatureKinds.IsBoss(def.Kind.Value);
             _session.Combat.Register(creature);
-            _creatures?.Add(creature, def.Level, 0, def.Faction, def.ClassId, def.SpecializationId, def.MainHandWeapon);
+            _creatures?.Add(creature, def.Level, 0, def.Faction, def.ClassId, def.SpecializationId, def.MainHandWeapon,
+                recovered: true);
             PublishSpawnVisual(id, def);
         }
 
@@ -1091,11 +1096,12 @@ namespace CubeGame.Gameplay
             BindWorldPresentation();
             _session.Hero.Inventory.EquipmentChanged += OnEquipmentChanged;
             PublishEquipment();
-            _creatures = new CreatureCombatDriver(_session, GroundAt, kind => _timings.AttackActionsOf(kind), _session.World.Seed.Value);
+            _creatures = new CreatureCombatDriver(_session, GroundAt, kind => _timings.AttackActionsOf(kind),
+                _session.World.Seed.Value, _worldState.VoxelAt);
             _session.Clock.Ticked += _creatures.Tick;
             StartPopulation();
-            // The target appears once the hero stands on the ground and the camera has a facing (see Update).
-            _trainingTargetPending = true;
+            // Editor combat integration fixtures still exercise the training actor.
+            _trainingTargetPending = Application.isEditor;
             return Report(true, description);
         }
 

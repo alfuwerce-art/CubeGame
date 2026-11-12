@@ -143,6 +143,9 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.AreEqual(1, game.GetComponentsInChildren<UIDocument>().Length);
 
             // Seed fixture, same generation and hit/loot runtime as the accepted F3 scenario.
+            game.TeleportHero(8397145, 8396899);
+            yield return null;
+            game.Session.Clock.StepTicks(2);
             hero.Sheet.AddExperience(AlphaMath.ExperienceCostForNextLevel(1) - 1);
             Combatant target = game.Session.Combat.Combatants.Where(c => c.Hostile && c.Id.Kind == EntityIdKind.ZoneSpawn)
                 .OrderBy(c => DistanceSquared(c.Position, hero.Position)).First();

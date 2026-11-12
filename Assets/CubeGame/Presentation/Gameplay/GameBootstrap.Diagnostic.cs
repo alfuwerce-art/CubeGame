@@ -4,6 +4,8 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using CubeGame.Features.Contracts;
+using CubeGame.Features.Creatures;
+using CubeGame.Gameplay.Streaming;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -19,6 +21,37 @@ namespace CubeGame.Gameplay
         private string _uiProbePath;
         private int _uiProbeFrame = -1;
         private string _captureDir;
+
+        private void LogPopulationSnapshot()
+        {
+            if (_recoveredPopulation == null || _session.Hero == null) return;
+
+            var rows = new StringBuilder();
+            void AppendActor(StableEntityId id, SpawnDefinition definition, string source)
+            {
+                if (!_session.Combat.TryGet(id, out var actor) || actor.IsDead ||
+                    DistanceToHeroSquared(actor.Position) >= AlphaSpawnLifecycle.DefaultActivationRadius *
+                        AlphaSpawnLifecycle.DefaultActivationRadius)
+                    return;
+
+                _creatures.TryGetAi(id, out var ai);
+                rows.AppendLine(FormattableString.Invariant(
+                    $"[Population] {source} id={id} kind={definition.Kind.Value:X2} faction={definition.Faction} class={definition.ClassId:X2} level={definition.Level} home={definition.Position} at={actor.Position} state={ai?.State} action={ai?.LastRequestedAction} distance={Math.Sqrt(DistanceToHeroSquared(actor.Position)):F2} reason={ai?.LastReason}"));
+            }
+
+            foreach (AlphaSpawnTemplate template in _recoveredPopulation.Templates)
+            {
+                if (template.Live) AppendActor(template.Id, template.Definition, "wild");
+            }
+            foreach (var spawn in _population.Live)
+            {
+                if (spawn.Channel == TownNpcPopulation.Channel)
+                    AppendActor(spawn.Id, spawn.Definition, "town-service");
+            }
+            Debug.Log($"[Population] seed={_session.World.Seed} hero={_session.Hero.Position} " +
+                      $"time={_session.Clock.WorldTimeMs} templates={_recoveredPopulation.TemplateCount} " +
+                      $"liveWild={_recoveredPopulation.LiveCount} training={_trainingTarget != null}\n{rows}");
+        }
 
         // The Windows Player can initialize Direct3D in batch mode without presenting a back buffer.
         // Capture the gameplay camera itself in that mode for terrain and horizon checks.

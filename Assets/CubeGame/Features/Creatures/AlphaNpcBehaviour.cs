@@ -47,6 +47,7 @@ namespace CubeGame.Features.Creatures
 
         /// <summary>True once a direction was chosen.</summary>
         public bool HasDirection { get; private set; }
+        public bool ReturningHome { get; private set; }
 
         /// <summary>Whether a position lies inside the leash (Alpha's integer test, written in units).</summary>
         public static bool InsideLeash(double x, double z, WorldPosition home)
@@ -62,7 +63,8 @@ namespace CubeGame.Features.Creatures
             TimerMs -= elapsedMs;
             if (TimerMs < 0) TimerMs = 0;
             if (TimerMs != 0) return false;
-            if (InsideLeash(x, z, home))
+            ReturningHome = !InsideLeash(x, z, home);
+            if (!ReturningHome)
             {
                 DirectionX = ((float)rand() * 2.0f / 32767.0f - 1.0f) * 10.0f;
                 DirectionZ = ((float)rand() * 2.0f / 32767.0f - 1.0f) * 10.0f;
@@ -97,6 +99,7 @@ namespace CubeGame.Features.Creatures
     public struct AlphaNpcMovementStep
     {
         public bool Move;
+        public bool ReturningHome;
         public WorldPosition Target;
         public string Reason;
 
@@ -178,7 +181,7 @@ namespace CubeGame.Features.Creatures
                     {
                         return new AlphaNpcMovementStep
                         {
-                            Move = true, Target = target, Reason = "SCHEDULE_TRAVEL " + Schedule.TargetIndex,
+                            Move = true, ReturningHome = true, Target = target, Reason = "SCHEDULE_TRAVEL " + Schedule.TargetIndex,
                         };
                     }
 
@@ -191,6 +194,7 @@ namespace CubeGame.Features.Creatures
             return new AlphaNpcMovementStep
             {
                 Move = true,
+                ReturningHome = RandomWalk.ReturningHome,
                 Target = new WorldPosition(x + RandomWalk.DirectionX, y, z + RandomWalk.DirectionZ),
                 Reason = "RANDOM_WALK",
             };

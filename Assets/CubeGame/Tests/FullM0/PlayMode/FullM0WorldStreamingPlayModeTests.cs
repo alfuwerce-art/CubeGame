@@ -355,17 +355,20 @@ namespace CubeGame.Tests.FullM0.PlayMode
             GameBootstrap game = NewGame();
             yield return null;
             Assert.IsTrue(game.StartNewWorld("slot0", "Recovered population", 666666u, "Walker", CharacterClass.Warrior), game.Status);
+            game.TeleportHero(8397145, 8396899);
+            yield return Frames(2);
+            game.Session.Clock.StepTicks(2);
             AlphaSpawnRuntime runtime = game.RecoveredPopulation;
             Assert.IsNotNull(runtime);
             AlphaSpawnTemplate target = runtime.Templates.FirstOrDefault(t => t.Live
-                && t.Definition.Faction == AlphaWildSpawnRules.FactionHostile);
+                && t.Definition.Faction == AlphaWildSpawnRules.FactionHostile && t.WindowStartMs > 0);
             Assert.IsNotNull(target, "a recovered wild template near the hero became live");
             ZoneKey home = target.Zone;
             int startX = home.X * WorldLayout.ZoneSize + 128;
             int startZ = home.Z * WorldLayout.ZoneSize + 128;
             game.TeleportHero(startX, startZ);
             yield return null;
-            Assert.AreEqual(AlphaRecoveredPopulation.RecoveredKindProvenance, target.Definition.Provenance);
+            Assert.AreEqual(AlphaRecoveredPopulation.ZoneStreamProvenance, target.Definition.Provenance);
             Assert.IsTrue(game.Visuals.TryGetRoot(target.Id, out _));
             KillSpawn(game, target);
             Assert.AreEqual(AlphaSpawnLifecycle.RespawnTimerMs, target.RespawnTimerMs);

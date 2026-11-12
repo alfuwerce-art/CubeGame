@@ -88,7 +88,10 @@ namespace CubeGame.Features.World
         public const string Id = "cubegame.alpha_terrain/4";
         public const string ContentId = "cubegame.alpha_terrain/5";
         public const string PreviousWorldRuntimeId = "cubegame.alpha_terrain/6";
-        public const string WorldRuntimeId = "cubegame.alpha_terrain/7";
+        public const string EnvironmentRuntimeId = "cubegame.alpha_terrain/7";
+        public const string WorldRuntimeId = "cubegame.alpha_terrain/8";
+
+        public static bool UsesP2Environment(string id) => id == EnvironmentRuntimeId || id == WorldRuntimeId;
 
         public const int DefaultWaterLevel = 0;
 

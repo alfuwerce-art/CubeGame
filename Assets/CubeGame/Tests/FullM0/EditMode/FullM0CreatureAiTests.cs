@@ -121,6 +121,116 @@ namespace CubeGame.Tests.FullM0.EditMode
         }
 
         [Test]
+        public void RecoveredCatNoticesChasesRequestsItsAlphaActionAndRecoversInCombat()
+        {
+            var kind = new KindId(0x1E);
+            var pounce = new ActionId(75);
+            ((ActionTimingTable)_session.ActionTimings).Add(kind, pounce, ActionTiming.FromAlpha(100, 250, 500));
+            _driver.Remove(_wolf.Id);
+            var cat = Combatant.CreateCreature(StableEntityId.ForRuntime(2), kind, "Cat", 1, 0);
+            cat.Position = new WorldPosition(19, 5, 0);
+            _session.Combat.Register(cat);
+            _driver.Add(cat, 1, 0, (int)CreatureFaction.Monster, 0, 0, recovered: true);
+            Assert.IsTrue(_driver.TryGetAi(cat.Id, out var ai));
+
+            int launches = 0;
+            _session.Events.Subscribe<ActionStarted>(action =>
+            {
+                if (!action.Entity.Equals(cat.Id)) return;
+                Assert.AreEqual(pounce, action.Action);
+                launches++;
+            });
+            _session.Clock.StepTicks(1);
+            Assert.AreEqual(CreatureAiState.Notice, ai.State);
+            _session.Clock.StepTicks(1);
+            Assert.AreEqual(CreatureAiState.Chase, ai.State);
+            for (int tick = 0; tick < 100 && launches == 0; tick++) _session.Clock.StepTicks(1);
+            Assert.AreEqual(1, launches, ai.LastReason);
+            Assert.AreEqual(75, ai.LastRequestedAction);
+            Assert.IsTrue(_session.Combat.IsActing(cat.Id));
+            Assert.AreEqual(_session.Hero.Health.MaxHealth, _session.Hero.Health.CurrentHealth, "decision only requests the action");
+            _session.Hero.Position = new WorldPosition(-10, 5, 0);
+            for (int tick = 0; tick < 30 && ai.State != CreatureAiState.Recover; tick++) _session.Clock.StepTicks(1);
+            Assert.AreEqual(CreatureAiState.Recover, ai.State);
+            for (int tick = 0; tick < 30 && ai.State != CreatureAiState.Chase; tick++) _session.Clock.StepTicks(1);
+            Assert.AreEqual(CreatureAiState.Chase, ai.State);
+            Assert.AreEqual(1, launches);
+        }
+
+        [Test]
+        public void FriendlyCatIgnoresHeroAsTargetAndLooksAtThem()
+        {
+            var cat = Combatant.CreateCreature(StableEntityId.ForRuntime(2), new KindId(0x1E), "Town cat", 1, 0);
+            cat.Position = new WorldPosition(1, 5, 0);
+            _session.Combat.Register(cat);
+            _driver.Remove(_wolf.Id);
+            _driver.Add(cat, 1, 0, (int)CreatureFaction.Npc, 0, 0, recovered: true);
+
+            _session.Clock.StepTicks(30);
+
+            Assert.IsTrue(_driver.TryGetAi(cat.Id, out var ai));
+            Assert.IsNull(ai.TargetId);
+            Assert.AreEqual("LOOK_AT_PLAYER", ai.LastReason);
+            Assert.AreEqual(-90f, cat.Yaw, 0.01f);
+            Assert.IsFalse(_session.Combat.IsActing(cat.Id));
+        }
+
+        [Test]
+        public void RecoveredActorDoesNotSubstituteAClipForAnUnknownDispatcherBranch()
+        {
+            _wolf.Position = new WorldPosition(1, 5, 0);
+            _driver.Add(_wolf, 1, 0, (int)CreatureFaction.Monster, 0, 0, recovered: true);
+
+            _session.Clock.StepTicks(30);
+
+            Assert.IsTrue(_driver.TryGetAi(_wolf.Id, out var ai));
+            Assert.AreEqual("UNKNOWN_ALPHA_DISPATCH", ai.LastReason);
+            Assert.AreEqual(-1, ai.LastRequestedAction);
+            Assert.IsFalse(_session.Combat.IsActing(_wolf.Id));
+            Assert.AreEqual(_session.Hero.Health.MaxHealth, _session.Hero.Health.CurrentHealth);
+        }
+
+        [Test]
+        public void RecoveredNoticeRequiresStrictRadiusAndUnobstructedVoxels()
+        {
+            bool wall = true;
+            _session.Clock.Ticked -= _driver.Tick;
+            _driver = new CreatureCombatDriver(_session, null, null, 11u,
+                (x, y, z) => wall && x == 4 ? Features.World.Voxel.DefaultSolid : Features.World.Voxel.Air);
+            _session.Clock.Ticked += _driver.Tick;
+            _driver.Add(_wolf, 1, 0, (int)CreatureFaction.Monster, 0, 0, recovered: true);
+            Assert.IsTrue(_driver.TryGetAi(_wolf.Id, out var ai));
+            _session.Clock.StepTicks(1);
+            Assert.IsNull(ai.TargetId, "solid voxel blocks acquisition");
+
+            wall = false;
+            _session.Hero.Position = new WorldPosition(-12, 5, 0);
+            _session.Clock.StepTicks(1);
+            Assert.IsNull(ai.TargetId, "distance exactly 20 is outside the Alpha scan");
+            _session.Hero.Position = new WorldPosition(-11, 5, 0);
+            _session.Clock.StepTicks(1);
+            Assert.AreEqual(CreatureAiState.Notice, ai.State);
+        }
+
+        [Test]
+        public void RecoveredApproachTimeoutReleasesTargetAndRandomWalkReturnsHome()
+        {
+            WorldPosition home = _wolf.Position;
+            _driver.Add(_wolf, 1, 0, (int)CreatureFaction.Monster, 0, 0, recovered: true);
+            Assert.IsTrue(_driver.TryGetAi(_wolf.Id, out var ai));
+            ai.AttachAlphaMovement(new AlphaNpcMovementDriver(home, () => _session.Clock.WorldTimeMs));
+            _session.Clock.StepTicks(1);
+            _session.Hero.Position = new WorldPosition(-250, 5, 0);
+            for (int i = 0; i < 615 && ai.TargetId != null; i++) _session.Clock.StepTicks(1);
+            Assert.AreEqual("APPROACH_TIMEOUT", ai.LastReason);
+            Assert.IsNull(ai.TargetId);
+            double before = _wolf.Position.X;
+            _session.Clock.StepTicks(1);
+            Assert.AreEqual(CreatureAiState.Return, ai.State);
+            Assert.Greater(_wolf.Position.X, before);
+        }
+
+        [Test]
         public void PauseStopsCreatures()
         {
             WorldPosition before = _wolf.Position;

@@ -27,6 +27,9 @@ namespace CubeGame.Features.Creatures
         public const string RecoveredKindProvenance =
             "grid/level/pack=ALPHA_CODE_STATIC (Cube.exe 0x5EAE6A-0x5EBBB1); kind=EMULATED_ALPHA_CODE 0x5F56C0; random stream=CUBEGAME_CONTRACT";
 
+        public const string ZoneStreamProvenance =
+            "ALPHA_CODE_STATIC / ALPHA_DECOMPILED 0x5EAE6A-0x5EBBB1; kind=EMULATED_ALPHA_CODE 0x5F56C0; zone RNG entry=PARTIAL";
+
         public const string BehaviourKey = "creature_ai";
 
         /// <summary>Spawn indices of one cell: leader + up to four members (pack range max 5).</summary>
@@ -36,6 +39,10 @@ namespace CubeGame.Features.Creatures
         readonly Func<ZoneKey, int, int, int> _kindAt;
         readonly Func<ZoneKey, int, int, double> _groundHeight;
         readonly Func<int, int, int[]> _candidatesAt;
+        readonly AlphaTerrainGenerator _terrain;
+
+        public AlphaRecoveredPopulation(AlphaTerrainGenerator terrain) =>
+            _terrain = terrain ?? throw new ArgumentNullException(nameof(terrain));
 
         /// <param name="candidatesAt">absolute voxel x/z → candidate kinds of 0x5F56C0
         /// (<see cref="AlphaCreatureKindSelector.FromClimate"/>); the kind is list[rand() % n], 0x3C when empty.</param>
@@ -54,7 +61,7 @@ namespace CubeGame.Features.Creatures
         }
 
         /// <summary>True when kinds come from the recovered selector 0x5F56C0.</summary>
-        public bool UsesRecoveredKindSelector => _candidatesAt != null;
+        public bool UsesRecoveredKindSelector => _candidatesAt != null || _terrain != null;
 
         /// <param name="kindAt">zone + local x/z → Alpha kind (the 0x5F56C0 choice), or −1 for "nothing here".</param>
         /// <param name="groundHeight">zone + local x/z → world Y of the surface; null → 0.</param>
@@ -69,6 +76,12 @@ namespace CubeGame.Features.Creatures
         public IReadOnlyList<SpawnDefinition> SpawnsForZone(ZoneKey zone)
         {
             var list = new List<SpawnDefinition>();
+            if (_terrain != null)
+            {
+                foreach (AlphaSpawnTemplateData template in ZoneStreamTemplates(zone)) list.Add(template.Definition);
+                return list;
+            }
+
             var stream = new Stream(_seed.Value, zone);
             var region = new RegionKey((int)Math.Floor(zone.X / (double)AlphaWorldScale.ZonesPerRegion),
                 (int)Math.Floor(zone.Z / (double)AlphaWorldScale.ZonesPerRegion));
@@ -148,6 +161,7 @@ namespace CubeGame.Features.Creatures
         /// </summary>
         public IReadOnlyList<AlphaSpawnTemplateData> TemplatesForZone(ZoneKey zone)
         {
+            if (_terrain != null) return ZoneStreamTemplates(zone);
             IReadOnlyList<SpawnDefinition> definitions = SpawnsForZone(zone);
             var list = new List<AlphaSpawnTemplateData>(definitions.Count);
             foreach (SpawnDefinition definition in definitions)
@@ -160,6 +174,115 @@ namespace CubeGame.Features.Creatures
             }
 
             return list;
+        }
+
+        private IReadOnlyList<AlphaSpawnTemplateData> ZoneStreamTemplates(ZoneKey key)
+        {
+            var result = new List<AlphaSpawnTemplateData>();
+            AlphaZone zone = _terrain.Zone(key.X, key.Z);
+            if (zone == null) return result;
+
+            var random = new AlphaCrtRandom(zone.PopulationRandomState);
+            int originX = key.X * AlphaZone.Size;
+            int originZ = key.Z * AlphaZone.Size;
+            LandmarkColumn landmark = _terrain.ColumnAt(originX, originZ);
+            var region = new RegionKey(key.X >> 6, key.Z >> 6);
+            const int cellsPerAxis = AlphaWildSpawnRules.CellsPerAxis;
+            for (int cell = 0; cell < cellsPerAxis * cellsPerAxis; cell++)
+            {
+                if (AlphaWildSpawnRules.CellSkipped(random.Next())) continue;
+                int x = originX + AlphaWildSpawnRules.CellCoordinate(cell / cellsPerAxis, random.Next());
+                int z = originZ + AlphaWildSpawnRules.CellCoordinate(cell % cellsPerAxis, random.Next());
+                if (landmark != null && landmark.Type != LandmarkType.None && landmark.Type != LandmarkType.Village &&
+                    AlphaTerrainGenerator.Falloff(_terrain.LandmarkDistance2(landmark, x, z)) > 0.3f)
+                    continue;
+
+                VoxelColumn column = zone.Column(x, z);
+                if (AlphaWildSpawnRules.ClimateSkipped(column.Humidity, column.Temperature, random.Next) ||
+                    _terrain.HeightAtXY(x, z) > 0f || _terrain.RotateAndPlace(x, z) < 1f)
+                    continue;
+
+                int y = column.Bottom;
+                while (Voxel.IsSolid(column.Read(y))) y++;
+
+                // The leader draws orientation before its kind. The ground override branches then
+                // consume their own rolls and send faction-6 placements down a separate content path.
+                float yaw = random.Next() * 360f / AlphaCrtRandom.RandMax;
+                var climate = new AlphaClimateSample(column.Humidity, column.Temperature, column.Rare, _terrain.Mountain(x, z));
+                int[] candidates = AlphaCreatureKindSelector.Candidates(climate, y);
+                int kind = AlphaCreatureKindSelector.Pick(candidates, candidates.Length == 0 ? 0 : random.Next());
+                if (GroundOverridesCreature(Voxel.Material(column.Read(y - 1)), y, climate, random)) continue;
+
+                random.Next(); // rand()%100 flag 0x200, whose downstream behaviour is still open.
+                int level = AlphaWildSpawnRules.Level(kind, random.Next());
+                int index = cell * IndicesPerCell;
+                var home = new WorldPosition(x + 0.5, y, z + 0.5);
+                AddActor(result, region, index, kind, level, yaw, home, true);
+
+                int members = AlphaWildSpawnRules.ExtraPackMembers(kind, random.Next());
+                for (int i = 0; i < members; i++)
+                {
+                    AlphaWildSpawnRules.PackOffset(i, members, out double dx, out double dz);
+                    int member = AlphaWildSpawnRules.CompanionKind(kind, random.Next);
+                    int memberLevel = AlphaWildSpawnRules.Level(member, random.Next());
+                    float memberYaw = random.Next() * 360f / AlphaCrtRandom.RandMax;
+                    var at = new WorldPosition(home.X + (int)(dx * 65536) / 65536.0, home.Y,
+                        home.Z + (int)(dz * 65536) / 65536.0);
+                    AddActor(result, region, index + 1 + i, member, memberLevel, memberYaw, at, false);
+                }
+            }
+            return result;
+        }
+
+        private static bool GroundOverridesCreature(int material, int height, AlphaClimateSample climate, AlphaCrtRandom random)
+        {
+            if (material == 12)
+            {
+                random.Next();
+                return true;
+            }
+            if (height < 0) return false;
+            if (material == 4 || material == 5 || material == 9)
+            {
+                if (random.Next() % 3 != 0 && climate.Humidity > 0.8f && climate.Temperature < 0.1f)
+                {
+                    random.Next();
+                    return true;
+                }
+                if (material == 4 && random.Next() % 3 != 0 && climate.Temperature > 0.1f)
+                {
+                    random.Next();
+                    return true;
+                }
+            }
+            else if (material == 10 && AlphaWildSpawnRules.CellSkipped(random.Next()))
+            {
+                random.Next();
+                return true;
+            }
+            return false;
+        }
+
+        private static void AddActor(List<AlphaSpawnTemplateData> result, RegionKey region, int index, int kind, int level,
+            float yaw, WorldPosition position, bool leader)
+        {
+            // Keep catalogued passive objects out of the combat/actor channel.
+            if (CreatureKinds.IsPassiveObject(kind)) return;
+            var actor = new SpawnDefinition
+            {
+                Region = region,
+                SpawnIndex = index,
+                Kind = new KindId(kind),
+                Position = position,
+                Yaw = yaw,
+                Faction = AlphaWildSpawnRules.FactionHostile,
+                Level = level,
+                ClassId = 0,
+                BehaviourKey = BehaviourKey,
+                Provenance = ZoneStreamProvenance,
+            };
+            result.Add(new AlphaSpawnTemplateData(actor, leader ? AlphaWildSpawnRules.HostileWindowStartMs : 0,
+                leader ? AlphaWildSpawnRules.HostileWindowEndMs : 0));
         }
 
         /// <summary>CUBEGAME_CONTRACT: deterministic stand-in for CRT rand() (15-bit values, like MSVC).</summary>

@@ -36,7 +36,7 @@ namespace CubeGame.Gameplay.Streaming
                 DecorSlots = 0,
             };
             // /5 and /6 retain their historical plans so old removal/container indices keep their meaning.
-            if (id == AlphaTerrainGenerator.WorldRuntimeId) settings.VegetationPerZone = 0;
+            if (AlphaTerrainGenerator.UsesP2Environment(id)) settings.VegetationPerZone = 0;
             IZoneContentProvider[] providers = id != AlphaTerrainGenerator.ContentId
                 ? AlphaContentProviders.CreateDefault(context => AlphaContentProviders.IsDungeonRecord(context.Record.Type),
                     settings, AlphaContentProviders.IsCityZone)
@@ -45,7 +45,7 @@ namespace CubeGame.Gameplay.Streaming
         }
 
         public static bool Supports(string id) => id == AlphaTerrainGenerator.ContentId ||
-            id == AlphaTerrainGenerator.PreviousWorldRuntimeId || id == AlphaTerrainGenerator.WorldRuntimeId;
+            id == AlphaTerrainGenerator.PreviousWorldRuntimeId || AlphaTerrainGenerator.UsesP2Environment(id);
 
         public static bool IsStaticContent(string behaviourKey) => behaviourKey == AlphaZoneContentProvider.PassiveBehaviourKey
             || behaviourKey == AlphaCityContentProvider.ServiceBehaviourKey

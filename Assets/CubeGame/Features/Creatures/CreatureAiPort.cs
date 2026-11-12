@@ -12,14 +12,28 @@ namespace CubeGame.Features.Creatures
         Attack = 3,
         Flee = 4,
         Dead = 5,
+        Notice = 6,
+        Recover = 7,
+        Return = 8,
     }
 
     public struct CreatureTarget
     {
         public string Id;
         public double X;
+        public double Y;
         public double Z;
+        public double Width;
         public bool Reachable;
+    }
+
+    /// <summary>World inputs used by the recovered population's CombatBehavior and LookAtPlayerBehavior.</summary>
+    public interface IAlphaCreatureAiWorld : ICreatureAiWorld
+    {
+        bool TryGetActionState(CreatureState self, out bool recovering);
+        bool HasLineOfSight(CreatureState self, CreatureTarget target);
+        void Face(CreatureState self, CreatureTarget target);
+        int NextAlphaRoll();
     }
 
     /// <summary>Everything the AI may read from or ask of the game world. No damage, no HP writes.</summary>

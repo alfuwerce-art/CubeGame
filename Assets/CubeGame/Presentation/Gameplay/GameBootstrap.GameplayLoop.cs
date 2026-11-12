@@ -198,10 +198,11 @@ namespace CubeGame.Gameplay
         {
             role = -1;
             position = default;
-            if (_population.TryGet(id, out LiveSpawn spawn) && spawn.Definition.BehaviourKey == TownNpcPopulation.BehaviourKey)
+            if (_population.TryGet(id, out LiveSpawn spawn) && spawn.Definition.BehaviourKey == TownNpcPopulation.BehaviourKey
+                && _session.Combat.TryGet(id, out Combatant service) && !service.IsDead)
             {
                 role = spawn.Definition.ClassId;
-                position = spawn.Definition.Position;
+                position = service.Position;
             }
             else if (_recoveredPopulation != null && _recoveredPopulation.TryGet(id, out AlphaSpawnTemplate template)
                 && template.Live && template.Definition.Faction == (int)CreatureFaction.Npc

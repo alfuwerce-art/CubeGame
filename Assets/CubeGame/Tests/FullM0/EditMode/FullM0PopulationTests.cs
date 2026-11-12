@@ -104,6 +104,7 @@ namespace CubeGame.Tests.FullM0.EditMode
         [TestCase(AlphaTerrainGenerator.Id)]
         [TestCase(AlphaTerrainGenerator.ContentId)]
         [TestCase(AlphaTerrainGenerator.PreviousWorldRuntimeId)]
+        [TestCase(AlphaTerrainGenerator.EnvironmentRuntimeId)]
         [TestCase(AlphaTerrainGenerator.WorldRuntimeId)]
         public void CheckpointRetainsTheWorldGeneratorVersion(string generatorId)
         {
@@ -117,6 +118,39 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.IsTrue(loaded.IsSuccess, loaded.ToString());
             Assert.IsTrue(D3ZonePopulation.TryCreateGenerator(loaded.World.GeneratorId, loaded.World.Seed.Value, out IWorldGenerator generator));
             Assert.AreEqual(generatorId, generator.GeneratorId);
+        }
+
+        [Test]
+        public void RecoveredPopulationRegeneratesWithIdenticalActorIdsAndAttributes()
+        {
+            const uint seed = 666666;
+            var key = WorldLayout.ZoneOf(8397145, 8396899);
+            Assert.IsTrue(D3ZonePopulation.TryCreateGenerator(AlphaTerrainGenerator.WorldRuntimeId, seed, out var first));
+            Assert.IsTrue(D3ZonePopulation.TryCreateGenerator(AlphaTerrainGenerator.WorldRuntimeId, seed, out var second));
+            var a = new AlphaRecoveredPopulation((AlphaTerrainGenerator)first).TemplatesForZone(key);
+            var b = new AlphaRecoveredPopulation((AlphaTerrainGenerator)second).TemplatesForZone(key);
+            Assert.IsNotEmpty(a);
+            CollectionAssert.AreEqual(a.Select(Signature), b.Select(Signature));
+            Assert.AreEqual(a.Count, a.Select(t => t.Definition.SpawnIndex).Distinct().Count());
+            Assert.IsTrue(a.All(t => !CreatureKinds.IsPassiveObject(t.Definition.Kind.Value)));
+
+            static object Signature(AlphaSpawnTemplateData t) =>
+                (t.Definition.SpawnIndex, t.Definition.Position, t.Definition.Kind, t.Definition.Level,
+                    t.Definition.Yaw, t.Definition.Faction, t.WindowStartMs, t.WindowEndMs);
+        }
+
+        [Test]
+        public void WildClimateDrawsAreConditionalAndHumidityPrecedesTemperature()
+        {
+            var rolls = new Queue<int>(new[] { 1, 0, 2 });
+            Assert.IsFalse(AlphaWildSpawnRules.ClimateSkipped(0.2f, 0.2f, rolls.Dequeue));
+            Assert.AreEqual(3, rolls.Count);
+            Assert.IsTrue(AlphaWildSpawnRules.ClimateSkipped(0.19f, 0.19f, rolls.Dequeue));
+            Assert.AreEqual(1, rolls.Count);
+            Assert.AreEqual(0x1E, AlphaWildSpawnRules.CompanionKind(0x1E, rolls.Dequeue));
+            Assert.AreEqual(1, rolls.Count);
+            Assert.AreEqual(2, AlphaWildSpawnRules.CompanionKind(0x03, rolls.Dequeue));
+            Assert.IsEmpty(rolls);
         }
 
         [Test]

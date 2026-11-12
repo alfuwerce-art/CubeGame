@@ -45,7 +45,9 @@ namespace CubeGame.Tests.FullM0.PlayMode
             game.SaveDirectory = _saveDirectory;
             yield return null;
             Assert.IsTrue(game.StartNewWorld("slot0", "F3 world", 666666u, "Brena", CharacterClass.Warrior), game.Status);
+            game.TeleportHero(8397145, 8396899);
             yield return null;
+            game.Session.Clock.StepTicks(2);
 
             HeroState hero = game.Session.Hero;
             Assert.IsTrue(game.TryApplyHeroProgression(new HeroSkillRanks(), CharacterSpecialization.Secondary), game.Status);
@@ -54,7 +56,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
                 .Where(c => c.Hostile && c.Id.Kind == EntityIdKind.ZoneSpawn)
                 .OrderBy(c => DistanceSquared(c.Position, hero.Position))
                 .FirstOrDefault();
-            Assert.IsNotNull(target, "seed produces a live hostile world spawn near the start");
+            Assert.IsNotNull(target, "the wilderness fixture contains a live hostile world spawn");
             PlaceHero(game, target.Position);
             yield return null;
             game.Session.Clock.StepTicks(1);
@@ -90,6 +92,10 @@ namespace CubeGame.Tests.FullM0.PlayMode
             LiveSpawn vendor = TownNpc(game, city, TownNpcPopulation.MerchantClass);
             Assert.IsTrue(game.Visuals.TryGetRoot(vendor.Id, out _));
             PlaceHero(game, vendor.Definition.Position);
+            game.Session.Clock.StepTicks(2);
+            Assert.IsTrue(game.Creatures.TryGetAi(vendor.Id, out var vendorAi));
+            Assert.IsNull(vendorAi.TargetId);
+            Assert.AreEqual("LOOK_AT_PLAYER", vendorAi.LastReason);
             Assert.IsTrue(game.TryInteract(vendor.Id), game.Status);
             Assert.IsFalse(game.TryBuyFromVendor(0), "zero starting copper");
             int proceeds = AlphaTradeValue.Of(hero.Inventory[lootSlot]);

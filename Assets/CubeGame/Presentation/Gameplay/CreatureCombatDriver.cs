@@ -5,6 +5,7 @@ using CubeGame.Features.Combat;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.Creatures;
 using CubeGame.Features.Session;
+using CubeGame.Features.World;
 
 namespace CubeGame.Gameplay
 {
@@ -14,22 +15,27 @@ namespace CubeGame.Gameplay
     /// go through gameplay; damage and HP stay in <see cref="CombatSystem"/> (Core S03/S04). Ticked by the game
     /// clock, so pause stops creatures and the result does not depend on frame rate.
     /// </summary>
-    public sealed class CreatureCombatDriver : ICreatureAiWorld
+    public sealed class CreatureCombatDriver : IAlphaCreatureAiWorld
     {
         public const string HeroTargetId = "hero";
 
         private readonly GameSession _session;
         private readonly Func<double, double, double> _groundAt;
         private readonly Func<KindId, int[]> _actionsOf;
+        private readonly Func<int, int, int, uint> _voxelAt;
+        private readonly AlphaCrtRandom _behaviourRandom;
         private readonly Dictionary<string, Enemy> _enemies = new Dictionary<string, Enemy>(StringComparer.Ordinal);
         private uint _roll;
         private long _lastTimeMs = -1;
 
-        public CreatureCombatDriver(GameSession session, Func<double, double, double> groundAt, Func<KindId, int[]> actionsOf, uint seed)
+        public CreatureCombatDriver(GameSession session, Func<double, double, double> groundAt, Func<KindId, int[]> actionsOf, uint seed,
+            Func<int, int, int, uint> voxelAt = null)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
             _groundAt = groundAt;
             _actionsOf = actionsOf;
+            _voxelAt = voxelAt;
+            _behaviourRandom = new AlphaCrtRandom(unchecked((int)seed));
             _roll = seed == 0 ? 0x9E3779B9u : seed;
         }
 
@@ -60,7 +66,7 @@ namespace CubeGame.Gameplay
         /// drive Alpha's attack selection (C-29/R-2).
         /// </summary>
         public void Add(Combatant combatant, int level, int stars, int faction, int classId, int specialisationId,
-            RawAlphaItemId? mainHandWeapon = null)
+            RawAlphaItemId? mainHandWeapon = null, bool recovered = false)
         {
             RawAlphaItemId? weapon = mainHandWeapon?.Type == AlphaNpcWeaponActions.WeaponItemType ? mainHandWeapon : null;
             var state = new CreatureState
@@ -79,8 +85,12 @@ namespace CubeGame.Gameplay
                 X = combatant.Position.X,
                 Y = combatant.Position.Y,
                 Z = combatant.Position.Z,
+                Width = combatant.HitWidth,
             };
-            _enemies[state.StableId] = new Enemy { Combatant = combatant, State = state, Ai = new CreatureAi() };
+            _enemies[state.StableId] = new Enemy
+            {
+                Combatant = combatant, State = state, Ai = new CreatureAi(recovered), Recovered = recovered,
+            };
         }
 
         public void Remove(StableEntityId id) => _enemies.Remove(id.ToString());
@@ -89,7 +99,9 @@ namespace CubeGame.Gameplay
         public void Tick(GameClock clock)
         {
             long now = clock.TimeMs;
-            int elapsed = _lastTimeMs < 0 ? (int)Math.Round(clock.TickSeconds * 1000.0) : (int)(now - _lastTimeMs);
+            // Restore can jump days without simulating the intervening creature ticks.
+            long previousTickMs = (clock.Tick - 1) * 1000L / clock.TicksPerSecond;
+            int elapsed = _lastTimeMs == now ? 0 : (int)(now - previousTickMs);
             _lastTimeMs = now;
             if (elapsed <= 0)
             {
@@ -138,13 +150,21 @@ namespace CubeGame.Gameplay
                 return false;
             }
 
-            target = new CreatureTarget { Id = id, X = _session.Hero.Position.X, Z = _session.Hero.Position.Z, Reachable = true };
+            WorldPosition position = _session.Hero.Position;
+            target = new CreatureTarget
+            {
+                Id = id, X = position.X, Y = position.Y, Z = position.Z, Width = 0.96, Reachable = true,
+            };
+            if (_session.Combat.TryGet(StableEntityId.Hero, out Combatant hero))
+            {
+                target.Width = hero.HitWidth;
+            }
             return true;
         }
 
         public string FindNearestHostile(CreatureState self, double radius)
         {
-            if (!_enemies.TryGetValue(self.StableId, out Enemy enemy) || !enemy.Combatant.Hostile
+            if (!_enemies.TryGetValue(self.StableId, out Enemy enemy)
                 || !TryGetTarget(HeroTargetId, out CreatureTarget hero))
             {
                 return null;
@@ -152,7 +172,58 @@ namespace CubeGame.Gameplay
 
             double dx = hero.X - self.X;
             double dz = hero.Z - self.Z;
-            return dx * dx + dz * dz <= radius * radius ? HeroTargetId : null;
+            if (enemy.Recovered)
+            {
+                // 0x596CA0, directed hostility against faction 0, with no aggression flag.
+                // The region-wide actor scan and +0x124 aggression flags are still open.
+                double dy = hero.Y - self.Y;
+                return self.Faction == (int)CreatureFaction.Monster && !self.IsPassiveObject
+                    && dx * dx + dy * dy + dz * dz < radius * radius && HasLineOfSight(self, hero)
+                    ? HeroTargetId : null;
+            }
+            return enemy.Combatant.Hostile && dx * dx + dz * dz <= radius * radius ? HeroTargetId : null;
+        }
+
+        public bool TryGetActionState(CreatureState self, out bool recovering)
+        {
+            recovering = false;
+            if (!_enemies.TryGetValue(self.StableId, out Enemy enemy) ||
+                !_session.Combat.TryGetPhase(enemy.Combatant.Id, out ActionPhase phase))
+            {
+                return false;
+            }
+
+            recovering = phase == ActionPhase.Recover;
+            return true;
+        }
+
+        public void Face(CreatureState self, CreatureTarget target)
+        {
+            if (_enemies.TryGetValue(self.StableId, out Enemy enemy) && (target.X != self.X || target.Z != self.Z))
+            {
+                enemy.Combatant.Yaw = YawTowards(self.X, self.Z, target.X, target.Z);
+            }
+        }
+
+        public bool HasLineOfSight(CreatureState self, CreatureTarget target)
+        {
+            double dx = target.X - self.X, dy = target.Y - self.Y, dz = target.Z - self.Z;
+            double distanceSquared = dx * dx + dy * dy + dz * dz;
+            if (distanceSquared > 200 * 200) return false; // 0x59EE90 caller's range
+            if (_voxelAt == null) return true;
+
+            // Approximate the original ray at body height using the edited absolute world columns.
+            int samples = (int)Math.Ceiling(Math.Sqrt(distanceSquared) * 2.0);
+            for (int i = 1; i < samples; i++)
+            {
+                double t = (double)i / samples;
+                if (Voxel.IsSolid(_voxelAt((int)Math.Floor(self.X + t * dx),
+                    (int)Math.Floor(self.Y + 0.5 + t * dy), (int)Math.Floor(self.Z + t * dz))))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public bool TryBeginAction(CreatureState self, int actionCode, out string reason)
@@ -166,6 +237,12 @@ namespace CubeGame.Gameplay
 
             Combatant attacker = enemy.Combatant;
             AttackPlan plan = AlphaAttackRoute.ForAction(actionCode);
+            if (enemy.Recovered && (enemy.Ai.LastSelectedAttack != actionCode || _session.ActionTimings == null ||
+                !_session.ActionTimings.TryGet(attacker.Kind, plan.Action, out _)))
+            {
+                reason = "MISSING_ALPHA_ACTION_OR_TIMING";
+                return false;
+            }
             // A timed clip offered by the library does not prove that this spawn launches it in Alpha.
             // C-29 or an equipped weapon plus its weapon-action gate can establish a routed attack.
             bool provenSelection = enemy.Ai.LastSelectedAttack == actionCode
@@ -248,6 +325,8 @@ namespace CubeGame.Gameplay
             return _roll;
         }
 
+        public int NextAlphaRoll() => _behaviourRandom.Next();
+
         private static float YawTowards(double fromX, double fromZ, double toX, double toZ)
         {
             return (float)(Math.Atan2(toX - fromX, toZ - fromZ) * 180.0 / Math.PI);
@@ -259,6 +338,7 @@ namespace CubeGame.Gameplay
             public CreatureState State;
             public CreatureAi Ai;
             public double Moved;
+            public bool Recovered;
         }
     }
 }

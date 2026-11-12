@@ -280,6 +280,9 @@ namespace CubeGame.Features.World
         /// <summary>Spawns created by the content providers (<see cref="IZoneContentProvider"/>).</summary>
         public List<Contracts.SpawnDefinition> ContentSpawns { get; } = new List<Contracts.SpawnDefinition>();
 
+        /// <summary>State of the zone CRT after the P2 pre-population passes.</summary>
+        public int PopulationRandomState { get; internal set; }
+
         internal void AddPlant(AlphaPlantPlacement plant)
         {
             var key = WorldLayout.ChunkOf(plant.X, plant.Z);

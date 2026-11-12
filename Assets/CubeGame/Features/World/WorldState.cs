@@ -80,7 +80,7 @@ namespace CubeGame.Features.World
             }
 
             if ((generatorId == AlphaTerrainGenerator.ContentId || generatorId == AlphaTerrainGenerator.PreviousWorldRuntimeId ||
-                 generatorId == AlphaTerrainGenerator.WorldRuntimeId)
+                 AlphaTerrainGenerator.UsesP2Environment(generatorId))
                 && contentProviders != null && contentProviders.Count > 0)
             {
                 generator = new AlphaTerrainGenerator(seed, contentProviders, generatorId);

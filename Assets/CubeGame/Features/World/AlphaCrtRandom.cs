@@ -11,6 +11,8 @@ namespace CubeGame.Features.World
 
         private uint _state;
 
+        internal int State => unchecked((int)_state);
+
         public AlphaCrtRandom(int seed)
         {
             Seed(seed);
