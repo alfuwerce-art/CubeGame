@@ -56,3 +56,27 @@ python tools\alpha_research\extract_world_ctor_tables.py `
 ## Статус
 
 `RESEARCH_DRAFT`. Не ТЗ, не разрешение на M0-01+, не приёмка S05B-2. Приёмку определяет продюсер.
+
+---
+
+# M1-R0 — реестр идентичности существ
+
+`extract_creature_identity_registry.py` строит
+[реестр существ](../../docs/research/M1_ALPHA_CREATURE_IDENTITY_REGISTRY.csv) для
+[M1-R0](../../docs/planning/M1_CREATURE_FAMILY_RESEARCH_TASK.md): вид Alpha → имя → анатомия →
+поведение → конкретный подготовленный Unity-вариант.
+
+```powershell
+python tools/alpha_research/extract_creature_identity_registry.py
+python -m tools.alpha_content.build_staged_visuals --check   # дрейф реестра вариантов
+```
+
+Источники: таблица видов и слоты моделей `Cube.exe` (`ALPHA_CODE_STATIC`), карта имён из
+`world/World.cpp` (`ALPHA_DECOMPILED`, wide-строки по `&DAT_` дочитываются из образа),
+эмуляция `drawModel` и `CombatBehavior` (`EMULATED_ALPHA_CODE`), коммитированный реестр
+`AlphaStagedVisuals.g.cs` (`UNITY_ASSET_VERIFIED`) и локальный кэш `.scratch/content` (`LOCAL_ONLY`).
+
+Скрипт **только читает**: `Cube.exe`, `data1.db` (read-only sqlite), текст декомпиляции, локальный
+кэш и сгенерированные C#-таблицы. В репозиторий пишется один текстовый CSV с именами, id, слотами
+и статусами — без геометрии, без ассетов, без изменений Unity-проекта. Строки с неподтверждёнными
+полями помечаются `INFERRED` / `UNKNOWN`, а не «доказано».
