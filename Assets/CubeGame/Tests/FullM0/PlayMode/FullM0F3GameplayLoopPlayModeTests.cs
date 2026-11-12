@@ -92,6 +92,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             LiveSpawn vendor = TownNpc(game, city, TownNpcPopulation.MerchantClass);
             Assert.IsTrue(game.Visuals.TryGetRoot(vendor.Id, out _));
             PlaceHero(game, vendor.Definition.Position);
+            yield return null;
             game.Session.Clock.StepTicks(2);
             Assert.IsTrue(game.Creatures.TryGetAi(vendor.Id, out var vendorAi));
             Assert.IsNull(vendorAi.TargetId);
