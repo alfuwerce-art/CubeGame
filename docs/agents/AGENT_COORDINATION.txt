@@ -995,3 +995,6 @@ Runtime/Player 52c9758, ветка codex/m0-p1-world-streaming. EditMode 771/773
 
 [2026-11-12 23:45] CLAIM | Codex | D92 M0 P2 — окружение и Unity slot
 Ветка codex/m0-p2-environment от 0763c83. Общие runtime-файлы World/Contracts, упаковка AlphaContent и тесты P2. Проверки Unity последовательно в D:\Projects\CubeGame.
+
+[2026-11-13 00:06] RELEASE | Codex | D92 M0 P2 — PARTIAL, Unity slot свободен
+Игровой коммит eb8de47, EditMode 773 прошли / 2 пропуска, полный PlayMode 75/75. Windows x64 и live smoke завершены. Открыты части деревьев, структуры и полная сверка с Alpha. Отчёт docs/reports/M0_ALPHA_FULL_PORT_P2_ENVIRONMENT_REPORT.md.
