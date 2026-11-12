@@ -67,7 +67,7 @@
 
 ## D92 — дополнительные blocking gaps, выявленные визуальной/кодовой проверкой
 
-- Streaming/render distance: priority восстановлен частично, реальные Alpha radii/двухуровневый tile path — `PARTIAL`.
+- P1 Streaming/render distance — `PARTIAL`. Игровой runtime использует восстановленные 40×40 чанков, границы генерации и выгрузки, бюджет вершин и кривые тумана. Открыты 3D-пути карты `ZoneTile` / `LandscapeTile`, точный порядок RNG после речного прохода и визуальное совпадение горизонта. [Отчёт P1](../reports/M0_ALPHA_FULL_PORT_P1_WORLD_REPORT.md)
 - Trees: selection частично исследован, density/placement/RNG всё ещё заменены hash + `MaxObjectsPerZone` — `CUBEGAME_CONTRACT/PARTIAL`.
 - Grass/flowers/world-object placement — `UNKNOWN/PARTIAL`.
 - World-object IDs ранее смешивались с actor KindId; требуется отдельный Alpha consumer/path — `PARTIAL`.

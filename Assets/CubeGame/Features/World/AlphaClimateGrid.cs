@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+using System.Collections.Concurrent;
+using CubeGame.Features.Contracts;
 
 namespace CubeGame.Features.World
 {
@@ -39,11 +40,11 @@ namespace CubeGame.Features.World
     /// </summary>
     public sealed class AlphaClimateGrid
     {
-        private readonly Dictionary<long, AlphaClimateCell> _cells = new Dictionary<long, AlphaClimateCell>();
+        private readonly ConcurrentDictionary<long, AlphaClimateCell> _cells =
+            new ConcurrentDictionary<long, AlphaClimateCell>();
         private readonly AlphaWorldSeeds _seeds;
         private readonly int _spawnX;
         private readonly int _spawnZ;
-        private readonly object _lock = new object();
 
         /// <param name="spawnX">Alpha world+0x8000F0: spawn point in voxels.</param>
         /// <param name="spawnZ">Alpha world+0x8000F4.</param>
@@ -54,16 +55,7 @@ namespace CubeGame.Features.World
             _spawnZ = spawnZ;
         }
 
-        public int CachedCount
-        {
-            get
-            {
-                lock (_lock)
-                {
-                    return _cells.Count;
-                }
-            }
-        }
+        public int CachedCount => _cells.Count;
 
         /// <summary>Returns the cell of region (rx, rz), or null outside the 1024×1024 grid.</summary>
         public AlphaClimateCell Get(int rx, int rz)
@@ -74,16 +66,22 @@ namespace CubeGame.Features.World
             }
 
             long key = ((long)rx << 20) | (uint)rz;
-            lock (_lock)
-            {
-                if (_cells.TryGetValue(key, out AlphaClimateCell cell))
-                {
-                    return cell;
-                }
+            // Climate cells are immutable after generation. Parallel terrain rows share the same inputs
+            // without taking a global lock for every noise sample.
+            return _cells.TryGetValue(key, out AlphaClimateCell cell)
+                ? cell
+                : _cells.GetOrAdd(key, Generate(rx, rz));
+        }
 
-                cell = Generate(rx, rz);
-                _cells.Add(key, cell);
-                return cell;
+        internal void EvictOutside(RegionKey center)
+        {
+            foreach (long key in _cells.Keys)
+            {
+                if (System.Math.Abs((int)(key >> 20) - center.X) >= 5 ||
+                    System.Math.Abs((int)(key & 0xFFFFF) - center.Z) >= 5)
+                {
+                    _cells.TryRemove(key, out _);
+                }
             }
         }
 

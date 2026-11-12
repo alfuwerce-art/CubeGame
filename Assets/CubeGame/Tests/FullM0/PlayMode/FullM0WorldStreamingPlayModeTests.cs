@@ -100,8 +100,10 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.Less(Mathf.Abs(player.position.y - (ground + 1)), 1.6f, $"hero y {player.position.y} vs column top {ground + 1}");
 
             game.WorldView.CompletePending();
-            int full = (2 * 6 + 1) * (2 * 6 + 1);
-            Assert.AreEqual(full, game.WorldView.LoadedCount);
+            ChunkKey focus = game.WorldView.Center;
+            Assert.AreEqual(0, game.WorldView.PendingCount, "eligible chunks finish streaming");
+            Assert.IsTrue(game.WorldView.IsLoaded(new ChunkKey(focus.X - 18, focus.Z)));
+            Assert.IsTrue(game.WorldView.IsLoaded(new ChunkKey(focus.X + 18, focus.Z)));
 
             // Travel 40 chunks (1280 voxels) east: the origin rebases, far chunks are released and zones recorded.
             Vector2Int originBefore = game.WorldView.Origin;
@@ -119,7 +121,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.AreEqual(targetX + 0.5, game.Session.Hero.Position.X, 0.6, "world position preserved across rebase");
             Assert.IsTrue(game.WorldView.IsLoaded(WorldLayout.ChunkOf(targetX, sz)));
             Assert.IsFalse(game.WorldView.IsLoaded(startChunk), "start chunk released beyond keep radius");
-            Assert.LessOrEqual(game.WorldView.LoadedCount, 17 * 17);
+            Assert.LessOrEqual(game.WorldView.LoadedCount, 40 * 40);
             Assert.Greater(game.WorldView.TotalReleased, 0);
             Assert.IsTrue(game.Session.WorldDeltas.IsDiscovered(new ZoneKey(sx >> 8, sz >> 8)));
             Assert.IsTrue(game.Session.WorldDeltas.IsDiscovered(new ZoneKey(targetX >> 8, sz >> 8)));

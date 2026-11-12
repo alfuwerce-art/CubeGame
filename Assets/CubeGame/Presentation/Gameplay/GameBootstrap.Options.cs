@@ -14,9 +14,7 @@ namespace CubeGame.Gameplay
     /// Camera Speed / Camera Smoothness / Invert Y Axis / FPS Limit / Language). Eleven rows, each a left/right
     /// carousel, plus Apply / OK / Cancel (the three connection targets of the widget constructor).
     ///
-    /// Not every setting has a restored consumer in this port: render distance belongs to the streaming block
-    /// (P1, PARTIAL), music to the audio block (P8), language to the localization data. Those values are stored and
-    /// edited exactly as Alpha does, but the report marks them as not connected.
+    /// Music and language still require their runtime consumers.
     /// </summary>
     public sealed partial class GameBootstrap
     {
@@ -121,6 +119,7 @@ namespace CubeGame.Gameplay
                 : -1;
 
             if (_audio != null) _audio.Volume = Mathf.Clamp01(options.SoundVolume / 100f);
+            _worldView?.SetRenderDistance(options.RenderDistance);
             if (_orbitCamera != null)
             {
                 _orbitCamera.SpeedScale = options.CameraSpeed <= 0 ? 0f : options.CameraSpeed / 50f;

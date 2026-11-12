@@ -157,6 +157,28 @@ namespace CubeGame.Tests.FullM0.EditMode
         }
 
         [Test]
+        public void AlphaTerrainWindowAndZoneGenerationUseSeparateScales()
+        {
+            WorldStreamingPolicy policy = WorldStreamingPolicy.Alpha;
+            int x = WorldLayout.StartVoxel;
+            ChunkKey chunk = WorldLayout.ChunkOf(x, x);
+            ZoneKey zone = WorldLayout.ZoneOf(x, x);
+            Assert.AreEqual(1600, policy.Wanted(chunk).Count);
+            Assert.IsFalse(policy.ShouldRelease(new ChunkKey(chunk.X - 20, chunk.Z), chunk));
+            Assert.IsTrue(policy.ShouldRelease(new ChunkKey(chunk.X + 20, chunk.Z), chunk));
+            Assert.AreEqual(400, policy.Wanted(new ChunkKey(0, 0)).Count);
+
+            List<ZoneKey> zones = WorldStreamingPolicy.GenerationOrder(x, x);
+            Assert.AreEqual(25, zones.Count, "distance is strictly less than 768 voxels");
+            CollectionAssert.AreEqual(new[] { zone, new ZoneKey(zone.X - 1, zone.Z), new ZoneKey(zone.X, zone.Z - 1) },
+                zones.GetRange(0, 3));
+            Assert.IsTrue(WorldStreamingPolicy.GenerationOrder(x + 1, x).Contains(new ZoneKey(zone.X + 3, zone.Z)));
+            Assert.IsTrue(WorldStreamingPolicy.KeepGeneratedZone(new ZoneKey(zone.X + 3, zone.Z + 2), zone));
+            Assert.IsFalse(WorldStreamingPolicy.KeepGeneratedZone(new ZoneKey(zone.X + 4, zone.Z), zone));
+            Assert.AreEqual(12582912, WorldStreamingPolicy.AlphaVertexBudget(50));
+        }
+
+        [Test]
         public void ThousandStepWalkKeepsDeltasAndNeverDuplicatesChunks()
         {
             var world = new WorldState(new AlphaTerrainGenerator(5u), new WorldDeltaStore());

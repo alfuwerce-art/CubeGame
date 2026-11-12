@@ -23,6 +23,34 @@ namespace CubeGame.Gameplay.Streaming
             var result = new ChunkVoxels { Key = key };
             int originX = key.X * Size;
             int originZ = key.Z * Size;
+            if (generator is AlphaTerrainGenerator terrain)
+            {
+                // Fetch each of the (at most four) source zones once for the chunk and its border.
+                ZoneKey first = WorldLayout.ZoneOf(originX - 1, originZ - 1);
+                ZoneKey last = WorldLayout.ZoneOf(originX + Size, originZ + Size);
+                for (int zx = first.X; zx <= last.X; zx++)
+                {
+                    for (int zz = first.Z; zz <= last.Z; zz++)
+                    {
+                        if (!WorldLayout.IsInside(new ZoneKey(zx, zz))) continue;
+
+                        AlphaZone zone = terrain.Zone(zx, zz);
+                        int x0 = System.Math.Max(-1, zx * WorldLayout.ZoneSize - originX);
+                        int x1 = System.Math.Min(Size + 1, (zx + 1) * WorldLayout.ZoneSize - originX);
+                        int z0 = System.Math.Max(-1, zz * WorldLayout.ZoneSize - originZ);
+                        int z1 = System.Math.Min(Size + 1, (zz + 1) * WorldLayout.ZoneSize - originZ);
+                        for (int lz = z0; lz < z1; lz++)
+                        {
+                            for (int lx = x0; lx < x1; lx++)
+                            {
+                                result.Columns[(lz + 1) * Span + lx + 1] = zone.Column(originX + lx, originZ + lz);
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+
             for (int lz = -1; lz <= Size; lz++)
             {
                 for (int lx = -1; lx <= Size; lx++)

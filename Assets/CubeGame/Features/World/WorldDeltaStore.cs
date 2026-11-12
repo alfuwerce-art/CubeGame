@@ -227,12 +227,19 @@ namespace CubeGame.Features.World
     }
 
     /// <summary>
-    /// Streaming policy for Unity's 32-voxel render chunks. The view and retention bounds are CubeGame
-    /// budgets. Cube.exe 0x469590 prioritizes its 256-voxel ZoneTiles by squared distance, with ties
-    /// resolved by X then Z. The same priority is used here on the Unity mesh grid.
+    /// Gameplay terrain uses the 32-voxel ChunkBuffer grid (Cube.exe 0x4690A0).
+    /// ZoneTile and LandscapeTile belong to the separate map path at 0x469590.
     /// </summary>
     public sealed class WorldStreamingPolicy
     {
+        public const int AlphaChunkRadius = 20;
+        public const int AlphaGenerationRadius = 3 * WorldLayout.ZoneSize;
+        public const int AlphaZoneKeepRadius = 4;
+        public const int AlphaWorkerDelayMs = 5;
+        public const int AlphaEvictionIntervalMs = 1000;
+
+        public bool UsesAlphaWindow { get; }
+
         public WorldStreamingPolicy(int viewRadius = 6, int keepRadius = 8)
         {
             if (viewRadius < 0 || keepRadius < viewRadius)
@@ -244,6 +251,17 @@ namespace CubeGame.Features.World
             KeepRadius = keepRadius;
         }
 
+        private WorldStreamingPolicy(bool usesAlphaWindow) : this(AlphaChunkRadius, AlphaChunkRadius)
+        {
+            UsesAlphaWindow = usesAlphaWindow;
+        }
+
+        public static WorldStreamingPolicy Alpha { get; } = new WorldStreamingPolicy(true);
+
+        // 0x469396: renderDistance * 0.01 * 0x1800000, truncated to a vertex count.
+        public static long AlphaVertexBudget(int renderDistance) =>
+            (long)(Math.Max(0, renderDistance) * 0.01 * 0x1800000);
+
         public int ViewRadius { get; }
 
         public int KeepRadius { get; }
@@ -252,9 +270,10 @@ namespace CubeGame.Features.World
         public List<ChunkKey> Wanted(ChunkKey center)
         {
             var result = new List<ChunkKey>();
-            for (int dx = -ViewRadius; dx <= ViewRadius; dx++)
+            int upper = UsesAlphaWindow ? ViewRadius : ViewRadius + 1;
+            for (int dx = -ViewRadius; dx < upper; dx++)
             {
-                for (int dz = -ViewRadius; dz <= ViewRadius; dz++)
+                for (int dz = -ViewRadius; dz < upper; dz++)
                 {
                     var key = new ChunkKey(center.X + dx, center.Z + dz);
                     if (WorldLayout.IsInside(key))
@@ -286,7 +305,54 @@ namespace CubeGame.Features.World
 
         public bool ShouldRelease(ChunkKey loaded, ChunkKey center)
         {
+            if (UsesAlphaWindow)
+            {
+                int dx = loaded.X - center.X;
+                int dz = loaded.Z - center.Z;
+                return dx < -KeepRadius || dz < -KeepRadius || dx >= KeepRadius || dz >= KeepRadius;
+            }
+
             return WorldLayout.Chebyshev(loaded, center) > KeepRadius;
+        }
+
+        /// <summary>Missing terrain zones are considered in X/Z order and ranked by distance to their voxel centre.</summary>
+        public static List<ZoneKey> GenerationOrder(int x, int z)
+        {
+            ZoneKey center = WorldLayout.ZoneOf(x, z);
+            var candidates = new List<ZoneKey>();
+            for (int dx = -3; dx <= 3; dx++)
+            {
+                for (int dz = -3; dz <= 3; dz++)
+                {
+                    var zone = new ZoneKey(center.X + dx, center.Z + dz);
+                    if (WorldLayout.IsInside(zone) && ZoneDistanceSquared(zone, x, z) < AlphaGenerationRadius * AlphaGenerationRadius)
+                    {
+                        candidates.Add(zone);
+                    }
+                }
+            }
+            candidates.Sort((a, b) =>
+            {
+                int distance = ZoneDistanceSquared(a, x, z).CompareTo(ZoneDistanceSquared(b, x, z));
+                if (distance != 0) return distance;
+                int order = a.X.CompareTo(b.X);
+                return order != 0 ? order : a.Z.CompareTo(b.Z);
+            });
+            return candidates;
+        }
+
+        private static long ZoneDistanceSquared(ZoneKey zone, int x, int z)
+        {
+            long dx = (long)zone.X * WorldLayout.ZoneSize + WorldLayout.ZoneSize / 2 - x;
+            long dz = (long)zone.Z * WorldLayout.ZoneSize + WorldLayout.ZoneSize / 2 - z;
+            return dx * dx + dz * dz;
+        }
+
+        public static bool KeepGeneratedZone(ZoneKey zone, ZoneKey center)
+        {
+            int dx = zone.X - center.X;
+            int dz = zone.Z - center.Z;
+            return dx * dx + dz * dz < AlphaZoneKeepRadius * AlphaZoneKeepRadius;
         }
     }
 }

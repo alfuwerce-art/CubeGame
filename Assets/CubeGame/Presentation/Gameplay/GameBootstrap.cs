@@ -71,8 +71,6 @@ namespace CubeGame.Gameplay
         [SerializeField] private Material terrainMaterial;
 
         /// <summary>32-voxel chunks shown around the hero / kept before release (CubeGame decision, PLACEHOLDER until profiling).</summary>
-        [SerializeField] private int viewRadius = 6;
-        [SerializeField] private int keepRadius = 8;
 
         /// <summary>Scene distance from the origin that triggers a floating-origin rebase (voxels).</summary>
         public const float RebaseDistance = 512f;
@@ -273,7 +271,9 @@ namespace CubeGame.Gameplay
             {
                 _screenshotFrame = -1;
                 ScreenCapture.CaptureScreenshot(_screenshotPath);
-                Debug.Log($"[Game] screenshot -> {_screenshotPath} state={_session.State} tick={_session.Clock?.Tick}");
+                Debug.Log($"[Game] screenshot -> {_screenshotPath} state={_session.State} tick={_session.Clock?.Tick} " +
+                          $"chunks={_worldView?.LoadedCount} pending={_worldView?.PendingCount} released={_worldView?.TotalReleased} " +
+                          $"vertices={_worldView?.LoadedVertices}/{_worldView?.VertexBudget}");
                 StartCoroutine(QuitAfterFrames(3));
             }
 
@@ -1111,8 +1111,9 @@ namespace CubeGame.Gameplay
 
             _worldRoot = new GameObject("WorldRoot");
             _worldView = _worldRoot.AddComponent<StreamingWorldView>();
-            _worldView.Initialise(_worldState, new WorldStreamingPolicy(viewRadius, keepRadius), terrainMaterial,
-                StreamingWorldView.OriginFor(hero.Position.X, hero.Position.Z));
+            _worldView.Initialise(_worldState, WorldStreamingPolicy.Alpha, terrainMaterial,
+                StreamingWorldView.OriginFor(hero.Position.X, hero.Position.Z), _camera);
+            _worldView.SetRenderDistance(_options.RenderDistance);
             Vector3 heroPoint = _worldView.ToScene(hero.Position.X, hero.Position.Y, hero.Position.Z);
             var loadTimer = System.Diagnostics.Stopwatch.StartNew();
             _worldView.LoadAround(heroPoint, 2);
@@ -1340,8 +1341,12 @@ namespace CubeGame.Gameplay
                 cameraObject.AddComponent<AudioListener>();
                 _camera.clearFlags = CameraClearFlags.SolidColor;
                 _camera.backgroundColor = new Color(0.45f, 0.62f, 0.82f);
-                _camera.farClipPlane = 600f;
             }
+
+            // Gameplay projection in Cube.exe 0x4AE5D3. Unity culls the terrain mesh bounds against it.
+            _camera.fieldOfView = 50f;
+            _camera.nearClipPlane = 0.1f;
+            _camera.farClipPlane = 2000f;
 
             _orbitCamera = _camera.GetComponent<OrbitCameraController>();
             if (_orbitCamera == null)
