@@ -800,7 +800,10 @@ Button:disabled {
 /* Alpha puts the 280x150 palette mesh at (10, 200), which runs past the 330 px frame; the port keeps the size and
    lifts it to y = 178 so the grid stays inside the frame (CUBEGAME_CONTRACT offset). */
 .alpha-hair-color-label {
-    top: 160px;
+    top: 158px;
+    height: 16px;
+    margin: 0;
+    padding: 0;
 }
 
 .alpha-palette {
