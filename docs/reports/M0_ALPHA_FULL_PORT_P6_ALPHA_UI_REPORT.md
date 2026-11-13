@@ -12,6 +12,16 @@
 Задача продюсера: «сделай нормальное меню как в игре и так же во время игры убрать кнопки меню на весь экран;
 экран во время игры, меню и редактор — как в оригинальной альфе».
 
+## 0. Почему меню были «кнопками на весь экран»
+
+В сборках P0–P5 таблица стилей `GameInterface.uss` **целиком отбрасывалась Unity** при импорте:
+`GameInterface.uss (line 403): error: Invalid complex selector delimiter: '.alpha-row-info .alpha-line+.alpha-line'`
+(лог сборки). Селектор соседа `+` появился в P0 review-fix `976c0d1`; USS UI Toolkit его не поддерживает. В
+результате ни один Alpha-стиль P0 не применялся, и каждый пункт меню рисовался как стандартная серая кнопка
+Unity на всю ширину окна (снимок `.scratch/p6-shots` до исправления совпадает с этой картиной). Исправлено в
+`a1c73ed`; добавлен EditMode-тест `FullM0AlphaInterfaceStyleTests`, который ловит неподдерживаемые селекторы и
+ошибки импорта таблицы.
+
 ## 1. Что найдено в Alpha
 
 ### 1.1 Формат `.plx` расшифрован — `ALPHA_CODE_STATIC`
@@ -105,7 +115,20 @@ help / skills / crafting / inventory / worldmap / system с подписями `
 
 ## 3. Проверки
 
-TESTS_PLACEHOLDER
+Код проверен на `81a7cdd` (последующий `6d4c9c0` меняет только отступ подписи «Hair color» в USS).
+
+| Проверка | Результат |
+|---|---|
+| EditMode (полный) | 823 тестов: **821 passed, 0 failed, 2 skipped**, `error CS = 0` |
+| PlayMode (полный) | **75 / 75 passed** |
+| Новый тест | `FullM0AlphaInterfaceStyleTests`: в USS нет `+ ~ :first-child :last-child :nth- :not(`, таблица импортируется без ошибок |
+| Обновлённые тесты | F4 Presentation и P0 Startup: кнопки меню нажимаются после Esc (`ToggleMenuMode`), журнал через `ToggleJournal`, варка зелья в окне крафта, HUD проверяется по текстам баров и `LVL n`; добавлено «нет `action-bar`» |
+| Windows build | `tools/release/build_windows_release.ps1 -OutputDir .scratch/p6-build`: **PASS** на `6d4c9c0`, `errorCS=0`, content gate PASS, `gui/` (106 файлов) в `StreamingAssets`, ошибок импорта USS в логе сборки 0 |
+| Windows Player, снимки 1920×1080 | `.scratch/p6-shots/`: `start`, `editor`, `createworld`, `hud`, `esc`, `inventory`, `system` (`-cubeUiScreen`, отдельная папка сохранений) |
+| Сверка со снимками Alpha | HUD внизу по центру (HP/MP, 7 слотов с подписями), панель персонажа слева вверху, ряд F1/X/C/B/M/O после Esc — совпадает по расположению с `ingame1.png` / `shot08_esc.png`; стартовый экран — логотип и Picroma как на `shot01.png` |
+
+Живой ввод мышью/клавиатурой в Player в P6 не прогонялся (снимки сделаны через диагностический ключ);
+клавиши проверены кодом и PlayMode-тестами.
 
 ## 4. Открытые долги (не считать закрытыми)
 
