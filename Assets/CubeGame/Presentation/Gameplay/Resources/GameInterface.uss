@@ -395,13 +395,10 @@ Button:disabled {
 
 /* Row text origin of 0x425450 / 0x605AE0: name y=30, title y=55, detail y=75/80 inside the 220 px row frame;
    a Label's ink starts ~10 px below its top at 14 px, so the block starts at y≈40. */
+/* UI Toolkit USS has no sibling combinator ('+'): one such selector makes Unity reject the whole sheet. */
 .alpha-row-info .alpha-line {
-    margin: 0;
+    margin: 0 0 5px 0;
     padding: 0;
-}
-
-.alpha-row-info .alpha-line + .alpha-line {
-    margin-top: 5px;
 }
 
 /* Alpha reveals the row action only while the row is hovered. */
@@ -1157,21 +1154,21 @@ Button:disabled {
     height: 0;
 }
 
-.alpha-crosshair > VisualElement {
+.alpha-crosshair-h, .alpha-crosshair-v {
     position: absolute;
     background-color: rgb(255, 255, 255);
     border-width: 1px;
     border-color: rgb(0, 0, 0);
 }
 
-.alpha-crosshair > VisualElement:first-child {
+.alpha-crosshair-h {
     left: -9px;
     top: -2px;
     width: 18px;
     height: 4px;
 }
 
-.alpha-crosshair > VisualElement:last-child {
+.alpha-crosshair-v {
     left: -2px;
     top: -9px;
     width: 4px;

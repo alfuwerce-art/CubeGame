@@ -124,8 +124,12 @@ namespace CubeGame.Gameplay
 
             var crosshair = new VisualElement { name = "crosshair", pickingMode = PickingMode.Ignore };
             crosshair.AddToClassList("alpha-crosshair");
-            crosshair.Add(new VisualElement { pickingMode = PickingMode.Ignore });
-            crosshair.Add(new VisualElement { pickingMode = PickingMode.Ignore });
+            var horizontal = new VisualElement { pickingMode = PickingMode.Ignore };
+            horizontal.AddToClassList("alpha-crosshair-h");
+            crosshair.Add(horizontal);
+            var vertical = new VisualElement { pickingMode = PickingMode.Ignore };
+            vertical.AddToClassList("alpha-crosshair-v");
+            crosshair.Add(vertical);
             hud.Add(crosshair);
 
             // Bottom centre: HP / MP bars and the hotbar.
