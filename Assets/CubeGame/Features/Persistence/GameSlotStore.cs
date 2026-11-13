@@ -177,6 +177,7 @@ namespace CubeGame.Features.Persistence
                 worldChecksum = worldChecksum,
             };
             WriteRawItems(hero, data);
+            WriteRecipes(hero, data);
 
             if (!TryValidate(data, out string validationError))
             {
@@ -322,6 +323,7 @@ namespace CubeGame.Features.Persistence
 
             hero.RestoreInventory(data.inventoryPlacement);
             RestoreRawItems(hero, data);
+            RestoreRecipes(hero, data);
             if (data.huntMissions != null)
             {
                 foreach (HuntMissionSaveData mission in data.huntMissions)
@@ -626,6 +628,50 @@ namespace CubeGame.Features.Persistence
         private static string Checksum(string text)
         {
             return SaveService.Fnv1a64(text).ToString("x16", CultureInfo.InvariantCulture);
+        }
+
+        public static void WriteRecipes(HeroState hero, SessionSaveData data)
+        {
+            int n = hero.KnownRecipes.Count;
+            data.heroRecipeTypes = new int[n];
+            data.heroRecipeSubtypes = new int[n];
+            data.heroRecipeSeeds = new int[n];
+            data.heroRecipeRarities = new int[n];
+            data.heroRecipeModifiers = new int[n];
+            data.heroRecipeLevels = new int[n];
+            for (int i = 0; i < n; i++)
+            {
+                AlphaItemRecord r = hero.KnownRecipes[i];
+                data.heroRecipeTypes[i] = r.Type;
+                data.heroRecipeSubtypes[i] = r.Subtype;
+                data.heroRecipeSeeds[i] = r.Seed;
+                data.heroRecipeRarities[i] = r.Rarity;
+                data.heroRecipeModifiers[i] = r.Modifier;
+                data.heroRecipeLevels[i] = r.Level;
+            }
+        }
+
+        public static void RestoreRecipes(HeroState hero, SessionSaveData data)
+        {
+            hero.KnownRecipes.Clear();
+            int n = data.heroRecipeTypes?.Length ?? 0;
+            bool full = n > 0 && data.heroRecipeSubtypes?.Length == n && data.heroRecipeSeeds?.Length == n
+                && data.heroRecipeRarities?.Length == n && data.heroRecipeModifiers?.Length == n && data.heroRecipeLevels?.Length == n;
+            if (!full)
+            {
+                for (int level = 1; level <= hero.Sheet.Progression.Level; level++)
+                {
+                    hero.LearnRecipesForLevel(level);
+                }
+
+                return;
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                hero.KnownRecipes.Add(new AlphaItemRecord(data.heroRecipeTypes[i], data.heroRecipeSubtypes[i], data.heroRecipeSeeds[i],
+                    0, data.heroRecipeRarities[i], data.heroRecipeModifiers[i], data.heroRecipeLevels[i]));
+            }
         }
 
         public static void WriteRawItems(HeroState hero, SessionSaveData data)

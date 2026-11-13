@@ -184,6 +184,59 @@ namespace CubeGame.Gameplay
             return Report(true, "rested until 07:00");
         }
 
+        /// <summary>
+        /// Alpha station test (0x42F910): water needs a water voxel at the hero; other stations need their world object
+        /// (Campfire 0x41, Furnace 0x47 … Workbench 0x4C) among the live spawns within 4 blocks.
+        /// </summary>
+        public bool StationNear(AlphaCraftStation station)
+        {
+            if (_session?.Hero == null)
+            {
+                return false;
+            }
+
+            WorldPosition hero = _session.Hero.Position;
+            if (station == AlphaCraftStation.Water)
+            {
+                return _worldState != null && Features.World.Voxel.IsWater(_worldState.VoxelAt((int)System.Math.Floor(hero.X),
+                    (int)System.Math.Floor(hero.Y), (int)System.Math.Floor(hero.Z)));
+            }
+
+            int objectId = AlphaCrafting.StationObject(station);
+            if (objectId < 0 || _population == null)
+            {
+                return false;
+            }
+
+            foreach (LiveSpawn spawn in _population.Live)
+            {
+                if (spawn.Definition.WorldObjectId == objectId
+                    && DistanceToHeroSquared(spawn.Definition.Position) < AlphaCrafting.StationRadius * AlphaCrafting.StationRadius)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool TryCraftRecipe(int recipeIndex)
+        {
+            bool crafted = _session.TryCraft(recipeIndex);
+            if (crafted)
+            {
+                _audio.Play("craft.wav");
+            }
+
+            return Report(crafted, crafted ? "crafted" : _session.LastRejection);
+        }
+
+        public bool TryLearnFormula(int bagSlot)
+        {
+            bool learned = _session.TryLearnFormula(bagSlot);
+            return Report(learned, learned ? "recipe learned" : _session.LastRejection);
+        }
+
         public bool TryBrewLifePotion()
         {
             bool brewed = _session.TryBrewLifePotion();

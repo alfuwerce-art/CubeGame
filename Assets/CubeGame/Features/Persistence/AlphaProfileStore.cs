@@ -362,6 +362,7 @@ namespace CubeGame.Features.Persistence
             session.huntMissions = GameSlotStore.WriteMissions(hero.Missions);
             session.inventoryPlacement = hero.InventoryPlacement();
             GameSlotStore.WriteRawItems(hero, session);
+            GameSlotStore.WriteRecipes(hero, session);
             session.characterChecksum = Checksum(characterText ?? string.Empty);
             session.worldName = record.LastWorldName;
             session.worldSeed = record.LastWorldSeed;
@@ -536,6 +537,7 @@ namespace CubeGame.Features.Persistence
 
             hero.RestoreInventory(session.inventoryPlacement);
             RestoreRawItems(hero, session);
+            GameSlotStore.RestoreRecipes(hero, session);
             if (session.huntMissions != null)
             {
                 foreach (HuntMissionSaveData mission in session.huntMissions)
@@ -1036,6 +1038,7 @@ namespace CubeGame.Features.Persistence
 
                     hero.RestoreInventory(session.inventoryPlacement);
                     RestoreRawItems(hero, session);
+                    GameSlotStore.RestoreRecipes(hero, session);
                     if (session.huntMissions != null)
                     {
                         foreach (HuntMissionSaveData mission in session.huntMissions)

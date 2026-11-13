@@ -1197,6 +1197,7 @@ namespace CubeGame.Gameplay
                 view.ToWorld(p, out double wx, out double wy, out double wz);
                 return Voxel.IsWater(waterWorld.VoxelAt((int)Math.Floor(wx), (int)Math.Floor(wy), (int)Math.Floor(wz)));
             };
+            _session.StationNear = StationNear;
             _orbitCamera.Target = _player.transform;
             _orbitCamera.AcceptsInput = AcceptsGameplayInput;
             _orbitCamera.Distance = OrbitCameraController.DefaultDistance;

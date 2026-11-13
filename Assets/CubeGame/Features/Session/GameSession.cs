@@ -117,6 +117,29 @@ namespace CubeGame.Features.Session
         /// <summary>Remaining ability cooldowns in ms by Alpha action id (Alpha <c>+0x139C</c> map, runtime only).</summary>
         public Dictionary<int, int> AbilityCooldowns { get; } = new Dictionary<int, int>();
 
+        /// <summary>Learned recipes (Alpha creature <c>+0x1D28</c>): the items the hero can craft, in learning order.</summary>
+        public List<AlphaItemRecord> KnownRecipes { get; } = new List<AlphaItemRecord>();
+
+        /// <summary>
+        /// 0x47FAE0: learns the recipes of <paramref name="level"/> that are not known yet. The roll stream is seeded by
+        /// hero name and level (CUBEGAME_CONTRACT: Alpha uses the global rand stream).
+        /// </summary>
+        public int LearnRecipesForLevel(int level)
+        {
+            var rng = new AlphaCrtRandom(unchecked(Name.GetHashCode() * 31 + level));
+            int added = 0;
+            foreach (AlphaItemRecord recipe in AlphaCrafting.LearnedAtLevel(rng, level, (int)Sheet.Class + 1))
+            {
+                if (!KnownRecipes.Contains(recipe))
+                {
+                    KnownRecipes.Add(recipe);
+                    added++;
+                }
+            }
+
+            return added;
+        }
+
         /// <summary>Platinum coins: Alpha counter fed by type 0x0D records (0x46EBE0, region mission reward).</summary>
         public int Platinum { get; internal set; }
 
@@ -402,6 +425,7 @@ namespace CubeGame.Features.Session
                 Appearance = AlphaHeroCreation.Normalize(request.Appearance),
             };
             hero.GiveStarterKit();
+            hero.LearnRecipesForLevel(1);
             return hero;
         }
 
@@ -751,7 +775,12 @@ namespace CubeGame.Features.Session
                     Events.Publish(new HuntChanged { TimeMs = died.TimeMs, Kind = dead.Kind, Complete = true });
                 }
                 long xp = KillExperience(dead.Sheet.Progression.Level, dead.Stars, dead.IsBoss);
+                int levelBefore = Hero.Sheet.Progression.Level;
                 int levels = Hero.Sheet.AddExperience(xp);
+                for (int learned = levelBefore + 1; learned <= Hero.Sheet.Progression.Level; learned++)
+                {
+                    Hero.LearnRecipesForLevel(learned);
+                }
                 // xp_applyLevelUps 0x447B00: every level-up sets HP to the new maximum; the pool is rebuilt after the
                 // combat update (the death arrives from inside it).
                 _levelUpHealPending |= levels > 0;
@@ -1113,15 +1142,102 @@ namespace CubeGame.Features.Session
             return true;
         }
 
+        /// <summary>Station test of the presentation (water at the hero, station object within 4 blocks); null = none.</summary>
+        public Func<AlphaCraftStation, bool> StationNear { get; set; }
+
+        /// <summary>
+        /// Alpha crafting 0x4709C0: the learned recipe <paramref name="recipeIndex"/> is made once when the bags cover its
+        /// ingredients (0x4A19D0) and its station is near (0x42F910). Ingredients are taken from matching stacks; a
+        /// crafted material gains the 1/5 bonus quantity rolls; the result goes to the bags.
+        /// </summary>
+        public bool TryCraft(int recipeIndex)
+        {
+            if (!CanUseServices || recipeIndex < 0 || recipeIndex >= Hero.KnownRecipes.Count)
+            {
+                return Reject("no such recipe");
+            }
+
+            AlphaRecipe recipe = AlphaCrafting.Build(Hero.KnownRecipes[recipeIndex]);
+            if (AlphaCrafting.Craftable(recipe, Hero.Inventory) < 1)
+            {
+                return Reject("missing ingredients");
+            }
+
+            if (recipe.Station != AlphaCraftStation.None && (StationNear == null || !StationNear(recipe.Station)))
+            {
+                return Reject(recipe.Station == AlphaCraftStation.Water ? "Requires water" : $"Requires {recipe.Station}");
+            }
+
+            var rng = new AlphaCrtRandom(unchecked(LootSeed(StableEntityId.ForRuntime((ulong)Clock.Tick)) ^ recipeIndex * 104729));
+            int count = AlphaCrafting.OutputCount(rng, recipe.Output);
+            InventoryEntry output = InventoryEntry.FromAlpha(recipe.Output, count);
+            bool placed = Hero.Inventory.TryAdd(output);
+            var taken = new List<InventoryEntry>();
+            foreach ((AlphaItemRecord item, int need) in recipe.Ingredients)
+            {
+                int left = need;
+                for (int slot = 0; slot < HeroInventory.Capacity && left > 0; slot++)
+                {
+                    InventoryEntry e = Hero.Inventory[slot];
+                    if (e == null || e.IsCore || !e.Record.Equals(item)) continue;
+                    int take = Math.Min(left, e.Count);
+                    taken.Add(Hero.Inventory.TakeFrom(slot, take));
+                    left -= take;
+                }
+            }
+
+            // With full bags the result may fit only into a slot freed by the last unit of an ingredient.
+            if (!placed && !Hero.Inventory.TryAdd(output))
+            {
+                foreach (InventoryEntry back in taken)
+                {
+                    Hero.Inventory.TryAdd(back);
+                }
+
+                return Reject("You can't carry more of these items.");
+            }
+
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        /// <summary>0x47D740: using a formula teaches its target item once and consumes one formula.</summary>
+        public bool TryLearnFormula(int bagSlot)
+        {
+            InventoryEntry entry = CanUseServices ? Hero.Inventory[bagSlot] : null;
+            if (entry == null || entry.IsCore || entry.Record.Type != AlphaLoot.TypeFormula)
+            {
+                return Reject("that is not a formula");
+            }
+
+            AlphaItemRecord target = AlphaCrafting.FormulaTarget(entry.Record);
+            if (Hero.KnownRecipes.Contains(target))
+            {
+                return Reject("recipe already known");
+            }
+
+            Hero.KnownRecipes.Add(target);
+            Hero.Inventory.TakeFrom(bagSlot, 1);
+            LastRejection = string.Empty;
+            return true;
+        }
+
         public bool TryBrewLifePotion()
         {
             if (!CanUseServices)
             {
                 return Reject("crafting requires a living hero");
             }
-            if (!Hero.Inventory.TryBrewLifePotion())
+
+            int index = Hero.KnownRecipes.FindIndex(r => r.Type == 1 && r.Subtype == 1);
+            if (index < 0)
             {
-                return Reject(Hero.Inventory.LastRejection);
+                return Reject("the Life Potion recipe is not known");
+            }
+
+            if (!TryCraft(index))
+            {
+                return false;
             }
 
             LastRejection = string.Empty;

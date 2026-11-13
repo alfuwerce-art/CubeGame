@@ -75,6 +75,22 @@ namespace CubeGame.Features.Persistence
         /// </summary>
         public int heroPlatinum;
 
+        /// <summary>
+        /// Optional P5 fields: learned recipes (Alpha +0x1D28) as parallel arrays. Slots written before P5 have none;
+        /// the hero then relearns the recipes of levels 1…L on load (CUBEGAME_CONTRACT migration).
+        /// </summary>
+        public int[] heroRecipeTypes;
+
+        public int[] heroRecipeSubtypes;
+
+        public int[] heroRecipeSeeds;
+
+        public int[] heroRecipeRarities;
+
+        public int[] heroRecipeModifiers;
+
+        public int[] heroRecipeLevels;
+
         public HuntMissionSaveData[] huntMissions;
 
         /// <summary>Calendar advances from inn visits, separate from the combat and movement tick.</summary>

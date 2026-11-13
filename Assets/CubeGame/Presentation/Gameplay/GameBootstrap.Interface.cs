@@ -505,6 +505,26 @@ namespace CubeGame.Gameplay
             HeroInventory inventory = hero.Inventory;
             Text(body, $"{inventory.UsedSlots}/{HeroInventory.Capacity} bag slots  ·  {hero.Copper} copper", "bag-summary", "muted");
             ButtonOf(body, "Brew Life Potion · 1 Heartflower + 1 Water Flask", "brew", () => TryBrewLifePotion());
+            Text(body, "Crafting", null, "section");
+            string[] tabs = { "Weapons", "Armor", "Amulets", "Cooking", "Alchemy", "Formulas" };
+            for (int i = 0; i < hero.KnownRecipes.Count; i++)
+            {
+                int index = i;
+                AlphaRecipe recipe = AlphaCrafting.Build(hero.KnownRecipes[i]);
+                int times = AlphaCrafting.Craftable(recipe, inventory);
+                string tab = recipe.Category >= 0 ? tabs[recipe.Category] : "Other";
+                string station = recipe.Station == AlphaCraftStation.None ? string.Empty : $" · {recipe.Station}";
+                var row = ItemRow(body, InventoryEntry.FromAlpha(recipe.Output), $"{tab} · ×{times}{station}");
+                ButtonOf(row, "Craft", $"craft-{index}", () => TryCraftRecipe(index)).SetEnabled(times > 0);
+            }
+            for (int i = 0; i < HeroInventory.Capacity; i++)
+            {
+                InventoryEntry formula = inventory[i];
+                if (formula == null || formula.IsCore || formula.Record.Type != AlphaLoot.TypeFormula) continue;
+                int slot = i;
+                var row = ItemRow(body, formula, "Formula");
+                ButtonOf(row, "Learn", $"learn-{slot}", () => WithBagEntry(slot, formula, () => TryLearnFormula(slot)));
+            }
             EquipmentStatSummary stats = EquipmentStats.Compute(hero.Loadout);
             Text(body, "Equipment", null, "section");
             Text(body, $"{hero.Health.MaxHealth:0} max HP  ·  {hero.Sheet.WeaponDamage + stats.WeaponDamageBonus:0.0} base damage  ·  {stats.TotalBlockValue:0.0} block",
