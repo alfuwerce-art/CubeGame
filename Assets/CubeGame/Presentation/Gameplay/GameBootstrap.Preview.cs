@@ -74,7 +74,8 @@ namespace CubeGame.Gameplay
             cameraObject.transform.localRotation = Quaternion.Euler(6f, 180f, 0f);
             _previewCamera = cameraObject.AddComponent<Camera>();
             _previewCamera.clearFlags = CameraClearFlags.SolidColor;
-            _previewCamera.backgroundColor = new Color(0.16f, 0.18f, 0.22f, 1f);
+            // Alpha draws the editor creature straight over the scene: transparent clear, no frame (P6).
+            _previewCamera.backgroundColor = new Color(0f, 0f, 0f, 0f);
             _previewCamera.fieldOfView = 30f;
             _previewCamera.nearClipPlane = 0.05f;
             _previewCamera.farClipPlane = 20f;
