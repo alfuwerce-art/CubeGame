@@ -182,6 +182,9 @@ namespace CubeGame.Gameplay
                 return;
             }
             if (Input.GetKeyDown(KeyCode.Q)) UsePotionShortcut();
+            if (Input.GetKeyDown(KeyCode.Alpha1)) HeroSlot(3);
+            if (Input.GetKeyDown(KeyCode.Alpha2)) HeroSlot(4);
+            if (Input.GetKeyDown(KeyCode.Alpha3)) HeroSlot(5);
             if (Input.GetKeyDown(KeyCode.E)) InteractFromInterface();
         }
 
@@ -359,7 +362,7 @@ namespace CubeGame.Gameplay
             string movement = HeroDead ? "Downed" : !_motor.enabled ? "Menu open" : _motor.Swimming ? "Swimming"
                 : _motor.Climbing ? "Climbing" : _motor.Gliding ? "Gliding"
                 : _motor.Sprinting && _motor.HorizontalSpeed > 0.1f ? "Sprinting" : "Ready";
-            SetText(_resourcesLabel, $"{movement}  ·  {hero.Copper} copper  ·  {hero.ManaCubes} mana cubes  ·  {minutes / 60:00}:{minutes % 60:00}");
+            SetText(_resourcesLabel, $"{movement}  ·  MP {(int)(hero.Mana * 100)}%  ·  {hero.Copper} copper  ·  {hero.Platinum} platinum  ·  {hero.ManaCubes} mana cubes  ·  {minutes / 60:00}:{minutes % 60:00}");
             if (!_lastCombatTarget.IsNone && _session.Combat.TryGet(_lastCombatTarget, out Combatant target))
             {
                 SetText(_targetLabel, $"{target.Name}  ·  {target.Health.CurrentHealth:0}/{target.Health.MaxHealth:0} HP");

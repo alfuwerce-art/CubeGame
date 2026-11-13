@@ -229,6 +229,10 @@ namespace CubeGame.Gameplay
                 {
                     HeroAttack();
                 }
+                else if (AcceptsGameplayInput() && Input.GetMouseButtonDown(1) && !PointerOverInterface())
+                {
+                    HeroSlot(2);
+                }
 
                 RebaseIfFar();
                 SyncHeroFromView();
@@ -504,6 +508,28 @@ namespace CubeGame.Gameplay
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Hotbar slot 2…5 of the Alpha class/specialization context (P5, 0x48B8AF). Key binding — right mouse for the
+        /// secondary, 1/2/3 for the abilities — is a CUBEGAME_CONTRACT; execution and refusals come from the session.
+        /// </summary>
+        public bool HeroSlot(int slot)
+        {
+            if (_session.State != SessionState.InGame || _session.Combat == null)
+            {
+                return Report(false, "hotbar refused: no running world");
+            }
+
+            SyncHeroFromView();
+            SyncHeroCombatant();
+            bool started = _session.TryHeroSlot(slot);
+            if (!started)
+            {
+                _combatLog = $"slot {slot} refused: {_session.LastRejection}";
+            }
+
+            return started;
         }
 
         /// <summary>Path chosen by the last <see cref="HeroAttack"/> (tests/diagnostics).</summary>

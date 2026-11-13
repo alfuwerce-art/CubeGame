@@ -111,6 +111,12 @@ namespace CubeGame.Features.Session
 
         public int ManaCubes { get; internal set; }
 
+        /// <summary>Alpha mana bar <c>+0x170</c> (0…1). Runtime state: it refills in 10 s, so it is not saved.</summary>
+        public float Mana { get; internal set; } = 1f;
+
+        /// <summary>Remaining ability cooldowns in ms by Alpha action id (Alpha <c>+0x139C</c> map, runtime only).</summary>
+        public Dictionary<int, int> AbilityCooldowns { get; } = new Dictionary<int, int>();
+
         /// <summary>Platinum coins: Alpha counter fed by type 0x0D records (0x46EBE0, region mission reward).</summary>
         public int Platinum { get; internal set; }
 
@@ -574,12 +580,101 @@ namespace CubeGame.Features.Session
             return true;
         }
 
+        private long _lastResourceTickMs = -1;
+
+        /// <summary>
+        /// Hero hotbar from class, specialization, weapons and ranks (Alpha 0x48B8AF): primary, secondary and the three
+        /// class abilities (0 = locked by rank 0 or no recovered weapon rule).
+        /// </summary>
+        public int[] HeroHotbar() => Hero == null ? new int[AlphaClassAbilities.Slots]
+            : AlphaClassAbilities.Hotbar(Hero.Sheet.Class, Hero.Sheet.Specialization,
+                Hero.Loadout.GetEquipped(EquipmentSlot.MainHand), Hero.Loadout.GetEquipped(EquipmentSlot.OffHand),
+                Hero.SkillRanks.ToArray());
+
+        /// <summary>
+        /// Starts hotbar slot 1…5 through the Alpha gate 0x43E5A0 (mana, cooldown). The action itself is executed by
+        /// the P4 <see cref="CombatSystem"/>; an action it does not support is refused there and costs nothing.
+        /// On start the mana cost (0x444AE0) is paid and the ability cooldown (0x43E6A0) begins.
+        /// </summary>
+        public bool TryHeroSlot(int slot)
+        {
+            if (State != SessionState.InGame || Hero == null || Combat == null || Hero.Health.IsDead)
+            {
+                return Reject("hotbar refused: no living hero in a running world");
+            }
+
+            int[] bar = HeroHotbar();
+            if (slot < 1 || slot > bar.Length)
+            {
+                return Reject($"no hotbar slot {slot}");
+            }
+
+            int action = bar[slot - 1];
+            if (action == 0)
+            {
+                return Reject(slot >= 3 ? $"slot {slot} is locked until its skill has a rank" : $"no Alpha action for slot {slot}");
+            }
+
+            int[] ranks = Hero.SkillRanks.ToArray();
+            float p = AlphaClassAbilities.PowerFactor(action, ranks);
+            Hero.AbilityCooldowns.TryGetValue(action, out int cooldown);
+            if (!AlphaClassAbilities.IsUsable(action, p, Hero.Mana, 0, cooldown))
+            {
+                return Reject(cooldown > 0 ? $"cooldown {cooldown} ms" : "not enough mana");
+            }
+
+            if (!Combat.TryStartAttack(Hero.Id, AlphaAttackRoute.ForAction(action), Clock.TimeMs))
+            {
+                return Reject($"action 0x{action:X2} refused: {Combat.LastRejection}");
+            }
+
+            Hero.Mana = Math.Max(0f, Hero.Mana - AlphaClassAbilities.ManaCost(action, p));
+            int start = AlphaClassAbilities.CooldownMs(action, p);
+            if (start > 0)
+            {
+                Hero.AbilityCooldowns[action] = start;
+            }
+
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        /// <summary>Mana regeneration and cooldown countdown of the hero (0x618790…0x6187B0, +0x139C).</summary>
+        private void TickHeroResources(long nowMs)
+        {
+            long dt = _lastResourceTickMs < 0 ? 0 : Math.Max(0, nowMs - _lastResourceTickMs);
+            _lastResourceTickMs = nowMs;
+            if (dt == 0 || Hero == null)
+            {
+                return;
+            }
+
+            bool casting = Combat.TryGetAction(Hero.Id, out AuthoritativeActionState acting)
+                && AlphaClassAbilities.BlocksManaRegen(acting.Action.Value);
+            if (!casting)
+            {
+                Hero.Mana = Math.Min(1f, Hero.Mana + dt * AlphaClassAbilities.ManaRegenPerMs);
+            }
+
+            if (Hero.AbilityCooldowns.Count > 0)
+            {
+                foreach (int key in new List<int>(Hero.AbilityCooldowns.Keys))
+                {
+                    int left = Hero.AbilityCooldowns[key] - (int)Math.Min(dt, int.MaxValue);
+                    if (left <= 0) Hero.AbilityCooldowns.Remove(key);
+                    else Hero.AbilityCooldowns[key] = left;
+                }
+            }
+        }
+
         private void OnClockTicked(GameClock clock)
         {
             if (Combat == null || Hero == null)
             {
                 return;
             }
+
+            TickHeroResources(clock.TimeMs);
 
             if (Combat.TryGet(Hero.Id, out Combatant heroCombatant))
             {
