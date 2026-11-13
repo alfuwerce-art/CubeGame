@@ -171,20 +171,15 @@ namespace CubeGame.Gameplay
 
         private bool TryClaimChest(LiveSpawn spawn)
         {
-            HeroInventory inventory = _session.Hero.Inventory;
-            if (HeroInventory.Capacity - inventory.UsedSlots < AlphaDungeonRules.ChestItemCount)
+            // Alpha 0x5C9F90/0x5F8750: ten container slots at the chest level; delivery into the bags on interaction
+            // is CUBEGAME_CONTRACT (the Alpha open path is not traced).
+            if (!_session.TryOpenChest(spawn.Id, spawn.Definition.Level, out int delivered))
             {
-                return Report(false, $"the chest needs {AlphaDungeonRules.ChestItemCount} free bag slots");
+                return Report(false, _session.LastRejection);
             }
 
-            // Q-17: 10 items. The composition is CubeGame's existing equipment loot rule.
-            int seed = unchecked((int)(_session.World.Seed.Value ^ spawn.Id.Value ^ (spawn.Id.Value >> 32)));
-            for (int i = 0; i < AlphaDungeonRules.ChestItemCount; i++)
-            {
-                inventory.TryAdd(LootRules.Roll(spawn.Definition.Level, unchecked(seed + i * 1_000_003))[0]);
-            }
             _population.MarkContainerOpened(spawn, _session.Clock.TimeMs);
-            return Report(true, $"claimed {AlphaDungeonRules.ChestItemCount} items from the chest");
+            return Report(true, $"claimed {delivered} items from the chest");
         }
 
         private bool TryTownNpcInReach(StableEntityId id, out int role)

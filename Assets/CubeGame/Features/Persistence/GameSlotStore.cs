@@ -170,6 +170,7 @@ namespace CubeGame.Features.Persistence
                 heroSkillRanks = hero.SkillRanks.ToArray(),
                 heroCopper = hero.Copper,
                 heroManaCubes = hero.ManaCubes,
+                heroPlatinum = hero.Platinum,
                 huntMissions = WriteMissions(hero.Missions),
                 inventoryPlacement = hero.InventoryPlacement(),
                 characterChecksum = Checksum(characterText),
@@ -299,6 +300,7 @@ namespace CubeGame.Features.Persistence
                 NeedsGroundPlacement = false,
                 Copper = data.heroCopper,
                 ManaCubes = data.heroManaCubes,
+                Platinum = data.heroPlatinum,
             };
             if (data.heroGender >= 0)
             {
@@ -551,7 +553,7 @@ namespace CubeGame.Features.Persistence
                 return false;
             }
 
-            if (data.heroCopper < 0 || data.heroManaCubes < 0 || data.worldTimeOffsetMs < 0
+            if (data.heroCopper < 0 || data.heroManaCubes < 0 || data.heroPlatinum < 0 || data.worldTimeOffsetMs < 0
                 || data.worldTimeOffsetMs > int.MaxValue * 86_400_000L
                 || (data.huntMissions?.Length ?? 0) > WorldSaveFormat.MaxDeltas)
             {
@@ -632,6 +634,11 @@ namespace CubeGame.Features.Persistence
             var subtypes = new List<int>();
             var counts = new List<int>();
             var slots = new List<int>();
+            var seeds = new List<int>();
+            var variants = new List<int>();
+            var rarities = new List<int>();
+            var modifiers = new List<int>();
+            var levels = new List<int>();
             for (int i = 0; i < HeroInventory.Capacity; i++)
             {
                 Record(hero.Inventory[i], i);
@@ -646,6 +653,11 @@ namespace CubeGame.Features.Persistence
             data.rawItemSubtypes = subtypes.ToArray();
             data.rawItemCounts = counts.ToArray();
             data.rawItemSlots = slots.ToArray();
+            data.rawItemSeeds = seeds.ToArray();
+            data.rawItemVariants = variants.ToArray();
+            data.rawItemRarities = rarities.ToArray();
+            data.rawItemModifiers = modifiers.ToArray();
+            data.rawItemLevels = levels.ToArray();
 
             void Record(InventoryEntry entry, int placement)
             {
@@ -655,8 +667,41 @@ namespace CubeGame.Features.Persistence
                     subtypes.Add(entry.Raw.Subtype);
                     counts.Add(entry.Count);
                     slots.Add(placement);
+                    seeds.Add(entry.Record.Seed);
+                    variants.Add(entry.Record.Variant);
+                    rarities.Add(entry.Record.Rarity);
+                    modifiers.Add(entry.Record.Modifier);
+                    levels.Add(entry.Record.Level);
                 }
             }
+        }
+
+        /// <summary>
+        /// Raw entry <paramref name="i"/> of a session file, or null when it must be skipped (non-positive count or a
+        /// Core equipment type 3–9, which the Core save owns). Optional P5 record arrays are used when complete.
+        /// </summary>
+        public static InventoryEntry RawEntryFromSave(SessionSaveData data, int i)
+        {
+            int type = data.rawItemTypes[i];
+            int count = data.rawItemCounts[i];
+            if (count <= 0 || (type >= 3 && type <= 9))
+            {
+                return null;
+            }
+
+            int n = data.rawItemTypes.Length;
+            bool full = data.rawItemSeeds?.Length == n && data.rawItemVariants?.Length == n
+                && data.rawItemRarities?.Length == n && data.rawItemModifiers?.Length == n && data.rawItemLevels?.Length == n;
+            if (!full)
+            {
+                return ItemInstance.IsSupportedType(type)
+                    ? null
+                    : InventoryEntry.FromRaw(new RawAlphaItemId(type, data.rawItemSubtypes[i]), count);
+            }
+
+            var record = new AlphaItemRecord(type, data.rawItemSubtypes[i], data.rawItemSeeds[i], data.rawItemVariants[i],
+                data.rawItemRarities[i], data.rawItemModifiers[i], data.rawItemLevels[i]);
+            return record.IsEmpty ? null : InventoryEntry.FromAlpha(record, count);
         }
 
         private static void RestoreRawItems(HeroState hero, SessionSaveData data)
@@ -669,12 +714,12 @@ namespace CubeGame.Features.Persistence
 
             for (int i = 0; i < n; i++)
             {
-                if (data.rawItemCounts[i] <= 0 || ItemInstance.IsSupportedType(data.rawItemTypes[i]))
+                InventoryEntry entry = RawEntryFromSave(data, i);
+                if (entry == null)
                 {
                     continue;
                 }
 
-                InventoryEntry entry = InventoryEntry.FromRaw(new RawAlphaItemId(data.rawItemTypes[i], data.rawItemSubtypes[i]), data.rawItemCounts[i]);
                 int placement = data.rawItemSlots[i];
                 bool placed = placement >= 0
                     ? hero.Inventory.TryPlace(placement, entry)

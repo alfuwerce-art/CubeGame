@@ -226,15 +226,28 @@ namespace CubeGame.Tests.FullM0.PlayMode
             }
             yield return Capture(game, "services");
             int potions = hero.Inventory.CountOf(LootRules.LifePotion);
+            // P5: the kill scattered Alpha coins (0x59B180) that the pickup moved into the wallet, so the first
+            // purchase succeeds whenever those coins cover the price.
+            int startCopper = hero.Copper;
+            int potionPrice = AlphaTradeValue.Of(InventoryEntry.FromRaw(LootRules.LifePotion, 1));
             Press(game, "buy-0");
             yield return null;
-            Assert.AreEqual(0, hero.Copper);
-            Assert.AreEqual(potions, hero.Inventory.CountOf(LootRules.LifePotion));
-            StringAssert.Contains("copper", Root(game).Q<Label>("panel-status").text);
+            if (startCopper < potionPrice)
+            {
+                Assert.AreEqual(startCopper, hero.Copper);
+                Assert.AreEqual(potions, hero.Inventory.CountOf(LootRules.LifePotion));
+                StringAssert.Contains("copper", Root(game).Q<Label>("panel-status").text);
+            }
+            else
+            {
+                Assert.AreEqual(startCopper - potionPrice, hero.Copper);
+                Assert.AreEqual(++potions, hero.Inventory.CountOf(LootRules.LifePotion));
+            }
             int proceeds = AlphaTradeValue.Of(hero.Inventory[loot]);
+            int beforeSale = hero.Copper;
             Press(game, $"sell-{loot}");
             yield return null;
-            Assert.AreEqual(proceeds, hero.Copper);
+            Assert.AreEqual(beforeSale + proceeds, hero.Copper);
             Press(game, "buy-1");
             yield return null;
             Press(game, "buy-2");
@@ -348,7 +361,8 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.AreEqual(bagSlots, hero.Inventory.UsedSlots);
             Assert.AreEqual(calendarOffset, game.Session.Clock.WorldTimeOffsetMs);
             Assert.AreEqual(1, hero.SkillRanks[HeroSkill.Climbing]);
-            Assert.AreEqual(1, hero.ManaCubes);
+            Assert.AreEqual(0, hero.ManaCubes, "P5: Alpha mission rewards give platinum and an item, not mana cubes");
+            Assert.Greater(hero.Platinum, 0);
             Assert.AreEqual(2, hero.Sheet.Progression.Level);
             Assert.AreEqual(weapon, hero.Loadout.GetEquipped(EquipmentSlot.MainHand));
             Assert.IsNull(Clip(AlphaSoundCatalog.MissionComplete), "reloading a completed hunt does not play its cue");

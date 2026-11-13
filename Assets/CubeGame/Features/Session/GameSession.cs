@@ -111,6 +111,38 @@ namespace CubeGame.Features.Session
 
         public int ManaCubes { get; internal set; }
 
+        /// <summary>Platinum coins: Alpha counter fed by type 0x0D records (0x46EBE0, region mission reward).</summary>
+        public int Platinum { get; internal set; }
+
+        /// <summary>
+        /// Receives one Alpha entry the way <c>GameController_addItemToInventory</c> 0x46EBE0 does: coin records
+        /// (type 0x0C copper/silver/gold, type 0x0D platinum) go to the wallet, everything else to the bags.
+        /// Refuses without change when the bags are full or the wallet would overflow.
+        /// </summary>
+        public bool TryCollect(InventoryEntry entry)
+        {
+            if (entry == null)
+            {
+                return false;
+            }
+
+            if (!entry.IsCore && AlphaWallet.IsCurrency(entry.Record))
+            {
+                long copper = Copper + AlphaWallet.CopperValue(entry.Record, entry.Count);
+                long platinum = Platinum + AlphaWallet.PlatinumValue(entry.Record, entry.Count);
+                if (copper > int.MaxValue || platinum > int.MaxValue || copper < 0 || platinum < 0)
+                {
+                    return false;
+                }
+
+                Copper = (int)copper;
+                Platinum = (int)platinum;
+                return true;
+            }
+
+            return Inventory.TryAdd(entry);
+        }
+
         public MissionJournal Missions { get; } = new MissionJournal();
 
         internal void ChangeSpecialization(CharacterSpecialization specialization)
@@ -615,10 +647,12 @@ namespace CubeGame.Features.Session
             {
                 if (Hero.Missions.TryComplete(died.Entity))
                 {
-                    if (Hero.ManaCubes < int.MaxValue)
-                    {
-                        Hero.ManaCubes++;
-                    }
+                    // Alpha mission completion reward (0x595A60 -> 0x596919...0x596A69): platinum and one class item,
+                    // directly into the bags. Mission level/stars are the target's (the hunt mission itself is a
+                    // CUBEGAME_CONTRACT); the former one-mana-cube reward is removed.
+                    var missionRng = new AlphaCrtRandom(unchecked(LootSeed(died.Entity) ^ 0x4D495353));
+                    DeliverToHero(AlphaLoot.MissionReward(missionRng, Math.Max(1, dead.Sheet.Progression.Level),
+                        Math.Max(0, dead.Stars), (int)Hero.Sheet.Class + 1), died.TimeMs);
                     Events.Publish(new HuntChanged { TimeMs = died.TimeMs, Kind = dead.Kind, Complete = true });
                 }
                 long xp = KillExperience(dead.Sheet.Progression.Level, dead.Stars, dead.IsBoss);
@@ -641,11 +675,116 @@ namespace CubeGame.Features.Session
                 return;
             }
 
-            int seed = unchecked((int)(World.Seed.Value * 2654435761u) ^ (int)died.Entity.Value ^ (int)(died.Entity.Value >> 32));
-            foreach (InventoryEntry entry in LootRules.Roll(dead.Sheet.Progression.Level, seed))
+            // Alpha 0x59B180 death drops. The CRT stream is seeded per world and entity (CUBEGAME_CONTRACT: Alpha uses
+            // the process-global rand stream); the routine and its roll order are ALPHA_CODE_STATIC.
+            var rng = new AlphaCrtRandom(LootSeed(died.Entity));
+            foreach (AlphaLootDrop drop in AlphaLoot.DeathDrops(rng, DeathInputOf(dead)))
             {
-                WorldItems.Drop(entry, dead.Position, died.TimeMs);
+                var at = new WorldPosition(dead.Position.X + drop.OffsetX, dead.Position.Y, dead.Position.Z + drop.OffsetZ);
+                WorldItems.Drop(InventoryEntry.FromAlpha(drop.Record, drop.Count), at, died.TimeMs);
             }
+        }
+
+        private int LootSeed(StableEntityId entity) =>
+            unchecked((int)(World.Seed.Value * 2654435761u) ^ (int)entity.Value ^ (int)(entity.Value >> 32));
+
+        /// <summary>
+        /// Alpha fields of a dead combatant. Role: hostile -> 1, other non-hero actors -> 2 (PARTIAL: Alpha roles 2/3 are
+        /// not separated in CubeGame). Flags carry the known +0x7E upgrade bits 0x8/0x10; 0x200/0x800 are UNKNOWN in
+        /// CubeGame and stay clear. Equipped items come from the S04 loadout in Alpha collection order.
+        /// </summary>
+        public static AlphaDeathInput DeathInputOf(Combatant dead)
+        {
+            var input = new AlphaDeathInput
+            {
+                Role = dead.Hostile ? 1 : 2,
+                Kind = dead.Kind.Value,
+                Level = dead.Sheet.Progression.Level,
+                Stars = Math.Max(0, dead.Stars),
+                Flags = (int)dead.Sheet.WeaponUpgrades & 0x18,
+            };
+            foreach (EquipmentSlot slot in DeathEquipmentOrder)
+            {
+                ItemInstance item = dead.Loadout.GetEquipped(slot);
+                if (item != null)
+                {
+                    input.Equipped.Add(InventoryEntry.FromCore(item).Record);
+                }
+            }
+
+            return input;
+        }
+
+        /// <summary>0x59B20E…0x59B31B collection order restricted to the S04 slots (amulet 0x418 is not in the loadout).</summary>
+        private static readonly EquipmentSlot[] DeathEquipmentOrder =
+        {
+            EquipmentSlot.OffHand, EquipmentSlot.MainHand, EquipmentSlot.Chest, EquipmentSlot.Shoulders,
+            EquipmentSlot.Boots, EquipmentSlot.Gloves,
+        };
+
+        /// <summary>
+        /// Delivers Alpha records to the hero: currency to the wallet, items to the bags; what does not fit is placed
+        /// on the ground at the hero (CUBEGAME_CONTRACT: Alpha bags have no capacity check in 0x46EBE0).
+        /// </summary>
+        private void DeliverToHero(IEnumerable<AlphaLootDrop> drops, long nowMs)
+        {
+            foreach (AlphaLootDrop drop in drops)
+            {
+                if (drop.Record.IsEmpty)
+                {
+                    continue;
+                }
+
+                InventoryEntry entry = InventoryEntry.FromAlpha(drop.Record, drop.Count);
+                if (!Hero.TryCollect(entry))
+                {
+                    WorldItems?.Drop(entry, Hero.Position, nowMs);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Opens a chest container: the ten slots of 0x5C9F90 / 0x5F8750 at the given level (Alpha passes the zone
+        /// level zone+0x80). Empty slots deliver nothing; coins go to the wallet. The stream seed is the stable id of
+        /// the chest (CUBEGAME_CONTRACT). Refuses without change when the item slots would not fit.
+        /// </summary>
+        public bool TryOpenChest(StableEntityId chest, int level, out int delivered)
+        {
+            delivered = 0;
+            if (!CanUseServices)
+            {
+                return Reject("opening a chest requires a living hero");
+            }
+
+            var rng = new AlphaCrtRandom(LootSeed(chest));
+            List<AlphaItemRecord> slots = AlphaLoot.ChestContents(rng, Math.Max(1, level));
+            int needed = 0;
+            foreach (AlphaItemRecord record in slots)
+            {
+                if (!record.IsEmpty && !AlphaWallet.IsCurrency(record))
+                {
+                    needed++;
+                }
+            }
+
+            if (HeroInventory.Capacity - Hero.Inventory.UsedSlots < needed)
+            {
+                return Reject($"the chest needs {needed} free bag slots");
+            }
+
+            var drops = new List<AlphaLootDrop>();
+            foreach (AlphaItemRecord record in slots)
+            {
+                if (!record.IsEmpty)
+                {
+                    drops.Add(new AlphaLootDrop(record, 1, 0, 0, "chest"));
+                    delivered++;
+                }
+            }
+
+            DeliverToHero(drops, Clock.TimeMs);
+            LastRejection = string.Empty;
+            return true;
         }
 
         /// <summary>Confirms increases funded by level points. Rank decreases require the paid reset path.</summary>

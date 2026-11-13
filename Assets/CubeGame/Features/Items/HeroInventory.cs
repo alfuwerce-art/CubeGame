@@ -120,7 +120,7 @@ namespace CubeGame.Features.Items
                 return Reject("bags are full");
             }
 
-            _extra[slot] = InventoryEntry.FromRaw(entry.Raw, 1);
+            _extra[slot] = entry.WithCount(1);
             entry.Remove(1);
             if (previous != null)
             {
@@ -224,7 +224,7 @@ namespace CubeGame.Features.Items
                     if (_slots[i] == null)
                     {
                         int moved = Math.Min(remaining, MaxStack);
-                        _slots[i] = InventoryEntry.FromRaw(entry.Raw, moved);
+                        _slots[i] = entry.WithCount(moved);
                         remaining -= moved;
                     }
                 }
@@ -279,7 +279,7 @@ namespace CubeGame.Features.Items
 
             entry.Remove(amount);
             Done();
-            return InventoryEntry.FromRaw(entry.Raw, amount);
+            return entry.WithCount(amount);
         }
 
         public bool TryBrewLifePotion()

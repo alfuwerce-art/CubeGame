@@ -8,7 +8,8 @@ namespace CubeGame.Features.Items
     /// <summary>
     /// Items lying in the world (loot). Pickup is automatic when the hero comes within <see cref="PickupRadius"/>
     /// and the bags have room (CubeGame rule, PLACEHOLDER_NOT_ALPHA: Alpha's pickup interaction is not restored).
-    /// Ground items are runtime-only and not saved (PLACEHOLDER_NOT_ALPHA).
+    /// Coin records go to the wallet on pickup (Alpha 0x46EBE0). Ground items are runtime-only and not saved
+    /// (PARTIAL: Alpha drops are falling-block world objects 0x59AEB0; their persistence is not traced).
     /// </summary>
     public sealed class WorldItems
     {
@@ -66,7 +67,7 @@ namespace CubeGame.Features.Items
                     continue;
                 }
 
-                if (!hero.Inventory.TryAdd(g.Entry))
+                if (!hero.TryCollect(g.Entry))
                 {
                     continue;
                 }

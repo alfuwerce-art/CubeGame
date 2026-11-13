@@ -358,6 +358,7 @@ namespace CubeGame.Features.Persistence
             session.heroSkillRanks = hero.SkillRanks.ToArray();
             session.heroCopper = hero.Copper;
             session.heroManaCubes = hero.ManaCubes;
+            session.heroPlatinum = hero.Platinum;
             session.huntMissions = GameSlotStore.WriteMissions(hero.Missions);
             session.inventoryPlacement = hero.InventoryPlacement();
             GameSlotStore.WriteRawItems(hero, session);
@@ -512,6 +513,7 @@ namespace CubeGame.Features.Persistence
                 NeedsGroundPlacement = false,
                 Copper = session.heroCopper,
                 ManaCubes = session.heroManaCubes,
+                Platinum = session.heroPlatinum,
             };
             if (session.heroGender >= 0)
             {
@@ -1123,13 +1125,12 @@ namespace CubeGame.Features.Persistence
 
             for (int i = 0; i < n; i++)
             {
-                if (data.rawItemCounts[i] <= 0 || ItemInstance.IsSupportedType(data.rawItemTypes[i]))
+                InventoryEntry entry = GameSlotStore.RawEntryFromSave(data, i);
+                if (entry == null)
                 {
                     continue;
                 }
 
-                InventoryEntry entry = InventoryEntry.FromRaw(
-                    new RawAlphaItemId(data.rawItemTypes[i], data.rawItemSubtypes[i]), data.rawItemCounts[i]);
                 int placement = data.rawItemSlots[i];
                 bool placed = placement >= 0
                     ? hero.Inventory.TryPlace(placement, entry)

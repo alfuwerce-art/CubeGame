@@ -128,13 +128,17 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.IsFalse(hero.Missions.Hunts.Single().Complete);
             Kill(second);
             Kill(far);
-            Assert.AreEqual(0, hero.ManaCubes);
+            Assert.AreEqual(0, hero.Platinum);
+            int bagsBefore = hero.Inventory.UsedSlots;
             Kill(first);
             Assert.IsTrue(hero.Missions.Hunts.Single().Complete);
-            Assert.AreEqual(1, hero.ManaCubes);
+            // Alpha 0x596919: platinum int(curve_level05(1+0)*50+1) = 1 and one class item into the bags.
+            Assert.AreEqual(1, hero.Platinum);
+            Assert.AreEqual(bagsBefore + 1, hero.Inventory.UsedSlots);
+            Assert.AreEqual(0, hero.ManaCubes, "mana cubes are not a mission reward in Alpha");
             Kill(first);
             session.Clock.StepTicks(1);
-            Assert.AreEqual(1, hero.ManaCubes);
+            Assert.AreEqual(1, hero.Platinum);
             Assert.AreEqual(0L, new HeroSkillRanks().UnspentLevelPoints(1, 3));
             Assert.AreEqual(1L, new HeroSkillRanks().UnspentLevelPoints(1, 4));
 

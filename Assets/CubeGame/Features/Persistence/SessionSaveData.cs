@@ -69,6 +69,12 @@ namespace CubeGame.Features.Persistence
 
         public int heroManaCubes;
 
+        /// <summary>
+        /// Optional P5 field: platinum coins (Alpha type 0x0D counter, 0x46EBE0). Older slots start with zero.
+        /// Copper keeps the whole Alpha money field (copper ×1, silver ×100, gold ×10000).
+        /// </summary>
+        public int heroPlatinum;
+
         public HuntMissionSaveData[] huntMissions;
 
         /// <summary>Calendar advances from inn visits, separate from the combat and movement tick.</summary>
@@ -90,6 +96,21 @@ namespace CubeGame.Features.Persistence
 
         /// <summary>Bag slot ≥ 0 or C5 extra equipment −(1+Alpha creature offset).</summary>
         public int[] rawItemSlots;
+
+        /// <summary>
+        /// Optional P5 fields, parallel to <see cref="rawItemTypes"/>: the Alpha record of raw items (seed +0x04,
+        /// variant +0x08, rarity +0x0C, modifier +0x0D, level +0x10). Missing arrays restore the Alpha defaults
+        /// (level 1, other fields 0), which is what pre-P5 raw items carried.
+        /// </summary>
+        public int[] rawItemSeeds;
+
+        public int[] rawItemVariants;
+
+        public int[] rawItemRarities;
+
+        public int[] rawItemModifiers;
+
+        public int[] rawItemLevels;
 
         /// <summary>FNV-1a 64 (hex) of the framed character save text written in the same checkpoint.</summary>
         public string characterChecksum = string.Empty;
