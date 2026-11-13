@@ -159,9 +159,7 @@
 - Проверяются распределения, пулы классов, кошелёк, стеки, raw-записи сейва и сессионное убийство с подбором монет в кошелёк.
 - Обновлены тесты F3/F4/C3, которые фиксировали прежние правила: мана-куб за охоту, 10 занятых слотов из сундука, нулевая медь до продажи и `LootRules.Roll`.
 
-Срез 1 проверен на коде `fc4ab41`: EditMode 794 из 796, PlayMode 75 из 75. Срез 2 проверен на коде `ad451ee`: EditMode 803 из 805, PlayMode 75 из 75. Срез 3 проверен на коде `4513696`: EditMode 814 из 816, PlayMode 75 из 75. Срез 4 проверен на коде `7c04e23`: EditMode 819 из 821, PlayMode 75 из 75. Unity 6000.3.27f2, с локальными кешем контента, атласом иконок и шрифтом. Последний прогон EditMode: 821 тест, 819 успешно, 0 падений, 2 пропуска (нет локальных дампов зон `zone_lake`/`zone_carves`). PlayMode: 75 из 75, без пропусков. Ошибок компиляции 0. XML лежат локально: `.unity-install/results/p5_{edit,play}.xml`. Живая сборка не обновлялась.
-
-### Windows Player
+Срез 1 проверен на коде `fc4ab41`: EditMode 794 из 796, PlayMode 75 из 75. Срез 2 проверен на коде `ad451ee`: EditMode 803 из 805, PlayMode 75 из 75. Срез 3 проверен на коде `4513696`: EditMode 814 из 816, PlayMode 75 из 75. Срез 4 проверен на коде `7c04e23`: EditMode 819 из 821, PlayMode 75 из 75. Unity 6000.3.27f2, с локальными кешем контента, атласом иконок и шрифтом. Последний прогон EditMode: 821 тест, 819 успешно, 0 падений, 2 пропуска (нет локальных дампов зон `zone_lake`/`zone_carves`). PlayMode: 75 из 75, без пропусков. Ошибок компиляции 0. XML лежат локально: `.unity-install/results/p5_{edit,play}.xml`. ### Windows Player
 
 Сборку выполнил `tools/release/build_windows_release.ps1 -OutputDir` в `.unity-install/builds/p5_791b3ce`; launcher и `current.txt` не тронуты. Unity 6000.3.27f2, D3D11. Результат: `BUILD_RESULT=PASS`, `content_gate=PASS`, `error CS` 0. Первая сборка `c05dc61` тоже PASS. Сборка `791b3ce` отличается только диагностическим режимом `-cubeP5Smoke`.
 
@@ -173,6 +171,14 @@
   - Известно 11 рецептов. Хотбар Warrior с большой булавой: `0x39, 0x3B, 0, 0, 0`. Слот 2 P4 отклонил как unsupported.
   - `SMOKE_SAVE=PASS`.
 - **load** (`p5_791b3ce_player_load.log`). Слот загружен на tick 131. Совпало всё: уровень, XP 2, медь 26, платина 7, 11 рецептов, 4 Core-предмета и 1 raw-предмет в сумке.
+
+### Установка
+
+`LIVE_GAME_UPDATED=YES` по решению продюсера от 13 ноября 2026.
+- Сборка `791b3ce` заменила `D:\Games\CubeGame\game`. Прежняя версия перенесена в `.unity-install/backups/live_before_p5_791b3ce`, откат возможен.
+- Хеши `CubeGame.exe`, `UnityPlayer.dll`, `CubeGame.Gameplay.dll` и `CubeGame.Features.dll` совпали со сборкой.
+- Launcher (SHA-256 `21b36489…`, совпадает с `launcher.sha256`) и `current.txt` (`game\CubeGame.exe`) не изменились.
+- Установленная игра с отдельным тестовым сейвом прошла smoke-тест: `SMOKE_KILL=PASS`, `SMOKE_PICKUP_WALLET=PASS` (0 → 26 меди), `SMOKE_SAVE=PASS`, выход с кодом 0. Лог `.unity-install/logs/p5_live_smoke.log`.
 
 Ограничение: убийство диагностическое, без реального боя с вводом игрока. Город, торговля и крафт в Player не прогонялись, они покрыты PlayMode (F3/F4).
 
@@ -215,7 +221,7 @@ ALPHA_RUNTIME_COMPARISON=PARTIAL
 EDITMODE=PASS
 PLAYMODE=PASS
 WINDOWS_BUILD=PASS
-LIVE_GAME_UPDATED=NO
+LIVE_GAME_UPDATED=YES
 REMOTE_SHA=<HEAD refs/heads/codex/m0-p5-character-items-progression; Windows build 791b3ce>
 ```
 
