@@ -129,6 +129,10 @@ namespace CubeGame.Gameplay
         private float _cameraPitch;
         private float _cameraDistance = OrbitCameraController.DefaultDistance;
         private int _attackFrame = -1;
+
+        /// <summary>P5 Player smoke mode: "fresh" (kill, loot, wallet, save) or "load" (report restored state).</summary>
+        private string _p5Smoke;
+        private bool _p5SmokeStarted;
         private int _teleportDx;
         private int _teleportDz;
 
@@ -261,6 +265,12 @@ namespace CubeGame.Gameplay
                 {
                     _worldView.SetFocus(_player.transform.position);
                 }
+            }
+
+            if (!string.IsNullOrEmpty(_p5Smoke) && !_p5SmokeStarted && _frames >= 240 && _session.State == SessionState.InGame)
+            {
+                _p5SmokeStarted = true;
+                StartCoroutine(RunP5Smoke(_p5Smoke));
             }
 
             if (_attackFrame >= 0 && _frames >= _attackFrame && _session.State == SessionState.InGame)
@@ -1527,8 +1537,83 @@ namespace CubeGame.Gameplay
                     case "-cubeSaveCheckpoint":
                         _saveCheckpoint = true;
                         break;
+                    case "-cubeP5Smoke":
+                        _p5Smoke = value;
+                        break;
                 }
             }
+        }
+
+        private void LogP5State(string phase)
+        {
+            HeroState hero = _session.Hero;
+            int raw = 0, core = 0;
+            for (int i = 0; i < HeroInventory.Capacity; i++)
+            {
+                InventoryEntry e = hero.Inventory[i];
+                if (e == null) continue;
+                if (e.IsCore) core++; else raw++;
+            }
+
+            Debug.Log($"[P5] {phase} level={hero.Sheet.Progression.Level} xp={hero.Sheet.Progression.Experience} copper={hero.Copper} " +
+                      $"platinum={hero.Platinum} manaCubes={hero.ManaCubes} mana={hero.Mana:F2} recipes={hero.KnownRecipes.Count} " +
+                      $"bagsCore={core} bagsRaw={raw} hotbar=[{string.Join(",", Array.ConvertAll(_session.HeroHotbar(), a => $"0x{a:X2}"))}] " +
+                      $"ground={_session.WorldItems?.Count}");
+        }
+
+        /// <summary>
+        /// Diagnostic Player smoke for P5 in the live world: a natural hostile creature near the hero is killed through
+        /// CombatSystem.ResolveHit (diagnostic damage), the Alpha death drop is logged and picked up, the wallet,
+        /// recipes and hotbar are logged and the slot is saved; "load" only logs the restored state.
+        /// </summary>
+        private System.Collections.IEnumerator RunP5Smoke(string mode)
+        {
+            LogP5State("start-" + mode);
+            if (mode == "fresh")
+            {
+                HeroState hero = _session.Hero;
+                Combatant target = null;
+                double best = double.MaxValue;
+                foreach (Combatant c in _session.Combat.Combatants)
+                {
+                    if (!c.Hostile || c.IsDead || c.Id.Equals(hero.Id)) continue;
+                    double d = DistanceToHeroSquared(c.Position);
+                    if (d < best) { best = d; target = c; }
+                }
+
+                if (target == null)
+                {
+                    Debug.Log("[P5] SMOKE_KILL=FAIL no hostile creature");
+                }
+                else
+                {
+                    Debug.Log($"[P5] target {target.Id} kind=0x{target.Kind.Value:X2} level={target.Sheet.Progression.Level} stars={target.Stars} dist={Math.Sqrt(best):F1}");
+                    int dropped = 0;
+                    Action<WorldItemDropped> onDrop = e => { dropped++; Debug.Log($"[P5] drop {e.Raw} x{e.Count} rarity={e.Rarity} material=0x{e.Material:X2}"); };
+                    _session.Events.Subscribe(onDrop);
+                    int copperBefore = hero.Copper;
+                    target.Health.ApplyDamage(target.Health.CurrentHealth - 0.01);
+                    for (int i = 0; i < 40 && !target.IsDead; i++)
+                    {
+                        _session.Combat.ResolveHit(hero.Id, target.Id, _session.Clock.TimeMs, i);
+                    }
+
+                    _session.Events.Unsubscribe(onDrop);
+                    Debug.Log($"[P5] SMOKE_KILL={(target.IsDead ? "PASS" : "FAIL")} drops={dropped}");
+                    WorldPosition at = target.Position;
+                    TeleportHero((int)Math.Floor(at.X), (int)Math.Floor(at.Z));
+                    for (int f = 0; f < 30; f++) yield return null;
+                    Debug.Log($"[P5] SMOKE_PICKUP_WALLET={(hero.Copper > copperBefore ? "PASS" : "FAIL")} copper {copperBefore}->{hero.Copper}");
+                }
+
+                Debug.Log($"[P5] SMOKE_SLOT2={(_session.TryHeroSlot(2) ? "STARTED" : "REFUSED " + _session.LastRejection)}");
+                LogP5State("after-kill");
+                bool saved = SaveCheckpoint();
+                Debug.Log($"[P5] SMOKE_SAVE={(saved ? "PASS" : "FAIL " + Status)}");
+            }
+
+            yield return null;
+            QuitGame();
         }
 
         private System.Collections.IEnumerator QuitAfterFrames(int frames)
