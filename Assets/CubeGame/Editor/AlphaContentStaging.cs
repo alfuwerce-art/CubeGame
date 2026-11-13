@@ -39,11 +39,12 @@ namespace CubeGame.EditorTools
             AlphaContentInventory.AppearanceFolder,
             AlphaContentInventory.SoundsFolder,
             AlphaContentSource.EnvironmentFolder,
+            AlphaContentInventory.GuiFolder,
         };
 
         static readonly HashSet<string> RuntimeExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            ".cubdec", ".json", ".wav",
+            ".cubdec", ".json", ".wav", ".png",
         };
 
         public int callbackOrder => 0;

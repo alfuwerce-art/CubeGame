@@ -211,7 +211,7 @@ namespace CubeGame.Gameplay
         /// True while a start screen, the Esc system menu, an options screen or any gameplay panel owns the input.
         /// Alpha <c>GameController::vfunc_1</c> 0x47F1D0 returns "GUI active" for exactly this set of visible nodes.
         /// </summary>
-        public bool GuiActive => _session.State == SessionState.MainMenu || _overlay != GameOverlay.None ||
+        public bool GuiActive => _session.State == SessionState.MainMenu || _overlay != GameOverlay.None || _menuMode ||
                                  _panel != GamePanel.None || TextInputFocused();
 
         private bool TextInputFocused()
@@ -278,6 +278,8 @@ namespace CubeGame.Gameplay
                 _attackFrame = -1;
                 HeroAttack();
             }
+
+            ApplyUiScreen();
 
             if (_screenshotFrame >= 0 && _frames >= _screenshotFrame)
             {
@@ -1539,6 +1541,9 @@ namespace CubeGame.Gameplay
                         break;
                     case "-cubeP5Smoke":
                         _p5Smoke = value;
+                        break;
+                    case "-cubeUiScreen":
+                        _uiScreen = value;
                         break;
                 }
             }

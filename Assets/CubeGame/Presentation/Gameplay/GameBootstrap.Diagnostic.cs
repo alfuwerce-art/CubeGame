@@ -1,4 +1,5 @@
 using System;
+using CubeGame.Features.Session;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -21,6 +22,42 @@ namespace CubeGame.Gameplay
         private string _uiProbePath;
         private int _uiProbeFrame = -1;
         private string _captureDir;
+        private string _uiScreen;
+
+        /// <summary>
+        /// -cubeUiScreen &lt;editor|create-world|menu|inventory|crafting|skills|system&gt;: opens one screen once for a
+        /// Windows Player screenshot (P6 visual check). Start screens need no world; in-game screens follow -cubeAutoNew.
+        /// </summary>
+        private void ApplyUiScreen()
+        {
+            if (string.IsNullOrEmpty(_uiScreen) || _frames < 30) return;
+            string screen = _uiScreen;
+            if (_session.State == SessionState.MainMenu && !_enteringWorld)
+            {
+                if (screen == "editor") BeginCharacterCreation();
+                else if (screen == "create-world") ShowStartupScreen(StartupScreen.CreateWorld);
+                else return;
+            }
+            else if (_session.State == SessionState.InGame && _frames >= 90)
+            {
+                switch (screen)
+                {
+                    case "menu": ToggleMenuMode(); break;
+                    case "inventory": ToggleMenuMode(); ShowPanel(GamePanel.Inventory); break;
+                    case "crafting": ShowPanel(GamePanel.Crafting); break;
+                    case "skills": ShowPanel(GamePanel.Skills); break;
+                    case "system": ToggleSystemMenu(); break;
+                    default: break;
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            Debug.Log($"[UI] P6 ui screen '{screen}' opened");
+            _uiScreen = null;
+        }
 
         private void LogPopulationSnapshot()
         {

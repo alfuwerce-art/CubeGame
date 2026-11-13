@@ -21,7 +21,7 @@ namespace CubeGame.Gameplay
 {
     public sealed partial class GameBootstrap
     {
-        private enum GamePanel { None, Inventory, Skills, Town, Journal, Map }
+        private enum GamePanel { None, Inventory, Skills, Town, Journal, Map, Crafting, Help }
 
         private GamePanel _panel;
         private SessionState? _drawnState;
@@ -32,8 +32,7 @@ namespace CubeGame.Gameplay
         private PanelSettings _panelSettings;
         private VisualElement _interface;
         private VisualElement _panelHost;
-        private Label _heroLabel, _resourcesLabel, _targetLabel, _statusLabel, _feedbackLabel;
-        private ProgressBar _healthBar, _experienceBar;
+        private Label _heroLabel, _targetLabel, _statusLabel, _feedbackLabel;
         private Button _interactButton, _potionButton;
         private VisualElement _mapMarker;
         private HeroInventory _observedInventory;
@@ -75,7 +74,8 @@ namespace CubeGame.Gameplay
 
         private void BindWorldPresentation()
         {
-            SetPixelScaleUi(false);
+            SetPixelScaleUi(true);
+            _menuMode = false;
             _audio.Release();
             BindLocalAudio();
             _observedInventory = _session.Hero.Inventory;
@@ -114,6 +114,8 @@ namespace CubeGame.Gameplay
             UnbindWorldPresentation();
             ReleaseMap();
             _itemIcons?.Dispose();
+            _guiIcons?.Dispose();
+            _guiIcons = null;
             if (_panelSettings != null) Destroy(_panelSettings);
         }
 
@@ -139,8 +141,8 @@ namespace CubeGame.Gameplay
         private void UpdateInterfaceInput()
         {
             // One frame owns one input context. Alpha GameController::vfunc_1 0x47F1D0 makes the whole GUI "active"
-            // while any screen, panel or text field is up, and 0x47E1B0 returns before the gameplay key switch while
-            // a start screen is visible.
+            // while any screen, panel, the Esc GUI flag (+0x8008F2) or a text field is up, and 0x47E1B0 returns before
+            // the gameplay key switch while a start screen is visible.
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 if (_session.State != SessionState.InGame) return;
@@ -150,33 +152,31 @@ namespace CubeGame.Gameplay
                     return;
                 }
 
-                if (_panel != GamePanel.None)
-                {
-                    ShowPanel(GamePanel.None);
-                    return;
-                }
-
-                if (_overlay == GameOverlay.Options)
-                {
-                    CloseOptions();
-                    return;
-                }
-
-                ToggleSystemMenu();
+                // CUBEGAME_CONTRACT: Esc first closes the topmost open window; with nothing open it is Alpha's
+                // 0x47E770 (toggle the GUI flag that shows the six menu buttons).
+                if (_overlay == GameOverlay.Options) { CloseOptions(); return; }
+                if (_overlay == GameOverlay.System) { CloseOverlay(); return; }
+                if (_panel != GamePanel.None) { ShowPanel(GamePanel.None); return; }
+                ToggleMenuMode();
                 return;
             }
 
-            if (_session.State != SessionState.InGame || HeroDead || _overlay != GameOverlay.None || TextInputFocused())
+            if (_session.State != SessionState.InGame || HeroDead || _overlay == GameOverlay.Options || TextInputFocused())
             {
                 return;
             }
 
-            // Cube.exe 0x47E1B0 dispatches B/I to 0x488C00 and M to the map flag.
+            // Alpha 0x47E1B0 character switch (key = index + 9): B/I inventory 0x488C00, C crafting 0x488BD0,
+            // X skills 0x488C70, M map flag +0x8006E4, O system window 0x488D00; F1 = help (menu button 0).
             // Resolve one UI transition before allowing gameplay to read the same frame.
+            if (Input.GetKeyDown(KeyCode.O)) ToggleSystemMenu();
+            if (_overlay != GameOverlay.None) return;
             if (Input.GetKeyDown(KeyCode.B) || Input.GetKeyDown(KeyCode.I)) ToggleInventory();
+            else if (Input.GetKeyDown(KeyCode.C)) TogglePanel(GamePanel.Crafting);
+            else if (Input.GetKeyDown(KeyCode.X)) TogglePanel(GamePanel.Skills);
             else if (Input.GetKeyDown(KeyCode.M)) TogglePanel(GamePanel.Map);
-            else if (Input.GetKeyDown(KeyCode.K)) TogglePanel(GamePanel.Skills);
-            else if (Input.GetKeyDown(KeyCode.J)) TogglePanel(GamePanel.Journal);
+            else if (Input.GetKeyDown(KeyCode.F1)) TogglePanel(GamePanel.Help);
+            else if (Input.GetKeyDown(KeyCode.J)) ToggleJournal();
             if (!AcceptsGameplayInput())
             {
                 return;
@@ -188,8 +188,11 @@ namespace CubeGame.Gameplay
             if (Input.GetKeyDown(KeyCode.E)) InteractFromInterface();
         }
 
+        /// <summary>Hunt journal (CUBEGAME_CONTRACT panel and key J; Alpha shows missions through its quest HUD).</summary>
+        public void ToggleJournal() => TogglePanel(GamePanel.Journal);
+
         private bool AcceptsGameplayInput() => _session.State == SessionState.InGame && !HeroDead
-            && _panel == GamePanel.None && _overlay == GameOverlay.None && !TextInputFocused()
+            && _panel == GamePanel.None && _overlay == GameOverlay.None && !_menuMode && !TextInputFocused()
             && _contextChangedFrame != Time.frameCount;
 
         private bool PointerOverInterface()
@@ -321,75 +324,6 @@ namespace CubeGame.Gameplay
             }
         }
 
-        private void BuildHud()
-        {
-            var hud = Surface("hero-hud", "hero-hud");
-            _interface.Add(hud);
-            _heroLabel = Text(hud, "", "hero-summary", "heading");
-            _healthBar = new ProgressBar { name = "hero-health" };
-            _experienceBar = new ProgressBar { name = "hero-experience" };
-            _healthBar.AddToClassList("health-bar");
-            _experienceBar.AddToClassList("experience-bar");
-            hud.Add(_healthBar);
-            hud.Add(_experienceBar);
-            _resourcesLabel = Text(hud, "", "hero-resources", "muted");
-            _targetLabel = Text(hud, "", "combat-target");
-
-            _panelHost = new VisualElement { pickingMode = PickingMode.Ignore };
-            _panelHost.AddToClassList("panel-host");
-            _interface.Add(_panelHost);
-
-            _feedbackLabel = Text(_interface, "", "game-feedback", "feedback");
-            _feedbackLabel.pickingMode = PickingMode.Ignore;
-            var actions = Row(_interface, "action-bar");
-            ButtonOf(actions, "Inventory [B/I]", "open-inventory", ToggleInventory);
-            ButtonOf(actions, "Skills [K]", "open-skills", () => TogglePanel(GamePanel.Skills));
-            ButtonOf(actions, "Journal [J]", "open-journal", () => TogglePanel(GamePanel.Journal));
-            ButtonOf(actions, "Map [M]", "open-map", () => TogglePanel(GamePanel.Map));
-            _potionButton = ButtonOf(actions, "Potion [Q]", "use-potion", UsePotionShortcut);
-            _interactButton = ButtonOf(actions, "Interact [E]", "interact", InteractFromInterface);
-            ButtonOf(actions, "Menu [Esc]", "system-menu", ToggleSystemMenu);
-        }
-
-        private void RefreshHud()
-        {
-            HeroState hero = _session.Hero;
-            var progress = hero.Sheet.Progression;
-            int minutes = _session.Clock.WorldTimeMs / 60_000;
-            SetText(_heroLabel, $"{hero.Name}  ·  {hero.Sheet.Class}  ·  Level {progress.Level}");
-            SetBar(_healthBar, hero.Health.CurrentHealth, hero.Health.MaxHealth, "HP");
-            SetBar(_experienceBar, progress.Experience, progress.ExperienceToNextLevel, "XP");
-            string movement = HeroDead ? "Downed" : !_motor.enabled ? "Menu open" : _motor.Swimming ? "Swimming"
-                : _motor.Climbing ? "Climbing" : _motor.Gliding ? "Gliding"
-                : _motor.Sprinting && _motor.HorizontalSpeed > 0.1f ? "Sprinting" : "Ready";
-            SetText(_resourcesLabel, $"{movement}  ·  MP {(int)(hero.Mana * 100)}%  ·  {hero.Copper} copper  ·  {hero.Platinum} platinum  ·  {hero.ManaCubes} mana cubes  ·  {minutes / 60:00}:{minutes % 60:00}");
-            if (!_lastCombatTarget.IsNone && _session.Combat.TryGet(_lastCombatTarget, out Combatant target))
-            {
-                SetText(_targetLabel, $"{target.Name}  ·  {target.Health.CurrentHealth:0}/{target.Health.MaxHealth:0} HP");
-            }
-            else
-            {
-                ItemInstance weapon = hero.Loadout.GetEquipped(EquipmentSlot.MainHand);
-                string equipped = weapon == null ? "Unarmed" : RawItemName(new RawAlphaItemId((byte)weapon.Type, weapon.Subtype));
-                SetText(_targetLabel, $"{equipped}  ·  Attack [LMB]");
-            }
-
-            SetText(_potionButton, $"Potion ×{hero.Inventory.CountOf(LootRules.LifePotion)} [Q]");
-            _potionButton.SetEnabled(!HeroDead && _panel == GamePanel.None);
-            _interactButton.SetEnabled(!_interactionTarget.IsNone);
-            bool npc = !_interactionTarget.IsNone && TryTownNpc(_interactionTarget, out _, out _);
-            SetText(_interactButton, _interactionTarget.IsNone ? "Interact [E]" : npc ? "Talk [E]" : "Open chest [E]");
-            while (_feedback.Count > 0 && _feedback.Peek().Until <= Time.unscaledTime)
-            {
-                _feedback.Dequeue();
-            }
-
-            string message = HeroDead ? "You fell. Returning to the world start…" :
-                string.Join("\n", _feedback.Select(notice => notice.Message));
-            SetText(_feedbackLabel, message);
-            _feedbackLabel.style.display = message.Length == 0 ? DisplayStyle.None : DisplayStyle.Flex;
-        }
-
         private void Notify(string message)
         {
             if (_feedback.Count == 4) _feedback.Dequeue();
@@ -476,7 +410,7 @@ namespace CubeGame.Gameplay
                 GamePanel.Map => "Local map",
                 _ => _panel.ToString(),
             }, "panel-heading", "heading");
-            ButtonOf(title, "Close [Esc]", "close-panel", () => ShowPanel(GamePanel.None));
+            ButtonOf(title, "X", "close-panel", () => ShowPanel(GamePanel.None)).AddToClassList("alpha-close");
             _statusLabel = Text(panel, "", "panel-status", "muted");
             if (_panel == GamePanel.Map)
             {
@@ -489,6 +423,8 @@ namespace CubeGame.Gameplay
             switch (_panel)
             {
                 case GamePanel.Inventory: BuildInventory(scroll); break;
+                case GamePanel.Crafting: BuildCrafting(scroll); break;
+                case GamePanel.Help: BuildHelp(scroll); break;
                 case GamePanel.Skills: BuildSkills(scroll); break;
                 case GamePanel.Town: BuildTown(scroll); break;
                 case GamePanel.Journal: BuildJournal(scroll); break;
@@ -503,7 +439,17 @@ namespace CubeGame.Gameplay
         {
             HeroState hero = _session.Hero;
             HeroInventory inventory = hero.Inventory;
-            Text(body, $"{inventory.UsedSlots}/{HeroInventory.Capacity} bag slots  ·  {hero.Copper} copper", "bag-summary", "muted");
+            // Currency panel of the inventory (GameController::drawCurrencyPanel 0x4C2050: copper and platinum coins).
+            Text(body, $"{hero.Copper} copper  ·  {hero.Platinum} platinum  ·  {hero.ManaCubes} mana cubes", "currency", "section");
+            Text(body, $"{inventory.UsedSlots}/{HeroInventory.Capacity} bag slots", "bag-summary", "muted");
+            BuildEquipment(body);
+        }
+
+        /// <summary>Crafting window of Alpha key C (0x488BD0 toggles node +0x8008C0).</summary>
+        private void BuildCrafting(VisualElement body)
+        {
+            HeroState hero = _session.Hero;
+            HeroInventory inventory = hero.Inventory;
             ButtonOf(body, "Brew Life Potion · 1 Heartflower + 1 Water Flask", "brew", () => TryBrewLifePotion());
             Text(body, "Crafting", null, "section");
             string[] tabs = { "Weapons", "Armor", "Amulets", "Cooking", "Alchemy", "Formulas" };
@@ -525,6 +471,12 @@ namespace CubeGame.Gameplay
                 var row = ItemRow(body, formula, "Formula");
                 ButtonOf(row, "Learn", $"learn-{slot}", () => WithBagEntry(slot, formula, () => TryLearnFormula(slot)));
             }
+        }
+
+        private void BuildEquipment(VisualElement body)
+        {
+            HeroState hero = _session.Hero;
+            HeroInventory inventory = hero.Inventory;
             EquipmentStatSummary stats = EquipmentStats.Compute(hero.Loadout);
             Text(body, "Equipment", null, "section");
             Text(body, $"{hero.Health.MaxHealth:0} max HP  ·  {hero.Sheet.WeaponDamage + stats.WeaponDamageBonus:0.0} base damage  ·  {stats.TotalBlockValue:0.0} block",
@@ -727,6 +679,24 @@ namespace CubeGame.Gameplay
             }
         }
 
+        /// <summary>
+        /// F1 window. Alpha opens help.plx (vector pages, not ported - PARTIAL); the list is the decoded key switch
+        /// 0x47E1B0 and the menu-button captions.
+        /// </summary>
+        private static void BuildHelp(VisualElement body)
+        {
+            Text(body, "Controls", null, "section");
+            foreach (string line in new[]
+            {
+                "LMB - primary attack (M1)", "RMB - secondary attack (M2)", "1 2 3 - class abilities",
+                "Q - life potion", "E - talk / open", "B or I - inventory", "C - crafting", "X - skills",
+                "M - world map", "O - system menu", "Esc - menu buttons", "J - hunt journal",
+            })
+            {
+                Text(body, line, null, "muted");
+            }
+        }
+
         private static string KindName(KindId id) =>
             AlphaCreatureCatalog.TryKind(id.Value, out var kind) && !string.IsNullOrEmpty(kind.NameHint)
                 ? kind.NameHint : id.ToString();
@@ -821,14 +791,6 @@ namespace CubeGame.Gameplay
             var button = new Button(action) { text = title, name = name };
             parent.Add(button);
             return button;
-        }
-
-        private static void SetBar(ProgressBar bar, double current, double max, string caption)
-        {
-            bar.highValue = (float)max;
-            bar.value = (float)current;
-            string title = $"{caption}  {current:0}/{max:0}";
-            if (bar.title != title) bar.title = title;
         }
 
         private static void SetText(TextElement element, string text)

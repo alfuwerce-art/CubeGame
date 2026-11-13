@@ -170,6 +170,11 @@ namespace CubeGame.Gameplay
         /// </summary>
         private void BuildStartMenu(VisualElement screen)
         {
+            // start.plx nodes "cubeworld" and "picroma": vector shapes rendered into the local cache by
+            // tools/alpha_content/render_start_logo.py (ALPHA_DATA geometry, EMULATED rasteriser). Position: ALPHA_CAPTURE
+            // (logo centred near the top, Picroma in the bottom-right corner).
+            AddStartImage(screen, "start-logo", "start-logo.png", "alpha-start-logo");
+            AddStartImage(screen, "start-picroma", "start-picroma.png", "alpha-start-picroma");
             var menu = new VisualElement { name = "start-menu" };
             menu.AddToClassList("alpha-menu");
             screen.Add(menu);
@@ -178,6 +183,18 @@ namespace CubeGame.Gameplay
             AlphaStartupPresentation.MenuItem(menu, "Options", "menu-options",
                 () => ShowStartupScreen(StartupScreen.Options));
             AlphaStartupPresentation.MenuItem(menu, "Exit", "menu-exit", QuitGame);
+        }
+
+        private void AddStartImage(VisualElement screen, string name, string file, string style)
+        {
+            Texture2D texture = GuiIcons.Get(file);
+            if (texture == null) return;
+            texture.filterMode = FilterMode.Bilinear;
+            var image = new Image { name = name, image = texture, pickingMode = PickingMode.Ignore, scaleMode = ScaleMode.ScaleToFit };
+            image.style.width = texture.width;
+            image.style.height = texture.height;
+            image.AddToClassList(style);
+            screen.Add(image);
         }
 
         // ----- Character list (0x49D650: rows 230 px from y = 50 + the extra "Create Character" row) -----
@@ -245,60 +262,63 @@ namespace CubeGame.Gameplay
 
         // ----- Character editor (0x42BD90 defaults, 0x42C080 model refresh, 0x4821A0 confirm) -----
 
+        /// <summary>
+        /// Alpha character editor (ALPHA_CODE_STATIC, Cube.exe GameController::vfunc_4 0x482E71…0x482F0F and
+        /// CharacterStyleWidget): Back at (20, 20); the appearance panel 300×330 at (20, H − 20 − 330) with the rows
+        /// Race / Gender / Class / Face / Haircut (labels x = 15, y = 27 + 30·i, size 12; arrows at x = 100 and at the
+        /// right edge; value centred between them, drawCharacterAppearancePanel 0x428E40) and the 16×7 hair palette
+        /// mesh 280×150 at (10, 200); the name edit centred on (W/2, H − 50); "Create Character" 300×40 in the
+        /// bottom-right corner (W − 20 − w, H − 20 − h). The creature itself stands in the middle of the screen.
+        /// </summary>
         private void BuildCharacterEditor(VisualElement screen)
         {
             AddBackButton(screen, () => ShowStartupScreen(StartupScreen.Characters));
-            var page = new VisualElement { name = "character-editor" };
-            page.AddToClassList("alpha-center");
-            page.AddToClassList("alpha-editor");
-            screen.Add(page);
 
-            var body = new VisualElement();
-            body.AddToClassList("alpha-editor-body");
-            page.Add(body);
-
-            var left = new VisualElement();
-            left.AddToClassList("alpha-editor-preview");
-            // Alpha previews the creature model while the editor is open (CharacterPreviewWidget 0x424E80).
-            VisualElement preview = PreviewPanel(left);
-            body.Add(left);
+            var stage = new VisualElement { name = "character-editor" };
+            stage.AddToClassList("alpha-editor-stage");
+            screen.Add(stage);
+            // Alpha shows the creature model while the editor is open (CharacterPreviewWidget 0x424E80).
+            VisualElement preview = PreviewPanel(stage);
             CreatePreviewStage(preview, _formLook);
 
-            var fields = new VisualElement();
-            fields.AddToClassList("alpha-editor-fields");
-            body.Add(fields);
+            var panel = new VisualElement { name = "character-style" };
+            panel.AddToClassList("alpha-character-panel");
+            screen.Add(panel);
 
-            TextField name = AddField(fields, "Name", "hero-name", _formHeroName, value => _formHeroName = value);
-            name.maxLength = AlphaHeroCreation.MaxNameLength;
-
-            AddCarousel(fields, "Class", "hero-class", Enum.GetNames(typeof(CharacterClass)), _formClass, index =>
+            var kind = AlphaHeroCreation.KindOf(_formLook);
+            EditorRow(panel, 0, "Race", "hero-race", AlphaHeroCreation.Races, _formLook.Race,
+                index => SetEditorAppearance(index, _formLook.Gender, _formLook.Face, _formLook.Haircut));
+            EditorRow(panel, 1, "Gender", "hero-sex", new[] { "Male", "Female" }, _formLook.Gender,
+                index => SetEditorAppearance(_formLook.Race, index, _formLook.Face, _formLook.Haircut));
+            EditorRow(panel, 2, "Class", "hero-class", Enum.GetNames(typeof(CharacterClass)), _formClass, index =>
             {
                 _formClass = index;
+                RequestRedraw();
                 RefreshEditorPreview();
             });
-            AddCarousel(fields, "Race", "hero-race", AlphaHeroCreation.Races, _formLook.Race,
-                index => SetEditorAppearance(index, _formLook.Gender, _formLook.Face, _formLook.Haircut));
-            AddCarousel(fields, "Sex", "hero-sex", new[] { "Male", "Female" }, _formLook.Gender,
-                index => SetEditorAppearance(_formLook.Race, index, _formLook.Face, _formLook.Haircut));
-            AddCarousel(fields, "Face", "hero-face",
-                NumberedChoices(AlphaHeroCreation.FaceCount(AlphaHeroCreation.KindOf(_formLook))),
+            EditorRow(panel, 3, "Face", "hero-face", NumberedChoices(AlphaHeroCreation.FaceCount(kind), "Face "),
                 _formLook.Face, index => SetEditorAppearance(_formLook.Race, _formLook.Gender, index, _formLook.Haircut));
-            AddCarousel(fields, "Hair", "hero-hair",
-                NumberedChoices(AlphaHeroCreation.HaircutCount(AlphaHeroCreation.KindOf(_formLook))),
+            EditorRow(panel, 4, "Haircut", "hero-hair", NumberedChoices(AlphaHeroCreation.HaircutCount(kind), "Haircut "),
                 _formLook.Haircut, index => SetEditorAppearance(_formLook.Race, _formLook.Gender, _formLook.Face, index));
 
-            // Alpha palette: 16 hues × 7 rows of shadings (drawCharacterAppearancePanel 0x428E40).
+            Label hairLabel = AlphaStartupPresentation.Line(panel, "Hair color", null, AlphaStartupPresentation.TitleColor,
+                AlphaStartupPresentation.OptionTextSize);
+            hairLabel.AddToClassList("alpha-hair-color-label");
+
+            // Alpha palette mesh: 16 hues × 7 shadings in a 280×150 quad (drawCharacterAppearancePanel 0x428E40).
+            var palette = new VisualElement { name = "hair-palette" };
+            palette.AddToClassList("alpha-palette");
+            panel.Add(palette);
             var swatches = new List<Button>();
             for (int rowIndex = 0; rowIndex < AlphaHeroCreation.PaletteRows; rowIndex++)
             {
-                var palette = new VisualElement();
-                palette.AddToClassList("row");
-                palette.AddToClassList("palette");
-                fields.Add(palette);
+                var line = new VisualElement();
+                line.AddToClassList("alpha-palette-row");
+                palette.Add(line);
                 for (int column = 0; column < AlphaHeroCreation.PaletteColumns; column++)
                 {
                     (byte R, byte G, byte B) color = AlphaHeroCreation.PaletteColor(column, rowIndex);
-                    Button swatch = ButtonOf(palette, string.Empty, $"hair-color-{column}-{rowIndex}", () =>
+                    Button swatch = ButtonOf(line, string.Empty, $"hair-color-{column}-{rowIndex}", () =>
                     {
                         HeroAppearance current = _formLook;
                         _formLook = new HeroAppearance(current.Race, current.Gender, current.Face, current.Haircut,
@@ -307,7 +327,6 @@ namespace CubeGame.Gameplay
                         RefreshEditorPreview();
                         _audio.Play("menu-select.wav");
                     });
-                    swatch.tooltip = $"RGB {color.R}, {color.G}, {color.B}";
                     swatch.style.backgroundColor = (Color)new Color32(color.R, color.G, color.B, 255);
                     swatch.AddToClassList("swatch");
                     swatches.Add(swatch);
@@ -316,14 +335,16 @@ namespace CubeGame.Gameplay
 
             RefreshPalette();
 
-            var actions = new VisualElement();
-            actions.AddToClassList("row");
-            actions.AddToClassList("alpha-editor-actions");
-            page.Add(actions);
-            AlphaStartupPresentation.Button(actions, "Create Character", "create-character", true,
-                () => ConfirmCharacterEditor());
-            AlphaStartupPresentation.Button(actions, "Back", "menu-back", false,
-                () => ShowStartupScreen(StartupScreen.Characters));
+            var nameBlock = new VisualElement { name = "name-block" };
+            nameBlock.AddToClassList("alpha-name-block");
+            screen.Add(nameBlock);
+            AlphaStartupPresentation.Line(nameBlock, "Name", null, AlphaStartupPresentation.TitleColor,
+                AlphaStartupPresentation.OptionTextSize).AddToClassList("alpha-field-caption");
+            TextField name = AddField(nameBlock, null, "hero-name", _formHeroName, value => _formHeroName = value);
+            name.maxLength = AlphaHeroCreation.MaxNameLength;
+
+            AlphaStartupPresentation.Button(screen, "Create Character", "create-character", true,
+                () => ConfirmCharacterEditor()).AddToClassList("alpha-bottom-right");
 
             void RefreshPalette()
             {
@@ -335,6 +356,37 @@ namespace CubeGame.Gameplay
                         color.R == _formLook.HairR && color.G == _formLook.HairG && color.B == _formLook.HairB);
                 }
             }
+        }
+
+        /// <summary>One CharacterStyleWidget row: label, left arrow at x = 100, centred value, right arrow.</summary>
+        private void EditorRow(VisualElement panel, int row, string label, string name, IReadOnlyList<string> values,
+            int index, Action<int> changed)
+        {
+            var line = new VisualElement();
+            line.AddToClassList("alpha-editor-row");
+            line.style.top = 12 + 30 * row;
+            panel.Add(line);
+            AlphaStartupPresentation.Line(line, label, name + "-label", AlphaStartupPresentation.TitleColor,
+                AlphaStartupPresentation.OptionTextSize).AddToClassList("alpha-editor-label");
+            var previous = new Button(() =>
+            {
+                changed(Cycle(index - 1, values.Count));
+                _audio.Play("menu-select.wav");
+            }) { name = name + "-prev", text = "<" };
+            previous.AddToClassList("alpha-arrow");
+            previous.AddToClassList("alpha-editor-arrow-left");
+            line.Add(previous);
+            AlphaStartupPresentation.Line(line, values[Mathf.Clamp(index, 0, values.Count - 1)], name,
+                AlphaStartupPresentation.TitleColor, AlphaStartupPresentation.OptionTextSize)
+                .AddToClassList("alpha-editor-value");
+            var next = new Button(() =>
+            {
+                changed(Cycle(index + 1, values.Count));
+                _audio.Play("menu-select.wav");
+            }) { name = name + "-next", text = ">" };
+            next.AddToClassList("alpha-arrow");
+            next.AddToClassList("alpha-editor-arrow-right");
+            line.Add(next);
         }
 
         /// <summary>Carousel step of the editor class field (CharCreation_refresh_model 0x42C080 cycling).</summary>
@@ -445,27 +497,27 @@ namespace CubeGame.Gameplay
                 Report(false, "multiplayer is outside the single player M0")).AddToClassList("alpha-bottom-right");
         }
 
+        /// <summary>
+        /// World creation of Alpha (vfunc_4 0x4831AE…0x48324C): seed edit centred on (W/2, H − 100), name edit on
+        /// (W/2, H − 50), "Create World" in the bottom-right corner, Back top-left.
+        /// </summary>
         private void BuildWorldCreation(VisualElement screen)
         {
             AddBackButton(screen, () => ShowStartupScreen(StartupScreen.Worlds));
             var page = new VisualElement { name = "world-creation" };
-            page.AddToClassList("alpha-center");
-            page.AddToClassList("alpha-creation");
+            page.AddToClassList("alpha-name-block");
+            page.AddToClassList("alpha-world-fields");
             screen.Add(page);
 
-            AlphaStartupPresentation.Line(page, "Create World", null, AlphaStartupPresentation.TitleColor,
-                AlphaStartupPresentation.TextSize);
-            AddField(page, "Name", "world-name", _formWorldName, value => _formWorldName = value);
-            AddField(page, "Seed (must be a number)", "world-seed", _formSeed, value => _formSeed = value);
+            AlphaStartupPresentation.Line(page, "Seed (must be a number)", null, AlphaStartupPresentation.TitleColor,
+                AlphaStartupPresentation.OptionTextSize).AddToClassList("alpha-field-caption");
+            AddField(page, null, "world-seed", _formSeed, value => _formSeed = value);
+            AlphaStartupPresentation.Line(page, "Name", null, AlphaStartupPresentation.TitleColor,
+                AlphaStartupPresentation.OptionTextSize).AddToClassList("alpha-field-caption");
+            AddField(page, null, "world-name", _formWorldName, value => _formWorldName = value);
 
-            var actions = new VisualElement();
-            actions.AddToClassList("row");
-            actions.AddToClassList("alpha-editor-actions");
-            page.Add(actions);
-            AlphaStartupPresentation.Button(actions, "Create World", "create-world", true,
-                () => ConfirmWorldCreation());
-            AlphaStartupPresentation.Button(actions, "Back", "menu-back", false,
-                () => ShowStartupScreen(StartupScreen.Worlds));
+            AlphaStartupPresentation.Button(screen, "Create World", "create-world", true,
+                () => ConfirmWorldCreation()).AddToClassList("alpha-bottom-right");
         }
 
         /// <summary>
@@ -631,26 +683,26 @@ namespace CubeGame.Gameplay
 
         private VisualElement BuildOverlayMenu()
         {
-            SetPixelScaleUi(false);
-            var panel = new VisualElement { name = "system-menu" };
-            panel.AddToClassList("alpha-screen");
+            SetPixelScaleUi(true);
+            // Alpha keeps drawing the world and the HUD under its windows: no full-screen backdrop.
+            var panel = new VisualElement { name = "system-menu", pickingMode = PickingMode.Ignore };
             panel.AddToClassList("alpha-overlay");
             switch (_overlay)
             {
                 case GameOverlay.Options:
                     panel.name = "options-screen";
                     var optionsPage = new VisualElement { name = "options-page" };
-                    optionsPage.AddToClassList("alpha-center");
                     optionsPage.AddToClassList("alpha-options");
+                    optionsPage.AddToClassList("alpha-window");
                     panel.Add(optionsPage);
                     BuildOptionsScreen(optionsPage, null, true);
                     break;
                 default:
                     // SystemWidget 0x587710: Options / Start Menu / Exit Game — same three-entry layout as 0x583320 but
                     // 14 px text on a 30 px pitch (y = 30 / 60 / 90 inside the 350 px wide widget).
+                    // Node +0x800910 (150×120, centred by vfunc_4 0x482F92) hosts SystemWidget.
                     var menu = new VisualElement { name = "system-menu-items" };
-                    menu.AddToClassList("alpha-menu");
-                    menu.AddToClassList("alpha-menu-small");
+                    menu.AddToClassList("alpha-system-window");
                     panel.Add(menu);
                     AlphaStartupPresentation.MenuItem(menu, "Options", "system-options", OpenOverlayOptions);
                     AlphaStartupPresentation.MenuItem(menu, "Start Menu", "system-start-menu",
@@ -680,6 +732,7 @@ namespace CubeGame.Gameplay
             }
 
             _overlay = GameOverlay.None;
+            _menuMode = false;
             if (!ExitToMenuInternal())
             {
                 return false;
@@ -747,7 +800,7 @@ namespace CubeGame.Gameplay
         private TextField AddField(VisualElement parent, string label, string name, string value,
             Action<string> changed)
         {
-            var field = new TextField(label) { name = name, value = value };
+            var field = label == null ? new TextField { name = name, value = value } : new TextField(label) { name = name, value = value };
             field.AddToClassList("alpha-field");
             field.RegisterValueChangedCallback(evt => changed(evt.newValue));
             parent.Add(field);
@@ -800,10 +853,11 @@ namespace CubeGame.Gameplay
 
         private static int Cycle(int index, int count) => count <= 0 ? 0 : ((index % count) + count) % count;
 
-        private static List<string> NumberedChoices(int count)
+        /// <summary>Alpha writes "Face " / "Haircut " + number (wostream at 0x428E40).</summary>
+        private static List<string> NumberedChoices(int count, string prefix = "")
         {
             var choices = new List<string>(count);
-            for (int i = 0; i < count; i++) choices.Add((i + 1).ToString(CultureInfo.InvariantCulture));
+            for (int i = 0; i < count; i++) choices.Add(prefix + (i + 1).ToString(CultureInfo.InvariantCulture));
             return choices;
         }
     }

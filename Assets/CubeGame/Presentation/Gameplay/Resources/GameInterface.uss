@@ -4,42 +4,46 @@
     font-size: 15px;
 }
 .surface {
-    background-color: rgba(18, 27, 35, 0.97);
-    border-color: rgb(71, 96, 112);
-    border-width: 1px;
-    border-radius: 6px;
-    padding: 12px 14px;
+    background-color: rgba(0, 0, 0, 0.67);
+    border-color: rgb(255, 255, 255);
+    border-width: 2px;
+    border-radius: 4px;
+    padding: 10px 12px;
 }
 .heading {
-    font-size: 22px;
-    -unity-font-style: bold;
+    font-size: 14px;
     margin-bottom: 5px;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(0, 0, 0);
 }
 .section {
-    font-size: 16px;
-    color: rgb(192, 225, 242);
-    -unity-font-style: bold;
+    font-size: 12px;
+    color: rgb(64, 255, 255);
     margin-top: 8px;
     margin-bottom: 4px;
 }
 .muted {
-    color: rgb(171, 196, 209);
-    font-size: 13px;
+    color: rgb(200, 210, 230);
+    font-size: 10px;
     white-space: normal;
 }
 Button {
-    color: rgb(237, 246, 250);
-    background-color: rgb(42, 66, 82);
-    border-color: rgb(90, 120, 137);
-    padding: 4px 9px;
-    min-height: 28px;
+    color: rgb(255, 255, 255);
+    background-color: rgba(10, 16, 22, 0.72);
+    border-color: rgb(255, 255, 255);
+    border-width: 1px;
+    border-radius: 0;
+    padding: 2px 8px;
+    min-height: 22px;
     margin: 2px;
+    font-size: 11px;
 }
 Button:hover {
-    background-color: rgb(59, 92, 110);
+    background-color: rgba(56, 78, 98, 0.82);
+    color: rgb(51, 255, 255);
 }
 Button:active {
-    background-color: rgb(77, 117, 135);
+    background-color: rgba(28, 44, 58, 0.9);
 }
 Button:disabled {
     opacity: 0.45;
@@ -132,14 +136,14 @@ Button:disabled {
 }
 .panel-host {
     position: absolute;
-    top: 14px;
-    right: 14px;
-    bottom: 70px;
-    left: 42%;
+    top: 20px;
+    right: 20px;
+    bottom: 180px;
+    left: 50%;
     align-items: flex-end;
 }
 .game-panel {
-    width: 530px;
+    width: 460px;
     max-width: 100%;
     max-height: 100%;
     flex-shrink: 1;
@@ -150,7 +154,7 @@ Button:disabled {
 .item-row {
     min-height: 36px;
     padding: 3px 5px;
-    background-color: rgba(49, 75, 92, 0.44);
+    background-color: rgba(255, 255, 255, 0.08);
     margin-top: 2px;
     margin-bottom: 2px;
 }
@@ -161,6 +165,7 @@ Button:disabled {
 }
 .item-name {
     white-space: normal;
+    font-size: 12px;
 }
 .hunt-active {
     color: rgb(255, 221, 150);
@@ -170,15 +175,16 @@ Button:disabled {
     color: rgb(165, 229, 193);
     white-space: normal;
 }
-.feedback {
+.alpha-feedback {
     position: absolute;
-    left: 14px;
-    right: 62%;
-    bottom: 72px;
-    background-color: rgba(18, 27, 35, 0.94);
-    padding: 7px 10px;
+    left: 20px;
+    bottom: 20px;
+    max-width: 30%;
     white-space: normal;
-    color: rgb(255, 225, 163);
+    font-size: 12px;
+    color: rgb(255, 255, 255);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(0, 0, 0);
 }
 .action-bar {
     position: absolute;
@@ -231,8 +237,40 @@ Button:disabled {
     background-color: rgb(0, 0, 0);
 }
 
+/* In-game windows sit over the running world: no backdrop (Alpha draws the world, then the GUI tree). */
 .alpha-overlay {
-    background-color: rgba(0, 0, 0, 0.55);
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.alpha-window {
+    background-color: rgba(0, 0, 0, 0.67);
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    border-radius: 4px;
+    padding: 8px 0;
+}
+
+/* SystemWidget host node +0x800910: 150x120, entries y = 30 / 60 / 90 at 14 px (0x587710). */
+.alpha-system-window {
+    width: 150px;
+    height: 120px;
+    padding-top: 15px;
+    background-color: rgba(0, 0, 0, 0.67);
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    border-radius: 4px;
+}
+
+.alpha-system-window .alpha-menu-item {
+    height: 30px;
+    font-size: 14px;
 }
 
 .alpha-center {
@@ -707,4 +745,464 @@ Button:disabled {
 .unity-base-field__label {
     min-width: 76px;
     color: rgb(201, 222, 233);
+}
+
+
+/* ----- P6 Alpha character editor (vfunc_4 0x482E71: panel bottom-left, name bottom-centre, create bottom-right) ----- */
+.alpha-editor-stage {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.alpha-editor-stage .preview-image {
+    width: 420px;
+    height: 560px;
+}
+
+.alpha-character-panel {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+}
+
+.alpha-editor-label {
+    -unity-text-align: middle-left;
+}
+
+.alpha-editor-arrow-left {
+    position: absolute;
+    left: 100px;
+    width: 24px;
+    height: 22px;
+    margin: 0;
+    font-size: 12px;
+}
+
+.alpha-editor-arrow-right {
+    position: absolute;
+    right: 15px;
+    width: 24px;
+    height: 22px;
+    margin: 0;
+    font-size: 12px;
+}
+
+.alpha-editor-value {
+    position: absolute;
+    left: 124px;
+    right: 39px;
+    width: auto;
+    -unity-text-align: middle-center;
+}
+
+.alpha-hair-color-label {
+    top: 172px;
+}
+
+.alpha-palette {
+    left: 10px;
+    top: 200px;
+    width: 280px;
+    height: 150px;
+}
+
+.alpha-palette-row {
+    height: 18px;
+}
+
+.alpha-palette .swatch {
+    width: 17px;
+    height: 18px;
+    margin: 0 0.5px 0 0.5px;
+}
+
+.alpha-name-block {
+    position: absolute;
+    left: 50%;
+    bottom: 30px;
+    width: 300px;
+    translate: -50% 0;
+    align-items: stretch;
+}
+
+.alpha-name-block .unity-base-text-field__input {
+    background-color: rgba(10, 16, 22, 0.72);
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    border-radius: 0;
+    color: rgb(255, 255, 255);
+    font-size: 14px;
+    min-height: 30px;
+    -unity-text-align: middle-center;
+}
+
+.alpha-field-caption {
+    -unity-text-align: middle-center;
+    margin-top: 6px;
+}
+
+.alpha-close {
+    width: 22px;
+    min-width: 22px;
+    padding: 0;
+    -unity-text-align: middle-center;
+}
+
+/* ----- P6 Alpha HUD (GameController::vfunc_10 / vfunc_4 placements; gui.plx templates) ----- */
+.alpha-hud {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.alpha-hud-text {
+    position: absolute;
+    color: rgb(255, 255, 255);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(0, 0, 0);
+    padding: 0;
+    margin: 0;
+}
+
+/* experiencebar widget, pivot (100, 75) (0x490BC8); name / class lines above it (ALPHA_CAPTURE). */
+.alpha-hud-character {
+    position: absolute;
+    left: 100px;
+    top: 4px;
+    width: 130px;
+    height: 120px;
+}
+
+.alpha-hud-name {
+    left: 5px;
+    top: 4px;
+    font-size: 10px;
+}
+
+.alpha-hud-class {
+    left: 5px;
+    top: 17px;
+    font-size: 10px;
+    color: rgb(0, 250, 255);
+}
+
+.alpha-hud-time {
+    right: 20px;
+    top: 12px;
+    font-size: 10px;
+}
+
+/* Bars: frame 158x27, pivot top-left; white 2 px stroke over a black outline; fill inset; gloss on the upper half. */
+.alpha-bar {
+    position: absolute;
+}
+
+.alpha-bar-frame {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.67);
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    border-radius: 5px;
+    padding: 3px;
+    overflow: hidden;
+}
+
+.alpha-bar-track {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: 3px;
+    bottom: 3px;
+}
+
+.alpha-bar-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    border-radius: 2px;
+}
+
+.alpha-bar-gloss {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: 3px;
+    height: 40%;
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.alpha-bar-value {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    -unity-text-align: middle-center;
+    font-size: 9px;
+    color: rgb(255, 255, 255);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(0, 0, 0);
+    padding: 0;
+    margin: 0;
+}
+
+.alpha-bar-caption {
+    position: absolute;
+    left: 2px;
+    top: -11px;
+    font-size: 10px;
+    color: rgb(255, 255, 255);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(0, 0, 0);
+    padding: 0;
+    margin: 0;
+}
+
+.alpha-bar-main {
+    width: 158px;
+    height: 27px;
+    bottom: 63px;
+    left: 50%;
+}
+
+.alpha-hp-anchor {
+    margin-left: -163px;
+}
+
+.alpha-mp-anchor {
+    margin-left: 8px;
+}
+
+.alpha-bar-small {
+    position: relative;
+    width: 120px;
+    height: 24px;
+    margin-top: 0;
+}
+
+.alpha-hud-character #hud-health-small {
+    position: absolute;
+    left: 0;
+    top: 41px;
+}
+
+.alpha-hud-character #hero-experience {
+    position: absolute;
+    left: 0;
+    top: 80px;
+}
+
+.alpha-bar-hp .alpha-bar-fill {
+    background-color: rgb(239, 53, 71);
+}
+
+.alpha-bar-mp .alpha-bar-fill {
+    background-color: rgb(0, 133, 255);
+}
+
+.alpha-bar-xp .alpha-bar-fill {
+    background-color: rgb(161, 0, 255);
+}
+
+.alpha-bar-target {
+    position: relative;
+    width: 160px;
+    height: 16px;
+}
+
+.alpha-bar-target .alpha-bar-value {
+    font-size: 8px;
+}
+
+.alpha-hud-target {
+    position: absolute;
+    left: 50%;
+    top: 40px;
+    translate: -50% 0;
+    align-items: center;
+}
+
+.alpha-hud-target-name {
+    position: relative;
+    font-size: 10px;
+    margin-bottom: 2px;
+}
+
+/* Hotbar: 7 clones of abilitybutton/quickitembutton, 42x42, pitch 48, pivot x = W/2 - 162, y = H - 50. */
+.alpha-hotbar {
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    margin-left: -162px;
+    flex-direction: row;
+}
+
+.alpha-slot {
+    width: 42px;
+    height: 42px;
+    min-height: 42px;
+    margin: 0 6px 0 0;
+    padding: 0;
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    border-radius: 5px;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+}
+
+.alpha-slot:hover {
+    border-color: rgb(51, 255, 255);
+}
+
+.alpha-slot:disabled {
+    opacity: 1;
+}
+
+.alpha-slot-quick {
+    background-color: rgba(64, 64, 64, 0.47);
+}
+
+.alpha-slot-icon {
+    width: 28px;
+    height: 28px;
+}
+
+.alpha-slot-key {
+    position: absolute;
+    left: -3px;
+    top: -12px;
+    font-size: 10px;
+    color: rgb(255, 255, 255);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(0, 0, 0);
+    padding: 0;
+    margin: 0;
+}
+
+.alpha-slot-count {
+    position: absolute;
+    right: 1px;
+    bottom: 0;
+    font-size: 10px;
+    color: rgb(255, 255, 255);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(0, 0, 0);
+    padding: 0;
+    margin: 0;
+}
+
+/* Esc menu buttons: 6 sprites 48x48, centres W/2 + 30(2i - 5), y = H - 140; caption under; hover scale 1.5. */
+.alpha-menu-row {
+    position: absolute;
+    left: 50%;
+    bottom: 116px;
+    margin-left: -174px;
+    flex-direction: row;
+}
+
+.alpha-menu-button {
+    width: 48px;
+    height: 48px;
+    min-height: 48px;
+    margin: 0 12px 0 0;
+    padding: 0;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+    overflow: visible;
+}
+
+.alpha-menu-button:hover {
+    background-color: rgba(0, 0, 0, 0);
+    scale: 1.5 1.5;
+}
+
+.alpha-menu-icon {
+    width: 48px;
+    height: 48px;
+}
+
+.alpha-menu-key {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -12px;
+    -unity-text-align: middle-center;
+    font-size: 10px;
+    color: rgb(255, 255, 255);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(0, 0, 0);
+    padding: 0;
+    margin: 0;
+}
+
+.alpha-crosshair {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+}
+
+.alpha-crosshair > VisualElement {
+    position: absolute;
+    background-color: rgb(255, 255, 255);
+    border-width: 1px;
+    border-color: rgb(0, 0, 0);
+}
+
+.alpha-crosshair > VisualElement:first-child {
+    left: -9px;
+    top: -2px;
+    width: 18px;
+    height: 4px;
+}
+
+.alpha-crosshair > VisualElement:last-child {
+    left: -2px;
+    top: -9px;
+    width: 4px;
+    height: 18px;
+}
+
+.alpha-interact {
+    position: absolute;
+    left: 50%;
+    top: 58%;
+    translate: -50% 0;
+    background-color: rgba(0, 0, 0, 0.67);
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+    border-radius: 4px;
+    font-size: 12px;
+    padding: 2px 10px;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(0, 0, 0);
+}
+
+/* start.plx logo and Picroma mark (ALPHA_CAPTURE placement). */
+.alpha-start-logo {
+    position: absolute;
+    left: 50%;
+    top: 50px;
+    translate: -50% 0;
+}
+
+.alpha-start-picroma {
+    position: absolute;
+    right: 12px;
+    bottom: 8px;
 }

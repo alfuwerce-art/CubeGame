@@ -154,7 +154,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             game.Session.Clock.StepTicks(1);
             HuntMission hunt = hero.Missions.Hunts.Single(m => !m.Complete);
             Assert.IsTrue(game.Session.Combat.TryGet(hunt.Target, out target));
-            Press(game, "open-journal");
+            game.ToggleJournal();
             yield return null;
             Assert.IsTrue(Root(game).Q<Label>($"hunt-{hunt.Target.Value}").ClassListContains("hunt-active"));
             Press(game, "close-panel");
@@ -183,7 +183,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.IsNotNull(Clip("pickup.wav"));
             Assert.AreEqual(game.Session.WorldItems.Count, game.Visuals.GroundItemCount);
 
-            Press(game, "open-inventory");
+            PressMenu(game, "open-inventory");
             yield return null;
             yield return Capture(game, "inventory");
             Assert.IsNotNull(Root(game).Q($"bag-slot-{loot}"));
@@ -196,7 +196,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             yield return null;
             Assert.AreSame(weapon, hero.Loadout.GetEquipped(EquipmentSlot.MainHand));
 
-            Press(game, "open-skills");
+            PressMenu(game, "open-skills");
             yield return null;
             Press(game, "raise-Climbing");
             yield return null;
@@ -247,7 +247,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.IsTrue(hero.Inventory.TryAdd(InventoryEntry.FromRaw(AlphaLifePotionRecipe.Heartflower, 1)));
             Assert.IsTrue(hero.Inventory.TryAdd(InventoryEntry.FromRaw(AlphaLifePotionRecipe.WaterFlask, 1)));
 
-            Press(game, "open-inventory");
+            PressMenu(game, "open-crafting");
             yield return null;
             Press(game, "brew");
             yield return null;
@@ -256,6 +256,8 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.IsNotNull(Clip("craft.wav"));
             hero.Health.ApplyDamage(20);
             double injured = hero.Health.CurrentHealth;
+            PressMenu(game, "open-inventory");
+            yield return null;
             Press(game, $"use-{hero.Inventory.FindFirst(LootRules.LifePotion)}");
             yield return null;
             Assert.Greater(hero.Health.CurrentHealth, injured);
@@ -306,11 +308,11 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.AreEqual(GameClock.InnDawnMs, clock.WorldTimeMs);
             yield return null;
 
-            Press(game, "open-journal");
+            game.ToggleJournal();
             yield return null;
             Assert.IsTrue(Root(game).Q<Label>($"hunt-{hunt.Target.Value}").ClassListContains("hunt-complete"));
             yield return Capture(game, "journal");
-            Press(game, "open-map");
+            PressMenu(game, "open-map");
             yield return null;
             Image map = Root(game).Q<Image>("map-image");
             Assert.IsNotNull(map?.image);
@@ -322,7 +324,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             int bagSlots = hero.Inventory.UsedSlots;
             long calendarOffset = clock.WorldTimeOffsetMs;
 
-            Press(game, "system-menu");
+            PressMenu(game, "system-menu");
             yield return null;
             Press(game, "system-start-menu");
             yield return null;
@@ -360,7 +362,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.IsNull(Clip(AlphaSoundCatalog.MissionComplete), "reloading a completed hunt does not play its cue");
             Assert.IsNull(Root(game).Q("game-panel"));
 
-            Press(game, "open-journal");
+            game.ToggleJournal();
             yield return null;
             Assert.IsTrue(Root(game).Q<Label>($"hunt-{hunt.Target.Value}").ClassListContains("hunt-complete"));
             Assert.IsNull(Clip(AlphaSoundCatalog.MissionComplete));
@@ -386,7 +388,6 @@ namespace CubeGame.Tests.FullM0.PlayMode
             }
             Assert.IsTrue(game.HeroDead);
             yield return null;
-            StringAssert.Contains("Downed", Root(game).Q<Label>("hero-resources").text);
             StringAssert.Contains("You fell", Root(game).Q<Label>("game-feedback").text);
             Assert.That(game.GetComponentsInChildren<AudioSource>().Length, Is.LessThanOrEqualTo(8));
             Assert.IsEmpty(game.Session.Events.HandlerErrors);
@@ -426,6 +427,14 @@ namespace CubeGame.Tests.FullM0.PlayMode
             }
         }
 
+        /// <summary>Alpha menu buttons exist only behind the Esc GUI flag (0x47E770): switch it on, then press.</summary>
+        private static void PressMenu(GameBootstrap game, string name)
+        {
+            if (!game.MenuMode) game.ToggleMenuMode();
+            Assert.AreEqual(DisplayStyle.Flex, Root(game).Q("menu-row").style.display.value, "menu row visible after Esc");
+            Press(game, name);
+        }
+
         private static void Press(GameBootstrap game, string name)
         {
             var button = Root(game).Q<Button>(name);
@@ -442,10 +451,13 @@ namespace CubeGame.Tests.FullM0.PlayMode
         private static void AssertHud(GameBootstrap game)
         {
             var hero = game.Session.Hero;
-            Assert.AreEqual(hero.Health.CurrentHealth, Root(game).Q<ProgressBar>("hero-health").value, 0.01);
-            Assert.AreEqual(hero.Sheet.Progression.Experience, Root(game).Q<ProgressBar>("hero-experience").value, 0.01);
-            StringAssert.Contains($"Level {hero.Sheet.Progression.Level}", Root(game).Q<Label>("hero-summary").text);
-            StringAssert.Contains($"{hero.Copper} copper", Root(game).Q<Label>("hero-resources").text);
+            // P6 Alpha HUD: bar value text "current/max" (hpbar/experiencebar templates), "LVL n CLASS" class line.
+            Assert.AreEqual($"{System.Math.Floor(hero.Health.CurrentHealth):0}/{hero.Health.MaxHealth:0}",
+                Root(game).Q<Label>("hero-health-text").text);
+            Assert.AreEqual($"{hero.Sheet.Progression.Experience:0}/{hero.Sheet.Progression.ExperienceToNextLevel:0}",
+                Root(game).Q<Label>("hero-experience-text").text);
+            StringAssert.Contains($"LVL {hero.Sheet.Progression.Level}", Root(game).Q<Label>("hero-summary").text);
+            Assert.IsNull(Root(game).Q("action-bar"), "no permanent CubeGame buttons on the game screen");
         }
 
         private static AudioClip Clip(string name) =>

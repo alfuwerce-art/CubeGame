@@ -130,7 +130,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.Greater(Mathf.Abs((float)(saved.X - start.X)) + Mathf.Abs((float)(saved.Z - start.Z)), 8f,
                 "the hero left the world start so the saved position is distinguishable");
 
-            Press(game, "system-menu");
+            PressMenu(game, "system-menu");
             yield return null;
             Assert.IsTrue(game.GuiActive, "the system menu owns the input context");
             PlayerMotor motor = game.PlayerTransform.GetComponent<PlayerMotor>();
@@ -167,7 +167,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.Less(Mathf.Abs((float)(restored.Y - saved.Y)), 3f, "y restored from the per-world entry");
 
             // A second world of the same character starts at the world start, not at the first world's position.
-            Press(game, "system-menu");
+            PressMenu(game, "system-menu");
             yield return null;
             Press(game, "system-start-menu");
             yield return null;
@@ -204,6 +204,14 @@ namespace CubeGame.Tests.FullM0.PlayMode
         }
 
         private static VisualElement Root(GameBootstrap game) => game.GetComponentInChildren<UIDocument>().rootVisualElement;
+
+        /// <summary>Alpha menu buttons exist only behind the Esc GUI flag (0x47E770): switch it on, then press.</summary>
+        private static void PressMenu(GameBootstrap game, string name)
+        {
+            if (!game.MenuMode) game.ToggleMenuMode();
+            Assert.AreEqual(DisplayStyle.Flex, Root(game).Q("menu-row").style.display.value, "menu row visible after Esc");
+            Press(game, name);
+        }
 
         private static void Press(GameBootstrap game, string name)
         {

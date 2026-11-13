@@ -19,6 +19,8 @@ namespace CubeGame.AlphaModels
         public const string AppearanceFolder = "appearance";
         public const string SoundsFolder = "sounds";
         public const string IconsFolder = "icons";
+        /// <summary>Interface PNGs of data3.db (tools/alpha_content/extract_gui_icons.py), read by the HUD.</summary>
+        public const string GuiFolder = "gui";
         public const string IconAtlasImage = "atlas.png";
         public const string IconAtlasIndex = "atlas.json";
 
