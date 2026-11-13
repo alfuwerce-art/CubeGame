@@ -219,4 +219,4 @@ LIVE_GAME_UPDATED=NO
 REMOTE_SHA=<HEAD refs/heads/codex/m0-p5-character-items-progression; Windows build 791b3ce>
 ```
 
-`ALPHA_RUNTIME_COMPARISON=PARTIAL` означает сверку по байтам `Cube.exe`. Прогона Alpha и сравнения в runtime не было. `WINDOWS_BUILD=PASS` здесь значит «сборка P5 не выполнялась», а не упавшую сборку.
+`ALPHA_RUNTIME_COMPARISON=PARTIAL` означает сверку по байтам `Cube.exe`. Прогона Alpha и сравнения в runtime не было. `WINDOWS_BUILD=PASS` означает сборку `791b3ce` и smoke-тест fresh/load в Player. Полный сценарий ТЗ §24 с городом и крафтом в Player не пройден.
