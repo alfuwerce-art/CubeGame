@@ -11,14 +11,31 @@ namespace CubeGame.Gameplay
 {
     public sealed partial class GameBootstrap
     {
-        // CUBEGAME_CONTRACT: interaction radius and small repeatable assortment.
+        // CUBEGAME_CONTRACT: interaction radius.
         public const double InteractionRadius = 4.0;
-        private static readonly (RawAlphaItemId Item, string Label)[] ShopStock =
+
+        // P5: Alpha vendor stock (AlphaShop) per vendor NPC; generated once per session. The roll stream seed
+        // (world seed and NPC id) is a CUBEGAME_CONTRACT, Alpha fills it from the global stream at town generation.
+        private readonly System.Collections.Generic.Dictionary<StableEntityId, System.Collections.Generic.List<AlphaItemRecord>> _vendorStock =
+            new System.Collections.Generic.Dictionary<StableEntityId, System.Collections.Generic.List<AlphaItemRecord>>();
+
+        /// <summary>Alpha stock of the vendor NPC <paramref name="id"/> with role <paramref name="role"/> (empty for non-vendors).</summary>
+        public System.Collections.Generic.IReadOnlyList<AlphaItemRecord> VendorStock(StableEntityId id, int role)
         {
-            (LootRules.LifePotion, "Life Potion"),
-            (AlphaLifePotionRecipe.Heartflower, "Heartflower"),
-            (AlphaLifePotionRecipe.WaterFlask, "Water Flask"),
-        };
+            if (!AlphaShop.IsVendor(role))
+            {
+                return System.Array.Empty<AlphaItemRecord>();
+            }
+
+            if (!_vendorStock.TryGetValue(id, out var stock))
+            {
+                int seed = unchecked((int)(_session.World.Seed.Value * 2246822519u) ^ (int)id.Value ^ (int)(id.Value >> 32) ^ role);
+                stock = AlphaShop.Stock(new Features.World.AlphaCrtRandom(seed), role);
+                _vendorStock[id] = stock;
+            }
+
+            return stock;
+        }
         private static readonly string[] SpecializationNames =
         {
             "Berserker", "Guardian", "Sniper", "Scout", "Fire", "Water", "Assassin", "Ninja",
@@ -89,26 +106,65 @@ namespace CubeGame.Gameplay
 
         public bool TryBuyFromVendor(int offerIndex)
         {
-            if (!TryTownNpcInReach(_townNpc, out int role) || role != TownNpcPopulation.MerchantClass
-                || (uint)offerIndex >= ShopStock.Length)
+            if (!TryTownNpcInReach(_townNpc, out int role) || !AlphaShop.IsVendor(role))
             {
                 return Report(false, "no such offer from an in-range merchant");
             }
 
-            var offer = ShopStock[offerIndex];
-            bool bought = _session.TryBuy(InventoryEntry.FromRaw(offer.Item, 1));
-            return Report(bought, bought ? $"bought {offer.Label}" : _session.LastRejection);
+            var stock = VendorStock(_townNpc, role);
+            if ((uint)offerIndex >= stock.Count)
+            {
+                return Report(false, "no such offer from an in-range merchant");
+            }
+
+            AlphaItemRecord offer = stock[offerIndex];
+            bool bought = _session.TryBuy(InventoryEntry.FromAlpha(offer));
+            return Report(bought, bought ? $"bought {offer}" : _session.LastRejection);
         }
 
         public bool TrySellToVendor(int bagSlot)
         {
-            if (!TryTownNpcInReach(_townNpc, out int role) || role != TownNpcPopulation.MerchantClass)
+            if (!TryTownNpcInReach(_townNpc, out int role) || !AlphaShop.IsVendor(role))
             {
                 return Report(false, "selling requires an in-range merchant");
             }
 
             bool sold = _session.TrySell(bagSlot);
             return Report(sold, sold ? "sold one item" : _session.LastRejection);
+        }
+
+        public bool TryBuyBackFromVendor(int index)
+        {
+            if (!TryTownNpcInReach(_townNpc, out int role) || !AlphaShop.IsVendor(role))
+            {
+                return Report(false, "buyback requires an in-range merchant");
+            }
+
+            bool bought = _session.TryBuyBack(index);
+            return Report(bought, bought ? "bought back" : _session.LastRejection);
+        }
+
+        /// <summary>Identification and adaptation are offered by every vendor (CUBEGAME_CONTRACT: the Alpha NPC is not traced).</summary>
+        public bool TryIdentifyAtVendor(int bagSlot)
+        {
+            if (!TryTownNpcInReach(_townNpc, out int role) || !AlphaShop.IsVendor(role))
+            {
+                return Report(false, "identification requires an in-range merchant");
+            }
+
+            bool done = _session.TryIdentify(bagSlot);
+            return Report(done, done ? "identified" : _session.LastRejection);
+        }
+
+        public bool TryAdaptAtVendor(int bagSlot)
+        {
+            if (!TryTownNpcInReach(_townNpc, out int role) || !AlphaShop.IsVendor(role))
+            {
+                return Report(false, "adaptation requires an in-range merchant");
+            }
+
+            bool done = _session.TryAdapt(bagSlot);
+            return Report(done, done ? "adapted" : _session.LastRejection);
         }
 
         public bool TryRestAtInn()
@@ -207,7 +263,7 @@ namespace CubeGame.Gameplay
                 position = actor.Position;
             }
 
-            return role == TownNpcPopulation.MerchantClass || role == TownNpcPopulation.InnkeeperClass
+            return AlphaShop.IsVendor(role) || role == TownNpcPopulation.InnkeeperClass
                 || (TownNpcPopulation.IsTrainer(role) && _population.TryGet(id, out _));
         }
 

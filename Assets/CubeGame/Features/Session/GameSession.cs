@@ -851,7 +851,7 @@ namespace CubeGame.Features.Session
             }
             if (!Hero.Inventory.TryAdd(offer))
             {
-                return Reject(Hero.Inventory.LastRejection);
+                return Reject("You can't carry more of these items.");
             }
 
             Hero.Copper -= price;
@@ -873,8 +873,136 @@ namespace CubeGame.Features.Session
                 return Reject("wallet is full");
             }
 
-            Hero.Inventory.TakeFrom(bagSlot, 1);
+            InventoryEntry sold = Hero.Inventory.TakeFrom(bagSlot, 1);
             Hero.Copper += price;
+            // Alpha 0x47B600: every sale appends one unit to the buyback list; above ten the oldest entry is dropped.
+            _buyback.Add(sold.IsCore ? sold : sold.WithCount(1));
+            if (_buyback.Count > AlphaShop.BuybackCapacity)
+            {
+                _buyback.RemoveAt(0);
+            }
+
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        private readonly List<InventoryEntry> _buyback = new List<InventoryEntry>();
+
+        /// <summary>Sold items that can be bought back (Alpha <c>GameController+0x800D3C</c>, runtime only, oldest first).</summary>
+        public IReadOnlyList<InventoryEntry> Buyback => _buyback;
+
+        /// <summary>
+        /// Alpha buyback (0x47B600 vendor sub-tab 1): units of the entry are bought one by one at the full Alpha value
+        /// while the wallet covers it and the bags take it; the entry disappears when no unit is left.
+        /// </summary>
+        public bool TryBuyBack(int index)
+        {
+            if (!CanUseServices || index < 0 || index >= _buyback.Count)
+            {
+                return Reject("no such buyback entry");
+            }
+
+            InventoryEntry entry = _buyback[index];
+            int unitPrice = AlphaTradeValue.Of(entry);
+            int units = entry.IsCore ? 1 : entry.Count;
+            int bought = 0;
+            for (int i = 0; i < units; i++)
+            {
+                if (Hero.Copper < unitPrice)
+                {
+                    break;
+                }
+
+                InventoryEntry unit = entry.IsCore ? entry : entry.WithCount(1);
+                if (!Hero.Inventory.TryAdd(unit))
+                {
+                    if (bought == 0)
+                    {
+                        return Reject("You can't carry more of these items.");
+                    }
+
+                    break;
+                }
+
+                Hero.Copper -= unitPrice;
+                bought++;
+            }
+
+            if (bought == 0)
+            {
+                return Reject($"need {unitPrice} copper");
+            }
+
+            if (bought >= units)
+            {
+                _buyback.RemoveAt(index);
+            }
+            else
+            {
+                _buyback[index] = entry.WithCount(units - bought);
+            }
+
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        /// <summary>
+        /// Alpha identification: one unidentified item (type 0x0E) becomes a class item of its level and rarity for
+        /// <c>max(1, value/2)</c> copper. The roll stream seed (world, clock tick, slot) is a CUBEGAME_CONTRACT.
+        /// </summary>
+        public bool TryIdentify(int bagSlot)
+        {
+            InventoryEntry entry = CanUseServices ? Hero.Inventory[bagSlot] : null;
+            if (entry == null || entry.IsCore || entry.Record.Type != AlphaLoot.TypeLeftovers)
+            {
+                return Reject("identification needs an unidentified item");
+            }
+
+            int price = AlphaShop.IdentifyPrice(entry);
+            if (Hero.Copper < price)
+            {
+                return Reject($"need {price} copper");
+            }
+
+            var rng = new AlphaCrtRandom(unchecked(LootSeed(StableEntityId.ForRuntime((ulong)Clock.Tick)) ^ bagSlot * 7919));
+            InventoryEntry result = InventoryEntry.FromAlpha(AlphaShop.Identify(rng, entry.Record));
+            bool lastUnit = entry.Count == 1;
+            if (!lastUnit && Hero.Inventory.UsedSlots >= HeroInventory.Capacity)
+            {
+                return Reject("bags are full");
+            }
+
+            Hero.Inventory.TakeFrom(bagSlot, 1);
+            Hero.Inventory.TryAdd(result);
+            Hero.Copper -= price;
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        /// <summary>
+        /// Alpha adaptation: an item below the hero's level is raised to it for <see cref="AlphaShop.AdaptPrice"/>
+        /// platinum (0x40F4F0). Alpha also sets bit 1 of <c>+0x0E</c>, which CubeGame does not model (PARTIAL).
+        /// </summary>
+        public bool TryAdapt(int bagSlot)
+        {
+            InventoryEntry entry = CanUseServices ? Hero.Inventory[bagSlot] : null;
+            int heroLevel = Hero?.Sheet.Progression.Level ?? 1;
+            if (entry == null || !entry.IsCore || entry.Core.Level >= heroLevel)
+            {
+                return Reject("adaptation needs equipment below the hero level");
+            }
+
+            int price = AlphaShop.AdaptPrice(entry.Core.Level, entry.Core.Rarity, heroLevel);
+            if (Hero.Platinum < price)
+            {
+                return Reject($"need {price} platinum");
+            }
+
+            ItemInstance old = entry.Core;
+            var adapted = new ItemInstance(old.Type, old.Subtype, heroLevel, old.Rarity, old.Seed, old.Modifier, old.PowerBonus);
+            Hero.Inventory.TakeFrom(bagSlot);
+            Hero.Inventory.TryPlace(bagSlot, InventoryEntry.FromCore(adapted));
+            Hero.Platinum -= price;
             LastRejection = string.Empty;
             return true;
         }

@@ -44,9 +44,9 @@ namespace CubeGame.Features.Items
                 }
             }
 
-            // Raw-only inventory entries carry no level or rarity. The bridge values them as L1, r0.
-            float scale = (float)AlphaMath.LevelFactor(item.Core?.Level ?? 1)
-                * (float)AlphaMath.StarFactor(item.Core?.Rarity ?? 0);
+            // P5: every entry carries its Alpha record; pre-P5 raw items restore as L1, r0.
+            float scale = (float)AlphaMath.LevelFactor(Math.Max(1, item.Record.Level))
+                * (float)AlphaMath.StarFactor(Math.Max(0, item.Record.Rarity));
             return Math.Max(1, (int)(scale * 10f * multiplier));
         }
     }

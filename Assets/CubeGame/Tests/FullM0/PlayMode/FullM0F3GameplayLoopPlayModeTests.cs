@@ -111,13 +111,19 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.IsTrue(game.TrySellToVendor(lootSlot), game.Status);
             Assert.AreEqual(coins + proceeds, hero.Copper);
             int potions = hero.Inventory.CountOf(LootRules.LifePotion);
+            // P5: the 0x80 vendor sells its Alpha 0x5C9B30 stock; offer 0 is the tier-0 flask (0x0B/0x0C, value 2).
+            var stock = game.VendorStock(vendor.Id, TownNpcPopulation.MerchantClass);
+            Assert.AreEqual(new AlphaItemRecord(0x0B, 0x0C, modifier: 0x18, level: 1), stock[0]);
+            int flasks = hero.Inventory.CountOf(new RawAlphaItemId(0x0B, 0x0C));
             Assert.IsTrue(game.TryBuyFromVendor(0), game.Status);
-            Assert.AreEqual(potions + 1, hero.Inventory.CountOf(LootRules.LifePotion));
+            Assert.AreEqual(flasks + 1, hero.Inventory.CountOf(new RawAlphaItemId(0x0B, 0x0C)));
             Assert.AreEqual(coins + proceeds - 2, hero.Copper);
-            Assert.IsTrue(game.TryBuyFromVendor(1), game.Status);
-            Assert.IsTrue(game.TryBuyFromVendor(2), game.Status);
+            Assert.AreEqual(1, game.Session.Buyback.Count, "the sale is on the Alpha buyback list");
+            // Diagnostic: Alpha vendors do not stock the Life Potion ingredients; they are placed for the crafting check.
+            Assert.IsTrue(hero.Inventory.TryAdd(InventoryEntry.FromRaw(AlphaLifePotionRecipe.Heartflower, 1)));
+            Assert.IsTrue(hero.Inventory.TryAdd(InventoryEntry.FromRaw(AlphaLifePotionRecipe.WaterFlask, 1)));
             Assert.IsTrue(game.TryBrewLifePotion(), game.Status);
-            Assert.AreEqual(potions + 2, hero.Inventory.CountOf(LootRules.LifePotion));
+            Assert.AreEqual(potions + 1, hero.Inventory.CountOf(LootRules.LifePotion));
             Assert.AreEqual(0, hero.Inventory.CountOf(AlphaLifePotionRecipe.Heartflower));
             Assert.AreEqual(0, hero.Inventory.CountOf(AlphaLifePotionRecipe.WaterFlask));
 
@@ -168,7 +174,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.AreEqual(CharacterSpecialization.Secondary, hero.Sheet.Specialization);
             Assert.AreEqual(1, hero.SkillRanks[HeroSkill.Climbing]);
             Assert.AreEqual(bags, hero.Inventory.UsedSlots);
-            Assert.AreEqual(potions + 2, hero.Inventory.CountOf(LootRules.LifePotion));
+            Assert.AreEqual(potions + 1, hero.Inventory.CountOf(LootRules.LifePotion));
             Assert.AreEqual(offset, game.Session.Clock.WorldTimeOffsetMs);
             Assert.IsTrue(hero.Missions.Hunts.Single(m => m.Target.Equals(hunt.Target)).Complete);
             Assert.IsFalse(game.Population.TryGet(chest.Id, out _));

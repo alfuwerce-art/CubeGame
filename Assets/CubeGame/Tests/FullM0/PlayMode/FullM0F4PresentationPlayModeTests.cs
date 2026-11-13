@@ -219,41 +219,33 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Press(game, "interact");
             yield return null;
             Assert.IsNotNull(Root(game).Q<Label>("vendor-wallet"));
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CUBEGAME_F4_SCREENSHOTS")))
-            {
-                Assert.AreEqual("alpha_icon_heartflower", Root(game).Q<Button>("buy-1").parent.Q<Image>()?.sprite?.name);
-                Assert.AreEqual("alpha_icon_water-flask", Root(game).Q<Button>("buy-2").parent.Q<Image>()?.sprite?.name);
-            }
             yield return Capture(game, "services");
             int potions = hero.Inventory.CountOf(LootRules.LifePotion);
-            // P5: the kill scattered Alpha coins (0x59B180) that the pickup moved into the wallet, so the first
-            // purchase succeeds whenever those coins cover the price.
+            // P5: the 0x80 vendor shows its Alpha 0x5C9B30 stock; offer 0 is the tier-0 flask (value 2 copper).
+            var flask = new RawAlphaItemId(0x0B, 0x0C);
+            int flasks = hero.Inventory.CountOf(flask);
             int startCopper = hero.Copper;
-            int potionPrice = AlphaTradeValue.Of(InventoryEntry.FromRaw(LootRules.LifePotion, 1));
             Press(game, "buy-0");
             yield return null;
-            if (startCopper < potionPrice)
+            if (startCopper < 2)
             {
                 Assert.AreEqual(startCopper, hero.Copper);
-                Assert.AreEqual(potions, hero.Inventory.CountOf(LootRules.LifePotion));
                 StringAssert.Contains("copper", Root(game).Q<Label>("panel-status").text);
             }
             else
             {
-                Assert.AreEqual(startCopper - potionPrice, hero.Copper);
-                Assert.AreEqual(++potions, hero.Inventory.CountOf(LootRules.LifePotion));
+                Assert.AreEqual(startCopper - 2, hero.Copper);
+                Assert.AreEqual(flasks + 1, hero.Inventory.CountOf(flask));
             }
             int proceeds = AlphaTradeValue.Of(hero.Inventory[loot]);
             int beforeSale = hero.Copper;
             Press(game, $"sell-{loot}");
             yield return null;
             Assert.AreEqual(beforeSale + proceeds, hero.Copper);
-            Press(game, "buy-1");
-            yield return null;
-            Press(game, "buy-2");
-            yield return null;
-            Assert.AreEqual(1, hero.Inventory.CountOf(AlphaLifePotionRecipe.Heartflower));
-            Assert.AreEqual(1, hero.Inventory.CountOf(AlphaLifePotionRecipe.WaterFlask));
+            Assert.IsNotNull(Root(game).Q<Button>("buyback-0"), "the sold item is offered for buyback");
+            // Diagnostic: Alpha vendors do not stock the Life Potion ingredients; they are placed for the crafting UI.
+            Assert.IsTrue(hero.Inventory.TryAdd(InventoryEntry.FromRaw(AlphaLifePotionRecipe.Heartflower, 1)));
+            Assert.IsTrue(hero.Inventory.TryAdd(InventoryEntry.FromRaw(AlphaLifePotionRecipe.WaterFlask, 1)));
 
             Press(game, "open-inventory");
             yield return null;

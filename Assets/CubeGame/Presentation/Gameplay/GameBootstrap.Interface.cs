@@ -622,17 +622,27 @@ namespace CubeGame.Gameplay
         {
             if (!TryTownNpcInReach(_townNpc, out int role)) return;
             HeroState hero = _session.Hero;
-            if (role == TownNpcPopulation.MerchantClass)
+            if (AlphaShop.IsVendor(role))
             {
-                Text(body, $"Merchant  ·  {hero.Copper} copper", "vendor-wallet", "section");
-                for (int i = 0; i < ShopStock.Length; i++)
+                Text(body, $"Merchant  ·  {hero.Copper} copper  ·  {hero.Platinum} platinum", "vendor-wallet", "section");
+                var stock = VendorStock(_townNpc, role);
+                for (int i = 0; i < stock.Count; i++)
                 {
                     int offer = i;
-                    var item = InventoryEntry.FromRaw(ShopStock[i].Item, 1);
-                    var row = ItemRow(body, item, "For sale");
+                    var item = InventoryEntry.FromAlpha(stock[i]);
+                    var row = ItemRow(body, item, $"For sale · L{stock[i].Level}");
                     ButtonOf(row, $"Buy · {AlphaTradeValue.Of(item)} copper", $"buy-{offer}", () => TryBuyFromVendor(offer));
                 }
+                Text(body, "Buyback", null, "section");
+                for (int i = 0; i < _session.Buyback.Count; i++)
+                {
+                    int index = i;
+                    var item = _session.Buyback[i];
+                    var row = ItemRow(body, item, "Sold");
+                    ButtonOf(row, $"Buy back · {AlphaTradeValue.Of(item)} copper", $"buyback-{index}", () => TryBuyBackFromVendor(index));
+                }
                 Text(body, "Sell one from a stack", null, "section");
+                int heroLevel = hero.Sheet.Progression.Level;
                 for (int i = 0; i < HeroInventory.Capacity; i++)
                 {
                     InventoryEntry item = hero.Inventory[i];
@@ -641,6 +651,16 @@ namespace CubeGame.Gameplay
                     var row = ItemRow(body, item, $"Bag {i / HeroInventory.SlotsPerBag + 1} · {i % HeroInventory.SlotsPerBag + 1}");
                     ButtonOf(row, $"Sell · {AlphaTradeValue.Of(item)} copper", $"sell-{slot}",
                         () => WithBagEntry(slot, item, () => TrySellToVendor(slot)));
+                    if (!item.IsCore && item.Record.Type == AlphaLoot.TypeLeftovers)
+                    {
+                        ButtonOf(row, $"Identify · {AlphaShop.IdentifyPrice(item)} copper", $"identify-{slot}",
+                            () => WithBagEntry(slot, item, () => TryIdentifyAtVendor(slot)));
+                    }
+                    if (item.IsCore && item.Core.Level < heroLevel)
+                    {
+                        ButtonOf(row, $"Adapt · {AlphaShop.AdaptPrice(item.Core.Level, item.Core.Rarity, heroLevel)} platinum", $"adapt-{slot}",
+                            () => WithBagEntry(slot, item, () => TryAdaptAtVendor(slot)));
+                    }
                 }
             }
             else if (role == TownNpcPopulation.InnkeeperClass)
