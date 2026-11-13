@@ -159,7 +159,22 @@
 - Проверяются распределения, пулы классов, кошелёк, стеки, raw-записи сейва и сессионное убийство с подбором монет в кошелёк.
 - Обновлены тесты F3/F4/C3, которые фиксировали прежние правила: мана-куб за охоту, 10 занятых слотов из сундука, нулевая медь до продажи и `LootRules.Roll`.
 
-Срез 1 проверен на коде `fc4ab41`: EditMode 794 из 796, PlayMode 75 из 75. Срез 2 проверен на коде `ad451ee`: EditMode 803 из 805, PlayMode 75 из 75. Срез 3 проверен на коде `4513696`: EditMode 814 из 816, PlayMode 75 из 75. Срез 4 проверен на коде `7c04e23`: EditMode 819 из 821, PlayMode 75 из 75. Unity 6000.3.27f2, с локальными кешем контента, атласом иконок и шрифтом. Последний прогон EditMode: 821 тест, 819 успешно, 0 падений, 2 пропуска (нет локальных дампов зон `zone_lake`/`zone_carves`). PlayMode: 75 из 75, без пропусков. Ошибок компиляции 0. XML лежат локально: `.unity-install/results/p5_{edit,play}.xml`. Windows Player для P5 не собирался. Живая сборка не обновлялась.
+Срез 1 проверен на коде `fc4ab41`: EditMode 794 из 796, PlayMode 75 из 75. Срез 2 проверен на коде `ad451ee`: EditMode 803 из 805, PlayMode 75 из 75. Срез 3 проверен на коде `4513696`: EditMode 814 из 816, PlayMode 75 из 75. Срез 4 проверен на коде `7c04e23`: EditMode 819 из 821, PlayMode 75 из 75. Unity 6000.3.27f2, с локальными кешем контента, атласом иконок и шрифтом. Последний прогон EditMode: 821 тест, 819 успешно, 0 падений, 2 пропуска (нет локальных дампов зон `zone_lake`/`zone_carves`). PlayMode: 75 из 75, без пропусков. Ошибок компиляции 0. XML лежат локально: `.unity-install/results/p5_{edit,play}.xml`. Живая сборка не обновлялась.
+
+### Windows Player
+
+Сборку выполнил `tools/release/build_windows_release.ps1 -OutputDir` в `.unity-install/builds/p5_791b3ce`; launcher и `current.txt` не тронуты. Unity 6000.3.27f2, D3D11. Результат: `BUILD_RESULT=PASS`, `content_gate=PASS`, `error CS` 0. Первая сборка `c05dc61` тоже PASS. Сборка `791b3ce` отличается только диагностическим режимом `-cubeP5Smoke`.
+
+- **fresh** (`p5_791b3ce_player_fresh.log`). Мир `/8` на seed 666666.
+  - Рядом с героем нашлось естественное враждебное существо kind `0x43`, уровень 4, на расстоянии 2.6 блока. Его убили через `CombatSystem.ResolveHit` с диагностически сниженным HP.
+  - Смерть дала Alpha-дроп: запись монет `(12,0)`.
+  - Подбор дал медь 0 → 26, это внутри `pow2Mul(4,0)·10·(1…3)`.
+  - Цель была целью охоты, поэтому пришла награда миссии: платина 7 (`int(curve(4)·50+1)`) и классовый предмет.
+  - Известно 11 рецептов. Хотбар Warrior с большой булавой: `0x39, 0x3B, 0, 0, 0`. Слот 2 P4 отклонил как unsupported.
+  - `SMOKE_SAVE=PASS`.
+- **load** (`p5_791b3ce_player_load.log`). Слот загружен на tick 131. Совпало всё: уровень, XP 2, медь 26, платина 7, 11 рецептов, 4 Core-предмета и 1 raw-предмет в сумке.
+
+Ограничение: убийство диагностическое, без реального боя с вводом игрока. Город, торговля и крафт в Player не прогонялись, они покрыты PlayMode (F3/F4).
 
 ## Не закрыто в P5
 
@@ -199,9 +214,9 @@ PERSISTENCE=PARTIAL
 ALPHA_RUNTIME_COMPARISON=PARTIAL
 EDITMODE=PASS
 PLAYMODE=PASS
-WINDOWS_BUILD=FAIL
+WINDOWS_BUILD=PASS
 LIVE_GAME_UPDATED=NO
-REMOTE_SHA=<HEAD refs/heads/codex/m0-p5-character-items-progression; код 7c04e23>
+REMOTE_SHA=<HEAD refs/heads/codex/m0-p5-character-items-progression; Windows build 791b3ce>
 ```
 
-`ALPHA_RUNTIME_COMPARISON=PARTIAL` означает сверку по байтам `Cube.exe`. Прогона Alpha и сравнения в runtime не было. `WINDOWS_BUILD=FAIL` здесь значит «сборка P5 не выполнялась», а не упавшую сборку.
+`ALPHA_RUNTIME_COMPARISON=PARTIAL` означает сверку по байтам `Cube.exe`. Прогона Alpha и сравнения в runtime не было. `WINDOWS_BUILD=PASS` здесь значит «сборка P5 не выполнялась», а не упавшую сборку.
