@@ -118,7 +118,8 @@ namespace CubeGame.Features.AI
             Threat.MarkReachable(target);
 
             double range = world.AttackRange > 0 ? world.AttackRange : DefaultAttackRange;
-            if (distance > range)
+            bool dragonRanged = self.Kind == 0x65 && distance >= 8 && distance < 60;
+            if (distance > range && !dragonRanged)
             {
                 world.MoveTowards(self, targetPos.X, targetPos.Z, world.WalkSpeed > 0 ? world.WalkSpeed : DefaultWalkSpeed, elapsedMs);
                 State = CreatureAiState.Chase;
@@ -130,8 +131,15 @@ namespace CubeGame.Features.AI
             LastReason = "IN_RANGE";
             if (_actionRetryInMs > 0) { LastReason = "ACTION_RETRY_WAIT"; return; }
 
-            int action = AlphaAttackSelection.SelectAttackId(self.Kind, self.ClassId, self.SpecialisationId,
-                self.WeaponItemType, self.WeaponItemSubtype, TargetPointerParity);
+            // 0x42DEC3: in the 8..60 block branch the dragon writes 0x25. The near flight branch is separate.
+            int action = dragonRanged ? 0x25 : self.Kind == 0x65 ? -1 :
+                AlphaAttackSelection.SelectAttackId(self.Kind, self.ClassId, self.SpecialisationId,
+                    self.WeaponItemType, self.WeaponItemSubtype, TargetPointerParity);
+            if (action < 0)
+            {
+                LastReason = "UNKNOWN_ALPHA_DISPATCH";
+                return;
+            }
             LastSelectedAttack = action;
             LastRequestedAction = action;
             LastReason = world.TryBeginAction(self, action, out string reason)

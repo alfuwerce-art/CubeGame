@@ -74,7 +74,7 @@ namespace CubeGame.Tests.Creatures.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator DragonRequestsOnlyItsTransferredAction()
+        public IEnumerator DragonRequestsItsAlphaRangedActionAtEightBlocks()
         {
             if (!ContentReady()) Assert.Ignore("local Alpha content cache is not staged here");
             var library = AlphaActorLibrary.Shared;
@@ -102,12 +102,12 @@ namespace CubeGame.Tests.Creatures.PlayMode
                 };
                 agent.Initialize(state, new CreatureAi(), def, 7u);
                 Assert.IsTrue(agent.VisualAvailable, agent.VisualStatus);
-                playerGo.transform.position = new Vector3(1.5f, 0, 0);
+                playerGo.transform.position = new Vector3(8f, 0, 0);
                 for (int i = 0; i < 10; i++) agent.Tick(0.05f);
                 Assert.AreEqual(CreatureAiState.Attack, agent.Ai.State);
                 for (int i = 0; i < 120 && agent.View.Controller.CurrentAction == null; i++) agent.Tick(0.05f);
                 Assert.AreEqual("action_037", agent.View.Controller.CurrentAction,
-                    $"dragon 0x65 launches 37/40/42/43; phase={agent.View.Controller.Phase} reason={agent.Ai.LastReason} " +
+                    $"dragon 0x65 launches 0x25 in the 8..60 block branch; phase={agent.View.Controller.Phase} reason={agent.Ai.LastReason} " +
                     $"problems={string.Join(",", agent.View.Problems)}");
                 yield return null;
             }
@@ -299,7 +299,7 @@ namespace CubeGame.Tests.Creatures.PlayMode
                 int requested = -1;
                 agent.ActionRequested += (a, code, source) => requested = code;
                 agent.Initialize(state, new CreatureAi(), def, 11u);
-                playerGo.transform.position = new Vector3(1.5f, 0, 0);
+                playerGo.transform.position = new Vector3(8f, 0, 0);
                 for (int i = 0; i < 120 && requested < 0; i++) agent.Tick(0.05f);
                 Assert.AreEqual(37, requested, "the game hook receives the Alpha action code the AI requested");
                 Assert.IsTrue(agent.TryGetActionTiming(37, out var timing), "the agent exposes the Alpha action timing");

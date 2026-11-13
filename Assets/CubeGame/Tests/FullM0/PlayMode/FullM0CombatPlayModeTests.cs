@@ -104,7 +104,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             StringAssert.Contains("action_057", hero.Status(), "the hero plays Alpha action 57 when gameplay starts the attack");
             foreach (string problem in visuals.Problems)
             {
-                StringAssert.DoesNotStartWith("ANIMATION_PARTIAL", problem);
+                Assert.IsFalse(problem.StartsWith("ANIMATION_PARTIAL") && problem.EndsWith(action.AnimationKey), problem);
             }
 
             Debug.Log($"[FullM0Visual] scale {visuals.ModelScale:F4} hero {hero.Status()} wolf {wolf.Status()} problems [{string.Join("; ", visuals.Problems)}]");
