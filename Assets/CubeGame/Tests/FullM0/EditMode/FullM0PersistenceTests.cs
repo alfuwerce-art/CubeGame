@@ -266,11 +266,11 @@ namespace CubeGame.Tests.FullM0.EditMode
         }
 
         [Test]
-        public void FeaturesIsEngineFreeAndDependsOnlyOnCore()
+        public void FeaturesIsEngineFreeAndUsesCoreAndAlphaData()
         {
             AsmDef features = Read("CubeGame/Features/CubeGame.Features.asmdef");
             Assert.IsTrue(features.noEngineReferences);
-            CollectionAssert.AreEqual(new[] { "CubeGame.Core" }, features.references);
+            CollectionAssert.AreEqual(new[] { "CubeGame.Core", "CubeGame.Content" }, features.references);
 
             AsmDef core = Read("CubeGame/Core/CubeGame.Core.asmdef");
             Assert.IsTrue(core.noEngineReferences);

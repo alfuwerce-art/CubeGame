@@ -69,6 +69,7 @@ namespace CubeGame.Gameplay
             RawAlphaItemId? mainHandWeapon = null, bool recovered = false)
         {
             RawAlphaItemId? weapon = mainHandWeapon?.Type == AlphaNpcWeaponActions.WeaponItemType ? mainHandWeapon : null;
+            combatant.AlphaMainHandSubtype = weapon?.Subtype;
             var state = new CreatureState
             {
                 StableId = combatant.Id.ToString(),
@@ -237,25 +238,17 @@ namespace CubeGame.Gameplay
 
             Combatant attacker = enemy.Combatant;
             AttackPlan plan = AlphaAttackRoute.ForAction(actionCode);
-            if (enemy.Recovered && (enemy.Ai.LastSelectedAttack != actionCode || _session.ActionTimings == null ||
-                !_session.ActionTimings.TryGet(attacker.Kind, plan.Action, out _)))
+            if (enemy.Ai.LastSelectedAttack != actionCode && actionCode != CreatureRules.PotionActionId)
             {
-                reason = "MISSING_ALPHA_ACTION_OR_TIMING";
+                reason = "UNKNOWN_ALPHA_ACTION_SELECTION";
                 return false;
-            }
-            // A timed clip offered by the library does not prove that this spawn launches it in Alpha.
-            // C-29 or an equipped weapon plus its weapon-action gate can establish a routed attack.
-            bool provenSelection = enemy.Ai.LastSelectedAttack == actionCode
-                || (AlphaNpcWeaponActions.HasWeapon(self) && AlphaNpcWeaponActions.IsWeaponOnly(actionCode));
-            if (!provenSelection && plan.Path != AttackPath.Melee)
-            {
-                plan = new AttackPlan(plan.Action, AttackPath.Melee, ProjectileKind.Arrow,
-                    "PLACEHOLDER_NOT_ALPHA: timed creature clip without a proven launch");
             }
 
             attacker.ClearAim();
+            StableEntityId targetId = StableEntityId.None;
             if (TryGetTarget(HeroTargetId, out CreatureTarget hero))
             {
+                targetId = StableEntityId.Hero;
                 attacker.Yaw = YawTowards(attacker.Position.X, attacker.Position.Z, hero.X, hero.Z);
                 if (plan.Path != AttackPath.Melee && _session.Combat.TryGet(StableEntityId.Hero, out Combatant target))
                 {
@@ -268,7 +261,7 @@ namespace CubeGame.Gameplay
 
             bool started = actionCode == CreatureRules.PotionActionId
                 ? _session.Combat.TryStartAction(attacker.Id, plan.Action, _session.Clock.TimeMs, $"action_{actionCode:000}", false)
-                : _session.Combat.TryStartAttack(attacker.Id, plan, _session.Clock.TimeMs);
+                : _session.Combat.TryStartAttack(attacker.Id, plan, _session.Clock.TimeMs, targetId);
             if (!started)
             {
                 reason = _session.Combat.LastRejection;
@@ -310,7 +303,12 @@ namespace CubeGame.Gameplay
 
         public bool HasLifePotion(CreatureState self) => false;
 
-        public int CurrentActionDurationMs(CreatureState self) => 0;
+        public int CurrentActionDurationMs(CreatureState self)
+        {
+            return _enemies.TryGetValue(self.StableId, out Enemy enemy) &&
+                _session.Combat.TryGetAction(enemy.Combatant.Id, out AuthoritativeActionState action)
+                ? (int)action.Timing.EndMs : 0;
+        }
 
         public int[] AvailableActions(CreatureState self)
         {

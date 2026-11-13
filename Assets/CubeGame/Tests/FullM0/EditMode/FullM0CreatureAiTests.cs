@@ -14,7 +14,7 @@ namespace CubeGame.Tests.FullM0.EditMode
     public sealed class FullM0CreatureAiTests
     {
         private static readonly KindId Wolf = new KindId(0x1c);
-        private static readonly ActionId Bite = new ActionId(37);
+        private static readonly ActionId Bite = new ActionId(3);
 
         private GameSession _session;
         private CreatureCombatDriver _driver;
@@ -23,8 +23,8 @@ namespace CubeGame.Tests.FullM0.EditMode
         [SetUp]
         public void SetUp()
         {
-            // Wolf action 37 from the S05 clip provenance: windup 1185, action end 1381, recovery 1392.
-            var timings = new ActionTimingTable().Add(Wolf, Bite, ActionTiming.FromAlpha(1185, 1381, 1392));
+            // Fixture for the legacy AI C-29 unarmed decision.
+            var timings = new ActionTimingTable().Add(Wolf, Bite, new ActionTiming(100, 200, 300, "test"));
             _session = new GameSession(timings);
             _session.EnterMainMenu();
             Assert.IsTrue(_session.BeginNewWorld("slot0", new NewWorldRequest { Seed = 11, GeneratorId = "test" }, 0));
@@ -44,30 +44,6 @@ namespace CubeGame.Tests.FullM0.EditMode
         {
             Assert.AreEqual(Core.Characters.CharacterStats.CalcCreatureMaxHealth(100.0, 1, 0), _wolf.Health.MaxHealth, 1e-9);
             Assert.IsTrue(_wolf.Hostile);
-        }
-
-        [TestCase(null, false)]
-        [TestCase(1, false)]
-        [TestCase(3, true)]
-        public void OnlyAWeaponInMainHandAllowsWeaponActions(int? itemType, bool expectsAttack)
-        {
-            var action = new ActionId(AlphaNpcWeaponActions.WeaponOnly[0]);
-            ((ActionTimingTable)_session.ActionTimings).Add(Wolf, action, ActionTiming.FromAlpha(100, 200, 300));
-            _session.Clock.Ticked -= _driver.Tick;
-            _driver = new CreatureCombatDriver(_session, (x, z) => 5.0, kind => new[] { action.Value }, 11u);
-            _session.Clock.Ticked += _driver.Tick;
-            _wolf.Position = new WorldPosition(1, 5, 0);
-            RawAlphaItemId? weapon = itemType.HasValue ? new RawAlphaItemId(itemType.Value, 0) : (RawAlphaItemId?)null;
-            _driver.Add(_wolf, 1, 0, (int)CreatureFaction.Monster, -1, -1, weapon);
-
-            _session.Clock.StepTicks(1);
-
-            Assert.IsTrue(_driver.TryGetAi(_wolf.Id, out var ai));
-            Assert.AreEqual(expectsAttack, _session.Combat.IsActing(_wolf.Id), ai.LastReason);
-            if (!expectsAttack)
-            {
-                StringAssert.Contains("ACTION_NEEDS_WEAPON", ai.LastReason);
-            }
         }
 
         [Test]

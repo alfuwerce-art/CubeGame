@@ -102,7 +102,6 @@ namespace CubeGame.Gameplay
         private ulong _runtimeSerial;
         private bool _trainingTargetPending;
         private GameVisualSink _visuals;
-        private AlphaActionTimingSource _timings;
         private CreatureCombatDriver _creatures;
         private ProjectileVisuals _projectileVisuals;
         private VoxelColumn _terrainColumn;
@@ -173,8 +172,7 @@ namespace CubeGame.Gameplay
                 _profiles = CreateProfiles(_saveDirectory);
             }
 
-            _timings = new AlphaActionTimingSource(AlphaActorLibrary.Shared);
-            _session = new GameSession(_timings) { ConsumableCooldownMs = CubeGame.Content.AlphaConsumableRules.CooldownMs };
+            _session = new GameSession() { ConsumableCooldownMs = CubeGame.Content.AlphaConsumableRules.CooldownMs };
             _session.EnterMainMenu();
             EnsureCameraAndLight();
             CreateInterface();
@@ -261,7 +259,7 @@ namespace CubeGame.Gameplay
                 }
             }
 
-            if (_attackFrame >= 0 && _frames >= _attackFrame && _session.State == SessionState.InGame && _trainingTarget != null)
+            if (_attackFrame >= 0 && _frames >= _attackFrame && _session.State == SessionState.InGame)
             {
                 _attackFrame = -1;
                 HeroAttack();
@@ -497,7 +495,7 @@ namespace CubeGame.Gameplay
             // M0-F2B: weapon state -> one attack path (melee / projectile / staff volume). An unknown Alpha rule is
             // refused with its reason; ranged and magic input never fall back to a melee swing.
             AttackPlan plan = AlphaAttackRoute.Select(hero.Sheet.Class,
-                hero.Loadout.GetEquipped(EquipmentSlot.MainHand), hero.Loadout.GetEquipped(EquipmentSlot.OffHand));
+                hero.Loadout.GetEquipped(EquipmentSlot.MainHand), hero.Loadout.GetEquipped(EquipmentSlot.OffHand), hero.Sheet.Specialization);
             LastAttackPlan = plan;
             if (!_session.Combat.TryStartAttack(hero.Id, plan, _session.Clock.TimeMs))
             {
@@ -633,7 +631,7 @@ namespace CubeGame.Gameplay
         private void OnHitResolved(HitResolved hit)
         {
             _combatLog = $"hit {hit.Target} damage {hit.Damage:F1} hp left {hit.TargetHealthAfter:F1}{(hit.Killed ? " KILLED" : string.Empty)}";
-            Debug.Log($"[Combat] {_combatLog}");
+            Debug.Log($"[Combat] {_combatLog} actor={hit.Attacker} action={hit.Action.Value} serial={hit.AttackSerial} time={hit.TimeMs}");
         }
 
         /// <summary>Uses the first bag stack of an Alpha item (Q: life potion).</summary>
@@ -1096,7 +1094,7 @@ namespace CubeGame.Gameplay
             BindWorldPresentation();
             _session.Hero.Inventory.EquipmentChanged += OnEquipmentChanged;
             PublishEquipment();
-            _creatures = new CreatureCombatDriver(_session, GroundAt, kind => _timings.AttackActionsOf(kind),
+            _creatures = new CreatureCombatDriver(_session, GroundAt, null,
                 _session.World.Seed.Value, _worldState.VoxelAt);
             _session.Clock.Ticked += _creatures.Tick;
             StartPopulation();
@@ -1148,7 +1146,7 @@ namespace CubeGame.Gameplay
             visualObject.transform.SetParent(_worldRoot.transform, false);
             _visuals = visualObject.AddComponent<GameVisualSink>();
             StreamingWorldView view = _worldView;
-            _visuals.Initialise(AlphaActorLibrary.Shared, p => view.ToScene(p.X, p.Y, p.Z), _player.transform);
+            _visuals.Initialise(AlphaActorLibrary.Shared, p => view.ToScene(p.X, p.Y, p.Z), _player.transform, _session.Combat);
             _session.Events.AddVisualSink(_visuals);
             _visuals.BindItems(_session.Events);   // D4: Alpha models of items on the ground
 

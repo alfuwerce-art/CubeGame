@@ -79,8 +79,8 @@ namespace CubeGame.Tests.FullM0.EditMode
         [TestCase(CharacterClass.Ranger, 8, -1, 26, AttackPath.Projectile, ProjectileKind.Boomerang)]
         [TestCase(CharacterClass.Ranger, 11, -1, 38, AttackPath.Projectile, ProjectileKind.Magic)]
         [TestCase(CharacterClass.Mage, 11, -1, 38, AttackPath.Projectile, ProjectileKind.Magic)]
-        [TestCase(CharacterClass.Mage, 10, -1, 30, AttackPath.AreaEffect, ProjectileKind.StaffBurst)]
-        [TestCase(CharacterClass.Mage, 12, -1, 39, AttackPath.Projectile, ProjectileKind.Magic)]
+        [TestCase(CharacterClass.Mage, 10, -1, 30, AttackPath.AreaEffect, ProjectileKind.Arrow)]
+        [TestCase(CharacterClass.Mage, 12, -1, 40, AttackPath.Projectile, ProjectileKind.Magic)]
         public void WeaponStateSelectsOneAttackPath(CharacterClass characterClass, int main, int off, int action, AttackPath path, ProjectileKind kind)
         {
             ItemInstance mainHand = main < 0 ? null : Weapon((WeaponSubtype)main);
@@ -124,7 +124,6 @@ namespace CubeGame.Tests.FullM0.EditMode
 
             AttackPlan plan = AlphaAttackRoute.Select(CharacterClass.Ranger, _hero.Loadout.GetEquipped(EquipmentSlot.MainHand), null);
             Assert.IsTrue(_combat.TryStartAttack(_hero.Id, plan, 0), _combat.LastRejection);
-            Assert.IsTrue(_combat.InMeleeReach(_hero, side), "the side wolf is inside the melee sector");
             long serial = _combat.ActionSerialOf(_hero.Id);
 
             Run(0, 399, 33);
@@ -150,20 +149,20 @@ namespace CubeGame.Tests.FullM0.EditMode
         [TestCase(0x1A, AttackPath.Projectile, ProjectileKind.Boomerang)]
         [TestCase(0x25, AttackPath.Projectile, ProjectileKind.Magic)]
         [TestCase(0x2E, AttackPath.Projectile, ProjectileKind.Magic)]
-        [TestCase(0x6C, AttackPath.Projectile, ProjectileKind.Magic)]
-        [TestCase(0x1E, AttackPath.AreaEffect, ProjectileKind.StaffBurst)]
-        [TestCase(0x21, AttackPath.AreaEffect, ProjectileKind.StaffBurst)]
+        [TestCase(0x6C, AttackPath.Unsupported, ProjectileKind.Arrow)]
+        [TestCase(0x1E, AttackPath.AreaEffect, ProjectileKind.Arrow)]
+        [TestCase(0x21, AttackPath.AreaEffect, ProjectileKind.Arrow)]
         [TestCase(0x1C, AttackPath.Hitscan, ProjectileKind.Beam)]
         [TestCase(0x5E, AttackPath.Hitscan, ProjectileKind.Beam)]
         [TestCase(0x5F, AttackPath.Hitscan, ProjectileKind.Beam)]
-        [TestCase(0x68, AttackPath.Hitscan, ProjectileKind.Beam)]
+        [TestCase(0x68, AttackPath.Unsupported, ProjectileKind.Arrow)]
         [TestCase(57, AttackPath.Melee, ProjectileKind.Arrow)]
         [TestCase(1, AttackPath.Melee, ProjectileKind.Arrow)]
         public void ActionIdSelectsTheAlphaHandlerGroup(int action, AttackPath path, ProjectileKind kind)
         {
             AttackPlan plan = AlphaAttackRoute.ForAction(action);
             Assert.AreEqual(path, plan.Path);
-            if (path != AttackPath.Melee) Assert.AreEqual(kind, plan.Projectile);
+            if (plan.IsSupported && path != AttackPath.Melee) Assert.AreEqual(kind, plan.Projectile);
         }
 
         [Test]
@@ -185,12 +184,12 @@ namespace CubeGame.Tests.FullM0.EditMode
             var rays = new List<HitscanFired>();
             _events.Subscribe<HitscanFired>(rays.Add);
 
-            Assert.IsTrue(_combat.TryStartAttack(_hero.Id, AlphaAttackRoute.ForAction(0x5F), 0), _combat.LastRejection);
+            Assert.IsTrue(_combat.TryStartAttack(_hero.Id, AlphaAttackRoute.ForAction(0x5E), 0), _combat.LastRejection);
             Run(0, 3000, 33);
             Assert.AreEqual(1, rays.Count, "one ray per attack");
             Assert.AreEqual(2, _hits.Count, "both wolves on the line, once each");
             Assert.IsFalse(_hits.Exists(h => h.Target.Equals(_hero.Id)), "never the owner");
-            Assert.IsTrue(rays[0].Trail, "0x5F has a byte-verified trail");
+            Assert.IsTrue(rays[0].Trail, "0x5E has a byte-verified trail");
             Assert.AreEqual(200.0, rays[0].End.Z - rays[0].Origin.Z, 1e-6, "range 200 without a wall");
             Assert.IsEmpty(_spawned, "a hitscan releases no flying projectile");
         }
@@ -366,6 +365,7 @@ namespace CubeGame.Tests.FullM0.EditMode
         public void BoomerangHitsOnceComesBackAndIsCaught()
         {
             _hero.SetAim(0, 0, 1);
+            _wolf.Position = new WorldPosition(100, 50, 102);
             Projectile b = _combat.Projectiles.Launch(_hero, ProjectileKind.Boomerang, new ActionId(26), 1, 0);
             Run(0, 1300, 10);
             Assert.AreEqual(1, _hits.Count, "hit on the way out, not again on the way back");
@@ -377,23 +377,24 @@ namespace CubeGame.Tests.FullM0.EditMode
         }
 
         [Test]
-        public void StaffVolumeHitsInFrontOnlyAndExpires()
+        public void StaffVolumeRepeatsWithinTheActionAndLeavesNoProjectile()
         {
             _wolf.Position = new WorldPosition(100, 50, 101.5);
             Combatant behind = Combatant.CreateCreature(StableEntityId.ForRuntime(5), Wolf, "Behind", 1, 0);
             behind.HitWidth = behind.HitDepth = 0.5;
-            behind.Position = new WorldPosition(100, 50, 97);
+            behind.Position = new WorldPosition(100, 50, 95);
             _combat.Register(behind);
             _hero.Loadout.Equip(EquipmentSlot.MainHand, Weapon(WeaponSubtype.Staff));
             AttackPlan plan = AlphaAttackRoute.Select(CharacterClass.Mage, _hero.Loadout.GetEquipped(EquipmentSlot.MainHand), null);
             Assert.IsTrue(_combat.TryStartAttack(_hero.Id, plan, 0), _combat.LastRejection);
             Run(0, 2000, 33);
-            Assert.AreEqual(1, _spawned.Count);
-            Assert.AreEqual((int)ProjectileKind.StaffBurst, _spawned[0].Kind);
-            Assert.AreEqual(1, _hits.Count);
-            Assert.AreEqual(_wolf.Id, _hits[0].Target);
+            Assert.IsEmpty(_spawned);
+            Assert.AreEqual(6, _hits.Count);
+            Assert.IsTrue(_hits.TrueForAll(hit => hit.Target.Equals(_wolf.Id)));
+            Assert.AreEqual(800, _hits[0].TimeMs);
+            Assert.AreEqual(1300, _hits[5].TimeMs);
             Assert.AreEqual(behind.Health.MaxHealth, behind.Health.CurrentHealth);
-            Assert.AreEqual((int)ProjectileEndReason.Expired, _removed[0].Reason);
+            Assert.IsFalse(_combat.IsActing(_hero.Id));
         }
 
         [Test]
@@ -448,15 +449,15 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.IsTrue(_combat.TryStartAttack(_hero.Id, plan, 0));
             long first = _combat.ActionSerialOf(_hero.Id);
             Assert.IsFalse(_combat.TryStartAttack(_hero.Id, plan, 10), "no second swing while acting");
-            Run(0, 1000, 33);
+            _combat.Update(1400);
             Assert.AreEqual(1, _hits.Count, "one hit per swing window");
             Assert.AreEqual(first, _hits[0].AttackSerial);
             Assert.IsEmpty(_spawned, "melee releases no projectile");
             Assert.IsFalse(_combat.IsActing(_hero.Id));
 
-            Assert.IsTrue(_combat.TryStartAttack(_hero.Id, plan, 1000));
+            Assert.IsTrue(_combat.TryStartAttack(_hero.Id, plan, 1400));
             long second = _combat.ActionSerialOf(_hero.Id);
-            Run(1000, 2000, 33);
+            _combat.Update(2800);
             Assert.AreEqual(2, _hits.Count);
             Assert.AreNotEqual(first, second);
             Assert.AreEqual(second, _hits[1].AttackSerial);

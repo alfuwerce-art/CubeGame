@@ -135,6 +135,8 @@ namespace CubeGame.Features.Contracts
 
         public ActionId Action { get; set; }
 
+        public long Serial { get; set; }
+
         public StableEntityId Target { get; set; }
 
         /// <summary>Phase durations in game ms (windup, strike, recover). Visual playback must follow them.</summary>
@@ -152,6 +154,8 @@ namespace CubeGame.Features.Contracts
 
         public ActionId Action { get; set; }
 
+        public long Serial { get; set; }
+
         public ActionPhase Phase { get; set; }
     }
 
@@ -162,6 +166,8 @@ namespace CubeGame.Features.Contracts
         public StableEntityId Entity { get; set; }
 
         public ActionId Action { get; set; }
+
+        public long Serial { get; set; }
 
         public ActionOutcome Outcome { get; set; }
 
@@ -175,6 +181,8 @@ namespace CubeGame.Features.Contracts
         public StableEntityId Attacker { get; set; }
 
         public StableEntityId Target { get; set; }
+
+        public ActionId Action { get; set; }
 
         public double Damage { get; set; }
 

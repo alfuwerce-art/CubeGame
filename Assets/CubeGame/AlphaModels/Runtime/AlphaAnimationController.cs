@@ -110,6 +110,24 @@ namespace CubeGame.AlphaTransfer
             return true;
         }
 
+        public void SampleGameplayAction(string clip, float cursor, bool recovering)
+        {
+            if (CurrentAction != clip) actions.Play(clip, cursor);
+            else actions.Seek(cursor);
+            CurrentAction = clip;
+            Phase = recovering ? AlphaControllerPhase.Recovery : AlphaControllerPhase.Action;
+            BlendWeight = 1f;
+        }
+
+        public void EndGameplayAction()
+        {
+            if (CurrentAction == null) return;
+            CurrentAction = null;
+            Phase = AlphaControllerPhase.Locomotion;
+            _rig.SetWeaponOnBack(true);
+            locomotion.Apply();
+        }
+
         PartPose[] Snapshot()
         {
             var p = new PartPose[_rig.parts.Length];

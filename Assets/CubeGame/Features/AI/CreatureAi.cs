@@ -128,40 +128,14 @@ namespace CubeGame.Features.AI
 
             State = CreatureAiState.Attack;
             LastReason = "IN_RANGE";
-            var actions = world.AvailableActions(self);
-            if (actions == null || actions.Length == 0) { LastReason = "IN_RANGE_NO_ACTION_EVIDENCE"; return; }
-            // CUBEGAME_CONTRACT: Alpha's per-action cooldown/lock lives in the attack choice, not in the
-            // AI tick; without it the AI would ask the game every 31 ms tick. 250 ms is a CubeGame
-            // throttle and is NOT an Alpha constant.
             if (_actionRetryInMs > 0) { LastReason = "ACTION_RETRY_WAIT"; return; }
-            // C-29 (M0-06C): Alpha decides the attack from the weapon/class table (AlphaAttackSelection),
-            // then requires it to exist in the creature's own action set; library order is only a fallback
-            // for a kind whose evidence does not contain the Alpha-selected id.
-            int preferred = AlphaAttackSelection.SelectAttackId(self.Kind, self.ClassId, self.SpecialisationId,
+
+            int action = AlphaAttackSelection.SelectAttackId(self.Kind, self.ClassId, self.SpecialisationId,
                 self.WeaponItemType, self.WeaponItemSubtype, TargetPointerParity);
-            LastSelectedAttack = preferred;
-            bool preferredInLibrary = Array.IndexOf(actions, preferred) >= 0;
-            bool hasWeapon = AlphaNpcWeaponActions.HasWeapon(self);
-            for (int i = -1; i < actions.Length; i++)
-            {
-                if (i < 0 && !preferredInLibrary) continue;
-                int action = i < 0 ? preferred : actions[i];
-                if (action < 0 || (i >= 0 && action == preferred)) continue;
-                // R-2 data rule: an Alpha action that needs a weapon is never launched without one.
-                if (!AlphaNpcWeaponActions.IsAllowed(action, hasWeapon))
-                {
-                    LastReason = "ACTION_NEEDS_WEAPON " + action;
-                    continue;
-                }
-                LastRequestedAction = action;
-                if (world.TryBeginAction(self, action, out var reason))
-                {
-                    LastReason = (preferredInLibrary ? "ACTION_C29 " : "ACTION_C29_NOT_IN_LIBRARY " + preferred + " ") + action;
-                    _actionRetryInMs = ActionRetryMs;
-                    return;
-                }
-                LastReason = "ACTION_REFUSED " + action + " " + reason;
-            }
+            LastSelectedAttack = action;
+            LastRequestedAction = action;
+            LastReason = world.TryBeginAction(self, action, out string reason)
+                ? "ACTION_C29 " + action : "ACTION_REFUSED " + action + " " + reason;
             _actionRetryInMs = ActionRetryMs;
         }
 

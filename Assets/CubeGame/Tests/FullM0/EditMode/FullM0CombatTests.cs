@@ -104,8 +104,10 @@ namespace CubeGame.Tests.FullM0.EditMode
             var expectedTarget = new HealthPool(before);
             CombatAttack attack = new EquipmentCombatAdapter().BuildAttack(_hero.Sheet, _hero.Loadout, 1.0,
                 EquipmentCombatAdapter.ComputeTargetArmor(_wolf.Loadout), 0.0);
+            double weaponDamage = CombatFormulas.WeaponDamage(attack.WeaponBase, attack.Level, attack.Upgrades) + attack.ItemWeaponDamageBonus;
+            var strike = new CombatAttack(2.0 * weaponDamage, 1, attack.HitChance) { TargetArmor = attack.TargetArmor };
             CombatOutcome expected = new DamageResolver(new SeededCombatRandom(_combat.StrikeSeed(_hero.Id, _wolf.Id, 1)))
-                .Resolve(attack, expectedTarget);
+                .Resolve(strike, expectedTarget);
 
             Assert.IsTrue(expected.IsHit);
             Assert.Greater(expected.AppliedDamage, 0.0);
@@ -146,7 +148,7 @@ namespace CubeGame.Tests.FullM0.EditMode
         [Test]
         public void TargetOutsideReachOrBehindIsNotHit()
         {
-            _wolf.Position = new WorldPosition(100, 50, 100 + _combat.Rules.MeleeReach + 0.5);
+            _wolf.Position = new WorldPosition(100, 50, 105);
             _combat.TryStartAttack(_hero.Id, Attack57, 0);
             _combat.Update(2000);
             Assert.AreEqual(0, Count<HitResolved>());
@@ -215,12 +217,32 @@ namespace CubeGame.Tests.FullM0.EditMode
         }
 
         [Test]
-        public void UnknownActionUsesPlaceholderTiming()
+        public void UnknownActionIsRefusedWithoutAnimationOrHit()
         {
-            _combat.TryStartAttack(_hero.Id, new ActionId(1), 0);
-            ActionStarted started = Single<ActionStarted>();
-            CollectionAssert.AreEqual(_combat.Rules.FallbackTiming.PhaseDurations, started.PhaseDurationsMs);
-            Assert.AreEqual("PLACEHOLDER_NOT_ALPHA", _combat.Rules.FallbackTiming.Source);
+            Assert.IsFalse(_combat.TryStartAttack(_hero.Id, new ActionId(0xFE), 0));
+            StringAssert.Contains("UNKNOWN", _combat.LastRejection);
+            _combat.Update(2000);
+            Assert.IsEmpty(_log);
+        }
+
+        [Test]
+        public void EarlierStrikeInterruptsLaterWindupEvenWhenRegisteredSecond()
+        {
+            var timing = new ActionTimingTable()
+                .Add(Human, new ActionId(1), new ActionTiming(100, 150, 200, "test"))
+                .Add(Wolf, new ActionId(1), new ActionTiming(300, 350, 400, "test"));
+            _combat = new CombatSystem(_events, timing, 666666);
+            _combat.Register(_hero);
+            _combat.Register(_wolf);
+            _wolf.Health.ApplyDamage(_wolf.Health.MaxHealth - 0.01);
+            Assert.IsTrue(_combat.TryStartAttack(_wolf.Id, new ActionId(1), 0));
+            Assert.IsTrue(_combat.TryGetAction(_wolf.Id, out AuthoritativeActionState interrupted));
+            Assert.IsTrue(_combat.TryStartAttack(_hero.Id, new ActionId(1), 0));
+            _combat.Update(500);
+            Assert.AreEqual(ActionOutcome.Interrupted, interrupted.Outcome);
+            Assert.AreEqual(0, interrupted.ReleaseCount);
+            Assert.AreEqual(1, Count<HitResolved>());
+            Assert.IsTrue(_wolf.IsDead);
         }
 
         [Test]
@@ -245,6 +267,7 @@ namespace CubeGame.Tests.FullM0.EditMode
 
             hero.Position = new WorldPosition(10, 5, 10);
             hero.Yaw = 90f; // facing +X
+            heroCombatant.Yaw = hero.Yaw;
             Combatant wolf = Combatant.Create(StableEntityId.ForRuntime(9), Wolf, "Wolf", CharacterClass.Warrior, 1);
             wolf.Hostile = true;
             wolf.Position = new WorldPosition(12, 5, 10);

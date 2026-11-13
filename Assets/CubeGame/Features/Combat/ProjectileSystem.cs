@@ -77,15 +77,6 @@ namespace CubeGame.Features.Combat
         /// </summary>
         public const double MaxStepBlocks = 0.25;
 
-        /// <summary>CUBEGAME_CONTRACT: forward offset of the staff hit volume (Alpha offset at 0x6142A0 is not decoded).</summary>
-        public const double StaffBurstForward = 1.5;
-
-        /// <summary>CUBEGAME_CONTRACT: half size added to the target box for the staff hit volume.</summary>
-        public const double StaffBurstScale = 1.0;
-
-        /// <summary>CUBEGAME_CONTRACT: the staff hit volume exists for one strike window.</summary>
-        public const long StaffBurstLifetimeMs = 100;
-
         /// <summary>ALPHA 0x615FBB: <c>push 200.0</c> — length limit of <c>World_raycastVoxels</c> for the hitscan actions.</summary>
         public const double HitscanRange = 200.0;
 
@@ -127,28 +118,19 @@ namespace CubeGame.Features.Combat
             switch (kind)
             {
                 case ProjectileKind.Magic: return MagicScale;
-                case ProjectileKind.StaffBurst: return StaffBurstScale;
                 default: return ArrowScale;
             }
         }
 
         public static long LifetimeOf(ProjectileKind kind) =>
-            kind == ProjectileKind.StaffBurst ? StaffBurstLifetimeMs : kind == ProjectileKind.Boomerang ? BoomerangCatchAtMs : LifetimeMs;
+            kind == ProjectileKind.Boomerang ? BoomerangCatchAtMs : LifetimeMs;
 
         /// <summary>Removed after the first creature hit (ALPHA 0x621A1F: every type except the boomerang).</summary>
         public static bool RemovedOnHit(ProjectileKind kind) => kind == ProjectileKind.Arrow || kind == ProjectileKind.Magic;
 
-        /// <summary>Terrain stops the projectile (ALPHA 0x6220D1/0x622293); a boomerang stops (v = 0) instead of vanishing.</summary>
-        public static bool CollidesWithTerrain(ProjectileKind kind) => kind != ProjectileKind.StaffBurst;
-
-        public static string Provenance(ProjectileKind kind) => kind == ProjectileKind.StaffBurst
-            ? "CUBEGAME_CONTRACT volume (Alpha 0x1E is a forward melee-group volume; offset/size not decoded)"
-            : kind == ProjectileKind.Boomerang
-                ? "ALPHA_CODE_STATIC speed/return/catch; out-phase steering PARTIAL"
-                : "ALPHA_CODE_STATIC speed/gravity/lifetime/size/removal";
     }
 
-    /// <summary>One flying projectile (or the staff hit volume). Game-space blocks; the hero's floating origin never touches it.</summary>
+    /// <summary>A flying projectile in world-space blocks.</summary>
     public sealed class Projectile
     {
         internal readonly HashSet<StableEntityId> HitTargets = new HashSet<StableEntityId>();
@@ -204,6 +186,8 @@ namespace CubeGame.Features.Combat
 
         internal long LastUpdateMs { get; set; }
 
+        internal AuthoritativeActionState SourceAction { get; set; }
+
         public WorldPosition Position => new WorldPosition(X, Y, Z);
 
         public override string ToString() => $"projectile {Id} {Kind} owner {Owner} at ({X:F2},{Y:F2},{Z:F2}) age {AgeMs}";
@@ -252,13 +236,14 @@ namespace CubeGame.Features.Combat
         }
 
         /// <summary>
-        /// Releases the projectile of an attack from the attacker's body centre along its aim. The staff volume is put
-        /// <see cref="ProjectileRules.StaffBurstForward"/> blocks in front of the attacker and does not move.
+        /// Releases a projectile from the attacker's body centre along the action's aim.
         /// </summary>
-        public Projectile Launch(Combatant owner, ProjectileKind kind, ActionId action, long attackSerial, long nowMs)
+        public Projectile Launch(Combatant owner, ProjectileKind kind, ActionId action, long attackSerial, long nowMs,
+            AuthoritativeActionState state = null)
         {
             if (owner == null) throw new ArgumentNullException(nameof(owner));
             owner.GetAim(out double ax, out double ay, out double az);
+            if (state != null) (ax, ay, az) = (state.Aim.X, state.Aim.Y, state.Aim.Z);
             var p = new Projectile(++_serial, owner.Id, kind, action, attackSerial, nowMs)
             {
                 X = owner.Position.X,
@@ -267,21 +252,15 @@ namespace CubeGame.Features.Combat
                 Gravity = ProjectileRules.GravityOf(kind),
                 Scale = ProjectileRules.ScaleOf(kind),
                 LifetimeMs = ProjectileRules.LifetimeOf(kind),
+                SourceAction = state,
             };
 
-            if (kind == ProjectileKind.StaffBurst)
-            {
-                p.X += ax * ProjectileRules.StaffBurstForward;
-                p.Y += ay * ProjectileRules.StaffBurstForward;
-                p.Z += az * ProjectileRules.StaffBurstForward;
-            }
-            else
-            {
-                double speed = ProjectileRules.SpeedOf(kind, owner.BraceletOffHand);
-                p.Vx = ax * speed;
-                p.Vy = ay * speed;
-                p.Vz = az * speed;
-            }
+            bool bracelet = state == null ? owner.BraceletOffHand
+                : state.MainHandSubtype == (int)CubeGame.Core.Items.WeaponSubtype.Bracelet;
+            double speed = ProjectileRules.SpeedOf(kind, bracelet);
+            p.Vx = ax * speed;
+            p.Vy = ay * speed;
+            p.Vz = az * speed;
 
             _active.Add(p);
             Spawned++;
@@ -300,12 +279,6 @@ namespace CubeGame.Features.Combat
                 Scale = p.Scale,
             });
 
-            // A volume hits what is inside it at once (the Alpha strike is the same frame).
-            if (kind == ProjectileKind.StaffBurst)
-            {
-                TestCreatures(p, nowMs);
-            }
-
             return p;
         }
 
@@ -315,10 +288,12 @@ namespace CubeGame.Features.Combat
         /// hostile living creature along the ray is hit once through <see cref="CombatSystem.ResolveHit"/>. The owner is
         /// never hit. Returns the number of hits.
         /// </summary>
-        public int FireRay(Combatant owner, ActionId action, long attackSerial, long nowMs)
+        public int FireRay(Combatant owner, ActionId action, long attackSerial, long nowMs,
+            AuthoritativeActionState state = null)
         {
             if (owner == null) throw new ArgumentNullException(nameof(owner));
             owner.GetAim(out double dx, out double dy, out double dz);
+            if (state != null) (dx, dy, dz) = (state.Aim.X, state.Aim.Y, state.Aim.Z);
             double ox = owner.Position.X, oy = owner.Position.Y + owner.HitHeight * 0.5, oz = owner.Position.Z;
             bool bomb = action.Value == AlphaAttackRoute.BombAction;
             double length = bomb ? ProjectileRules.BombRange : ProjectileRules.HitscanRange;
@@ -340,7 +315,7 @@ namespace CubeGame.Features.Combat
             int hits = 0;
             foreach (Combatant target in new List<Combatant>(_combat.Combatants))
             {
-                if (target.Id.Equals(owner.Id) || target.IsDead || target.Hostile == owner.Hostile)
+                if (!_combat.CanHit(owner, target))
                 {
                     continue;
                 }
@@ -357,7 +332,7 @@ namespace CubeGame.Features.Combat
                     && Math.Abs(cz - pz) < target.HitDepth * 0.5 + ProjectileRules.HitscanTolerance
                     && Math.Abs(cy - py) < target.HitHeight * 0.5 + ProjectileRules.HitscanTolerance)
                 {
-                    _combat.ResolveHit(owner.Id, target.Id, nowMs, attackSerial);
+                    _combat.ResolveHit(owner.Id, target.Id, nowMs, attackSerial, state);
                     hits++;
                 }
             }
@@ -420,9 +395,33 @@ namespace CubeGame.Features.Combat
             _active.Clear();
         }
 
+        internal void RemoveOwnedBy(StableEntityId owner, long nowMs)
+        {
+            foreach (Projectile projectile in _active.ToArray())
+            {
+                if (projectile.Owner.Equals(owner)) Remove(projectile, ProjectileEndReason.OwnerGone, StableEntityId.None, nowMs);
+            }
+
+            _active.RemoveAll(projectile => projectile.Removed);
+        }
+
+        internal bool HasLineOfSight(WorldPosition origin, double dx, double dy, double dz)
+        {
+            if (TerrainAt == null) return true;
+            int steps = (int)Math.Ceiling(Math.Sqrt(dx * dx + dy * dy + dz * dz) / ProjectileRules.RayStepBlocks);
+            for (int i = 1; i < steps; i++)
+            {
+                double fraction = (double)i / steps;
+                if (TerrainAt((int)Math.Floor(origin.X + dx * fraction), (int)Math.Floor(origin.Y + dy * fraction),
+                    (int)Math.Floor(origin.Z + dz * fraction)) != TerrainCell.Air) return false;
+            }
+
+            return true;
+        }
+
         private void Advance(Projectile p, long elapsedMs, long nowMs)
         {
-            if (!_combat.TryGet(p.Owner, out Combatant owner))
+            if (!_combat.TryGet(p.Owner, out Combatant owner) || owner.IsDead)
             {
                 // CUBEGAME_CONTRACT: Alpha reads the owner for damage and the boomerang return (0x620AE9 → removal).
                 Remove(p, ProjectileEndReason.OwnerGone, StableEntityId.None, nowMs);
@@ -438,7 +437,7 @@ namespace CubeGame.Features.Combat
             {
                 long ms = msLeft / (steps - i);
                 msLeft -= ms;
-                Step(p, owner, ms, nowMs);
+                Step(p, owner, ms, nowMs - msLeft);
             }
         }
 
@@ -447,7 +446,7 @@ namespace CubeGame.Features.Combat
             double dt = ms / 1000.0;
             if (p.Kind == ProjectileKind.Boomerang)
             {
-                SteerBoomerang(p, owner);
+                SteerBoomerang(p, owner, ms);
             }
 
             p.Vy -= p.Gravity * dt;
@@ -468,9 +467,9 @@ namespace CubeGame.Features.Combat
                 return;
             }
 
-            TestCreatures(p, nowMs);
-            if (p.Removed || !ProjectileRules.CollidesWithTerrain(p.Kind) || TerrainAt == null)
+            if (TerrainAt == null)
             {
+                TestCreatures(p, nowMs);
                 return;
             }
 
@@ -494,9 +493,13 @@ namespace CubeGame.Features.Combat
                     Remove(p, ProjectileEndReason.HitTerrain, StableEntityId.None, nowMs);
                 }
             }
+            else
+            {
+                TestCreatures(p, nowMs);
+            }
         }
 
-        private static void SteerBoomerang(Projectile p, Combatant owner)
+        private static void SteerBoomerang(Projectile p, Combatant owner, long elapsedMs)
         {
             double ox = owner.Position.X, oy = owner.Position.Y + owner.HitHeight * 0.5, oz = owner.Position.Z;
             if (p.AgeMs > ProjectileRules.BoomerangPullAtMs)
@@ -526,7 +529,7 @@ namespace CubeGame.Features.Combat
         /// </summary>
         private void TestCreatures(Projectile p, long nowMs)
         {
-            if (!_combat.TryGet(p.Owner, out Combatant owner))
+            if (!_combat.TryGet(p.Owner, out Combatant owner) || owner.IsDead)
             {
                 return;
             }
@@ -538,7 +541,7 @@ namespace CubeGame.Features.Combat
                     return;
                 }
 
-                if (target.Id.Equals(p.Owner) || target.IsDead || target.Hostile == owner.Hostile || p.HitTargets.Contains(target.Id))
+                if (!_combat.CanHit(owner, target) || p.HitTargets.Contains(target.Id))
                 {
                     continue;
                 }
@@ -549,7 +552,7 @@ namespace CubeGame.Features.Combat
                 }
 
                 p.HitTargets.Add(target.Id);
-                _combat.ResolveHit(owner.Id, target.Id, nowMs, p.AttackSerial);
+                _combat.ResolveHit(owner.Id, target.Id, nowMs, p.AttackSerial, p.SourceAction);
                 if (ProjectileRules.RemovedOnHit(p.Kind))
                 {
                     Remove(p, ProjectileEndReason.HitTarget, target.Id, nowMs);

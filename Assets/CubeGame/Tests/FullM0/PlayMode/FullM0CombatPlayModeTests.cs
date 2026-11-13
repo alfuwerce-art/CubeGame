@@ -89,6 +89,13 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.AreEqual(GameVisualSink.HeroVisualHeight, heroBounds.size.y, 0.25f, "hero body fitted to the controller height");
 
             Assert.IsTrue(game.HeroAttack(), game.CombatLog);
+            Assert.IsTrue(game.Session.Combat.TryGetAction(StableEntityId.Hero, out AuthoritativeActionState action));
+            Assert.AreEqual(action.AnimationKey, hero.Controller.CurrentAction);
+            float cursor = hero.Clips.Cursor;
+            game.Session.Pause();
+            yield return null;
+            Assert.AreEqual(cursor, hero.Clips.Cursor, "a paused authoritative clock holds the pose");
+            game.Session.Resume();
             for (int i = 0; i < 5; i++)
             {
                 yield return null;
@@ -97,7 +104,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             StringAssert.Contains("action_057", hero.Status(), "the hero plays Alpha action 57 when gameplay starts the attack");
             foreach (string problem in visuals.Problems)
             {
-                StringAssert.DoesNotStartWith("ANIM_MISSING", problem);
+                StringAssert.DoesNotStartWith("ANIMATION_PARTIAL", problem);
             }
 
             Debug.Log($"[FullM0Visual] scale {visuals.ModelScale:F4} hero {hero.Status()} wolf {wolf.Status()} problems [{string.Join("; ", visuals.Problems)}]");
@@ -171,8 +178,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.Greater(hits, 0);
             Assert.Less(wolf.Health.CurrentHealth, firstHp);
             Assert.AreEqual(1, deaths, "exactly one death event");
-            Debug.Log($"[FullM0Combat] wolf killed with {hits} hits; timing source " +
-                      (game.Session.ActionTimings.TryGet(GameSession.HeroKind, GameBootstrap.HeroAttackAction, out ActionTiming t) ? t.ToString() : "fallback"));
+            Debug.Log($"[FullM0Combat] wolf killed with {hits} hits through CombatSystem");
 
             // The hero takes one Core hit (the training wolf has no AI yet), then the game is saved and reloaded.
             Combatant attacker = Combatant.Create(StableEntityId.ForRuntime(999), GameBootstrap.TrainingTargetKind, "Wolf B", CharacterClass.Warrior, 1);

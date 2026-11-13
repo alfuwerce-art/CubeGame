@@ -290,7 +290,7 @@ namespace CubeGame.Features.Session
             ActionTimings = actionTimings;
         }
 
-        /// <summary>Attack phase source for the combat system (Alpha clip timings in the game, fixed table in tests).</summary>
+        /// <summary>Optional explicit action timing overrides for test sessions.</summary>
         public IActionTimingSource ActionTimings { get; set; }
 
         /// <summary>Combat of the running world (M0-05A first slice); created on LoadingWorld, advanced by clock ticks.</summary>
@@ -566,8 +566,7 @@ namespace CubeGame.Features.Session
                 if (!Hero.Health.IsDead)
                 {
                     Hero.Revive();
-                    Combat.Unregister(Hero.Id);
-                    RegisterHeroCombatant();
+                    if (Combat.TryGet(Hero.Id, out Combatant leveledHero)) leveledHero.Health = Hero.Health;
                 }
             }
             if (!Hero.Health.IsDead && WorldItems != null && WorldItems.Count > 0)

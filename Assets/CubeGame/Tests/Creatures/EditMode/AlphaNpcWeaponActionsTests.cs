@@ -72,19 +72,18 @@ namespace CubeGame.Tests.Creatures.EditMode
                 Level = 1, MaxHealth = 100, Health = 100,
             };
             ai.Tick(self, 100, world);
-            CollectionAssert.IsEmpty(world.Requested, "no action may be requested: the only one needs a weapon");
-            StringAssert.Contains("ACTION_NEEDS_WEAPON", ai.LastReason);
+            CollectionAssert.AreEqual(new[] { 3 }, world.Requested, "selection follows the unarmed Alpha branch");
 
             // With a weapon in hand the same action is allowed.
             var armedWorld = new Probe { Actions = new[] { 5 } };
             var armed = new CreatureState
             {
                 StableId = "spawn:0:0:0:0:1", Kind = 0x02, Faction = (int)CreatureFaction.Monster,
-                Level = 1, MaxHealth = 100, Health = 100, WeaponItemType = 3, WeaponItemSubtype = 0,
+                Level = 1, MaxHealth = 100, Health = 100, WeaponItemType = 3, WeaponItemSubtype = 5,
             };
             var armedAi = new CreatureAi();
             armedAi.Tick(armed, 100, armedWorld);
-            CollectionAssert.Contains(armedWorld.Requested, 5);
+            CollectionAssert.AreEqual(new[] { 5 }, armedWorld.Requested);
         }
     }
 }

@@ -99,6 +99,12 @@ namespace CubeGame.AlphaTransfer
             FramesApplied++;
         }
 
+        public void Seek(float cursor)
+        {
+            Cursor = cursor;
+            ApplyAt(cursor);
+        }
+
         void ApplyLookPitch(float pitch)
         {
             // Alpha X axis == Unity X axis (only Y/Z swap), so the pitch is a rotation about the

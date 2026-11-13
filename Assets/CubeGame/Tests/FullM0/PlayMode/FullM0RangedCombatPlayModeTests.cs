@@ -203,7 +203,8 @@ namespace CubeGame.Tests.FullM0.PlayMode
             float deadline = Time.realtimeSinceStartup + 10f;
             while (game.Session.Combat.IsActing(hero.Id) && Time.realtimeSinceStartup < deadline) yield return null;
             Assert.Less(near.Health.CurrentHealth, nearHp, "the staff volume damaged the target");
-            Assert.AreEqual(1, log.Spawned.FindAll(s => s.Kind == (int)ProjectileKind.StaffBurst).Count);
+            Assert.IsEmpty(log.Spawned, "staff windows use the action volume directly");
+            Assert.Greater(log.Hits.FindAll(h => h.Target.Equals(near.Id)).Count, 1);
 
             // Wand: Alpha 0x26 magic projectile.
             EquipFromBags(game, WeaponSubtype.Wand);
