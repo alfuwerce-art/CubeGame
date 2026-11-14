@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using CubeGame.Features.World;
 using NUnit.Framework;
 using UnityEngine;
@@ -35,7 +39,8 @@ namespace CubeGame.Tests.FullM0.EditMode
         {
             string path = Path.Combine(Application.dataPath,
                 "CubeGame/Tests/FullM0/EditMode/Fixtures/alpha_dungeon_contents_trace_666666_s1.json");
-            Trace t = JsonUtility.FromJson<Trace>(File.ReadAllText(path));
+            string json = File.ReadAllText(path);
+            Trace t = JsonUtility.FromJson<Trace>(json);
             Assert.AreEqual("EMULATED_ALPHA_CODE", t.status);
 
             var terrain = new AlphaTerrainGenerator((uint)t.masterSeed);
@@ -74,23 +79,51 @@ namespace CubeGame.Tests.FullM0.EditMode
                 draw++;
             };
 
+            List<AlphaDungeonObject> objects;
             try
             {
-                AlphaDungeonContents.Write(cells, build, world, x0, y0, t.flag != 0, random);
+                objects = AlphaDungeonContents.Write(cells, build, world, x0, y0, t.flag != 0, random);
             }
             catch (AlphaDungeonNotPortedException e)
             {
-                if (e.Message.EndsWith(AlphaDungeonContents.PostPass, StringComparison.Ordinal))
-                {
-                    // the cell pass is complete: every Alpha draw before the first post-pass site is reproduced
-                    int firstPost = Array.FindIndex(t.sites, s => s >= 0x5D3D60 && s < AlphaGeneratorTo);
-                    Assert.AreEqual(firstPost, draw, "the cell pass makes exactly Alpha's draws");
-                }
-
                 Assert.Inconclusive($"{e.Message}; {draw} of {t.states.Length} Alpha draws matched so far");
+                return;
             }
 
             Assert.AreEqual(t.states.Length, draw, "every Alpha draw of stage 4b is reproduced");
+
+            // every creature Alpha spawned (chests, master, groups, followers, guards) in order: position, role, kind,
+            // level, quality, flags
+            List<long[]> spawns = Spawns(json);
+            List<AlphaDungeonObject> creatures = objects.Where(o => o.List == AlphaDungeonObjectList.Creature).ToList();
+            Assert.AreEqual(spawns.Count, creatures.Count, "creature count");
+            for (int i = 0; i < spawns.Count; i++)
+            {
+                long[] a = spawns[i];
+                AlphaDungeonObject o = creatures[i];
+                string tag = $"creature {i} ({o})";
+                Assert.AreEqual(a[0], o.X, 1e-3, tag + " x");
+                Assert.AreEqual(a[1], o.Y, 1e-3, tag + " y");
+                Assert.AreEqual(a[2], o.Z, 1e-3, tag + " z");
+                Assert.AreEqual(a[3], o.Role, tag + " role");
+                Assert.AreEqual(a[4], o.Type, tag + " kind");
+                Assert.AreEqual(a[5], o.Level, tag + " level");
+                Assert.AreEqual(a[6], o.Quality, tag + " quality");
+                Assert.AreEqual(a[7], o.Flags, tag + " flags");
+            }
+        }
+
+        /// <summary>The fixture's "spawns" rows [x, y, z, role, kind, level, quality, flags, master] (JsonUtility
+        /// cannot read nested arrays).</summary>
+        private static List<long[]> Spawns(string json)
+        {
+            int start = json.IndexOf("\"spawns\"", StringComparison.Ordinal);
+            int open = json.IndexOf('[', start);
+            int end = json.IndexOf("]]", open, StringComparison.Ordinal);
+            return Regex.Matches(json.Substring(open + 1, end - open), @"\[([^\[\]]*)\]")
+                .Cast<Match>()
+                .Select(m => m.Groups[1].Value.Split(',').Select(x => (long)double.Parse(x, CultureInfo.InvariantCulture)).ToArray())
+                .ToList();
         }
     }
 }

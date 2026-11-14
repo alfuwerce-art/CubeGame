@@ -20,6 +20,9 @@ namespace CubeGame.Features.World
         /// <summary>Material (flags &amp; 0x1F) with Alpha's read rule (0x42F7E0 and its static defaults).</summary>
         int Type(int x, int y, int z);
 
+        /// <summary>Flags byte of the voxel read by the same rule (0x42F7E0).</summary>
+        int Flags(int x, int y, int z);
+
         /// <summary>tilemap_writeGlyphColumn (0x44E7A0).</summary>
         void Write(int x, int y, int z, uint voxel);
     }
@@ -442,6 +445,12 @@ namespace CubeGame.Features.World
         {
             VoxelColumn c = Column(x, y);
             return c == null ? 1 : Voxel.Material(c.Read(z));
+        }
+
+        public int Flags(int x, int y, int z)
+        {
+            VoxelColumn c = Column(x, y);
+            return c == null ? 1 : Voxel.Flags(c.Read(z));
         }
 
         public void Write(int x, int y, int z, uint voxel)
