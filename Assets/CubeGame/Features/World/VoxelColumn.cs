@@ -60,6 +60,9 @@ namespace CubeGame.Features.World
 
         public int Bottom { get; internal set; }
 
+        /// <summary>Alpha Field +0x14: the unmodified terrain surface minus 8.</summary>
+        internal int SurfaceScanStart { get; private set; }
+
         public int Count { get; private set; }
 
         public IReadOnlyList<uint> Voxels => _voxels;
@@ -107,6 +110,7 @@ namespace CubeGame.Features.World
         internal void Reset(int bottom, uint v0, uint v1)
         {
             Bottom = bottom;
+            SurfaceScanStart = bottom - 8;
             _voxels = new uint[4];
             _voxels[0] = v0;
             _voxels[1] = v1;

@@ -8,6 +8,7 @@ import argparse
 import json
 import struct
 import sys
+from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -28,9 +29,12 @@ def trace(exe, seed, zone_x, zone_z):
     cpu.mem.w(actor_head + 0xD, 1, 1)
     cpu.mem.w(WORLD + 4, 4, actor_head)
     placement = {}
+    zone_stages = {}
     entry = {}
     draws = []
     placement_draws = []
+    decoration_draws = Counter()
+    tree_draws = Counter()
     spawns = []
     entry_address = 0x5DC6E0
     return_address = 0x5EACEC
@@ -46,6 +50,7 @@ def trace(exe, seed, zone_x, zone_z):
             "landmark": oracle.i32(column + 0x18),
             "landmark_id": oracle.i32(column + 0x20),
             "landmark_center_fixed_16_16": struct.unpack("<2q", current.mem.read(column, 16)),
+            "radius": oracle.f32(column + 0x10),
             "level": oracle.i32(column + 0x24),
             "quality": oracle.i32(column + 0x28),
             "zone_record": list(current.mem.read(zone + 0x78, 2)),
@@ -73,6 +78,9 @@ def trace(exe, seed, zone_x, zone_z):
             raise RuntimeError(f"Model registry missing {stage} at return address 0x{caller:08X}")
 
     cpu.hooks.update({
+        0x5E8490: lambda _: zone_stages.update(after_terrain=oracle.crt.state),
+        0x5E888E: lambda _: zone_stages.update(after_river_stones=oracle.crt.state),
+        0x5E9E7D: lambda _: zone_stages.update(before_trees=oracle.crt.state),
         0x5EAA59: record_placement,
         entry_address: record_entry,
         return_address: record_return,
@@ -109,6 +117,10 @@ def trace(exe, seed, zone_x, zone_z):
             draws.append((run.last_return, oracle.crt.state))
         elif placement:
             placement_draws.append((run.last_return, oracle.crt.state))
+        elif "before_trees" in zone_stages:
+            tree_draws[run.last_return] += 1
+        elif "after_river_stones" in zone_stages:
+            decoration_draws[run.last_return] += 1
         return value
 
     oracle.crt.rand = record_rand
@@ -165,6 +177,9 @@ def trace(exe, seed, zone_x, zone_z):
         "seed": seed,
         "zone": [zone_x, zone_z],
         "skipped_carves": carves,
+        "zone_stages": zone_stages,
+        "decoration_draw_calls": dict(sorted(decoration_draws.items())),
+        "tree_draw_calls": dict(sorted(tree_draws.items())),
         "placement": placement,
         "entry": entry,
         "crt_out": oracle.crt.state,
