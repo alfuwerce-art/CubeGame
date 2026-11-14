@@ -44,6 +44,10 @@ namespace CubeGame.Features.World
         public float SizeY { get; set; }
         public float SizeZ { get; set; }
         public float Angle { get; set; }
+
+        /// <summary>Scale of the creature's power factor +0xF60 (followers 0.5 at 0x5D5603, guards 0.75 at
+        /// 0x5D59FB/0x5D5D6D).</summary>
+        public float Power { get; set; } = 1f;
         public int Level { get; set; }
 
         /// <summary>Creature flags word +0x7A (the master carries 0x1000 | 0x200).</summary>
@@ -587,6 +591,7 @@ namespace CubeGame.Features.World
                     int kind = Kind(guardKinds, out int role);
                     AlphaDungeonObject o = Creature(kind, x, y, cz, role);
                     o.Angle = (float)(angle / Math.PI * 180.0 + 90.0);
+                    o.Power = 0.75f;
                     o.Route.Add((x, y, cz));
                     Potions(o);
                     objects.Add(o);
@@ -654,6 +659,7 @@ namespace CubeGame.Features.World
                                         int fk = g.Followers[(int)((uint)random.Next() % (uint)g.Followers.Length)];
                                         AlphaDungeonObject f = Creature(fk, lx, ly, lz, 1);
                                         f.Leader = leader;
+                                        f.Power = 0.5f;
                                         f.Route.Add((lx, ly, lz));
                                         objects.Add(f);
                                     }

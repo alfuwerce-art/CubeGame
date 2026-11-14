@@ -128,6 +128,83 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.AreEqual(AlphaMissionState.Complete, mission.State, "the master finishes the type-5 mission");
         }
 
+        [Test]
+        public void RoomCreaturesCarryTheirAlphaBehaviour()
+        {
+            List<SpawnDefinition> spawns = Terrain().Zone(DungeonZone.X, DungeonZone.Z).ContentSpawns
+                .Where(s => s.BehaviourKey == AlphaDungeonContents.CreatureBehaviourKey).ToList();
+            Dictionary<int, SpawnDefinition> byIndex = spawns.ToDictionary(s => s.SpawnIndex);
+            List<SpawnDefinition> followers = spawns.Where(s => s.LeaderSpawnIndex >= 0).ToList();
+            List<SpawnDefinition> leaders = spawns.Where(s => s.Route.Count == 4).ToList();
+            List<SpawnDefinition> guards = spawns.Where(s => s.LeaderSpawnIndex < 0 && s.Route.Count == 1).ToList();
+            Assert.IsNotEmpty(followers, "group with followers (kind 0x60)");
+            Assert.AreEqual(5, leaders.Count, "five rooms with a patrolling group leader (five group draws 0x5D4CDB in the Alpha log)");
+            Assert.AreEqual(spawns.Count, followers.Count + leaders.Count + guards.Count, "every room creature has a role");
+            foreach (SpawnDefinition f in followers)
+            {
+                SpawnDefinition leader = byIndex[f.LeaderSpawnIndex];
+                Assert.AreEqual(4, leader.Route.Count, "a follower walks after a patrolling leader");
+                Assert.AreEqual(0.5f, f.PowerScale, "0x5D5603: follower power ×0.5");
+                Assert.AreEqual(leader.Position, f.Route[0], "the follower's WalkPath point is the leader's start");
+                Assert.AreEqual(0x60, f.Kind.Value);
+            }
+
+            foreach (SpawnDefinition g in guards)
+            {
+                Assert.AreEqual(0.75f, g.PowerScale, "0x5D59FB: guard power ×0.75");
+                Assert.AreEqual(g.Position, g.Route[0], "a guard's WalkPath holds its own spot");
+            }
+
+            Assert.IsTrue(leaders.All(l => l.Route.Contains(l.Position) && l.PowerScale == 1f));
+            Assert.IsTrue(spawns.All(s => (s.AlphaFlags & 0x1000) != 0));
+        }
+
+        [Test]
+        public void CompanionFollowsTheLeaderBeforeItsWalkPath()
+        {
+            WorldPosition? leader = new WorldPosition(10, 0, 0);
+            var driver = new AlphaNpcMovementDriver(new WorldPosition(0, 0, 0), () => 0,
+                walkPath: new AlphaWalkPath(new[] { new WorldPosition(0, 0, 5) }), companionOf: () => leader);
+            AlphaNpcMovementStep far = driver.Tick(0, 0, 0, 16, () => 0);
+            Assert.IsTrue(far.Move);
+            Assert.AreEqual("COMPANION_RUN", far.Reason, "beyond 8 voxels the follower runs");
+            Assert.AreEqual(10.0, far.Target.X);
+            AlphaNpcMovementStep near = driver.Tick(4, 0, 0, 16, () => 0);
+            Assert.AreEqual("COMPANION", near.Reason);
+            AlphaNpcMovementStep close = driver.Tick(8, 0, 0, 16, () => 0);
+            StringAssert.StartsWith("WALK_PATH", close.Reason, "within 4 voxels the WalkPath child runs");
+            leader = null;
+            StringAssert.StartsWith("WALK_PATH", driver.Tick(0, 0, 0, 16, () => 0).Reason, "no leader → WalkPath");
+        }
+
+        [Test]
+        public void TypeFiveMissionSetsTheDungeonCreatureLevel()
+        {
+            AlphaTerrainGenerator terrain = Terrain();
+            var session = new GameSession();
+            Assert.IsTrue(session.EnterMainMenu());
+            Assert.IsTrue(session.BeginNewWorld("slot0", new NewWorldRequest { GeneratorId = "test" }, 0));
+            Assert.IsTrue(session.CompleteLoading());
+            session.Hero.Missions.AttachWorld(terrain, (int)Seed, null);
+            MissionJournal journal = session.Hero.Missions;
+            Assert.IsFalse(journal.TryDungeonSpawnLevel(DungeonZone, 0x1000, out _, out _), "no mission → spawn level");
+            Assert.IsTrue(GameSlotStore.RestoreMissions(session.Hero, new SessionSaveData
+            {
+                alphaMissions = new[]
+                {
+                    new AlphaMissionSaveData
+                    {
+                        columnX = DungeonZone.X >> 3, columnZ = DungeonZone.Z >> 3, level = 1, type = (int)AlphaMissionType.Dungeon,
+                        maxLevel = 17, levelClass = 2, required = 1, targetZoneX = DungeonZone.X, targetZoneZ = DungeonZone.Z,
+                    },
+                },
+            }));
+            Assert.IsTrue(journal.TryDungeonSpawnLevel(DungeonZone, 0x1000, out int level, out int stars));
+            Assert.AreEqual(17, level, "0x60FD25: level = mission +0x3C");
+            Assert.AreEqual(2, stars, "0x60FD2B: quality = mission +0x40");
+            Assert.IsFalse(journal.TryDungeonSpawnLevel(DungeonZone, 0, out _, out _), "only creatures with flag 0x1000");
+        }
+
         private static void Kill(GameSession session, SpawnDefinition spawn)
         {
             StableEntityId id = StableEntityId.ForZoneSpawn(DungeonZone, MissionJournal.ContentChannel, spawn.SpawnIndex);

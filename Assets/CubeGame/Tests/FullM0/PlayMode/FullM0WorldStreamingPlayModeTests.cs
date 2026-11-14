@@ -293,6 +293,17 @@ namespace CubeGame.Tests.FullM0.PlayMode
                 Assert.IsTrue(game.Visuals.TryGetRoot(chest.Id, out _));
             }
 
+            // P7-B: the dungeon's master and room creatures are live combatants of the zone content channel
+            LiveSpawn[] creatures = game.Population.Live.Where(s => s.Zone.Equals(dungeon)
+                && D3ZonePopulation.IsDungeonCreature(s.Definition.BehaviourKey)).ToArray();
+            Assert.IsNotEmpty(creatures, "dungeon creatures reach the scene");
+            Assert.AreEqual(1, creatures.Count(s => s.Definition.BehaviourKey == AlphaDungeonContents.MasterBehaviourKey));
+            foreach (LiveSpawn creature in creatures)
+            {
+                Assert.IsTrue(game.Session.Combat.TryGet(creature.Id, out var fighter), "dungeon creature is a combatant");
+                Assert.IsTrue(fighter.Hostile);
+            }
+
             LiveSpawn removed = chests[0];
             WorldPosition anchor = removed.Definition.Position;
             int x = (int)anchor.X;

@@ -210,6 +210,27 @@ namespace CubeGame.Features.Session
             return true;
         }
 
+        /// <summary>
+        /// Spawn activation 0x60FCFE…0x60FD2E: a creature with flag 0x1000 (not a chest) in a zone whose column carries a
+        /// type-5 mission takes the mission's level (+0x3C, the highest player level when the mission was made) and its
+        /// level class byte (+0x40) as quality → stars. In the same place Alpha seeds srand(+0x30 + group id), reruns
+        /// creature_initBehaviorByType and gives the master (+0x10E8, flag 0x200) the target flag 0x2000.
+        /// </summary>
+        public bool TryDungeonSpawnLevel(ZoneKey zone, int alphaFlags, out int level, out int stars)
+        {
+            level = 0;
+            stars = 0;
+            if ((alphaFlags & 0x1000) == 0 || !_columns.TryGetValue(ColumnKey(zone.X >> 3, zone.Z >> 3), out AlphaMission mission)
+                || mission.Type != AlphaMissionType.Dungeon)
+            {
+                return false;
+            }
+
+            level = Math.Max(1, mission.MaxLevel);
+            stars = mission.LevelClass;
+            return true;
+        }
+
         /// <summary>True when the zone content spawn is the master of the zone's Alpha dungeon.</summary>
         public static bool IsDungeonMaster(AlphaTerrainGenerator terrain, ZoneKey zone, int spawnIndex)
         {

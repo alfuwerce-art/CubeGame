@@ -967,16 +967,79 @@ namespace CubeGame.Gameplay
                 return;
             }
 
-            var creature = Combatant.CreateCreature(id, def.Kind, $"Creature 0x{def.Kind.Value:x2}", def.Level, 0);
+            int level = def.Level, stars = 0;
+            bool dungeon = D3ZonePopulation.IsDungeonCreature(def.BehaviourKey);
+            if (dungeon)
+            {
+                stars = def.Quality;
+                DungeonLevel(id, def, ref level, ref stars);
+            }
+
+            var creature = Combatant.CreateCreature(id, def.Kind, $"Creature 0x{def.Kind.Value:x2}", level, stars);
             ApplyAlphaSize(creature, def.Kind);
             creature.Position = def.Position;
             creature.Yaw = def.Yaw;
             creature.Hostile = def.Faction == (int)CreatureFaction.Monster;
             creature.IsBoss = CreatureKinds.IsBoss(def.Kind.Value);
             _session.Combat.Register(creature);
-            _creatures?.Add(creature, def.Level, 0, def.Faction, def.ClassId, def.SpecializationId, def.MainHandWeapon,
+            _creatures?.Add(creature, level, 0, def.Faction, def.ClassId, def.SpecializationId, def.MainHandWeapon,
                 recovered: true);
+            if (dungeon)
+            {
+                AttachDungeonMovement(id, def);
+            }
+
             PublishSpawnVisual(id, def);
+        }
+
+        /// <summary>
+        /// Spawn activation 0x60FCFE…0x60FD2E: when the column of the spawn's zone carries a type-5 mission, a creature
+        /// with flag 0x1000 that is not a chest takes the mission's level (+0x3C) and quality (+0x40 → stars).
+        /// </summary>
+        private void DungeonLevel(StableEntityId id, SpawnDefinition def, ref int level, ref int stars)
+        {
+            if (TryZoneOf(id, out ZoneKey zone)
+                && _session.Hero.Missions.TryDungeonSpawnLevel(zone, def.AlphaFlags, out int missionLevel, out int missionStars))
+            {
+                level = missionLevel;
+                stars = missionStars;
+            }
+        }
+
+        /// <summary>
+        /// Behaviour of a dungeon creature (0x5D4AA9…): Sequential[Combat(20), Companion(leader), WalkPath(2.0)] — the
+        /// CreatureAi keeps combat first; without a target the Alpha movement driver runs Companion, then WalkPath.
+        /// </summary>
+        private void AttachDungeonMovement(StableEntityId id, SpawnDefinition def)
+        {
+            if (_creatures == null || !_creatures.TryGetAi(id, out var ai) || !TryZoneOf(id, out ZoneKey zone))
+            {
+                return;
+            }
+
+            Func<WorldPosition?> companion = null;
+            if (def.LeaderSpawnIndex >= 0)
+            {
+                StableEntityId leaderId = StableEntityId.ForZoneSpawn(zone, D3ZonePopulation.Channel, def.LeaderSpawnIndex);
+                companion = () => _session.Combat != null && _session.Combat.TryGet(leaderId, out Combatant leader)
+                    && !leader.Health.IsDead ? leader.Position : (WorldPosition?)null;
+            }
+
+            AlphaWalkPath path = def.Route.Count > 0 ? new AlphaWalkPath(def.Route) : null;
+            ai.AttachAlphaMovement(new AlphaNpcMovementDriver(def.Position, () => _session.Clock.WorldTimeMs,
+                walkPath: path, companionOf: companion));
+        }
+
+        private static bool TryZoneOf(StableEntityId id, out ZoneKey zone)
+        {
+            zone = default;
+            if (id.Kind != EntityIdKind.ZoneSpawn)
+            {
+                return false;
+            }
+
+            zone = new ZoneKey((int)((id.Value >> 32) & 0xFFFF), (int)((id.Value >> 16) & 0xFFFF));
+            return true;
         }
 
         private void PublishSpawnVisual(StableEntityId id, SpawnDefinition def)

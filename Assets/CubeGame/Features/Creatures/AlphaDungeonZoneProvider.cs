@@ -68,6 +68,7 @@ namespace CubeGame.Features.Creatures
             var region = new RegionKey((int)Math.Floor(zone.X / (double)AlphaWorldScale.ZonesPerRegion),
                 (int)Math.Floor(zone.Z / (double)AlphaWorldScale.ZonesPerRegion));
             var result = new List<SpawnDefinition>();
+            var indexOf = new Dictionary<AlphaDungeonObject, int>();
             int index = startIndex;
             foreach (AlphaDungeonObject o in objects)
             {
@@ -96,8 +97,16 @@ namespace CubeGame.Features.Creatures
                 }
 
                 bool master = (o.Flags & 0x200) != 0;
+                var route = new List<WorldPosition>(o.Route.Count);
+                foreach ((double X, double Y, double Z) p in o.Route) route.Add(new WorldPosition(p.X, p.Z, p.Y));
+                indexOf[o] = index;
                 result.Add(new SpawnDefinition
                 {
+                    Quality = o.Quality,
+                    AlphaFlags = o.Flags,
+                    PowerScale = o.Power,
+                    Route = route,
+                    LeaderSpawnIndex = o.Leader != null && indexOf.TryGetValue(o.Leader, out int leader) ? leader : -1,
                     Region = region,
                     SpawnIndex = index++,
                     Kind = new KindId(o.Type),
@@ -108,7 +117,7 @@ namespace CubeGame.Features.Creatures
                     BehaviourKey = master ? AlphaDungeonContents.MasterBehaviourKey : AlphaDungeonContents.CreatureBehaviourKey,
                     Provenance = master
                         ? "EMULATED_ALPHA_CODE: 0x5D3ACD dungeon master (+0x10E8); equipment and potions not delivered (PARTIAL)"
-                        : "EMULATED_ALPHA_CODE: 0x5D4AA9 room creature; patrol route and follow behaviour not attached (PARTIAL)",
+                        : "EMULATED_ALPHA_CODE: 0x5D4AA9 room creature: Sequential[Combat(20), Companion(leader), WalkPath(2)]",
                 });
             }
 

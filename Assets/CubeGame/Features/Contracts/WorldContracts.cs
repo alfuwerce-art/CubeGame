@@ -39,6 +39,21 @@ namespace CubeGame.Features.Contracts
         /// <summary>Raw Alpha weapon (type 3) proved to be in the main hand; null if the hand is unknown or empty.</summary>
         public RawAlphaItemId? MainHandWeapon { get; set; }
 
+        /// <summary>Alpha spawn quality byte (+0x58, becomes the creature's stars +0x1A8); 0 when unknown.</summary>
+        public int Quality { get; set; }
+
+        /// <summary>Alpha spawn flags word (+0x7A): 0x1000 dungeon/hostile group creature, 0x200 elite/master.</summary>
+        public int AlphaFlags { get; set; }
+
+        /// <summary>Alpha power factor scale of the spawn (+0xF60 multiplier, 1 = the kind's own value).</summary>
+        public float PowerScale { get; set; } = 1f;
+
+        /// <summary>Waypoints of the spawn's WalkPathBehavior (0x58CFA0), world voxels; empty = none.</summary>
+        public IReadOnlyList<WorldPosition> Route { get; set; } = Array.Empty<WorldPosition>();
+
+        /// <summary>Spawn index (same zone and channel) of the leader a CompanionBehavior follows; −1 = none.</summary>
+        public int LeaderSpawnIndex { get; set; } = -1;
+
         /// <summary>Behaviour profile key owned by Features/AI (DeepSeek); empty = static object.</summary>
         public string BehaviourKey { get; set; } = string.Empty;
 

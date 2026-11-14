@@ -121,10 +121,19 @@ namespace CubeGame.Features.Creatures
 
         readonly Func<int> _worldTimeMs;
 
+        /// <summary>CompanionBehavior 0x43ACE0: follow when the leader is at least 4 voxels away (16 = 4²).</summary>
+        public const double CompanionFollowDistance2 = 16.0;
+
+        /// <summary>CompanionBehavior: beyond 8 voxels (fixed 0x400000 = 64 = 8²) the creature runs (+0x124 |= 0x40).</summary>
+        public const double CompanionRunDistance2 = 64.0;
+
+        readonly Func<WorldPosition?> _companionOf;
+
         public AlphaNpcMovementDriver(WorldPosition home, Func<int> worldTimeMs,
-            AlphaSpawnLocationSchedule schedule = null, AlphaWalkPath walkPath = null)
+            AlphaSpawnLocationSchedule schedule = null, AlphaWalkPath walkPath = null, Func<WorldPosition?> companionOf = null)
         {
             _worldTimeMs = worldTimeMs ?? throw new ArgumentNullException(nameof(worldTimeMs));
+            _companionOf = companionOf;
             Home = home;
             Schedule = schedule != null && schedule.Count > 0 ? schedule : null;
             WalkPath = walkPath != null && walkPath.Count > 0 ? walkPath : null;
@@ -160,6 +169,21 @@ namespace CubeGame.Features.Creatures
         {
             if (rand == null) throw new ArgumentNullException(nameof(rand));
             LastWorldTimeMs = _worldTimeMs();
+            // SequentialBehavior 0x4DC390: the first child that handles the tick wins — Companion before WalkPath.
+            if (_companionOf != null && _companionOf() is WorldPosition leader)
+            {
+                double dx = leader.X - x, dy = leader.Y - y, dz = leader.Z - z;
+                double d2 = dx * dx + dy * dy + dz * dz;
+                if (d2 >= CompanionFollowDistance2)
+                {
+                    return new AlphaNpcMovementStep
+                    {
+                        Move = true, Target = leader,
+                        Reason = d2 > CompanionRunDistance2 ? "COMPANION_RUN" : "COMPANION",
+                    };
+                }
+            }
+
             if (WalkPath != null)
             {
                 bool walk = WalkPath.Tick(x, y, z, elapsedMs, rand, out WorldPosition point);
