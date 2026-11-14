@@ -1,103 +1,63 @@
-# ACTIVE STAGE — M0-F4 PRESENTATION
+# ACTIVE STAGE — M0 ALPHA FULL UNITY PORT
 
-**Canonical branch:** `integration/m0-all` · **Status:** `ACTIVE`
+**Decision:** [D92 — full Alpha-to-Unity port](decisions/D92-m0-full-alpha-unity-port.md)  
+**Stage:** [M0 ALPHA FULL UNITY PORT](stages/M0_ALPHA_FULL_UNITY_PORT_STAGE.md)  
+**Status:** `ACTIVE / REWORKED`  
+**Canonical branch:** `integration/m0-all` (документы D92 и отчёты P0–P6 сведены 2026-11-14; код P0–P6 ещё в review-ветках)  
+**Последний implementation checkpoint:** `codex/m0-p6-alpha-menu-hud` @ `fb4e0d5`  
+**Следующий блок:** **P7 — QUESTS / CITIES / DUNGEONS / GAMEPLAY CONTENT**
 
-- M0-F3 принят продюсером и включён в canonical на `3cd79b4366dda4ff0d2410be22ee11d084eefaf1`.
-- ТЗ этапа: [M0-F4 PRESENTATION](stages/M0_F4_PRESENTATION_STAGE.md).
-- Все хвосты неполного переноса Alpha: [M0 Alpha Parity Backlog](planning/M0_ALPHA_PARITY_BACKLOG.md).
-- Приоритет F4: WAV/RIFF + runtime audio → HUD → inventory/skills/services → map/journal/icons → полная Unity-регрессия.
-- Художественный редизайн интерфейса не входит в F4; здесь нужен рабочий presentation baseline поверх систем F1–F3.
+## Решение продюсера 2026-11-11
 
-## Предыдущий этап — M0-F3 GAMEPLAY LOOP
+M0 полностью переработан. Цель — перенести Cube World Alpha 2013 как цельную одиночную игру на Unity. Старый подход «подсистема существует + тест проходит = этап готов» больше не используется.
 
-**Status:** `ACCEPTED` 10 ноября 2026 · **Commit:** `3cd79b4366dda4ff0d2410be22ee11d084eefaf1`
+D90 F1–F5 и прежние F1–F4 результаты сохраняются как инженерные checkpoint'ы и доказательная база, но **не доказывают parity соответствующей системы**.
 
-- Развитие, бой/лут, торговля/услуги, Life Potion, охота, сундуки и persistence работают в одном игровом сеансе.
-- EditMode 754 PASS / 0 FAIL / 2 SKIP; PlayMode 70/70; compilation errors 0.
-- Известные `PARTIAL/UNKNOWN/CUBEGAME_CONTRACT/PLACEHOLDER` перенесены в parity backlog и не считаются забытыми.
-- [Отчёт F3](reports/M0_F3_GAMEPLAY_LOOP_REPORT.md)
+## Состояние P-блоков
 
----
+Ветки идут одной цепочкой: каждая следующая содержит все предыдущие
+(`review/m0-full-unity-port-rework` ⊂ P0 ⊂ P1-research ⊂ P1 ⊂ … ⊂ P6). Ни один блок не имеет `PASS`.
 
-## Предыдущий этап — M0-F2 INTEGRATION CHECKPOINT
+| Блок | Ветка @ коммит | Статус | Отчёт |
+|---|---|---|---|
+| P0 Boot / menu / input / save selection | `deepseek/m0-full-port-p0` @ `6e0c16c` | `PARTIAL` (логика — кандидат, presentation-fix) | [P0](reports/M0_ALPHA_FULL_PORT_P0_REPORT.md) |
+| P1 research: code parity | `codex/m0-alpha-code-parity-p1` @ `c1f9f75` | `PARTIAL` | [P1 code parity](reports/M0_ALPHA_CODE_PARITY_P1_REPORT.md) |
+| P1 World core / streaming / render distance | `codex/m0-p1-world-streaming` @ `0763c83` | `PARTIAL` | [P1](reports/M0_ALPHA_FULL_PORT_P1_WORLD_REPORT.md) |
+| P2 Environment / objects / structures | `codex/m0-p2-environment` @ `85d4e13` | `PARTIAL` | [P2](reports/M0_ALPHA_FULL_PORT_P2_ENVIRONMENT_REPORT.md) |
+| P3 Population / NPC / creature AI | `codex/m0-p3-population-ai` @ `f265108` | `PARTIAL` | [P3](reports/M0_ALPHA_FULL_PORT_P3_POPULATION_AI_REPORT.md) |
+| P4 Action / combat / animation | `codex/m0-p4-action-combat` @ `f0d2b71` | `PARTIAL` | [P4](reports/M0_ALPHA_FULL_PORT_P4_ACTION_COMBAT_REPORT.md), [coverage](reports/M0_ALPHA_FULL_PORT_P4_ACTION_COVERAGE.tsv) |
+| P5 Character / items / progression | `codex/m0-p5-character-items-progression` @ `01930ff` | `PARTIAL` | [P5](reports/M0_ALPHA_FULL_PORT_P5_CHARACTER_ITEMS_PROGRESSION_REPORT.md) |
+| P6 UI / HUD / map / journal | `codex/m0-p6-alpha-menu-hud` @ `fb4e0d5` | `READY_FOR_PRODUCER_REVIEW` / `PARTIAL` | [P6](reports/M0_ALPHA_FULL_PORT_P6_ALPHA_UI_REPORT.md) |
+| P7 Quests / cities / dungeons / content | — | `NOT_STARTED` → следующий | — |
+| P8 Audio / VFX / time / presentation | — | `NOT_STARTED` | — |
+| P9 Persistence | — | `NOT_STARTED` | — |
+| P10 Final parity run | — | `NOT_STARTED` | — |
 
-Продюсер присвоил `ACCEPTED` коммиту `4b9480836beeba859340938486f4200d16c1549e` 10 ноября 2026. `integration/m0-all` переведена на этот коммит fast-forward. EditMode 744 PASS, 0 FAIL, 2 SKIP. PlayMode 69 PASS, 0 FAIL. Ошибок компиляции 0. [Отчёт интеграции](reports/M0_F2_INTEGRATION_REPORT.md)
+Дополнительно, как вход и история:
+- [Runtime recovery](reports/M0_ALPHA_RUNTIME_RECOVERY_REPORT.md) — упаковка AlphaContent, модели, отсутствие magenta.
+- [M0-F4 presentation](reports/M0_F4_PRESENTATION_REPORT.md) — `codex/m0-f4-presentation` @ `60f24be`, инженерный checkpoint до D92 (RIFF/WAV, UI Toolkit baseline); вошёл в цепочку P-веток.
+- `deepseek/m0-f5-stable-launcher` @ `44550b8` — стабильный лаунчер и первая Windows-сборка; **не** входит в цепочку P-веток.
 
----
+Открытые долги каждого блока — в [parity backlog](planning/M0_ALPHA_PARITY_BACKLOG.md); `PARTIAL` выше означает, что там есть blocking-записи.
 
-# Предыдущий этап — M0-F2B COMBAT RUNTIME
+## Обязательный метод
 
-**Review branch:** `claude/m0-f2b-combat-runtime` (база F2A `5f197f9` + DeepSeek evidence `08ae4e3`) · **Status:** `READY_FOR_REVIEW`
+Для каждого системного контура:
 
-- Атака героя выбирает один путь по оружию и действию Alpha: melee, летящий снаряд (лук/арбалет/бумеранг/жезл/браслет — числа из байтов), объём посоха или луч до 200 блоков (`0x1C/0x5E/0x5F`, бомба 10). Fallback в melee нет.
-- Попадание всегда через `CombatSystem.ResolveHit`: владелец не поражается, один hit на снаряд/взмах, удаление ровно один раз, корректно через смену начала координат и save/load (снаряды не сохраняются).
-- Масштаб вида — одно правило для героя и NPC (эмулированная матрица размещения `Creature_drawModel`); hit box — размер вида Alpha.
-- EditMode 746/744/0/2, PlayMode 68/68, `error CS = 0`. `PARTIAL`: формулы урона Alpha для дальнего боя, подруливание бумеранга, способности/бомба без ввода, dodge `UNKNOWN`. [Отчёт M0-F2B](reports/M0_F2B_COMBAT_RUNTIME_REPORT.md)
+`FIND ORIGINAL CODE → TRACE → DATA/STATE/RNG → SPEC → UNITY IMPLEMENTATION → RUNTIME INTEGRATION → WINDOWS PLAYER → COMPARE → PRODUCER REVIEW`.
 
----
+`UNKNOWN`, `PARTIAL`, `PLACEHOLDER_NOT_ALPHA` и непринятый `CUBEGAME_CONTRACT` на обязательном основном пути блокируют PASS системы.
 
-# Предыдущий этап — M0-F2A CHARACTER RUNTIME
+## Следующий шаг — P7
 
-**Review branch:** `claude/m0-f2a-character-runtime` (база M0-F1 `748d650`) · **Status:** `READY_FOR_REVIEW`
+База: `codex/m0-p6-alpha-menu-hud` @ `fb4e0d5`. Объём — [P7 в ТЗ этапа](stages/M0_ALPHA_FULL_UNITY_PORT_STAGE.md#p7--quests--cities--dungeons--gameplay-content):
+mission generation/types/targets/rewards, city NPC roles/services, dungeon entry/layout/population, bosses/chests/rewards, pets.
 
-- Внешность героя из сейва (раса, пол, лицо, причёска, цвет волос) определяет модель в сцене; экипировка рисуется моделями, выбранными по байтам предмета.
-- Один владелец визуала героя и один владелец лута; лут и герой корректны после смены начала координат; визуал восстанавливается после save → exit → load.
-- EditMode 679/677/0/2, PlayMode 62/62, `error CS = 0`. `PARTIAL`: OrcFemale, блоки наплечников/амулета/лампы, относительный рост видов. [Отчёт M0-F2A](reports/M0_F2A_CHARACTER_RUNTIME_REPORT.md)
-- Параллельно (Codex, F2B): ranged/projectiles/abilities — вне F2A.
+Канонический код ещё не содержит P0–P6: перенос кода в `integration/m0-all` — решение продюсера после ревью.
 
----
+## Источники
 
-# Предыдущий этап — M0-F1 WORLD FIX
-
-**Canonical plan:** [D90](decisions/D90-m0-five-stage-finish-plan.md) / [M0 remaining plan](planning/M0_REMAINING_PLAN_D90.md)  
-**Branch:** `integration/m0-all`  
-**Review branch:** `codex/m0-f1-world-runtime`
-
-**Status:** `READY_FOR_REVIEW` в ветке ревью. Каноническое слияние следует за проверкой продюсера.
-
-## Результат M0-F1
-
-- В Pilot подключены recovered population, жизненный цикл, игровое время и драйвер движения из F1A Claude `9e50915`.
-- В новом генераторе `/6` единый D3-маршрут формирует город и данжи с сундуками. Коллайдер перестраивается при voxel edit. Дельты объектов, вокселей и таймер респауна прошли streaming и save/exit/load.
-- Полный EditMode **664 passed, 0 failed, 2 skipped**. Полный PlayMode **60 passed, 0 failed, 0 skipped**. `error CS = 0`. Оба прежних падения коллайдера исправлены.
-- Расписания естественных городских NPC и часть генерации Alpha остаются `PARTIAL`. [Отчёт M0-F1](reports/M0_F1_WORLD_FIX_REPORT.md)
-
-## Входное состояние D90
-
-Последний сведённый код до D90-cleanup: `fce38e0`.
-
-Claude D1/D2 review-fix — `READY_FOR_REVIEW`:
-- прежняя D1 spawn-table отменена как неверная интерпретация торгового ассортимента;
-- восстановлены `cube::Spawn`, 35 spawn construction sites, wild 3×3 rules, lifecycle/respawn;
-- восстановлены `SpawnLocationBehavior` и `WalkPathBehavior`;
-- runtime в `GameBootstrap` ещё не подключён.
-
-Codex D3–D6 audit — `READY_FOR_REVIEW`:
-- города/данжи/сундуки не в основном runtime route;
-- два владельца ground loot и origin drift;
-- projectiles = data/math без attack→hit runtime;
-- 93 sounds cataloged, playback отсутствует;
-- 32 WAV metadata entries parsed неверно.
-
-## Поставленные задачи M0-F1
-
-1. Подключить recovered D1/D2 к реальному миру и игровому времени.
-2. Исправить два известных PlayMode world-collider fail.
-3. Подключить city/dungeon/chest providers в один world-content route.
-4. Проверить unload/reload, stable IDs, persistence и отсутствие дублей.
-5. Прогнать полный EditMode + PlayMode и оформить `M0_F1_WORLD_FIX_REPORT.md`.
-
-## Тестовая база до M0-F1
-
-После merge Claude+Codex:
-- EditMode: **639 total / 637 passed / 0 failed / 2 skipped / error CS 0**.
-- PlayMode после merge не повторён.
-- Последний полный PlayMode Claude до merge: **57 total / 54 passed / 2 failed / 1 skipped**.
-- Известные fail: `TerrainEditSurvivesSaveExitAndLoad`, `VoxelEditBuildsColliderAndSurvivesSaveLoad`.
-
-## Не делать сейчас
-
-- Не начинать художественную переработку CubeGame поверх незакрытого M0.
-- Не возвращаться к старой D71–D89 схеме распределения агентов.
-- Не считать historical READY_FOR_REVIEW как ACCEPTED.
-- Не публиковать Alpha assets.
+- [D92](decisions/D92-m0-full-alpha-unity-port.md)
+- [Stage matrix](stages/M0_ALPHA_FULL_UNITY_PORT_STAGE.md)
+- [Alpha parity backlog](planning/M0_ALPHA_PARITY_BACKLOG.md)
+- [Root-cause audit](reports/M0_ALPHA_TO_UNITY_ROOT_CAUSE_AUDIT.md)
