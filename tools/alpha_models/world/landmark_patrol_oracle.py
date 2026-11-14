@@ -1,0 +1,190 @@
+"""Trace Alpha's 0x5DC6E0 from the real zone generator without launching Cube.exe.
+
+Usage: python landmark_patrol_oracle.py <Cube.exe> <seed> <zone_x> <zone_z> <out.json>
+Requires Unicorn. Uses the zone oracle's terrain substitutions and a synthetic world with no players.
+"""
+
+import argparse
+import json
+import struct
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from tools.alpha_models.universal.drawmodel_emu import RETURN_VA, STACK_BASE, STACK_SIZE  # noqa: E402
+from tools.alpha_models.universal.unicorn_bridge import UnicornRun  # noqa: E402
+from tools.alpha_models.world.dungeon_oracle import Stop, args, apply_static_init, prepare  # noqa: E402
+from tools.alpha_models.world.terrain_oracle import WORLD  # noqa: E402
+
+
+def trace(exe, seed, zone_x, zone_z):
+    oracle, carves = prepare(exe, seed, zone_x, zone_z)
+    apply_static_init(oracle)
+    cpu = oracle.cpu
+    # 0x5D9460 enumerates world+4 before looking for a mission. A head pointing
+    # to itself represents the empty actor map of this generation-only run.
+    actor_head = oracle.alloc(0x20)
+    cpu.mem.write(actor_head, struct.pack("<3I", actor_head, actor_head, actor_head))
+    cpu.mem.w(actor_head + 0xD, 1, 1)
+    cpu.mem.w(WORLD + 4, 4, actor_head)
+    placement = {}
+    entry = {}
+    draws = []
+    placement_draws = []
+    spawns = []
+    entry_address = 0x5DC6E0
+    return_address = 0x5EACEC
+    spawned_at = {0x5DE9A9, 0x5DEDC9, 0x5DF1D9}
+
+    def record_placement(_cpu):
+        placement["crt_in"] = oracle.crt.state
+
+    def record_entry(current):
+        zone, column, points, group_size = args(current, 4)
+        begin, end = struct.unpack("<II", current.mem.read(points, 8))
+        entry.update({
+            "landmark": oracle.i32(column + 0x18),
+            "landmark_id": oracle.i32(column + 0x20),
+            "landmark_center_fixed_16_16": struct.unpack("<2q", current.mem.read(column, 16)),
+            "level": oracle.i32(column + 0x24),
+            "quality": oracle.i32(column + 0x28),
+            "zone_record": list(current.mem.read(zone + 0x78, 2)),
+            "group_size_argument": group_size,
+            "points_fixed_16_16": list(struct.iter_unpack("<3q", current.mem.read(begin, end - begin))),
+            "crt_in": oracle.crt.state,
+        })
+        if "crt_in" not in placement:
+            raise RuntimeError("Missing patrol point selection entry at 0x5EAA59")
+        print(f"Entered 0x5DC6E0: landmark {entry['landmark']}, {len(entry['points_fixed_16_16'])} points", flush=True)
+
+    def record_spawn(current):
+        caller = current.mem.u(current.r["esp"], 4)
+        if caller in spawned_at:
+            spawns.append((caller - 5, current.r["ecx"]))
+
+    def record_return(_cpu):
+        if entry:
+            raise Stop()
+
+    def require_model_registry(current):
+        if current.r["ecx"] == 0:
+            caller = current.mem.u(current.r["esp"], 4)
+            stage = "in 0x5DC6E0" if entry else "before 0x5DC6E0"
+            raise RuntimeError(f"Model registry missing {stage} at return address 0x{caller:08X}")
+
+    cpu.hooks.update({
+        0x5EAA59: record_placement,
+        entry_address: record_entry,
+        return_address: record_return,
+        0x5ADB20: record_spawn,
+        0x424820: require_model_registry,
+    })
+    cpu.fpu.clear()
+    cpu.r["esp"] = STACK_BASE + STACK_SIZE - 0x100
+    for arg in (zone_z, zone_x, RETURN_VA):
+        cpu.push(arg)
+    cpu.r["ecx"] = WORLD
+    cpu.eip = 0x5E4850
+    run = UnicornRun(cpu, oracle.image)
+    cpu.mem = run.mem
+
+    heap_start = 0x80000000
+    heap_end = heap_start + 0x20000000
+    run.uc.mem_map(heap_start, heap_end - heap_start)
+    oracle.heap_top = heap_start
+
+    def alloc(size):
+        address = oracle.heap_top
+        oracle.heap_top += (size + 15) & ~15
+        if oracle.heap_top > heap_end:
+            raise RuntimeError("Patrol trace heap exhausted")
+        return address  # Unicorn maps the fresh block to zero-filled storage.
+
+    oracle.alloc = alloc
+    rand = oracle.crt.rand
+
+    def record_rand():
+        value = rand()
+        if entry:
+            draws.append((run.last_return, oracle.crt.state))
+        elif placement:
+            placement_draws.append((run.last_return, oracle.crt.state))
+        return value
+
+    oracle.crt.rand = record_rand
+    try:
+        run.run(until=RETURN_VA)
+    except Stop:
+        pass
+    else:
+        raise ValueError(f"Zone {zone_x}/{zone_z} returned without a landmark patrol call")
+
+    placement["draws"] = placement_draws
+
+    def behavior(ptr):
+        sequential = cpu.mem.u(ptr + 0x109C, 4)
+        if not sequential or cpu.mem.u(sequential, 4) != 0x703A00:
+            raise ValueError(f"Expected SequentialBehavior in spawn at 0x{ptr:08X}")
+        head = cpu.mem.u(sequential + 4, 4)
+        count = cpu.mem.u(sequential + 8, 4)
+        node = cpu.mem.u(head, 4)
+        children = []
+        for _ in range(count):
+            child = cpu.mem.u(node + 8, 4)
+            vtable = cpu.mem.u(child, 4)
+            record = {"vtable": f"0x{vtable:06X}"}
+            if vtable == 0x71A770:
+                begin, end = struct.unpack("<II", cpu.mem.read(child + 4, 8))
+                record["route_fixed_16_16"] = list(struct.iter_unpack("<3q", cpu.mem.read(begin, end - begin)))
+            elif vtable == 0x6FD868:
+                record["leader_id"] = struct.unpack("<q", cpu.mem.read(child + 8, 8))[0]
+            children.append(record)
+            node = cpu.mem.u(node, 4)
+        if node != head:
+            raise ValueError(f"Invalid SequentialBehavior list in spawn at 0x{ptr:08X}")
+        return children
+
+    records = [
+        {
+            "constructor_call": site,
+            "position_fixed_16_16": struct.unpack("<3q", cpu.mem.read(ptr + 0x10, 24)),
+            "role": oracle.i32(ptr + 0x28),
+            "kind": oracle.i32(ptr + 0x2C),
+            "id": struct.unpack("<q", cpu.mem.read(ptr + 0x48, 8))[0],
+            "level": oracle.i32(ptr + 0x34),
+            "quality": cpu.mem.u(ptr + 0x58, 1),
+            "flags": cpu.mem.u(ptr + 0x7A, 2),
+            "master": bool(cpu.mem.u(ptr + 0x10E8, 1)),
+            "behavior": behavior(ptr),
+        }
+        for site, ptr in spawns
+    ]
+    return {
+        "status": "EMULATED_ALPHA_CODE",
+        "function": "0x5DC6E0",
+        "seed": seed,
+        "zone": [zone_x, zone_z],
+        "skipped_carves": carves,
+        "placement": placement,
+        "entry": entry,
+        "crt_out": oracle.crt.state,
+        "draws": draws,
+        "spawns": records,
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("exe", type=Path)
+    parser.add_argument("seed", type=int)
+    parser.add_argument("zone_x", type=int)
+    parser.add_argument("zone_z", type=int)
+    parser.add_argument("output", type=Path)
+    options = parser.parse_args()
+    result = trace(options.exe, options.seed, options.zone_x, options.zone_z)
+    options.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    print(f"Patrol {result['entry']['landmark']}: {len(result['spawns'])} spawns, {len(result['draws'])} CRT draws")
+
+
+if __name__ == "__main__":
+    main()

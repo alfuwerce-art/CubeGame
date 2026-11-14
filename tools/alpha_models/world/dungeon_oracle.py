@@ -92,13 +92,16 @@ def snapshot(o, zone):
     return cols
 
 
-def main():
-    exe, master, zx, zz, out = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), sys.argv[5]
-    opts = sys.argv[6:]
-    save_entry = opts[opts.index("--save-entry") + 1] if "--save-entry" in opts else None
-    from_entry = opts[opts.index("--from-entry") + 1] if "--from-entry" in opts else None
-    layout_only = "--layout" in opts
-    stop_va = int(opts[opts.index("--stop") + 1], 0) if "--stop" in opts else None
+def sint(v):
+    return v - (1 << 32) if v & 0x80000000 else v
+
+
+def args(cpu, n):
+    return [cpu.mem.u(cpu.r["esp"] + 4 + 4 * i, 4) for i in range(n)]
+
+
+def prepare(exe, master, zx, zz):
+    """Oracle with the verified substitutions of zone_oracle.py, regions around the zone generated."""
     rx0, rz0 = zx >> 6, zz >> 6
     o = Oracle(exe, master, fast_noise=True)
     o.cpu.max_steps = 4_000_000_000
@@ -156,12 +159,6 @@ def main():
     from tools.alpha_models.world.color_port import ColorPort
     colors = ColorPort(seeds, land)
 
-    def sint(v):
-        return v - (1 << 32) if v & 0x80000000 else v
-
-    def args(cpu, n):
-        return [cpu.mem.u(cpu.r["esp"] + 4 + 4 * i, 4) for i in range(n)]
-
     def surface_stub(cpu):
         out, x, z, y, t, h = args(cpu, 6)
         x, z, y = sint(x), sint(z), sint(y)
@@ -195,6 +192,17 @@ def main():
     o.cpu.stubs[0x5CB600] = (carve_stub("A"), 28)
     o.cpu.stubs[0x5C7140] = (float3_stub(colors.rock_color), 20)
     o.cpu.stubs[0x5F9620] = (float3_stub(colors.soil_color), 20)
+    return o, carves
+
+
+def main():
+    exe, master, zx, zz, out = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), sys.argv[5]
+    opts = sys.argv[6:]
+    save_entry = opts[opts.index("--save-entry") + 1] if "--save-entry" in opts else None
+    from_entry = opts[opts.index("--from-entry") + 1] if "--from-entry" in opts else None
+    layout_only = "--layout" in opts
+    stop_va = int(opts[opts.index("--stop") + 1], 0) if "--stop" in opts else None
+    o, carves = prepare(exe, master, zx, zz)
 
     started = time.time()
     zone_ptr = {}
