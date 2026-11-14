@@ -141,6 +141,27 @@ namespace CubeGame.Features.World
         public List<(int X, int Y, int Z)> MasterCells { get; } = new List<(int, int, int)>();
 
         public AlphaDungeonVolume Volume { get; internal set; }
+
+        /// <summary>Subtypes 0/1/3 with flag 0: rand()%3 room scheme; −1 otherwise.</summary>
+        public int Scheme { get; internal set; } = -1;
+
+        /// <summary>Room links (A slot i,j,k → B slot i,j,k) in Alpha's list order.</summary>
+        public List<int[]> Links { get; } = new List<int[]>();
+
+        /// <summary>Entrance cell (type 4) in volume coordinates before rotation.</summary>
+        public (int X, int Y, int Z) Entrance { get; internal set; }
+
+        /// <summary>Bytes at ebp−0x2BDC…−0x2BDA (three rand()%50+20).</summary>
+        public byte[] WallColor { get; } = new byte[3];
+
+        /// <summary>Bytes at ebp−0x2B40…−0x2B3E.</summary>
+        public byte[] PaletteA { get; } = new byte[3];
+
+        /// <summary>Bytes at ebp−0x2BA8…−0x2BA6.</summary>
+        public byte[] PaletteB { get; } = new byte[3];
+
+        /// <summary>Float at ebp−0x2B6C (0.005; 0.0015 for subtypes 1/2; 0.0025 for subtype 4).</summary>
+        public float PaletteScale { get; internal set; }
     }
 
     /// <summary>
@@ -227,6 +248,277 @@ namespace CubeGame.Features.World
             return layout;
         }
 
+        /// <summary>
+        /// Room links per scheme (list at ebp−0x2B7C, read from the executed function; pairs of room slots A → B).
+        /// </summary>
+        private static readonly int[][] LinksFlag = Links(
+            1, 1, 1, 1, 2, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 2, 1, 1, 0, 1, 1, 0, 0, 1, 2, 1, 1, 2, 0, 1);
+
+        private static readonly int[][] LinksScheme0 = Links(
+            1, 0, 1, 0, 0, 1, 1, 0, 1, 2, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 2, 1,
+            1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 2, 2, 1);
+
+        private static readonly int[][] LinksScheme1 = Links(
+            1, 0, 1, 1, 1, 1, 1, 0, 1, 2, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 2, 1,
+            0, 2, 1, 1, 2, 1, 1, 2, 1, 2, 2, 1, 2, 2, 1, 2, 1, 1);
+
+        private static readonly int[][] LinksScheme2 = Links(
+            1, 0, 1, 0, 0, 1, 1, 0, 1, 2, 0, 1, 2, 0, 1, 2, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1,
+            0, 1, 1, 0, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 2, 2, 1);
+
+        private static readonly int[][] LinksSubtype2 = Links(
+            1, 0, 2, 1, 2, 1, 1, 2, 1, 0, 2, 1, 1, 2, 1, 2, 2, 1, 0, 2, 1, 0, 1, 1, 2, 2, 1, 2, 1, 1,
+            2, 1, 1, 2, 0, 1, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 1, 1, 0);
+
+        private static readonly int[][] LinksSubtype45 = Links(
+            1, 1, 2, 1, 2, 1, 1, 2, 1, 0, 2, 1, 1, 2, 1, 2, 2, 1, 0, 2, 1, 0, 1, 1, 2, 2, 1, 2, 1, 1,
+            2, 1, 1, 2, 0, 1, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 1, 1, 0);
+
+        private static int[][] Links(params int[] flat)
+        {
+            var links = new int[flat.Length / 6][];
+            for (int i = 0; i < links.Length; i++)
+            {
+                links[i] = new int[6];
+                Array.Copy(flat, i * 6, links[i], 0, 6);
+            }
+
+            return links;
+        }
+
+        /// <summary>
+        /// Stages 1–3 of 0x5CC510 (to 0x5CEA6B, right before the volume is written into the zone): rooms, corridors
+        /// (0x5C52A0 / 0x5EF6D0), entrance cell, volume rotation and mirror, palette, column pass. EMULATED_ALPHA_CODE on
+        /// 27 executed cases (all room schemes): volume, rotation, mirror, palette bytes and the CRT state are identical.
+        /// </summary>
+        public static AlphaDungeonRooms GenerateCells(int subtype, bool flag, AlphaCrtRandom random)
+        {
+            AlphaDungeonRooms layout = GenerateRooms(subtype, flag, random);
+            AlphaDungeonVolume volume = layout.Volume;
+            int[][] links = flag ? LinksFlag
+                : subtype == 4 || subtype == 5 ? LinksSubtype45
+                : subtype == 2 ? LinksSubtype2
+                : layout.Scheme == 0 ? LinksScheme0
+                : layout.Scheme == 1 ? LinksScheme1
+                : LinksScheme2;
+            layout.Links.AddRange(links);
+            foreach (int[] link in links)
+            {
+                AlphaDungeonRoom a = layout.Rooms[link[0] * 9 + link[1] * 3 + link[2]];
+                AlphaDungeonRoom b = layout.Rooms[link[3] * 9 + link[4] * 3 + link[5]];
+                if (a.Present && b.Present)
+                {
+                    Corridor(volume, a.Origin, a.Size, b.Origin, b.Size, random);
+                }
+            }
+
+            // 0x5CE3F3: entrance (type 4) in front of room A of the first link, before the volume is turned.
+            AlphaDungeonRoom first = layout.Rooms[links[0][0] * 9 + links[0][1] * 3 + links[0][2]];
+            int[] fp = first.Parameters;
+            layout.Entrance = (7 * links[0][0] + 2 + fp[0], 7 * links[0][1] + 1 + fp[1], 7 * links[0][2] + 3 + fp[2]);
+            volume.SetType(layout.Entrance.X, layout.Entrance.Y, layout.Entrance.Z, 4);
+
+            volume.Rotation = random.Next() & 3;
+            volume.Mirror = (random.Next() & 1) == 0;
+            Palette(layout, subtype, random);
+            if (subtype >= 0 && subtype <= 3)
+            {
+                Columns(volume, subtype, random);
+            }
+
+            return layout;
+        }
+
+        /// <summary>0x5CE4FB…0x5CE844: wall colour and the two subtype palettes (bytes as Alpha keeps them).</summary>
+        private static void Palette(AlphaDungeonRooms layout, int subtype, AlphaCrtRandom random)
+        {
+            byte[] wall = layout.WallColor;
+            byte[] a = layout.PaletteA;
+            byte[] b = layout.PaletteB;
+            wall[2] = (byte)(random.Next() % 50 + 20);
+            wall[1] = (byte)(random.Next() % 50 + 20);
+            wall[0] = (byte)(random.Next() % 50 + 20);
+            int baseValue = random.Next() % 50;
+            if (subtype == 3)
+            {
+                baseValue = random.Next() % 50 + 100;
+            }
+
+            a[2] = (byte)(random.Next() % 50 + 50 + baseValue);
+            a[1] = (byte)(random.Next() % 50 + 50 + baseValue);
+            a[0] = (byte)(random.Next() % 50 + 50 + baseValue);
+            b[2] = (byte)(random.Next() % 50 + 50 + baseValue);
+            b[1] = (byte)(random.Next() % 50 + 50 + baseValue);
+            b[0] = (byte)(random.Next() % 50 + 50 + baseValue);
+            layout.PaletteScale = BitConverter.ToSingle(BitConverter.GetBytes(0x3BA3D70A), 0);
+            switch (subtype)
+            {
+                case 1:
+                case 2:
+                    a[2] = (byte)(random.Next() % 50 + 50);
+                    a[1] = (byte)(random.Next() % 50 + 50);
+                    a[0] = (byte)(random.Next() % 20 + 50);
+                    b[2] = (byte)(random.Next() % 50 + 50);
+                    b[1] = (byte)(random.Next() % 50 + 50);
+                    b[0] = (byte)(random.Next() % 20 + 50);
+                    layout.PaletteScale = BitConverter.ToSingle(BitConverter.GetBytes(0x3AC49BA6), 0);
+                    break;
+                case 4:
+                    a[2] = (byte)(random.Next() % 50 + 20);
+                    a[1] = (byte)(random.Next() % 50 + 80);
+                    a[0] = (byte)(random.Next() % 50 + 100);
+                    b[2] = (byte)(random.Next() % 50 + 20);
+                    b[1] = (byte)(random.Next() % 50 + 80);
+                    b[0] = (byte)(random.Next() % 50 + 100);
+                    layout.PaletteScale = BitConverter.ToSingle(BitConverter.GetBytes(0x3B23D70A), 0);
+                    break;
+                case 5:
+                    a[0] = 0xFF;
+                    a[1] = 0xD2;
+                    a[2] = 0x82;
+                    b[0] = 0xC8;
+                    b[1] = 0xB4;
+                    b[2] = 0x50;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 0x5CE8A4…0x5CEA05 (subtypes 0…3): over every column from the top, the first cell that is neither empty nor
+        /// the entrance gets h cells of type 2 above it; h = 1, or rand()%3+2 when rand()%6 == 0 (not for subtype 2).
+        /// Addressed through the turned volume.
+        /// </summary>
+        private static void Columns(AlphaDungeonVolume volume, int subtype, AlphaCrtRandom random)
+        {
+            int n = volume.SizeX;
+            for (int x = 0; x < n; x++)
+            {
+                for (int y = 0; y < n; y++)
+                {
+                    int h = 1;
+                    if (subtype != 2 && random.Next() % 6 == 0)
+                    {
+                        h = random.Next() % 3 + 2;
+                    }
+
+                    int z = volume.SizeZ - 1;
+                    while (z >= 0)
+                    {
+                        byte t = volume.Type(x, y, z);
+                        if (t != 4 && t != 0)
+                        {
+                            break;
+                        }
+
+                        z--;
+                    }
+
+                    if (z < 0)
+                    {
+                        continue;
+                    }
+
+                    int top = Math.Min(z + h, volume.SizeZ - 1);
+                    for (int zz = z + 1; zz <= top; zz++)
+                    {
+                        volume.SetType(x, y, zz, 2);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 0x5C52A0: corridor between room A and room B along the axis on which they overlap (X first, then Y; none
+        /// otherwise) — a main line at m, and with probability ½ each, lines at m−1 and m+1. Limits are kept as in the
+        /// bytes, including the Y branch comparing m with X extents (0x5C55BF, 0x5C5682).
+        /// </summary>
+        private static void Corridor(AlphaDungeonVolume v, int[] a, int[] sa, int[] b, int[] sb, AlphaCrtRandom random)
+        {
+            int endAx = a[0] + sa[0];
+            if (b[0] < endAx && a[0] < b[0] + sb[0])
+            {
+                int m = b[0] + sb[0] / 2;
+                if (m < a[0]) m = a[0];
+                if (m >= endAx) m = endAx - 1;
+                bool below = b[1] < a[1];
+                int fromY = below ? a[1] : a[1] + sa[1] - 1;
+                int toY = below ? b[1] + sb[1] : b[1] - 1;
+                Line(v, m, fromY, a[2], m, toY, b[2]);
+                if ((random.Next() & 1) != 0 && m > a[0] && m > b[0])
+                {
+                    Line(v, m - 1, fromY, a[2], m - 1, toY, b[2]);
+                }
+
+                if ((random.Next() & 1) != 0 && m < a[0] + sa[0] - 1 && m < b[0] + sb[0] - 1)
+                {
+                    Line(v, m + 1, fromY, a[2], m + 1, toY, b[2]);
+                }
+
+                return;
+            }
+
+            int endAy = a[1] + sa[1];
+            if (b[1] < endAy && a[1] < b[1] + sb[1])
+            {
+                int m = b[1] + sb[1] / 2;
+                if (m < a[1]) m = a[1];
+                if (m >= endAy) m = endAy - 1;
+                bool left = b[0] < a[0];
+                int fromX = left ? a[0] : a[0] + sa[0] - 1;
+                int toX = left ? b[0] + sb[0] : b[0] - 1;
+                Line(v, fromX, m, a[2], toX, m, b[2]);
+                if ((random.Next() & 1) != 0 && m > a[1] && m > b[1])
+                {
+                    Line(v, fromX, m - 1, a[2], toX, m - 1, b[2]);
+                }
+
+                bool wide = left
+                    ? m < a[1] + sa[1] - 1 && m < b[0] + sb[0] - 1
+                    : m < a[0] + sa[0] - 1 && m < b[0] + sb[0] - 1;
+                if ((random.Next() & 1) != 0 && wide)
+                {
+                    Line(v, fromX, m + 1, a[2], toX, m + 1, b[2]);
+                }
+            }
+        }
+
+        /// <summary>0x5EF6D0: cells from start to end (truncating steps), type 3; a height change opens the cell above
+        /// or below and marks the step |1.</summary>
+        private static void Line(AlphaDungeonVolume v, int sx, int sy, int sz, int ex, int ey, int ez)
+        {
+            int dx = ex - sx;
+            int dy = ey - sy;
+            int dz = ez - sz;
+            int m = Math.Max(Math.Abs(dx), Math.Abs(dy));
+            int n = m > Math.Abs(dz) ? m : Math.Abs(dz);
+            if (n == 0)
+            {
+                return;
+            }
+
+            int previous = sz;
+            for (int t = 0; t <= n; t++)
+            {
+                int x = sx + dx * t / n;
+                int y = sy + dy * t / n;
+                int z = sz + dz * t / n;
+                v.SetType(x, y, z, 3);
+                if (z < previous)
+                {
+                    v.SetType(x, y, z + 1, 3);
+                    v.AddFlags(x, y, z, 1);
+                }
+
+                if (z > previous)
+                {
+                    v.SetType(x, y, z - 1, 3);
+                    v.AddFlags(x, y, z - 1, 1);
+                }
+
+                previous = z;
+            }
+        }
+
         /// <summary>Room presence by subtype and flag (0x5CC9xx…0x5CDFC9).</summary>
         private static void Schemes(AlphaDungeonRooms layout, int subtype, bool flag, AlphaCrtRandom random)
         {
@@ -264,6 +556,7 @@ namespace CubeGame.Features.World
             }
 
             int scheme = random.Next() % 3;
+            layout.Scheme = scheme;
             Set(1, 0, 1);
             if (scheme == 1)
             {

@@ -83,6 +83,7 @@ def main():
     save_entry = opts[opts.index("--save-entry") + 1] if "--save-entry" in opts else None
     from_entry = opts[opts.index("--from-entry") + 1] if "--from-entry" in opts else None
     layout_only = "--layout" in opts
+    stop_va = int(opts[opts.index("--stop") + 1], 0) if "--stop" in opts else None
     rx0, rz0 = zx >> 6, zz >> 6
     o = Oracle(exe, master, fast_noise=True)
     o.cpu.max_steps = 4_000_000_000
@@ -224,6 +225,15 @@ def main():
             layout["frame"] = cpu.mem.read(ebp - 0x400, 0x400).hex()
             layout["ebp"] = ebp
             layout["crt"] = o.crt.state
+            links = []
+            head = cpu.mem.u(ebp - 0x2B7C, 4)
+            node = cpu.mem.u(head, 4)
+            while node != head and len(links) < 64:
+                links.append([o.i32(node + 8 + 4 * i) for i in range(6)])
+                node = cpu.mem.u(node, 4)
+            layout["links"] = links
+            layout["va"] = cpu.eip if hasattr(cpu, "eip") else None
+            layout["colors"] = cpu.mem.read(ebp - 0x2BDC, 0xB0).hex()   # ebp-0x2BDC..-0x2B2C (palette bytes, scale float)
             vol = ebp - 0x2BCC          # cube::Dungeon cell volume (ctor 0x5C38C0): +4 rot, +8 mirror, +0xC.. size, +0x18 data
             sx, sy, sz = (o.i32(vol + off) for off in (0xC, 0x10, 0x14))
             layout["volume"] = {"rotation": o.i32(vol + 4), "mirror": cpu.mem.u(vol + 8, 1), "size": [sx, sy, sz],
@@ -234,7 +244,7 @@ def main():
     o.cpu.hooks[0x6240F0] = on_zone_ctor
     o.cpu.hooks[ROOM_BOX] = on_box
     o.cpu.hooks[BOSS_CELL] = on_boss_cell
-    o.cpu.hooks[LAYOUT_DONE] = on_layout
+    o.cpu.hooks[stop_va or LAYOUT_DONE] = on_layout
     o.cpu.hooks[SPAWN_CTOR] = on_spawn
     for r in RETURNS:
         o.cpu.hooks[r] = on_return
@@ -266,7 +276,8 @@ def main():
                 pass
             results.append({"subtype": subtype, "flag": flag, "crt_in": crt, "room_boxes": list(boxes),
                             "boss_cells": list(boss_cells), "crt_out": layout.get("crt"),
-                            "frame": layout.get("frame"), "ebp": layout.get("ebp"), "volume": layout.get("volume")})
+                            "frame": layout.get("frame"), "ebp": layout.get("ebp"), "volume": layout.get("volume"),
+                            "links": layout.get("links"), "colors": layout.get("colors")})
             o.cpu.mem = python_mem
             print("case", subtype, flag, crt, ":", len(boxes), "rooms, boss", boss_cells, flush=True)
         Path(out).write_text(json.dumps({"status": "EMULATED_ALPHA_CODE", "function": "0x5CC510 rooms (to 0x5CE200)",

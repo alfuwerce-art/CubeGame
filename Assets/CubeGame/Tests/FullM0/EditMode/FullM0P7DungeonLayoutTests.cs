@@ -32,6 +32,72 @@ namespace CubeGame.Tests.FullM0.EditMode
             public string volumeSha256;
         }
 
+        [Serializable]
+        private sealed class CellsFixture
+        {
+            public string status;
+            public CellsCase[] cases;
+        }
+
+        [Serializable]
+        private sealed class CellsCase
+        {
+            public int subtype;
+            public int flag;
+            public long crtIn;
+            public long crtOut;
+            public int rotation;
+            public int mirror;
+            public int[] wallColor;
+            public int[] paletteA;
+            public int[] paletteB;
+            public int paletteScaleBits;
+            public int[] links;
+            public string volumeSha256;
+        }
+
+        [Test]
+        public void CorridorsTurnAndPaletteMatchTheExecutedAlphaGenerator()
+        {
+            string path = Path.Combine(Application.dataPath,
+                "CubeGame/Tests/FullM0/EditMode/Fixtures/alpha_dungeon_cells_oracle_666666.json");
+            CellsFixture fixture = JsonUtility.FromJson<CellsFixture>(File.ReadAllText(path));
+            Assert.AreEqual("EMULATED_ALPHA_CODE", fixture.status);
+            Assert.AreEqual(27, fixture.cases.Length);
+            var schemes = new HashSet<int>();
+            foreach (CellsCase c in fixture.cases)
+            {
+                string tag = $"subtype {c.subtype} flag {c.flag} crt {c.crtIn}";
+                var random = new AlphaCrtRandom(unchecked((int)(uint)c.crtIn));
+                AlphaDungeonRooms d = AlphaDungeonGenerator.GenerateCells(c.subtype, c.flag != 0, random);
+                schemes.Add(d.Scheme);
+                var links = new List<int>();
+                foreach (int[] link in d.Links) links.AddRange(link);
+                CollectionAssert.AreEqual(c.links, links, $"{tag}: room links");
+                Assert.AreEqual(c.rotation, d.Volume.Rotation, $"{tag}: rotation");
+                Assert.AreEqual(c.mirror != 0, d.Volume.Mirror, $"{tag}: mirror");
+                CollectionAssert.AreEqual(c.wallColor, Ints(d.WallColor), $"{tag}: wall colour");
+                CollectionAssert.AreEqual(c.paletteA, Ints(d.PaletteA), $"{tag}: palette A");
+                CollectionAssert.AreEqual(c.paletteB, Ints(d.PaletteB), $"{tag}: palette B");
+                Assert.AreEqual(c.paletteScaleBits, BitConverter.ToInt32(BitConverter.GetBytes(d.PaletteScale), 0), $"{tag}: scale");
+                Assert.AreEqual(c.volumeSha256, Sha256(d.Volume.Cells), $"{tag}: 22³ volume after corridors and columns");
+                var expected = new AlphaCrtRandom(unchecked((int)(uint)c.crtOut));
+                for (int i = 0; i < 4; i++)
+                {
+                    Assert.AreEqual(expected.Next(), random.Next(), $"{tag}: CRT state before the zone writes");
+                }
+            }
+
+            CollectionAssert.IsSupersetOf(schemes, new[] { -1, 0, 1, 2 }, "every room scheme is covered");
+        }
+
+        private static int[] Ints(byte[] bytes)
+        {
+            var result = new int[bytes.Length];
+            for (int i = 0; i < bytes.Length; i++) result[i] = bytes[i];
+            return result;
+        }
+
         private static Fixture Load()
         {
             string path = Path.Combine(Application.dataPath,
