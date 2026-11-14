@@ -119,6 +119,7 @@ class UnicornRun:
         self.mem = UcMem(uc)
         self.cpu = _Facade(uc, self.mem)
         self.stop_exc = None
+        self.last_return = 0          # return address of the import/stub being executed (call-site tracing)
         # PE image
         lo = image.image_base
         hi = max(lo + s.virtual_address + max(s.virtual_size, s.raw_size) for s in image.sections)
@@ -201,10 +202,12 @@ class UnicornRun:
                 # The interpreter runs `call [IAT]` without pushing a return address (args at esp+0) and via_iat
                 # pops the stdcall bytes itself; here `call` reached the trampoline, so take the return first.
                 ret = self.cpu.pop()
+                self.last_return = ret
                 result = fn(self.cpu)
                 uc.reg_write(UC_X86_REG_EAX, (result or 0) & MASK)
                 self._resume(ret, 0)
             else:
+                self.last_return = self.mem.u(self.cpu.r["esp"], 4)
                 fn(self.cpu)
                 ret = self.cpu.pop()
                 self._resume(ret, cleanup)

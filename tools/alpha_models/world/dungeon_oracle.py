@@ -205,6 +205,7 @@ def main():
         if entry:
             raise Stop()
 
+    trace_holder = {}
     boxes = []
     boss_cells = []
     layout = {}
@@ -307,6 +308,37 @@ def main():
                 return va
 
             o.alloc = alloc
+            if "--trace-rand" in opts:
+                # every rand() of the dungeon call: (call site, CRT state after the draw)
+                rand_log = []
+                plain = o.crt.rand
+
+                def traced():
+                    v = plain()
+                    rand_log.append((run.last_return, o.crt.state))
+                    return v
+
+                o.crt.rand = traced
+                trace_holder["rand"] = rand_log
+                call_log = []
+                for va in (0x5ADB20, 0x5DF600, 0x44E7A0, 0x59ABA0, 0x5CB550, 0x5F0CE0, 0x5F6E20, 0x5C9F90, 0x5F7A60):
+                    known = va in run.hooks or va in run.calls
+
+                    def hook(cpu, va=va, prev=run.hooks.get(va)):
+                        if prev: prev(cpu)
+                        esp = cpu.r["esp"]
+                        rec = [va, cpu.mem.u(esp, 4), len(rand_log)]
+                        if va == 0x5DF600:
+                            a = [cpu.mem.u(esp + 4 + 4 * i, 4) for i in range(8)]
+                            sz = [o.i32(a[3] + 4 * i) for i in range(3)]
+                            col = list(cpu.mem.read(a[4], 3))
+                            prob = struct.unpack("<f", struct.pack("<I", a[5]))[0]
+                            rec += [[o.i32(esp + 4), o.i32(esp + 8), o.i32(esp + 12)], sz, col, prob, a[7] & 0xFF]
+                        call_log.append(rec)
+                    run.hooks[va] = hook
+                    if not known:
+                        run.uc.hook_add(__import__("unicorn").UC_HOOK_CODE, run._on_code, begin=va, end=va)
+                trace_holder["calls"] = call_log
             try:
                 run.run()
                 print("unicorn run ended without reaching a stop hook")
@@ -364,6 +396,9 @@ def main():
         q = lambda off: struct.unpack("<q", o.cpu.mem.read(p + off, 8))[0] / 65536.0
         records.append({"x": q(0x10), "z": q(0x18), "y": q(0x20), "role": o.i32(p + 0x28), "kind": o.i32(p + 0x2C),
                         "level": o.i32(p + 0x34), "quality": u(0x58, 1), "flags": u(0x7A, 2), "master": u(0x10E8, 1)})
+    if trace_holder:
+        Path(out + ".trace.json").write_text(json.dumps({"rand": trace_holder["rand"], "calls": trace_holder["calls"]}),
+                                             encoding="utf-8")
     info = {k: v for k, v in entry.items() if k != "before"}
     info["crt_out"] = o.crt.state
     info["zone_level"] = o.i32(zone + 0x80)
