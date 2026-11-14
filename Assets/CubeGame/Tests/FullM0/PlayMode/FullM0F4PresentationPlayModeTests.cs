@@ -147,16 +147,16 @@ namespace CubeGame.Tests.FullM0.PlayMode
             yield return null;
             game.Session.Clock.StepTicks(2);
             hero.Sheet.AddExperience(AlphaMath.ExperienceCostForNextLevel(1) - 1);
-            Combatant target = game.Session.Combat.Combatants.Where(c => c.Hostile && c.Id.Kind == EntityIdKind.ZoneSpawn)
-                .OrderBy(c => DistanceSquared(c.Position, hero.Position)).First();
-            PlaceHero(game, target.Position);
+            AlphaMission hunt = hero.Missions.Missions.FirstOrDefault(m => m.Type == AlphaMissionType.Monster);
+            Assert.IsNotNull(hunt, "the start region has a type-1 mission");
+            game.TeleportHero(hunt.BossZoneX * WorldLayout.ZoneSize + 0x80, hunt.BossZoneZ * WorldLayout.ZoneSize + 0x80);
             yield return null;
             game.Session.Clock.StepTicks(1);
-            HuntMission hunt = hero.Missions.Hunts.Single(m => !m.Complete);
-            Assert.IsTrue(game.Session.Combat.TryGet(hunt.Target, out target));
+            Assert.IsTrue(game.Session.Combat.TryGet(MissionJournal.BossId(hunt), out Combatant target));
+            string huntLabel = $"hunt-{hunt.ColumnX}-{hunt.ColumnZ}";
             game.ToggleJournal();
             yield return null;
-            Assert.IsTrue(Root(game).Q<Label>($"hunt-{hunt.Target.Value}").ClassListContains("hunt-active"));
+            Assert.IsTrue(Root(game).Q<Label>(huntLabel).ClassListContains("hunt-active"));
             Press(game, "close-panel");
             yield return null;
 
@@ -170,7 +170,8 @@ namespace CubeGame.Tests.FullM0.PlayMode
                 game.Session.Clock.StepTicks(game.Session.Clock.TicksPerSecond * 2);
             }
             Assert.IsTrue(target.IsDead);
-            Assert.AreEqual(2, hero.Sheet.Progression.Level);
+            int level = hero.Sheet.Progression.Level;
+            Assert.GreaterOrEqual(level, 2, "boss experience ×20");
             AudioClip mission = Clip(AlphaSoundCatalog.MissionComplete);
             Assert.IsNotNull(mission, "a live hunt transition loaded and played its staged cue");
             Assert.IsNotNull(Clip("hit.wav"));
@@ -310,7 +311,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
 
             game.ToggleJournal();
             yield return null;
-            Assert.IsTrue(Root(game).Q<Label>($"hunt-{hunt.Target.Value}").ClassListContains("hunt-complete"));
+            Assert.IsTrue(Root(game).Q<Label>(huntLabel).ClassListContains("hunt-complete"));
             yield return Capture(game, "journal");
             PressMenu(game, "open-map");
             yield return null;
@@ -357,14 +358,14 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.AreEqual(1, hero.SkillRanks[HeroSkill.Climbing]);
             Assert.AreEqual(0, hero.ManaCubes, "P5: Alpha mission rewards give platinum and an item, not mana cubes");
             Assert.Greater(hero.Platinum, 0);
-            Assert.AreEqual(2, hero.Sheet.Progression.Level);
+            Assert.AreEqual(level, hero.Sheet.Progression.Level);
             Assert.AreEqual(weapon, hero.Loadout.GetEquipped(EquipmentSlot.MainHand));
             Assert.IsNull(Clip(AlphaSoundCatalog.MissionComplete), "reloading a completed hunt does not play its cue");
             Assert.IsNull(Root(game).Q("game-panel"));
 
             game.ToggleJournal();
             yield return null;
-            Assert.IsTrue(Root(game).Q<Label>($"hunt-{hunt.Target.Value}").ClassListContains("hunt-complete"));
+            Assert.IsTrue(Root(game).Q<Label>(huntLabel).ClassListContains("hunt-complete"));
             Assert.IsNull(Clip(AlphaSoundCatalog.MissionComplete));
             Press(game, "close-panel");
             yield return null;

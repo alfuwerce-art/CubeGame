@@ -376,7 +376,8 @@ namespace CubeGame.Gameplay
 
         private void PresentHunt(HuntChanged hunt)
         {
-            Notify(hunt.Complete ? $"Hunt completed · {KindName(hunt.Kind)}" : $"Hunt discovered · {KindName(hunt.Kind)}");
+            string name = MissionName((AlphaMissionType)hunt.MissionType);
+            Notify(hunt.Complete ? $"Mission completed · {name}" : $"Mission discovered · {name}: {KindName(hunt.Kind)}");
             if (_panel == GamePanel.Journal || _panel == GamePanel.Skills || _panel == GamePanel.Map) InvalidatePanel();
             if (hunt.Complete) _audio.Play(AlphaSoundCatalog.MissionComplete);
         }
@@ -661,21 +662,43 @@ namespace CubeGame.Gameplay
 
         private void BuildJournal(VisualElement body)
         {
-            Text(body, "Regional hunts", null, "section");
-            Text(body, "Approach a hostile creature to discover a hunt.", null, "muted");
-            var hunts = _session.Hero.Missions.Hunts;
-            foreach (bool complete in new[] { false, true })
+            Text(body, "Missions", null, "section");
+            Text(body, "Missions are found by entering their area of a region.", null, "muted");
+            foreach (AlphaMissionState state in new[] { AlphaMissionState.Active, AlphaMissionState.Complete })
             {
-                Text(body, complete ? "Completed" : "Active", null, "section");
+                Text(body, state == AlphaMissionState.Complete ? "Completed" : "Active", null, "section");
                 bool any = false;
-                foreach (HuntMission hunt in hunts)
+                foreach (AlphaMission mission in _session.Hero.Missions.Missions)
                 {
-                    if (hunt.Complete != complete) continue;
+                    if (mission.State != state) continue;
                     any = true;
-                    Text(body, $"{KindName(hunt.Kind)}  ·  Region cell {hunt.CellX}, {hunt.CellZ}",
-                        $"hunt-{hunt.Target.Value}", complete ? "hunt-complete" : "hunt-active");
+                    string progress = mission.CountsKills ? $"  ·  {mission.Progress}/{mission.Required}" : string.Empty;
+                    Text(body, $"{MissionName(mission.Type)}: {KindName(new KindId(mission.TargetKind))}  ·  level {mission.Level}{progress}",
+                        $"hunt-{mission.ColumnX}-{mission.ColumnZ}",
+                        state == AlphaMissionState.Complete ? "hunt-complete" : "hunt-active");
                 }
                 if (!any) Text(body, "No entries", null, "muted");
+            }
+        }
+
+        /// <summary>Alpha target type names (_library/crt_stl.cpp:5404).</summary>
+        private static string MissionName(AlphaMissionType type)
+        {
+            switch (type)
+            {
+                case AlphaMissionType.Monster: return "Monster";
+                case AlphaMissionType.RareBoss: return "Rare boss";
+                case AlphaMissionType.VillageMonster: return "Village monster";
+                case AlphaMissionType.VillageRareBoss: return "Village rare boss";
+                case AlphaMissionType.Dungeon: return "Dungeon";
+                case AlphaMissionType.Invasion: return "Invasion";
+                case AlphaMissionType.SceneryInvasion: return "Scenery invasion";
+                case AlphaMissionType.VillageInvasion: return "Village invasion";
+                case AlphaMissionType.CaveInvasion: return "Cave invasion";
+                case AlphaMissionType.RiverInvasion: return "River invasion";
+                case AlphaMissionType.Gang: return "Gang";
+                case AlphaMissionType.GangBoss: return "Gang boss";
+                default: return "Mission";
             }
         }
 
@@ -690,7 +713,7 @@ namespace CubeGame.Gameplay
             {
                 "LMB - primary attack (M1)", "RMB - secondary attack (M2)", "1 2 3 - class abilities",
                 "Q - life potion", "E - talk / open", "B or I - inventory", "C - crafting", "X - skills",
-                "M - world map", "O - system menu", "Esc - menu buttons", "J - hunt journal",
+                "M - world map", "O - system menu", "Esc - menu buttons", "J - mission journal",
             })
             {
                 Text(body, line, null, "muted");

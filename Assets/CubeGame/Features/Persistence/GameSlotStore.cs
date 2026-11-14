@@ -171,13 +171,13 @@ namespace CubeGame.Features.Persistence
                 heroCopper = hero.Copper,
                 heroManaCubes = hero.ManaCubes,
                 heroPlatinum = hero.Platinum,
-                huntMissions = WriteMissions(hero.Missions),
                 inventoryPlacement = hero.InventoryPlacement(),
                 characterChecksum = Checksum(characterText),
                 worldChecksum = worldChecksum,
             };
             WriteRawItems(hero, data);
             WriteRecipes(hero, data);
+            WriteMissions(hero.Missions, data);
 
             if (!TryValidate(data, out string validationError))
             {
@@ -324,17 +324,11 @@ namespace CubeGame.Features.Persistence
             hero.RestoreInventory(data.inventoryPlacement);
             RestoreRawItems(hero, data);
             RestoreRecipes(hero, data);
-            if (data.huntMissions != null)
+            if (!RestoreMissions(hero, data))
             {
-                foreach (HuntMissionSaveData mission in data.huntMissions)
-                {
-                    if (mission == null || !hero.Missions.TryRestore(new HuntMission(
-                        new StableEntityId(unchecked((ulong)mission.target)), new KindId(mission.kind), mission.complete)))
-                    {
-                        return Fail(SlotLoadStatus.Corrupted, "invalid or duplicate hunt mission");
-                    }
-                }
+                return Fail(SlotLoadStatus.Corrupted, "invalid or duplicate Alpha mission");
             }
+
             if (data.heroHealth >= 0.0)
             {
                 hero.RestoreHealth(data.heroHealth);
@@ -351,21 +345,82 @@ namespace CubeGame.Features.Persistence
             };
         }
 
-        public static HuntMissionSaveData[] WriteMissions(MissionJournal journal)
+        /// <summary>P7: Alpha mission blocks and generated regions into the session save; legacy hunts are dropped.</summary>
+        public static void WriteMissions(MissionJournal journal, SessionSaveData data)
         {
-            var result = new HuntMissionSaveData[journal.Hunts.Count];
-            int index = 0;
-            foreach (HuntMission mission in journal.Hunts)
+            var missions = new List<AlphaMissionSaveData>();
+            foreach (AlphaMission m in journal.Columns)
             {
-                result[index++] = new HuntMissionSaveData
+                missions.Add(new AlphaMissionSaveData
                 {
-                    target = (long)mission.Target.Value,
-                    kind = mission.Kind.Value,
-                    complete = mission.Complete,
-                };
+                    columnX = m.ColumnX,
+                    columnZ = m.ColumnZ,
+                    level = m.Level,
+                    seed = m.Seed,
+                    type = (int)m.Type,
+                    targetKind = m.TargetKind,
+                    maxLevel = m.MaxLevel,
+                    levelClass = m.LevelClass,
+                    state = (int)m.State,
+                    progress = m.Progress,
+                    required = m.Required,
+                    targetZoneX = m.TargetZoneX,
+                    targetZoneZ = m.TargetZoneZ,
+                    bossKind = m.BossKind,
+                    bossLevel = m.BossLevel,
+                    bossQuality = m.BossQuality,
+                    bossZoneX = m.BossZoneX,
+                    bossZoneZ = m.BossZoneZ,
+                });
             }
 
-            return result;
+            var regions = new List<int>();
+            foreach ((int rx, int rz) in journal.GeneratedRegions)
+            {
+                regions.Add(rx);
+                regions.Add(rz);
+            }
+
+            data.huntMissions = null;
+            data.alphaMissions = missions.ToArray();
+            data.alphaMissionRegions = regions.ToArray();
+        }
+
+        /// <summary>P7: restores Alpha missions; false for a malformed record. Legacy F3 hunts are ignored.</summary>
+        public static bool RestoreMissions(HeroState hero, SessionSaveData data)
+        {
+            if (data.alphaMissionRegions != null)
+            {
+                if ((data.alphaMissionRegions.Length & 1) != 0)
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < data.alphaMissionRegions.Length; i += 2)
+                {
+                    if (!hero.Missions.TryRestoreRegion(data.alphaMissionRegions[i], data.alphaMissionRegions[i + 1]))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            if (data.alphaMissions == null)
+            {
+                return true;
+            }
+
+            foreach (AlphaMissionSaveData m in data.alphaMissions)
+            {
+                if (m == null || m.columnX < 0 || m.columnZ < 0 || m.columnX >= WorldLayout.RegionGrid * 8
+                    || m.columnZ >= WorldLayout.RegionGrid * 8
+                    || !hero.Missions.TryRestore(AlphaMission.Restore(m.columnX, m.columnZ, m.level, m.seed, m.type, m.targetKind, m.maxLevel, m.levelClass, m.state, m.progress, m.required, m.targetZoneX, m.targetZoneZ, m.bossKind, m.bossLevel, m.bossQuality, m.bossZoneX, m.bossZoneZ)))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>Returns null on success (deltas filled), otherwise the failure result.</summary>
@@ -557,7 +612,8 @@ namespace CubeGame.Features.Persistence
 
             if (data.heroCopper < 0 || data.heroManaCubes < 0 || data.heroPlatinum < 0 || data.worldTimeOffsetMs < 0
                 || data.worldTimeOffsetMs > int.MaxValue * 86_400_000L
-                || (data.huntMissions?.Length ?? 0) > WorldSaveFormat.MaxDeltas)
+                || (data.alphaMissions?.Length ?? 0) > WorldSaveFormat.MaxDeltas
+                || (data.alphaMissionRegions?.Length ?? 0) > 2 * WorldSaveFormat.MaxDeltas)
             {
                 error = "invalid gameplay progress";
                 return false;

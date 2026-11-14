@@ -52,16 +52,17 @@ namespace CubeGame.Tests.FullM0.PlayMode
             HeroState hero = game.Session.Hero;
             Assert.IsTrue(game.TryApplyHeroProgression(new HeroSkillRanks(), CharacterSpecialization.Secondary), game.Status);
             hero.Sheet.AddExperience(AlphaMath.ExperienceCostForNextLevel(1) - 1);
-            Combatant target = game.Session.Combat.Combatants
-                .Where(c => c.Hostile && c.Id.Kind == EntityIdKind.ZoneSpawn)
-                .OrderBy(c => DistanceSquared(c.Position, hero.Position))
-                .FirstOrDefault();
-            Assert.IsNotNull(target, "the wilderness fixture contains a live hostile world spawn");
-            PlaceHero(game, target.Position);
+            // P7-A: the region pass (0x5D9AD0) gives the region its Alpha missions; a type-1 mission targets the
+            // boss of its column, which stands at the centre of the boss zone.
+            AlphaMission hunt = hero.Missions.Missions.FirstOrDefault(m => m.Type == AlphaMissionType.Monster);
+            Assert.IsNotNull(hunt, "the start region has a type-1 mission");
+            game.TeleportHero(hunt.BossZoneX * WorldLayout.ZoneSize + 0x80, hunt.BossZoneZ * WorldLayout.ZoneSize + 0x80);
             yield return null;
             game.Session.Clock.StepTicks(1);
-            HuntMission hunt = hero.Missions.Hunts.Single(m => !m.Complete);
-            Assert.IsTrue(game.Session.Combat.TryGet(hunt.Target, out target), "the journal tracks a real world spawn");
+            Assert.AreEqual(AlphaMissionState.Active, hunt.State, "0x60CC3D: entering the column activates it");
+            Assert.IsTrue(game.Session.Combat.TryGet(MissionJournal.BossId(hunt), out Combatant target),
+                "the column boss is a live world spawn");
+            Assert.AreEqual(hunt.BossKind, target.Kind.Value);
             PlaceHero(game, target.Position);
             yield return null;
 
@@ -72,10 +73,11 @@ namespace CubeGame.Tests.FullM0.PlayMode
                 game.Session.Combat.ResolveHit(hero.Id, target.Id, game.Session.Clock.TimeMs, attempt);
             }
             Assert.IsTrue(target.IsDead);
-            Assert.IsTrue(hero.Missions.Hunts.Single(m => m.Target.Equals(hunt.Target)).Complete);
+            Assert.AreEqual(AlphaMissionState.Complete, hunt.State);
             Assert.AreEqual(0, hero.ManaCubes, "P5: the Alpha mission reward is platinum plus one class item");
             Assert.Greater(hero.Platinum, 0);
-            Assert.AreEqual(2, hero.Sheet.Progression.Level);
+            int level = hero.Sheet.Progression.Level;
+            Assert.GreaterOrEqual(level, 2, "boss experience ×20");
             PlaceHero(game, target.Position);
             yield return null;
             game.Session.Clock.StepTicks(1);
@@ -170,13 +172,14 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.AreEqual(1, CountNamed("WorldRoot"));
             Assert.AreEqual(wallet, hero.Copper);
             Assert.AreEqual(0, hero.ManaCubes);
-            Assert.AreEqual(2, hero.Sheet.Progression.Level);
+            Assert.AreEqual(level, hero.Sheet.Progression.Level);
             Assert.AreEqual(CharacterSpecialization.Secondary, hero.Sheet.Specialization);
             Assert.AreEqual(1, hero.SkillRanks[HeroSkill.Climbing]);
             Assert.AreEqual(bags, hero.Inventory.UsedSlots);
             Assert.AreEqual(potions + 1, hero.Inventory.CountOf(LootRules.LifePotion));
             Assert.AreEqual(offset, game.Session.Clock.WorldTimeOffsetMs);
-            Assert.IsTrue(hero.Missions.Hunts.Single(m => m.Target.Equals(hunt.Target)).Complete);
+            Assert.IsTrue(hero.Missions.TryGet(hunt.ColumnX, hunt.ColumnZ, out AlphaMission loadedHunt));
+            Assert.AreEqual(AlphaMissionState.Complete, loadedHunt.State);
             Assert.IsFalse(game.Population.TryGet(chest.Id, out _));
             Assert.IsFalse(game.TryInteract(chest.Id));
             Assert.AreEqual(0, game.Session.WorldItems.Count);

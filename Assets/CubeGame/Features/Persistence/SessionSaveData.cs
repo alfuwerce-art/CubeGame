@@ -91,7 +91,17 @@ namespace CubeGame.Features.Persistence
 
         public int[] heroRecipeLevels;
 
+        /// <summary>Legacy F3 hunts (CUBEGAME_CONTRACT). Read and ignored since P7; never written.</summary>
         public HuntMissionSaveData[] huntMissions;
+
+        /// <summary>
+        /// P7, optional: Alpha mission/boss blocks of landmark columns (column +0x24, +0x30…+0x64). Alpha keeps them
+        /// in the world database (mission&lt;x&gt;_&lt;z&gt;); CubeGame bridges them through the session (CUBEGAME_CONTRACT).
+        /// </summary>
+        public AlphaMissionSaveData[] alphaMissions;
+
+        /// <summary>P7, optional: regions whose mission pass already ran (Alpha region +0x15A18), as x,z pairs.</summary>
+        public int[] alphaMissionRegions;
 
         /// <summary>Calendar advances from inn visits, separate from the combat and movement tick.</summary>
         public long worldTimeOffsetMs;
@@ -141,6 +151,29 @@ namespace CubeGame.Features.Persistence
         public long target;
         public int kind;
         public bool complete;
+    }
+
+    [Serializable]
+    public sealed class AlphaMissionSaveData
+    {
+        public int columnX;
+        public int columnZ;
+        public int level;
+        public int seed;
+        public int type;
+        public int targetKind;
+        public int maxLevel;
+        public int levelClass;
+        public int state;
+        public int progress;
+        public int required;
+        public int targetZoneX;
+        public int targetZoneZ;
+        public int bossKind;
+        public int bossLevel;
+        public int bossQuality;
+        public int bossZoneX;
+        public int bossZoneZ;
     }
 
     public static class SessionSaveFormat

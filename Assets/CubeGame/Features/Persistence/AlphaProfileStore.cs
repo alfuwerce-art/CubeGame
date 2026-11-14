@@ -359,7 +359,7 @@ namespace CubeGame.Features.Persistence
             session.heroCopper = hero.Copper;
             session.heroManaCubes = hero.ManaCubes;
             session.heroPlatinum = hero.Platinum;
-            session.huntMissions = GameSlotStore.WriteMissions(hero.Missions);
+            GameSlotStore.WriteMissions(hero.Missions, session);
             session.inventoryPlacement = hero.InventoryPlacement();
             GameSlotStore.WriteRawItems(hero, session);
             GameSlotStore.WriteRecipes(hero, session);
@@ -538,15 +538,7 @@ namespace CubeGame.Features.Persistence
             hero.RestoreInventory(session.inventoryPlacement);
             RestoreRawItems(hero, session);
             GameSlotStore.RestoreRecipes(hero, session);
-            if (session.huntMissions != null)
-            {
-                foreach (HuntMissionSaveData mission in session.huntMissions)
-                {
-                    if (mission == null) continue;
-                    hero.Missions.TryRestore(new HuntMission(new StableEntityId(unchecked((ulong)mission.target)),
-                        new KindId(mission.kind), mission.complete));
-                }
-            }
+            GameSlotStore.RestoreMissions(hero, session);
 
             if (session.heroHealth >= 0.0) hero.RestoreHealth(session.heroHealth);
 
@@ -1039,15 +1031,7 @@ namespace CubeGame.Features.Persistence
                     hero.RestoreInventory(session.inventoryPlacement);
                     RestoreRawItems(hero, session);
                     GameSlotStore.RestoreRecipes(hero, session);
-                    if (session.huntMissions != null)
-                    {
-                        foreach (HuntMissionSaveData mission in session.huntMissions)
-                        {
-                            if (mission == null) continue;
-                            hero.Missions.TryRestore(new HuntMission(new StableEntityId(unchecked((ulong)mission.target)),
-                                new KindId(mission.kind), mission.complete));
-                        }
-                    }
+                    GameSlotStore.RestoreMissions(hero, session);
 
                     if (session.heroHealth >= 0.0) hero.RestoreHealth(session.heroHealth);
                     SaveResult characterResult = SaveCharacter(record, hero, session, session.savedUtcTicks);

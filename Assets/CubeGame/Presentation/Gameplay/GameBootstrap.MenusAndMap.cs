@@ -21,7 +21,8 @@ namespace CubeGame.Gameplay
         private Vector2Int _localMapOrigin;
         private ZoneKey _mapCenter;
         private int _mapDiscoveryCount;
-        private readonly Dictionary<StableEntityId, Label> _mapHunts = new Dictionary<StableEntityId, Label>();
+        // Mission markers (0x5FEEA2): label and the voxel point it marks.
+        private readonly List<(Label Marker, double X, double Z)> _mapHunts = new List<(Label, double, double)>();
 
         private ZoneKey CurrentMapZone()
         {
@@ -81,12 +82,29 @@ namespace CubeGame.Gameplay
                         zone.Z * (double)WorldLayout.ZoneSize + WorldLayout.ZoneSize / 2);
                 }
             }
-            foreach (HuntMission hunt in _session.Hero.Missions.Hunts)
+            // Alpha 0x5FEEA2: a mission that is not complete is drawn at its target zone (type 1) or at the
+            // landmark centre of its column (other types).
+            var terrain = (AlphaTerrainGenerator)_worldState.Generator;
+            foreach (AlphaMission mission in _session.Hero.Missions.Missions)
             {
-                if (!hunt.Complete)
+                if (mission.State == AlphaMissionState.Complete) continue;
+                double x;
+                double z;
+                if (mission.Type == AlphaMissionType.Monster)
                 {
-                    _mapHunts.Add(hunt.Target, Text(image, "!", $"map-hunt-{hunt.Target.Value}", "map-marker"));
+                    x = mission.TargetZoneX * (double)WorldLayout.ZoneSize + 0x80;
+                    z = mission.TargetZoneZ * (double)WorldLayout.ZoneSize + 0x80;
                 }
+                else
+                {
+                    LandmarkColumn column = terrain.RegionRecord(mission.RegionX, mission.RegionZ)
+                        ?.Column(mission.ColumnX & 7, mission.ColumnZ & 7);
+                    if (column == null) continue;
+                    x = column.X;
+                    z = column.Z;
+                }
+                Label label = Text(image, "!", $"map-hunt-{mission.ColumnX}-{mission.ColumnZ}", "map-marker");
+                _mapHunts.Add((label, x, z));
             }
             _mapMarker = Text(image, "●", "map-hero", "map-marker");
             _mapMarker.AddToClassList("map-player");
@@ -108,20 +126,20 @@ namespace CubeGame.Gameplay
             WorldPosition p = _session.Hero.Position;
             _mapMarker.style.display = OnMap(p) ? DisplayStyle.Flex : DisplayStyle.None;
             PositionMarker(_mapMarker, p.X, p.Z);
-            foreach (var pair in _mapHunts)
+            foreach ((Label marker, double x, double z) in _mapHunts)
             {
-                if (_session.Combat.TryGet(pair.Key, out Combatant target) && OnMap(target.Position))
+                var position = new WorldPosition(x, 0, z);
+                if (OnMap(position))
                 {
-                    WorldPosition position = target.Position;
-                    ZoneKey zone = WorldLayout.ZoneOf((int)Math.Floor(position.X), (int)Math.Floor(position.Z));
+                    ZoneKey zone = WorldLayout.ZoneOf((int)Math.Floor(x), (int)Math.Floor(z));
                     if (zone.Equals(_mapCenter) || _session.WorldDeltas.IsDiscovered(zone))
                     {
-                        pair.Value.style.display = DisplayStyle.Flex;
-                        PositionMarker(pair.Value, position.X, position.Z);
+                        marker.style.display = DisplayStyle.Flex;
+                        PositionMarker(marker, x, z);
                         continue;
                     }
                 }
-                pair.Value.style.display = DisplayStyle.None;
+                marker.style.display = DisplayStyle.None;
             }
         }
 

@@ -818,6 +818,7 @@ namespace CubeGame.Gameplay
             if (_worldState.Generator is AlphaTerrainGenerator terrain && D3ZonePopulation.Supports(terrain.GeneratorId))
             {
                 _population.AddSource(new D3ZonePopulation(terrain, _worldState.Deltas), D3ZonePopulation.Channel);
+                AttachMissions(terrain);
                 if (AlphaTerrainGenerator.UsesP2Environment(terrain.GeneratorId))
                 {
                     _population.AddSource(new TownNpcPopulation(terrain), TownNpcPopulation.Channel);
@@ -893,8 +894,29 @@ namespace CubeGame.Gameplay
             return template.Definition.Position;
         }
 
+        /// <summary>
+        /// P7-A: the hero's mission journal runs Alpha's region pass on this terrain; column bosses join the
+        /// population on their own channel and appear in already active zones once their region is generated.
+        /// </summary>
+        private void AttachMissions(AlphaTerrainGenerator terrain)
+        {
+            MissionJournal missions = _session.Hero.Missions;
+            missions.AttachWorld(terrain, unchecked((int)_session.World.Seed.Value), (x, z, height, mode, random) =>
+                AlphaCreatureKindSelector.Select(new AlphaClimateSample(terrain.Humidity(x, z), terrain.Temperature(x, z),
+                    terrain.RareCellTerm(x, z), terrain.Mountain(x, z)), height, mode, random.Next()));
+            missions.RegionGenerated += OnMissionRegionGenerated;
+            _population.AddSource(new AlphaMissionBossPopulation(terrain, missions), AlphaMissionBossPopulation.Channel);
+        }
+
+        private void OnMissionRegionGenerated(int rx, int rz) => _population?.Refresh(AlphaMissionBossPopulation.Channel);
+
         private void StopPopulation()
         {
+            if (_session?.Hero != null)
+            {
+                _session.Hero.Missions.RegionGenerated -= OnMissionRegionGenerated;
+                _session.Hero.Missions.DetachWorld();
+            }
             if (_recoveredPopulation != null)
             {
                 _populationClock.Ticked -= TickRecoveredPopulation;
@@ -936,7 +958,8 @@ namespace CubeGame.Gameplay
             }
 
             bool actor = def.BehaviourKey == AlphaRecoveredPopulation.BehaviourKey ||
-                def.BehaviourKey == TownNpcPopulation.BehaviourKey;
+                def.BehaviourKey == TownNpcPopulation.BehaviourKey ||
+                def.BehaviourKey == AlphaMissionBossPopulation.BehaviourKey;
             if (!actor || def.Faction == (int)CreatureFaction.Passive || _session.Combat == null)
             {
                 return;

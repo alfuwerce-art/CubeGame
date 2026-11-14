@@ -2,8 +2,10 @@
 //
 // The W-18 scatter table (WorldInfo_scatterObjectsInArea 0x5F56C0) selects CREATURE templates, so the
 // existing "vegetation" that routed through it was wrong. Real Alpha vegetation is two functions:
-//   * trees: World_generateTreeRoot 0x5D9AD0 (tree "kind" by climate) -> dtor_listBuffer 0x5F7820
-//     (kind -> model id 0x6C..0x77 = 108..119), random pick;
+//   * "trees": World_generateTreeRoot 0x5D9AD0 -> dtor_listBuffer 0x5F7820. P7 byte trace corrects this:
+//     0x5D9AD0 is the region mission pass and 0x5F7820 picks a BOSS creature kind (0x6C Troll … 0x77), with the
+//     climate range below as the boss level (docs/research/alpha2013/P7_MISSIONS_TRACE.md). Not used by the game
+//     runtime; kept for the editor/import tools until P2 replaces it;
 //   * decor: World_serializeCellData 0x5F6E20 (kind + scale).
 // Everything here is ALPHA_DECOMPILED (byte-level), not live-verified against a running Alpha scene.
 using System;

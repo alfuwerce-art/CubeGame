@@ -129,7 +129,7 @@ namespace CubeGame.Tests.FullM0.EditMode
             CollectionAssert.AreEqual(new int[11], loaded.Hero.SkillRanks.ToArray());
             Assert.AreEqual(0, loaded.Hero.Copper);
             Assert.AreEqual(0, loaded.Hero.ManaCubes);
-            Assert.IsEmpty(loaded.Hero.Missions.Hunts);
+            Assert.IsEmpty(loaded.Hero.Missions.Columns);
             Assert.AreEqual(0L, loaded.WorldTimeOffsetMs);
         }
 

@@ -706,9 +706,18 @@ namespace CubeGame.Features.Session
                 heroCombatant.Yaw = Hero.Yaw;
             }
 
-            if (!Hero.Health.IsDead && Hero.Missions.TryActivateNear(Hero.Position, Combat.Combatants, out HuntMission hunt))
+            if (!Hero.Health.IsDead)
             {
-                Events.Publish(new HuntChanged { TimeMs = clock.TimeMs, Kind = hunt.Kind });
+                Hero.Missions.EnsureRegion(Hero.Position, Hero.Sheet.Progression.Level);
+                if (Hero.Missions.TryActivate(Hero.Position, out AlphaMission activated))
+                {
+                    Events.Publish(new HuntChanged
+                    {
+                        TimeMs = clock.TimeMs,
+                        Kind = new KindId(activated.TargetKind),
+                        MissionType = (int)activated.Type,
+                    });
+                }
             }
             Combat.Update(clock.TimeMs);
             if (_levelUpHealPending)
@@ -764,15 +773,20 @@ namespace CubeGame.Features.Session
 
             if (Hero != null && died.Killer.Equals(Hero.Id) && dead.Hostile && !Hero.Health.IsDead)
             {
-                if (Hero.Missions.TryComplete(died.Entity))
+                if (Hero.Missions.TryComplete(died.Entity, out AlphaMission completed))
                 {
                     // Alpha mission completion reward (0x595A60 -> 0x596919...0x596A69): platinum and one class item,
-                    // directly into the bags. Mission level/stars are the target's (the hunt mission itself is a
-                    // CUBEGAME_CONTRACT); the former one-mana-cube reward is removed.
+                    // directly into the bags, from the level and stars of the killed target.
                     var missionRng = new AlphaCrtRandom(unchecked(LootSeed(died.Entity) ^ 0x4D495353));
                     DeliverToHero(AlphaLoot.MissionReward(missionRng, Math.Max(1, dead.Sheet.Progression.Level),
                         Math.Max(0, dead.Stars), (int)Hero.Sheet.Class + 1), died.TimeMs);
-                    Events.Publish(new HuntChanged { TimeMs = died.TimeMs, Kind = dead.Kind, Complete = true });
+                    Events.Publish(new HuntChanged
+                    {
+                        TimeMs = died.TimeMs,
+                        Kind = dead.Kind,
+                        MissionType = (int)completed.Type,
+                        Complete = true,
+                    });
                 }
                 long xp = KillExperience(dead.Sheet.Progression.Level, dead.Stars, dead.IsBoss);
                 int levelBefore = Hero.Sheet.Progression.Level;

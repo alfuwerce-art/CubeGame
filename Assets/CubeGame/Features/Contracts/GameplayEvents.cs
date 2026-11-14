@@ -341,11 +341,14 @@ namespace CubeGame.Features.Contracts
         public double HealthRestored { get; set; }
     }
 
-    /// <summary>Live hunt transition. Rehydrating a saved journal emits no transition.</summary>
+    /// <summary>Live mission transition (activated or completed). Rehydrating a saved journal emits no transition.</summary>
     public sealed class HuntChanged : IGameEvent
     {
         public long TimeMs { get; set; }
+        /// <summary>Target kind of the mission (column +0x38) on activation, the killed kind on completion.</summary>
         public KindId Kind { get; set; }
+        /// <summary>Alpha mission type (column +0x34).</summary>
+        public int MissionType { get; set; }
         public bool Complete { get; set; }
     }
 

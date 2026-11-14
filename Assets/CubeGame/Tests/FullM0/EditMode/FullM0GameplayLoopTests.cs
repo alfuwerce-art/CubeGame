@@ -114,47 +114,10 @@ namespace CubeGame.Tests.FullM0.EditMode
         }
 
         [Test]
-        public void OnlyTheTrackedKillCompletesTheMissionAndRewardsOnce()
+        public void SkillPointsFollowTheLevelTable()
         {
-            GameSession session = StartSession();
-            HeroState hero = session.Hero;
-            var home = new ZoneKey(10, 10);
-            Combatant first = Spawn(StableEntityId.ForZoneSpawn(home, 0, 0), 8);
-            Combatant second = Spawn(StableEntityId.ForZoneSpawn(home, 0, 1), 12);
-            Combatant far = Spawn(StableEntityId.ForZoneSpawn(new ZoneKey(18, 18), 0, 0), 100);
-
-            session.Clock.StepTicks(1);
-            Assert.AreEqual(first.Id, hero.Missions.Hunts.Single().Target);
-            Assert.IsFalse(hero.Missions.Hunts.Single().Complete);
-            Kill(second);
-            Kill(far);
-            Assert.AreEqual(0, hero.Platinum);
-            int bagsBefore = hero.Inventory.UsedSlots;
-            Kill(first);
-            Assert.IsTrue(hero.Missions.Hunts.Single().Complete);
-            // Alpha 0x596919: platinum int(curve_level05(1+0)*50+1) = 1 and one class item into the bags.
-            Assert.AreEqual(1, hero.Platinum);
-            Assert.AreEqual(bagsBefore + 1, hero.Inventory.UsedSlots);
-            Assert.AreEqual(0, hero.ManaCubes, "mana cubes are not a mission reward in Alpha");
-            Kill(first);
-            session.Clock.StepTicks(1);
-            Assert.AreEqual(1, hero.Platinum);
             Assert.AreEqual(0L, new HeroSkillRanks().UnspentLevelPoints(1, 3));
             Assert.AreEqual(1L, new HeroSkillRanks().UnspentLevelPoints(1, 4));
-
-            Combatant Spawn(StableEntityId id, int distance)
-            {
-                Combatant fighter = Combatant.CreateCreature(id, new KindId(0x1C), "Wolf", 1, 0);
-                fighter.Position = new WorldPosition(hero.Position.X + distance, hero.Position.Y, hero.Position.Z);
-                session.Combat.Register(fighter);
-                return fighter;
-            }
-
-            void Kill(Combatant fighter)
-            {
-                fighter.Health.ApplyDamage(fighter.Health.CurrentHealth);
-                session.Events.Publish(new EntityDied { Entity = fighter.Id, Killer = hero.Id, TimeMs = session.Clock.TimeMs });
-            }
         }
 
         private static GameSession StartSession()
