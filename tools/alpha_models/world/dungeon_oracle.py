@@ -340,7 +340,8 @@ def main():
                 o.crt.rand = traced
                 trace_holder["rand"] = rand_log
                 call_log = []
-                for va in (0x5ADB20, 0x5DF600, 0x44E7A0, 0x59ABA0, 0x5CB550, 0x5F0CE0, 0x5F6E20, 0x5C9F90, 0x5F7A60):
+                for va in (0x5ADB20, 0x5DF600, 0x44E7A0, 0x59ABA0, 0x5CB550, 0x5F0CE0, 0x5F6E20, 0x5C9F90, 0x5F7A60,
+                           0x5A0E00, 0x5F4BA0):
                     known = va in run.hooks or va in run.calls
 
                     def hook(cpu, va=va, prev=run.hooks.get(va)):
@@ -353,6 +354,14 @@ def main():
                             col = list(cpu.mem.read(a[4], 3))
                             prob = struct.unpack("<f", struct.pack("<I", a[5]))[0]
                             rec += [[o.i32(esp + 4), o.i32(esp + 8), o.i32(esp + 12)], sz, col, prob, a[7] & 0xFF]
+                        elif va == 0x59ABA0:   # Terrain_fillCuboid(x, y, z, size*, zone, flag)
+                            sp = cpu.mem.u(esp + 16, 4)
+                            rec += [[o.i32(esp + 4), o.i32(esp + 8), o.i32(esp + 12)],
+                                    [o.i32(sp + 4 * i) for i in range(3)], cpu.mem.u(esp + 24, 1)]
+                        elif va == 0x44E7A0 and len(rand_log) > 1900000:   # direct writes of the late stage only
+                            rec += [[o.i32(esp + 4), o.i32(esp + 8), o.i32(esp + 12)], cpu.mem.u(cpu.mem.u(esp + 16, 4), 4)]
+                        elif va == 0x5A0E00:   # push of a 0x188 object record (first dword = record type)
+                            rec += [o.i32(cpu.mem.u(esp + 4, 4))]
                         call_log.append(rec)
                     run.hooks[va] = hook
                     if not known:
