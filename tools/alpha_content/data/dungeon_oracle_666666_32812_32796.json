@@ -1,0 +1,722 @@
+{
+ "status": "EMULATED_ALPHA_CODE",
+ "function": "0x5CC510 World_populateRegionDecorations (dungeon generator)",
+ "executor": "tools/alpha_models/world/dungeon_oracle.py (zone pass: Python interpreter; dungeon: unicorn bridge, layout byte-equal to the interpreter)",
+ "master_seed": 666666,
+ "zone": [
+  32812,
+  32796
+ ],
+ "entry": {
+  "zone": 1074661696,
+  "region": 1074152864,
+  "x": 8399904,
+  "z": 8395808,
+  "subtype": 1,
+  "flag": 0,
+  "crt_in": 1811628196,
+  "crt_out": 349589712,
+  "zone_level": 1,
+  "zone_quality": 0
+ },
+ "room_boxes": [
+  {
+   "origin": [
+    3,
+    9,
+    10
+   ],
+   "size": [
+    2,
+    4,
+    3
+   ],
+   "flag": 0
+  },
+  {
+   "origin": [
+    2,
+    16,
+    10
+   ],
+   "size": [
+    3,
+    2,
+    2
+   ],
+   "flag": 1
+  },
+  {
+   "origin": [
+    9,
+    3,
+    9
+   ],
+   "size": [
+    3,
+    4,
+    2
+   ],
+   "flag": 0
+  },
+  {
+   "origin": [
+    10,
+    9,
+    10
+   ],
+   "size": [
+    2,
+    2,
+    3
+   ],
+   "flag": 0
+  },
+  {
+   "origin": [
+    9,
+    17,
+    9
+   ],
+   "size": [
+    3,
+    3,
+    3
+   ],
+   "flag": 1
+  },
+  {
+   "origin": [
+    16,
+    3,
+    10
+   ],
+   "size": [
+    2,
+    2,
+    2
+   ],
+   "flag": 0
+  },
+  {
+   "origin": [
+    17,
+    10,
+    10
+   ],
+   "size": [
+    4,
+    3,
+    3
+   ],
+   "flag": 0
+  },
+  {
+   "origin": [
+    16,
+    16,
+    11
+   ],
+   "size": [
+    3,
+    4,
+    1
+   ],
+   "flag": 0
+  }
+ ],
+ "boss_cells": [
+  [
+   17,
+   18,
+   11
+  ]
+ ],
+ "layout_crt": 136000360,
+ "spawns": [
+  {
+   "x": 8400013.0,
+   "z": 8395953.0,
+   "y": 125.0,
+   "role": 6,
+   "kind": 143,
+   "level": 1,
+   "quality": 0,
+   "flags": 0,
+   "master": 0
+  },
+  {
+   "x": 8400037.0,
+   "z": 8395979.0,
+   "y": 125.0,
+   "role": 6,
+   "kind": 143,
+   "level": 1,
+   "quality": 0,
+   "flags": 0,
+   "master": 0
+  },
+  {
+   "x": 8400083.0,
+   "z": 8395974.0,
+   "y": 125.0,
+   "role": 6,
+   "kind": 143,
+   "level": 1,
+   "quality": 0,
+   "flags": 0,
+   "master": 0
+  },
+  {
+   "x": 8400088.0,
+   "z": 8395852.0,
+   "y": 135.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4608,
+   "master": 1
+  },
+  {
+   "x": 8400098.0,
+   "z": 8395839.0,
+   "y": 135.0,
+   "role": 6,
+   "kind": 143,
+   "level": 1,
+   "quality": 0,
+   "flags": 0,
+   "master": 0
+  },
+  {
+   "x": 8400029.0,
+   "z": 8395993.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 97,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400031.0,
+   "z": 8395993.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400028.0,
+   "z": 8395995.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400028.0,
+   "z": 8395991.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400001.0,
+   "z": 8395993.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399997.0,
+   "z": 8395993.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400081.0,
+   "z": 8395983.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400078.0,
+   "z": 8395985.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400078.0,
+   "z": 8395981.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400081.0,
+   "z": 8396003.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400078.0,
+   "z": 8396005.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400078.0,
+   "z": 8396001.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399939.0,
+   "z": 8395913.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 97,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399941.0,
+   "z": 8395913.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399938.0,
+   "z": 8395915.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399938.0,
+   "z": 8395911.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399971.0,
+   "z": 8395913.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399968.0,
+   "z": 8395915.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399968.0,
+   "z": 8395911.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399971.0,
+   "z": 8395933.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399968.0,
+   "z": 8395935.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399968.0,
+   "z": 8395931.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399951.0,
+   "z": 8395923.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399947.0,
+   "z": 8395923.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400001.0,
+   "z": 8395923.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399997.0,
+   "z": 8395923.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400079.0,
+   "z": 8395913.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400079.0,
+   "z": 8395913.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 96,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400079.0,
+   "z": 8395913.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 96,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400101.0,
+   "z": 8395933.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400097.0,
+   "z": 8395933.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400081.0,
+   "z": 8395933.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400077.0,
+   "z": 8395933.0,
+   "y": 115.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399941.0,
+   "z": 8395853.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399938.0,
+   "z": 8395855.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8399938.0,
+   "z": 8395851.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400009.0,
+   "z": 8395853.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400009.0,
+   "z": 8395853.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 96,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400009.0,
+   "z": 8395853.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 96,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400031.0,
+   "z": 8395853.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400027.0,
+   "z": 8395853.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 16,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400011.0,
+   "z": 8395853.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400008.0,
+   "z": 8395855.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400008.0,
+   "z": 8395851.0,
+   "y": 125.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400069.0,
+   "z": 8395863.0,
+   "y": 135.0,
+   "role": 1,
+   "kind": 15,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400069.0,
+   "z": 8395863.0,
+   "y": 135.0,
+   "role": 1,
+   "kind": 96,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400069.0,
+   "z": 8395863.0,
+   "y": 135.0,
+   "role": 1,
+   "kind": 96,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  },
+  {
+   "x": 8400069.0,
+   "z": 8395863.0,
+   "y": 135.0,
+   "role": 1,
+   "kind": 96,
+   "level": 1,
+   "quality": 0,
+   "flags": 4096,
+   "master": 0
+  }
+ ],
+ "changed_columns": 14670
+}
