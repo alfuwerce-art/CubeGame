@@ -268,6 +268,58 @@ namespace CubeGame.Features.Items
             return new AlphaItemRecord(TypeFormula, target.Subtype, target.Seed, target.Type, target.Rarity, target.Modifier, target.Level);
         }
 
+        /// <summary>
+        /// 0x5F7A60 (byte-verified at 0x5F7B12…0x5F84FB): one random pick from 26 candidates of level
+        /// <paramref name="level"/>. One shared template record is rewritten field by field and pushed 25 times, each
+        /// with its own <see cref="RollRarity"/>(<paramref name="quality"/>): weapons 3/rand%3, 3/0x0D (modifier 1),
+        /// 3/6, 3/7, 3/0x0A, 3/0x0B (modifier 2); then types 7, 4, 5, 6 with modifier 1 and 7, 7, 4, 5, 6 with
+        /// modifiers 0x19, 0x1A, 0x1B. Four and five <c>rand()</c> results before the first two are discarded by the
+        /// original. The 26th candidate is a formula (0x5F6D50); the pick is <c>(unsigned)rand() % 26</c>.
+        /// </summary>
+        public static AlphaItemRecord RandomEquipment(AlphaCrtRandom rng, int level, int quality)
+        {
+            var list = new List<AlphaItemRecord>(26);
+            int type = 3, subtype = 0, modifier = 0;
+
+            void Push() => list.Add(new AlphaItemRecord(type, subtype, 0, 0, RollRarity(rng, quality), modifier, level));
+
+            for (int i = 0; i < 4; i++) rng.Next();
+            modifier = 1;
+            subtype = rng.Next() % 3;
+            Push();
+            for (int i = 0; i < 5; i++) rng.Next();
+            subtype = 0x0D;
+            Push();
+            modifier = 2;
+            foreach (int s in new[] { 6, 7, 0x0A, 0x0B })
+            {
+                subtype = s;
+                Push();
+            }
+
+            type = 7;
+            subtype = 0;
+            modifier = 1;
+            foreach (int t in new[] { 7, 4, 5, 6 })
+            {
+                type = t;
+                Push();
+            }
+
+            foreach (int m in new[] { 0x19, 0x1A, 0x1B })
+            {
+                modifier = m;
+                foreach (int t in new[] { 7, 7, 4, 5, 6 })
+                {
+                    type = t;
+                    Push();
+                }
+            }
+
+            list.Add(GenerateFormula(rng, level, quality));
+            return list[(int)((uint)rng.Next() % (uint)list.Count)];
+        }
+
         // ---------------------------------------------------------------- chest contents
 
         /// <summary>
