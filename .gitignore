@@ -85,3 +85,4 @@ outputs/factory/characters_v2/*.png
 
 # COMFY-STYLE-11 local review images (experimental ral-vxl)
 outputs/factory/human_base_front_v1/
+outputs/factory/human_base_front_v2/

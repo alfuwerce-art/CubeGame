@@ -1,0 +1,82 @@
+{
+  "task": "COMFY-STYLE-11B",
+  "scope": {
+    "race": "HUMAN",
+    "gender": "MALE",
+    "view": "FRONT"
+  },
+  "template": "workflows/character_factory/base_body/BASE_BODY_V2.json",
+  "style_lock": "workflows/character_factory/shared/STYLE_LOCK_V1.json",
+  "profile": "workflows/character_factory/profiles/HUMAN/MALE.json",
+  "structure": {
+    "original_guide_file": "HUMAN_MALE_BASE_FRONT_GUIDE_V1.png",
+    "original_guide_sha256": "9b618a41dda4b57989c0ec96be4718f099b29969bf8c9e88b7cd2a1de97a4ff7",
+    "input": "HUMAN_MALE_FRONT_POSE_SILHOUETTE.png",
+    "sha256": "c849c7d5998c99f512e8c6eac6098d3d27b617776c64be2117d15f4f6e735bca",
+    "rgb": "white subject on black background",
+    "matte_rule": "any source RGB channel differs from 158",
+    "latent": "empty",
+    "controlnet_strength_series": [
+      0.9,
+      0.6,
+      0.4
+    ]
+  },
+  "style_reference": {
+    "input": "HUMAN_V1_STYLE_REFERENCE.png",
+    "local_archive_file": "human_v1_latest_available.png",
+    "original_filename": "reference_controlnet_00006_.png",
+    "sha256": "b9f3d6e41e68e8239ab61f70fc5ddf81f95e0e85124903841bdd2e1195977e77",
+    "owner_time_id_match": "UNKNOWN",
+    "ipadapter_weight_type": "style transfer",
+    "ipadapter_weight_series": [
+      0.3,
+      0.5,
+      0.7
+    ]
+  },
+  "rejected_anchor": {
+    "local_filename": "HUMAN_MALE_BASE_FRONT_V1.png",
+    "sha256": "a5785c9db2d5dba39d74253d9a0ea6b51a158d5ae6613d1e6884d23f79dda755"
+  },
+  "control_sweep_ipadapter_weight": 0.5,
+  "experiment_order": "ControlNet strengths independently at IPAdapter 0.5; IPAdapter sweep at chosen fixed ControlNet. Common cell reused.",
+  "runtime": {
+    "comfyui": "0.45.0",
+    "ipadapter_plus_package_version": "2.0.0",
+    "pytorch": "2.14.1+cu130",
+    "python": "3.13.14",
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "flags": [
+      "--novram",
+      "--reserve-vram",
+      "5",
+      "--disable-auto-launch",
+      "--disable-assets",
+      "--disable-all-custom-nodes",
+      "--whitelist-custom-nodes",
+      "ComfyUI_IPAdapter_plus",
+      "--offline"
+    ]
+  },
+  "ipadapter_sweep_control_strength": 0.4,
+  "executed_cases": [
+    "HUMAN_MALE_BASE_FRONT_V2_CN90_IPA50",
+    "HUMAN_MALE_BASE_FRONT_V2_CN60_IPA50",
+    "HUMAN_MALE_BASE_FRONT_V2_CN40_IPA50",
+    "HUMAN_MALE_BASE_FRONT_V2_CN40_IPA30",
+    "HUMAN_MALE_BASE_FRONT_V2_CN40_IPA70"
+  ],
+  "visual_status": "PARTIAL",
+  "review_status": "READY_FOR_OWNER_VISUAL_REVIEW",
+  "review_output": {
+    "case": "CN40_IPA50",
+    "filename": "HUMAN_MALE_BASE_FRONT_V2.png",
+    "sha256": "dea26a722921c0b30e9c57f0abb090d883dd9abb77e782f94f5595d87d48cfcd",
+    "local_review_dir": "outputs/factory/human_base_front_v2",
+    "comparison": "HUMAN_MALE_BASE_FRONT_V2_COMPARISON.jpg",
+    "comparison_sha256": "1c02de3fbd0048224b5dbe9f5d12aaced78e15bf45d7265ec0c71adf59e98f17",
+    "sweep": "SWEEP_COMPARISON.jpg",
+    "sweep_sha256": "2705991db7a14a465bc0b9e781f2d466209bffa611b95a47ec790bc2585d0879"
+  }
+}

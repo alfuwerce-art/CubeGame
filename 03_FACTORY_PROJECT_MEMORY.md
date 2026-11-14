@@ -6,7 +6,9 @@
 
 **COMFY-STYLE-10 · READY_FOR_OWNER_REVIEW · 14.11.2026.** Сохранён frozen owner workflow с проверенным SHA-256. Подготовлены общий Style Lock, независимые профили и сокеты Human, три шаблона и компилятор одного ракурса из каталога Alpha. ComfyUI 0.45.0 принял 168 графов без inference. Следующий этап после решения владельца — зарегистрированные носители и проверка Human. [Архитектура и запуск компилятора](docs/tasks/COMFY-STYLE-10_CHARACTER_FACTORY_WORKFLOWS.md).
 
-**COMFY-STYLE-11 · READY_FOR_OWNER_VISUAL_REVIEW · 14.11.2026.** Base Body переведён на техническую болванку. Выполнены только Human Male/Female FRONT, по одному PNG. Кадры совпали по измеренным границам, поза и голова читаются. Линия у бедра Female и слабая глубина отданы на визуальную оценку. [Отчёт, графы и хэши](docs/tasks/COMFY-STYLE-11_HUMAN_BASE_BODY_FIRST_SMOKE.md).
+**COMFY-STYLE-11 · REJECTED BY OWNER · 14.11.2026.** Первый smoke Human Male/Female FRONT сохранил позу и кадрирование. Владелец отклонил визуальный результат из-за плоской серой поверхности. [Отчёт, графы и хэши](docs/tasks/COMFY-STYLE-11_HUMAN_BASE_BODY_FIRST_SMOKE.md).
+
+**COMFY-STYLE-11B · READY_FOR_OWNER_VISUAL_REVIEW · 14.11.2026.** `BASE_BODY_V2` использует силуэт для Canny и архивный Human V1 для IPAdapter. Пять диагностических Human Male FRONT, общая точка 0.4/0.5 вынесена в сравнение. Поза сохранилась и объём стал читаемее. Все кадры сохранили детали лица, визуальная проверка `PARTIAL`. [Результаты, настройки и ограничения](docs/tasks/COMFY-STYLE-11B_HUMAN_BASE_FRONT_V2.md).
 
 **Документ:** `03_FACTORY_PROJECT_MEMORY.md`  
 **Версия:** 2.7 · 14.11.2026
