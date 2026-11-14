@@ -5,7 +5,7 @@
 **Status:** `ACTIVE / REWORKED`  
 **Canonical branch:** `integration/m0-all` (документы D92 и отчёты P0–P6 сведены 2026-11-14; код P0–P6 ещё в review-ветках)  
 **Последний implementation checkpoint:** `codex/m0-p6-alpha-menu-hud` @ `fb4e0d5`  
-**Следующий блок:** **P7 — QUESTS / CITIES / DUNGEONS / GAMEPLAY CONTENT**
+**Текущий блок:** **P7 — QUESTS / CITIES / DUNGEONS / GAMEPLAY CONTENT** (срез A — миссии — готов к ревью)
 
 ## Решение продюсера 2026-11-11
 
@@ -28,7 +28,7 @@ D90 F1–F5 и прежние F1–F4 результаты сохраняютс�
 | P4 Action / combat / animation | `codex/m0-p4-action-combat` @ `f0d2b71` | `PARTIAL` | [P4](reports/M0_ALPHA_FULL_PORT_P4_ACTION_COMBAT_REPORT.md), [coverage](reports/M0_ALPHA_FULL_PORT_P4_ACTION_COVERAGE.tsv) |
 | P5 Character / items / progression | `codex/m0-p5-character-items-progression` @ `01930ff` | `PARTIAL` | [P5](reports/M0_ALPHA_FULL_PORT_P5_CHARACTER_ITEMS_PROGRESSION_REPORT.md) |
 | P6 UI / HUD / map / journal | `codex/m0-p6-alpha-menu-hud` @ `fb4e0d5` | `READY_FOR_PRODUCER_REVIEW` / `PARTIAL` | [P6](reports/M0_ALPHA_FULL_PORT_P6_ALPHA_UI_REPORT.md) |
-| P7 Quests / cities / dungeons / content | `codex/m0-p7-quests-cities-dungeons` (база P6) | `RESEARCH` — TRACE миссий готов | [P7-A trace](research/alpha2013/P7_MISSIONS_TRACE.md) (в ветке P7) |
+| P7 Quests / cities / dungeons / content | `codex/m0-p7-quests-cities-dungeons` @ `23e0f7f` | `PARTIAL` — срез A миссии `READY_FOR_PRODUCER_REVIEW` | [P7](reports/M0_ALPHA_FULL_PORT_P7_QUESTS_REPORT.md) (в ветке P7) |
 | P8 Audio / VFX / time / presentation | — | `NOT_STARTED` | — |
 | P9 Persistence | — | `NOT_STARTED` | — |
 | P10 Final parity run | — | `NOT_STARTED` | — |
