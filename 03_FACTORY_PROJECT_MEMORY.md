@@ -8,7 +8,9 @@
 
 **COMFY-STYLE-11 · REJECTED BY OWNER · 14.11.2026.** Первый smoke Human Male/Female FRONT сохранил позу и кадрирование. Владелец отклонил визуальный результат из-за плоской серой поверхности. [Отчёт, графы и хэши](docs/tasks/COMFY-STYLE-11_HUMAN_BASE_BODY_FIRST_SMOKE.md).
 
-**COMFY-STYLE-11B · READY_FOR_OWNER_VISUAL_REVIEW · 14.11.2026.** `BASE_BODY_V2` использует силуэт для Canny и архивный Human V1 для IPAdapter. Пять диагностических Human Male FRONT, общая точка 0.4/0.5 вынесена в сравнение. Поза сохранилась и объём стал читаемее. Все кадры сохранили детали лица, визуальная проверка `PARTIAL`. [Результаты, настройки и ограничения](docs/tasks/COMFY-STYLE-11B_HUMAN_BASE_FRONT_V2.md).
+**COMFY-STYLE-11B · VISUAL_REJECTED · 14.11.2026.** Силуэт для Canny и отдельный IPAdapter улучшили T-pose и объём. Владелец отклонил тип и посадку головы V2. [Результаты, настройки и ограничения](docs/tasks/COMFY-STYLE-11B_HUMAN_BASE_FRONT_V2.md).
+
+**COMFY-STYLE-11C · READY_FOR_OWNER_VISUAL_REVIEW · 14.11.2026.** Зарегистрирован Human Male Head Carrier FRONT по сокету 14×8×8. Один кадр V3 с защищённым контуром головы, ушами, ступенчатым подбородком и короткой посадкой. Корпус и кадрирование перенесены из V2 с пиксельной проверкой. Дальнейшее использование carrier зависит от оценки владельца. [Сравнение и воспроизведение](docs/tasks/COMFY-STYLE-11C_HUMAN_HEAD_GEOMETRY_LOCK.md).
 
 **Документ:** `03_FACTORY_PROJECT_MEMORY.md`  
 **Версия:** 2.7 · 14.11.2026
