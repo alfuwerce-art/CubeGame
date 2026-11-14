@@ -46,6 +46,17 @@ def save_state(o, path, extra):
         pickle.dump({"cpu": state, "mem": mem, "crt": o.crt.state, "heap_top": o.heap_top, "extra": extra}, f)
 
 
+# Static initializers 0x6F9514…0x6F979D (CRT startup, never run by the oracle): the default voxel words returned by
+# the column readers outside a stored column — water FF FF FF 82, air FF FF FF 00, stone C8 C8 C8 01 — one triple
+# per inlined copy of the reader.
+DEFAULT_VOXELS = [(base + 0, bytes([0xFF, 0xFF, 0xFF, 0x82])) for base in (0x76AF7C, 0x76AF8C, 0x76AF9C, 0x76AFAC, 0x76AFBC)]     + [(base + 4, bytes([0xFF, 0xFF, 0xFF, 0x00])) for base in (0x76AF7C, 0x76AF8C, 0x76AF9C, 0x76AFAC, 0x76AFBC)]     + [(base + 8, bytes([0xC8, 0xC8, 0xC8, 0x01])) for base in (0x76AF7C, 0x76AF8C, 0x76AF9C, 0x76AFAC, 0x76AFBC)]
+
+
+def apply_static_init(o):
+    for va, value in DEFAULT_VOXELS:
+        o.cpu.mem.write(va, value)
+
+
 def load_state(o, path):
     with open(path, "rb") as f:
         snap = pickle.load(f)
@@ -56,6 +67,7 @@ def load_state(o, path):
     o.cpu.mem.writes = []
     o.crt.state = snap["crt"]
     o.heap_top = snap["heap_top"]
+    apply_static_init(o)
     return snap["extra"]
 RETURNS = (0x5E84C8, 0x5E84FC)
 SPAWN_CTOR = 0x5ADB20
@@ -288,6 +300,13 @@ def main():
     if from_entry:
         extra = load_state(o, from_entry)
         zone_ptr["zone"] = extra["zone_ptr"]
+        if "--override" in opts:
+            # same zone and entry state, another subtype / flag / CRT state (full-run test vectors)
+            sub_o, flag_o, crt_o = (int(v, 0) for v in opts[opts.index("--override") + 1].split(":"))
+            esp = o.cpu.r["esp"]
+            o.cpu.mem.w(esp + 20, 4, sub_o)
+            o.cpu.mem.w(esp + 24, 4, flag_o)
+            o.crt.state = crt_o
         on_dungeon(o.cpu)
         print("resumed at dungeon entry", hex(o.cpu.eip), flush=True)
         if "--unicorn" in opts:
@@ -295,7 +314,7 @@ def main():
             run = UnicornRun(o.cpu, o.image)
             o.cpu.mem = run.mem          # oracle helpers (o.i32, snapshot) now read unicorn memory
             # The 16 MiB bump heap (frees ignored) is too small for the dungeon: continue in a 512 MiB region.
-            big, big_size = 0x50000000, 0x20000000
+            big, big_size = 0x80000000, 0x60000000     # 1.5 GiB above the trampolines (0x7E…)
             run.uc.mem_map(big, big_size)
             top = {"va": big}
 
