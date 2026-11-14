@@ -224,6 +224,10 @@ def main():
             layout["frame"] = cpu.mem.read(ebp - 0x400, 0x400).hex()
             layout["ebp"] = ebp
             layout["crt"] = o.crt.state
+            vol = ebp - 0x2BCC          # cube::Dungeon cell volume (ctor 0x5C38C0): +4 rot, +8 mirror, +0xC.. size, +0x18 data
+            sx, sy, sz = (o.i32(vol + off) for off in (0xC, 0x10, 0x14))
+            layout["volume"] = {"rotation": o.i32(vol + 4), "mirror": cpu.mem.u(vol + 8, 1), "size": [sx, sy, sz],
+                                "cells": cpu.mem.read(cpu.mem.u(vol + 0x18, 4), 2 * sx * sy * sz).hex()}
             if layout_only:
                 raise Stop()
 
@@ -234,6 +238,40 @@ def main():
     o.cpu.hooks[SPAWN_CTOR] = on_spawn
     for r in RETURNS:
         o.cpu.hooks[r] = on_return
+
+    if from_entry and "--batch" in opts:
+        # Layout test vectors: same entry state, overridden subtype / flag / CRT state (the room layout reads no
+        # terrain). Each case: --batch subtype:flag:crt[,subtype:flag:crt...]; requires --unicorn --layout.
+        from tools.alpha_models.universal.unicorn_bridge import UnicornRun
+        cases = [tuple(int(v, 0) for v in c.split(":")) for c in opts[opts.index("--batch") + 1].split(",")]
+        results = []
+        for subtype, flag, crt in cases:
+            extra = load_state(o, from_entry)
+            zone_ptr["zone"] = extra["zone_ptr"]
+            esp = o.cpu.r["esp"]
+            o.cpu.mem.w(esp + 20, 4, subtype)
+            o.cpu.mem.w(esp + 24, 4, flag)
+            o.crt.state = crt
+            boxes.clear()
+            boss_cells.clear()
+            layout.clear()
+            entry.clear()
+            on_dungeon(o.cpu)
+            python_mem = o.cpu.mem
+            run = UnicornRun(o.cpu, o.image)
+            o.cpu.mem = run.mem
+            try:
+                run.run()
+            except Stop:
+                pass
+            results.append({"subtype": subtype, "flag": flag, "crt_in": crt, "room_boxes": list(boxes),
+                            "boss_cells": list(boss_cells), "crt_out": layout.get("crt"),
+                            "frame": layout.get("frame"), "ebp": layout.get("ebp"), "volume": layout.get("volume")})
+            o.cpu.mem = python_mem
+            print("case", subtype, flag, crt, ":", len(boxes), "rooms, boss", boss_cells, flush=True)
+        Path(out).write_text(json.dumps({"status": "EMULATED_ALPHA_CODE", "function": "0x5CC510 rooms (to 0x5CE200)",
+                                         "cases": results}), encoding="utf-8")
+        return
 
     if from_entry:
         extra = load_state(o, from_entry)
