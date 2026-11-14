@@ -5,6 +5,7 @@ Requires Unicorn. Uses the zone oracle's terrain substitutions and a synthetic w
 """
 
 import argparse
+import hashlib
 import json
 import struct
 import sys
@@ -35,6 +36,12 @@ def trace(exe, seed, zone_x, zone_z):
     placement_draws = []
     decoration_draws = Counter()
     tree_draws = Counter()
+    trees = []
+    surface_props = []
+    boulders = []
+    boulder_writes = hashlib.sha256()
+    boulder_voxels = set()
+    boulder_write_count = 0
     spawns = []
     entry_address = 0x5DC6E0
     return_address = 0x5EACEC
@@ -71,6 +78,51 @@ def trace(exe, seed, zone_x, zone_z):
         if entry:
             raise Stop()
 
+    def record_surface_prop(current):
+        if current.mem.u(current.r["esp"], 4) == 0x5E8F43:
+            _, position = args(current, 2)
+            surface_props.append({"position": struct.unpack("<3q", current.mem.read(position, 24))})
+
+    def record_surface_prop_result(current):
+        surface_props[-1]["placed"] = bool(current.r["eax"] & 0xFF)
+
+    def record_boulder_start(current):
+        frame = current.r["ebp"]
+        zone_stages.update(before_boulders=oracle.crt.state,
+                           boulder_temperature=oracle.f32(frame - 0x12FC),
+                           boulder_humidity=oracle.f32(frame - 0x1310))
+
+    def record_boulder(current):
+        frame = current.r["ebp"]
+        boulders.append({
+            "center": [current.r["edi"], current.r["eax"]],
+            "radii": [oracle.i32(frame - offset) for offset in (0x12FC, 0x12EC, 0x12D0)],
+        })
+
+    def record_boulder_base(current):
+        boulders[-1]["base"] = oracle.i32(current.r["ebp"] - 0x12D4)
+
+    def record_boulder_write(current):
+        nonlocal boulder_write_count
+        x, z, y, voxel = struct.unpack("<3iI", current.mem.read(current.r["esp"], 16))
+        boulder_writes.update(struct.pack("<3iB", x, z, y, current.mem.u(voxel + 3, 1)))
+        boulder_voxels.add((x, z, y))
+        boulder_write_count += 1
+
+    def record_tree(current):
+        x, z, y, radius, height, kind = struct.unpack("<6i", current.mem.read(current.r["esp"], 24))
+        trees.append({
+            "position": [x, z, y],
+            "radius": radius,
+            "height": height,
+            "kind": kind,
+            "crt_in": oracle.crt.state,
+        })
+
+    def record_tree_return(_current):
+        if trees and "crt_out" not in trees[-1]:
+            trees[-1]["crt_out"] = oracle.crt.state
+
     def require_model_registry(current):
         if current.r["ecx"] == 0:
             caller = current.mem.u(current.r["esp"], 4)
@@ -80,7 +132,17 @@ def trace(exe, seed, zone_x, zone_z):
     cpu.hooks.update({
         0x5E8490: lambda _: zone_stages.update(after_terrain=oracle.crt.state),
         0x5E888E: lambda _: zone_stages.update(after_river_stones=oracle.crt.state),
+        0x5AD320: record_surface_prop,
+        0x5E8F43: record_surface_prop_result,
+        0x5E8FB5: record_boulder_start,
+        0x5E911F: record_boulder,
+        0x5E9344: record_boulder_base,
+        0x5E95B1: record_boulder_write,
+        0x5E9655: lambda _: zone_stages.update(after_boulders=oracle.crt.state),
         0x5E9E7D: lambda _: zone_stages.update(before_trees=oracle.crt.state),
+        0x5EA7AE: record_tree,
+        0x5EA7B3: record_tree_return,
+        0x5EA7E7: lambda _: zone_stages.update(after_trees=oracle.crt.state),
         0x5EAA59: record_placement,
         entry_address: record_entry,
         return_address: record_return,
@@ -179,7 +241,16 @@ def trace(exe, seed, zone_x, zone_z):
         "skipped_carves": carves,
         "zone_stages": zone_stages,
         "decoration_draw_calls": dict(sorted(decoration_draws.items())),
+        "surface_prop_attempts": surface_props,
+        "boulders": boulders,
+        "boulder_write_count": boulder_write_count,
+        "boulder_write_hash": boulder_writes.hexdigest(),
+        "boulder_voxel_count": len(boulder_voxels),
+        "boulder_voxel_hash": hashlib.sha256(
+            b"".join(struct.pack("<3i", *point) for point in sorted(boulder_voxels))
+        ).hexdigest(),
         "tree_draw_calls": dict(sorted(tree_draws.items())),
+        "trees": trees,
         "placement": placement,
         "entry": entry,
         "crt_out": oracle.crt.state,

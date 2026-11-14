@@ -78,7 +78,7 @@ namespace CubeGame.Features.World
 
         // 0x5F8E10. The noise coordinates and displacements are truncated to 16.16 before computing the distance.
         // Keep the fixed-point calculation here to preserve the established world generators' distance rules.
-        private static float DistanceSquared(LandmarkColumn landmark, double x, double z)
+        internal static float DistanceSquared(LandmarkColumn landmark, double x, double z)
         {
             float radius = landmark.Radius;
             if (radius < 0.001f)
