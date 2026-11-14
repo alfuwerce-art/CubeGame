@@ -580,7 +580,14 @@ namespace CubeGame.Gameplay
             if (world == null) return Report(false, "world is missing");
             if (_pendingHero == null) return Report(false, "select a character first");
 
-            AlphaWorldLoad load = _profiles.LoadWorld(world.Id, GeneratorId);
+            // A world keeps the generator it was created with (older /8 worlds keep the contract dungeon); any
+            // generator this build still supports is accepted.
+            if (!CubeGame.Gameplay.Streaming.D3ZonePopulation.Supports(world.GeneratorId))
+            {
+                return Report(false, $"world {world.Id}: generator '{world.GeneratorId}' is not supported");
+            }
+
+            AlphaWorldLoad load = _profiles.LoadWorld(world.Id, world.GeneratorId);
             if (!load.IsSuccess)
             {
                 return Report(false, $"world {world.Id}: {load.Message}");

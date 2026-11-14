@@ -826,7 +826,8 @@ namespace CubeGame.Gameplay
                         (x, z) => new AlphaClimateSample(terrain.Humidity(x, z), terrain.Temperature(x, z),
                             terrain.RareCellTerm(x, z), terrain.Mountain(x, z)),
                         (x, z) => FirstNonSolid(terrain.Voxels(x, z)));
-                    var source = terrain.GeneratorId == GeneratorId ? new AlphaRecoveredPopulation(terrain)
+                    var source = AlphaTerrainGenerator.UsesRecoveredPopulation(terrain.GeneratorId)
+                        ? new AlphaRecoveredPopulation(terrain)
                         : AlphaRecoveredPopulation.WithKindSelector(_session.World.Seed, candidates,
                             (zone, lx, lz) => GroundAt(zone.X * (double)WorldLayout.ZoneSize + lx, zone.Z * (double)WorldLayout.ZoneSize + lz));
                     _recoveredPopulation = new AlphaSpawnRuntime();
@@ -959,7 +960,8 @@ namespace CubeGame.Gameplay
 
             bool actor = def.BehaviourKey == AlphaRecoveredPopulation.BehaviourKey ||
                 def.BehaviourKey == TownNpcPopulation.BehaviourKey ||
-                def.BehaviourKey == AlphaMissionBossPopulation.BehaviourKey;
+                def.BehaviourKey == AlphaMissionBossPopulation.BehaviourKey ||
+                D3ZonePopulation.IsDungeonCreature(def.BehaviourKey);
             if (!actor || def.Faction == (int)CreatureFaction.Passive || _session.Combat == null)
             {
                 return;

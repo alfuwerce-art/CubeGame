@@ -243,6 +243,12 @@ namespace CubeGame.Features.World
         /// <summary>Message of the stop at the post-pass (tests compare the draws made up to it).</summary>
         public const string PostPass = "0x5D3D9C post-pass";
 
+        /// <summary>Behaviour key of the dungeon master spawn (Alpha +0x10E8 → creature +0x1D38).</summary>
+        public const string MasterBehaviourKey = "alpha_dungeon_master";
+
+        /// <summary>Behaviour key of the dungeon's room creatures (groups, followers, guards).</summary>
+        public const string CreatureBehaviourKey = "alpha_dungeon_creature";
+
         /// <summary>True for the cells 0x5EEA40 treats as open: empty (0), column (2) and the outside (1).</summary>
         private static bool Open(int t) => t == 0 || t == 2 || t == 1;
 

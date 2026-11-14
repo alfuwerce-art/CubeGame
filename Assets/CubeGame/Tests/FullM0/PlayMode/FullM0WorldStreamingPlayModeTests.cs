@@ -257,8 +257,9 @@ namespace CubeGame.Tests.FullM0.PlayMode
             yield return null;
             Assert.IsTrue(game.StartNewWorld("slot0", "World content", 666666u, "Walker", CharacterClass.Ranger), game.Status);
             var terrain = (AlphaTerrainGenerator)game.WorldState.Generator;
-            CollectionAssert.AreEqual(new[] { AlphaZoneContentProvider.ProviderKey, AlphaCityContentProvider.ProviderKey,
-                AlphaDungeonContentProvider.ProviderKey }, terrain.ContentProviders.Select(p => p.Key));
+            // P7-B: the Alpha dungeon 0x5CC510 draws first on the zone stream; the contract dungeon is gone from /9
+            CollectionAssert.AreEqual(new[] { AlphaDungeonZoneProvider.ProviderKey, AlphaZoneContentProvider.ProviderKey,
+                AlphaCityContentProvider.ProviderKey }, terrain.ContentProviders.Select(p => p.Key));
 
             const int regionIndex = WorldLayout.StartVoxel / WorldLayout.RegionSize;
             AlphaRegion region = terrain.RegionRecord(regionIndex, regionIndex);
@@ -282,7 +283,10 @@ namespace CubeGame.Tests.FullM0.PlayMode
             yield return null;
 
             LiveSpawn[] chests = DungeonChests(game, dungeon);
-            Assert.AreEqual(3, chests.Length);
+            int generated = terrain.Zone(dungeon.X, dungeon.Z).ContentSpawns
+                .Count(s => s.BehaviourKey == AlphaDungeonContentProvider.ChestBehaviourKey);
+            Assert.Greater(generated, 0, "the Alpha dungeon of this zone has chests");
+            Assert.AreEqual(generated, chests.Length);
             foreach (LiveSpawn chest in chests)
             {
                 Assert.AreEqual(StableEntityId.ForZoneSpawn(dungeon, D3ZonePopulation.Channel, chest.Definition.SpawnIndex), chest.Id);

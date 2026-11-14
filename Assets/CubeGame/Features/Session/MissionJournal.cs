@@ -14,8 +14,10 @@ namespace CubeGame.Features.Session
     /// <item>completion 0x59642A: a kill by the hero of a creature with flag 0x2000 in the column — in Alpha only
     /// the column boss of a type-1 mission carries it (0x5D9730). Types 1–5 and 13 complete at once, 7–12 count.</item>
     /// </list>
-    /// Missions of type 3, 4 and 9 get no flagged target in Alpha and so never complete; type 5 completes on the
-    /// dungeon master (+0x1D38), which CubeGame does not have yet (P7 dungeons) — both kept as in Alpha.
+    /// Missions of type 3, 4 and 9 get no flagged target in Alpha and so never complete (kept as in Alpha); type 5
+    /// completes on the dungeon master (+0x1D38) of a zone in the column — the master spawn of the ported dungeon
+    /// generator 0x5CC510 (zone content channel). Masters of landmark patrols 0x5DC6E0 and settlements 0x5AF170 are
+    /// not ported yet.
     /// CUBEGAME_CONTRACT: the journal lives in the session save (Alpha: world database blobs mission&lt;x&gt;_&lt;z&gt;),
     /// one random stream per region, the region is the one containing the hero (Alpha selects it through the
     /// nearest region lookup).
@@ -24,6 +26,9 @@ namespace CubeGame.Features.Session
     {
         /// <summary>Population channel of column bosses (0 creatures, 1 zone content, 2 town NPCs).</summary>
         public const int BossChannel = 3;
+
+        /// <summary>Population channel of zone content (dungeon chests, master and room creatures).</summary>
+        public const int ContentChannel = 1;
 
         private readonly SortedDictionary<long, AlphaMission> _columns = new SortedDictionary<long, AlphaMission>();
         private readonly HashSet<long> _regions = new HashSet<long>();
@@ -147,12 +152,23 @@ namespace CubeGame.Features.Session
         internal bool TryComplete(StableEntityId target, out AlphaMission completed)
         {
             completed = null;
-            if (target.Kind != EntityIdKind.ZoneSpawn || (int)((target.Value >> 12) & 0xF) != BossChannel)
+            if (target.Kind != EntityIdKind.ZoneSpawn)
             {
                 return false;
             }
 
+            int channel = (int)((target.Value >> 12) & 0xF);
             var zone = new ZoneKey((int)((target.Value >> 32) & 0xFFFF), (int)((target.Value >> 16) & 0xFFFF));
+            if (channel == ContentChannel)
+            {
+                return TryCompleteDungeon(zone, (int)(target.Value & 0xFFF), out completed);
+            }
+
+            if (channel != BossChannel)
+            {
+                return false;
+            }
+
             if (!TryBossAt(zone, out AlphaMission mission) || !mission.BossIsMissionTarget
                 || mission.State == AlphaMissionState.Complete)
             {
@@ -172,6 +188,40 @@ namespace CubeGame.Features.Session
             mission.State = AlphaMissionState.Complete;
             completed = mission;
             return true;
+        }
+
+        /// <summary>
+        /// 0x59642A, second condition: mission type 5 and the killed creature is the dungeon master (+0x1D38). The
+        /// column is the one of the creature's spawn zone (zone >> 3); a finished mission (+0x41 == 2) stays finished.
+        /// </summary>
+        private bool TryCompleteDungeon(ZoneKey zone, int spawnIndex, out AlphaMission completed)
+        {
+            completed = null;
+            if (_terrain == null || !IsDungeonMaster(_terrain, zone, spawnIndex)
+                || !_columns.TryGetValue(ColumnKey(zone.X >> 3, zone.Z >> 3), out AlphaMission mission)
+                || !mission.HasMission || mission.Type != AlphaMissionType.Dungeon
+                || mission.State == AlphaMissionState.Complete)
+            {
+                return false;
+            }
+
+            mission.State = AlphaMissionState.Complete;
+            completed = mission;
+            return true;
+        }
+
+        /// <summary>True when the zone content spawn is the master of the zone's Alpha dungeon.</summary>
+        public static bool IsDungeonMaster(AlphaTerrainGenerator terrain, ZoneKey zone, int spawnIndex)
+        {
+            foreach (SpawnDefinition spawn in terrain.Zone(zone.X, zone.Z).ContentSpawns)
+            {
+                if (spawn.SpawnIndex == spawnIndex)
+                {
+                    return spawn.BehaviourKey == AlphaDungeonContents.MasterBehaviourKey;
+                }
+            }
+
+            return false;
         }
 
         internal bool TryRestore(AlphaMission mission)

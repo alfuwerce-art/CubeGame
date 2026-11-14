@@ -89,9 +89,20 @@ namespace CubeGame.Features.World
         public const string ContentId = "cubegame.alpha_terrain/5";
         public const string PreviousWorldRuntimeId = "cubegame.alpha_terrain/6";
         public const string EnvironmentRuntimeId = "cubegame.alpha_terrain/7";
-        public const string WorldRuntimeId = "cubegame.alpha_terrain/8";
+        /// <summary>World of the recovered Alpha population with the CubeGame contract dungeon (kept for its saves).</summary>
+        public const string PopulationRuntimeId = "cubegame.alpha_terrain/8";
 
-        public static bool UsesP2Environment(string id) => id == EnvironmentRuntimeId || id == WorldRuntimeId;
+        /// <summary>Current world: as /8, and zone records 3/5 run the ported Alpha dungeon generator 0x5CC510 (P7-B).</summary>
+        public const string WorldRuntimeId = "cubegame.alpha_terrain/9";
+
+        public static bool UsesP2Environment(string id) =>
+            id == EnvironmentRuntimeId || id == PopulationRuntimeId || id == WorldRuntimeId;
+
+        /// <summary>Worlds whose wild creatures come from the recovered Alpha spawn templates.</summary>
+        public static bool UsesRecoveredPopulation(string id) => id == PopulationRuntimeId || id == WorldRuntimeId;
+
+        /// <summary>Worlds whose dungeons come from the ported Alpha generator (not the contract layout).</summary>
+        public static bool UsesAlphaDungeons(string id) => id == WorldRuntimeId;
 
         public const int DefaultWaterLevel = 0;
 

@@ -37,10 +37,25 @@ namespace CubeGame.Gameplay.Streaming
             };
             // /5 and /6 retain their historical plans so old removal/container indices keep their meaning.
             if (AlphaTerrainGenerator.UsesP2Environment(id)) settings.VegetationPerZone = 0;
-            IZoneContentProvider[] providers = id != AlphaTerrainGenerator.ContentId
-                ? AlphaContentProviders.CreateDefault(context => AlphaContentProviders.IsDungeonRecord(context.Record.Type),
-                    settings, AlphaContentProviders.IsCityZone)
-                : new IZoneContentProvider[] { new AlphaZoneContentProvider(settings) };
+            IZoneContentProvider[] providers;
+            if (AlphaTerrainGenerator.UsesAlphaDungeons(id))
+            {
+                // The Alpha dungeon draws first: 0x5CC510 runs on the zone stream right after the terrain passes.
+                providers = new IZoneContentProvider[]
+                {
+                    new AlphaDungeonZoneProvider(),
+                    new AlphaZoneContentProvider(settings, AlphaContentProviders.IsCityZone),
+                    new AlphaCityContentProvider(AlphaContentProviders.IsCityZone),
+                };
+            }
+            else
+            {
+                providers = id != AlphaTerrainGenerator.ContentId
+                    ? AlphaContentProviders.CreateDefault(context => AlphaContentProviders.IsDungeonRecord(context.Record.Type),
+                        settings, AlphaContentProviders.IsCityZone)
+                    : new IZoneContentProvider[] { new AlphaZoneContentProvider(settings) };
+            }
+
             return WorldState.TryCreateGenerator(id, seed, out generator, providers);
         }
 
@@ -50,6 +65,10 @@ namespace CubeGame.Gameplay.Streaming
         public static bool IsStaticContent(string behaviourKey) => behaviourKey == AlphaZoneContentProvider.PassiveBehaviourKey
             || behaviourKey == AlphaCityContentProvider.ServiceBehaviourKey
             || behaviourKey == AlphaDungeonContentProvider.ChestBehaviourKey;
+
+        /// <summary>Creatures of the Alpha dungeon generator (room creatures and the master).</summary>
+        public static bool IsDungeonCreature(string behaviourKey) => behaviourKey == AlphaDungeonContents.CreatureBehaviourKey
+            || behaviourKey == AlphaDungeonContents.MasterBehaviourKey;
 
         public IReadOnlyList<SpawnDefinition> SpawnsForZone(ZoneKey zone)
         {
@@ -66,6 +85,7 @@ namespace CubeGame.Gameplay.Streaming
                 }
 
                 if ((IsStaticContent(definition.BehaviourKey) && _deltas?.IsObjectRemoved(zone, Channel, definition.SpawnIndex) != true)
+                    || IsDungeonCreature(definition.BehaviourKey)
                     || (_terrain.GeneratorId == AlphaTerrainGenerator.ContentId
                     && definition.BehaviourKey == AlphaZoneContentProvider.CreatureBehaviourKey))
                 {
