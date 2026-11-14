@@ -10,7 +10,7 @@
 
 **COMFY-STYLE-11B · VISUAL_REJECTED · 14.11.2026.** Силуэт для Canny и отдельный IPAdapter улучшили T-pose и объём. Владелец отклонил тип и посадку головы V2. [Результаты, настройки и ограничения](docs/tasks/COMFY-STYLE-11B_HUMAN_BASE_FRONT_V2.md).
 
-**COMFY-STYLE-11C · READY_FOR_OWNER_VISUAL_REVIEW · 14.11.2026.** Владелец указал, что голова V3 отличается от Human V1. Ревизия carrier привязывает челюсть и уши к видимым границам Human V1. Верх черепа задан по наблюдаемой форме Alpha. Для ревизии собран локальный композит из прежних кадров. [Сравнение и ограничения](docs/tasks/COMFY-STYLE-11C_HUMAN_HEAD_CARRIER_REVISION.md).
+**COMFY-STYLE-11C · READY_FOR_OWNER_VISUAL_REVIEW · 14.11.2026.** Владелец отклонил V3 и повторную ревизию carrier. Подготовлена локальная трассировка видимой челюсти и ушей по Human V1 и техническая посадка на T-pose. Макушка, виски под волосами и глубина неизвестны. [Сравнение и ограничения](docs/tasks/COMFY-STYLE-11C_HUMAN_V1_TRACE_REVIEW.md).
 
 **Документ:** `03_FACTORY_PROJECT_MEMORY.md`  
 **Версия:** 2.7 · 14.11.2026
