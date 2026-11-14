@@ -146,4 +146,14 @@ help / skills / crafting / inventory / worldmap / system с подписями `
   не перенесена (`PARTIAL`). F1 показывает список клавиш вместо страниц `help.plx`.
 - Esc сначала закрывает открытое окно, и только без окон переключает ряд меню (`CUBEGAME_CONTRACT`).
 - Квадратичные контуры логотипа растеризуются собственным кодом; размытие/свечение α Plasma не повторено.
-- Живая игра (`D:\Games\CubeGame\game`) **не обновлялась** — нужно согласие продюсера.
+
+## 5. Установка в живую игру
+
+`LIVE_GAME_UPDATED=YES` по решению продюсера от 14 ноября 2026.
+- Сборка `6d4c9c0` заменила `D:\Games\CubeGame\game` (копия через staging, хэши `CubeGame.exe`,
+  `CubeGame.Gameplay.dll`, `manifest.json`, `gui/start-logo.png` совпали). Прежняя версия (P5 `791b3ce`) перенесена в
+  `D:\Projects\CubeGame\.unity-install\backups\live_before_p6_6d4c9c0`, откат возможен. Лаунчер не изменён
+  (SHA-256 `21B36489…2A297`), `current.txt` по-прежнему `game\CubeGame.exe`.
+- Smoke установленной игры с отдельной папкой сохранений (`.scratch/p6-live-smoke`): стартовый экран и игра с рядом
+  меню после Esc, оба запуска с кодом 0; в логе `ALPHA_FONT=RUNTIME`, `GUI_ICONS=RUNTIME` (иконки из
+  `StreamingAssets`).
