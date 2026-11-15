@@ -52,18 +52,20 @@ namespace CubeGame.Features.World
                         continue;
                     }
 
-                    VoxelColumn field = zone.Column(x, z);
-                    int height = field.SurfaceScanStart;
-                    while (Voxel.IsSolid(field.Read(height)))
-                    {
-                        height++;
-                    }
-
+                    int height = FindSurface(zone.Column(x, z));
                     points.Add(new WorldPosition(x + 0.5, height, z + 0.5));
                 }
             }
 
             return points;
+        }
+
+        internal static int FindSurface(VoxelColumn column)
+        {
+            int height = column.SurfaceScanStart;
+            while (Voxel.IsSolid(column.Read(height)))
+                height++;
+            return height;
         }
 
         public static int SelectMasterPoint(AlphaZone zone, LandmarkColumn landmark, IReadOnlyList<WorldPosition> points)

@@ -44,6 +44,7 @@ def trace(exe, seed, zone_x, zone_z):
     boulder_voxels = set()
     boulder_write_count = 0
     spawns = []
+    leaders = {}
     entry_address = 0x5DC6E0
     return_address = 0x5EACEC
     spawned_at = {0x5DE9A9, 0x5DEDC9, 0x5DF1D9}
@@ -74,6 +75,14 @@ def trace(exe, seed, zone_x, zone_z):
         caller = current.mem.u(current.r["esp"], 4)
         if caller in spawned_at:
             spawns.append((caller - 5, current.r["ecx"]))
+
+    def record_leader(current):
+        # The companion copies the leader's ID from EBX. Resolve its index even
+        # when the synthetic world has not assigned the persistent IDs yet.
+        site, follower = spawns[-1]
+        if site != 0x5DF1D4:
+            raise ValueError("Companion assignment outside follower construction")
+        leaders[follower] = current.r["ebx"]
 
     def record_return(_cpu):
         if entry:
@@ -160,6 +169,7 @@ def trace(exe, seed, zone_x, zone_z):
         entry_address: record_entry,
         return_address: record_return,
         0x5ADB20: record_spawn,
+        0x5DF334: record_leader,
         0x424820: require_model_registry,
     })
     cpu.fpu.clear()
@@ -231,6 +241,7 @@ def trace(exe, seed, zone_x, zone_z):
             raise ValueError(f"Invalid SequentialBehavior list in spawn at 0x{ptr:08X}")
         return children
 
+    spawn_indices = {ptr: index for index, (_, ptr) in enumerate(spawns)}
     records = [
         {
             "constructor_call": site,
@@ -239,9 +250,15 @@ def trace(exe, seed, zone_x, zone_z):
             "kind": oracle.i32(ptr + 0x2C),
             "id": struct.unpack("<q", cpu.mem.read(ptr + 0x48, 8))[0],
             "level": oracle.i32(ptr + 0x34),
+            "yaw": oracle.f32(ptr + 0x54),
             "quality": cpu.mem.u(ptr + 0x58, 1),
             "flags": cpu.mem.u(ptr + 0x7A, 2),
+            "class": cpu.mem.u(ptr + 0x30, 1),
+            "specialization": cpu.mem.u(ptr + 0x31, 1),
+            "power_scale": oracle.f32(ptr + 0xF60),
+            "hands": [list(cpu.mem.read(ptr + offset, 2)) for offset in (0x7B0, 0x8C8)],
             "master": bool(cpu.mem.u(ptr + 0x10E8, 1)),
+            "leader_index": spawn_indices[leaders[ptr]] if ptr in leaders else -1,
             "behavior": behavior(ptr),
         }
         for site, ptr in spawns
