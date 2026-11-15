@@ -76,7 +76,7 @@ namespace CubeGame.Features.World
                     if (material != 4 && material != 10 && (material != 9 || surface + 1 >= 3)) continue;
                     if (column.Humidity < 0.2f) kind = 3;
 
-                    // Branches 3 and 5 still need their geometry and RNG recovered.
+                    // This generator version predates the recovered growth for kind 5.
                     if (kind == 0 || kind == 1 || kind == 2 || kind == 4)
                         Grow(context, px, surface + 1, pz, radius, height, kind);
                 }
@@ -104,6 +104,12 @@ namespace CubeGame.Features.World
             {
                 trunk = narrow = 1.5f;
                 bark = tip = new Vector3(255f);
+            }
+            else if (kind == 5)
+            {
+                radius = Math.Min(TruncateSingle(radius * 0.2f), 3);
+                height = Math.Max(TruncateSingle(height * 0.7f), radius * 8);
+                trunk = narrow = Math.Max(trunk, 0.3f);
             }
 
             Vector3 lower;
@@ -165,11 +171,19 @@ namespace CubeGame.Features.World
                 }
             }
 
-            // The draw controls the optional branch ornament, which still needs its render path.
+            if (kind == 5)
+                GrowRoots(context, x, y, z, trunk, bark);
+
+            // The draw controls the optional trunk ornament, whose world-object path is separate.
             random.Next();
             if (kind == 1)
             {
                 GrowConifer(context, x, y, z, radius, height, humidity);
+                return;
+            }
+            if (kind == 5)
+            {
+                GrowArchedBranches(context, x, y, z, radius, height, trunk, bark, tip, lower, upper);
                 return;
             }
 
@@ -204,6 +218,86 @@ namespace CubeGame.Features.World
                 if (i > 4) py += crownHeight * 0.5f;
                 GrowCrown(context, (int)px, (int)(py + crownHeight * 0.25f), (int)pz, width, crownHeight,
                     lower, upper, kind == 4);
+            }
+        }
+
+        private static void GrowRoots(ZoneContentContext context, int x, int y, int z, float trunk, Vector3 bark)
+        {
+            var color = new Vector3((int)bark.X, (int)bark.Y, (int)bark.Z);
+            float spread = -1f;
+            for (int depth = 0; depth < 2; depth++)
+            {
+                float radius = (4 - depth) * trunk / 5f;
+                spread += radius;
+                PaintRound(context, TruncateSingle(x - spread), y - depth, z, color, true, 0x27, radius);
+                PaintRound(context, TruncateSingle(x + 1 + spread), y - depth, z, color, true, 0x27, radius);
+                PaintRound(context, x, y - depth, TruncateSingle(z - spread), color, true, 0x27, radius);
+                PaintRound(context, x, y - depth, TruncateSingle(z + 1 + spread), color, true, 0x27, radius);
+            }
+        }
+
+        // Alpha rounds the SSE scalar result to single precision before truncation.
+        private static int TruncateSingle(float value) =>
+            (int)BitConverter.Int32BitsToSingle(BitConverter.SingleToInt32Bits(value));
+
+        // 0x5E2119…0x5E2E8C. Growth can extend past the zone; missing neighbours read as
+        // unprotected terrain for branch and crown draws, and this zone only writes its own voxels.
+        private static void GrowArchedBranches(ZoneContentContext context, int x, int y, int z, int radius,
+            int height, float trunk, Vector3 bark, Vector3 tip, Vector3 lower, Vector3 upper)
+        {
+            const int fixedScale = 1 << 16;
+            AlphaCrtRandom random = context.Random;
+            int branchCount = height / 4 + 6 + radius / 2;
+            random.Next();
+            random.Next();
+            float rotation = (float)((random.Next() & 7) * (Math.PI / 4));
+            int startX = context.Zone.Zx * AlphaZone.Size;
+            int startZ = context.Zone.Zz * AlphaZone.Size;
+            for (int branch = 0; branch < branchCount; branch++)
+            {
+                if ((branch & 1) != 0 && random.Next() % 3 != 0)
+                    continue;
+
+                float level = branch * 0.6f / (branchCount - 1) + 0.6f;
+                float direction = (float)(branch * Math.PI * 0.25 + rotation);
+                float cos = (float)Math.Cos(direction);
+                float sin = (float)Math.Sin(direction);
+                double baseX = x + 0.5 + cos * trunk;
+                double baseZ = z + 0.5 + sin * trunk;
+                double baseY = height * level + y;
+                float inverseLevel = 1f - level;
+                Vector3 color = Vector3.Clamp(bark * inverseLevel + tip * level, Vector3.Zero, new Vector3(255f));
+                uint wood = Pack(color, 0x27);
+                int lift = height / 2 + random.Next() % (height / 2) + branch * height / 4 / branchCount;
+                int steps = lift * 2;
+                float stretch = radius * 8f * inverseLevel + radius;
+                float reachX = stretch * cos, reachZ = stretch * sin;
+                for (int step = 0; step <= steps; step++)
+                {
+                    float remaining = 1f - step / (float)steps;
+                    float reach = 1f - remaining * remaining;
+                    long fx = (long)((baseX + reach * reachX) * fixedScale);
+                    long fz = (long)((baseZ + reach * reachZ) * fixedScale);
+                    int px = (int)(fx / fixedScale);
+                    int pz = (int)(fz / fixedScale);
+                    int py = (int)((long)((baseY + step * 0.5f) * fixedScale) / fixedScale);
+                    if (context.Contains(px, pz) && (!CanWrite(context, px, py, pz) || !CanWrite(context, px, py + 1, pz)))
+                        continue;
+
+                    context.Write(px, py + 1, pz, wood);
+                    context.Write(px, py, pz, wood);
+                    if (step != steps && ((step & 3) != 0 || random.Next() % 3 != 0))
+                        continue;
+
+                    float width = (random.Next() * (reach * 0.75f) / AlphaCrtRandom.RandMax + 0.25f) *
+                        (lift * 0.5f) + 2f;
+                    float crownHeight = (random.Next() * 0.5f / AlphaCrtRandom.RandMax + 0.5f) * width;
+                    fx += (long)(width * cos * 0.25f * fixedScale);
+                    fz += (long)(width * sin * 0.25f * fixedScale);
+                    int crownX = (int)FitCrown(fx / (double)fixedScale, width, startX);
+                    int crownZ = (int)FitCrown(fz / (double)fixedScale, width, startZ);
+                    GrowCrown(context, crownX, py + 1, crownZ, width, crownHeight, lower, upper, false);
+                }
             }
         }
 
@@ -283,19 +377,20 @@ namespace CubeGame.Features.World
             }
         }
 
-        private static void PaintRound(ZoneContentContext context, int x, int y, int z, Vector3 color, bool sphere, int flags)
+        private static void PaintRound(ZoneContentContext context, int x, int y, int z, Vector3 color, bool sphere,
+            int flags, float radius = 2f)
         {
-            // Both original helpers are called with radius 2 and the centered flag.
-            for (int px = x - 1; px <= x + 2; px++)
+            int span = (int)Math.Ceiling(radius);
+            for (int px = x - span + 1; px <= x + span; px++)
             {
-                for (int pz = z - 1; pz <= z + 2; pz++)
+                for (int pz = z - span + 1; pz <= z + span; pz++)
                 {
                     double dx = px - x - 0.5;
                     double dz = pz - z - 0.5;
-                    for (int py = sphere ? y - 1 : y; py <= (sphere ? y + 2 : y); py++)
+                    for (int py = sphere ? y - span + 1 : y; py <= (sphere ? y + span : y); py++)
                     {
                         double dy = sphere ? py - y - 0.5 : 0;
-                        if (dx * dx + dy * dy + dz * dz <= 4.0 && CanWrite(context, px, py, pz))
+                        if (dx * dx + dy * dy + dz * dz <= radius * radius && CanWrite(context, px, py, pz))
                             context.Write(px, py, pz, Pack(sphere ? Shade(context, px, py, pz, color) : color, flags));
                     }
                 }
