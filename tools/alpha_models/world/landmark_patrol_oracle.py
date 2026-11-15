@@ -37,6 +37,7 @@ def trace(exe, seed, zone_x, zone_z):
     decoration_draws = Counter()
     tree_draws = Counter()
     trees = []
+    post_tree_prop = None
     surface_props = []
     boulders = []
     boulder_writes = hashlib.sha256()
@@ -123,6 +124,17 @@ def trace(exe, seed, zone_x, zone_z):
         if trees and "crt_out" not in trees[-1]:
             trees[-1]["crt_out"] = oracle.crt.state
 
+    def record_post_tree_prop(current):
+        nonlocal post_tree_prop
+        ptr = current.mem.u(current.r["esp"], 4)
+        kind, x, z, y, yaw, width, depth, height = struct.unpack("<i4x3qi3f", current.mem.read(ptr, 48))
+        post_tree_prop = {
+            "kind": kind,
+            "position_fixed_16_16": [x, z, y],
+            "yaw": yaw,
+            "dimensions": [width, depth, height],
+        }
+
     def require_model_registry(current):
         if current.r["ecx"] == 0:
             caller = current.mem.u(current.r["esp"], 4)
@@ -143,6 +155,7 @@ def trace(exe, seed, zone_x, zone_z):
         0x5EA7AE: record_tree,
         0x5EA7B3: record_tree_return,
         0x5EA7E7: lambda _: zone_stages.update(after_trees=oracle.crt.state),
+        0x5EA9B6: record_post_tree_prop,
         0x5EAA59: record_placement,
         entry_address: record_entry,
         return_address: record_return,
@@ -251,6 +264,7 @@ def trace(exe, seed, zone_x, zone_z):
         ).hexdigest(),
         "tree_draw_calls": dict(sorted(tree_draws.items())),
         "trees": trees,
+        "post_tree_prop": post_tree_prop,
         "placement": placement,
         "entry": entry,
         "crt_out": oracle.crt.state,

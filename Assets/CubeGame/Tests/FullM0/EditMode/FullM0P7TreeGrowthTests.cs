@@ -18,8 +18,12 @@ namespace CubeGame.Tests.FullM0.EditMode
             public uint seed;
             public int zoneX;
             public int zoneZ;
+            public long beforeTrees;
+            public long afterTrees;
             public long[] trees;
         }
+
+        private const int GrowthStride = 8;
 
         [TestCase(8399918, 8399900, 64, 10, 20, 2214495820u, 134685627u, 205, 6841,
             "4e2fbfac8a844dbcf0b2043332e0a577f549b3f2a022603f7cd6da866545e3a3")]
@@ -46,23 +50,72 @@ namespace CubeGame.Tests.FullM0.EditMode
         [Test]
         public void KindFiveMatchesCrtForAllValleyGrowthCalls()
         {
-            string path = Path.Combine(Application.dataPath, "CubeGame/Tests/FullM0/EditMode/Fixtures",
-                "alpha_kind_five_trees_32812_32812.json");
-            var fixture = JsonUtility.FromJson<ValleyFixture>(File.ReadAllText(path));
-            Assert.AreEqual("EMULATED_ALPHA_CODE", fixture.status);
+            ValleyFixture fixture = ReadValleyFixture();
             // The zone oracle records but does not apply the earlier terrain carves.
             var terrain = new AlphaTerrainGenerator(fixture.seed);
             AlphaZone zone = AlphaZoneGenerator.Generate(terrain, fixture.zoneX, fixture.zoneZ, true, new List<CarveCall>());
-            const int stride = 7;
-            Assert.AreEqual(45 * stride, fixture.trees.Length);
             long[] data = fixture.trees;
-            for (int i = 0; i < data.Length; i += stride)
+            int tested = 0;
+            for (int i = 0; i < data.Length; i += GrowthStride)
             {
-                var random = new AlphaCrtRandom(unchecked((int)data[i + 5]));
+                if (data[i + 5] != 5)
+                    continue;
+                var random = new AlphaCrtRandom(unchecked((int)data[i + 6]));
                 GrowKindFive(terrain, zone, random, (int)data[i], (int)data[i + 2], (int)data[i + 1],
                     (int)data[i + 3], (int)data[i + 4]);
-                Assert.AreEqual(data[i + 6], unchecked((uint)random.State), $"CRT after tree {i / stride}");
+                Assert.AreEqual(data[i + 7], unchecked((uint)random.State), $"CRT after tree {i / GrowthStride}");
+                tested++;
             }
+            Assert.AreEqual(45, tested);
+        }
+
+        [Test]
+        public void ValleyTreesMatchAllGrowthCallsOnOneStream()
+        {
+            ValleyFixture fixture = ReadValleyFixture();
+            var provider = new TreePassProbe();
+            var terrain = new AlphaTerrainGenerator(fixture.seed, new[] { provider });
+            AlphaZoneGenerator.Generate(terrain, fixture.zoneX, fixture.zoneZ, true, new List<CarveCall>());
+
+            Assert.AreEqual(fixture.beforeTrees, provider.BeforeTrees, "CRT on entry to trees");
+            long[] expected = fixture.trees;
+            for (int i = 0; i < Math.Min(expected.Length / GrowthStride, provider.Growth.Count); i++)
+            {
+                var row = new ArraySegment<long>(expected, i * GrowthStride, GrowthStride);
+                CollectionAssert.AreEqual(row, provider.Growth[i], $"growth call {i + 1} (X, Z, Y, radius, height, kind, CRT in, CRT out)");
+            }
+            Assert.AreEqual(expected.Length / GrowthStride, provider.Growth.Count, "number of growth calls");
+            Assert.AreEqual(fixture.afterTrees, provider.AfterTrees, "CRT after trees");
+        }
+
+        private sealed class TreePassProbe : IZoneContentProvider
+        {
+            public string Key => nameof(TreePassProbe);
+            public uint BeforeTrees { get; private set; }
+            public uint AfterTrees { get; private set; }
+            public List<long[]> Growth { get; } = new List<long[]>();
+
+            public void Populate(ZoneContentContext context)
+            {
+                AlphaZoneSurfaceDecorations.Populate(context);
+                BeforeTrees = unchecked((uint)context.Random.State);
+                Type type = typeof(AlphaZoneGenerator).Assembly.GetType("CubeGame.Features.World.AlphaZoneTrees", true);
+                MethodInfo run = type.GetMethod("PopulateBeforePatrols", BindingFlags.Static | BindingFlags.NonPublic);
+                Action<int, int, int, int, int, int, uint, uint> onGrowth = (x, z, y, r, h, k, input, output) =>
+                    Growth.Add(new long[] { x, z, y, r, h, k, input, output });
+                run.Invoke(null, new object[] { context, null, onGrowth });
+                AfterTrees = unchecked((uint)context.Random.State);
+            }
+        }
+
+        private static ValleyFixture ReadValleyFixture()
+        {
+            string path = Path.Combine(Application.dataPath, "CubeGame/Tests/FullM0/EditMode/Fixtures",
+                "alpha_tree_growth_32812_32812.json");
+            var fixture = JsonUtility.FromJson<ValleyFixture>(File.ReadAllText(path));
+            Assert.AreEqual("EMULATED_ALPHA_CODE", fixture.status);
+            Assert.AreEqual(99 * GrowthStride, fixture.trees.Length);
+            return fixture;
         }
 
         private static void GrowKindFive(AlphaTerrainGenerator terrain, AlphaZone zone, AlphaCrtRandom random,

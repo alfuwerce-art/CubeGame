@@ -29,7 +29,9 @@ namespace CubeGame.Features.World
     /// </summary>
     public static class AlphaZoneSurfaceDecorations
     {
-        public static IReadOnlyList<AlphaSurfaceProp> Populate(ZoneContentContext context)
+        public static IReadOnlyList<AlphaSurfaceProp> Populate(ZoneContentContext context) => Populate(context, out _);
+
+        internal static List<AlphaSurfaceProp> Populate(ZoneContentContext context, out WorldPosition? scatterOrigin)
         {
             var props = new List<AlphaSurfaceProp>();
             AlphaCrtRandom random = context.Random;
@@ -39,13 +41,40 @@ namespace CubeGame.Features.World
             int startZ = context.Zone.Zz * AlphaZone.Size;
             try
             {
-                WorldPosition? scatterOrigin = ScatterProps(context, startX, startZ, props);
+                scatterOrigin = ScatterProps(context, startX, startZ, props);
                 PlaceBoulders(context, startX, startZ, scatterOrigin);
                 return props;
             }
             finally
             {
                 random.At(previousSiteFrom, previousSiteTo);
+            }
+        }
+
+        // 0x5EA7E7…0x5EAA24: the even-zone object after trees and before patrol placement.
+        internal static void AddAfterTrees(ZoneContentContext context, List<AlphaSurfaceProp> props)
+        {
+            AlphaZone zone = context.Zone;
+            if (((zone.Zx + zone.Zz) & 1) != 0)
+                return;
+
+            AlphaCrtRandom random = context.Random;
+            int from = random.SiteFrom, to = random.SiteTo;
+            try
+            {
+                int x = zone.Zx * AlphaZone.Size + 16 + Draw(random, 0x5EA7FA) % 224;
+                int z = zone.Zz * AlphaZone.Size + 16 + Draw(random, 0x5EA819) % 224;
+                VoxelColumn column = zone.Column(x, z);
+                if (column == null)
+                    return;
+
+                int y = column.TopSolid() + 1;
+                int yaw = Draw(random, 0x5EA994) & 3;
+                props.Add(new AlphaSurfaceProp(0, new WorldPosition(x + 0.5, y, z + 0.5), yaw, 2f, 8f));
+            }
+            finally
+            {
+                random.At(from, to);
             }
         }
 
@@ -236,7 +265,7 @@ namespace CubeGame.Features.World
             }
         }
 
-        private static double DistanceSquared(WorldPosition point, int x, int z)
+        internal static double DistanceSquared(WorldPosition point, int x, int z)
         {
             double dx = x - point.X, dz = z - point.Z;
             return dx * dx + dz * dz;

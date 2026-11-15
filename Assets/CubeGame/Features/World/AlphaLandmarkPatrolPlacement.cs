@@ -6,12 +6,26 @@ namespace CubeGame.Features.World
 {
     /// <summary>
     /// The point selection at 0x5EAA24 and the master point selection at 0x5DD9D7.
-    /// Call after the zone decoration passes, with their resulting voxel columns and CRT state.
     /// </summary>
     public static class AlphaLandmarkPatrolPlacement
     {
         private const double FixedScale = 65536.0;
 
+        /// <summary>
+        /// Continues the zone CRT from surface decoration through the patrol point list.
+        /// The caller has run the terrain and early rock passes. Settlement passes are outside this route.
+        /// </summary>
+        public static IReadOnlyList<WorldPosition> Populate(ZoneContentContext context,
+            out IReadOnlyList<AlphaSurfaceProp> surfaceProps)
+        {
+            List<AlphaSurfaceProp> props = AlphaZoneSurfaceDecorations.Populate(context, out WorldPosition? scatterOrigin);
+            AlphaZoneTrees.PopulateBeforePatrols(context, scatterOrigin);
+            AlphaZoneSurfaceDecorations.AddAfterTrees(context, props);
+            surfaceProps = props;
+            return SelectPoints(context.Zone, context.Landmark, context.Random);
+        }
+
+        /// <summary>Selects points from the completed decoration passes and their resulting CRT state.</summary>
         public static IReadOnlyList<WorldPosition> SelectPoints(AlphaZone zone, LandmarkColumn landmark,
             AlphaCrtRandom random)
         {

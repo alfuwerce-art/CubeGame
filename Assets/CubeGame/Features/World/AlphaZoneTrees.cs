@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using CubeGame.Features.Contracts;
 
 namespace CubeGame.Features.World
 {
@@ -10,7 +11,14 @@ namespace CubeGame.Features.World
     {
         private static readonly Vector3 BarkNoiseColor = new Vector3(50f, 120f, 60f);
 
-        internal static void Populate(ZoneContentContext context)
+        internal static void Populate(ZoneContentContext context) => Populate(context, false, null, null);
+
+        internal static void PopulateBeforePatrols(ZoneContentContext context, WorldPosition? scatterOrigin,
+            Action<int, int, int, int, int, int, uint, uint> onGrowth = null) =>
+            Populate(context, true, scatterOrigin, onGrowth);
+
+        private static void Populate(ZoneContentContext context, bool beforePatrols, WorldPosition? scatterOrigin,
+            Action<int, int, int, int, int, int, uint, uint> onGrowth)
         {
             int startX = context.Zone.Zx * AlphaZone.Size;
             int startZ = context.Zone.Zz * AlphaZone.Size;
@@ -26,18 +34,44 @@ namespace CubeGame.Features.World
             {
                 for (int z = startZ; z < startZ + 14 * 18; z += 18)
                 {
-                    float forest = context.Landmark?.Type == LandmarkType.Forest
-                        ? Math.Max(1f - terrain.LandmarkDistance2(context.Landmark, x + 8, z + 8), 0f)
-                        : 0f;
+                    float forest = 0f;
+                    if (context.Landmark?.Type == LandmarkType.Forest)
+                    {
+                        float distance = beforePatrols
+                            ? AlphaLandmarkPatrolPlacement.DistanceSquared(context.Landmark, x + 8, z + 8)
+                            : terrain.LandmarkDistance2(context.Landmark, x + 8, z + 8);
+                        forest = Math.Max(1f - distance, 0f);
+                    }
                     forest *= forest;
                     float temperature = context.Zone.Column(x + 8, z + 8).Temperature;
-                    int radius = (int)(random.Next() % 5 + temperature * 2f + 6f + forest * 4f);
-                    int height = (int)((Unit(random) * 8f + forest * 6f + 8f) * (temperature * 0.5f + 1f));
+                    int radius, height;
+                    if (beforePatrols)
+                    {
+                        radius = TruncateSingle(random.Next() % 5 + (temperature * 2f + 6f) + forest * 4f);
+                        height = TruncateSingle((random.Next() * 8f / AlphaCrtRandom.RandMax + (forest * 6f + 8f)) *
+                            (temperature * 0.5f + 1f));
+                        float rawX = x + radius - WorldLayout.StartVoxel;
+                        float rawZ = z + radius - WorldLayout.StartVoxel;
+                        if (rawX * rawX + rawZ * rawZ < 400f) continue;
+                    }
+                    else
+                    {
+                        radius = (int)(random.Next() % 5 + temperature * 2f + 6f + forest * 4f);
+                        height = (int)((Unit(random) * 8f + forest * 6f + 8f) * (temperature * 0.5f + 1f));
+                    }
                     int px = Math.Min(x + radius, endX - radius / 2);
                     int pz = Math.Min(z + radius, endZ - radius / 2);
-                    float dx = px - WorldLayout.StartVoxel;
-                    float dz = pz - WorldLayout.StartVoxel;
-                    if (dx * dx + dz * dz < 400f) continue;
+                    if (beforePatrols)
+                    {
+                        if (scatterOrigin.HasValue && AlphaZoneSurfaceDecorations.DistanceSquared(scatterOrigin.Value, px, pz) < 1600.0)
+                            continue;
+                    }
+                    else
+                    {
+                        float dx = px - WorldLayout.StartVoxel;
+                        float dz = pz - WorldLayout.StartVoxel;
+                        if (dx * dx + dz * dz < 400f) continue;
+                    }
 
                     float speciesNoise = AlphaNoise.Sample(px * 0.001 + speciesSeedX, pz * 0.001 + speciesSeedZ);
                     int kind = (random.Next() & 1) * 5;
@@ -74,11 +108,16 @@ namespace CubeGame.Features.World
                     if (surface < 0) continue;
                     int material = Voxel.Material(column.Read(surface));
                     if (material != 4 && material != 10 && (material != 9 || surface + 1 >= 3)) continue;
-                    if (column.Humidity < 0.2f) kind = 3;
+                    if (beforePatrols ? column.Humidity > 0.8f && column.Temperature < 0.2f : column.Humidity < 0.2f) kind = 3;
 
-                    // This generator version predates the recovered growth for kind 5.
-                    if (kind == 0 || kind == 1 || kind == 2 || kind == 4)
+                    if (kind == 3 && beforePatrols)
+                        throw new NotSupportedException("Alpha growth for kind 3 is required before this zone can generate patrols.");
+                    if (kind == 0 || kind == 1 || kind == 2 || kind == 4 || (beforePatrols && kind == 5))
+                    {
+                        uint before = unchecked((uint)random.State);
                         Grow(context, px, surface + 1, pz, radius, height, kind);
+                        onGrowth?.Invoke(px, pz, surface + 1, radius, height, kind, before, unchecked((uint)random.State));
+                    }
                 }
             }
         }
