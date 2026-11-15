@@ -1,7 +1,8 @@
-"""Trace Alpha's 0x5DC6E0 from the real zone generator without launching Cube.exe.
+"""Trace Alpha's 0x5DC6E0 without launching Cube.exe.
 
 Usage: python landmark_patrol_oracle.py <Cube.exe> <seed> <zone_x> <zone_z> <out.json>
-Requires Unicorn. Uses the zone oracle's terrain substitutions and a synthetic world with no players.
+The default runs the zone generator with the terrain oracle substitutions. --composition
+starts at 0x5DC6E0 with a synthetic voxel field and a fixed grid of input points.
 """
 
 import argparse
@@ -16,11 +17,43 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from tools.alpha_models.universal.drawmodel_emu import RETURN_VA, STACK_BASE, STACK_SIZE  # noqa: E402
 from tools.alpha_models.universal.unicorn_bridge import UnicornRun  # noqa: E402
 from tools.alpha_models.world.dungeon_oracle import Stop, args, apply_static_init, prepare  # noqa: E402
-from tools.alpha_models.world.terrain_oracle import WORLD  # noqa: E402
+from tools.alpha_models.world.terrain_oracle import Oracle, WORLD  # noqa: E402
 
 
-def trace(exe, seed, zone_x, zone_z):
-    oracle, carves = prepare(exe, seed, zone_x, zone_z)
+def composition_arguments(oracle, zone_x, zone_z, composition):
+    zone = oracle.alloc(0xC8)
+    oracle.call(0x6240F0, [], ecx=zone)
+    mem = oracle.cpu.mem
+    mem.write(zone + 0x60, struct.pack("<2i", zone_x, zone_z))
+    if composition <= 5:
+        # The camp footprint needs solid ground. Native column reads supply it
+        # below Bottom, so this flat field needs no individual voxel buffers.
+        field = mem.u(zone + 0xA8, 4)
+        mem.write(field, struct.pack("<16x2i8x", 64, 56) * (256 * 256))
+    scale = 65536
+    x0, z0 = zone_x * 256, zone_z * 256
+    points = [
+        ((x0 + x) * scale + scale // 2, (z0 + z) * scale + scale // 2, (48 + (x + z) % 13) * scale)
+        for x in range(40, 185, 36) for z in range(40, 185, 36)
+    ]
+    begin = oracle.alloc(len(points) * 24)
+    end = begin + len(points) * 24
+    mem.write(begin, b"".join(struct.pack("<3q", *point) for point in points))
+    vector = oracle.alloc(12)
+    mem.write(vector, struct.pack("<3I", begin, end, end))
+    landmark_type, landmark_id = {6: (11, 9), 9: (4, 9), 10: (3, 10)}.get(composition, (11, composition))
+    landmark = oracle.alloc(0x68)
+    centre_x, centre_z, _ = points[len(points) // 2]
+    mem.write(landmark, struct.pack("<2q2f5i", centre_x, centre_z, 300.0, 0.0,
+                                    landmark_type, 0, landmark_id, 60, 3))
+    return zone, landmark, vector, 5
+
+
+def trace(exe, seed, zone_x, zone_z, composition=None):
+    if composition is None:
+        oracle, carves = prepare(exe, seed, zone_x, zone_z)
+    else:
+        oracle, carves = Oracle(exe, seed, fast_noise=True), []
     apply_static_init(oracle)
     cpu = oracle.cpu
     # 0x5D9460 enumerates world+4 before looking for a mission. A head pointing
@@ -67,7 +100,7 @@ def trace(exe, seed, zone_x, zone_z):
             "points_fixed_16_16": list(struct.iter_unpack("<3q", current.mem.read(begin, end - begin))),
             "crt_in": oracle.crt.state,
         })
-        if "crt_in" not in placement:
+        if composition is None and "crt_in" not in placement:
             raise RuntimeError("Missing patrol point selection entry at 0x5EAA59")
         print(f"Entered 0x5DC6E0: landmark {entry['landmark']}, {len(entry['points_fixed_16_16'])} points", flush=True)
 
@@ -172,12 +205,19 @@ def trace(exe, seed, zone_x, zone_z):
         0x5DF334: record_leader,
         0x424820: require_model_registry,
     })
+    if composition is None:
+        arguments = (zone_x, zone_z)
+        start = 0x5E4850
+    else:
+        arguments = composition_arguments(oracle, zone_x, zone_z, composition)
+        oracle.crt.srand(seed)
+        start = entry_address
     cpu.fpu.clear()
     cpu.r["esp"] = STACK_BASE + STACK_SIZE - 0x100
-    for arg in (zone_z, zone_x, RETURN_VA):
+    for arg in reversed((RETURN_VA, *arguments)):
         cpu.push(arg)
     cpu.r["ecx"] = WORLD
-    cpu.eip = 0x5E4850
+    cpu.eip = start
     run = UnicornRun(cpu, oracle.image)
     cpu.mem = run.mem
 
@@ -214,7 +254,8 @@ def trace(exe, seed, zone_x, zone_z):
     except Stop:
         pass
     else:
-        raise ValueError(f"Zone {zone_x}/{zone_z} returned without a landmark patrol call")
+        if composition is None or not entry:
+            raise ValueError(f"Zone {zone_x}/{zone_z} returned without a landmark patrol call")
 
     placement["draws"] = placement_draws
 
@@ -263,6 +304,14 @@ def trace(exe, seed, zone_x, zone_z):
         }
         for site, ptr in spawns
     ]
+    camp_props = []
+    if composition is not None:
+        begin, end = struct.unpack("<2I", cpu.mem.read(arguments[0] + 0x0C, 8))
+        for ptr in range(begin, end, 0x188):
+            kind, x, z, y, yaw, width, depth, height = struct.unpack("<i4x3qi3f", cpu.mem.read(ptr, 48))
+            camp_props.append({
+                "kind": kind, "position_fixed_16_16": [x, z, y], "yaw": yaw, "dimensions": [width, depth, height],
+            })
     return {
         "status": "EMULATED_ALPHA_CODE",
         "function": "0x5DC6E0",
@@ -286,6 +335,7 @@ def trace(exe, seed, zone_x, zone_z):
         "entry": entry,
         "crt_out": oracle.crt.state,
         "draws": draws,
+        "camp_props": camp_props,
         "spawns": records,
     }
 
@@ -297,8 +347,9 @@ def main():
     parser.add_argument("zone_x", type=int)
     parser.add_argument("zone_z", type=int)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--composition", type=int, choices=range(11))
     options = parser.parse_args()
-    result = trace(options.exe, options.seed, options.zone_x, options.zone_z)
+    result = trace(options.exe, options.seed, options.zone_x, options.zone_z, options.composition)
     options.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     print(f"Patrol {result['entry']['landmark']}: {len(result['spawns'])} spawns, {len(result['draws'])} CRT draws")
 

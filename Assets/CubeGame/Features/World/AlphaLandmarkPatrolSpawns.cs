@@ -4,7 +4,7 @@ using CubeGame.Features.Contracts;
 
 namespace CubeGame.Features.World
 {
-    /// <summary>Landmark creature generation at 0x5DC6E0 for the lake and valley compositions verified in Alpha.</summary>
+    /// <summary>Landmark creature generation at 0x5DC6E0 for the five Alpha compositions without camps.</summary>
     public static class AlphaLandmarkPatrolSpawns
     {
         private const int HostileGroupFlag = 0x1000;
@@ -13,9 +13,16 @@ namespace CubeGame.Features.World
 
         public const string BehaviourKey = "alpha.landmark.creature";
 
+        private static readonly int[] Group6 = { 0x46, 0x45 };
+        private static readonly int[][] PatrolPools6 = { new[] { 0x47 }, Group6 };
+        private static readonly int[] Group8 = { 0x66, 0x69, 0x68 };
+        private static readonly int[][] PatrolPools8 = { new[] { 0x68 }, new[] { 0x66 }, new[] { 0x69 } };
+        private static readonly int[] Group10 = { 0x23, 0x5A, 0x5B };
+        private static readonly int[][] PatrolPools10 = { new[] { 0x23 }, new[] { 0x5A }, new[] { 0x5B } };
         private static readonly int[] LakeKinds = { 0x56, 0x6A };
+        private static readonly int[][] LakePatrolPools = { new[] { 0x56 }, new[] { 0x6A } };
         private static readonly int[] ValleyGroup = { 0x34 };
-        private static readonly int[] ValleyPatrol = { 0x3E, 0x3C, 0x34 };
+        private static readonly int[][] ValleyPatrolPools = { new[] { 0x3E }, new[] { 0x3C }, ValleyGroup };
         private static readonly int[] Compositions = { 0, 1, 2, 3, 4, 5, 1, 7, 8, 6, 10 };
         private static readonly int[] AppearanceDraws = { 0x43F80D, 0x43F826, 0x43F83A, 0x43F85E, 0x43F86B };
         private static readonly int[] ItemSeedDraws = { 0x5C81A8, 0x5C81B0, 0x5C81B8, 0x5C81C0, 0x5C81C8, 0x5C81D0 };
@@ -29,10 +36,13 @@ namespace CubeGame.Features.World
 
             LandmarkColumn landmark = context.Landmark;
             int composition = SelectComposition(landmark);
-            (int[] groupKinds, int[] patrolKinds) = composition switch
+            (int[] groupKinds, int[][] patrolPools) = composition switch
             {
-                7 => (ValleyGroup, ValleyPatrol),
-                9 => (LakeKinds, LakeKinds),
+                6 => (Group6, PatrolPools6),
+                7 => (ValleyGroup, ValleyPatrolPools),
+                8 => (Group8, PatrolPools8),
+                9 => (LakeKinds, LakePatrolPools),
+                10 => (Group10, PatrolPools10),
                 _ => throw new NotSupportedException($"Landmark patrol composition {composition} still needs its Alpha port."),
             };
             int masterIndex = AlphaLandmarkPatrolPlacement.SelectMasterPoint(context.Zone, landmark, points);
@@ -53,7 +63,7 @@ namespace CubeGame.Features.World
                     if (master || (Draw(random, 0x5DDD97) & 1) != 0)
                         AddGroup(spawns, startIndex, region, landmark, point, master, groupKinds, random);
                     else
-                        AddPatrol(spawns, startIndex, region, context.Zone, landmark, point, points, neighbours, patrolKinds, random);
+                        AddPatrol(spawns, startIndex, region, context.Zone, landmark, point, points, neighbours, patrolPools, random);
                 }
                 return spawns;
             }
@@ -97,12 +107,12 @@ namespace CubeGame.Features.World
 
         private static void AddPatrol(List<SpawnDefinition> spawns, int startIndex, RegionKey region, AlphaZone zone,
             LandmarkColumn landmark, WorldPosition start, IReadOnlyList<WorldPosition> points, List<WorldPosition> neighbours,
-            int[] kinds, AlphaCrtRandom random)
+            int[][] pools, AlphaCrtRandom random)
         {
-            // The two verified compositions have one kind in each leader/companion pool, even though Alpha still rolls both.
-            int kind = kinds[Draw(random, 0x5DED67) % kinds.Length];
+            // Each of these compositions uses the same pool for leader and companions. They roll independently.
+            int[] kinds = pools[Draw(random, 0x5DED67) % pools.Length];
             int yaw = Draw(random, 0x5DEDF3) % 360;
-            Draw(random, 0x5DEE5B);
+            int kind = kinds[Draw(random, 0x5DEE5B) % kinds.Length];
             neighbours.Clear();
             foreach (WorldPosition point in points)
             {
@@ -131,8 +141,8 @@ namespace CubeGame.Features.World
             int count = Draw(random, 0x5DF198) % 3 + 1;
             for (int i = 0; i < count; i++)
             {
-                Draw(random, 0x5DF236);
-                SpawnDefinition follower = Create(region, startIndex + spawns.Count, landmark, kind, start);
+                int followerKind = kinds[Draw(random, 0x5DF236) % kinds.Length];
+                SpawnDefinition follower = Create(region, startIndex + spawns.Count, landmark, followerKind, start);
                 follower.LeaderSpawnIndex = leader.SpawnIndex;
                 spawns.Add(follower);
             }
@@ -159,20 +169,25 @@ namespace CubeGame.Features.World
             foreach (int site in AppearanceDraws)
                 Draw(random, site);
 
-            // 0x5C7730 initializes these three stationary species. The 0x10/0x08 flags bypass humanoid gear selection.
+            // 0x5C7730 uses the appearance flags to choose the gear path.
+            spawn.AlphaFlags |= kind switch
+            {
+                0x23 => 0x30,
+                0x34 => 0x20,
+                0x45 or 0x46 or 0x5A or 0x5B or 0x6A => 0x28,
+                0x56 => 0x10,
+                0x66 or 0x69 => 0x31,
+                0x68 => 0x29,
+                _ => throw new NotSupportedException($"Appearance flags for stationary kind 0x{kind:X} still need the Alpha port."),
+            };
             switch (kind)
             {
                 case 0x34:
-                    spawn.AlphaFlags |= 0x20;
                     AssignArmedClass(spawn, random);
                     break;
                 case 0x56:
-                    spawn.AlphaFlags |= 0x10;
                     spawn.ClassId = 2;
                     spawn.SpecializationId = 1;
-                    break;
-                case 0x6A:
-                    spawn.AlphaFlags |= 0x28;
                     break;
             }
             if ((spawn.AlphaFlags & MasterFlag) != 0)

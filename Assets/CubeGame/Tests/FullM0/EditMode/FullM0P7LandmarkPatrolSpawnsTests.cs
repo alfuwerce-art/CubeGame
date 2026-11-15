@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.World;
 using NUnit.Framework;
@@ -19,6 +20,16 @@ namespace CubeGame.Tests.FullM0.EditMode
             public long crtOut;
             public int[] drawSites;
             public Spawn[] spawns;
+            public CompositionInput input;
+            public long[] points;
+        }
+
+        [Serializable]
+        private sealed class CompositionInput
+        {
+            public int zoneX, zoneZ, landmarkType, landmarkId, level, quality;
+            public long[] centre;
+            public float radius;
         }
 
         [Serializable]
@@ -53,24 +64,69 @@ namespace CubeGame.Tests.FullM0.EditMode
         [TestCase(32812, 32812)]
         public void ReproducesAlphaLandmarkSpawnsFromTerrain(int zoneX, int zoneZ)
         {
-            string path = Path.Combine(Application.dataPath, "CubeGame/Tests/FullM0/EditMode/Fixtures",
-                $"alpha_landmark_patrol_spawns_{zoneX}_{zoneZ}.json");
-            var fixture = JsonUtility.FromJson<Fixture>(File.ReadAllText(path));
-            Assert.AreEqual("EMULATED_ALPHA_CODE", fixture.status);
+            Fixture fixture = ReadFixture($"alpha_landmark_patrol_spawns_{zoneX}_{zoneZ}.json");
             var probe = new PatrolProbe();
             var terrain = new AlphaTerrainGenerator(fixture.seed, new[] { probe });
             // The native zone oracle only records the earlier terrain carves in these fixtures.
             AlphaZoneGenerator.Generate(terrain, zoneX, zoneZ, true, new List<CarveCall>());
 
             Assert.AreEqual(fixture.crtIn, probe.BeforeSpawns);
-            Assert.AreEqual(fixture.drawSites.Length, probe.Sites.Count, "draw count");
-            for (int i = 0; i < fixture.drawSites.Length; i++)
-                Assert.AreEqual(fixture.drawSites[i], probe.Sites[i], $"draw {i} return address");
-            Assert.AreEqual(fixture.crtOut, probe.AfterSpawns);
+            AssertOutput(fixture, probe.Sites, probe.AfterSpawns, probe.Spawns);
+        }
 
-            Assert.AreEqual(fixture.spawns.Length, probe.Spawns.Count, "spawn count");
+        [TestCase(6)]
+        [TestCase(8)]
+        [TestCase(10)]
+        public void ReproducesAlphaCompositionOnTheNativeInputGrid(int composition)
+        {
+            Fixture fixture = ReadFixture($"alpha_landmark_patrol_composition_{composition}.json");
+            CompositionInput input = fixture.input;
+            var zone = new AlphaZone(input.zoneX, input.zoneZ);
+            for (int i = 0; i < zone.Columns.Length; i++)
+                zone.Columns[i] = new VoxelColumn();
+
+            var terrain = new AlphaTerrainGenerator(fixture.seed);
+            var random = new AlphaCrtRandom(unchecked((int)fixture.crtIn));
+            var context = (ZoneContentContext)Activator.CreateInstance(typeof(ZoneContentContext),
+                BindingFlags.Instance | BindingFlags.NonPublic, null,
+                new object[] { terrain, new AlphaColors(terrain), zone, random }, null);
+            LandmarkColumn landmark = context.Landmark;
+            void SetLandmark(string property, object value) => typeof(LandmarkColumn).GetProperty(property).SetValue(landmark, value);
+            SetLandmark(nameof(LandmarkColumn.Id), input.landmarkId);
+            SetLandmark(nameof(LandmarkColumn.Type), (LandmarkType)input.landmarkType);
+            SetLandmark(nameof(LandmarkColumn.X), input.centre[0] / 65536.0);
+            SetLandmark(nameof(LandmarkColumn.Z), input.centre[1] / 65536.0);
+            SetLandmark(nameof(LandmarkColumn.Radius), input.radius);
+            SetLandmark(nameof(LandmarkColumn.Level), input.level);
+            SetLandmark(nameof(LandmarkColumn.LevelClass), input.quality);
+
+            var points = new List<WorldPosition>();
+            for (int i = 0; i < fixture.points.Length; i += 3)
+                points.Add(Position(fixture.points, i));
+            var sites = new List<int>();
+            random.AfterDraw = stream => sites.Add(stream.SiteFrom);
+            List<SpawnDefinition> spawns = AlphaLandmarkPatrolSpawns.Generate(context, points);
+            AssertOutput(fixture, sites, unchecked((uint)random.State), spawns);
+        }
+
+        private static Fixture ReadFixture(string file)
+        {
+            string path = Path.Combine(Application.dataPath, "CubeGame/Tests/FullM0/EditMode/Fixtures", file);
+            var fixture = JsonUtility.FromJson<Fixture>(File.ReadAllText(path));
+            Assert.AreEqual("EMULATED_ALPHA_CODE", fixture.status);
+            return fixture;
+        }
+
+        private static void AssertOutput(Fixture fixture, IReadOnlyList<int> sites, uint after, IReadOnlyList<SpawnDefinition> spawns)
+        {
+            Assert.AreEqual(fixture.drawSites.Length, sites.Count, "draw count");
+            for (int i = 0; i < fixture.drawSites.Length; i++)
+                Assert.AreEqual(fixture.drawSites[i], sites[i], $"draw {i} return address");
+            Assert.AreEqual(fixture.crtOut, after);
+
+            Assert.AreEqual(fixture.spawns.Length, spawns.Count, "spawn count");
             for (int i = 0; i < fixture.spawns.Length; i++)
-                AssertSpawn(fixture.spawns[i], probe.Spawns[i], i);
+                AssertSpawn(fixture.spawns[i], spawns[i], i);
         }
 
         private static void AssertSpawn(Spawn expected, SpawnDefinition spawn, int index)
