@@ -89,3 +89,6 @@ outputs/factory/human_base_front_v2/
 outputs/factory/human_base_front_v3/
 outputs/factory/human_head_geometry_review/
 outputs/factory/human_head_v1_trace/
+
+# COMFY-STYLE-12 local mannequin frames and guide plates stay local
+outputs/factory/mannequin_v1/
