@@ -96,3 +96,10 @@ outputs/factory/mannequin_v1/
 # COMFY-STYLE-12 MANNEQUIN V3: owner reference render, plates and frames stay local;
 # only numbers, hashes and the report are published
 outputs/factory/mannequin_v3/
+
+# MANNEQUIN-RIG-01: review images built on the owner-approved V3 reference stay local;
+# the generated model renders, rig diagram, numbers and the report are published
+outputs/prototypes/mannequin_v3_rig/run1/compare/
+outputs/prototypes/mannequin_v3_rig/run1/*.blend
+outputs/prototypes/mannequin_v3_rig/run1/*.blend1
+outputs/prototypes/mannequin_v3_rig/run1/*.glb
