@@ -3,6 +3,7 @@
 **Дата:** 2026-11-17
 **Этап:** G1-00 (вход в [G1 Technical Foundation](../stages/G1_TECHNICAL_FOUNDATION_STAGE.md))
 **Ветка:** `deepseek/g1-00-runtime-baseline-candidate` (опубликована в `origin`)
+**Коммиты:** `c613ae6` — merge P0–P7 в candidate; `08392a9` — CR-001; `ecbcd11` — выбор baseline и отчёт
 **База:** `integration/m0-all` @ `4e36f1539d787e6a03f85d1f9fc92efcb1b64a79`
 **Исполнитель:** DeepSeek Harness
 
