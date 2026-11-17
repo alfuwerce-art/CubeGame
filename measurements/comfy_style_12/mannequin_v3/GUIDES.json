@@ -1,0 +1,772 @@
+{
+  "task": "COMFY-STYLE-12",
+  "role": "ControlNet-only technical guides for MANNEQUIN V3 (never sampler inputs)",
+  "reference_image": "outputs/factory/mannequin_v3/REFERENCE_MANNEQUIN_V3_OWNER.png",
+  "reference_sha256": "b95e4666a3b3caae543e3ba4663cce8d7f9ad3d026f381cca2231fee04d841c5",
+  "canvas": [
+    768,
+    1024
+  ],
+  "symmetry_axis_x": 383.5,
+  "crown_y": 174,
+  "sole_y": 850,
+  "figure_height_px": 676,
+  "tones": {
+    "face": 198,
+    "ring": 96,
+    "ring_px": 6,
+    "background": [
+      158,
+      158,
+      158
+    ]
+  },
+  "head_rule": "one empty cranium cube with a flat crown, narrower stepped chin block, small side ear cubes; no eyes, mouth, hair, plate, band or second layer",
+  "variant": "silhouette + 6 px inset ring (DIAG3 recipe of COMFY-STYLE-12 MANNEQUIN_V1)",
+  "arm_note": "per arm the render shows a hand cube, a thin connector and an elbow cube whose connectors merge with the silhouette; the plate keeps them merged (one connected body) and reproduces the block widths",
+  "generator": "scripts/comfyui/prepare_mannequin_v3_guides.py",
+  "guides": {
+    "HUMAN_MALE_MANNEQUIN_GUIDE": {
+      "figure": "HUMAN_MALE_MANNEQUIN_V3",
+      "reference_transform": {
+        "scale": 1.027356,
+        "crown_y_ref": 97,
+        "figure_height_ref": 658,
+        "center_x_ref": 511
+      },
+      "parts": [
+        {
+          "name": "cranium",
+          "side": "C",
+          "x0": 266,
+          "y0": 174,
+          "x1": 498,
+          "y1": 347,
+          "ref_rect": [
+            397,
+            97,
+            622,
+            265
+          ]
+        },
+        {
+          "name": "chin",
+          "side": "C",
+          "x0": 270,
+          "y0": 347,
+          "x1": 494,
+          "y1": 388,
+          "ref_rect": [
+            401,
+            265,
+            619,
+            305
+          ]
+        },
+        {
+          "name": "neck",
+          "side": "C",
+          "x0": 322,
+          "y0": 388,
+          "x1": 445,
+          "y1": 421,
+          "ref_rect": [
+            451,
+            305,
+            571,
+            337
+          ]
+        },
+        {
+          "name": "chest",
+          "side": "C",
+          "x0": 299,
+          "y0": 419,
+          "x1": 469,
+          "y1": 557,
+          "ref_rect": [
+            429,
+            335,
+            594,
+            470
+          ]
+        },
+        {
+          "name": "abdomen",
+          "side": "C",
+          "x0": 326,
+          "y0": 557,
+          "x1": 441,
+          "y1": 588,
+          "ref_rect": [
+            455,
+            470,
+            567,
+            500
+          ]
+        },
+        {
+          "name": "pelvis",
+          "side": "C",
+          "x0": 299,
+          "y0": 588,
+          "x1": 469,
+          "y1": 642,
+          "ref_rect": [
+            429,
+            500,
+            594,
+            553
+          ]
+        },
+        {
+          "name": "ear",
+          "side": "L",
+          "x0": 226,
+          "y0": 267,
+          "x1": 266,
+          "y1": 347,
+          "ref_rect": [
+            358,
+            188,
+            397,
+            265
+          ]
+        },
+        {
+          "name": "ear",
+          "side": "R",
+          "x0": 501,
+          "y0": 267,
+          "x1": 541,
+          "y1": 347,
+          "ref_rect": [
+            358,
+            188,
+            397,
+            265
+          ]
+        },
+        {
+          "name": "hand",
+          "side": "L",
+          "x0": 105,
+          "y0": 427,
+          "x1": 183,
+          "y1": 507,
+          "ref_rect": [
+            240,
+            343,
+            316,
+            421
+          ]
+        },
+        {
+          "name": "hand",
+          "side": "R",
+          "x0": 584,
+          "y0": 427,
+          "x1": 662,
+          "y1": 507,
+          "ref_rect": [
+            240,
+            343,
+            316,
+            421
+          ]
+        },
+        {
+          "name": "arm_link",
+          "side": "L",
+          "x0": 172,
+          "y0": 434,
+          "x1": 244,
+          "y1": 500,
+          "ref_rect": [
+            305,
+            350,
+            375,
+            414
+          ]
+        },
+        {
+          "name": "arm_link",
+          "side": "R",
+          "x0": 523,
+          "y0": 434,
+          "x1": 595,
+          "y1": 500,
+          "ref_rect": [
+            305,
+            350,
+            375,
+            414
+          ]
+        },
+        {
+          "name": "elbow",
+          "side": "L",
+          "x0": 180,
+          "y0": 428,
+          "x1": 244,
+          "y1": 496,
+          "ref_rect": [
+            313,
+            344,
+            375,
+            410
+          ]
+        },
+        {
+          "name": "elbow",
+          "side": "R",
+          "x0": 523,
+          "y0": 428,
+          "x1": 587,
+          "y1": 496,
+          "ref_rect": [
+            313,
+            344,
+            375,
+            410
+          ]
+        },
+        {
+          "name": "shoulder",
+          "side": "L",
+          "x0": 242,
+          "y0": 419,
+          "x1": 300,
+          "y1": 504,
+          "ref_rect": [
+            373,
+            335,
+            430,
+            418
+          ]
+        },
+        {
+          "name": "shoulder",
+          "side": "R",
+          "x0": 467,
+          "y0": 419,
+          "x1": 525,
+          "y1": 504,
+          "ref_rect": [
+            373,
+            335,
+            430,
+            418
+          ]
+        },
+        {
+          "name": "thigh",
+          "side": "L",
+          "x0": 300,
+          "y0": 642,
+          "x1": 368,
+          "y1": 729,
+          "ref_rect": [
+            430,
+            553,
+            496,
+            637
+          ]
+        },
+        {
+          "name": "thigh",
+          "side": "R",
+          "x0": 399,
+          "y0": 642,
+          "x1": 467,
+          "y1": 729,
+          "ref_rect": [
+            430,
+            553,
+            496,
+            637
+          ]
+        },
+        {
+          "name": "shin",
+          "side": "L",
+          "x0": 307,
+          "y0": 729,
+          "x1": 364,
+          "y1": 790,
+          "ref_rect": [
+            437,
+            637,
+            492,
+            697
+          ]
+        },
+        {
+          "name": "shin",
+          "side": "R",
+          "x0": 403,
+          "y0": 729,
+          "x1": 460,
+          "y1": 790,
+          "ref_rect": [
+            437,
+            637,
+            492,
+            697
+          ]
+        },
+        {
+          "name": "foot",
+          "side": "L",
+          "x0": 287,
+          "y0": 790,
+          "x1": 373,
+          "y1": 849,
+          "ref_rect": [
+            417,
+            697,
+            501,
+            754
+          ]
+        },
+        {
+          "name": "foot",
+          "side": "R",
+          "x0": 394,
+          "y0": 790,
+          "x1": 480,
+          "y1": 849,
+          "ref_rect": [
+            417,
+            697,
+            501,
+            754
+          ]
+        }
+      ],
+      "stats": {
+        "mask_area_px": 156686,
+        "mask_bbox_xyxy": [
+          105,
+          174,
+          662,
+          848
+        ],
+        "mask_components": 1,
+        "symmetry_error_px": 0,
+        "figure_height_px": 675,
+        "head_frac_of_figure": 0.317
+      },
+      "file": "outputs/factory/mannequin_v3\\HUMAN_MALE_MANNEQUIN_GUIDE.png",
+      "sha256": "89c5098245ef416d9f183fbd4a30241817da2d8e7f3512590ddde1c472fa4850",
+      "canny": {
+        "file": "outputs/factory/mannequin_v3\\HUMAN_MALE_MANNEQUIN_GUIDE_CANNY.png",
+        "sha256": "04f7a9a98ca33bb6e749c6e0be9e34fee4bd0d5d9585478f0bb1663d7a221580",
+        "low": 0.35,
+        "high": 0.75,
+        "edge_pixels": 6856,
+        "bbox_xyxy": [
+          104,
+          173,
+          662,
+          848
+        ]
+      },
+      "depth": {
+        "file": "outputs/factory/mannequin_v3\\HUMAN_MALE_MANNEQUIN_DEPTH.png",
+        "sha256": "7478cf40d05431d6869687d70711b827b7be8b19f84b3a07bbcd4d1a3a188984",
+        "values": {
+          "cranium": 255,
+          "chin": 250,
+          "neck": 170,
+          "chest": 225,
+          "abdomen": 230,
+          "waist": 230,
+          "pelvis": 228,
+          "shoulder": 205,
+          "arm_link": 185,
+          "elbow": 190,
+          "hand": 195,
+          "ear": 210,
+          "thigh": 215,
+          "shin": 205,
+          "foot": 235
+        },
+        "note": "design depth parameters, not measured from the single front render"
+      }
+    },
+    "HUMAN_FEMALE_MANNEQUIN_GUIDE": {
+      "figure": "HUMAN_FEMALE_MANNEQUIN_V3",
+      "reference_transform": {
+        "scale": 1.05296,
+        "crown_y_ref": 113,
+        "figure_height_ref": 642,
+        "center_x_ref": 1264
+      },
+      "parts": [
+        {
+          "name": "cranium",
+          "side": "C",
+          "x0": 272,
+          "y0": 174,
+          "x1": 492,
+          "y1": 342,
+          "ref_rect": [
+            1158,
+            113,
+            1367,
+            273
+          ]
+        },
+        {
+          "name": "chin",
+          "side": "C",
+          "x0": 275,
+          "y0": 342,
+          "x1": 488,
+          "y1": 385,
+          "ref_rect": [
+            1161,
+            273,
+            1363,
+            313
+          ]
+        },
+        {
+          "name": "neck",
+          "side": "C",
+          "x0": 327,
+          "y0": 385,
+          "x1": 438,
+          "y1": 419,
+          "ref_rect": [
+            1210,
+            313,
+            1316,
+            346
+          ]
+        },
+        {
+          "name": "chest",
+          "side": "C",
+          "x0": 309,
+          "y0": 419,
+          "x1": 456,
+          "y1": 508,
+          "ref_rect": [
+            1193,
+            346,
+            1333,
+            430
+          ]
+        },
+        {
+          "name": "waist",
+          "side": "C",
+          "x0": 323,
+          "y0": 508,
+          "x1": 444,
+          "y1": 581,
+          "ref_rect": [
+            1207,
+            430,
+            1321,
+            500
+          ]
+        },
+        {
+          "name": "pelvis",
+          "side": "C",
+          "x0": 306,
+          "y0": 581,
+          "x1": 462,
+          "y1": 637,
+          "ref_rect": [
+            1190,
+            500,
+            1339,
+            553
+          ]
+        },
+        {
+          "name": "ear",
+          "side": "L",
+          "x0": 232,
+          "y0": 266,
+          "x1": 272,
+          "y1": 338,
+          "ref_rect": [
+            1120,
+            200,
+            1158,
+            269
+          ]
+        },
+        {
+          "name": "ear",
+          "side": "R",
+          "x0": 495,
+          "y0": 266,
+          "x1": 535,
+          "y1": 338,
+          "ref_rect": [
+            1120,
+            200,
+            1158,
+            269
+          ]
+        },
+        {
+          "name": "hand",
+          "side": "L",
+          "x0": 130,
+          "y0": 424,
+          "x1": 207,
+          "y1": 500,
+          "ref_rect": [
+            1023,
+            350,
+            1096,
+            423
+          ]
+        },
+        {
+          "name": "hand",
+          "side": "R",
+          "x0": 560,
+          "y0": 424,
+          "x1": 637,
+          "y1": 500,
+          "ref_rect": [
+            1023,
+            350,
+            1096,
+            423
+          ]
+        },
+        {
+          "name": "arm_link",
+          "side": "L",
+          "x0": 200,
+          "y0": 430,
+          "x1": 266,
+          "y1": 495,
+          "ref_rect": [
+            1090,
+            356,
+            1152,
+            418
+          ]
+        },
+        {
+          "name": "arm_link",
+          "side": "R",
+          "x0": 501,
+          "y0": 430,
+          "x1": 567,
+          "y1": 495,
+          "ref_rect": [
+            1090,
+            356,
+            1152,
+            418
+          ]
+        },
+        {
+          "name": "elbow",
+          "side": "L",
+          "x0": 219,
+          "y0": 419,
+          "x1": 289,
+          "y1": 486,
+          "ref_rect": [
+            1108,
+            346,
+            1174,
+            409
+          ]
+        },
+        {
+          "name": "elbow",
+          "side": "R",
+          "x0": 478,
+          "y0": 419,
+          "x1": 548,
+          "y1": 486,
+          "ref_rect": [
+            1108,
+            346,
+            1174,
+            409
+          ]
+        },
+        {
+          "name": "shoulder",
+          "side": "L",
+          "x0": 286,
+          "y0": 419,
+          "x1": 312,
+          "y1": 508,
+          "ref_rect": [
+            1171,
+            346,
+            1196,
+            430
+          ]
+        },
+        {
+          "name": "shoulder",
+          "side": "R",
+          "x0": 455,
+          "y0": 419,
+          "x1": 481,
+          "y1": 508,
+          "ref_rect": [
+            1171,
+            346,
+            1196,
+            430
+          ]
+        },
+        {
+          "name": "thigh",
+          "side": "L",
+          "x0": 306,
+          "y0": 637,
+          "x1": 369,
+          "y1": 725,
+          "ref_rect": [
+            1190,
+            553,
+            1250,
+            636
+          ]
+        },
+        {
+          "name": "thigh",
+          "side": "R",
+          "x0": 398,
+          "y0": 637,
+          "x1": 461,
+          "y1": 725,
+          "ref_rect": [
+            1190,
+            553,
+            1250,
+            636
+          ]
+        },
+        {
+          "name": "shin",
+          "side": "L",
+          "x0": 313,
+          "y0": 726,
+          "x1": 366,
+          "y1": 788,
+          "ref_rect": [
+            1197,
+            637,
+            1247,
+            696
+          ]
+        },
+        {
+          "name": "shin",
+          "side": "R",
+          "x0": 401,
+          "y0": 726,
+          "x1": 454,
+          "y1": 788,
+          "ref_rect": [
+            1197,
+            637,
+            1247,
+            696
+          ]
+        },
+        {
+          "name": "foot",
+          "side": "L",
+          "x0": 292,
+          "y0": 789,
+          "x1": 374,
+          "y1": 849,
+          "ref_rect": [
+            1177,
+            697,
+            1255,
+            754
+          ]
+        },
+        {
+          "name": "foot",
+          "side": "R",
+          "x0": 393,
+          "y0": 789,
+          "x1": 475,
+          "y1": 849,
+          "ref_rect": [
+            1177,
+            697,
+            1255,
+            754
+          ]
+        }
+      ],
+      "stats": {
+        "mask_area_px": 142992,
+        "mask_bbox_xyxy": [
+          130,
+          174,
+          637,
+          848
+        ],
+        "mask_components": 1,
+        "symmetry_error_px": 0,
+        "figure_height_px": 675,
+        "head_frac_of_figure": 0.3126
+      },
+      "file": "outputs/factory/mannequin_v3\\HUMAN_FEMALE_MANNEQUIN_GUIDE.png",
+      "sha256": "cacc80819926b4ee90bf85b59727ad9f660881a1e44d0ba02cca855365d26527",
+      "canny": {
+        "file": "outputs/factory/mannequin_v3\\HUMAN_FEMALE_MANNEQUIN_GUIDE_CANNY.png",
+        "sha256": "e96bbf85c78bf8f279e42e47c636c2fb72e6f098de699ea32bca12cccb33c874",
+        "low": 0.35,
+        "high": 0.75,
+        "edge_pixels": 6676,
+        "bbox_xyxy": [
+          129,
+          173,
+          637,
+          848
+        ]
+      },
+      "depth": {
+        "file": "outputs/factory/mannequin_v3\\HUMAN_FEMALE_MANNEQUIN_DEPTH.png",
+        "sha256": "72f598feadbe6e2d8a087c4d227da06fb321f9643b525366e1654b9b293b1cf5",
+        "values": {
+          "cranium": 255,
+          "chin": 250,
+          "neck": 170,
+          "chest": 225,
+          "abdomen": 230,
+          "waist": 230,
+          "pelvis": 228,
+          "shoulder": 205,
+          "arm_link": 185,
+          "elbow": 190,
+          "hand": 195,
+          "ear": 210,
+          "thigh": 215,
+          "shin": 205,
+          "foot": 235
+        },
+        "note": "design depth parameters, not measured from the single front render"
+      }
+    }
+  },
+  "canny_parameters": {
+    "low_threshold": 0.35,
+    "high_threshold": 0.75
+  }
+}

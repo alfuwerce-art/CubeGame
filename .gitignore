@@ -92,3 +92,7 @@ outputs/factory/human_head_v1_trace/
 
 # COMFY-STYLE-12 local mannequin frames and guide plates stay local
 outputs/factory/mannequin_v1/
+
+# COMFY-STYLE-12 MANNEQUIN V3: owner reference render, plates and frames stay local;
+# only numbers, hashes and the report are published
+outputs/factory/mannequin_v3/
