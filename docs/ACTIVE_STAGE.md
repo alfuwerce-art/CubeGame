@@ -1,52 +1,122 @@
-# ACTIVE STAGE — G2-1 CONTENT BINDING
+# ACTIVE STAGE — G3 HUMANOID CHARACTER FACTORY
 
-**Canonical branch:** `integration/m0-all` · **G2 baseline:** `claude/g2-world-foundation` @ `d6f84699c5e127ce3823990ebd137b59cf16d09a` (`ACCEPTED`)
-**Review branch:** `claude/g2-1-content-binding`
-**Статус:** `READY_FOR_REVIEW` — агент не выставляет `ACCEPTED`.
+**Producer decision:** G2-1 Content Binding accepted; next main production focus is G3 humanoid character production.  
+**Decision:** [D94 — humanoid modular appearance and NPC generation](decisions/D94-g3-humanoid-modular-appearance.md)  
+**Stage:** [G3 Humanoid Character Factory](stages/G3_HUMANOID_CHARACTER_FACTORY_STAGE.md)  
+**Roadmap:** [ROADMAP_DRAFT.md](planning/ROADMAP_DRAFT.md)  
+**Architecture reference:** [M1 model / rig / animation evolution](stages/M1_MODEL_ANIMATION_EVOLUTION_STAGE.md)
 
-**ТЗ этапа:** [G2_1_CONTENT_BINDING_STAGE.md](stages/G2_1_CONTENT_BINDING_STAGE.md)
-**Отчёт:** [G2_1_CONTENT_BINDING_REPORT.md](reports/G2_1_CONTENT_BINDING_REPORT.md)
-**Предыдущий этап:** [G2 World Foundation](stages/G2_WORLD_FOUNDATION_STAGE.md) · [отчёт](reports/G2_WORLD_FOUNDATION_REPORT.md)
-**Архитектура:** [WORLD_GENERATION_ARCHITECTURE.md](architecture/WORLD_GENERATION_ARCHITECTURE.md)
-**Тест-матрица:** [G2_WORLD_TEST_MATRIX.md](planning/G2_WORLD_TEST_MATRIX.md)
+**Status:** `G3-0 PLANNED / PRODUCER DIRECTION APPROVED`  
+**Accepted world baseline:** `claude/g2-1-content-binding` @ `5a2d69387ffc607756cd2f9b59db3ce4a62211e4`
 
 ---
 
-## 1. Что изменено
+## Current product direction
 
-Foundation G2 теперь **владеет контентом мира**, Alpha-ассеты остаются визуальными плейсхолдерами:
+CubeGame is developed as its own game. CW Alpha remains research/reference and temporary placeholder content where still useful; Alpha parity is not the active target.
 
-| Пакет | Результат |
-|---|---|
-| G2-1A | `CubeGameVegetationProvider`: seed → biome → vegetation profile → rules → `VegetationPolicy` → placements → persistent id → временная Alpha-модель |
-| G2-1B | `CubeGameStructureProvider`: `StructurePlacementPipeline` → прототипы (camp/ruin/tower/cave/landmark) → spawn-записи → id → state |
-| G2-1C | `CubeGameEntityCatalog` (5 CubeGame-native определений) + `CubeGameVisualBindings` (`TEMPORARY_VISUAL_PLACEHOLDER`) |
-| Прототипы | settlement (4 слота, дорога, 9 якорей), dungeon (вход + комната + возврат), generic landmark/camp/ruin/tower |
-| Runtime | `CubeGameContentRuntime` + `CubeGameStructurePopulation` (канал 7), фильтр удалённых растений в меше чанка (канал 8) |
-| Debug | overlay: biome, vegetation profile/rules, candidates/accepted/removed, структуры id/state, settlement/anchors, dungeon, entity definition + recipe |
-| Save | удаления — существующие world deltas; content world id = `cubegame.alpha_terrain/10` |
-| Automation | `-cubeSmokeContent fresh|verify` — полный Player-сценарий контента с сохранением и проверкой после перезапуска |
+G2/G2-1 established the world, content placement, persistence and entity seams required by G3.
 
-## 2. Проверки
+G2-2 world-object destruction is **deferred** until gameplay actually needs that work. It does not block character production.
 
-| Проверка | Результат |
-|---|---|
-| Компиляция | `error CS = 0` |
-| G2-1 EditMode | 11 / 11 PASS |
-| Полный EditMode (с Alpha-кэшем) | 904 total / 898 passed / 0 failed / 6 skipped |
-| G2-1 PlayMode | 1 / 1 PASS |
-| Полный PlayMode (с Alpha-кэшем) | [см. отчёт §15](reports/G2_1_CONTENT_BINDING_REPORT.md) |
-| Windows Player | собран (`BUILD_SUCCEEDED`, errors=0); content smoke fresh/verify PASS |
-| Производительность | mean frame 30.6 → 9.1 мс, вершины −33 %, зоны 1176 → 713 мс (тот же сценарий) |
+---
 
-## 3. Важное следствие для версий мира
+## Active G3 order
 
-- Мир `/10` = тот же террейн, но CubeGame-контент; мир `/9` (G2) намеренно не загружается новым клиентом
-  (`GeneratorMismatch`), потому что контентная стадия изменилась.
-- Исторические Alpha-content тесты PlayMode продолжают работать на явно запрошенном `/9` мире
-  (`StartNewWorld(..., generatorId: ...)` — automation-only параметр).
+### G3-0 — Humanoid Race Mannequins
 
-## 4. Вне этапа
+Create base mannequins for every supported humanoid race and the sex/body variations that require distinct editor bases.
 
-Production city/dungeon/vegetation, разрушение вокселей зданий, фракции, расписания NPC, G3 factory, Alpha cleanup.
-Следующий рекомендуемый пакет: **G2-2 World object lifecycle & destruction** (см. §16 отчёта).
+Each mannequin defines:
+
+- race/body proportions;
+- modular boundaries;
+- stable Humanoid rig interface where compatible;
+- sockets/attachments;
+- face/head interface;
+- equipment interface;
+- scale/pivot/orientation.
+
+Do not mass-produce complete NPC models.
+
+### G3-1 — Character Editor Visual Library
+
+For each race, create the reusable visual modules required by the Character Creator:
+
+- face/head;
+- hair;
+- beard/moustache where applicable;
+- skin/body colors;
+- hair colors;
+- ears;
+- tusks/fangs;
+- horns/crests;
+- other race-specific traits.
+
+These modules are shared by player creation and NPC generation.
+
+### G3-2 — AppearanceRecipe + Modular Assembly
+
+Player and NPC must resolve through one assembly path.
+
+### G3-3 — Race-based NPC Appearance Randomizer
+
+Population chooses race + persistent NPC identity.
+
+Appearance is generated by:
+
+```text
+WorldSeed + PersistentNpcId
+        ↓
+AppearanceSeed
+        ↓
+RaceAppearanceProfile
+        ↓
+random / weighted allowed race modules
+        ↓
+AppearanceRecipe
+```
+
+The randomizer is intentionally simple. Race defines legal visual traits; the same NPC must reproduce the same appearance after reload.
+
+### G3-4 — Humanoid Rig + Base Animations
+
+Shared Humanoid skeleton topology where compatible, weights, locomotion and base action packages, with small race/body corrections where needed.
+
+### G3-5 — Equipment / Armor / Weapons
+
+Separate modular equipment layer.
+
+### G3-6 — World NPC Integration
+
+Bind generated humanoids to the accepted G2-1 `EntityDefinition / EntityVisualRecipe` world seams.
+
+---
+
+## Non-humanoid creature policy
+
+Do not generate the full creature catalog in advance.
+
+Creature Factory architecture remains available, but actual non-humanoid models/rigs/animations are produced when a current region, dungeon, enemy set or boss requires them.
+
+---
+
+## Current acceptance target
+
+The immediate target is **G3-0**.
+
+G3-0 is ready for producer review only when every currently supported humanoid race has a compatible mannequin base and those mannequins can enter the common modular Factory path without requiring separate runtime technology per race.
+
+---
+
+## Accepted previous stage
+
+**G2-1 Content Binding:** accepted based on branch `claude/g2-1-content-binding` @ `5a2d69387ffc607756cd2f9b59db3ce4a62211e4`.
+
+Key accepted result:
+
+- CubeGame owns vegetation/structure placement logic;
+- settlement/dungeon seams exist;
+- EntityDefinition / EntityVisualRecipe seams exist;
+- persistence and Player smoke pass;
+- Alpha visuals may remain temporary placeholders while G3/G9 replace them.
