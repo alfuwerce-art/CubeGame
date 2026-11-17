@@ -1,0 +1,127 @@
+{
+  "schema_version": "0.1.0",
+  "example": true,
+  "id": "CHARACTER_ASSET_STYLE_LOCK",
+  "version": "0.1.0",
+  "style_target_id": "HUMAN_V3_PAIR",
+  "checkpoint": {
+    "file": {
+      "path": "models/checkpoints/sd_xl_base_1.0.safetensors",
+      "sha256": "31e35c80fc4829d14f90153f4c74cd59c90b779f6afe05a74cd6120b893f7e5b"
+    },
+    "family": "SDXL1.0",
+    "source": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0",
+    "license": "CreativeML OpenRAIL++-M",
+    "eligibility": "LAB_ONLY"
+  },
+  "loras": [
+    {
+      "model": {
+        "file": {
+          "path": "models/loras/VoxelXL_v1.safetensors",
+          "sha256": "7d9a5f11e1b38d97f75d2b84bfb5bb3bf95cd0e5f2500b002d13374eb4f88b5c"
+        },
+        "family": "SDXL1.0",
+        "source": "https://huggingface.co/Fictiverse/Voxel_XL_Lora",
+        "license": "OpenRAIL (author card)",
+        "eligibility": "LAB_ONLY"
+      },
+      "model_strength": 0.6,
+      "clip_strength": 0.6,
+      "trigger": "voxel style"
+    }
+  ],
+  "sampling": {
+    "sampler": "dpmpp_2m",
+    "scheduler": "karras",
+    "steps": 28,
+    "cfg": 6,
+    "denoise": 1,
+    "batch_size": 1
+  },
+  "frame_defaults": {
+    "resolution_px": [
+      768,
+      1024
+    ],
+    "background": "#9E9E9E",
+    "lighting": "Neutral soft diffuse studio lighting, no rim, no hard shadows.",
+    "color_space": "sRGB"
+  },
+  "style": {
+    "block_hierarchy": [
+      "large primary cuboids",
+      "medium contour steps",
+      "few small accents"
+    ],
+    "material_classes": [
+      "SKIN",
+      "HAIR",
+      "CLOTH",
+      "LEATHER",
+      "METAL",
+      "WOOD"
+    ],
+    "detail": "Low frequency pixel pattern; matte surfaces with readable volume.",
+    "positive_prefix": "voxel style, axial cuboids, restrained pixel colors",
+    "negative_terms": [
+      "photorealism",
+      "round sculpting",
+      "busy texture",
+      "watermark",
+      "multiple objects"
+    ],
+    "palette_defaults": [
+      {
+        "id": "FIBER_NEUTRAL",
+        "version": "0.1.0",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ]
+  },
+  "conditioning": {
+    "controlnet": {
+      "model": {
+        "file": {
+          "path": "models/controlnet/controlnet-union-sdxl-1.0.safetensors",
+          "sha256": "a9e13fd61f3193887791c8a0dd07a07202174dc47d5ddaea94ea1344f07c7467"
+        },
+        "family": "SDXL1.0",
+        "source": "https://huggingface.co/xinsir/controlnet-union-sdxl-1.0",
+        "license": "Apache-2.0",
+        "eligibility": "LAB_ONLY"
+      },
+      "mode": "CANNY",
+      "strength": 0.6,
+      "begin": 0,
+      "end": 1,
+      "canny_thresholds": [
+        0.35,
+        0.75
+      ]
+    },
+    "masked_img2img": {
+      "denoise_range": [
+        0.25,
+        0.45
+      ]
+    }
+  },
+  "references": [
+    {
+      "file": {
+        "path": "references/private/HUMAN_MALE_FEMALE_V3.png",
+        "sha256": "b95e4666a3b3caae543e3ba4663cce8d7f9ad3d026f381cca2231fee04d841c5"
+      },
+      "role": "REVIEW",
+      "rights": "Owner reference. Local review only."
+    }
+  ],
+  "license_policy": {
+    "production": "REVIEW_REQUIRED",
+    "excluded_weights": [
+      "ral-vxl.safetensors"
+    ],
+    "decision_uri": "docs/decisions/FACT-D21-civitai-voxel-lora-license.md"
+  }
+}

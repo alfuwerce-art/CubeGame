@@ -1,0 +1,580 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Factoria DESIGN-01 style-lock",
+  "description": "Project schema, not a production API. Cross-contract rules are in ASSET_DATA_CONTRACTS.md.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "example": {
+      "type": "boolean"
+    },
+    "style_target_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "checkpoint": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "$ref": "#/$defs/artifact"
+        },
+        "family": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri"
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1
+        },
+        "eligibility": {
+          "enum": [
+            "LAB_ONLY",
+            "APPROVED_FOR_PRODUCTION",
+            "BLOCKED",
+            "REVIEW_REQUIRED"
+          ]
+        }
+      },
+      "required": [
+        "file",
+        "family",
+        "source",
+        "license",
+        "eligibility"
+      ],
+      "additionalProperties": false
+    },
+    "loras": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "object",
+            "properties": {
+              "file": {
+                "$ref": "#/$defs/artifact"
+              },
+              "family": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+              },
+              "source": {
+                "type": "string",
+                "format": "uri"
+              },
+              "license": {
+                "type": "string",
+                "minLength": 1
+              },
+              "eligibility": {
+                "enum": [
+                  "LAB_ONLY",
+                  "APPROVED_FOR_PRODUCTION",
+                  "BLOCKED",
+                  "REVIEW_REQUIRED"
+                ]
+              }
+            },
+            "required": [
+              "file",
+              "family",
+              "source",
+              "license",
+              "eligibility"
+            ],
+            "additionalProperties": false
+          },
+          "model_strength": {
+            "type": "number"
+          },
+          "clip_strength": {
+            "type": "number"
+          },
+          "trigger": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "model",
+          "model_strength",
+          "clip_strength",
+          "trigger"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "sampling": {
+      "type": "object",
+      "properties": {
+        "sampler": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+        },
+        "scheduler": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+        },
+        "steps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cfg": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "denoise": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "batch_size": {
+          "const": 1
+        }
+      },
+      "required": [
+        "sampler",
+        "scheduler",
+        "steps",
+        "cfg",
+        "denoise",
+        "batch_size"
+      ],
+      "additionalProperties": false
+    },
+    "frame_defaults": {
+      "type": "object",
+      "properties": {
+        "resolution_px": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "background": {
+          "$ref": "#/$defs/rgb"
+        },
+        "lighting": {
+          "type": "string",
+          "minLength": 1
+        },
+        "color_space": {
+          "const": "sRGB"
+        }
+      },
+      "required": [
+        "resolution_px",
+        "background",
+        "lighting",
+        "color_space"
+      ],
+      "additionalProperties": false
+    },
+    "style": {
+      "type": "object",
+      "properties": {
+        "block_hierarchy": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "material_classes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        },
+        "positive_prefix": {
+          "type": "string",
+          "minLength": 1
+        },
+        "negative_terms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "palette_defaults": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/pin"
+          },
+          "description": "Pins for the default project palettes; the item profile can select a compatible palette."
+        }
+      },
+      "required": [
+        "block_hierarchy",
+        "material_classes",
+        "detail",
+        "positive_prefix",
+        "negative_terms",
+        "palette_defaults"
+      ],
+      "additionalProperties": false
+    },
+    "conditioning": {
+      "type": "object",
+      "properties": {
+        "controlnet": {
+          "type": "object",
+          "properties": {
+            "model": {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "$ref": "#/$defs/artifact"
+                },
+                "family": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+                },
+                "source": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "license": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "eligibility": {
+                  "enum": [
+                    "LAB_ONLY",
+                    "APPROVED_FOR_PRODUCTION",
+                    "BLOCKED",
+                    "REVIEW_REQUIRED"
+                  ]
+                }
+              },
+              "required": [
+                "file",
+                "family",
+                "source",
+                "license",
+                "eligibility"
+              ],
+              "additionalProperties": false
+            },
+            "mode": {
+              "enum": [
+                "CANNY",
+                "DEPTH"
+              ]
+            },
+            "strength": {
+              "type": "number"
+            },
+            "begin": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "end": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "canny_thresholds": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "model",
+            "mode",
+            "strength",
+            "begin",
+            "end"
+          ],
+          "additionalProperties": false
+        },
+        "ipadapter": {
+          "type": "object",
+          "properties": {
+            "adapter": {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "$ref": "#/$defs/artifact"
+                },
+                "family": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+                },
+                "source": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "license": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "eligibility": {
+                  "enum": [
+                    "LAB_ONLY",
+                    "APPROVED_FOR_PRODUCTION",
+                    "BLOCKED",
+                    "REVIEW_REQUIRED"
+                  ]
+                }
+              },
+              "required": [
+                "file",
+                "family",
+                "source",
+                "license",
+                "eligibility"
+              ],
+              "additionalProperties": false
+            },
+            "encoder": {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "$ref": "#/$defs/artifact"
+                },
+                "family": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+                },
+                "source": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "license": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "eligibility": {
+                  "enum": [
+                    "LAB_ONLY",
+                    "APPROVED_FOR_PRODUCTION",
+                    "BLOCKED",
+                    "REVIEW_REQUIRED"
+                  ]
+                }
+              },
+              "required": [
+                "file",
+                "family",
+                "source",
+                "license",
+                "eligibility"
+              ],
+              "additionalProperties": false
+            },
+            "node_pack_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "weight": {
+              "type": "number"
+            },
+            "begin": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "end": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "adapter",
+            "encoder",
+            "node_pack_version",
+            "weight",
+            "begin",
+            "end"
+          ],
+          "additionalProperties": false
+        },
+        "masked_img2img": {
+          "type": "object",
+          "properties": {
+            "denoise_range": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "denoise_range"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "$ref": "#/$defs/artifact"
+          },
+          "role": {
+            "enum": [
+              "STYLE_TARGET",
+              "CONDITIONING",
+              "REVIEW"
+            ]
+          },
+          "rights": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "file",
+          "role",
+          "rights"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "license_policy": {
+      "type": "object",
+      "properties": {
+        "production": {
+          "enum": [
+            "REVIEW_REQUIRED",
+            "APPROVED",
+            "BLOCKED"
+          ]
+        },
+        "excluded_weights": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "decision_uri": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "production",
+        "excluded_weights",
+        "decision_uri"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "version",
+    "example",
+    "style_target_id",
+    "checkpoint",
+    "loras",
+    "sampling",
+    "frame_defaults",
+    "style",
+    "conditioning",
+    "references",
+    "license_policy"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "pin": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "rgb": {
+      "type": "string",
+      "pattern": "^#[a-fA-F0-9]{6}$"
+    }
+  }
+}
