@@ -7,14 +7,15 @@
 ## 1. Рабочая дорожная карта
 
 - [ROADMAP_DRAFT.md](ROADMAP_DRAFT.md) — **действующая дорожная карта CubeGame** (G0…G15). Файл сохранил историческое имя `*_DRAFT`, но содержательно это рабочая карта: решение продюсера 2026-11-17, коммит `4e36f1539d787e6a03f85d1f9fc92efcb1b64a79`.
-- [ACTIVE_STAGE](../ACTIVE_STAGE.md) — что делается прямо сейчас. Текущий этап — **G0 DEVELOPMENT PIVOT / BASELINE FREEZE**.
+- [ACTIVE_STAGE](../ACTIVE_STAGE.md) — что делается прямо сейчас. Текущий основной фокус — **G3 HUMANOID CHARACTER FACTORY**, начиная с G3-0 Humanoid Race Mannequins.
 
 ## 2. Текущий этап и его документы
 
-- [G0_EXISTING_WORK_REUSE_AUDIT.md](G0_EXISTING_WORK_REUSE_AUDIT.md) — что из уже сделанного переиспользуется: `KEEP / REWORK / RESEARCH / RETIRE` по системам.
-- [G2_WORLD_FOUNDATION_AUDIT.md](G2_WORLD_FOUNDATION_AUDIT.md) — фактическое состояние генерации мира.
-- [G1_TECHNICAL_FOUNDATION_STAGE.md](../stages/G1_TECHNICAL_FOUNDATION_STAGE.md) — исполнимый план следующего этапа.
-- [G0_DEVELOPMENT_PIVOT_REPORT.md](../reports/G0_DEVELOPMENT_PIVOT_REPORT.md) — отчёт G0: baseline, reuse summary, риски.
+- [G3_HUMANOID_CHARACTER_FACTORY_STAGE.md](../stages/G3_HUMANOID_CHARACTER_FACTORY_STAGE.md) — исполнимый порядок G3-0…G3-6.
+- [D94](../decisions/D94-g3-humanoid-modular-appearance.md) — утверждённое решение: общая библиотека внешности игрока/NPC, простой детерминированный race-based randomizer, существа по фактической потребности.
+- [M1_MODEL_ANIMATION_EVOLUTION_STAGE.md](../stages/M1_MODEL_ANIMATION_EVOLUTION_STAGE.md) — архитектурный reference Factory/rig/animation, синхронизированный с D94.
+- [G2_WORLD_FOUNDATION_AUDIT.md](G2_WORLD_FOUNDATION_AUDIT.md) — принятый фундамент мира, на чьи entity seams подключается G3.
+- [G0_EXISTING_WORK_REUSE_AUDIT.md](G0_EXISTING_WORK_REUSE_AUDIT.md) и [G1_RUNTIME_REUSE_MATRIX.md](G1_RUNTIME_REUSE_MATRIX.md) — история выбора текущего runtime baseline.
 
 ## 3. Главный источник игровых требований
 
@@ -27,7 +28,7 @@
 - [ADR-0001 — модульный монолит](../architecture/ADR-0001-modular-monolith.md) — **утверждено**.
 - [ARCHITECTURE_PROPOSAL.md](ARCHITECTURE_PROPOSAL.md) — предложение архитектуры v0.2, не утверждено целиком; ADR-0001 и действующие решения имеют приоритет.
 - [UNITY_REUSE_MAP.md](../architecture/UNITY_REUSE_MAP.md) — какие подсистемы закрывает Unity 6.3, а что пишем сами.
-- [UNIVERSAL_ENTITY_CONTRACT.md](../architecture/UNIVERSAL_ENTITY_CONTRACT.md), [UNIVERSAL_ASSET_ANIMATION_PIPELINE.md](../architecture/UNIVERSAL_ASSET_ANIMATION_PIPELINE.md) — контракты для будущего G3.
+- [UNIVERSAL_ENTITY_CONTRACT.md](../architecture/UNIVERSAL_ENTITY_CONTRACT.md), [UNIVERSAL_ASSET_ANIMATION_PIPELINE.md](../architecture/UNIVERSAL_ASSET_ANIMATION_PIPELINE.md) — архитектурные контракты, используемые текущим G3.
 - [WORKFLOW_PROTOCOL_DRAFT.md](WORKFLOW_PROTOCOL_DRAFT.md) — исторический черновик протокола работы, не действующий регламент.
 
 ## 5. Legacy: старый M0 (не active target)
