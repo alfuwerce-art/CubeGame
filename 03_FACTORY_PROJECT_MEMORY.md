@@ -1,3 +1,5 @@
+**HUMANOID VISUAL ASSET FACTORY · ARCHITECTURE APPROVED IN PRINCIPLE / IMPLEMENTATION PLANNED · 18.11.2026.** Владелец потребовал организовать генерацию всех визуальных элементов гуманоидов: body, face, hair, race features, clothing, armor, weapons, accessories, palettes/materials и сборочных recipes. Целевая схема — ComfyUI → проверка изображения → процедурная геометрия или проверенный 3D-конвертер → Blender fit/rig/socket → валидация → библиотека → seeded NPC assembly. Первый сквозной тест на ограниченном комплекте, без массового batch и без изменений Unity. [План](docs/planning/HUMANOID_VISUAL_ASSET_FACTORY.md).
+
 # CubeGame Asset & Animation Factory Lab — межчатовая память
 
 **COMFY-STYLE-08 · READY_FOR_OWNER_REVIEW · 14.11.2026.** Сохранены параметры и доступный архивный PNG Human, проверены 16 сочетаний расы и пола Alpha, подготовлены восемь карточек и восемь фронтальных кадров ComfyUI. ral-vxl использован в локальном эксперименте по запросу владельца. Каноническое имя Fildor / Enderman и связь Dragonkin / Lizard ждут решения владельца. [Отчёт и визуальные наблюдения](docs/tasks/COMFY-STYLE-08_RUN_REPORT.md).
