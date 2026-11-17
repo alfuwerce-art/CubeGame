@@ -1,10 +1,10 @@
 # M1 — эволюция моделей, ригов и анимаций CubeGame
 
-**Статус:** `APPROVED CONCEPT / FUTURE STAGE / NOT_AUTHORIZED`  
-**Направление roadmap:** M1 — модели, анимации и визуал.  
-**Концептуальные решения утверждены продюсером:** 2026-11-10.  
-**Начало исполнения:** только после закрытия M0 и отдельного решения продюсера.  
-**Назначение документа:** зафиксировать утверждённую архитектурную концепцию создания моделей, модульных персонажей/существ, ригов, анимаций, оружия и производственного конвейера CubeGame. Детальная техническая реализация, конкретные классы, форматы данных и инструменты будут дополнительно спроектированы при фактическом открытии M1.
+**Статус:** `APPROVED CONCEPT / ACTIVE G3 REFERENCE`  
+**Направление roadmap:** G3 — Character & Creature Factory. Историческое имя документа M1 сохранено ради ссылок.  
+**Концептуальные решения утверждены продюсером:** 2026-11-10; производственный порядок гуманоидов уточнён [D94](../decisions/D94-g3-humanoid-modular-appearance.md) 2026-11-17.  
+**Текущий исполнимый этап:** [G3 Humanoid Character Factory](G3_HUMANOID_CHARACTER_FACTORY_STAGE.md).  
+**Назначение документа:** зафиксировать утверждённую архитектурную концепцию создания моделей, модульных персонажей/существ, ригов, анимаций, оружия и производственного конвейера CubeGame. D94 уточняет порядок: сначала все гуманоидные расовые манекены и библиотека редактора, затем общий recipe/randomizer/rig/equipment/world binding; негуманоидные существа производятся по фактической потребности контента.
 
 ---
 
@@ -152,18 +152,29 @@ NPC GENERATOR             ├→ ENTITY RECIPE → CHARACTER / CREATURE FACTORY
 ENEMY GENERATOR           ┘
 ```
 
-Игрок выбирает параметры вручную.
+Игрок выбирает допустимые параметры внешности вручную.
 
-NPC и противники получают те же параметры из:
+NPC использует **тот же набор модулей**, но получает внешность из простого расового randomizer. Population/world logic сначала определяет расу и постоянный `PersistentNpcId`, после чего:
 
-- seed;
-- правил вида;
-- биома;
-- фракции;
-- роли;
-- уровня;
-- экипировки;
-- генератора мира.
+```text
+WorldSeed + PersistentNpcId
+        ↓
+AppearanceSeed
+        ↓
+RaceAppearanceProfile
+        ↓
+random / weighted choice из разрешённых модулей расы
+        ↓
+AppearanceRecipe
+        ↓
+Character / Creature Factory
+```
+
+Внешность NPC должна быть детерминирована: тот же NPC после save/load получает то же лицо, волосы, клыки, рога и другие физические признаки.
+
+Биом, фракция, профессия, уровень и combat role **по умолчанию не усложняют randomizer физической внешности**. Они могут независимо влиять на экипировку, поведение и gameplay state.
+
+Каждая раса задаёт собственные допустимые визуальные слоты и варианты: например Orc может иметь клыки, рогатая/драконоподобная гуманоидная раса — рога/гребни, Dwarf — собственные бороды и пропорции.
 
 ## 2.5. Производственная единица — Archetype Package
 
@@ -376,6 +387,10 @@ Humanoid
 
 Разные виды получают собственные пропорции, геометрию и допустимые части, но по возможности используют один стабильный humanoid rig contract.
 
+Для каждой поддерживаемой гуманоидной расы сначала создаётся **базовый mannequin** (и отдельная sex/body variation, если она реально меняет базовую геометрию редактора). Манекен задаёт тело, пропорции, modular boundaries, sockets и интерфейс рига; он не является готовым NPC.
+
+Над манекеном существует `RaceAppearanceProfile` — каталог разрешённых для этой расы модулей и вероятностей: face/head, hair, beard/moustache, skin/body color, hair color, ears, tusks/fangs, horns/crests и другие расовые признаки.
+
 ---
 
 # 8. Телосложения и пропорции гуманоидов
@@ -459,28 +474,33 @@ Character rebuilt / updated
 
 Таким образом визуальный редактор игрока автоматически проверяет ту же систему, которой потом пользуется мир.
 
+**Правило D94:** Character Creator и NPC randomizer не имеют отдельных библиотек внешности. Редактор выбирает значения `RaceAppearanceProfile` вручную, NPC randomizer выбирает их автоматически; оба получают один и тот же `AppearanceRecipe` и проходят один `Humanoid Builder`.
+
 ---
 
 # 10. Генерация гуманоидных NPC и противников
 
-NPC Generator и Enemy Generator должны формировать тот же recipe.
+Генерация внешности NPC должна быть простой и дешёвой.
 
-Пример:
+World/population system отвечает за:
+
+- `PersistentNpcId`;
+- расу;
+- позицию/settlement;
+- gameplay role/state.
+
+Appearance system отвечает только за стабильную физическую внешность:
 
 ```text
-WORLD SEED
+RACE + PERSISTENT NPC ID + WORLD SEED
 ↓
-SETTLEMENT / FACTION RULES
+APPEARANCE SEED
 ↓
-ROLE
+RACE APPEARANCE PROFILE
 ↓
-SPECIES RULES
+BODY / FACE / HAIR / BEARD / COLORS / RACE TRAITS
 ↓
-BODY / FACE / PART VARIATION
-↓
-EQUIPMENT
-↓
-ENTITY RECIPE
+APPEARANCE RECIPE
 ↓
 HUMANOID FACTORY
 ```
@@ -488,22 +508,32 @@ HUMANOID FACTORY
 Пример результата:
 
 ```text
-Orc Warrior #1849
+PersistentNpcId = settlement:42:npc:17
+Race = Orc
+AppearanceSeed = deterministic
 
-Species = Orc
 Body = Heavy
-Height = 1.07
-Torso = 03
-Arms = 02
-Head = 09
-Tusks = 04
+Head = OrcHead_09
+Tusks = Tusks_04
 Hair = None
-
-Weapon = Axe
-Armor = Medium
+SkinColor = OrcSkin_03
 ```
 
-Именно эта система должна позволить создавать в мире множество визуально отличающихся гуманоидов без хранения отдельной полной модели и анимационной библиотеки для каждого.
+Одежда, броня, оружие, профессия и combat role являются **отдельным слоем** и могут меняться независимо от стабильной внешности NPC.
+
+Именно эта система позволяет создавать большое количество визуально отличающихся гуманоидов без хранения отдельной полной модели на каждую комбинацию.
+
+## 10.1. Утверждённый производственный порядок G3
+
+1. **G3-0 — Humanoid Race Mannequins** — базовые манекены всех поддерживаемых гуманоидных рас и необходимых sex/body variations.
+2. **G3-1 — Character Editor Visual Library** — все визуальные категории редактора для каждой расы.
+3. **G3-2 — AppearanceRecipe + Modular Assembly** — один общий assembly path игрока и NPC.
+4. **G3-3 — Race-based NPC Appearance Randomizer** — простой детерминированный randomizer через `WorldSeed + PersistentNpcId`.
+5. **G3-4 — Humanoid Rig + Base Animations** — общий humanoid rig contract и базовые animation packages с расовыми/body corrections при необходимости.
+6. **G3-5 — Equipment / Armor / Weapon Modules** — одежда, броня и оружие отдельными модулями.
+7. **G3-6 — World NPC Integration** — подключение Factory к G2-1 `EntityDefinition/EntityVisualRecipe` и population runtime.
+
+Подробное исполнимое ТЗ: [G3_HUMANOID_CHARACTER_FACTORY_STAGE.md](G3_HUMANOID_CHARACTER_FACTORY_STAGE.md).
 
 ---
 
@@ -1858,63 +1888,35 @@ Batch не отменяет human visual review.
 
 ---
 
-# 49. Итоговая последовательность M1
+# 49. Итоговая последовательность M1 / G3
 
 ```text
-M0 CLOSED
+G2-1 WORLD / ENTITY SEAMS ACCEPTED
 ↓
-M1 DESIGN REVIEW
+G3-0 HUMANOID RACE MANNEQUINS
 ↓
-DETAILED FACTORY IMPLEMENTATION PLAN
+G3-1 CHARACTER EDITOR VISUAL LIBRARY
 ↓
-EXPERIMENT HARNESS
+G3-2 APPEARANCE RECIPE + MODULAR ASSEMBLY
 ↓
-FIRST HUMANOID MODULAR MODEL
+G3-3 SIMPLE RACE-BASED NPC RANDOMIZER
 ↓
-CG_HUMANOID RIG CONTRACT
+G3-4 COMMON HUMANOID RIG + BASE ANIMATIONS
 ↓
-ENTITY RECIPE
+G3-5 EQUIPMENT / ARMOR / WEAPON MODULES
 ↓
-HUMANOID BUILDER
+G3-6 WORLD NPC INTEGRATION
 ↓
-BASE LOCOMOTION
+HUMANOID SYSTEM PROVEN
 ↓
-FIRST WEAPON / COMBAT PACKAGE
+NON-HUMANOID CREATURE PACKAGE ONLY WHEN CURRENT CONTENT REQUIRES IT
 ↓
-IK / PROCEDURAL
-↓
-HUMAN STANDARD + ORC HEAVY
-↓
-REUSE PROVEN
-↓
-2 → 5 → 10 HUMANOIDS
-↓
-HUMANOID FAMILY ANCHORS
-↓
-QUADRUPED
-↓
-FLOATING
-↓
-AVIAN / UNUSUAL AVIAN
-↓
-INSECT / ARACHNID
-↓
-OTHER REQUIRED ARCHETYPES
-↓
-1 → 2 → 5 → 10 FOR EACH FAMILY
-↓
-25
-↓
-50
-↓
-CONTROLLED PRODUCTION BATCHES
-↓
-NEW ORIGINAL CONTENT THROUGH THE SAME FACTORY
+REUSE THE SAME CREATURE FACTORY ARCHITECTURE
 ```
 
 Главный принцип моделей:
 
-> **не создавать каталог несвязанных моделей — создавать модульные entities, совместимые с утверждёнными anatomy/rig contracts.**
+> **не создавать каталог несвязанных готовых NPC — создавать расовые манекены и совместимые модульные entities через общий recipe.**
 
 Главный принцип анимаций:
 
@@ -1922,15 +1924,15 @@ NEW ORIGINAL CONTENT THROUGH THE SAME FACTORY
 
 Главный принцип генерации мира:
 
-> **Character Creator, NPC Generator и Enemy Generator должны использовать один и тот же EntityRecipe и одну и ту же Character / Creature Factory.**
+> **Character Creator и NPC Generator используют одну библиотеку расовых visual modules и один Humanoid Factory; игрок выбирает модули вручную, NPC — простым детерминированным randomizer.**
 
 Главный принцип существ:
 
-> **не загонять всё в один skeleton — создавать ограниченное число хорошо доказанных anatomy/rig archetypes и использовать общую Factory поверх них.**
+> **не производить весь каталог существ заранее. Creature Factory остаётся общей технологией, а конкретные негуманоидные семьи создаются по фактической потребности региона, противника, данжа или босса.**
 
 Главный принцип масштабирования:
 
-> **сначала доказать качество на одном эталоне, затем доказать повторное использование, затем масштабировать 2 → 5 → 10 → 25 → 50 → batch.**
+> **масштабировать доказанную технологию там, где это нужно продукту; последовательность 1 → 2 → 5 → 10 → batch является методом проверки throughput, а не обязательством заранее изготовить все creature families.**
 
 ---
 
