@@ -1,11 +1,25 @@
 # CubeGame — PROJECT MEMORY
 
-**Updated:** 2026-11-14  
-**Canonical branch:** `integration/m0-all`  
-**Current plan:** [D92 — full Alpha-to-Unity port](docs/decisions/D92-m0-full-alpha-unity-port.md)  
-**Current stage:** [M0 ALPHA FULL UNITY PORT](docs/ACTIVE_STAGE.md) — ACTIVE / REWORKED
+**Updated:** 2026-11-17
+**Canonical branch:** `integration/m0-all`
+**Текущее направление:** [D93 — CubeGame как собственная игра](docs/decisions/D93-development-pivot-own-game.md) (2026-11-17)
+**Рабочая карта:** [ROADMAP_DRAFT](docs/planning/ROADMAP_DRAFT.md) · **Текущий этап:** [ACTIVE_STAGE — G0 DEVELOPMENT PIVOT](docs/ACTIVE_STAGE.md)
 
-## 0. D92 — переоценка M0
+## 0. G0 — DEVELOPMENT PIVOT (2026-11-17)
+
+Решение продюсера: **CubeGame разрабатывается как самостоятельная игра**. Полный перенос Cube World Alpha 2013 прекращён как active target. GDD и утверждённые игровые решения не пересобираются; меняется способ разработки и порядок этапов.
+
+- Alpha 2013 = источник исследований, алгоритмов, формул, инженерного референса. Не спецификация.
+- Старый **M0 ALPHA FULL UNITY PORT** → `LEGACY / RESEARCH BASE / NOT A RELEASE TARGET`. P7/P8/P9/P10 не продолжаются.
+- Код, тесты, отчёты и decompilation evidence сохраняются. Принцип: `REUSE BEFORE REWRITE`.
+- Разбор существующей работы: [G0 reuse audit](docs/planning/G0_EXISTING_WORK_REUSE_AUDIT.md).
+- Состояние генерации мира: [G2 world audit](docs/planning/G2_WORLD_FOUNDATION_AUDIT.md).
+- Следующий этап: [G1 Technical Foundation](docs/stages/G1_TECHNICAL_FOUNDATION_STAGE.md).
+- Baseline и результаты проверок: [G0 report](docs/reports/G0_DEVELOPMENT_PIVOT_REPORT.md).
+
+Документы ниже в этом файле описывают **историю** M0/D90/D92 и остаются как evidence.
+
+## 0a. D92 — переоценка M0 (историческая схема)
 
 Продюсер отклонил старый критерий, при котором наличие отдельных подсистем и зелёных тестов трактовалось как перенос игры. D90 как активная схема исполнения superseded.
 
@@ -13,7 +27,9 @@
 
 Текущий implementation checkpoint: `codex/m0-p6-alpha-menu-hud` @ `fb4e0d5` — P0–P6 выполнены как `PARTIAL` (P6 `READY_FOR_PRODUCER_REVIEW`), ни один блок не `PASS`. Документы и отчёты P0–P6 сведены в canonical 2026-11-14, код остаётся в review-ветках. Следующий блок — P7. Сводная таблица — [ACTIVE_STAGE](docs/ACTIVE_STAGE.md).
 
-## 1. Главная цель M0
+## 1. Главная цель M0 (historical, до 2026-11-17)
+
+> `LEGACY` — цель больше не действует. Оставлено как evidence метода.
 
 Полностью перенести одиночную Cube World Alpha 2013 на Unity как связанную игру. Исходный код недоступен, поэтому перенос выполняется через reverse engineering `Cube.exe` и данных Alpha.
 
@@ -25,7 +41,9 @@
 
 Непринятые `UNKNOWN/PARTIAL/PLACEHOLDER_NOT_ALPHA/CUBEGAME_CONTRACT` на обязательном основном пути блокируют закрытие соответствующей системы и M0.
 
-## 2. Alpha parity backlog
+## 2. Alpha parity backlog (historical)
+
+> `LEGACY` — реестр больше не является blocking для продукта; см. [параметры backlog](docs/planning/M0_ALPHA_PARITY_BACKLOG.md).
 
 [M0 Alpha Parity Backlog](docs/planning/M0_ALPHA_PARITY_BACKLOG.md) теперь является **blocking registry** для обязательного Alpha single-player baseline: долг нельзя просто отложить в M1/M2, если без него M0 перестаёт быть переносом оригинальной игры.
 

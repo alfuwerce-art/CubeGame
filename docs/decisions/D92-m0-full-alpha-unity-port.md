@@ -1,5 +1,9 @@
 # D92 — M0: полный перенос Cube World Alpha 2013 в Unity
 
+> **LEGACY — superseded as active development target by 2026-11-17 development pivot.**
+> Решение сохраняется как история метода и как доказательная база. Полный Alpha port больше не является
+> active target. Действующее направление: [D93](D93-development-pivot-own-game.md), [ACTIVE_STAGE](../ACTIVE_STAGE.md).
+
 **Дата:** 2026-11-11  
 **Решение продюсера:** текущий M0 полностью перерабатывается ради исходной цели — перенести Cube World Alpha 2013 как цельную игру на Unity, а не собрать набор похожих подсистем.  
 **Статус:** APPROVED PLAN. Это не ACCEPTED результата M0.

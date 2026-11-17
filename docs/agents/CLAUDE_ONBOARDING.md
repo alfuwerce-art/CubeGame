@@ -162,6 +162,9 @@ STATUS: PASS | FAIL | BLOCKED | NOT_VERIFIED
 
 ## 12. Текущее состояние (сводка, сверять с `ACTIVE_STAGE.md`)
 
+> **LEGACY** — сводка ниже относится к эпохе S05A/M0 и не является текущей задачей.
+> Активный этап: [ACTIVE_STAGE — G0](../ACTIVE_STAGE.md). Действующее направление: [D93](../decisions/D93-development-pivot-own-game.md).
+
 - **`S05A-1` → ACCEPTED** (D50): собран один 8-узловой технический гуманоид из `.cub`-частей, один собственный цикл `technical_walk_NOT_ALPHA`. Масштабы/pivots/tint/анимации Alpha **не** восстановлены.
 - **`S05A-2` → READY_FOR_REVIEW, не ACCEPTED** (D51): пропорции (оружие ×0.6 по константе из кода), tint по маске, хват меча (D52, GRIP), тайминги фаз атаки (D53, `RECONSTRUCTED_FROM_EVIDENCE`). Оригинальная атака не восстановлена (`ORIGINAL_NOT_ALPHA`), живой захват Alpha — `BLOCKED`.
 - **`S05B` (массовое производство моделей/анимаций) → NOT_AUTHORIZED.**

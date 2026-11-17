@@ -1,6 +1,9 @@
 # M0-F4 PRESENTATION
 
-**Status:** ACTIVE  
+> **LEGACY — superseded as active development target by 2026-11-17 development pivot.**
+> ТЗ сохранено как evidence выполненной работы. Активный этап: [ACTIVE_STAGE — G0](../ACTIVE_STAGE.md).
+
+**Status (historical):** ACTIVE  
 **Canonical base:** `integration/m0-all` после принятого M0-F3  
 **Plan:** D90  
 **Parity debts:** [M0 Alpha Parity Backlog](../planning/M0_ALPHA_PARITY_BACKLOG.md)

@@ -1,63 +1,105 @@
-# ACTIVE STAGE — M0 ALPHA FULL UNITY PORT
+# ACTIVE STAGE — G0 DEVELOPMENT PIVOT / BASELINE FREEZE
 
-**Decision:** [D92 — full Alpha-to-Unity port](decisions/D92-m0-full-alpha-unity-port.md)  
-**Stage:** [M0 ALPHA FULL UNITY PORT](stages/M0_ALPHA_FULL_UNITY_PORT_STAGE.md)  
-**Status:** `ACTIVE / REWORKED`  
-**Canonical branch:** `integration/m0-all` (документы D92 и отчёты P0–P6 сведены 2026-11-14; код P0–P6 ещё в review-ветках)  
-**Последний implementation checkpoint:** `codex/m0-p6-alpha-menu-hud` @ `fb4e0d5`  
-**Текущий блок:** **P7 — QUESTS / CITIES / DUNGEONS / GAMEPLAY CONTENT** (срез A — миссии — готов к ревью)
+**Canonical branch:** `integration/m0-all` · **G0 work branch:** `deepseek/g0-development-pivot`
+**Status:** `ACTIVE` — G0 выполняется
+**Решение продюсера:** 2026-11-17 — CubeGame разрабатывается как **собственная игра**; полный перенос Cube World Alpha 2013 прекращён как active target.
+**Рабочая дорожная карта:** [ROADMAP_DRAFT.md](planning/ROADMAP_DRAFT.md) (коммит `4e36f1539d787e6a03f85d1f9fc92efcb1b64a79`)
+**G0 отчёт:** [G0_DEVELOPMENT_PIVOT_REPORT.md](reports/G0_DEVELOPMENT_PIVOT_REPORT.md)
 
-## Решение продюсера 2026-11-11
+---
 
-M0 полностью переработан. Цель — перенести Cube World Alpha 2013 как цельную одиночную игру на Unity. Старый подход «подсистема существует + тест проходит = этап готов» больше не используется.
+## 1. Что мы делаем сейчас
 
-D90 F1–F5 и прежние F1–F4 результаты сохраняются как инженерные checkpoint'ы и доказательная база, но **не доказывают parity соответствующей системы**.
+CubeGame — самостоятельная 3D action RPG с кубическим voxel-миром, процедурной генерацией, живыми NPC, боем, RPG-прогрессией и собственным визуалом. Название игры не утверждено.
 
-## Состояние P-блоков
+Что **не** изменилось этим pivot:
 
-Ветки идут одной цепочкой: каждая следующая содержит все предыдущие
-(`review/m0-full-unity-port-rework` ⊂ P0 ⊂ P1-research ⊂ P1 ⊂ … ⊂ P6). Ни один блок не имеет `PASS`.
+- GDD и утверждённые игровые решения сохраняются: [DECISIONS_001-036.md](planning/DECISIONS_001-036.md);
+- идея мира, NPC, городов, квестов, развития, моделей, анимаций, графики и будущих систем не пересобирается;
+- ранее сделанный код, тесты, исследования и отчёты не выбрасываются.
 
-| Блок | Ветка @ коммит | Статус | Отчёт |
-|---|---|---|---|
-| P0 Boot / menu / input / save selection | `deepseek/m0-full-port-p0` @ `6e0c16c` | `PARTIAL` (логика — кандидат, presentation-fix) | [P0](reports/M0_ALPHA_FULL_PORT_P0_REPORT.md) |
-| P1 research: code parity | `codex/m0-alpha-code-parity-p1` @ `c1f9f75` | `PARTIAL` | [P1 code parity](reports/M0_ALPHA_CODE_PARITY_P1_REPORT.md) |
-| P1 World core / streaming / render distance | `codex/m0-p1-world-streaming` @ `0763c83` | `PARTIAL` | [P1](reports/M0_ALPHA_FULL_PORT_P1_WORLD_REPORT.md) |
-| P2 Environment / objects / structures | `codex/m0-p2-environment` @ `85d4e13` | `PARTIAL` | [P2](reports/M0_ALPHA_FULL_PORT_P2_ENVIRONMENT_REPORT.md) |
-| P3 Population / NPC / creature AI | `codex/m0-p3-population-ai` @ `f265108` | `PARTIAL` | [P3](reports/M0_ALPHA_FULL_PORT_P3_POPULATION_AI_REPORT.md) |
-| P4 Action / combat / animation | `codex/m0-p4-action-combat` @ `f0d2b71` | `PARTIAL` | [P4](reports/M0_ALPHA_FULL_PORT_P4_ACTION_COMBAT_REPORT.md), [coverage](reports/M0_ALPHA_FULL_PORT_P4_ACTION_COVERAGE.tsv) |
-| P5 Character / items / progression | `codex/m0-p5-character-items-progression` @ `01930ff` | `PARTIAL` | [P5](reports/M0_ALPHA_FULL_PORT_P5_CHARACTER_ITEMS_PROGRESSION_REPORT.md) |
-| P6 UI / HUD / map / journal | `codex/m0-p6-alpha-menu-hud` @ `fb4e0d5` | `READY_FOR_PRODUCER_REVIEW` / `PARTIAL` | [P6](reports/M0_ALPHA_FULL_PORT_P6_ALPHA_UI_REPORT.md) |
-| P7 Quests / cities / dungeons / content | `codex/m0-p7-quests-cities-dungeons` @ `23e0f7f` | `PARTIAL` — срез A миссии `READY_FOR_PRODUCER_REVIEW` | [P7](reports/M0_ALPHA_FULL_PORT_P7_QUESTS_REPORT.md) (в ветке P7) |
-| P8 Audio / VFX / time / presentation | — | `NOT_STARTED` | — |
-| P9 Persistence | — | `NOT_STARTED` | — |
-| P10 Final parity run | — | `NOT_STARTED` | — |
+Что изменилось: **способ разработки и порядок этапов**. Alpha 2013 больше не является спецификацией CubeGame. Она остаётся источником исследований, алгоритмов, формул и инженерных референсов, когда существует конкретный вопрос CubeGame.
 
-Дополнительно, как вход и история:
-- [Runtime recovery](reports/M0_ALPHA_RUNTIME_RECOVERY_REPORT.md) — упаковка AlphaContent, модели, отсутствие magenta.
-- [M0-F4 presentation](reports/M0_F4_PRESENTATION_REPORT.md) — `codex/m0-f4-presentation` @ `60f24be`, инженерный checkpoint до D92 (RIFF/WAV, UI Toolkit baseline); вошёл в цепочку P-веток.
-- `deepseek/m0-f5-stable-launcher` @ `44550b8` — стабильный лаунчер и первая Windows-сборка; **не** входит в цепочку P-веток.
+---
 
-Открытые долги каждого блока — в [parity backlog](planning/M0_ALPHA_PARITY_BACKLOG.md); `PARTIAL` выше означает, что там есть blocking-записи.
+## 2. Старый M0
 
-## Обязательный метод
+`M0 ALPHA FULL UNITY PORT` переведён в статус:
 
-Для каждого системного контура:
+`LEGACY / RESEARCH BASE / NOT A RELEASE TARGET`
 
-`FIND ORIGINAL CODE → TRACE → DATA/STATE/RNG → SPEC → UNITY IMPLEMENTATION → RUNTIME INTEGRATION → WINDOWS PLAYER → COMPARE → PRODUCER REVIEW`.
+- P7 / P8 / P9 / P10 автоматически **не продолжаются**.
+- Alpha parity backlog ([M0_ALPHA_PARITY_BACKLOG.md](planning/M0_ALPHA_PARITY_BACKLOG.md)) больше **не** blocking registry продукта; это исторический исследовательский реестр.
+- Все старые отчёты, decompilation evidence, таблицы, фикстуры и тесты сохраняются как доказательная база.
+- Исторические документы M0 не переписываются задним числом; на них стоит пометка `LEGACY`.
 
-`UNKNOWN`, `PARTIAL`, `PLACEHOLDER_NOT_ALPHA` и непринятый `CUBEGAME_CONTRACT` на обязательном основном пути блокируют PASS системы.
+---
 
-## Следующий шаг — P7
+## 3. Порядок этапов
 
-База: `codex/m0-p6-alpha-menu-hud` @ `fb4e0d5`. Объём — [P7 в ТЗ этапа](stages/M0_ALPHA_FULL_UNITY_PORT_STAGE.md#p7--quests--cities--dungeons--gameplay-content):
-mission generation/types/targets/rewards, city NPC roles/services, dungeon entry/layout/population, bosses/chests/rewards, pets.
+| Этап | Смысл | Документ |
+|---|---|---|
+| **G0** | pivot, reuse map, baseline freeze | этот файл, [G0 reuse audit](planning/G0_EXISTING_WORK_REUSE_AUDIT.md) |
+| **G1** | Technical Foundation: устойчивая платформа CubeGame | [G1_TECHNICAL_FOUNDATION_STAGE.md](stages/G1_TECHNICAL_FOUNDATION_STAGE.md) |
+| **G2** | World Foundation: генерация как технология CubeGame | [G2_WORLD_FOUNDATION_AUDIT.md](planning/G2_WORLD_FOUNDATION_AUDIT.md) |
+| **G3** | Character & Creature Factory | [M1](stages/M1_MODEL_ANIMATION_EVOLUTION_STAGE.md) как технический референс |
+| G4–G8 | combat, NPC/living world, RPG/economy, core gameplay prototype, vertical slice | [Roadmap](planning/ROADMAP_DRAFT.md) |
+| G9–G12 | production: world/visual, characters, content/quests, UI/UX/audio/VFX | [Roadmap](planning/ROADMAP_DRAFT.md) |
+| G13–G15 | Alpha / Beta / Release Candidate | [Roadmap](planning/ROADMAP_DRAFT.md) |
 
-Канонический код ещё не содержит P0–P6: перенос кода в `integration/m0-all` — решение продюсера после ревью.
+Ближайшая цель после G0 — **G1 Technical Foundation**, затем G2 World Foundation и G3 Character/Creature Factory как параллельные крупные направления.
 
-## Источники
+---
 
-- [D92](decisions/D92-m0-full-alpha-unity-port.md)
-- [Stage matrix](stages/M0_ALPHA_FULL_UNITY_PORT_STAGE.md)
-- [Alpha parity backlog](planning/M0_ALPHA_PARITY_BACKLOG.md)
-- [Root-cause audit](reports/M0_ALPHA_TO_UNITY_ROOT_CAUSE_AUDIT.md)
+## 4. Что запрещено без отдельного решения продюсера
+
+- продолжать P7/P8/P9/P10 старого M0;
+- закрывать Alpha parity backlog ради самого backlog;
+- восстанавливать Alpha UI / audio / VFX / save format ради parity;
+- добиваться побайтового parity с Cube World;
+- удалять результаты старого M0, reverse-engineering evidence и старые отчёты;
+- переписывать GDD и утверждённые игровые решения;
+- начинать проект с нуля или выбрасывать рабочий код за то, что он появился при Alpha port.
+
+Главный принцип: `REUSE BEFORE REWRITE`.
+
+---
+
+## 5. Технический baseline
+
+Зафиксирован в [G0 отчёте](reports/G0_DEVELOPMENT_PIVOT_REPORT.md) и [G1 ТЗ](stages/G1_TECHNICAL_FOUNDATION_STAGE.md): canonical `integration/m0-all` @ `4e36f1539d787e6a03f85d1f9fc92efcb1b64a79`, Unity `6000.3.27f2`, компиляция без ошибок, EditMode/PlayMode прогоны и состояние Windows-сборки.
+
+Важно: каноническая ветка содержит runtime уровня F1–F3. Более поздняя работа P0–P7 находится в отдельных review-ветках (линейная цепь `codex/m0-p1…p7-world-streaming → p3 → p4 → p5 → p6 → p7`). Выбор базовой линии для G1 — первая задача G1, а не скрытое допущение.
+
+---
+
+## 6. Где искать Alpha research
+
+- [docs/research/alpha2013/](research/alpha2013/) — исследования, спецификации поведения, каталоги, таблицы, инструменты;
+- [docs/reports/](reports/) — отчёты P0–P7, F1–F4, D-серии, аудиты;
+- [docs/planning/M0_ALPHA_PARITY_BACKLOG.md](planning/M0_ALPHA_PARITY_BACKLOG.md) — что осталось незакрытым в старом M0;
+- `tools/alpha_*` — извлечение и верификация данных Alpha (только локально, не публикуется).
+
+Исследование Alpha разрешено только под конкретный вопрос CubeGame, в формате:
+
+`CUBEGAME PROBLEM → CURRENT IMPLEMENTATION → ALPHA RESEARCH → EXTERNAL RESEARCH → OPTIONS → CUBEGAME DECISION → IMPLEMENTATION → PLAYTEST`
+
+Не является задачей: «нашли ещё неизвестную Alpha-функцию → надо её восстановить». Если функция не нужна нашей игре, она не blocker.
+
+---
+
+## 7. Definition of Done для любой системы
+
+`SPEC/DESIGN → IMPLEMENTED → INTEGRATED → TESTED → WINDOWS PLAYER → SAVE/LOAD (если применимо) → PERFORMANCE (если применимо) → PLAYTEST → PRODUCER REVIEW`
+
+Статусы: `RESEARCH` · `PROTOTYPE` · `INTEGRATED` · `READY_FOR_PRODUCER_REVIEW` · `ACCEPTED` · `REWORK` · `DEFERRED`.
+
+Старые маркеры `ALPHA_CODE_STATIC / EMULATED_ALPHA_CODE / ALPHA_DECOMPILED / CUBEGAME_CONTRACT / PLACEHOLDER_NOT_ALPHA / PARTIAL / UNKNOWN` остаются допустимыми для **legacy и research** материалов и больше не являются глобальными blockers CubeGame.
+
+`ACCEPTED` ставит только продюсер.
+
+---
+
+## 8. Предыдущие этапы
+
+Предыдущая схема (D92 → M0 ALPHA FULL UNITY PORT, P0–P7) — `LEGACY`, см. [M0_ALPHA_FULL_UNITY_PORT_STAGE.md](stages/M0_ALPHA_FULL_UNITY_PORT_STAGE.md). Историю статусов F1–F4 и P0–P7 смотреть в [PROJECT_MEMORY.md](../PROJECT_MEMORY.md) и в отчётах `docs/reports/M0_*`.

@@ -1,9 +1,15 @@
 # M0 — ALPHA PARITY BACKLOG
 
-**Status:** ACTIVE REFERENCE  
+> **LEGACY — superseded as active development target by 2026-11-17 development pivot.**
+> Это больше **не** blocking registry продукта. Документ остаётся исследовательским реестром:
+> он показывает, какие детали Alpha остались незакрытыми в legacy M0, и используется как evidence,
+> когда конкретный механизм решено воспроизвести. Открытые здесь пункты не являются blockers CubeGame.
+> Активный этап: [ACTIVE_STAGE — G0](../ACTIVE_STAGE.md). Решение: [D93](../decisions/D93-development-pivot-own-game.md).
+
+**Status:** `LEGACY RESEARCH REFERENCE` (ранее `ACTIVE REFERENCE`)  
 **Purpose:** не потерять системы и детали Cube World Alpha 2013, которые в принятой M0-базе остаются `PARTIAL`, `UNKNOWN`, `PLACEHOLDER_NOT_ALPHA` или реализованы как `CUBEGAME_CONTRACT`.
 
-## Правило проекта — D92
+## Правило проекта — D92 (historical)
 
 Этот документ является **blocking registry** полного M0 Alpha→Unity port.
 

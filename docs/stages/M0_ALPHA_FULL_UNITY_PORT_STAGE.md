@@ -1,6 +1,11 @@
 # M0 — ALPHA FULL UNITY PORT
 
-**Status:** ACTIVE / REWORKED BY D92  
+> **LEGACY — superseded as active development target by 2026-11-17 development pivot.**
+> Этот документ сохранён как evidence. Он не задаёт текущие задачи и не должен исполняться.
+> Активный этап: [ACTIVE_STAGE — G0](../ACTIVE_STAGE.md). Рабочая карта: [ROADMAP_DRAFT](../planning/ROADMAP_DRAFT.md).
+> Решение: [D93](../decisions/D93-development-pivot-own-game.md).
+
+**Status (historical):** ACTIVE / REWORKED BY D92  
 **Decision:** [D92](../decisions/D92-m0-full-alpha-unity-port.md)  
 **Implementation checkpoint:** `codex/m0-p6-alpha-menu-hud` @ `fb4e0d5` (P0–P6 `PARTIAL`, см. [ACTIVE_STAGE](../ACTIVE_STAGE.md))  
 **Parity registry:** [M0 Alpha Parity Backlog](../planning/M0_ALPHA_PARITY_BACKLOG.md)

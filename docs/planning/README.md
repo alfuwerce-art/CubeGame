@@ -1,45 +1,51 @@
 # CubeGame — проектные документы
 
-**Рабочее название:** CubeGame; название игры будет выбрано позже.  
-**Дата комплекта:** 2026-11-02  
-**Статус:** проектирование; реализация ещё не начата.
+**Рабочее название:** CubeGame; окончательное название игры не утверждено.
+**Дата обновления:** 2026-11-17.
+**Статус:** CubeGame разрабатывается как **собственная игра**. Реализация идёт с 2026-11-02 и продолжается; формулировка прежних версий этого файла «реализация ещё не начата / текущая фаза — архитектурный разбор» **недействительна**.
 
-## Главный источник требований
-- [DECISIONS_001-036.md](DECISIONS_001-036.md) — **утверждено продюсером**: 36 игровых и организационных решений. В случае расхождения с черновиками приоритет у этого файла.
+## 1. Рабочая дорожная карта
 
-## Документы, требующие отдельной приёмки
-- [ARCHITECTURE_PROPOSAL.md](ARCHITECTURE_PROPOSAL.md) — **предложение архитектуры v0.2**, не утверждено. Unity 6.3 LTS/URP, симуляция, генерация, сохранения, сеть и ассеты — решения для отдельной приёмки.
-- [ROADMAP_DRAFT.md](ROADMAP_DRAFT.md) — **черновик дорожной карты**, не утверждён.
-- [WORKFLOW_PROTOCOL_DRAFT.md](WORKFLOW_PROTOCOL_DRAFT.md) — **черновик протокола работы**, не утверждён.
+- [ROADMAP_DRAFT.md](ROADMAP_DRAFT.md) — **действующая дорожная карта CubeGame** (G0…G15). Файл сохранил историческое имя `*_DRAFT`, но содержательно это рабочая карта: решение продюсера 2026-11-17, коммит `4e36f1539d787e6a03f85d1f9fc92efcb1b64a79`.
+- [ACTIVE_STAGE](../ACTIVE_STAGE.md) — что делается прямо сейчас. Текущий этап — **G0 DEVELOPMENT PIVOT / BASELINE FREEZE**.
 
-Не начинать реализацию на основе черновиков без отдельного решения продюсера об архитектуре и активном этапе. Художественный стиль утверждается по прототипам на графических этапах. GitHub является источником актуальных версий документов.
+## 2. Текущий этап и его документы
 
-**Текущая фаза:** архитектурный разбор. Агенту не разрешено начинать производство ядра до явного утверждения архитектуры и открытия активного этапа. Название игры не утверждено.
+- [G0_EXISTING_WORK_REUSE_AUDIT.md](G0_EXISTING_WORK_REUSE_AUDIT.md) — что из уже сделанного переиспользуется: `KEEP / REWORK / RESEARCH / RETIRE` по системам.
+- [G2_WORLD_FOUNDATION_AUDIT.md](G2_WORLD_FOUNDATION_AUDIT.md) — фактическое состояние генерации мира.
+- [G1_TECHNICAL_FOUNDATION_STAGE.md](../stages/G1_TECHNICAL_FOUNDATION_STAGE.md) — исполнимый план следующего этапа.
+- [G0_DEVELOPMENT_PIVOT_REPORT.md](../reports/G0_DEVELOPMENT_PIVOT_REPORT.md) — отчёт G0: baseline, reuse summary, риски.
 
-## Архитектурные решения и следующий этап
-- [ADR-0001](../architecture/ADR-0001-modular-monolith.md) — **УТВЕРЖДЕНО:** принцип модульного монолита. Это не утверждение всего черновика архитектуры.
-- [ACTIVE_STAGE](../ACTIVE_STAGE.md) — подготовка проверки локальной Alpha; путь предоставлен, версия/запуск ещё не подтверждены.
-- [S00_ALPHA_RESEARCH.md](../stages/S00_ALPHA_RESEARCH.md) — конкретное ТЗ исследования.
-- [S00_COVERAGE_TEMPLATE.md](../stages/S00_COVERAGE_TEMPLATE.md) — пустой шаблон фактов/источников.
+## 3. Главный источник игровых требований
 
-## История обновления источников
+- [DECISIONS_001-036.md](DECISIONS_001-036.md) — **утверждено продюсером**: 36 игровых и организационных решений. Идея игры, мир, NPC, города, квесты, развитие, модели, анимации, графика и будущие системы остаются в силе.
 
-- [D37: стратегия источников](../decisions/D37-source-strategy.md) — историческое решение, принятое до появления скачанной Alpha; частично заменено D38.
-- [S00 v2](../stages/S00_ALPHA_RESEARCH.md) — актуальное ТЗ прямого исследования Alpha, v3.
-- [S00 Comparison](../research/S00_COMPARISON_MATRIX.md) — первоначальная таблица **предложений**, ещё не утверждённых игровых механик.
+**Оговорка о методе (2026-11-17).** Решения D01, D14 и D20 формулируют первый крупный результат как «максимально близкое соответствие Cube World Alpha 2013». Это была формулировка **способа разработки и критерия приёмки**, а не отдельная игровая механика. Решением продюсера от 2026-11-17 полный Alpha port прекращён как active target, поэтому критерий parity из D01/D14/D20 больше не действует как обязательный. Текст утверждённых решений задним числом не изменяется; формальный `CHANGE_REQUEST` к реестру — открытый пункт продюсера, см. [D93](../decisions/D93-development-pivot-own-game.md) и раздел RISKS в G0-отчёте.
 
-- [D38: локальная Alpha](../decisions/D38-alpha-client-available.md) — **актуальное решение**: путь к игре сообщён; перед исследованием агент должен проверить версию/безопасность/запуск.
+## 4. Архитектура
 
-## Актуальное исключение D40 (2026-11-02)
+- [ADR-0001 — модульный монолит](../architecture/ADR-0001-modular-monolith.md) — **утверждено**.
+- [ARCHITECTURE_PROPOSAL.md](ARCHITECTURE_PROPOSAL.md) — предложение архитектуры v0.2, не утверждено целиком; ADR-0001 и действующие решения имеют приоритет.
+- [UNITY_REUSE_MAP.md](../architecture/UNITY_REUSE_MAP.md) — какие подсистемы закрывает Unity 6.3, а что пишем сами.
+- [UNIVERSAL_ENTITY_CONTRACT.md](../architecture/UNIVERSAL_ENTITY_CONTRACT.md), [UNIVERSAL_ASSET_ANIMATION_PIPELINE.md](../architecture/UNIVERSAL_ASSET_ANIMATION_PIPELINE.md) — контракты для будущего G3.
+- [WORKFLOW_PROTOCOL_DRAFT.md](WORKFLOW_PROTOCOL_DRAFT.md) — исторический черновик протокола работы, не действующий регламент.
 
-По прямому решению продюсера **S00-R01 (статический анализ Alpha) и S01-PILOT (минимальный Unity vertical slice) разрешены параллельно**, несмотря на незавершённое общее исследование/архитектурный черновик. Это **не** открывает массовую реализацию всех систем или полное утверждение архитектуры. Unity Hub/Editor не установлены; их установка требует отдельного согласия продюсера на ПК, Blender пока не требуется. Источник исполнения: [D40](../decisions/D40-static-first-unity-pilot.md), [ACTIVE_STAGE](../ACTIVE_STAGE.md), [S01-PILOT](../stages/S01_UNITY_PILOT.md).
+## 5. Legacy: старый M0 (не active target)
 
-## Актуальная инструкция D41 (заменяет ранние приоритеты)
+`M0 ALPHA FULL UNITY PORT` — `LEGACY / RESEARCH BASE / NOT A RELEASE TARGET`.
 
-- [D41 — утверждённое решение](../decisions/D41-research-before-port.md).
-- [S00-R02: углублённое исследование Alpha A…L](../stages/S00_DEEP_RESEARCH.md).
-- [REFERENCE_ATLAS — исторические источники, wiki, верификация и визуальный каталог](../research/alpha2013/REFERENCE_ATLAS.md).
-- [UNITY_REUSE_MAP — какие технические подсистемы уже встроены в Unity](../architecture/UNITY_REUSE_MAP.md).
-- [Текущая задача DeepSeek](../stages/DEEPSEEK_RESEARCH_TASK.md).
+- [M0_ALPHA_FULL_UNITY_PORT_STAGE.md](../stages/M0_ALPHA_FULL_UNITY_PORT_STAGE.md) — ТЗ старого M0 (историческое).
+- [M0_ALPHA_PARITY_BACKLOG.md](M0_ALPHA_PARITY_BACKLOG.md) — незакрытые детали Alpha; теперь исследовательский реестр, а не blocking registry.
+- [M0_D88_FULL_WORK_PLAN.md](M0_D88_FULL_WORK_PLAN.md), [M0_FULL_ALPHA_INTEGRATION.md](M0_FULL_ALPHA_INTEGRATION.md), [M0_00_FULL_TRANSFER_MAP.md](M0_00_FULL_TRANSFER_MAP.md), [M0_TRANSFER_MASTER_MATRIX.md](M0_TRANSFER_MASTER_MATRIX.md), [M0_TEAM_TRANSFER_MATRIX.md](M0_TEAM_TRANSFER_MATRIX.md), [M0_REMAINING_PLAN_D90.md](M0_REMAINING_PLAN_D90.md) — исторические планы и матрицы.
 
-Если этот файл содержит ранние статусы S00/S01, для фактического статуса ориентироваться только на `docs/ACTIVE_STAGE.md`.
+Эти документы сохраняются как evidence. Они не задают порядок активной разработки и не должны читаться как текущие задачи. Отчёты P0–P7 и F1–F4 остаются в [docs/reports](../reports/).
+
+## 6. Исследования Alpha
+
+- [docs/research/alpha2013/](../research/alpha2013/) — карта архитектуры Alpha, спецификации поведения, каталоги моделей/анимаций/предметов, инструменты верификации.
+- [S00_ALPHA_RESEARCH.md](../stages/S00_ALPHA_RESEARCH.md), [S00_DEEP_RESEARCH.md](../stages/S00_DEEP_RESEARCH.md) — исторические ТЗ исследования.
+- Alpha 2013 — исследовательский и инженерный референс, а не спецификация CubeGame. Исследование выполняется только под конкретный вопрос CubeGame (формат цикла — в [ACTIVE_STAGE](../ACTIVE_STAGE.md) §6).
+
+## 7. Основание
+
+GitHub — источник актуальных версий документов. При расхождении документов приоритет: решение продюсера → `ACTIVE_STAGE` → дорожная карта → утверждённый реестр решений → ТЗ активного этапа → исторические документы.
