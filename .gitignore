@@ -200,3 +200,14 @@ __pycache__/
 
 # Unified Alpha runtime verification artifacts (local only: frames, logs, results)
 AlphaOutput/
+
+# --- M0 runtime recovery: staged Alpha content (local only, never published) ---
+# The build copies the local cache straight into the built Player; these rules are a
+# safety net in case content is ever staged under Assets/.
+/Assets/StreamingAssets/CubeGame/AlphaContent/
+/Assets/StreamingAssets/CubeGame/AlphaContent.meta
+*.wav
+
+# --- M0 P0 presentation: local Alpha UI font (closed asset, staged by tools/alpha_content/stage_alpha_ui_font.ps1) ---
+/Assets/CubeGame/Presentation/Gameplay/Resources/AlphaFont.ttf
+/Assets/CubeGame/Presentation/Gameplay/Resources/AlphaFont.ttf.meta

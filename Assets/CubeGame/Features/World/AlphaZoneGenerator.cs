@@ -89,6 +89,16 @@ namespace CubeGame.Features.World
                 {
                     provider.Populate(context);
                 }
+
+                if (AlphaTerrainGenerator.UsesP2Environment(terrain.GeneratorId))
+                {
+                    AlphaZoneFeatures.PlaceRiverStones(context, colors);
+                    AlphaZoneTrees.Populate(context);
+                    zone.PopulationRandomState = rng.State;
+                }
+                if (AlphaTerrainGenerator.UsesP2Environment(terrain.GeneratorId) ||
+                    terrain.GeneratorId == AlphaTerrainGenerator.PreviousWorldRuntimeId)
+                    AlphaGroundVegetation.Populate(context);
             }
 
             return zone;

@@ -63,10 +63,16 @@ namespace CubeGame.Presentation.Visual
             var built = VoxelMesh.Build(cubdec, "icon_" + name, false);
             if (built.problem != null) { problems?.Add("ICON_MESH " + built.problem); return null; }
             var material = AlphaVisualResources.Base;
-            if (material == null) { problems?.Add("ICON_MATERIAL_MISSING"); return null; }
+            if (material == null)
+            {
+                DestroyIconResource(built.mesh);
+                problems?.Add("ICON_MATERIAL_MISSING");
+                return null;
+            }
 
             var root = new GameObject("AlphaIcon_" + name);
             RenderTexture rt = null;
+            RenderTexture previousTarget = RenderTexture.active;
             try
             {
                 var meshGo = new GameObject("mesh");
@@ -96,21 +102,24 @@ namespace CubeGame.Presentation.Visual
                 var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { name = "icon_" + name };
                 tex.ReadPixels(new Rect(0, 0, size, size), 0, 0);
                 tex.Apply();
-                RenderTexture.active = null;
                 cam.targetTexture = null;
                 if (tex.GetPixels32().Length == 0) { problems?.Add("ICON_EMPTY_TEXTURE"); return null; }
                 return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
             }
             finally
             {
-                if (rt != null)
-                {
-                    if (Application.isPlaying) Object.Destroy(rt);
-                    else Object.DestroyImmediate(rt);
-                }
-                if (Application.isPlaying) Object.Destroy(root);
-                else Object.DestroyImmediate(root);
+                RenderTexture.active = previousTarget;
+                DestroyIconResource(rt);
+                DestroyIconResource(root);
+                DestroyIconResource(built.mesh);
             }
+        }
+
+        private static void DestroyIconResource(Object asset)
+        {
+            if (asset == null) return;
+            if (Application.isPlaying) Object.Destroy(asset);
+            else Object.DestroyImmediate(asset);
         }
     }
 }

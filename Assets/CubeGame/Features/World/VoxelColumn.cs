@@ -60,6 +60,9 @@ namespace CubeGame.Features.World
 
         public int Bottom { get; internal set; }
 
+        /// <summary>Alpha Field +0x14: the unmodified terrain surface minus 8.</summary>
+        internal int SurfaceScanStart { get; private set; }
+
         public int Count { get; private set; }
 
         public IReadOnlyList<uint> Voxels => _voxels;
@@ -107,6 +110,7 @@ namespace CubeGame.Features.World
         internal void Reset(int bottom, uint v0, uint v1)
         {
             Bottom = bottom;
+            SurfaceScanStart = bottom - 8;
             _voxels = new uint[4];
             _voxels[0] = v0;
             _voxels[1] = v1;
@@ -257,6 +261,8 @@ namespace CubeGame.Features.World
     public sealed class AlphaZone
     {
         public const int Size = WorldLayout.ZoneSize;
+        private readonly Dictionary<Contracts.ChunkKey, List<AlphaPlantPlacement>> _plants =
+            new Dictionary<Contracts.ChunkKey, List<AlphaPlantPlacement>>();
 
         public AlphaZone(int zx, int zz)
         {
@@ -277,6 +283,23 @@ namespace CubeGame.Features.World
 
         /// <summary>Spawns created by the content providers (<see cref="IZoneContentProvider"/>).</summary>
         public List<Contracts.SpawnDefinition> ContentSpawns { get; } = new List<Contracts.SpawnDefinition>();
+
+        /// <summary>State of the zone CRT after the P2 pre-population passes.</summary>
+        public int PopulationRandomState { get; internal set; }
+
+        internal void AddPlant(AlphaPlantPlacement plant)
+        {
+            var key = WorldLayout.ChunkOf(plant.X, plant.Z);
+            if (!_plants.TryGetValue(key, out var plants))
+            {
+                plants = new List<AlphaPlantPlacement>();
+                _plants.Add(key, plants);
+            }
+            plants.Add(plant);
+        }
+
+        public IReadOnlyList<AlphaPlantPlacement> PlantsIn(Contracts.ChunkKey chunk) =>
+            _plants.TryGetValue(chunk, out var plants) ? plants : (IReadOnlyList<AlphaPlantPlacement>)Array.Empty<AlphaPlantPlacement>();
 
         public VoxelColumn Column(int x, int z) => Columns[(x - Zx * Size) + (z - Zz * Size) * Size];
     }

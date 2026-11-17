@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using CubeGame.AlphaModels;
+using CubeGame.AlphaTransfer;
 using CubeGame.Content;
 using CubeGame.Core.Items;
+using CubeGame.Features.Combat;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.Creatures;
 using CubeGame.Features.Session;
@@ -39,6 +41,7 @@ namespace CubeGame.Gameplay
         private readonly Dictionary<StableEntityId, GroundItem> _groundItems = new Dictionary<StableEntityId, GroundItem>();
         private readonly Dictionary<VisualEquipmentSlot, HeroVisualItem> _heroEquipment = new Dictionary<VisualEquipmentSlot, HeroVisualItem>();
         private AlphaActorLibrary _library;
+        private CombatSystem _combat;
         private Func<WorldPosition, Vector3> _toScene;
         private Transform _heroRoot;
         private string _itemsDirectory;
@@ -49,6 +52,7 @@ namespace CubeGame.Gameplay
         private string _heroBuiltSignature;
         private Features.Session.GameEventBus _bus;
         private static Material _placeholderMaterial;
+        private static Material _bodyPlaceholderMaterial;
 
         /// <summary>Last composed hero visual (what the hero state asks for).</summary>
         public HeroVisualSpec HeroSpec { get; private set; }
@@ -78,9 +82,10 @@ namespace CubeGame.Gameplay
             }
         }
 
-        public void Initialise(AlphaActorLibrary library, Func<WorldPosition, Vector3> toScene, Transform heroRoot)
+        public void Initialise(AlphaActorLibrary library, Func<WorldPosition, Vector3> toScene, Transform heroRoot, CombatSystem combat = null)
         {
             _library = library;
+            _combat = combat;
             _toScene = toScene;
             _heroRoot = heroRoot;
             if (library != null && library.State == AlphaContentState.Ready && library.Source != null)
@@ -119,7 +124,9 @@ namespace CubeGame.Gameplay
             }
             else
             {
-                string name = e.WorldObjectName ?? $"Entity_{e.Kind.Value:x2}";
+                string name = e.WorldObjectId.HasValue
+                    ? e.WorldObjectName ?? $"WorldObject_{e.WorldObjectId:x2}"
+                    : $"Entity_{e.Kind.Value:x2}";
                 entry.Root = new GameObject($"{name}_{e.Entity.Value:x}").transform;
                 entry.Root.SetParent(transform, false);
                 entry.Root.position = _toScene != null ? _toScene(e.Position) : Vector3.zero;
@@ -145,9 +152,9 @@ namespace CubeGame.Gameplay
                 return;
             }
 
-            if (e.WorldObjectName == null)
+            if (!e.WorldObjectId.HasValue && e.WorldObjectName == null)
             {
-                entry.View = BuildCreature(e.Kind, entry.Root);
+                entry.View = BuildCreature(e.Kind, entry.Root, e.Entity.Kind == EntityIdKind.ZoneSpawn);
             }
 
             if (entry.View == null)
@@ -380,8 +387,8 @@ namespace CubeGame.Gameplay
             cube.transform.localPosition = new Vector3(0f, 0.2f, 0f);
             if (_placeholderMaterial == null)
             {
-                Shader shader = Shader.Find("Standard") ?? Shader.Find("Universal Render Pipeline/Lit");
-                _placeholderMaterial = new Material(shader) { name = "GroundItem_PLACEHOLDER", color = new Color(0.9f, 0.8f, 0.2f) };
+                _placeholderMaterial = CubeGame.Presentation.Rendering.RuntimeMaterials.Solid(
+                    "GroundItem_PLACEHOLDER", new Color(0.9f, 0.8f, 0.2f));
             }
 
             cube.GetComponent<Renderer>().sharedMaterial = _placeholderMaterial;
@@ -446,23 +453,77 @@ namespace CubeGame.Gameplay
 
         public void OnActionStarted(ActionStarted e)
         {
-            if (!_entries.TryGetValue(e.Entity, out Entry entry) || entry.View == null)
+            if (_combat != null && _combat.TryGetAction(e.Entity, out AuthoritativeActionState action) &&
+                _entries.TryGetValue(e.Entity, out Entry entry))
             {
-                return;
-            }
-
-            if (!entry.View.TryPlayAction(e.Action.Value, out string reason))
-            {
-                Problems.Add($"ANIM_MISSING {e.Entity} action {e.Action.Value}: {reason}");
+                SampleAction(entry, action);
             }
         }
 
         public void OnActionPhaseChanged(ActionPhaseChanged e)
         {
+            if (e.Phase == ActionPhase.Strike && _combat != null &&
+                _combat.TryGetAction(e.Entity, out AuthoritativeActionState action) && action.Serial == e.Serial &&
+                _entries.TryGetValue(e.Entity, out Entry entry))
+            {
+                bool posed = SampleAction(entry, action);
+                Debug.Log($"[CombatAction] strike actor={e.Entity} action={e.Action.Value} serial={e.Serial} " +
+                    $"elapsed={action.ElapsedMs} pose={(posed ? entry.View.Clips.Cursor.ToString("F1") : "ANIMATION_PARTIAL")}");
+            }
         }
 
         public void OnActionResolved(ActionResolved e)
         {
+            if (_entries.TryGetValue(e.Entity, out Entry entry) && entry.ActionSerial == e.Serial)
+            {
+                entry.View?.Controller?.EndGameplayAction();
+                Debug.Log($"[CombatAction] {e.Outcome} actor={e.Entity} action={e.Action.Value} serial={e.Serial} time={e.TimeMs}");
+            }
+        }
+
+        private bool SampleAction(Entry entry, AuthoritativeActionState action)
+        {
+            AlphaActorView view = entry.View;
+            if (view == null || !view.Ready)
+            {
+                RecordMissingAction($"kind={action.Actor.Kind.Value:X2} {action.AnimationKey}");
+                return false;
+            }
+
+            AlphaClip clip = view.Clips.Get(action.AnimationKey);
+            if (clip == null || Array.IndexOf(view.Definition.RequiredActions, action.AnimationKey) < 0)
+            {
+                RecordMissingAction($"{view.ActorId} {action.AnimationKey}");
+                return false;
+            }
+
+            // Baked poses have a fixed native sampling rate. Align their windup landmark to the
+            // runtime windup, then map the remaining action lifetime to the baked native idle.
+            double cursor = action.ElapsedMs;
+            if (view.Definition.ActionTimings.TryGetValue(action.Action.Value, out AlphaActionTiming baked) && baked.WindupMs > 0)
+            {
+                long windup = action.Timing.NativeWindupMs;
+                if (windup > 0 && cursor <= windup)
+                {
+                    cursor *= baked.WindupMs / windup;
+                }
+                else
+                {
+                    double tail = Math.Max(1, action.Timing.EndMs - windup);
+                    cursor = baked.WindupMs + (cursor - windup) / tail * (baked.RecoveryStartMs - baked.WindupMs);
+                }
+            }
+
+            entry.ActionSerial = action.Serial;
+            view.Controller.SampleGameplayAction(action.AnimationKey, (float)Math.Min(cursor, clip.Data.duration),
+                action.Phase == ActionPhase.Recover);
+            return true;
+        }
+
+        private void RecordMissingAction(string description)
+        {
+            string problem = $"ANIMATION_PARTIAL {description}";
+            if (!Problems.Contains(problem)) Problems.Add(problem);
         }
 
         public void OnHitResolved(HitResolved e)
@@ -494,8 +555,9 @@ namespace CubeGame.Gameplay
                 PlaceGroundItem(ground);
             }
 
-            foreach (Entry entry in _entries.Values)
+            foreach (KeyValuePair<StableEntityId, Entry> pair in _entries)
             {
+                Entry entry = pair.Value;
                 if (entry.Root == null)
                 {
                     continue;
@@ -545,6 +607,12 @@ namespace CubeGame.Gameplay
                     Boost = entry.Mode == LocomotionMode.Run,
                     OnGround = entry.Mode != LocomotionMode.Fall && entry.Mode != LocomotionMode.Jump,
                 });
+                if (_combat != null && _combat.TryGetAction(pair.Key, out AuthoritativeActionState action) && SampleAction(entry, action))
+                {
+                    continue;
+                }
+
+                entry.View.Controller?.EndGameplayAction();
                 entry.View.Tick(dt);
             }
         }
@@ -692,7 +760,7 @@ namespace CubeGame.Gameplay
             return hi - lo;
         }
 
-        private AlphaActorView BuildCreature(KindId kind, Transform root)
+        private AlphaActorView BuildCreature(KindId kind, Transform root, bool worldSpawn)
         {
             if (_library == null || _library.State != AlphaContentState.Ready)
             {
@@ -718,6 +786,19 @@ namespace CubeGame.Gameplay
             {
                 DestroyView(view);
                 return null;
+            }
+
+            if (worldSpawn && definition.Contract?.parts != null)
+            {
+                // The staged rig can contain equipment from its reference actor. World spawn gear
+                // needs its own template-to-item mapping (R-1); keep the rig joints for animation.
+                foreach (var part in definition.Contract.parts)
+                {
+                    if (part.role != "equipment") continue;
+                    int index = view.Rig.IndexOf(part.name);
+                    if (index >= 0 && view.Rig.meshes[index] != null)
+                        view.Rig.meshes[index].gameObject.SetActive(false);
+                }
             }
 
             view.Tick(0f);
@@ -764,6 +845,14 @@ namespace CubeGame.Gameplay
             body.transform.SetParent(root, false);
             body.transform.localScale = hero ? new Vector3(0.8f, 0.9f, 0.8f) : new Vector3(0.9f, 0.9f, 1.4f);
             body.transform.localPosition = new Vector3(0f, hero ? 0.9f : 0.45f, 0f);
+            // Explicit committed material: the primitive's built-in default material is not relied on in a Player.
+            if (_bodyPlaceholderMaterial == null)
+            {
+                _bodyPlaceholderMaterial = CubeGame.Presentation.Rendering.RuntimeMaterials.Solid(
+                    "Body_PLACEHOLDER", new Color(0.6f, 0.6f, 0.6f));
+            }
+
+            body.GetComponent<Renderer>().sharedMaterial = _bodyPlaceholderMaterial;
             return body;
         }
 
@@ -777,6 +866,7 @@ namespace CubeGame.Gameplay
 
         private sealed class Entry
         {
+            public long ActionSerial;
             public Transform Root;
             public AlphaActorView View;
             public GameObject Placeholder;

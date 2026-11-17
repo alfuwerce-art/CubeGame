@@ -44,7 +44,7 @@ namespace CubeGame.Tests.FullM0.EditMode
         private static WorldPosition At(int zoneX, int zoneZ) => new WorldPosition(zoneX * 256 + 128, 30, zoneZ * 256 + 128);
 
         [Test]
-        public void D3GeneratorPlacesHousesAndW18SpawnsWithoutChangingLegacyZones()
+        public void D3GeneratorKeepsLegacyHouseAndIndicesButDoesNotPublishActorDecor()
         {
             const uint seed = 20131234u;
             const int zoneIndex = WorldLayout.StartVoxel / WorldLayout.ZoneSize;
@@ -58,9 +58,10 @@ namespace CubeGame.Tests.FullM0.EditMode
             var terrain = (AlphaTerrainGenerator)current;
             AlphaZone generated = terrain.Zone(zoneIndex, zoneIndex);
             SpawnDefinition house = generated.ContentSpawns.Single(s => s.BehaviourKey == AlphaZoneContentProvider.StructureBehaviourKey);
+            int style = 1 + (int)(CubeGame.Core.Generation.DeterministicHash.Combine((int)house.Position.X, (int)house.Position.Z) % 5);
             int x = (int)(house.Position.X - 1.5);
             int z = (int)(house.Position.Z - 1.5);
-            int roofY = (int)house.Position.Y + 3;
+            int roofY = (int)house.Position.Y + (style == 1 ? 3 : 2);
             Assert.IsTrue(Voxel.IsSolid(current.Voxels(x, z).Read(roofY)), "house geometry is in the streamed columns");
             Assert.IsFalse(Voxel.IsSolid(legacy.Voxels(x, z).Read(roofY)), "legacy slot keeps its original terrain");
 
@@ -70,26 +71,41 @@ namespace CubeGame.Tests.FullM0.EditMode
             var center = new ZoneKey(zoneIndex, zoneIndex);
             population.Update(At(center.X, center.Z));
             LiveSpawn[] spawns = population.Live.Where(s => s.Channel == 1).ToArray();
-            Assert.IsNotEmpty(spawns);
-            Assert.AreEqual(generated.ContentSpawns.Count - 1, spawns.Length, "house stays geometry");
-            foreach (LiveSpawn spawn in spawns)
-            {
-                StringAssert.StartsWith("W-18", spawn.Definition.Provenance);
-                Assert.AreEqual(StableEntityId.ForZoneSpawn(center, 1, spawn.Definition.SpawnIndex), spawn.Id);
-            }
+            Assert.IsTrue(generated.ContentSpawns.Any(s => s.BehaviourKey == AlphaZoneContentProvider.PassiveBehaviourKey));
+            Assert.IsEmpty(spawns, "legacy actor decor is not published; house stays geometry");
+        }
 
-            StableEntityId[] ids = spawns.Select(s => s.Id).ToArray();
-            var despawned = new List<StableEntityId>();
-            population.Despawned += s => despawned.Add(s.Id);
-            population.Clear();
-            Assert.AreEqual(0, population.LiveCount);
-            CollectionAssert.IsSubsetOf(ids, despawned);
-            population.Update(At(center.X, center.Z));
-            CollectionAssert.AreEquivalent(ids, population.Live.Where(s => s.Channel == 1).Select(s => s.Id));
+        [Test]
+        public void EnvironmentRegeneratesFromTheSameSeedWithoutActorRecords()
+        {
+            const uint seed = 666666;
+            var key = WorldLayout.ZoneOf(8397145, 8396899);
+            Assert.IsTrue(D3ZonePopulation.TryCreateGenerator(AlphaTerrainGenerator.WorldRuntimeId, seed, out var first));
+            Assert.IsTrue(D3ZonePopulation.TryCreateGenerator(AlphaTerrainGenerator.WorldRuntimeId, seed, out var second));
+            AlphaZone a = ((AlphaTerrainGenerator)first).Zone(key.X, key.Z);
+            AlphaZone b = ((AlphaTerrainGenerator)second).Zone(key.X, key.Z);
+            int plants = 0;
+            for (int x = 0; x < 8; x++)
+            {
+                for (int z = 0; z < 8; z++)
+                {
+                    var chunk = new ChunkKey(key.X * 8 + x, key.Z * 8 + z);
+                    var placements = a.PlantsIn(chunk);
+                    CollectionAssert.AreEqual(placements, b.PlantsIn(chunk));
+                    plants += placements.Count;
+                    Assert.IsTrue(placements.All(p => WorldLayout.ChunkOf(p.X, p.Z).Equals(chunk)));
+                }
+            }
+            Assert.Greater(plants, 0);
+            Assert.IsTrue(a.Columns.Any(c => c.Voxels.Take(c.Count).Any(v => Voxel.Material(v) == 7 || Voxel.Material(v) == 8)));
+            Assert.IsFalse(a.ContentSpawns.Any(s => s.BehaviourKey == AlphaZoneContentProvider.PassiveBehaviourKey));
         }
 
         [TestCase(AlphaTerrainGenerator.Id)]
         [TestCase(AlphaTerrainGenerator.ContentId)]
+        [TestCase(AlphaTerrainGenerator.PreviousWorldRuntimeId)]
+        [TestCase(AlphaTerrainGenerator.EnvironmentRuntimeId)]
+        [TestCase(AlphaTerrainGenerator.PopulationRuntimeId)]
         [TestCase(AlphaTerrainGenerator.WorldRuntimeId)]
         public void CheckpointRetainsTheWorldGeneratorVersion(string generatorId)
         {
@@ -103,6 +119,39 @@ namespace CubeGame.Tests.FullM0.EditMode
             Assert.IsTrue(loaded.IsSuccess, loaded.ToString());
             Assert.IsTrue(D3ZonePopulation.TryCreateGenerator(loaded.World.GeneratorId, loaded.World.Seed.Value, out IWorldGenerator generator));
             Assert.AreEqual(generatorId, generator.GeneratorId);
+        }
+
+        [Test]
+        public void RecoveredPopulationRegeneratesWithIdenticalActorIdsAndAttributes()
+        {
+            const uint seed = 666666;
+            var key = WorldLayout.ZoneOf(8397145, 8396899);
+            Assert.IsTrue(D3ZonePopulation.TryCreateGenerator(AlphaTerrainGenerator.WorldRuntimeId, seed, out var first));
+            Assert.IsTrue(D3ZonePopulation.TryCreateGenerator(AlphaTerrainGenerator.WorldRuntimeId, seed, out var second));
+            var a = new AlphaRecoveredPopulation((AlphaTerrainGenerator)first).TemplatesForZone(key);
+            var b = new AlphaRecoveredPopulation((AlphaTerrainGenerator)second).TemplatesForZone(key);
+            Assert.IsNotEmpty(a);
+            CollectionAssert.AreEqual(a.Select(Signature), b.Select(Signature));
+            Assert.AreEqual(a.Count, a.Select(t => t.Definition.SpawnIndex).Distinct().Count());
+            Assert.IsTrue(a.All(t => !CreatureKinds.IsPassiveObject(t.Definition.Kind.Value)));
+
+            static object Signature(AlphaSpawnTemplateData t) =>
+                (t.Definition.SpawnIndex, t.Definition.Position, t.Definition.Kind, t.Definition.Level,
+                    t.Definition.Yaw, t.Definition.Faction, t.WindowStartMs, t.WindowEndMs);
+        }
+
+        [Test]
+        public void WildClimateDrawsAreConditionalAndHumidityPrecedesTemperature()
+        {
+            var rolls = new Queue<int>(new[] { 1, 0, 2 });
+            Assert.IsFalse(AlphaWildSpawnRules.ClimateSkipped(0.2f, 0.2f, rolls.Dequeue));
+            Assert.AreEqual(3, rolls.Count);
+            Assert.IsTrue(AlphaWildSpawnRules.ClimateSkipped(0.19f, 0.19f, rolls.Dequeue));
+            Assert.AreEqual(1, rolls.Count);
+            Assert.AreEqual(0x1E, AlphaWildSpawnRules.CompanionKind(0x1E, rolls.Dequeue));
+            Assert.AreEqual(1, rolls.Count);
+            Assert.AreEqual(2, AlphaWildSpawnRules.CompanionKind(0x03, rolls.Dequeue));
+            Assert.IsEmpty(rolls);
         }
 
         [Test]

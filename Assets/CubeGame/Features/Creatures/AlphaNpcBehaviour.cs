@@ -47,6 +47,7 @@ namespace CubeGame.Features.Creatures
 
         /// <summary>True once a direction was chosen.</summary>
         public bool HasDirection { get; private set; }
+        public bool ReturningHome { get; private set; }
 
         /// <summary>Whether a position lies inside the leash (Alpha's integer test, written in units).</summary>
         public static bool InsideLeash(double x, double z, WorldPosition home)
@@ -62,7 +63,8 @@ namespace CubeGame.Features.Creatures
             TimerMs -= elapsedMs;
             if (TimerMs < 0) TimerMs = 0;
             if (TimerMs != 0) return false;
-            if (InsideLeash(x, z, home))
+            ReturningHome = !InsideLeash(x, z, home);
+            if (!ReturningHome)
             {
                 DirectionX = ((float)rand() * 2.0f / 32767.0f - 1.0f) * 10.0f;
                 DirectionZ = ((float)rand() * 2.0f / 32767.0f - 1.0f) * 10.0f;
@@ -97,6 +99,7 @@ namespace CubeGame.Features.Creatures
     public struct AlphaNpcMovementStep
     {
         public bool Move;
+        public bool ReturningHome;
         public WorldPosition Target;
         public string Reason;
 
@@ -118,10 +121,19 @@ namespace CubeGame.Features.Creatures
 
         readonly Func<int> _worldTimeMs;
 
+        /// <summary>CompanionBehavior 0x43ACE0: follow when the leader is at least 4 voxels away (16 = 4²).</summary>
+        public const double CompanionFollowDistance2 = 16.0;
+
+        /// <summary>CompanionBehavior: beyond 8 voxels (fixed 0x400000 = 64 = 8²) the creature runs (+0x124 |= 0x40).</summary>
+        public const double CompanionRunDistance2 = 64.0;
+
+        readonly Func<WorldPosition?> _companionOf;
+
         public AlphaNpcMovementDriver(WorldPosition home, Func<int> worldTimeMs,
-            AlphaSpawnLocationSchedule schedule = null, AlphaWalkPath walkPath = null)
+            AlphaSpawnLocationSchedule schedule = null, AlphaWalkPath walkPath = null, Func<WorldPosition?> companionOf = null)
         {
             _worldTimeMs = worldTimeMs ?? throw new ArgumentNullException(nameof(worldTimeMs));
+            _companionOf = companionOf;
             Home = home;
             Schedule = schedule != null && schedule.Count > 0 ? schedule : null;
             WalkPath = walkPath != null && walkPath.Count > 0 ? walkPath : null;
@@ -157,6 +169,21 @@ namespace CubeGame.Features.Creatures
         {
             if (rand == null) throw new ArgumentNullException(nameof(rand));
             LastWorldTimeMs = _worldTimeMs();
+            // SequentialBehavior 0x4DC390: the first child that handles the tick wins — Companion before WalkPath.
+            if (_companionOf != null && _companionOf() is WorldPosition leader)
+            {
+                double dx = leader.X - x, dy = leader.Y - y, dz = leader.Z - z;
+                double d2 = dx * dx + dy * dy + dz * dz;
+                if (d2 >= CompanionFollowDistance2)
+                {
+                    return new AlphaNpcMovementStep
+                    {
+                        Move = true, Target = leader,
+                        Reason = d2 > CompanionRunDistance2 ? "COMPANION_RUN" : "COMPANION",
+                    };
+                }
+            }
+
             if (WalkPath != null)
             {
                 bool walk = WalkPath.Tick(x, y, z, elapsedMs, rand, out WorldPosition point);
@@ -178,7 +205,7 @@ namespace CubeGame.Features.Creatures
                     {
                         return new AlphaNpcMovementStep
                         {
-                            Move = true, Target = target, Reason = "SCHEDULE_TRAVEL " + Schedule.TargetIndex,
+                            Move = true, ReturningHome = true, Target = target, Reason = "SCHEDULE_TRAVEL " + Schedule.TargetIndex,
                         };
                     }
 
@@ -191,6 +218,7 @@ namespace CubeGame.Features.Creatures
             return new AlphaNpcMovementStep
             {
                 Move = true,
+                ReturningHome = RandomWalk.ReturningHome,
                 Target = new WorldPosition(x + RandomWalk.DirectionX, y, z + RandomWalk.DirectionZ),
                 Reason = "RANDOM_WALK",
             };

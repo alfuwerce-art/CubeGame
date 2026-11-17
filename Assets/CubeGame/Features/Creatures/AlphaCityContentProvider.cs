@@ -90,7 +90,7 @@ namespace CubeGame.Features.Creatures
                 {
                     Region = region,
                     SpawnIndex = index++,
-                    Kind = new KindId(service.ObjectId),
+                    WorldObjectId = service.ObjectId,
                     Position = new WorldPosition(x, top + 1, z),
                     Yaw = (float)(state % 360UL),
                     Faction = (int)CreatureFaction.Passive,

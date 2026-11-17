@@ -69,7 +69,39 @@ namespace CubeGame.Features.Persistence
 
         public int heroManaCubes;
 
+        /// <summary>
+        /// Optional P5 field: platinum coins (Alpha type 0x0D counter, 0x46EBE0). Older slots start with zero.
+        /// Copper keeps the whole Alpha money field (copper ×1, silver ×100, gold ×10000).
+        /// </summary>
+        public int heroPlatinum;
+
+        /// <summary>
+        /// Optional P5 fields: learned recipes (Alpha +0x1D28) as parallel arrays. Slots written before P5 have none;
+        /// the hero then relearns the recipes of levels 1…L on load (CUBEGAME_CONTRACT migration).
+        /// </summary>
+        public int[] heroRecipeTypes;
+
+        public int[] heroRecipeSubtypes;
+
+        public int[] heroRecipeSeeds;
+
+        public int[] heroRecipeRarities;
+
+        public int[] heroRecipeModifiers;
+
+        public int[] heroRecipeLevels;
+
+        /// <summary>Legacy F3 hunts (CUBEGAME_CONTRACT). Read and ignored since P7; never written.</summary>
         public HuntMissionSaveData[] huntMissions;
+
+        /// <summary>
+        /// P7, optional: Alpha mission/boss blocks of landmark columns (column +0x24, +0x30…+0x64). Alpha keeps them
+        /// in the world database (mission&lt;x&gt;_&lt;z&gt;); CubeGame bridges them through the session (CUBEGAME_CONTRACT).
+        /// </summary>
+        public AlphaMissionSaveData[] alphaMissions;
+
+        /// <summary>P7, optional: regions whose mission pass already ran (Alpha region +0x15A18), as x,z pairs.</summary>
+        public int[] alphaMissionRegions;
 
         /// <summary>Calendar advances from inn visits, separate from the combat and movement tick.</summary>
         public long worldTimeOffsetMs;
@@ -91,6 +123,21 @@ namespace CubeGame.Features.Persistence
         /// <summary>Bag slot ≥ 0 or C5 extra equipment −(1+Alpha creature offset).</summary>
         public int[] rawItemSlots;
 
+        /// <summary>
+        /// Optional P5 fields, parallel to <see cref="rawItemTypes"/>: the Alpha record of raw items (seed +0x04,
+        /// variant +0x08, rarity +0x0C, modifier +0x0D, level +0x10). Missing arrays restore the Alpha defaults
+        /// (level 1, other fields 0), which is what pre-P5 raw items carried.
+        /// </summary>
+        public int[] rawItemSeeds;
+
+        public int[] rawItemVariants;
+
+        public int[] rawItemRarities;
+
+        public int[] rawItemModifiers;
+
+        public int[] rawItemLevels;
+
         /// <summary>FNV-1a 64 (hex) of the framed character save text written in the same checkpoint.</summary>
         public string characterChecksum = string.Empty;
 
@@ -104,6 +151,29 @@ namespace CubeGame.Features.Persistence
         public long target;
         public int kind;
         public bool complete;
+    }
+
+    [Serializable]
+    public sealed class AlphaMissionSaveData
+    {
+        public int columnX;
+        public int columnZ;
+        public int level;
+        public int seed;
+        public int type;
+        public int targetKind;
+        public int maxLevel;
+        public int levelClass;
+        public int state;
+        public int progress;
+        public int required;
+        public int targetZoneX;
+        public int targetZoneZ;
+        public int bossKind;
+        public int bossLevel;
+        public int bossQuality;
+        public int bossZoneX;
+        public int bossZoneZ;
     }
 
     public static class SessionSaveFormat
@@ -153,6 +223,23 @@ namespace CubeGame.Features.Persistence
 
         /// <summary>Explored zones (256×256 voxels) as flat pairs (x0, z0, x1, z1, …) — Alpha "discovered" blob, own format.</summary>
         public List<int> discovered = new List<int>();
+
+        /// <summary>World identity of this file (Alpha <c>worlds.db</c> record: name + seed; the state file is <c>world_&lt;name&gt;.db</c>).</summary>
+        public string worldName = string.Empty;
+
+        public long createdUtcTicks;
+
+        public long savedUtcTicks;
+
+        /// <summary>
+        /// World time. Alpha stores it inside the world blob (<c>world_&lt;name&gt;.db</c> key <c>time</c>),
+        /// so the clock belongs to the world, not to a character/world pair.
+        /// </summary>
+        public long clockTick;
+
+        public int ticksPerSecond;
+
+        public long worldTimeOffsetMs;
     }
 
     public interface IWorldSaveSerializer

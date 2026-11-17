@@ -143,10 +143,39 @@ namespace CubeGame.Tests.FullM0.EditMode
             List<ChunkKey> wanted = policy.Wanted(center);
             Assert.AreEqual(25, wanted.Count);
             Assert.AreEqual(center, wanted[0]);
+            CollectionAssert.AreEqual(new[]
+            {
+                new ChunkKey(center.X - 1, center.Z),
+                new ChunkKey(center.X, center.Z - 1),
+                new ChunkKey(center.X, center.Z + 1),
+                new ChunkKey(center.X + 1, center.Z),
+            }, wanted.GetRange(1, 4), "axial neighbors precede diagonals and ties use X then Z");
             Assert.AreEqual(25, new HashSet<ChunkKey>(wanted).Count, "no duplicates");
             Assert.IsFalse(policy.ShouldRelease(new ChunkKey(center.X + 3, center.Z), center));
             Assert.IsTrue(policy.ShouldRelease(new ChunkKey(center.X + 4, center.Z), center));
             Assert.AreEqual(9, policy.Wanted(new ChunkKey(0, 0)).Count, "world edge is clipped");
+        }
+
+        [Test]
+        public void AlphaTerrainWindowAndZoneGenerationUseSeparateScales()
+        {
+            WorldStreamingPolicy policy = WorldStreamingPolicy.Alpha;
+            int x = WorldLayout.StartVoxel;
+            ChunkKey chunk = WorldLayout.ChunkOf(x, x);
+            ZoneKey zone = WorldLayout.ZoneOf(x, x);
+            Assert.AreEqual(1600, policy.Wanted(chunk).Count);
+            Assert.IsFalse(policy.ShouldRelease(new ChunkKey(chunk.X - 20, chunk.Z), chunk));
+            Assert.IsTrue(policy.ShouldRelease(new ChunkKey(chunk.X + 20, chunk.Z), chunk));
+            Assert.AreEqual(400, policy.Wanted(new ChunkKey(0, 0)).Count);
+
+            List<ZoneKey> zones = WorldStreamingPolicy.GenerationOrder(x, x);
+            Assert.AreEqual(25, zones.Count, "distance is strictly less than 768 voxels");
+            CollectionAssert.AreEqual(new[] { zone, new ZoneKey(zone.X - 1, zone.Z), new ZoneKey(zone.X, zone.Z - 1) },
+                zones.GetRange(0, 3));
+            Assert.IsTrue(WorldStreamingPolicy.GenerationOrder(x + 1, x).Contains(new ZoneKey(zone.X + 3, zone.Z)));
+            Assert.IsTrue(WorldStreamingPolicy.KeepGeneratedZone(new ZoneKey(zone.X + 3, zone.Z + 2), zone));
+            Assert.IsFalse(WorldStreamingPolicy.KeepGeneratedZone(new ZoneKey(zone.X + 4, zone.Z), zone));
+            Assert.AreEqual(12582912, WorldStreamingPolicy.AlphaVertexBudget(50));
         }
 
         [Test]

@@ -40,6 +40,7 @@ namespace CubeGame.Features.Creatures
         public double X;
         public double Y;
         public double Z;
+        public double Width;
 
         // ---- Alpha attack-variant inputs (C-29). Not part of the saved blob: the M0NPC|1 format stays
         // byte-identical, and a creature without a world spawn record (R-1) keeps the unarmed defaults.

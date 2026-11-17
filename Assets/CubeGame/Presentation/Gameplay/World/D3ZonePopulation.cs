@@ -35,29 +35,49 @@ namespace CubeGame.Gameplay.Streaming
                 CreatureSlots = 0,
                 DecorSlots = 0,
             };
-            if (id == AlphaTerrainGenerator.WorldRuntimeId)
+            // /5 and /6 retain their historical plans so old removal/container indices keep their meaning.
+            if (AlphaTerrainGenerator.UsesP2Environment(id)) settings.VegetationPerZone = 0;
+            IZoneContentProvider[] providers;
+            if (AlphaTerrainGenerator.UsesAlphaDungeons(id))
             {
-                // F1A verified 0x5F56C0 selects creature templates. The legacy scatter is kept for /5 saves.
-                settings.VegetationPerZone = 0;
+                // The Alpha dungeon draws first: 0x5CC510 runs on the zone stream right after the terrain passes.
+                providers = new IZoneContentProvider[]
+                {
+                    new AlphaDungeonZoneProvider(),
+                    new AlphaZoneContentProvider(settings, AlphaContentProviders.IsCityZone),
+                    new AlphaCityContentProvider(AlphaContentProviders.IsCityZone),
+                };
             }
-            IZoneContentProvider[] providers = id == AlphaTerrainGenerator.WorldRuntimeId
-                ? AlphaContentProviders.CreateDefault(context => AlphaContentProviders.IsDungeonRecord(context.Record.Type),
-                    settings, AlphaContentProviders.IsCityZone)
-                : new IZoneContentProvider[] { new AlphaZoneContentProvider(settings) };
+            else
+            {
+                providers = id != AlphaTerrainGenerator.ContentId
+                    ? AlphaContentProviders.CreateDefault(context => AlphaContentProviders.IsDungeonRecord(context.Record.Type),
+                        settings, AlphaContentProviders.IsCityZone)
+                    : new IZoneContentProvider[] { new AlphaZoneContentProvider(settings) };
+            }
+
             return WorldState.TryCreateGenerator(id, seed, out generator, providers);
         }
 
-        public static bool Supports(string id) => id == AlphaTerrainGenerator.ContentId || id == AlphaTerrainGenerator.WorldRuntimeId;
+        public static bool Supports(string id) => id == AlphaTerrainGenerator.ContentId ||
+            id == AlphaTerrainGenerator.PreviousWorldRuntimeId || AlphaTerrainGenerator.UsesP2Environment(id);
 
         public static bool IsStaticContent(string behaviourKey) => behaviourKey == AlphaZoneContentProvider.PassiveBehaviourKey
             || behaviourKey == AlphaCityContentProvider.ServiceBehaviourKey
             || behaviourKey == AlphaDungeonContentProvider.ChestBehaviourKey;
+
+        /// <summary>Creatures of the Alpha dungeon generator (room creatures and the master).</summary>
+        public static bool IsDungeonCreature(string behaviourKey) => behaviourKey == AlphaDungeonContents.CreatureBehaviourKey
+            || behaviourKey == AlphaDungeonContents.MasterBehaviourKey;
 
         public IReadOnlyList<SpawnDefinition> SpawnsForZone(ZoneKey zone)
         {
             var spawns = new List<SpawnDefinition>();
             foreach (SpawnDefinition definition in _terrain.Zone(zone.X, zone.Z).ContentSpawns)
             {
+                // This channel's old static_object records are the retired actor-based vegetation plan.
+                if (definition.BehaviourKey == AlphaZoneContentProvider.PassiveBehaviourKey) continue;
+
                 if (definition.BehaviourKey == AlphaDungeonContentProvider.ChestBehaviourKey
                     && _deltas?.IsContainerOpened(zone, Channel, definition.SpawnIndex) == true)
                 {
@@ -65,6 +85,7 @@ namespace CubeGame.Gameplay.Streaming
                 }
 
                 if ((IsStaticContent(definition.BehaviourKey) && _deltas?.IsObjectRemoved(zone, Channel, definition.SpawnIndex) != true)
+                    || IsDungeonCreature(definition.BehaviourKey)
                     || (_terrain.GeneratorId == AlphaTerrainGenerator.ContentId
                     && definition.BehaviourKey == AlphaZoneContentProvider.CreatureBehaviourKey))
                 {

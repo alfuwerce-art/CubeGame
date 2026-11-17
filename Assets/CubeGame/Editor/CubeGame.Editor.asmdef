@@ -3,7 +3,8 @@
     "rootNamespace": "CubeGame.EditorTools",
     "references": [
         "CubeGame.Core",
-        "CubeGame.Presentation"
+        "CubeGame.Presentation",
+        "CubeGame.AlphaModels"
     ],
     "includePlatforms": [
         "Editor"

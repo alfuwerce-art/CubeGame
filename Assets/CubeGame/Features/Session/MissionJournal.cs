@@ -1,104 +1,279 @@
 using System;
 using System.Collections.Generic;
-using CubeGame.Features.Combat;
 using CubeGame.Features.Contracts;
+using CubeGame.Features.World;
 
 namespace CubeGame.Features.Session
 {
-    public readonly struct HuntMission
-    {
-        public HuntMission(StableEntityId target, KindId kind, bool complete)
-        {
-            Target = target;
-            Kind = kind;
-            Complete = complete;
-        }
-
-        public StableEntityId Target { get; }
-        public KindId Kind { get; }
-        public bool Complete { get; }
-        // A mission cell spans eight of Alpha's 256-block zones on each axis (J4/J5).
-        public int CellX => (int)((Target.Value >> 35) & 0x1FFF);
-        public int CellZ => (int)((Target.Value >> 19) & 0x1FFF);
-    }
-
     /// <summary>
-    /// Alpha J4: proximity activates a regional hunt and a matching kill completes it once.
-    /// CUBEGAME_CONTRACT: select a nearby streamed hostile as the cell target, use a 32-block
-    /// activation radius and award one mana cube. Alpha mission generation and rewards are PARTIAL.
+    /// Alpha missions of the hero's world (P7-A, docs/research/alpha2013/P7_MISSIONS_TRACE.md):
+    /// <list type="bullet">
+    /// <item>region pass 0x5D9AD0 once per region the hero stands in (<see cref="EnsureRegion"/>);</item>
+    /// <item>activation 0x60CC3D: the column under the hero, mission sleeping, hero inside the landmark
+    /// (0x5FA4C0 weight &gt; 0) → active;</item>
+    /// <item>completion 0x59642A: a kill by the hero of a creature with flag 0x2000 in the column — in Alpha only
+    /// the column boss of a type-1 mission carries it (0x5D9730). Types 1–5 and 13 complete at once, 7–12 count.</item>
+    /// </list>
+    /// Missions of type 3, 4 and 9 get no flagged target in Alpha and so never complete (kept as in Alpha); type 5
+    /// completes on the dungeon master (+0x1D38) of a zone in the column — the master spawn of the ported dungeon
+    /// generator 0x5CC510 (zone content channel). Masters of landmark patrols 0x5DC6E0 and settlements 0x5AF170 are
+    /// not ported yet.
+    /// CUBEGAME_CONTRACT: the journal lives in the session save (Alpha: world database blobs mission&lt;x&gt;_&lt;z&gt;),
+    /// one random stream per region, the region is the one containing the hero (Alpha selects it through the
+    /// nearest region lookup).
     /// </summary>
     public sealed class MissionJournal
     {
-        public const double ActivationRadius = 32.0;
-        private readonly SortedDictionary<int, HuntMission> _hunts = new SortedDictionary<int, HuntMission>();
+        /// <summary>Population channel of column bosses (0 creatures, 1 zone content, 2 town NPCs).</summary>
+        public const int BossChannel = 3;
 
-        public IReadOnlyCollection<HuntMission> Hunts => _hunts.Values;
+        /// <summary>Population channel of zone content (dungeon chests, master and room creatures).</summary>
+        public const int ContentChannel = 1;
 
-        internal void ActivateNear(WorldPosition hero, IReadOnlyCollection<Combatant> combatants)
+        private readonly SortedDictionary<long, AlphaMission> _columns = new SortedDictionary<long, AlphaMission>();
+        private readonly HashSet<long> _regions = new HashSet<long>();
+        private AlphaTerrainGenerator _terrain;
+        private AlphaMissionKindSelector _kindAt;
+        private int _worldSeed;
+
+        /// <summary>Every column record with a boss or a mission.</summary>
+        public IReadOnlyCollection<AlphaMission> Columns => _columns.Values;
+
+        /// <summary>Columns that carry a mission (any state).</summary>
+        public IEnumerable<AlphaMission> Missions
         {
-            Combatant nearest = null;
-            double nearestSquared = ActivationRadius * ActivationRadius;
-            foreach (Combatant candidate in combatants)
+            get
             {
-                if (!candidate.Hostile || candidate.IsDead || candidate.Id.Kind != EntityIdKind.ZoneSpawn)
+                foreach (AlphaMission mission in _columns.Values)
                 {
-                    continue;
+                    if (mission.HasMission) yield return mission;
                 }
-
-                double dx = candidate.Position.X - hero.X;
-                double dy = candidate.Position.Y - hero.Y;
-                double dz = candidate.Position.Z - hero.Z;
-                double distanceSquared = dx * dx + dy * dy + dz * dz;
-                if (distanceSquared > nearestSquared || (distanceSquared == nearestSquared && nearest != null
-                    && nearest.Id.Value < candidate.Id.Value))
-                {
-                    continue;
-                }
-
-                var mission = new HuntMission(candidate.Id, candidate.Kind, false);
-                if (!_hunts.ContainsKey(CellKey(mission)))
-                {
-                    nearest = candidate;
-                    nearestSquared = distanceSquared;
-                }
-            }
-
-            if (nearest != null)
-            {
-                TryRestore(new HuntMission(nearest.Id, nearest.Kind, false));
             }
         }
 
-        internal bool TryComplete(StableEntityId target)
+        public IEnumerable<(int Rx, int Rz)> GeneratedRegions
         {
+            get
+            {
+                foreach (long key in _regions) yield return ((int)(key >> 32), (int)(key & 0xFFFFFFFF));
+            }
+        }
+
+        public bool HasWorld => _terrain != null;
+
+        /// <summary>Raised after a region pass created bosses and missions (region x, region z).</summary>
+        public event Action<int, int> RegionGenerated;
+
+        /// <summary>Connects the journal to the Alpha terrain of the running world (no world → missions stay idle).</summary>
+        public void AttachWorld(AlphaTerrainGenerator terrain, int worldSeed, AlphaMissionKindSelector kindAt)
+        {
+            _terrain = terrain ?? throw new ArgumentNullException(nameof(terrain));
+            _worldSeed = worldSeed;
+            _kindAt = kindAt;
+        }
+
+        public void DetachWorld()
+        {
+            _terrain = null;
+            _kindAt = null;
+        }
+
+        public bool IsRegionGenerated(int rx, int rz) => _regions.Contains(RegionId(rx, rz));
+
+        public bool TryGet(int columnX, int columnZ, out AlphaMission mission) =>
+            _columns.TryGetValue(ColumnKey(columnX, columnZ), out mission);
+
+        /// <summary>Stable id of the boss of a column (zone of the boss, boss channel, index 0).</summary>
+        public static StableEntityId BossId(AlphaMission column) =>
+            StableEntityId.ForZoneSpawn(new ZoneKey(column.BossZoneX, column.BossZoneZ), BossChannel, 0);
+
+        /// <summary>Boss placed in this zone by 0x5D9460, if any.</summary>
+        public bool TryBossAt(ZoneKey zone, out AlphaMission column)
+        {
+            if (_columns.TryGetValue(ColumnKey(zone.X >> 3, zone.Z >> 3), out column) && column.HasBoss
+                && column.BossZoneX == zone.X && column.BossZoneZ == zone.Z)
+            {
+                return true;
+            }
+
+            column = null;
+            return false;
+        }
+
+        /// <summary>Runs the region pass for the hero's region once. Returns true when it ran now.</summary>
+        internal bool EnsureRegion(WorldPosition hero, int heroLevel)
+        {
+            if (_terrain == null || !Voxel(hero, out int x, out int z))
+            {
+                return false;
+            }
+
+            int rx = x >> 14;
+            int rz = z >> 14;
+            if (!_regions.Add(RegionId(rx, rz)))
+            {
+                return false;
+            }
+
+            var random = new AlphaCrtRandom(AlphaMissionGenerator.RegionSeed(_worldSeed, rx, rz));
+            foreach (AlphaMission mission in AlphaMissionGenerator.GenerateRegion(_terrain, rx, rz, heroLevel, heroLevel,
+                random, _kindAt))
+            {
+                _columns[ColumnKey(mission.ColumnX, mission.ColumnZ)] = mission;
+            }
+
+            RegionGenerated?.Invoke(rx, rz);
+            return true;
+        }
+
+        /// <summary>0x60CC3D…0x60CCA6.</summary>
+        internal bool TryActivate(WorldPosition hero, out AlphaMission activated)
+        {
+            activated = null;
+            if (_terrain == null || !Voxel(hero, out int x, out int z)
+                || !_columns.TryGetValue(ColumnKey(x >> 11, z >> 11), out AlphaMission mission)
+                || !mission.HasMission || mission.State != AlphaMissionState.Sleeping)
+            {
+                return false;
+            }
+
+            LandmarkColumn column = _terrain.ColumnAt(x, z);
+            if (column == null || !(AlphaTerrainGenerator.Falloff(_terrain.LandmarkDistance2(column, x, z)) > 0f))
+            {
+                return false;
+            }
+
+            mission.State = AlphaMissionState.Active;
+            activated = mission;
+            return true;
+        }
+
+        /// <summary>0x59642A…0x596517 for a creature killed by the hero. Returns true when the mission finished now.</summary>
+        internal bool TryComplete(StableEntityId target, out AlphaMission completed)
+        {
+            completed = null;
             if (target.Kind != EntityIdKind.ZoneSpawn)
             {
                 return false;
             }
 
-            int key = CellKey(new HuntMission(target, default, false));
-            if (!_hunts.TryGetValue(key, out HuntMission mission) || mission.Complete || !mission.Target.Equals(target))
+            int channel = (int)((target.Value >> 12) & 0xF);
+            var zone = new ZoneKey((int)((target.Value >> 32) & 0xFFFF), (int)((target.Value >> 16) & 0xFFFF));
+            if (channel == ContentChannel)
+            {
+                return TryCompleteDungeon(zone, (int)(target.Value & 0xFFF), out completed);
+            }
+
+            if (channel != BossChannel)
             {
                 return false;
             }
 
-            _hunts[key] = new HuntMission(target, mission.Kind, true);
+            if (!TryBossAt(zone, out AlphaMission mission) || !mission.BossIsMissionTarget
+                || mission.State == AlphaMissionState.Complete)
+            {
+                return false;
+            }
+
+            if (mission.CountsKills)
+            {
+                mission.Progress++;
+                mission.State = AlphaMissionState.Active;
+                if (mission.Progress < mission.Required)
+                {
+                    return false;
+                }
+            }
+
+            mission.State = AlphaMissionState.Complete;
+            completed = mission;
             return true;
         }
 
-        internal bool TryRestore(HuntMission mission)
+        /// <summary>
+        /// 0x59642A, second condition: mission type 5 and the killed creature is the dungeon master (+0x1D38). The
+        /// column is the one of the creature's spawn zone (zone >> 3); a finished mission (+0x41 == 2) stays finished.
+        /// </summary>
+        private bool TryCompleteDungeon(ZoneKey zone, int spawnIndex, out AlphaMission completed)
         {
-            int key = CellKey(mission);
-            if (mission.Target.Kind != EntityIdKind.ZoneSpawn || (uint)mission.Kind.Value > byte.MaxValue
-                || _hunts.ContainsKey(key))
+            completed = null;
+            if (_terrain == null || !IsDungeonMaster(_terrain, zone, spawnIndex)
+                || !_columns.TryGetValue(ColumnKey(zone.X >> 3, zone.Z >> 3), out AlphaMission mission)
+                || !mission.HasMission || mission.Type != AlphaMissionType.Dungeon
+                || mission.State == AlphaMissionState.Complete)
             {
                 return false;
             }
 
-            _hunts.Add(key, mission);
+            mission.State = AlphaMissionState.Complete;
+            completed = mission;
             return true;
         }
 
-        private static int CellKey(HuntMission mission) => (mission.CellX << 13) | mission.CellZ;
+        /// <summary>
+        /// Spawn activation 0x60FCFE…0x60FD2E: a creature with flag 0x1000 (not a chest) in a zone whose column carries a
+        /// type-5 mission takes the mission's level (+0x3C, the highest player level when the mission was made) and its
+        /// level class byte (+0x40) as quality → stars. In the same place Alpha seeds srand(+0x30 + group id), reruns
+        /// creature_initBehaviorByType and gives the master (+0x10E8, flag 0x200) the target flag 0x2000.
+        /// </summary>
+        public bool TryDungeonSpawnLevel(ZoneKey zone, int alphaFlags, out int level, out int stars)
+        {
+            level = 0;
+            stars = 0;
+            if ((alphaFlags & 0x1000) == 0 || !_columns.TryGetValue(ColumnKey(zone.X >> 3, zone.Z >> 3), out AlphaMission mission)
+                || mission.Type != AlphaMissionType.Dungeon)
+            {
+                return false;
+            }
+
+            level = Math.Max(1, mission.MaxLevel);
+            stars = mission.LevelClass;
+            return true;
+        }
+
+        /// <summary>True when the zone content spawn is the master of the zone's Alpha dungeon.</summary>
+        public static bool IsDungeonMaster(AlphaTerrainGenerator terrain, ZoneKey zone, int spawnIndex)
+        {
+            foreach (SpawnDefinition spawn in terrain.Zone(zone.X, zone.Z).ContentSpawns)
+            {
+                if (spawn.SpawnIndex == spawnIndex)
+                {
+                    return spawn.BehaviourKey == AlphaDungeonContents.MasterBehaviourKey;
+                }
+            }
+
+            return false;
+        }
+
+        internal bool TryRestore(AlphaMission mission)
+        {
+            if (mission == null)
+            {
+                return false;
+            }
+
+            long key = ColumnKey(mission.ColumnX, mission.ColumnZ);
+            if (_columns.ContainsKey(key))
+            {
+                return false;
+            }
+
+            _columns.Add(key, mission);
+            return true;
+        }
+
+        internal bool TryRestoreRegion(int rx, int rz) =>
+            rx >= 0 && rz >= 0 && rx < WorldLayout.RegionGrid && rz < WorldLayout.RegionGrid && _regions.Add(RegionId(rx, rz));
+
+        private static bool Voxel(WorldPosition position, out int x, out int z)
+        {
+            x = (int)Math.Floor(position.X);
+            z = (int)Math.Floor(position.Z);
+            return x >= 0 && z >= 0 && x < WorldLayout.WorldVoxels && z < WorldLayout.WorldVoxels;
+        }
+
+        private static long ColumnKey(int columnX, int columnZ) => ((long)columnX << 16) | (uint)columnZ;
+
+        private static long RegionId(int rx, int rz) => ((long)rx << 32) | (uint)rz;
     }
 }

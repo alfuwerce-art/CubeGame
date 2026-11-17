@@ -1,5 +1,7 @@
 // D6 — EditMode checks of the Alpha item icon lookup (held items proven, weapons/armour refused).
 using System;
+using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.IO;
 using CubeGame.Features.Contracts;
 using CubeGame.Presentation.Visual;
@@ -56,6 +58,37 @@ namespace CubeGame.Tests.Creatures.EditMode
             {
                 UnityEngine.Object.DestroyImmediate(atlas?.Texture);
                 UnityEngine.Object.DestroyImmediate(texture);
+                File.Delete(png);
+                File.Delete(json);
+                Directory.Delete(directory);
+            }
+        }
+
+        [Test]
+        public void OversizedAtlasIsRefusedBeforeNativeTextureLoading()
+        {
+            string directory = Path.Combine(Path.GetTempPath(), "cubegame-icons-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            string png = Path.Combine(directory, "atlas.png");
+            string json = Path.Combine(directory, "atlas.json");
+            try
+            {
+                var header = new byte[24];
+                BinaryPrimitives.WriteUInt64BigEndian(header, 0x89504E470D0A1A0AUL);
+                BinaryPrimitives.WriteUInt32BigEndian(header.AsSpan(8), 13);
+                BinaryPrimitives.WriteUInt32BigEndian(header.AsSpan(12), 0x49484452);
+                BinaryPrimitives.WriteUInt32BigEndian(header.AsSpan(16), 64);
+                BinaryPrimitives.WriteUInt32BigEndian(header.AsSpan(20), (uint)SystemInfo.maxTextureSize + 1);
+                File.WriteAllBytes(png, header);
+                File.WriteAllText(json, "{}");
+
+                var problems = new List<string>();
+                Assert.IsFalse(AlphaIconAtlas.TryLoad(directory, out AlphaIconAtlas atlas, problems));
+                Assert.IsNull(atlas);
+                StringAssert.StartsWith("ICON_ATLAS_TOO_LARGE ", problems[0]);
+            }
+            finally
+            {
                 File.Delete(png);
                 File.Delete(json);
                 Directory.Delete(directory);

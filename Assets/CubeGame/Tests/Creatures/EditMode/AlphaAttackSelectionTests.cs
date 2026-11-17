@@ -193,14 +193,14 @@ namespace CubeGame.Tests.Creatures.EditMode
         }
 
         [Test]
-        public void MissingC29ActionFallsBackToTheLibraryAndSaysSo()
+        public void C29ActionDoesNotDependOnTheClipLibrary()
         {
             var ai = new CreatureAi();
             var world = new ScriptedWorld { Actions = new[] { 54, 6 } };
             ai.Tick(Creature(0x1c), 100, world);
             Assert.AreEqual(3, ai.LastSelectedAttack);
-            CollectionAssert.AreEqual(new[] { 54 }, world.Requested);
-            StringAssert.Contains("C29_NOT_IN_LIBRARY", ai.LastReason);
+            CollectionAssert.AreEqual(new[] { 3 }, world.Requested);
+            StringAssert.Contains("ACTION_C29", ai.LastReason);
         }
     }
 }

@@ -45,6 +45,10 @@ namespace CubeGame.Features.Creatures
 
         public static bool CellSkipped(int rand) => (rand & SkipMask) == 0;
 
+        /// <summary>0x5EAF9E…0x5EB1xx: consume cold and dry rolls only when their respective gate is entered.</summary>
+        public static bool ClimateSkipped(float humidity, float temperature, Func<int> next) =>
+            (humidity < 0.2f && CellSkipped(next())) || (temperature < 0.2f && CellSkipped(next()));
+
         /// <summary>Local coordinate of a cell on one axis for a rand() value.</summary>
         public static int CellCoordinate(int cell, int rand) => cell * CellStep + CellOffset + rand % JitterRange;
 
@@ -76,20 +80,33 @@ namespace CubeGame.Features.Creatures
         /// </summary>
         public static int CompanionKind(int leaderKind, int rand)
         {
+            (int first, int mask) = CompanionGroup(leaderKind);
+            return first + (rand & mask);
+        }
+
+        /// <summary>0x5F8590 calls CRT only for kinds in the pair/group switch.</summary>
+        public static int CompanionKind(int leaderKind, Func<int> next)
+        {
+            (int first, int mask) = CompanionGroup(leaderKind);
+            return mask == 0 ? first : first + (next() & mask);
+        }
+
+        private static (int First, int Mask) CompanionGroup(int leaderKind)
+        {
             switch (leaderKind)
             {
-                case 0x00: case 0x01: return 0x00 + (rand & 1);
-                case 0x02: case 0x03: return 0x02 + (rand & 1);
-                case 0x04: case 0x05: return 0x04 + (rand & 1);
-                case 0x07: case 0x08: return 0x07 + (rand & 1);
-                case 0x09: case 0x0A: return 0x09 + (rand & 1);
-                case 0x0B: case 0x0C: return 0x0B + (rand & 1);
-                case 0x0D: case 0x0E: return 0x0D + (rand & 1);
-                case 0x0F: case 0x10: return 0x0F + (rand & 1);
-                case 0x16: case 0x17: return 0x16 + (rand & 1);
-                case 0x25: case 0x26: case 0x27: case 0x28: return 0x25 + (rand & 3);
-                case 0x53: case 0x54: return 0x53 + (rand & 1);
-                default: return leaderKind;
+                case 0x00: case 0x01: return (0x00, 1);
+                case 0x02: case 0x03: return (0x02, 1);
+                case 0x04: case 0x05: return (0x04, 1);
+                case 0x07: case 0x08: return (0x07, 1);
+                case 0x09: case 0x0A: return (0x09, 1);
+                case 0x0B: case 0x0C: return (0x0B, 1);
+                case 0x0D: case 0x0E: return (0x0D, 1);
+                case 0x0F: case 0x10: return (0x0F, 1);
+                case 0x16: case 0x17: return (0x16, 1);
+                case 0x25: case 0x26: case 0x27: case 0x28: return (0x25, 3);
+                case 0x53: case 0x54: return (0x53, 1);
+                default: return (leaderKind, 0);
             }
         }
     }

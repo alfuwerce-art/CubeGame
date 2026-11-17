@@ -79,7 +79,10 @@ namespace CubeGame.Tests.FullM0.PlayMode
 
             Assert.IsTrue(game.StartNewWorld("slot0", "Stream", 20131234u, "Walker", CharacterClass.Ranger), game.Status);
             Assert.AreEqual(AlphaTerrainGenerator.WorldRuntimeId, game.Session.World.GeneratorId);
-            Assert.AreEqual(WorldLayout.StartVoxel + 0.5, game.Session.Hero.Position.X, 1e-6);
+            WorldPosition expectedStart = WorldState.StartPosition(game.WorldState.Generator, game.WorldState.Deltas);
+            Assert.AreEqual(expectedStart.X, game.Session.Hero.Position.X, 1e-6);
+            int sx = (int)game.Session.Hero.Position.X;
+            int sz = (int)game.Session.Hero.Position.Z;
             Assert.AreEqual(1, game.WorldState.Generator.Region(new RegionKey(512, 512)).Level, "start = centre region (Alpha level 1)");
 
             Transform player = game.PlayerTransform;
@@ -93,19 +96,22 @@ namespace CubeGame.Tests.FullM0.PlayMode
             }
 
             Assert.IsTrue(motor.IsGrounded, "hero stands on generated Alpha terrain");
-            int ground = game.WorldState.SurfaceAt(WorldLayout.StartVoxel, WorldLayout.StartVoxel);
+            int ground = game.WorldState.SurfaceAt(sx, sz);
             Assert.Less(Mathf.Abs(player.position.y - (ground + 1)), 1.6f, $"hero y {player.position.y} vs column top {ground + 1}");
 
             game.WorldView.CompletePending();
-            int full = (2 * 6 + 1) * (2 * 6 + 1);
-            Assert.AreEqual(full, game.WorldView.LoadedCount);
+            ChunkKey focus = game.WorldView.Center;
+            Assert.Greater(game.WorldView.LoadedPlants, 0, "AlphaContent vegetation was installed with the chunks");
+            Assert.AreEqual(0, game.WorldView.PendingCount, "eligible chunks finish streaming");
+            Assert.IsTrue(game.WorldView.IsLoaded(new ChunkKey(focus.X - 18, focus.Z)));
+            Assert.IsTrue(game.WorldView.IsLoaded(new ChunkKey(focus.X + 18, focus.Z)));
 
             // Travel 40 chunks (1280 voxels) east: the origin rebases, far chunks are released and zones recorded.
             Vector2Int originBefore = game.WorldView.Origin;
             ChunkKey startChunk = game.WorldView.Center;
-            int targetX = WorldLayout.StartVoxel + 40 * WorldLayout.ChunkSize;
-            int targetGround = Mathf.Max(game.WorldState.SurfaceAt(targetX, WorldLayout.StartVoxel), 0);
-            player.position = game.WorldView.ToScene(targetX + 0.5, targetGround + 3.0, WorldLayout.StartVoxel + 0.5);
+            int targetX = sx + 40 * WorldLayout.ChunkSize;
+            int targetGround = Mathf.Max(game.WorldState.SurfaceAt(targetX, sz), 0);
+            player.position = game.WorldView.ToScene(targetX + 0.5, targetGround + 3.0, sz + 0.5);
             Physics.SyncTransforms();
             yield return Frames(2);
             game.WorldView.CompletePending();
@@ -114,16 +120,16 @@ namespace CubeGame.Tests.FullM0.PlayMode
             Assert.AreNotEqual(originBefore, game.WorldView.Origin, "floating origin moved");
             Assert.Less(player.position.magnitude, 600f);
             Assert.AreEqual(targetX + 0.5, game.Session.Hero.Position.X, 0.6, "world position preserved across rebase");
-            Assert.IsTrue(game.WorldView.IsLoaded(WorldLayout.ChunkOf(targetX, WorldLayout.StartVoxel)));
+            Assert.IsTrue(game.WorldView.IsLoaded(WorldLayout.ChunkOf(targetX, sz)));
             Assert.IsFalse(game.WorldView.IsLoaded(startChunk), "start chunk released beyond keep radius");
-            Assert.LessOrEqual(game.WorldView.LoadedCount, 17 * 17);
+            Assert.LessOrEqual(game.WorldView.LoadedCount, 40 * 40);
             Assert.Greater(game.WorldView.TotalReleased, 0);
-            Assert.IsTrue(game.Session.WorldDeltas.IsDiscovered(new ZoneKey(32800, 32800)));
-            Assert.IsTrue(game.Session.WorldDeltas.IsDiscovered(new ZoneKey(targetX >> 8, 32800)));
+            Assert.IsTrue(game.Session.WorldDeltas.IsDiscovered(new ZoneKey(sx >> 8, sz >> 8)));
+            Assert.IsTrue(game.Session.WorldDeltas.IsDiscovered(new ZoneKey(targetX >> 8, sz >> 8)));
 
             // The target column exists in the rebased scene at its generated height (terrain colliders only).
-            int targetSurface = game.WorldState.SurfaceAt(targetX, WorldLayout.StartVoxel);
-            Vector3 above = game.WorldView.ToScene(targetX + 0.5, targetSurface + 60.0, WorldLayout.StartVoxel + 0.5);
+            int targetSurface = game.WorldState.SurfaceAt(targetX, sz);
+            Vector3 above = game.WorldView.ToScene(targetX + 0.5, targetSurface + 60.0, sz + 0.5);
             float terrainHit = float.NaN;
             foreach (RaycastHit h in Physics.RaycastAll(above, Vector3.down, 400f))
             {
@@ -134,6 +140,66 @@ namespace CubeGame.Tests.FullM0.PlayMode
             }
 
             Assert.AreEqual(targetSurface + 1, terrainHit, 0.01f);
+            Assert.IsTrue(game.ExitToMenu(false));
+        }
+
+        [UnityTest]
+        public IEnumerator PlantSupportEditSurvivesChunkReloadAndSaveLoad()
+        {
+            GameBootstrap game = NewGame();
+            yield return null;
+            Assert.IsTrue(game.StartNewWorld("slot0", "Vegetation", 666666u, "Walker", CharacterClass.Ranger), game.Status);
+            StreamingWorldView view = game.WorldView;
+            ChunkKey center = view.Center;
+            AlphaPlantPlacement plant = default;
+            ChunkKey chosen = default;
+            bool found = false;
+            for (int x = -2; x <= 2 && !found; x++)
+            {
+                for (int z = -2; z <= 2 && !found; z++)
+                {
+                    var chunk = new ChunkKey(center.X + x, center.Z + z);
+                    var placements = ChunkVoxels.Sample(game.WorldState.Generator, chunk).Plants;
+                    if (placements.Count == 0) continue;
+                    plant = placements[0];
+                    chosen = chunk;
+                    found = true;
+                }
+            }
+            Assert.IsTrue(found, "a loaded starting chunk owns a generated plant");
+            string root = $"Chunk_{chosen.X}_{chosen.Z}";
+            GameObject plants = GameObject.Find(root + "/Vegetation");
+            Assert.IsNotNull(plants);
+            int originalVertices = plants.GetComponent<MeshFilter>().sharedMesh.vertexCount;
+            Vector3 local = plants.transform.localPosition;
+            Vector3 scene = plants.transform.position;
+            Vector2Int origin = view.Origin;
+            Vector3 shift = view.Rebase(origin + new Vector2Int(512, 0));
+            Assert.AreEqual(-512f, shift.x);
+            Assert.AreEqual(local, plants.transform.localPosition);
+            Assert.AreEqual(scene + shift, plants.transform.position);
+            view.Rebase(origin);
+            Assert.IsTrue(game.WorldState.Deltas.SetVoxel(plant.X, plant.Y - 1, plant.Z, Voxel.Air, game.Session.Clock.TimeMs));
+            view.SetFocus(game.PlayerTransform.position);
+            GameObject edited = GameObject.Find(root + "/Vegetation");
+            int editedVertices = edited != null ? edited.GetComponent<MeshFilter>().sharedMesh.vertexCount : 0;
+            Assert.Less(editedVertices, originalVertices);
+
+            view.SetFocus(view.ToScene(plant.X + 1280, plant.Y + 2, plant.Z));
+            Assert.IsFalse(view.IsLoaded(chosen));
+            view.LoadAround(view.ToScene(plant.X + 0.5, plant.Y + 2, plant.Z + 0.5), 0);
+            Assert.IsTrue(view.IsLoaded(chosen));
+            GameObject reloaded = GameObject.Find(root + "/Vegetation");
+            Assert.AreEqual(editedVertices, reloaded != null ? reloaded.GetComponent<MeshFilter>().sharedMesh.vertexCount : 0);
+
+            Assert.IsTrue(game.ExitToMenu(true), game.Status);
+            yield return null;
+            Assert.IsTrue(game.LoadWorld("slot0"), game.Status);
+            Assert.IsTrue(game.WorldState.Deltas.TryGetVoxel(plant.X, plant.Y - 1, plant.Z, out uint saved));
+            Assert.AreEqual(Voxel.Air, saved);
+            Assert.IsTrue(game.WorldView.IsLoaded(chosen));
+            GameObject savedPlants = GameObject.Find(root + "/Vegetation");
+            Assert.AreEqual(editedVertices, savedPlants != null ? savedPlants.GetComponent<MeshFilter>().sharedMesh.vertexCount : 0);
             Assert.IsTrue(game.ExitToMenu(false));
         }
 
@@ -191,8 +257,9 @@ namespace CubeGame.Tests.FullM0.PlayMode
             yield return null;
             Assert.IsTrue(game.StartNewWorld("slot0", "World content", 666666u, "Walker", CharacterClass.Ranger), game.Status);
             var terrain = (AlphaTerrainGenerator)game.WorldState.Generator;
-            CollectionAssert.AreEqual(new[] { AlphaZoneContentProvider.ProviderKey, AlphaCityContentProvider.ProviderKey,
-                AlphaDungeonContentProvider.ProviderKey }, terrain.ContentProviders.Select(p => p.Key));
+            // P7-B: the Alpha dungeon 0x5CC510 draws first on the zone stream; the contract dungeon is gone from /9
+            CollectionAssert.AreEqual(new[] { AlphaDungeonZoneProvider.ProviderKey, AlphaZoneContentProvider.ProviderKey,
+                AlphaCityContentProvider.ProviderKey }, terrain.ContentProviders.Select(p => p.Key));
 
             const int regionIndex = WorldLayout.StartVoxel / WorldLayout.RegionSize;
             AlphaRegion region = terrain.RegionRecord(regionIndex, regionIndex);
@@ -216,11 +283,25 @@ namespace CubeGame.Tests.FullM0.PlayMode
             yield return null;
 
             LiveSpawn[] chests = DungeonChests(game, dungeon);
-            Assert.AreEqual(3, chests.Length);
+            int generated = terrain.Zone(dungeon.X, dungeon.Z).ContentSpawns
+                .Count(s => s.BehaviourKey == AlphaDungeonContentProvider.ChestBehaviourKey);
+            Assert.Greater(generated, 0, "the Alpha dungeon of this zone has chests");
+            Assert.AreEqual(generated, chests.Length);
             foreach (LiveSpawn chest in chests)
             {
                 Assert.AreEqual(StableEntityId.ForZoneSpawn(dungeon, D3ZonePopulation.Channel, chest.Definition.SpawnIndex), chest.Id);
                 Assert.IsTrue(game.Visuals.TryGetRoot(chest.Id, out _));
+            }
+
+            // P7-B: the dungeon's master and room creatures are live combatants of the zone content channel
+            LiveSpawn[] creatures = game.Population.Live.Where(s => s.Zone.Equals(dungeon)
+                && D3ZonePopulation.IsDungeonCreature(s.Definition.BehaviourKey)).ToArray();
+            Assert.IsNotEmpty(creatures, "dungeon creatures reach the scene");
+            Assert.AreEqual(1, creatures.Count(s => s.Definition.BehaviourKey == AlphaDungeonContents.MasterBehaviourKey));
+            foreach (LiveSpawn creature in creatures)
+            {
+                Assert.IsTrue(game.Session.Combat.TryGet(creature.Id, out var fighter), "dungeon creature is a combatant");
+                Assert.IsTrue(fighter.Hostile);
             }
 
             LiveSpawn removed = chests[0];
@@ -289,21 +370,27 @@ namespace CubeGame.Tests.FullM0.PlayMode
             GameBootstrap game = NewGame();
             yield return null;
             Assert.IsTrue(game.StartNewWorld("slot0", "Recovered population", 666666u, "Walker", CharacterClass.Warrior), game.Status);
+            game.TeleportHero(8397145, 8396899);
+            yield return Frames(2);
+            game.Session.Clock.StepTicks(2);
             AlphaSpawnRuntime runtime = game.RecoveredPopulation;
             Assert.IsNotNull(runtime);
-            var home = new ZoneKey(WorldLayout.StartVoxel / WorldLayout.ZoneSize, WorldLayout.StartVoxel / WorldLayout.ZoneSize);
-            AlphaSpawnTemplate target = runtime.Templates.FirstOrDefault(t => t.Zone.Equals(home) && t.Live
-                && t.Definition.Faction == AlphaWildSpawnRules.FactionHostile);
+            AlphaSpawnTemplate target = runtime.Templates.FirstOrDefault(t => t.Live
+                && t.Definition.Faction == AlphaWildSpawnRules.FactionHostile && t.Data.WindowStartMs > 0);
             Assert.IsNotNull(target, "a recovered wild template near the hero became live");
-            Assert.AreEqual(AlphaRecoveredPopulation.RecoveredKindProvenance, target.Definition.Provenance);
+            ZoneKey home = target.Zone;
+            int startX = home.X * WorldLayout.ZoneSize + 128;
+            int startZ = home.Z * WorldLayout.ZoneSize + 128;
+            game.TeleportHero(startX, startZ);
+            yield return null;
+            Assert.AreEqual(AlphaRecoveredPopulation.ZoneStreamProvenance, target.Definition.Provenance);
             Assert.IsTrue(game.Visuals.TryGetRoot(target.Id, out _));
             KillSpawn(game, target);
             Assert.AreEqual(AlphaSpawnLifecycle.RespawnTimerMs, target.RespawnTimerMs);
             game.Session.Clock.StepTicks(3);
             Assert.That(target.RespawnTimerMs, Is.LessThan(AlphaSpawnLifecycle.RespawnTimerMs));
 
-            int start = WorldLayout.StartVoxel;
-            game.TeleportHero(start + 4 * WorldLayout.ZoneSize, start);
+            game.TeleportHero(startX + 4 * WorldLayout.ZoneSize, startZ);
             yield return null;
             Assert.IsFalse(runtime.IsLoaded(home));
             Assert.IsFalse(game.Visuals.TryGetRoot(target.Id, out _), "the corpse releases with its zone");
@@ -311,10 +398,10 @@ namespace CubeGame.Tests.FullM0.PlayMode
             game.Session.Clock.StepTicks(3);
             Assert.AreEqual(parkedTimer, runtime.SnapshotStates().Single(s => s.Id.Equals(target.Id)).RespawnTimerMs);
 
-            int npcX = start + 40;
-            var npcHome = new WorldPosition(npcX, game.WorldState.SurfaceAt(npcX, start) + 1, start);
+            int npcX = startX + 40;
+            var npcHome = new WorldPosition(npcX, game.WorldState.SurfaceAt(npcX, startZ) + 1, startZ);
             runtime.AddSource(new ScheduledNpcFixture(home, npcHome));
-            game.TeleportHero(start, start);
+            game.TeleportHero(startX, startZ);
             yield return Frames(2);
             game.Session.Clock.StepTicks(2);
             Assert.IsTrue(runtime.TryGet(target.Id, out AlphaSpawnTemplate returned));
@@ -405,8 +492,8 @@ namespace CubeGame.Tests.FullM0.PlayMode
             yield return null;
 
             Assert.IsTrue(game.StartNewWorld("slot2", "Edit", 99u, "Digger", CharacterClass.Warrior), game.Status);
-            int x = WorldLayout.StartVoxel + 5;
-            int z = WorldLayout.StartVoxel + 5;
+            int x = (int)game.Session.Hero.Position.X + 5;
+            int z = (int)game.Session.Hero.Position.Z + 5;
             int original = game.WorldState.SurfaceAt(x, z);
             int edited = original - 6;
 
@@ -439,8 +526,8 @@ namespace CubeGame.Tests.FullM0.PlayMode
             yield return null;
 
             Assert.IsTrue(game.StartNewWorld("slot0", "Voxel", 99u, "Builder", CharacterClass.Warrior), game.Status);
-            int x = WorldLayout.StartVoxel + 7;
-            int z = WorldLayout.StartVoxel - 4;
+            int x = (int)game.Session.Hero.Position.X + 7;
+            int z = (int)game.Session.Hero.Position.Z - 4;
             int ground = game.WorldState.SurfaceAt(x, z);
             uint stone = Voxel.Pack(90, 90, 90, 6);
 

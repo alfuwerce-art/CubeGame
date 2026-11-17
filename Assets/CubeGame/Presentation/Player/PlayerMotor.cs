@@ -38,6 +38,8 @@ namespace CubeGame.Presentation.Player
 
         public float VerticalSpeed => (float)_movement.VelocityY;
 
+        public System.Func<bool> AcceptsInput { get; set; }
+
         public float HorizontalSpeed => (float)_movement.HorizontalSpeed;
 
         public bool Swimming => _movement.InWater;
@@ -66,7 +68,7 @@ namespace CubeGame.Presentation.Player
 
         private void Update()
         {
-            if (_controller == null)
+            if (_controller == null || (AcceptsInput != null && !AcceptsInput()))
             {
                 return;
             }

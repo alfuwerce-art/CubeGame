@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using CubeGame.Core.Rendering;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.World;
@@ -17,12 +19,43 @@ namespace CubeGame.Gameplay.Streaming
 
         public ChunkKey Key;
         public VoxelColumn[] Columns = new VoxelColumn[Span * Span];
+        public IReadOnlyList<AlphaPlantPlacement> Plants { get; private set; } = Array.Empty<AlphaPlantPlacement>();
 
         public static ChunkVoxels Sample(IWorldGenerator generator, ChunkKey key)
         {
             var result = new ChunkVoxels { Key = key };
             int originX = key.X * Size;
             int originZ = key.Z * Size;
+            if (generator is AlphaTerrainGenerator terrain)
+            {
+                // Fetch each of the (at most four) source zones once for the chunk and its border.
+                ZoneKey first = WorldLayout.ZoneOf(originX - 1, originZ - 1);
+                ZoneKey last = WorldLayout.ZoneOf(originX + Size, originZ + Size);
+                for (int zx = first.X; zx <= last.X; zx++)
+                {
+                    for (int zz = first.Z; zz <= last.Z; zz++)
+                    {
+                        if (!WorldLayout.IsInside(new ZoneKey(zx, zz))) continue;
+
+                        AlphaZone zone = terrain.Zone(zx, zz);
+                        if (zx == originX / WorldLayout.ZoneSize && zz == originZ / WorldLayout.ZoneSize)
+                            result.Plants = zone.PlantsIn(key);
+                        int x0 = System.Math.Max(-1, zx * WorldLayout.ZoneSize - originX);
+                        int x1 = System.Math.Min(Size + 1, (zx + 1) * WorldLayout.ZoneSize - originX);
+                        int z0 = System.Math.Max(-1, zz * WorldLayout.ZoneSize - originZ);
+                        int z1 = System.Math.Min(Size + 1, (zz + 1) * WorldLayout.ZoneSize - originZ);
+                        for (int lz = z0; lz < z1; lz++)
+                        {
+                            for (int lx = x0; lx < x1; lx++)
+                            {
+                                result.Columns[(lz + 1) * Span + lx + 1] = zone.Column(originX + lx, originZ + lz);
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+
             for (int lz = -1; lz <= Size; lz++)
             {
                 for (int lx = -1; lx <= Size; lx++)
@@ -53,7 +86,7 @@ namespace CubeGame.Gameplay.Streaming
 
         public ChunkVoxels Copy()
         {
-            return new ChunkVoxels { Key = Key, Columns = (VoxelColumn[])Columns.Clone() };
+            return new ChunkVoxels { Key = Key, Columns = (VoxelColumn[])Columns.Clone(), Plants = Plants };
         }
     }
 
@@ -109,6 +142,7 @@ namespace CubeGame.Gameplay.Streaming
                         }
                     }
 
+                    int top = c.TopSolid();
                     int yMax = c.TopStored > 0 ? c.TopStored : 0;
                     for (int y = yMin; y <= yMax; y++)
                     {
@@ -118,9 +152,21 @@ namespace CubeGame.Gameplay.Streaming
                             float r = Voxel.R(v) / 255f;
                             float g = Voxel.G(v) / 255f;
                             float b = Voxel.B(v) / 255f;
+                            // Alpha sunlight fill (ChunkBuffer): sky-exposed voxels are full-bright, voxels under
+                            // an overhang / inside a cave fade with depth instead of looking flat.
+                            float sun = y >= top ? 1f : System.MathF.Max(0.35f, 1f - (top - y) * 0.07f);
+                            r *= sun;
+                            g *= sun;
+                            b *= sun;
                             if (!Voxel.IsSolid(c.Read(y + 1)))
                             {
-                                Top(terrain, lx, y + 1, lz, r, g, b, 1f);
+                                // Standard voxel AO on the top face vertices: each vertex sees its two edge
+                                // neighbours and the corner at the face level.
+                                float a0 = VertexAo(chunk, lx, lz, y + 1, -1, -1);
+                                float a1 = VertexAo(chunk, lx, lz, y + 1, -1, 1);
+                                float a2 = VertexAo(chunk, lx, lz, y + 1, 1, 1);
+                                float a3 = VertexAo(chunk, lx, lz, y + 1, 1, -1);
+                                TopWithAo(terrain, lx, y + 1, lz, r, g, b, a0, a1, a2, a3);
                             }
 
                             if (y >= c.Bottom && !Voxel.IsSolid(c.Read(y - 1)))
@@ -167,6 +213,34 @@ namespace CubeGame.Gameplay.Streaming
             }
 
             return new Result { Terrain = terrain, Water = water };
+        }
+
+        /// <summary>Standard voxel AO for one top-face vertex (dx, dz are the corner direction, ±1).</summary>
+        private static float VertexAo(ChunkVoxels chunk, int x, int z, int y, int dx, int dz)
+        {
+            bool sideX = SolidAt(chunk, x + dx, z, y);
+            bool sideZ = SolidAt(chunk, x, z + dz, y);
+            bool corner = SolidAt(chunk, x + dx, z + dz, y);
+            if (sideX && sideZ) return 0.55f;
+            int count = (sideX ? 1 : 0) + (sideZ ? 1 : 0) + (corner ? 1 : 0);
+            return 1f - count * 0.15f;
+        }
+
+        private static bool SolidAt(ChunkVoxels chunk, int x, int z, int y)
+        {
+            VoxelColumn c = chunk.At(x, z);
+            return c != null && Voxel.IsSolid(c.Read(y));
+        }
+
+        private static void TopWithAo(MeshData mesh, float x, float y, float z, float r, float g, float b,
+            float a0, float a1, float a2, float a3)
+        {
+            int s = mesh.VertexCount;
+            mesh.AddVertex(x, y, z, 0f, 1f, 0f, r * a0, g * a0, b * a0, 1f);
+            mesh.AddVertex(x, y, z + 1, 0f, 1f, 0f, r * a1, g * a1, b * a1, 1f);
+            mesh.AddVertex(x + 1, y, z + 1, 0f, 1f, 0f, r * a2, g * a2, b * a2, 1f);
+            mesh.AddVertex(x + 1, y, z, 0f, 1f, 0f, r * a3, g * a3, b * a3, 1f);
+            mesh.AddQuad(s, s + 1, s + 2, s + 3);
         }
 
         private static void Top(MeshData mesh, float x, float y, float z, float r, float g, float b, float a)

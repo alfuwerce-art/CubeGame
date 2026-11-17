@@ -70,6 +70,8 @@ namespace CubeGame.Features.Contracts
         /// <summary>Optional world object name. Its table ID is separate from the creature kind namespace.</summary>
         public string WorldObjectName { get; set; }
 
+        public int? WorldObjectId { get; set; }
+
         public WorldPosition Position { get; set; }
 
         public float Yaw { get; set; }
@@ -133,6 +135,8 @@ namespace CubeGame.Features.Contracts
 
         public ActionId Action { get; set; }
 
+        public long Serial { get; set; }
+
         public StableEntityId Target { get; set; }
 
         /// <summary>Phase durations in game ms (windup, strike, recover). Visual playback must follow them.</summary>
@@ -150,6 +154,8 @@ namespace CubeGame.Features.Contracts
 
         public ActionId Action { get; set; }
 
+        public long Serial { get; set; }
+
         public ActionPhase Phase { get; set; }
     }
 
@@ -160,6 +166,8 @@ namespace CubeGame.Features.Contracts
         public StableEntityId Entity { get; set; }
 
         public ActionId Action { get; set; }
+
+        public long Serial { get; set; }
 
         public ActionOutcome Outcome { get; set; }
 
@@ -173,6 +181,8 @@ namespace CubeGame.Features.Contracts
         public StableEntityId Attacker { get; set; }
 
         public StableEntityId Target { get; set; }
+
+        public ActionId Action { get; set; }
 
         public double Damage { get; set; }
 
@@ -319,6 +329,27 @@ namespace CubeGame.Features.Contracts
 
         /// <summary>Who picked it up; None when it expired.</summary>
         public StableEntityId PickedBy { get; set; }
+
+        public RawAlphaItemId Raw { get; set; }
+        public int Count { get; set; }
+    }
+
+    public sealed class HeroItemUsed : IGameEvent
+    {
+        public long TimeMs { get; set; }
+        public RawAlphaItemId Raw { get; set; }
+        public double HealthRestored { get; set; }
+    }
+
+    /// <summary>Live mission transition (activated or completed). Rehydrating a saved journal emits no transition.</summary>
+    public sealed class HuntChanged : IGameEvent
+    {
+        public long TimeMs { get; set; }
+        /// <summary>Target kind of the mission (column +0x38) on activation, the killed kind on completion.</summary>
+        public KindId Kind { get; set; }
+        /// <summary>Alpha mission type (column +0x34).</summary>
+        public int MissionType { get; set; }
+        public bool Complete { get; set; }
     }
 
     public sealed class SessionStateChanged : IGameEvent

@@ -10,13 +10,13 @@ namespace CubeGame.Features.Combat
         /// <summary>The Alpha rule for this weapon state is not known: the attack is refused, never turned into melee.</summary>
         Unsupported = 0,
 
-        /// <summary>Frontal hit sector at the strike moment (<see cref="CombatSystem.InMeleeReach"/>).</summary>
+        /// <summary>Actor-relative volume evaluated in the action hit window.</summary>
         Melee = 1,
 
         /// <summary>A projectile is released at the strike moment and hits through <see cref="ProjectileSystem"/>.</summary>
         Projectile = 2,
 
-        /// <summary>A short-lived hit volume in front of the attacker, also resolved by <see cref="ProjectileSystem"/>.</summary>
+        /// <summary>A short-lived hit volume in front of the attacker, resolved within the action hit windows.</summary>
         AreaEffect = 3,
 
         /// <summary>
@@ -24,20 +24,20 @@ namespace CubeGame.Features.Combat
         /// actions 0x1C/0x5E/0x5F; bomb 0x68 uses a fixed range of 10 instead of the voxel ray).
         /// </summary>
         Hitscan = 4,
+
+        ItemUse = 5,
     }
 
     /// <summary>
     /// Alpha projectile type byte (projectile struct +0x60, written by the action handlers of
     /// <c>GameController_updateSubsystems</c> 0x60C510): 0 arrow (actions 0x16/0x17), 1 magic (0x25…0x2E),
-    /// 2 boomerang (0x1A). <see cref="StaffBurst"/> is CubeGame's: Alpha resolves the staff action 0x1E as a hit volume
-    /// (the melee case group at 0x6142A0), not as a projectile.
+    /// 2 boomerang (0x1A).
     /// </summary>
     public enum ProjectileKind
     {
         Arrow = 0,
         Magic = 1,
         Boomerang = 2,
-        StaffBurst = 100,
 
         /// <summary>Not a flying object: the trail of a hitscan attack (event <see cref="HitscanFired"/>).</summary>
         Beam = 101,
@@ -59,7 +59,7 @@ namespace CubeGame.Features.Combat
 
         public AttackPath Path { get; }
 
-        /// <summary>Meaningful for <see cref="AttackPath.Projectile"/> and <see cref="AttackPath.AreaEffect"/>.</summary>
+        /// <summary>Projectile type for the launch route.</summary>
         public ProjectileKind Projectile { get; }
 
         public string Provenance { get; }
@@ -69,14 +69,11 @@ namespace CubeGame.Features.Combat
 
         public bool IsSupported => Path != AttackPath.Unsupported;
 
-        public static AttackPlan Melee(ActionId action) =>
-            new AttackPlan(action, AttackPath.Melee, ProjectileKind.Arrow, "ALPHA_CODE_STATIC (C4 0x445020)");
-
         public static AttackPlan Refused(string reason) =>
             new AttackPlan(default, AttackPath.Unsupported, ProjectileKind.Arrow, "UNKNOWN", reason);
 
         public override string ToString() =>
-            IsSupported ? $"action {Action.Value} {Path}{(Path == AttackPath.Melee ? string.Empty : " " + Projectile)}" : $"refused: {Reason}";
+            IsSupported ? $"action {Action.Value} {Path}" : $"refused: {Reason}";
     }
 
     /// <summary>
@@ -97,15 +94,16 @@ namespace CubeGame.Features.Combat
         public const int BoomerangAction = 26;
         public const int StaffAction = 30;
         public const int WandAction = 38;
-        public const int BraceletAction = 39;
+        public const int BraceletAction = 0x28;
         public const int BombAction = 0x68;
 
-        public static AttackPlan Select(CharacterClass characterClass, ItemInstance mainHand, ItemInstance offHand)
+        public static AttackPlan Select(CharacterClass characterClass, ItemInstance mainHand, ItemInstance offHand,
+            CharacterSpecialization specialization = CharacterSpecialization.Primary)
         {
             ActionId? melee = AlphaPrimaryAttack.SelectMelee(characterClass, mainHand, offHand);
             if (melee.HasValue)
             {
-                return AttackPlan.Melee(melee.Value);
+                return ForAction(melee.Value.Value);
             }
 
             if (IsWeapon(offHand, WeaponSubtype.Bow) || IsWeapon(offHand, WeaponSubtype.Crossbow))
@@ -123,15 +121,11 @@ namespace CubeGame.Features.Combat
                     case WeaponSubtype.Boomerang:
                         return ForAction(BoomerangAction);
                     case WeaponSubtype.Wand:
-                        return ForAction(WandAction);
+                        return ForAction(specialization == CharacterSpecialization.Secondary ? 0x2C : WandAction);
                     case WeaponSubtype.Staff:
-                        return ForAction(StaffAction);
+                        return ForAction(specialization == CharacterSpecialization.Secondary ? 0x20 : StaffAction);
                     case WeaponSubtype.Bracelet:
-                        // 0x445020 read from the decompilation (DeepSeek evidence 08ae4e3 §3): bracelet → 0x27 (spec 0);
-                        // not covered by the C4 emulation → PARTIAL.
-                        AttackPlan bracelet = ForAction(BraceletAction);
-                        return new AttackPlan(bracelet.Action, bracelet.Path, bracelet.Projectile,
-                            "PARTIAL: action ALPHA_DECOMPILED (0x445020), release ALPHA_CODE_STATIC (0x617C88 group 0x25..0x2E)");
+                        return ForAction(specialization == CharacterSpecialization.Secondary ? 0x2A : BraceletAction);
                 }
             }
 
@@ -139,42 +133,43 @@ namespace CubeGame.Features.Combat
             return AttackPlan.Refused($"UNKNOWN Alpha primary attack for class {characterClass} with {hand}");
         }
 
-        /// <summary>
-        /// Path of an Alpha action id by the case group of <c>GameController_updateSubsystems</c> that consumes it
-        /// (bytes, see M0_F2B report): 0x16/0x17/0x1A push an arrow/boomerang (0x617184), 0x25…0x2E and 0x6C push a magic
-        /// projectile (0x617C88), 0x1E…0x21 resolve a forward volume in the melee group (0x6142A0), 0x1C/0x5E/0x5F cast
-        /// the 200-block voxel ray (0x615F62) and 0x68 (bomb) uses the fixed range [0x745E74] = 10. Everything else
-        /// is the melee group.
-        /// </summary>
+        /// <summary>Routes decoded from the action jump table at 0x611E04 / 0x622CCC in Cube.exe.</summary>
         public static AttackPlan ForAction(int action)
         {
             var id = new ActionId(action);
-            const string release = "ALPHA_CODE_STATIC (0x60C510 action group)";
+            const string dispatcher = "ALPHA_CODE_STATIC (0x611E04)";
             switch (action)
             {
                 case 0x16:
                 case 0x17:
-                    return new AttackPlan(id, AttackPath.Projectile, ProjectileKind.Arrow, release);
+                    return new AttackPlan(id, AttackPath.Projectile, ProjectileKind.Arrow, dispatcher);
                 case 0x1A:
-                    return new AttackPlan(id, AttackPath.Projectile, ProjectileKind.Boomerang, release);
+                    return new AttackPlan(id, AttackPath.Projectile, ProjectileKind.Boomerang, dispatcher);
                 case 0x1E:
                 case 0x1F:
                 case 0x20:
                 case 0x21:
-                    return new AttackPlan(id, AttackPath.AreaEffect, ProjectileKind.StaffBurst,
-                        "ALPHA_DECOMPILED path (melee group, forward volume 0x6142A0); volume size/offset CUBEGAME_CONTRACT");
+                    return new AttackPlan(id, AttackPath.AreaEffect, default, dispatcher);
                 case 0x1C:
                 case 0x5E:
                 case 0x5F:
-                case BombAction:
-                    return new AttackPlan(id, AttackPath.Hitscan, ProjectileKind.Beam, release);
+                    return new AttackPlan(id, AttackPath.Hitscan, ProjectileKind.Beam, dispatcher);
+                case 0x50:
+                    return new AttackPlan(id, AttackPath.ItemUse, default, "PARTIAL (0x50 consumable)");
+                case 0x01: case 0x02: case 0x03: case 0x04: case 0x05: case 0x06: case 0x07:
+                case 0x09: case 0x0A: case 0x0C: case 0x0D: case 0x0E: case 0x0F:
+                case 0x10: case 0x12: case 0x13: case 0x39: case 0x3A: case 0x41:
+                case 0x42: case 0x43: case 0x44: case 0x46: case 0x4B: case 0x4C:
+                case 0x4D: case 0x4E:
+                    return new AttackPlan(id, AttackPath.Melee, default, dispatcher);
                 default:
-                    if ((action >= 0x25 && action <= 0x2E) || action == 0x6C)
+                    if (action >= 0x25 && action <= 0x2E)
                     {
-                        return new AttackPlan(id, AttackPath.Projectile, ProjectileKind.Magic, release);
+                        return new AttackPlan(id, AttackPath.Projectile, ProjectileKind.Magic, dispatcher);
                     }
 
-                    return new AttackPlan(id, AttackPath.Melee, ProjectileKind.Arrow, "ALPHA_CODE_STATIC (melee group)");
+                    return new AttackPlan(id, AttackPath.Unsupported, default, "UNKNOWN",
+                        $"UNKNOWN or unsupported Alpha action 0x{action:X}");
             }
         }
 

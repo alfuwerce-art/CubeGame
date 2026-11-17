@@ -170,12 +170,14 @@ namespace CubeGame.Features.Persistence
                 heroSkillRanks = hero.SkillRanks.ToArray(),
                 heroCopper = hero.Copper,
                 heroManaCubes = hero.ManaCubes,
-                huntMissions = WriteMissions(hero.Missions),
+                heroPlatinum = hero.Platinum,
                 inventoryPlacement = hero.InventoryPlacement(),
                 characterChecksum = Checksum(characterText),
                 worldChecksum = worldChecksum,
             };
             WriteRawItems(hero, data);
+            WriteRecipes(hero, data);
+            WriteMissions(hero.Missions, data);
 
             if (!TryValidate(data, out string validationError))
             {
@@ -299,6 +301,7 @@ namespace CubeGame.Features.Persistence
                 NeedsGroundPlacement = false,
                 Copper = data.heroCopper,
                 ManaCubes = data.heroManaCubes,
+                Platinum = data.heroPlatinum,
             };
             if (data.heroGender >= 0)
             {
@@ -320,17 +323,12 @@ namespace CubeGame.Features.Persistence
 
             hero.RestoreInventory(data.inventoryPlacement);
             RestoreRawItems(hero, data);
-            if (data.huntMissions != null)
+            RestoreRecipes(hero, data);
+            if (!RestoreMissions(hero, data))
             {
-                foreach (HuntMissionSaveData mission in data.huntMissions)
-                {
-                    if (mission == null || !hero.Missions.TryRestore(new HuntMission(
-                        new StableEntityId(unchecked((ulong)mission.target)), new KindId(mission.kind), mission.complete)))
-                    {
-                        return Fail(SlotLoadStatus.Corrupted, "invalid or duplicate hunt mission");
-                    }
-                }
+                return Fail(SlotLoadStatus.Corrupted, "invalid or duplicate Alpha mission");
             }
+
             if (data.heroHealth >= 0.0)
             {
                 hero.RestoreHealth(data.heroHealth);
@@ -347,21 +345,82 @@ namespace CubeGame.Features.Persistence
             };
         }
 
-        private static HuntMissionSaveData[] WriteMissions(MissionJournal journal)
+        /// <summary>P7: Alpha mission blocks and generated regions into the session save; legacy hunts are dropped.</summary>
+        public static void WriteMissions(MissionJournal journal, SessionSaveData data)
         {
-            var result = new HuntMissionSaveData[journal.Hunts.Count];
-            int index = 0;
-            foreach (HuntMission mission in journal.Hunts)
+            var missions = new List<AlphaMissionSaveData>();
+            foreach (AlphaMission m in journal.Columns)
             {
-                result[index++] = new HuntMissionSaveData
+                missions.Add(new AlphaMissionSaveData
                 {
-                    target = (long)mission.Target.Value,
-                    kind = mission.Kind.Value,
-                    complete = mission.Complete,
-                };
+                    columnX = m.ColumnX,
+                    columnZ = m.ColumnZ,
+                    level = m.Level,
+                    seed = m.Seed,
+                    type = (int)m.Type,
+                    targetKind = m.TargetKind,
+                    maxLevel = m.MaxLevel,
+                    levelClass = m.LevelClass,
+                    state = (int)m.State,
+                    progress = m.Progress,
+                    required = m.Required,
+                    targetZoneX = m.TargetZoneX,
+                    targetZoneZ = m.TargetZoneZ,
+                    bossKind = m.BossKind,
+                    bossLevel = m.BossLevel,
+                    bossQuality = m.BossQuality,
+                    bossZoneX = m.BossZoneX,
+                    bossZoneZ = m.BossZoneZ,
+                });
             }
 
-            return result;
+            var regions = new List<int>();
+            foreach ((int rx, int rz) in journal.GeneratedRegions)
+            {
+                regions.Add(rx);
+                regions.Add(rz);
+            }
+
+            data.huntMissions = null;
+            data.alphaMissions = missions.ToArray();
+            data.alphaMissionRegions = regions.ToArray();
+        }
+
+        /// <summary>P7: restores Alpha missions; false for a malformed record. Legacy F3 hunts are ignored.</summary>
+        public static bool RestoreMissions(HeroState hero, SessionSaveData data)
+        {
+            if (data.alphaMissionRegions != null)
+            {
+                if ((data.alphaMissionRegions.Length & 1) != 0)
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < data.alphaMissionRegions.Length; i += 2)
+                {
+                    if (!hero.Missions.TryRestoreRegion(data.alphaMissionRegions[i], data.alphaMissionRegions[i + 1]))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            if (data.alphaMissions == null)
+            {
+                return true;
+            }
+
+            foreach (AlphaMissionSaveData m in data.alphaMissions)
+            {
+                if (m == null || m.columnX < 0 || m.columnZ < 0 || m.columnX >= WorldLayout.RegionGrid * 8
+                    || m.columnZ >= WorldLayout.RegionGrid * 8
+                    || !hero.Missions.TryRestore(AlphaMission.Restore(m.columnX, m.columnZ, m.level, m.seed, m.type, m.targetKind, m.maxLevel, m.levelClass, m.state, m.progress, m.required, m.targetZoneX, m.targetZoneZ, m.bossKind, m.bossLevel, m.bossQuality, m.bossZoneX, m.bossZoneZ)))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>Returns null on success (deltas filled), otherwise the failure result.</summary>
@@ -455,7 +514,7 @@ namespace CubeGame.Features.Persistence
             return null;
         }
 
-        private static WorldSaveData ToWorldSave(GameSession session)
+        public static WorldSaveData ToWorldSave(GameSession session)
         {
             var data = new WorldSaveData
             {
@@ -551,9 +610,10 @@ namespace CubeGame.Features.Persistence
                 return false;
             }
 
-            if (data.heroCopper < 0 || data.heroManaCubes < 0 || data.worldTimeOffsetMs < 0
+            if (data.heroCopper < 0 || data.heroManaCubes < 0 || data.heroPlatinum < 0 || data.worldTimeOffsetMs < 0
                 || data.worldTimeOffsetMs > int.MaxValue * 86_400_000L
-                || (data.huntMissions?.Length ?? 0) > WorldSaveFormat.MaxDeltas)
+                || (data.alphaMissions?.Length ?? 0) > WorldSaveFormat.MaxDeltas
+                || (data.alphaMissionRegions?.Length ?? 0) > 2 * WorldSaveFormat.MaxDeltas)
             {
                 error = "invalid gameplay progress";
                 return false;
@@ -626,12 +686,61 @@ namespace CubeGame.Features.Persistence
             return SaveService.Fnv1a64(text).ToString("x16", CultureInfo.InvariantCulture);
         }
 
-        private static void WriteRawItems(HeroState hero, SessionSaveData data)
+        public static void WriteRecipes(HeroState hero, SessionSaveData data)
+        {
+            int n = hero.KnownRecipes.Count;
+            data.heroRecipeTypes = new int[n];
+            data.heroRecipeSubtypes = new int[n];
+            data.heroRecipeSeeds = new int[n];
+            data.heroRecipeRarities = new int[n];
+            data.heroRecipeModifiers = new int[n];
+            data.heroRecipeLevels = new int[n];
+            for (int i = 0; i < n; i++)
+            {
+                AlphaItemRecord r = hero.KnownRecipes[i];
+                data.heroRecipeTypes[i] = r.Type;
+                data.heroRecipeSubtypes[i] = r.Subtype;
+                data.heroRecipeSeeds[i] = r.Seed;
+                data.heroRecipeRarities[i] = r.Rarity;
+                data.heroRecipeModifiers[i] = r.Modifier;
+                data.heroRecipeLevels[i] = r.Level;
+            }
+        }
+
+        public static void RestoreRecipes(HeroState hero, SessionSaveData data)
+        {
+            hero.KnownRecipes.Clear();
+            int n = data.heroRecipeTypes?.Length ?? 0;
+            bool full = n > 0 && data.heroRecipeSubtypes?.Length == n && data.heroRecipeSeeds?.Length == n
+                && data.heroRecipeRarities?.Length == n && data.heroRecipeModifiers?.Length == n && data.heroRecipeLevels?.Length == n;
+            if (!full)
+            {
+                for (int level = 1; level <= hero.Sheet.Progression.Level; level++)
+                {
+                    hero.LearnRecipesForLevel(level);
+                }
+
+                return;
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                hero.KnownRecipes.Add(new AlphaItemRecord(data.heroRecipeTypes[i], data.heroRecipeSubtypes[i], data.heroRecipeSeeds[i],
+                    0, data.heroRecipeRarities[i], data.heroRecipeModifiers[i], data.heroRecipeLevels[i]));
+            }
+        }
+
+        public static void WriteRawItems(HeroState hero, SessionSaveData data)
         {
             var types = new List<int>();
             var subtypes = new List<int>();
             var counts = new List<int>();
             var slots = new List<int>();
+            var seeds = new List<int>();
+            var variants = new List<int>();
+            var rarities = new List<int>();
+            var modifiers = new List<int>();
+            var levels = new List<int>();
             for (int i = 0; i < HeroInventory.Capacity; i++)
             {
                 Record(hero.Inventory[i], i);
@@ -646,6 +755,11 @@ namespace CubeGame.Features.Persistence
             data.rawItemSubtypes = subtypes.ToArray();
             data.rawItemCounts = counts.ToArray();
             data.rawItemSlots = slots.ToArray();
+            data.rawItemSeeds = seeds.ToArray();
+            data.rawItemVariants = variants.ToArray();
+            data.rawItemRarities = rarities.ToArray();
+            data.rawItemModifiers = modifiers.ToArray();
+            data.rawItemLevels = levels.ToArray();
 
             void Record(InventoryEntry entry, int placement)
             {
@@ -655,8 +769,41 @@ namespace CubeGame.Features.Persistence
                     subtypes.Add(entry.Raw.Subtype);
                     counts.Add(entry.Count);
                     slots.Add(placement);
+                    seeds.Add(entry.Record.Seed);
+                    variants.Add(entry.Record.Variant);
+                    rarities.Add(entry.Record.Rarity);
+                    modifiers.Add(entry.Record.Modifier);
+                    levels.Add(entry.Record.Level);
                 }
             }
+        }
+
+        /// <summary>
+        /// Raw entry <paramref name="i"/> of a session file, or null when it must be skipped (non-positive count or a
+        /// Core equipment type 3–9, which the Core save owns). Optional P5 record arrays are used when complete.
+        /// </summary>
+        public static InventoryEntry RawEntryFromSave(SessionSaveData data, int i)
+        {
+            int type = data.rawItemTypes[i];
+            int count = data.rawItemCounts[i];
+            if (count <= 0 || (type >= 3 && type <= 9))
+            {
+                return null;
+            }
+
+            int n = data.rawItemTypes.Length;
+            bool full = data.rawItemSeeds?.Length == n && data.rawItemVariants?.Length == n
+                && data.rawItemRarities?.Length == n && data.rawItemModifiers?.Length == n && data.rawItemLevels?.Length == n;
+            if (!full)
+            {
+                return ItemInstance.IsSupportedType(type)
+                    ? null
+                    : InventoryEntry.FromRaw(new RawAlphaItemId(type, data.rawItemSubtypes[i]), count);
+            }
+
+            var record = new AlphaItemRecord(type, data.rawItemSubtypes[i], data.rawItemSeeds[i], data.rawItemVariants[i],
+                data.rawItemRarities[i], data.rawItemModifiers[i], data.rawItemLevels[i]);
+            return record.IsEmpty ? null : InventoryEntry.FromAlpha(record, count);
         }
 
         private static void RestoreRawItems(HeroState hero, SessionSaveData data)
@@ -669,12 +816,12 @@ namespace CubeGame.Features.Persistence
 
             for (int i = 0; i < n; i++)
             {
-                if (data.rawItemCounts[i] <= 0 || ItemInstance.IsSupportedType(data.rawItemTypes[i]))
+                InventoryEntry entry = RawEntryFromSave(data, i);
+                if (entry == null)
                 {
                     continue;
                 }
 
-                InventoryEntry entry = InventoryEntry.FromRaw(new RawAlphaItemId(data.rawItemTypes[i], data.rawItemSubtypes[i]), data.rawItemCounts[i]);
                 int placement = data.rawItemSlots[i];
                 bool placed = placement >= 0
                     ? hero.Inventory.TryPlace(placement, entry)

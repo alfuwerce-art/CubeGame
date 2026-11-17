@@ -111,6 +111,67 @@ namespace CubeGame.Features.Session
 
         public int ManaCubes { get; internal set; }
 
+        /// <summary>Alpha mana bar <c>+0x170</c> (0…1). Runtime state: it refills in 10 s, so it is not saved.</summary>
+        public float Mana { get; internal set; } = 1f;
+
+        /// <summary>Remaining ability cooldowns in ms by Alpha action id (Alpha <c>+0x139C</c> map, runtime only).</summary>
+        public Dictionary<int, int> AbilityCooldowns { get; } = new Dictionary<int, int>();
+
+        /// <summary>Learned recipes (Alpha creature <c>+0x1D28</c>): the items the hero can craft, in learning order.</summary>
+        public List<AlphaItemRecord> KnownRecipes { get; } = new List<AlphaItemRecord>();
+
+        /// <summary>
+        /// 0x47FAE0: learns the recipes of <paramref name="level"/> that are not known yet. The roll stream is seeded by
+        /// hero name and level (CUBEGAME_CONTRACT: Alpha uses the global rand stream).
+        /// </summary>
+        public int LearnRecipesForLevel(int level)
+        {
+            var rng = new AlphaCrtRandom(unchecked(Name.GetHashCode() * 31 + level));
+            int added = 0;
+            foreach (AlphaItemRecord recipe in AlphaCrafting.LearnedAtLevel(rng, level, (int)Sheet.Class + 1))
+            {
+                if (!KnownRecipes.Contains(recipe))
+                {
+                    KnownRecipes.Add(recipe);
+                    added++;
+                }
+            }
+
+            return added;
+        }
+
+        /// <summary>Platinum coins: Alpha counter fed by type 0x0D records (0x46EBE0, region mission reward).</summary>
+        public int Platinum { get; internal set; }
+
+        /// <summary>
+        /// Receives one Alpha entry the way <c>GameController_addItemToInventory</c> 0x46EBE0 does: coin records
+        /// (type 0x0C copper/silver/gold, type 0x0D platinum) go to the wallet, everything else to the bags.
+        /// Refuses without change when the bags are full or the wallet would overflow.
+        /// </summary>
+        public bool TryCollect(InventoryEntry entry)
+        {
+            if (entry == null)
+            {
+                return false;
+            }
+
+            if (!entry.IsCore && AlphaWallet.IsCurrency(entry.Record))
+            {
+                long copper = Copper + AlphaWallet.CopperValue(entry.Record, entry.Count);
+                long platinum = Platinum + AlphaWallet.PlatinumValue(entry.Record, entry.Count);
+                if (copper > int.MaxValue || platinum > int.MaxValue || copper < 0 || platinum < 0)
+                {
+                    return false;
+                }
+
+                Copper = (int)copper;
+                Platinum = (int)platinum;
+                return true;
+            }
+
+            return Inventory.TryAdd(entry);
+        }
+
         public MissionJournal Missions { get; } = new MissionJournal();
 
         internal void ChangeSpecialization(CharacterSpecialization specialization)
@@ -290,7 +351,7 @@ namespace CubeGame.Features.Session
             ActionTimings = actionTimings;
         }
 
-        /// <summary>Attack phase source for the combat system (Alpha clip timings in the game, fixed table in tests).</summary>
+        /// <summary>Optional explicit action timing overrides for test sessions.</summary>
         public IActionTimingSource ActionTimings { get; set; }
 
         /// <summary>Combat of the running world (M0-05A first slice); created on LoadingWorld, advanced by clock ticks.</summary>
@@ -345,6 +406,29 @@ namespace CubeGame.Features.Session
             return TryTransition(SessionState.MainMenu);
         }
 
+        /// <summary>
+        /// Builds the hero of an editor decision exactly as <see cref="BeginNewWorld"/> does, without attaching a world.
+        /// Alpha confirms the character in the editor (0x4821A0 saves the creature) before a world is chosen.
+        /// </summary>
+        public static HeroState CreateHero(NewWorldRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            var sheet = new CharacterSheet(request.Class, request.Specialization);
+            var hero = new HeroState(AlphaHeroCreation.NormalizeName(request.HeroName), 0, sheet)
+            {
+                Position = request.Spawn,
+                NeedsGroundPlacement = true,
+                Appearance = AlphaHeroCreation.Normalize(request.Appearance),
+            };
+            hero.GiveStarterKit();
+            hero.LearnRecipesForLevel(1);
+            return hero;
+        }
+
         /// <summary>MainMenu → LoadingWorld with a freshly created world and hero.</summary>
         public bool BeginNewWorld(string slotKey, NewWorldRequest request, long nowUtcTicks)
         {
@@ -363,15 +447,7 @@ namespace CubeGame.Features.Session
                 return Reject($"cannot start a new world from {State}");
             }
 
-            var sheet = new CharacterSheet(request.Class, request.Specialization);
-            var hero = new HeroState(AlphaHeroCreation.NormalizeName(request.HeroName), 0, sheet)
-            {
-                Position = request.Spawn,
-                NeedsGroundPlacement = true,
-                Appearance = AlphaHeroCreation.Normalize(request.Appearance),
-            };
-            hero.GiveStarterKit();
-
+            HeroState hero = CreateHero(request);
             var world = new WorldInfo(request.WorldName, new WorldSeed(request.Seed), request.GeneratorId, nowUtcTicks);
             return Attach(slotKey, world, hero, new GameClock(), new WorldDeltaStore());
         }
@@ -528,12 +604,101 @@ namespace CubeGame.Features.Session
             return true;
         }
 
+        private long _lastResourceTickMs = -1;
+
+        /// <summary>
+        /// Hero hotbar from class, specialization, weapons and ranks (Alpha 0x48B8AF): primary, secondary and the three
+        /// class abilities (0 = locked by rank 0 or no recovered weapon rule).
+        /// </summary>
+        public int[] HeroHotbar() => Hero == null ? new int[AlphaClassAbilities.Slots]
+            : AlphaClassAbilities.Hotbar(Hero.Sheet.Class, Hero.Sheet.Specialization,
+                Hero.Loadout.GetEquipped(EquipmentSlot.MainHand), Hero.Loadout.GetEquipped(EquipmentSlot.OffHand),
+                Hero.SkillRanks.ToArray());
+
+        /// <summary>
+        /// Starts hotbar slot 1…5 through the Alpha gate 0x43E5A0 (mana, cooldown). The action itself is executed by
+        /// the P4 <see cref="CombatSystem"/>; an action it does not support is refused there and costs nothing.
+        /// On start the mana cost (0x444AE0) is paid and the ability cooldown (0x43E6A0) begins.
+        /// </summary>
+        public bool TryHeroSlot(int slot)
+        {
+            if (State != SessionState.InGame || Hero == null || Combat == null || Hero.Health.IsDead)
+            {
+                return Reject("hotbar refused: no living hero in a running world");
+            }
+
+            int[] bar = HeroHotbar();
+            if (slot < 1 || slot > bar.Length)
+            {
+                return Reject($"no hotbar slot {slot}");
+            }
+
+            int action = bar[slot - 1];
+            if (action == 0)
+            {
+                return Reject(slot >= 3 ? $"slot {slot} is locked until its skill has a rank" : $"no Alpha action for slot {slot}");
+            }
+
+            int[] ranks = Hero.SkillRanks.ToArray();
+            float p = AlphaClassAbilities.PowerFactor(action, ranks);
+            Hero.AbilityCooldowns.TryGetValue(action, out int cooldown);
+            if (!AlphaClassAbilities.IsUsable(action, p, Hero.Mana, 0, cooldown))
+            {
+                return Reject(cooldown > 0 ? $"cooldown {cooldown} ms" : "not enough mana");
+            }
+
+            if (!Combat.TryStartAttack(Hero.Id, AlphaAttackRoute.ForAction(action), Clock.TimeMs))
+            {
+                return Reject($"action 0x{action:X2} refused: {Combat.LastRejection}");
+            }
+
+            Hero.Mana = Math.Max(0f, Hero.Mana - AlphaClassAbilities.ManaCost(action, p));
+            int start = AlphaClassAbilities.CooldownMs(action, p);
+            if (start > 0)
+            {
+                Hero.AbilityCooldowns[action] = start;
+            }
+
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        /// <summary>Mana regeneration and cooldown countdown of the hero (0x618790…0x6187B0, +0x139C).</summary>
+        private void TickHeroResources(long nowMs)
+        {
+            long dt = _lastResourceTickMs < 0 ? 0 : Math.Max(0, nowMs - _lastResourceTickMs);
+            _lastResourceTickMs = nowMs;
+            if (dt == 0 || Hero == null)
+            {
+                return;
+            }
+
+            bool casting = Combat.TryGetAction(Hero.Id, out AuthoritativeActionState acting)
+                && AlphaClassAbilities.BlocksManaRegen(acting.Action.Value);
+            if (!casting)
+            {
+                Hero.Mana = Math.Min(1f, Hero.Mana + dt * AlphaClassAbilities.ManaRegenPerMs);
+            }
+
+            if (Hero.AbilityCooldowns.Count > 0)
+            {
+                foreach (int key in new List<int>(Hero.AbilityCooldowns.Keys))
+                {
+                    int left = Hero.AbilityCooldowns[key] - (int)Math.Min(dt, int.MaxValue);
+                    if (left <= 0) Hero.AbilityCooldowns.Remove(key);
+                    else Hero.AbilityCooldowns[key] = left;
+                }
+            }
+        }
+
         private void OnClockTicked(GameClock clock)
         {
             if (Combat == null || Hero == null)
             {
                 return;
             }
+
+            TickHeroResources(clock.TimeMs);
 
             if (Combat.TryGet(Hero.Id, out Combatant heroCombatant))
             {
@@ -543,7 +708,16 @@ namespace CubeGame.Features.Session
 
             if (!Hero.Health.IsDead)
             {
-                Hero.Missions.ActivateNear(Hero.Position, Combat.Combatants);
+                Hero.Missions.EnsureRegion(Hero.Position, Hero.Sheet.Progression.Level);
+                if (Hero.Missions.TryActivate(Hero.Position, out AlphaMission activated))
+                {
+                    Events.Publish(new HuntChanged
+                    {
+                        TimeMs = clock.TimeMs,
+                        Kind = new KindId(activated.TargetKind),
+                        MissionType = (int)activated.Type,
+                    });
+                }
             }
             Combat.Update(clock.TimeMs);
             if (_levelUpHealPending)
@@ -552,8 +726,7 @@ namespace CubeGame.Features.Session
                 if (!Hero.Health.IsDead)
                 {
                     Hero.Revive();
-                    Combat.Unregister(Hero.Id);
-                    RegisterHeroCombatant();
+                    if (Combat.TryGet(Hero.Id, out Combatant leveledHero)) leveledHero.Health = Hero.Health;
                 }
             }
             if (!Hero.Health.IsDead && WorldItems != null && WorldItems.Count > 0)
@@ -600,12 +773,28 @@ namespace CubeGame.Features.Session
 
             if (Hero != null && died.Killer.Equals(Hero.Id) && dead.Hostile && !Hero.Health.IsDead)
             {
-                if (Hero.Missions.TryComplete(died.Entity) && Hero.ManaCubes < int.MaxValue)
+                if (Hero.Missions.TryComplete(died.Entity, out AlphaMission completed))
                 {
-                    Hero.ManaCubes++;
+                    // Alpha mission completion reward (0x595A60 -> 0x596919...0x596A69): platinum and one class item,
+                    // directly into the bags, from the level and stars of the killed target.
+                    var missionRng = new AlphaCrtRandom(unchecked(LootSeed(died.Entity) ^ 0x4D495353));
+                    DeliverToHero(AlphaLoot.MissionReward(missionRng, Math.Max(1, dead.Sheet.Progression.Level),
+                        Math.Max(0, dead.Stars), (int)Hero.Sheet.Class + 1), died.TimeMs);
+                    Events.Publish(new HuntChanged
+                    {
+                        TimeMs = died.TimeMs,
+                        Kind = dead.Kind,
+                        MissionType = (int)completed.Type,
+                        Complete = true,
+                    });
                 }
                 long xp = KillExperience(dead.Sheet.Progression.Level, dead.Stars, dead.IsBoss);
+                int levelBefore = Hero.Sheet.Progression.Level;
                 int levels = Hero.Sheet.AddExperience(xp);
+                for (int learned = levelBefore + 1; learned <= Hero.Sheet.Progression.Level; learned++)
+                {
+                    Hero.LearnRecipesForLevel(learned);
+                }
                 // xp_applyLevelUps 0x447B00: every level-up sets HP to the new maximum; the pool is rebuilt after the
                 // combat update (the death arrives from inside it).
                 _levelUpHealPending |= levels > 0;
@@ -624,11 +813,116 @@ namespace CubeGame.Features.Session
                 return;
             }
 
-            int seed = unchecked((int)(World.Seed.Value * 2654435761u) ^ (int)died.Entity.Value ^ (int)(died.Entity.Value >> 32));
-            foreach (InventoryEntry entry in LootRules.Roll(dead.Sheet.Progression.Level, seed))
+            // Alpha 0x59B180 death drops. The CRT stream is seeded per world and entity (CUBEGAME_CONTRACT: Alpha uses
+            // the process-global rand stream); the routine and its roll order are ALPHA_CODE_STATIC.
+            var rng = new AlphaCrtRandom(LootSeed(died.Entity));
+            foreach (AlphaLootDrop drop in AlphaLoot.DeathDrops(rng, DeathInputOf(dead)))
             {
-                WorldItems.Drop(entry, dead.Position, died.TimeMs);
+                var at = new WorldPosition(dead.Position.X + drop.OffsetX, dead.Position.Y, dead.Position.Z + drop.OffsetZ);
+                WorldItems.Drop(InventoryEntry.FromAlpha(drop.Record, drop.Count), at, died.TimeMs);
             }
+        }
+
+        private int LootSeed(StableEntityId entity) =>
+            unchecked((int)(World.Seed.Value * 2654435761u) ^ (int)entity.Value ^ (int)(entity.Value >> 32));
+
+        /// <summary>
+        /// Alpha fields of a dead combatant. Role: hostile -> 1, other non-hero actors -> 2 (PARTIAL: Alpha roles 2/3 are
+        /// not separated in CubeGame). Flags carry the known +0x7E upgrade bits 0x8/0x10; 0x200/0x800 are UNKNOWN in
+        /// CubeGame and stay clear. Equipped items come from the S04 loadout in Alpha collection order.
+        /// </summary>
+        public static AlphaDeathInput DeathInputOf(Combatant dead)
+        {
+            var input = new AlphaDeathInput
+            {
+                Role = dead.Hostile ? 1 : 2,
+                Kind = dead.Kind.Value,
+                Level = dead.Sheet.Progression.Level,
+                Stars = Math.Max(0, dead.Stars),
+                Flags = (int)dead.Sheet.WeaponUpgrades & 0x18,
+            };
+            foreach (EquipmentSlot slot in DeathEquipmentOrder)
+            {
+                ItemInstance item = dead.Loadout.GetEquipped(slot);
+                if (item != null)
+                {
+                    input.Equipped.Add(InventoryEntry.FromCore(item).Record);
+                }
+            }
+
+            return input;
+        }
+
+        /// <summary>0x59B20E…0x59B31B collection order restricted to the S04 slots (amulet 0x418 is not in the loadout).</summary>
+        private static readonly EquipmentSlot[] DeathEquipmentOrder =
+        {
+            EquipmentSlot.OffHand, EquipmentSlot.MainHand, EquipmentSlot.Chest, EquipmentSlot.Shoulders,
+            EquipmentSlot.Boots, EquipmentSlot.Gloves,
+        };
+
+        /// <summary>
+        /// Delivers Alpha records to the hero: currency to the wallet, items to the bags; what does not fit is placed
+        /// on the ground at the hero (CUBEGAME_CONTRACT: Alpha bags have no capacity check in 0x46EBE0).
+        /// </summary>
+        private void DeliverToHero(IEnumerable<AlphaLootDrop> drops, long nowMs)
+        {
+            foreach (AlphaLootDrop drop in drops)
+            {
+                if (drop.Record.IsEmpty)
+                {
+                    continue;
+                }
+
+                InventoryEntry entry = InventoryEntry.FromAlpha(drop.Record, drop.Count);
+                if (!Hero.TryCollect(entry))
+                {
+                    WorldItems?.Drop(entry, Hero.Position, nowMs);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Opens a chest container: the ten slots of 0x5C9F90 / 0x5F8750 at the given level (Alpha passes the zone
+        /// level zone+0x80). Empty slots deliver nothing; coins go to the wallet. The stream seed is the stable id of
+        /// the chest (CUBEGAME_CONTRACT). Refuses without change when the item slots would not fit.
+        /// </summary>
+        public bool TryOpenChest(StableEntityId chest, int level, out int delivered)
+        {
+            delivered = 0;
+            if (!CanUseServices)
+            {
+                return Reject("opening a chest requires a living hero");
+            }
+
+            var rng = new AlphaCrtRandom(LootSeed(chest));
+            List<AlphaItemRecord> slots = AlphaLoot.ChestContents(rng, Math.Max(1, level));
+            int needed = 0;
+            foreach (AlphaItemRecord record in slots)
+            {
+                if (!record.IsEmpty && !AlphaWallet.IsCurrency(record))
+                {
+                    needed++;
+                }
+            }
+
+            if (HeroInventory.Capacity - Hero.Inventory.UsedSlots < needed)
+            {
+                return Reject($"the chest needs {needed} free bag slots");
+            }
+
+            var drops = new List<AlphaLootDrop>();
+            foreach (AlphaItemRecord record in slots)
+            {
+                if (!record.IsEmpty)
+                {
+                    drops.Add(new AlphaLootDrop(record, 1, 0, 0, "chest"));
+                    delivered++;
+                }
+            }
+
+            DeliverToHero(drops, Clock.TimeMs);
+            LastRejection = string.Empty;
+            return true;
         }
 
         /// <summary>Confirms increases funded by level points. Rank decreases require the paid reset path.</summary>
@@ -695,7 +989,7 @@ namespace CubeGame.Features.Session
             }
             if (!Hero.Inventory.TryAdd(offer))
             {
-                return Reject(Hero.Inventory.LastRejection);
+                return Reject("You can't carry more of these items.");
             }
 
             Hero.Copper -= price;
@@ -717,8 +1011,136 @@ namespace CubeGame.Features.Session
                 return Reject("wallet is full");
             }
 
-            Hero.Inventory.TakeFrom(bagSlot, 1);
+            InventoryEntry sold = Hero.Inventory.TakeFrom(bagSlot, 1);
             Hero.Copper += price;
+            // Alpha 0x47B600: every sale appends one unit to the buyback list; above ten the oldest entry is dropped.
+            _buyback.Add(sold.IsCore ? sold : sold.WithCount(1));
+            if (_buyback.Count > AlphaShop.BuybackCapacity)
+            {
+                _buyback.RemoveAt(0);
+            }
+
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        private readonly List<InventoryEntry> _buyback = new List<InventoryEntry>();
+
+        /// <summary>Sold items that can be bought back (Alpha <c>GameController+0x800D3C</c>, runtime only, oldest first).</summary>
+        public IReadOnlyList<InventoryEntry> Buyback => _buyback;
+
+        /// <summary>
+        /// Alpha buyback (0x47B600 vendor sub-tab 1): units of the entry are bought one by one at the full Alpha value
+        /// while the wallet covers it and the bags take it; the entry disappears when no unit is left.
+        /// </summary>
+        public bool TryBuyBack(int index)
+        {
+            if (!CanUseServices || index < 0 || index >= _buyback.Count)
+            {
+                return Reject("no such buyback entry");
+            }
+
+            InventoryEntry entry = _buyback[index];
+            int unitPrice = AlphaTradeValue.Of(entry);
+            int units = entry.IsCore ? 1 : entry.Count;
+            int bought = 0;
+            for (int i = 0; i < units; i++)
+            {
+                if (Hero.Copper < unitPrice)
+                {
+                    break;
+                }
+
+                InventoryEntry unit = entry.IsCore ? entry : entry.WithCount(1);
+                if (!Hero.Inventory.TryAdd(unit))
+                {
+                    if (bought == 0)
+                    {
+                        return Reject("You can't carry more of these items.");
+                    }
+
+                    break;
+                }
+
+                Hero.Copper -= unitPrice;
+                bought++;
+            }
+
+            if (bought == 0)
+            {
+                return Reject($"need {unitPrice} copper");
+            }
+
+            if (bought >= units)
+            {
+                _buyback.RemoveAt(index);
+            }
+            else
+            {
+                _buyback[index] = entry.WithCount(units - bought);
+            }
+
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        /// <summary>
+        /// Alpha identification: one unidentified item (type 0x0E) becomes a class item of its level and rarity for
+        /// <c>max(1, value/2)</c> copper. The roll stream seed (world, clock tick, slot) is a CUBEGAME_CONTRACT.
+        /// </summary>
+        public bool TryIdentify(int bagSlot)
+        {
+            InventoryEntry entry = CanUseServices ? Hero.Inventory[bagSlot] : null;
+            if (entry == null || entry.IsCore || entry.Record.Type != AlphaLoot.TypeLeftovers)
+            {
+                return Reject("identification needs an unidentified item");
+            }
+
+            int price = AlphaShop.IdentifyPrice(entry);
+            if (Hero.Copper < price)
+            {
+                return Reject($"need {price} copper");
+            }
+
+            var rng = new AlphaCrtRandom(unchecked(LootSeed(StableEntityId.ForRuntime((ulong)Clock.Tick)) ^ bagSlot * 7919));
+            InventoryEntry result = InventoryEntry.FromAlpha(AlphaShop.Identify(rng, entry.Record));
+            bool lastUnit = entry.Count == 1;
+            if (!lastUnit && Hero.Inventory.UsedSlots >= HeroInventory.Capacity)
+            {
+                return Reject("bags are full");
+            }
+
+            Hero.Inventory.TakeFrom(bagSlot, 1);
+            Hero.Inventory.TryAdd(result);
+            Hero.Copper -= price;
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        /// <summary>
+        /// Alpha adaptation: an item below the hero's level is raised to it for <see cref="AlphaShop.AdaptPrice"/>
+        /// platinum (0x40F4F0). Alpha also sets bit 1 of <c>+0x0E</c>, which CubeGame does not model (PARTIAL).
+        /// </summary>
+        public bool TryAdapt(int bagSlot)
+        {
+            InventoryEntry entry = CanUseServices ? Hero.Inventory[bagSlot] : null;
+            int heroLevel = Hero?.Sheet.Progression.Level ?? 1;
+            if (entry == null || !entry.IsCore || entry.Core.Level >= heroLevel)
+            {
+                return Reject("adaptation needs equipment below the hero level");
+            }
+
+            int price = AlphaShop.AdaptPrice(entry.Core.Level, entry.Core.Rarity, heroLevel);
+            if (Hero.Platinum < price)
+            {
+                return Reject($"need {price} platinum");
+            }
+
+            ItemInstance old = entry.Core;
+            var adapted = new ItemInstance(old.Type, old.Subtype, heroLevel, old.Rarity, old.Seed, old.Modifier, old.PowerBonus);
+            Hero.Inventory.TakeFrom(bagSlot);
+            Hero.Inventory.TryPlace(bagSlot, InventoryEntry.FromCore(adapted));
+            Hero.Platinum -= price;
             LastRejection = string.Empty;
             return true;
         }
@@ -734,15 +1156,102 @@ namespace CubeGame.Features.Session
             return true;
         }
 
+        /// <summary>Station test of the presentation (water at the hero, station object within 4 blocks); null = none.</summary>
+        public Func<AlphaCraftStation, bool> StationNear { get; set; }
+
+        /// <summary>
+        /// Alpha crafting 0x4709C0: the learned recipe <paramref name="recipeIndex"/> is made once when the bags cover its
+        /// ingredients (0x4A19D0) and its station is near (0x42F910). Ingredients are taken from matching stacks; a
+        /// crafted material gains the 1/5 bonus quantity rolls; the result goes to the bags.
+        /// </summary>
+        public bool TryCraft(int recipeIndex)
+        {
+            if (!CanUseServices || recipeIndex < 0 || recipeIndex >= Hero.KnownRecipes.Count)
+            {
+                return Reject("no such recipe");
+            }
+
+            AlphaRecipe recipe = AlphaCrafting.Build(Hero.KnownRecipes[recipeIndex]);
+            if (AlphaCrafting.Craftable(recipe, Hero.Inventory) < 1)
+            {
+                return Reject("missing ingredients");
+            }
+
+            if (recipe.Station != AlphaCraftStation.None && (StationNear == null || !StationNear(recipe.Station)))
+            {
+                return Reject(recipe.Station == AlphaCraftStation.Water ? "Requires water" : $"Requires {recipe.Station}");
+            }
+
+            var rng = new AlphaCrtRandom(unchecked(LootSeed(StableEntityId.ForRuntime((ulong)Clock.Tick)) ^ recipeIndex * 104729));
+            int count = AlphaCrafting.OutputCount(rng, recipe.Output);
+            InventoryEntry output = InventoryEntry.FromAlpha(recipe.Output, count);
+            bool placed = Hero.Inventory.TryAdd(output);
+            var taken = new List<InventoryEntry>();
+            foreach ((AlphaItemRecord item, int need) in recipe.Ingredients)
+            {
+                int left = need;
+                for (int slot = 0; slot < HeroInventory.Capacity && left > 0; slot++)
+                {
+                    InventoryEntry e = Hero.Inventory[slot];
+                    if (e == null || e.IsCore || !e.Record.Equals(item)) continue;
+                    int take = Math.Min(left, e.Count);
+                    taken.Add(Hero.Inventory.TakeFrom(slot, take));
+                    left -= take;
+                }
+            }
+
+            // With full bags the result may fit only into a slot freed by the last unit of an ingredient.
+            if (!placed && !Hero.Inventory.TryAdd(output))
+            {
+                foreach (InventoryEntry back in taken)
+                {
+                    Hero.Inventory.TryAdd(back);
+                }
+
+                return Reject("You can't carry more of these items.");
+            }
+
+            LastRejection = string.Empty;
+            return true;
+        }
+
+        /// <summary>0x47D740: using a formula teaches its target item once and consumes one formula.</summary>
+        public bool TryLearnFormula(int bagSlot)
+        {
+            InventoryEntry entry = CanUseServices ? Hero.Inventory[bagSlot] : null;
+            if (entry == null || entry.IsCore || entry.Record.Type != AlphaLoot.TypeFormula)
+            {
+                return Reject("that is not a formula");
+            }
+
+            AlphaItemRecord target = AlphaCrafting.FormulaTarget(entry.Record);
+            if (Hero.KnownRecipes.Contains(target))
+            {
+                return Reject("recipe already known");
+            }
+
+            Hero.KnownRecipes.Add(target);
+            Hero.Inventory.TakeFrom(bagSlot, 1);
+            LastRejection = string.Empty;
+            return true;
+        }
+
         public bool TryBrewLifePotion()
         {
             if (!CanUseServices)
             {
                 return Reject("crafting requires a living hero");
             }
-            if (!Hero.Inventory.TryBrewLifePotion())
+
+            int index = Hero.KnownRecipes.FindIndex(r => r.Type == 1 && r.Subtype == 1);
+            if (index < 0)
             {
-                return Reject(Hero.Inventory.LastRejection);
+                return Reject("the Life Potion recipe is not known");
+            }
+
+            if (!TryCraft(index))
+            {
+                return false;
             }
 
             LastRejection = string.Empty;
@@ -791,12 +1300,17 @@ namespace CubeGame.Features.Session
             Hero.Inventory.TakeFrom(bagSlot, 1);
             int cooldown = ConsumableCooldownMs?.Invoke(entry.Raw.Type, entry.Raw.Subtype) ?? 0;
             _cooldownUntilMs[entry.Raw] = Clock.TimeMs + cooldown;
+            double healthBefore = Hero.Health.CurrentHealth;
             if (entry.Raw.Equals(LootRules.LifePotion))
             {
                 Hero.Health.Heal(Hero.Health.MaxHealth * LifePotionHealShare);
             }
 
             LastRejection = string.Empty;
+            Events.Publish(new HeroItemUsed
+            {
+                TimeMs = Clock.TimeMs, Raw = entry.Raw, HealthRestored = Hero.Health.CurrentHealth - healthBefore,
+            });
             return true;
         }
 

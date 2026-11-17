@@ -20,7 +20,8 @@
 // while its zone is unloaded and restored on reload; it does not tick while unloaded (Alpha ticks only templates
 // of loaded zones). Persistence across a save: SnapshotStates()/RestoreStates() give the data; the save format is
 // NOT changed here (PERSISTENCE_SCHEMA_HANDOFF, see docs/reports/M0_F1A_POPULATION_RUNTIME_REPORT.md).
-// Distances are 3-D in voxels (1 Alpha unit = 1 voxel); whether Alpha's activation test is 2-D or 3-D is PARTIAL.
+// Distances are 3-D in voxels. Alpha's activation path at 0x60FC64 converts a fixed-point delta
+// with 0x42C4A0, then computes its three-component squared length with 0x424860.
 //
 // This class is engine-free: it raises events; the game creates/destroys combatants and visuals.
 // It is NOT FallbackPopulationPolicy and does not use AlphaSpawnTable (vendor stock).

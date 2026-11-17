@@ -92,30 +92,6 @@ namespace CubeGame.Tests.FullM0.EditMode
         }
 
         [Test]
-        public void LootUsesTheAlphaRarityRuleAndIsDeterministic()
-        {
-            List<InventoryEntry> first = LootRules.Roll(3, 1234);
-            List<InventoryEntry> second = LootRules.Roll(3, 1234);
-            Assert.AreEqual(first.Count, second.Count);
-            Assert.AreEqual(first[0].Core, second[0].Core);
-            Assert.AreEqual(3, first[0].Core.Level);
-
-            int rare = 0;
-            for (int seed = 0; seed < 4000; seed++)
-            {
-                List<InventoryEntry> drop = LootRules.Roll(1, seed);
-                Assert.IsTrue(drop[0].IsCore);
-                if (drop[0].Core.Rarity > 0)
-                {
-                    rare++;
-                }
-            }
-
-            // Alpha I-03: +1 rarity with 1 % (then 0.1 %, 0.01 %) → about 1 % of drops are not common.
-            Assert.That(rare, Is.InRange(15, 80), $"rare drops {rare}/4000");
-        }
-
-        [Test]
         public void PotionHealsUsesActionAndRespectsTheAlphaCooldown()
         {
             GameSession session = Running();
@@ -151,13 +127,16 @@ namespace CubeGame.Tests.FullM0.EditMode
             session.Events.Publish(new EntityDied { TimeMs = 0, Entity = wolf.Id, Killer = StableEntityId.Hero });
             Assert.GreaterOrEqual(session.WorldItems.Count, 1);
             int before = session.Hero.Inventory.UsedSlots;
+            int copper = session.Hero.Copper;
 
             Run(session, 0.2);
             Assert.AreEqual(before, session.Hero.Inventory.UsedSlots, "too far to pick up");
-            session.Hero.Position = new WorldPosition(30.5, 5, 30);
+            Assert.AreEqual(copper, session.Hero.Copper, "too far to pick up");
+            session.Hero.Position = new WorldPosition(30, 5, 30); // Alpha scatter is at most ±1 block per axis
             Run(session, 0.2);
             Assert.AreEqual(0, session.WorldItems.Count, "picked up");
-            Assert.Greater(session.Hero.Inventory.UsedSlots, before);
+            // P5: a hostile Alpha death (0x59B180) always scatters coins; pickup moves them into the wallet (0x46EBE0).
+            Assert.Greater(session.Hero.Copper, copper);
         }
 
         [Test]

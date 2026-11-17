@@ -2,7 +2,8 @@
     "name": "CubeGame.Features",
     "rootNamespace": "CubeGame.Features",
     "references": [
-        "CubeGame.Core"
+        "CubeGame.Core",
+        "CubeGame.Content"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

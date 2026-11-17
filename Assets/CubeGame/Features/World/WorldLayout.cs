@@ -56,6 +56,12 @@ namespace CubeGame.Features.World
             return region.X >= 0 && region.Z >= 0 && region.X < RegionGrid && region.Z < RegionGrid;
         }
 
+        public static bool IsInside(ZoneKey zone)
+        {
+            const int zones = RegionGrid * ZonesPerRegion;
+            return zone.X >= 0 && zone.Z >= 0 && zone.X < zones && zone.Z < zones;
+        }
+
         public static bool IsInside(ChunkKey chunk)
         {
             const int chunks = WorldVoxels / ChunkSize;

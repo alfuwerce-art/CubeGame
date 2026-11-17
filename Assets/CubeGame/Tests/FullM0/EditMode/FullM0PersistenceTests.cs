@@ -129,7 +129,7 @@ namespace CubeGame.Tests.FullM0.EditMode
             CollectionAssert.AreEqual(new int[11], loaded.Hero.SkillRanks.ToArray());
             Assert.AreEqual(0, loaded.Hero.Copper);
             Assert.AreEqual(0, loaded.Hero.ManaCubes);
-            Assert.IsEmpty(loaded.Hero.Missions.Hunts);
+            Assert.IsEmpty(loaded.Hero.Missions.Columns);
             Assert.AreEqual(0L, loaded.WorldTimeOffsetMs);
         }
 
@@ -266,11 +266,11 @@ namespace CubeGame.Tests.FullM0.EditMode
         }
 
         [Test]
-        public void FeaturesIsEngineFreeAndDependsOnlyOnCore()
+        public void FeaturesIsEngineFreeAndUsesCoreAndAlphaData()
         {
             AsmDef features = Read("CubeGame/Features/CubeGame.Features.asmdef");
             Assert.IsTrue(features.noEngineReferences);
-            CollectionAssert.AreEqual(new[] { "CubeGame.Core" }, features.references);
+            CollectionAssert.AreEqual(new[] { "CubeGame.Core", "CubeGame.Content" }, features.references);
 
             AsmDef core = Read("CubeGame/Core/CubeGame.Core.asmdef");
             Assert.IsTrue(core.noEngineReferences);

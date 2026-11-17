@@ -10,7 +10,8 @@ namespace CubeGame.Gameplay.Streaming
     /// <summary>
     /// CUBEGAME_CONTRACT: service NPCs stand by existing town service objects. The auxiliary population
     /// channel leaves the terrain generator and the identities of the existing town objects intact.
-    /// Role codes 0x80 and 0x84 come from Alpha's town constructors (D1/D2 review fix).
+    /// Role codes 0x80…0x84 come from Alpha's town constructors (D1/D2 review fix; P5: 0x80 item, 0x81/0x83 weapon,
+    /// 0x82 armour vendor, byte-checked at 0x5BCE42/0x5BD1FA/0x5BD3D6/0x5BD01E).
     /// </summary>
     public sealed class TownNpcPopulation : IWorldPopulationSource
     {
@@ -18,6 +19,9 @@ namespace CubeGame.Gameplay.Streaming
         public const string BehaviourKey = "town_service_npc";
         public const int MerchantClass = 0x80;
         public const int InnkeeperClass = 0x84;
+        public const int WeaponVendorClass = 0x81;
+        public const int ArmorVendorClass = 0x82;
+        public const int WeaponVendor2Class = 0x83;
         public static bool IsTrainer(int classId) => classId >= 1 && classId <= CharacterClasses.Count;
 
         private readonly AlphaTerrainGenerator _terrain;
@@ -38,6 +42,10 @@ namespace CubeGame.Gameplay.Streaming
                         At(anchor, 3, 2, 3, 3),
                         At(anchor, 4, 3, -3, -3),
                         At(anchor, 5, 4, 3, -3),
+                        // P5: the remaining Alpha vendor roles; spawn indices 6…8 keep the earlier identities stable.
+                        At(anchor, 6, WeaponVendorClass, -6, 0),
+                        At(anchor, 7, ArmorVendorClass, 6, 0),
+                        At(anchor, 8, WeaponVendor2Class, 0, 6),
                     };
                 }
             }

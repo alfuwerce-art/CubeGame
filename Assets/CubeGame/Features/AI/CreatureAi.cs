@@ -44,6 +44,15 @@ namespace CubeGame.Features.AI
         int _wanderRemainingMs;
         int _wanderDirection;
         int _actionRetryInMs;
+        int _alphaElapsedMs;
+        int _alphaApproachMs;
+        int _alphaRescanMs;
+        readonly bool _recovered;
+
+        public const double AlphaNoticeRadius = 20.0; // 0x61027D → CombatBehavior ctor 0x42C550
+        public const double AlphaLookRadius = 8.0; // 0x4C8140: strictly inside 64 squared
+
+        public CreatureAi(bool recovered = false) => _recovered = recovered;
 
         public void Tick(CreatureState self, int elapsedMs, ICreatureAiWorld world)
         {
@@ -54,6 +63,13 @@ namespace CubeGame.Features.AI
             if (self.Health <= 0.0) { State = CreatureAiState.Dead; LastReason = "DEAD"; return; }
             // Passive objects never walk and never act (D67/D69); the AI must not animate them as creatures.
             if (self.IsPassiveObject) { State = CreatureAiState.Idle; LastReason = "PASSIVE_OBJECT"; return; }
+            if (_recovered)
+            {
+                if (world is IAlphaCreatureAiWorld alphaWorld) TickRecovered(self, elapsedMs, alphaWorld);
+                else LastReason = "ALPHA_WORLD_UNAVAILABLE";
+                return;
+            }
+
             if (!self.CanThink) { State = CreatureAiState.Idle; LastReason = "STUNNED"; return; }
             if (self.ActionLockMs > 0) { LastReason = "ACTION_LOCK"; return; }
             if (_actionRetryInMs > 0) _actionRetryInMs = Math.Max(0, _actionRetryInMs - elapsedMs);
@@ -102,7 +118,8 @@ namespace CubeGame.Features.AI
             Threat.MarkReachable(target);
 
             double range = world.AttackRange > 0 ? world.AttackRange : DefaultAttackRange;
-            if (distance > range)
+            bool dragonRanged = self.Kind == 0x65 && distance >= 8 && distance < 60;
+            if (distance > range && !dragonRanged)
             {
                 world.MoveTowards(self, targetPos.X, targetPos.Z, world.WalkSpeed > 0 ? world.WalkSpeed : DefaultWalkSpeed, elapsedMs);
                 State = CreatureAiState.Chase;
@@ -112,41 +129,119 @@ namespace CubeGame.Features.AI
 
             State = CreatureAiState.Attack;
             LastReason = "IN_RANGE";
-            var actions = world.AvailableActions(self);
-            if (actions == null || actions.Length == 0) { LastReason = "IN_RANGE_NO_ACTION_EVIDENCE"; return; }
-            // CUBEGAME_CONTRACT: Alpha's per-action cooldown/lock lives in the attack choice, not in the
-            // AI tick; without it the AI would ask the game every 31 ms tick. 250 ms is a CubeGame
-            // throttle and is NOT an Alpha constant.
             if (_actionRetryInMs > 0) { LastReason = "ACTION_RETRY_WAIT"; return; }
-            // C-29 (M0-06C): Alpha decides the attack from the weapon/class table (AlphaAttackSelection),
-            // then requires it to exist in the creature's own action set; library order is only a fallback
-            // for a kind whose evidence does not contain the Alpha-selected id.
-            int preferred = AlphaAttackSelection.SelectAttackId(self.Kind, self.ClassId, self.SpecialisationId,
-                self.WeaponItemType, self.WeaponItemSubtype, TargetPointerParity);
-            LastSelectedAttack = preferred;
-            bool preferredInLibrary = Array.IndexOf(actions, preferred) >= 0;
-            bool hasWeapon = AlphaNpcWeaponActions.HasWeapon(self);
-            for (int i = -1; i < actions.Length; i++)
+
+            // 0x42DEC3: in the 8..60 block branch the dragon writes 0x25. The near flight branch is separate.
+            int action = dragonRanged ? 0x25 : self.Kind == 0x65 ? -1 :
+                AlphaAttackSelection.SelectAttackId(self.Kind, self.ClassId, self.SpecialisationId,
+                    self.WeaponItemType, self.WeaponItemSubtype, TargetPointerParity);
+            if (action < 0)
             {
-                if (i < 0 && !preferredInLibrary) continue;
-                int action = i < 0 ? preferred : actions[i];
-                if (action < 0 || (i >= 0 && action == preferred)) continue;
-                // R-2 data rule: an Alpha action that needs a weapon is never launched without one.
-                if (!AlphaNpcWeaponActions.IsAllowed(action, hasWeapon))
+                LastReason = "UNKNOWN_ALPHA_DISPATCH";
+                return;
+            }
+            LastSelectedAttack = action;
+            LastRequestedAction = action;
+            LastReason = world.TryBeginAction(self, action, out string reason)
+                ? "ACTION_C29 " + action : "ACTION_REFUSED " + action + " " + reason;
+            _actionRetryInMs = ActionRetryMs;
+        }
+
+        private void TickRecovered(CreatureState self, int elapsedMs, IAlphaCreatureAiWorld world)
+        {
+            // GameController accumulates +0x13C4 to >31 ms and clears on dispatch.
+            // Combat owns the active action phases.
+            _alphaElapsedMs += elapsedMs;
+            if (world.TryGetActionState(self, out bool recovering))
+            {
+                _alphaElapsedMs = 0;
+                State = recovering ? CreatureAiState.Recover : CreatureAiState.Attack;
+                LastReason = recovering ? "ACTION_RECOVER" : "ACTION_ACTIVE";
+                return;
+            }
+            if (!self.CanThink || _alphaElapsedMs <= 31) return;
+            int dt = _alphaElapsedMs;
+            _alphaElapsedMs = 0;
+            ThinkTicks++;
+
+            _alphaRescanMs = Math.Max(0, _alphaRescanMs - dt);
+            bool noticed = false;
+            if (TargetId == null && _alphaRescanMs == 0)
+            {
+                TargetId = world.FindNearestHostile(self, AlphaNoticeRadius);
+                noticed = TargetId != null;
+            }
+
+            if (TargetId == null || !world.TryGetTarget(TargetId, out CreatureTarget target))
+            {
+                TargetId = null;
+                _alphaApproachMs = 0;
+                if (world.TryGetTarget("hero", out CreatureTarget hero) && DistanceSquared(self, hero) < AlphaLookRadius * AlphaLookRadius)
                 {
-                    LastReason = "ACTION_NEEDS_WEAPON " + action;
-                    continue;
+                    world.Face(self, hero);
+                    State = CreatureAiState.Idle;
+                    LastReason = "LOOK_AT_PLAYER";
                 }
-                LastRequestedAction = action;
-                if (world.TryBeginAction(self, action, out var reason))
+                else if (AlphaMovement != null)
                 {
-                    LastReason = (preferredInLibrary ? "ACTION_C29 " : "ACTION_C29_NOT_IN_LIBRARY " + preferred + " ") + action;
-                    _actionRetryInMs = ActionRetryMs;
+                    Wander(self, world, dt);
+                }
+                else
+                {
+                    State = CreatureAiState.Idle;
+                    LastReason = "NO_MOVEMENT_EVIDENCE";
+                }
+                return;
+            }
+
+            world.Face(self, target);
+            double range = 2.0 * self.Width + target.Width; // CombatBehavior 0x42CB20, appearance field +0x80.
+            if (DistanceSquared(self, target) > range * range || !world.HasLineOfSight(self, target))
+            {
+                // The original counts time spent in the approach branch, including unobstructed pursuit.
+                _alphaApproachMs += dt;
+                if (_alphaApproachMs > ThreatTable.UnreachableResetMs)
+                {
+                    TargetId = null;
+                    _alphaApproachMs = 0;
+                    _alphaRescanMs = ThreatTable.RescanMs;
+                    State = CreatureAiState.Idle;
+                    LastReason = "APPROACH_TIMEOUT";
                     return;
                 }
-                LastReason = "ACTION_REFUSED " + action + " " + reason;
+
+                // Until the voxel path follower is ported, use the existing grounded walk adapter.
+                world.MoveTowards(self, target.X, target.Z, DefaultWalkSpeed, dt);
+                State = noticed ? CreatureAiState.Notice : CreatureAiState.Chase;
+                LastReason = noticed ? "NOTICE" : "CHASE";
+                return;
             }
-            _actionRetryInMs = ActionRetryMs;
+
+            _alphaApproachMs = 0;
+            State = CreatureAiState.Attack;
+            // 0x42D87F dispatcher. These unarmed groups have single outcomes in the emulated inputs.
+            // Other kinds, equipped cases and special/ranged branches need their own dispatcher evidence.
+            int action = -1;
+            if (!AlphaNpcWeaponActions.HasWeapon(self))
+            {
+                if (self.Kind >= 0x1E && self.Kind <= 0x20) action = 75;
+                else if (self.Kind >= 0x3F && self.Kind <= 0x42) action = 6;
+            }
+            LastSelectedAttack = action;
+            if (action < 0)
+            {
+                LastReason = "UNKNOWN_ALPHA_DISPATCH";
+                return;
+            }
+            LastRequestedAction = action;
+            LastReason = world.TryBeginAction(self, action, out string reason)
+                ? "ALPHA_ACTION " + action : "ACTION_REFUSED " + action + " " + reason;
+        }
+
+        private static double DistanceSquared(CreatureState self, CreatureTarget target)
+        {
+            double dx = target.X - self.X, dy = target.Y - self.Y, dz = target.Z - self.Z;
+            return dx * dx + dy * dy + dz * dz;
         }
 
         string SelectTarget(CreatureState self, ICreatureAiWorld world, bool hasTarget, int elapsedMs)
@@ -193,8 +288,13 @@ namespace CubeGame.Features.AI
             if (AlphaMovement != null)
             {
                 AlphaNpcMovementStep step = AlphaMovement.Tick(self.X, self.Y, self.Z, elapsedMs,
-                    () => (int)(world.NextRoll() & 0x7FFFu));
+                    () => _recovered && world is IAlphaCreatureAiWorld alphaWorld
+                        ? alphaWorld.NextAlphaRoll() : (int)(world.NextRoll() & 0x7FFFu));
                 State = step.Move ? CreatureAiState.Wander : CreatureAiState.Idle;
+                if (_recovered && step.Move && step.ReturningHome)
+                {
+                    State = CreatureAiState.Return;
+                }
                 LastReason = step.Reason;
                 if (step.Move)
                 {

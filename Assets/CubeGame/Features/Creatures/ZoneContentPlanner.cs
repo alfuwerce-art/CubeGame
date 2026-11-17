@@ -91,12 +91,13 @@ namespace CubeGame.Features.Creatures
             uint seed = source.Seed;
             var ids = new HashSet<string>(StringComparer.Ordinal);
 
-            // 1. Vegetation / passive objects: W-18 selection, zone-scoped positions.
+            // 1. Vegetation: real trees + decor (B_vegetation_research.md), not the W-18 creature scatter.
             if (settings.VegetationPerZone > 0 && settings.StagedObjectKinds.Count > 0)
             {
-                var vegetation = AlphaVegetationPlanner.PlanZone(seed, zone.X, zone.Z,
-                    climate.Humidity, climate.Temperature, climate.CellValue, climate.Spacing,
-                    climate.ScatterHeight ?? climate.Level, climate.Mode, settings.StagedObjectKinds, problems, settings.VegetationPerZone);
+                int cellFlag = climate.Spacing > 0.5 ? 1 : 0;   // cell+0x08 mountain flag proxy (PARTIAL)
+                var vegetation = AlphaVegetationPlanner.PlanZoneVegetation(seed, zone.X, zone.Z,
+                    climate.Humidity, climate.Temperature, cellFlag, climate.CellType,
+                    settings.StagedObjectKinds, problems, settings.VegetationPerZone);
                 foreach (var placement in vegetation)
                 {
                     var item = new ContentPlacement
@@ -107,8 +108,9 @@ namespace CubeGame.Features.Creatures
                         Zone = zone,
                         X = placement.X,
                         Z = placement.Z,
-                        // The W-18 table selects Alpha object/creature kinds; the faction is the catalog's, not a guess.
-                        Faction = CreatureKinds.FactionOf(placement.Kind),
+                        // Static vegetation is always passive (faction 6); the catalog still marks some
+                        // tree/decor ids as combat, so the faction is forced here, not read from it.
+                        Faction = (int)CreatureFaction.Passive,
                         Level = climate.Level,
                         Provenance = placement.Source,
                     };

@@ -166,6 +166,24 @@ namespace CubeGame.Features.Session
             return false;
         }
 
+        /// <summary>
+        /// Creates the spawns of one channel that are missing in the active zones (a source learned about new spawns,
+        /// e.g. the bosses of a region whose mission pass just ran). Live and killed spawns are left as they are.
+        /// </summary>
+        public void Refresh(int channel)
+        {
+            foreach (KeyValuePair<ZoneKey, List<StableEntityId>> pair in new List<KeyValuePair<ZoneKey, List<StableEntityId>>>(_zones))
+            {
+                foreach ((IWorldPopulationSource source, int sourceChannel) in _sources)
+                {
+                    if (sourceChannel == channel)
+                    {
+                        SpawnFrom(source, channel, pair.Key, pair.Value);
+                    }
+                }
+            }
+        }
+
         /// <summary>Despawns everything (world unload).</summary>
         public void Clear()
         {
@@ -181,24 +199,29 @@ namespace CubeGame.Features.Session
             _zones.Add(zone, ids);
             foreach ((IWorldPopulationSource source, int channel) in _sources)
             {
-                foreach (SpawnDefinition definition in source.SpawnsForZone(zone))
+                SpawnFrom(source, channel, zone, ids);
+            }
+        }
+
+        private void SpawnFrom(IWorldPopulationSource source, int channel, ZoneKey zone, List<StableEntityId> ids)
+        {
+            foreach (SpawnDefinition definition in source.SpawnsForZone(zone))
+            {
+                if (definition == null || IsKilled(zone, channel, definition.SpawnIndex))
                 {
-                    if (definition == null || IsKilled(zone, channel, definition.SpawnIndex))
-                    {
-                        continue;
-                    }
-
-                    StableEntityId id = StableEntityId.ForZoneSpawn(zone, channel, definition.SpawnIndex);
-                    if (_live.ContainsKey(id))
-                    {
-                        continue;   // a source must not repeat an index; never create a duplicate entity
-                    }
-
-                    var live = new LiveSpawn { Id = id, Zone = zone, Channel = channel, Definition = definition };
-                    _live.Add(id, live);
-                    ids.Add(id);
-                    Spawned?.Invoke(live);
+                    continue;
                 }
+
+                StableEntityId id = StableEntityId.ForZoneSpawn(zone, channel, definition.SpawnIndex);
+                if (_live.ContainsKey(id))
+                {
+                    continue;   // a source must not repeat an index; never create a duplicate entity
+                }
+
+                var live = new LiveSpawn { Id = id, Zone = zone, Channel = channel, Definition = definition };
+                _live.Add(id, live);
+                ids.Add(id);
+                Spawned?.Invoke(live);
             }
         }
 

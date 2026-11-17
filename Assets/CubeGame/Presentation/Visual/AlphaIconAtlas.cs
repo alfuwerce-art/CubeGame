@@ -1,9 +1,10 @@
 // CubeGame.Presentation.Visual — runtime loader for the item icon atlas (D86 M0-08A).
 //
-// The editor writes AlphaOutput/icons/atlas.png + atlas.json (origin bottom-left, 8 columns, 64px cells).
+// The editor writes AlphaOutput/icons/atlas.png + atlas.json (origin bottom-left, 64px cells).
 // Claude's UI can consume that atlas through this loader instead of re-implementing the layout. The atlas
 // is a local artifact (not in Git); when it is absent TryLoad returns false with a reason.
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -11,7 +12,7 @@ using UnityEngine;
 
 namespace CubeGame.Presentation.Visual
 {
-    public sealed class AlphaIconAtlas
+    public sealed class AlphaIconAtlas : IDisposable
     {
         public Texture2D Texture { get; private set; }
         public IReadOnlyDictionary<string, Rect> Rects => _rects;
@@ -37,6 +38,21 @@ namespace CubeGame.Presentation.Visual
             return sprite;
         }
 
+        public void Dispose()
+        {
+            foreach (Sprite sprite in _sprites.Values) DestroyAsset(sprite);
+            _sprites.Clear();
+            _rects.Clear();
+            if (Texture != null) DestroyAsset(Texture);
+            Texture = null;
+        }
+
+        private static void DestroyAsset(UnityEngine.Object asset)
+        {
+            if (Application.isPlaying) UnityEngine.Object.Destroy(asset);
+            else UnityEngine.Object.DestroyImmediate(asset);
+        }
+
         public static bool TryLoad(string atlasDirectory, out AlphaIconAtlas atlas, List<string> problems)
         {
             atlas = null;
@@ -47,8 +63,21 @@ namespace CubeGame.Presentation.Visual
                 problems?.Add("ICON_ATLAS_MISSING " + atlasDirectory);
                 return false;
             }
+            byte[] image = File.ReadAllBytes(png);
+            // Unity logs an error from native LoadImage for an oversized PNG, even when the caller can fall back.
+            // Read the standard PNG IHDR dimensions before handing the image to Unity.
+            if (image.Length >= 24 && BinaryPrimitives.ReadUInt64BigEndian(image) == 0x89504E470D0A1A0AUL)
+            {
+                uint width = BinaryPrimitives.ReadUInt32BigEndian(image.AsSpan(16));
+                uint height = BinaryPrimitives.ReadUInt32BigEndian(image.AsSpan(20));
+                if (Math.Max(width, height) > SystemInfo.maxTextureSize)
+                {
+                    problems?.Add($"ICON_ATLAS_TOO_LARGE {width}x{height}");
+                    return false;
+                }
+            }
             var texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-            if (!texture.LoadImage(File.ReadAllBytes(png)))
+            if (!texture.LoadImage(image))
             {
                 problems?.Add("ICON_ATLAS_PNG_INVALID");
                 UnityEngine.Object.DestroyImmediate(texture);
@@ -82,7 +111,30 @@ namespace CubeGame.Presentation.Visual
             return true;
         }
 
-        public static string DefaultDirectory =>
+        /// <summary>
+        /// The atlas of the resolved content root (&lt;root&gt;/icons — how a Player build receives it), else the
+        /// Editor's local artifact AlphaOutput/icons.
+        /// </summary>
+        public static string DefaultDirectory
+        {
+            get
+            {
+                string root = CubeGame.AlphaModels.AlphaActorLibrary.Shared.Source.Root;
+                if (!string.IsNullOrEmpty(root))
+                {
+                    string packaged = Path.Combine(root, CubeGame.AlphaModels.AlphaContentInventory.IconsFolder);
+                    if (File.Exists(Path.Combine(packaged, CubeGame.AlphaModels.AlphaContentInventory.IconAtlasImage)))
+                    {
+                        return packaged;
+                    }
+                }
+
+                return EditorArtifactDirectory;
+            }
+        }
+
+        /// <summary>Where the Editor atlas builder writes (local, not in Git, never read by a Player).</summary>
+        public static string EditorArtifactDirectory =>
             Path.GetFullPath(Path.Combine(Application.dataPath, "..", "AlphaOutput", "icons"));
 
         public static List<string> Validate(AlphaIconAtlas atlas)

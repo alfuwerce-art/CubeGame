@@ -38,7 +38,7 @@ namespace CubeGame.Features.Combat
 
         public EquipmentLoadout Loadout { get; }
 
-        public HealthPool Health { get; }
+        public HealthPool Health { get; internal set; }
 
         /// <summary>Game-space position (blocks). Updated by the owner of movement every frame.</summary>
         public WorldPosition Position { get; set; }
@@ -56,6 +56,11 @@ namespace CubeGame.Features.Combat
         public bool IsBoss { get; set; }
 
         public bool IsDead => Health.IsDead;
+
+        // 0x447700 reads the non-player star term. Item haste, buffs and +0x17C updates remain partial.
+        internal float TimingRate => Id.Equals(StableEntityId.Hero) ? 1f : 0.75f + Stars * 0.0625f;
+
+        public int? AlphaMainHandSubtype { get; set; }
 
         /// <summary>
         /// Hit box in blocks (Unity axes: width X, height Y, depth Z). The game sets the Alpha species size

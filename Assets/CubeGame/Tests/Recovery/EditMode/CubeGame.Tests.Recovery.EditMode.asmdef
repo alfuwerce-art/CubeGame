@@ -1,0 +1,32 @@
+{
+    "name": "CubeGame.Tests.Recovery.EditMode",
+    "rootNamespace": "CubeGame.Tests.Recovery",
+    "references": [
+        "CubeGame.Core",
+        "CubeGame.Content",
+        "CubeGame.AlphaModels",
+        "CubeGame.Features",
+        "CubeGame.Features.Creatures",
+        "CubeGame.Presentation",
+        "CubeGame.Presentation.Visual",
+        "CubeGame.Gameplay",
+        "CubeGame.Editor",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
