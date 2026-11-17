@@ -190,38 +190,66 @@ M0-F2/F3/F4, существующие gameplay contracts, save/load, тесты 
 
 **Фаза:** production technology R&D.
 
-**Технический референс:** [M1 — эволюция моделей, ригов и анимаций](../stages/M1_MODEL_ANIMATION_EVOLUTION_STAGE.md).
+**Технические референсы:**  
+[M1 — эволюция моделей, ригов и анимаций](../stages/M1_MODEL_ANIMATION_EVOLUTION_STAGE.md)  
+[G3 — Humanoid Character Factory](../stages/G3_HUMANOID_CHARACTER_FACTORY_STAGE.md)  
+[D94 — modular humanoid appearance + NPC generation](../decisions/D94-g3-humanoid-modular-appearance.md)
 
 ### Цель
 
-Создать масштабируемый производственный конвейер собственных персонажей и существ.
+Сначала построить производственный контур **всех поддерживаемых гуманоидных рас**, используя общую модульную Factory. Не создавать отдельную полную модель для каждого NPC.
 
-### Объём
+Игрок и NPC используют одну библиотеку внешности:
 
-- Character/Creature Factory;
-- modular LEGO body parts;
-- EntityRecipe;
-- anatomy/rig archetypes:
-  - Humanoid;
-  - Quadruped;
-  - Floating;
-  - Avian;
-  - Insect;
-  - Arachnid;
-  - Custom;
-- unified skeleton rules;
-- rigging/weights;
-- animation packages;
-- weapon/equipment attachment;
-- IK/procedural correction layers;
-- character editor integration;
-- ComfyUI reference generation;
-- image → 3D/model pipeline experiments;
-- масштабирование эталонов `1 → 2 → 5 → 10 → 25 → 50 → batch`.
+```text
+PLAYER: Race → Character Creator → AppearanceRecipe ┐
+                                                    ├→ Humanoid Factory
+NPC:    Race → deterministic randomizer → Recipe   ┘
+```
+
+NPC appearance randomizer намеренно простой: population выбирает расу и `PersistentNpcId`, затем `WorldSeed + PersistentNpcId` даёт стабильный `AppearanceSeed`, а `RaceAppearanceProfile` разрешает только подходящие этой расе лицо, волосы, бороду, клыки, рога, уши, цвета и другие признаки.
+
+### Порядок G3
+
+- **G3-0 — Humanoid Race Mannequins**  
+  Базовые манекены всех поддерживаемых гуманоидных рас и необходимых sex/body variations.
+
+- **G3-1 — Character Editor Visual Library**  
+  Полный набор визуальных категорий, реально влияющих на редактор: face/head, hair, beard/moustache, colors и race-specific traits.
+
+- **G3-2 — AppearanceRecipe + Modular Assembly**  
+  Один data-driven assembly path игрока и NPC.
+
+- **G3-3 — Race-based NPC Appearance Randomizer**  
+  Простой детерминированный выбор разрешённых модулей расы. NPC не создаются отдельными готовыми моделями.
+
+- **G3-4 — Humanoid Rig + Base Animations**  
+  Общий Humanoid skeleton/rig contract где совместимо, weights, locomotion и базовые action packages; небольшие race/body corrections при необходимости.
+
+- **G3-5 — Equipment / Armor / Weapons**  
+  Одежда, броня и оружие — отдельные модульные слои, не склеенные с базовой внешностью.
+
+- **G3-6 — World NPC Integration**  
+  Подключение к G2-1 `EntityDefinition / EntityVisualRecipe`, population и persistence.
+
+### Негуманоидные существа
+
+Creature Factory остаётся общей архитектурой (`Quadruped`, `Floating`, `Avian`, `Insect`, `Arachnid`, `Custom`), но **массовый каталог существ заранее не производится**.
+
+Конкретные существа создаются по фактической необходимости текущего региона, данжа, босса или другого контента. Последовательность `1 → 2 → 5 → 10 → batch` используется как метод проверки качества/масштабируемости, а не как обязательство заранее изготовить все семейства.
 
 ### PASS
 
-Один гуманоидный эталон полностью проходит pipeline: concept/reference → model → modular split → rig → weights → базовые animations → equipment → Unity runtime. После этого pipeline подтверждается на нескольких существах разных archetypes.
+G3 humanoid foundation принят, когда:
+
+- все поддерживаемые гуманоидные расы имеют принятые mannequin bases;
+- редактор располагает race-specific visual libraries;
+- Player и NPC получают один и тот же тип `AppearanceRecipe`;
+- NPC appearance детерминирован через `WorldSeed + PersistentNpcId`;
+- общий Humanoid rig/animation contract работает на принятых расовых телах;
+- equipment остаётся модульным отдельным слоем;
+- NPC собирается через G2-1 entity seam и сохраняет ту же внешность после unload/load и save/load;
+- для разнообразия NPC не требуется хранить отдельную полную модель каждой комбинации.
 
 ---
 
