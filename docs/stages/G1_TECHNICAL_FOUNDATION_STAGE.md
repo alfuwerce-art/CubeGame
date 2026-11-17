@@ -53,11 +53,18 @@ G1 **не** добавляет новые игровые механики и н�
 | **B. Взять цепь P0–P7 как базовую** | максимальный reuse: 29 тыс. строк уже написанного runtime | 278 файлов не в canonical, merge не fast-forward, состояние тестов G0 не подтверждено, часть кода — Alpha-parity (UI Toolkit HUD), который pivot не требует |
 | **C. Гибрид**: canonical + выборочный `cherry-pick` полезных P-блоков (loot/shop/missions/profile store), без Alpha-parity UI | сохраняет ценное, не тащит parity-долг | нужна отдельная ревизия каждого блока |
 
-**Рекомендация исполнителя:** вариант C, при уже собранном факте: P7-tip собирается и его тесты фактически зелёные (851/859 EditMode, 74/75 PlayMode, оба исключения — отсутствие `AlphaOutput/icons`). Практический порядок: merge цепи P0–P7 в отдельную ветку от `integration/m0-all`, полный прогон (включая Player), и только затем решение «оставить как базу / взять выборочно». Alpha-parity UI из P6 при этом вычищается не в G1, а в G12.
+**Решение (2026-11-17, G1-00): выбран OPTION C.** Candidate-ветка `deepseek/g1-00-runtime-baseline-candidate` содержит canonical + pivot-документы + полный runtime P0–P7 (merge `c613ae6`; код равен P7-tip). Проверено: `error CS = 0`; EditMode **853/859** с Alpha-кэшем и 845/859 без; PlayMode **75/75** и 39/75 (3 content-presence fail, 33 skip); Windows Player собран (0 errors) и прошёл сценарии new/load/continue/attack/UI/save в обоих режимах. Отчёт: [G1_00_RUNTIME_BASELINE_SELECTION_REPORT](../reports/G1_00_RUNTIME_BASELINE_SELECTION_REPORT.md).
 
-**Пока решение не принято, G1-работы W1–W9 делаются от canonical** — они не конфликтуют ни с одним вариантом.
+**Перед слиянием candidate в canonical обязателен ограниченный cleanup:**
 
-Выход задачи: запись решения (decision record) + зафиксированный commit базовой линии.
+- **C1** — пометить 4 content-presence теста как `RequiresAlphaCache` (входит в W9);
+- **C2** — не ставить `_screenshotFrame` без `_screenshotPath` (входит в W10);
+- **C3** — сделать build-gate независимым от Alpha-кэша (входит в W10);
+- **C4** — зафиксировать шрифт UI: собственный TTF либо штатный placeholder (G12, вне G1).
+
+До выполнения C1–C4 работы W1–W12 ведутся от candidate-ветки, а не от canonical.
+
+Выход задачи: решение + candidate-ветка с проверенной базовой линией.
 
 ---
 

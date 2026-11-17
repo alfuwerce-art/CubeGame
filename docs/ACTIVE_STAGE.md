@@ -1,10 +1,27 @@
-# ACTIVE STAGE — G0 DEVELOPMENT PIVOT / BASELINE FREEZE
+# ACTIVE STAGE — G1 TECHNICAL FOUNDATION
 
-**Canonical branch:** `integration/m0-all` · **G0 work branch:** `deepseek/g0-development-pivot`
-**Status:** `ACTIVE` — G0 выполняется
-**Решение продюсера:** 2026-11-17 — CubeGame разрабатывается как **собственная игра**; полный перенос Cube World Alpha 2013 прекращён как active target.
+**Canonical branch:** `integration/m0-all` · **G1 baseline branch:** `deepseek/g1-00-runtime-baseline-candidate`
+**Status:** `ACTIVE` — G1-00 (Runtime Baseline Selection) завершён, baseline выбран: **OPTION C**
+**Решение продюсера:** 2026-11-17 — CubeGame разрабатывается как **собственная игра**; полный перенос Cube World Alpha 2013 прекращён как active target ([CR-001](planning/DECISIONS_001-036.md#cr-001--parity-больше-не-является-целью-первой-версии-2026-11-17)).
 **Рабочая дорожная карта:** [ROADMAP_DRAFT.md](planning/ROADMAP_DRAFT.md) (коммит `4e36f1539d787e6a03f85d1f9fc92efcb1b64a79`)
-**G0 отчёт:** [G0_DEVELOPMENT_PIVOT_REPORT.md](reports/G0_DEVELOPMENT_PIVOT_REPORT.md)
+**Отчёты:** [G1-00 baseline selection](reports/G1_00_RUNTIME_BASELINE_SELECTION_REPORT.md) · [G0 pivot](reports/G0_DEVELOPMENT_PIVOT_REPORT.md)
+
+---
+
+## 0. Baseline G1 (зафиксирован 2026-11-17)
+
+| Параметр | Значение |
+|---|---|
+| Основа | полный runtime цепи P0–P7 (`0533698..85ba64a`, 104 линейных коммита, 278 файлов, +29 197/−2 024) |
+| Candidate-ветка | `deepseek/g1-00-runtime-baseline-candidate` (= canonical + pivot-документы + P0–P7) |
+| Код | 328 `.cs` / 72 400 строк; код побайтово равен P7-tip |
+| Компиляция | `error CS = 0`, 38 warnings |
+| EditMode | **853/859** с Alpha-кэшем (0 fail, 6 skip) · 845/859 без кэша (1 content-presence fail, 11 skip) |
+| PlayMode | **75/75** с кэшем · 39/75 без кэша (3 content-presence fail, 33 skip) |
+| Player | сборка `errors=0`; сценарии new/load/continue/attack/UI/save — PASS в обоих режимах |
+| Решение | **OPTION C**: P0–P7 — база; перед слиянием в canonical выполняется ограниченный cleanup C1–C4 |
+
+Перед слиянием candidate в canonical обязательны C1–C4 из [G1-00 отчёта §12](reports/G1_00_RUNTIME_BASELINE_SELECTION_REPORT.md). До этого canonical `integration/m0-all` остаётся исторической базой F1–F3.
 
 ---
 
@@ -67,9 +84,9 @@ CubeGame — самостоятельная 3D action RPG с кубически�
 
 ## 5. Технический baseline
 
-Зафиксирован в [G0 отчёте](reports/G0_DEVELOPMENT_PIVOT_REPORT.md) и [G1 ТЗ](stages/G1_TECHNICAL_FOUNDATION_STAGE.md): canonical `integration/m0-all` @ `4e36f1539d787e6a03f85d1f9fc92efcb1b64a79`, Unity `6000.3.27f2`, компиляция без ошибок, EditMode/PlayMode прогоны и состояние Windows-сборки.
+Зафиксирован в [G1-00 отчёте](reports/G1_00_RUNTIME_BASELINE_SELECTION_REPORT.md): ветка `deepseek/g1-00-runtime-baseline-candidate` (canonical + pivot-документы + полный runtime P0–P7), Unity `6000.3.27f2`, `error CS = 0`, EditMode 853/859, PlayMode 75/75, Windows Player собирается и проходит сценарии new/load/continue/attack/UI/save в двух режимах (с Alpha-кэшем и без).
 
-Важно: каноническая ветка содержит runtime уровня F1–F3. Более поздняя работа P0–P7 находится в отдельных review-ветках (линейная цепь `codex/m0-p1-world-streaming` → `m0-p2-environment` → `m0-p3-population-ai` → `m0-p4-action-combat` → `m0-p5-character-items-progression` → `m0-p6-alpha-menu-hud` → `m0-p7-quests-cities-dungeons`). Выбор базовой линии для G1 — первая задача G1, а не скрытое допущение.
+Важно: canonical `integration/m0-all` всё ещё содержит runtime F1–F3. P0–P7 интегрирован в candidate, но **не слит** в canonical: слияние выполняется после ограниченного cleanup C1–C4 ([§12 G1-00 отчёта](reports/G1_00_RUNTIME_BASELINE_SELECTION_REPORT.md)). Работать следует от candidate.
 
 ---
 

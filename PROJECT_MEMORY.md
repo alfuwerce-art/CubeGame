@@ -3,9 +3,21 @@
 **Updated:** 2026-11-17
 **Canonical branch:** `integration/m0-all`
 **Текущее направление:** [D93 — CubeGame как собственная игра](docs/decisions/D93-development-pivot-own-game.md) (2026-11-17)
-**Рабочая карта:** [ROADMAP_DRAFT](docs/planning/ROADMAP_DRAFT.md) · **Текущий этап:** [ACTIVE_STAGE — G0 DEVELOPMENT PIVOT](docs/ACTIVE_STAGE.md)
+**Рабочая карта:** [ROADMAP_DRAFT](docs/planning/ROADMAP_DRAFT.md) · **Текущий этап:** [ACTIVE_STAGE — G1 TECHNICAL FOUNDATION](docs/ACTIVE_STAGE.md)
 
-## 0. G0 — DEVELOPMENT PIVOT (2026-11-17)
+## 0. G1-00 — RUNTIME BASELINE (2026-11-17)
+
+Baseline для дальнейшей разработки — **OPTION C**: полный runtime цепи P0–P7 становится основой CubeGame.
+
+- Candidate-ветка: `deepseek/g1-00-runtime-baseline-candidate` = `integration/m0-all` + pivot-документы + merge `codex/m0-p7-quests-cities-dungeons` (merge-коммит `c613ae6`, код равен P7-tip).
+- Цепь: `0533698..85ba64a`, 104 линейных коммита, 278 файлов, +29 197/−2 024. В canonical пока **не слита**: сначала cleanup C1–C4.
+- Проверено: `error CS = 0`; EditMode 853/859 (с Alpha-кэшем) и 845/859 (без); PlayMode 75/75 и 39/75 (3 content-presence fail, 33 skip); Windows Player собран (0 errors) и проверены сценарии new/load/continue/attack/UI/save с кэшем и без.
+- Alpha-зависимости классифицированы: `RESEARCH_ONLY` / `TEMPORARY_RUNTIME` / `PRODUCT_BLOCKER` / `REMOVE`.
+- Performance baseline: стартовый мир 67–357 мс, 25 стартовых чанков, vertex budget 12 582 912, 56 активных NPC в 9 зонах, peak WS 2.4–2.5 ГБ с контентом / 1.2–1.3 ГБ без.
+- Parity-конфликт D01/D14/D20 закрыт записью [CR-001](docs/planning/DECISIONS_001-036.md) (текст решений не изменён).
+- Отчёт: [G1_00_RUNTIME_BASELINE_SELECTION_REPORT](docs/reports/G1_00_RUNTIME_BASELINE_SELECTION_REPORT.md) · матрица: [G1_RUNTIME_REUSE_MATRIX](docs/planning/G1_RUNTIME_REUSE_MATRIX.md).
+
+## 0a. G0 — DEVELOPMENT PIVOT (2026-11-17)
 
 Решение продюсера: **CubeGame разрабатывается как самостоятельная игра**. Полный перенос Cube World Alpha 2013 прекращён как active target. GDD и утверждённые игровые решения не пересобираются; меняется способ разработки и порядок этапов.
 
