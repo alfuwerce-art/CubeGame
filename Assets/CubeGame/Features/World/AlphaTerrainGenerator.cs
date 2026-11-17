@@ -241,6 +241,36 @@ namespace CubeGame.Features.World
             }
         }
 
+        /// <summary>Zones the generator has produced (cached entries; G2 debug/metrics).</summary>
+        public int GeneratedZoneCount
+        {
+            get
+            {
+                lock (_zoneLock)
+                {
+                    return _zones.Count;
+                }
+            }
+        }
+
+        /// <summary>Zones held in the cache right now (bounded by <see cref="ZoneCacheSize"/> when not streaming).</summary>
+        public int CachedZoneCount => GeneratedZoneCount;
+
+        /// <summary>Regions whose landmark records are held in memory (G2 metrics).</summary>
+        public int CachedRegionCount
+        {
+            get
+            {
+                lock (_regionLock)
+                {
+                    return _regions.Count;
+                }
+            }
+        }
+
+        /// <summary>Climate cells held in memory (G2 metrics; the grid evicts outside five regions).</summary>
+        public int CachedClimateCellCount => _climate.CachedCount;
+
         public void UseStreamingRetention()
         {
             lock (_zoneLock)

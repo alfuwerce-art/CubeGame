@@ -9,6 +9,7 @@ using CubeGame.Features.Contracts;
 using CubeGame.Features.Items;
 using CubeGame.Features.Session;
 using CubeGame.Features.World;
+using CubeGame.Features.World.Foundation;
 
 namespace CubeGame.Features.Persistence
 {
@@ -476,6 +477,16 @@ namespace CubeGame.Features.Persistence
                 return Fail(SlotLoadStatus.Corrupted, "world file describes another world");
             }
 
+            // G2-J: a world written by another generation profile is refused, not silently regenerated.
+            WorldCompatibilityReport compatibility = WorldGenerationIdentity.Check(world.generatorId,
+                (uint)world.worldSeed, world.generationFingerprint,
+                string.IsNullOrEmpty(session.generatorId) ? world.generatorId : session.generatorId,
+                (uint)world.worldSeed);
+            if (!compatibility.CanLoad)
+            {
+                return Fail(SlotLoadStatus.GeneratorMismatch, compatibility.Reason);
+            }
+
             if (world.deltas.Count > WorldSaveFormat.MaxDeltas || world.discovered.Count % 2 != 0)
             {
                 return Fail(SlotLoadStatus.Corrupted, "world file sizes are invalid");
@@ -520,6 +531,9 @@ namespace CubeGame.Features.Persistence
             {
                 generatorId = session.World.GeneratorId,
                 worldSeed = session.World.Seed.Value,
+                // G2-J: identity of the generation profile that produced the untouched world.
+                generationFingerprint = WorldGenerationIdentity.Fingerprint(session.World.GeneratorId,
+                    session.World.Seed.Value),
             };
 
             foreach (WorldDelta delta in session.WorldDeltas.All())

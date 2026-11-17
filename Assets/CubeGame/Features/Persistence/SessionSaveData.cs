@@ -240,6 +240,13 @@ namespace CubeGame.Features.Persistence
         public int ticksPerSecond;
 
         public long worldTimeOffsetMs;
+
+        /// <summary>
+        /// G2, optional: FNV-1a 64 (hex) of (generator id, seed, generation profile). Empty = world written before G2.
+        /// A non-empty value that no longer matches the running profile refuses the load instead of silently
+        /// regenerating a different world from the same seed.
+        /// </summary>
+        public string generationFingerprint = string.Empty;
     }
 
     public interface IWorldSaveSerializer

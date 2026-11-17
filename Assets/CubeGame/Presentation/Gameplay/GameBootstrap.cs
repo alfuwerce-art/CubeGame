@@ -223,6 +223,7 @@ namespace CubeGame.Gameplay
         private void Update()
         {
             _frames++;
+            UpdateSmoke(Time.unscaledDeltaTime);
             WriteUiProbe();
             UpdateInterfaceInput();
 
@@ -1252,6 +1253,7 @@ namespace CubeGame.Gameplay
             _worldView.Initialise(_worldState, WorldStreamingPolicy.Alpha, terrainMaterial,
                 StreamingWorldView.OriginFor(hero.Position.X, hero.Position.Z), _camera);
             _worldView.SetRenderDistance(_options.RenderDistance);
+            SetupWorldFoundation(generator);
             Vector3 heroPoint = _worldView.ToScene(hero.Position.X, hero.Position.Y, hero.Position.Z);
             var loadTimer = System.Diagnostics.Stopwatch.StartNew();
             _worldView.LoadAround(heroPoint, 2);
@@ -1315,6 +1317,7 @@ namespace CubeGame.Gameplay
 
         private void DestroyWorldViews()
         {
+            TeardownWorldFoundation();
             UnbindWorldPresentation();
             ShowPanel(GamePanel.None, false);
             if (_sun != null)
@@ -1633,8 +1636,25 @@ namespace CubeGame.Gameplay
                     case "-cubeUiScreen":
                         _uiScreen = value;
                         break;
+                    case "-cubeWorldMetrics":
+                        _worldMetricsPath = value;
+                        break;
+                    case "-cubeDebugOverlay":
+                        _debugOverlayFromStart = true;
+                        break;
+                    case "-cubeSmokeSeconds":
+                        if (float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture,
+                                out float smokeSeconds) && smokeSeconds > 0f)
+                        {
+                            _smokeSeconds = smokeSeconds;
+                        }
+
+                        break;
                 }
             }
+
+            // Flags without a value may be the last argument: scan for them separately.
+            if (Array.IndexOf(args, "-cubeDebugOverlay") >= 0) _debugOverlayFromStart = true;
         }
 
         private void LogP5State(string phase)

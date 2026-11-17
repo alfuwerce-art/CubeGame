@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.World;
+using CubeGame.Features.World.Foundation;
 using CubeGame.Presentation.Rendering;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -58,6 +59,12 @@ namespace CubeGame.Gameplay.Streaming
         private long _vertexBudget;
         private double _lastEviction;
 
+        // G2: explicit budget and reproducible measurement. Both are optional: without them the view behaves exactly
+        // as before (existing tests and PlayMode scenarios keep their numbers).
+        private WorldStreamingBudget _budget;
+        private WorldPerformanceRecorder _metrics;
+        private double _zoneStartedAt = -1.0;
+
         private sealed class ChunkView
         {
             public GameObject Root;
@@ -98,6 +105,33 @@ namespace CubeGame.Gameplay.Streaming
         public int LoadedPlants { get; private set; }
         public long VertexBudget => _vertexBudget;
         public float HorizonRange => _horizonRange;
+
+        /// <summary>G2-C budget applied to this view (null = unbudgeted legacy behaviour).</summary>
+        public WorldStreamingBudget Budget => _budget;
+
+        /// <summary>Zones the generator has already produced (all cached entries).</summary>
+        public int GeneratedZoneCount => _terrain?.GeneratedZoneCount ?? 0;
+
+        /// <summary>Zones currently held in the generator cache.</summary>
+        public int CachedZoneCount => _terrain?.CachedZoneCount ?? 0;
+
+        /// <summary>
+        /// Applies the world streaming budget: the vertex limit is never raised above the budget, plants stop at the
+        /// total vegetation budget, and the streaming counters feed the performance recorder.
+        /// </summary>
+        public void ApplyBudget(WorldStreamingBudget budget)
+        {
+            _budget = budget;
+            if (budget == null) return;
+            _vertexBudget = Math.Min(_vertexBudget, budget.VertexBudget);
+            _planDirty = true;
+        }
+
+        /// <summary>Attaches the G2-I recorder; the view then times zone/chunk work and reports counts.</summary>
+        public void AttachMetrics(WorldPerformanceRecorder recorder)
+        {
+            _metrics = recorder;
+        }
 
         public bool IsLoaded(ChunkKey chunk) => _loaded.ContainsKey(chunk);
 
@@ -141,6 +175,7 @@ namespace CubeGame.Gameplay.Streaming
         public void SetRenderDistance(int renderDistance)
         {
             _vertexBudget = WorldStreamingPolicy.AlphaVertexBudget(renderDistance);
+            if (_budget != null) _vertexBudget = Math.Min(_vertexBudget, _budget.VertexBudget);
             _planDirty = true;
         }
 
@@ -402,6 +437,13 @@ namespace CubeGame.Gameplay.Streaming
                 Task completed = _zoneWorker;
                 _zoneWorker = null;
                 completed.GetAwaiter().GetResult();
+                double finishedAt = Time.realtimeSinceStartupAsDouble;
+                if (_metrics != null && _zoneStartedAt >= 0.0)
+                {
+                    _metrics.RecordZoneGenerated(finishedAt, (finishedAt - _zoneStartedAt) * 1000.0);
+                }
+
+                _zoneStartedAt = -1.0;
                 _planDirty = true;
             }
             foreach (ZoneKey zone in _zoneOrder)
@@ -409,6 +451,7 @@ namespace CubeGame.Gameplay.Streaming
                 if (_terrain.IsZoneGenerated(zone)) continue;
 
                 AlphaTerrainGenerator terrain = _terrain;
+                _zoneStartedAt = Time.realtimeSinceStartupAsDouble;
                 _zoneWorker = Task.Run(() => terrain.Zone(zone.X, zone.Z));
                 break;
             }
@@ -513,6 +556,7 @@ namespace CubeGame.Gameplay.Streaming
 
         private void Install(ChunkVoxels generated, ChunkMesher.Result data)
         {
+            var buildTimer = System.Diagnostics.Stopwatch.StartNew();
             ChunkKey key = generated.Key;
             ChunkVoxels heights = generated;
             if (_edited.Contains(key))
@@ -544,7 +588,14 @@ namespace CubeGame.Gameplay.Streaming
                 waterObject.AddComponent<MeshRenderer>().sharedMaterial = _waterMaterial ?? _terrainMaterial;
             }
 
-            Mesh vegetation = _vegetation.Build(heights, out int plantCount);
+            int plantCount = 0;
+            Mesh vegetation = null;
+            // G2-C: the total vegetation budget is a real limit, not a report. An exhausted budget keeps the terrain
+            // mesh and drops the plants (budget status is visible in the debug overlay and the metrics log).
+            if (_budget == null || _budget.VegetationBudget <= 0 || LoadedPlants < _budget.VegetationBudget)
+            {
+                vegetation = _vegetation.Build(heights, out plantCount);
+            }
             if (vegetation != null)
             {
                 var plants = new GameObject("Vegetation");
@@ -566,6 +617,12 @@ namespace CubeGame.Gameplay.Streaming
             _heights[key] = generated;
             _vertices += _loaded[key].Vertices;
             TotalBuilt++;
+            if (_metrics != null)
+            {
+                buildTimer.Stop();
+                _metrics.RecordChunkBuilt(Time.realtimeSinceStartupAsDouble, buildTimer.Elapsed.TotalMilliseconds,
+                    _loaded[key].Vertices, plantCount);
+            }
         }
 
         private void Release(ChunkKey key, bool countAsUnload)

@@ -9,6 +9,7 @@ using CubeGame.Features.Contracts;
 using CubeGame.Features.Items;
 using CubeGame.Features.Session;
 using CubeGame.Features.World;
+using CubeGame.Features.World.Foundation;
 
 namespace CubeGame.Features.Persistence
 {
@@ -414,6 +415,8 @@ namespace CubeGame.Features.Persistence
             data.worldName = record.Name;
             data.worldSeed = record.Seed;
             data.generatorId = record.GeneratorId;
+            // G2-J: the world file states which generation profile produced the untouched terrain.
+            data.generationFingerprint = WorldGenerationIdentity.Fingerprint(record.GeneratorId, record.Seed);
             data.createdUtcTicks = record.CreatedUtcTicks;
             data.savedUtcTicks = nowUtcTicks;
 
@@ -625,6 +628,17 @@ namespace CubeGame.Features.Persistence
                 !string.Equals(data.worldName, record.Name, StringComparison.Ordinal)))
             {
                 return FailWorld(AlphaLoadStatus.Corrupted, "world file describes another world");
+            }
+
+            // G2-J: refuse a world generated with another generation profile instead of silently regenerating it.
+            string runningGeneratorId = string.IsNullOrEmpty(expectedGeneratorId)
+                ? record.GeneratorId
+                : expectedGeneratorId;
+            WorldCompatibilityReport compatibility = WorldGenerationIdentity.Check(record.GeneratorId, record.Seed,
+                data.generationFingerprint, runningGeneratorId, record.Seed);
+            if (!compatibility.CanLoad)
+            {
+                return FailWorld(AlphaLoadStatus.GeneratorMismatch, compatibility.Reason);
             }
 
             if (data.deltas.Count > WorldSaveFormat.MaxDeltas || data.discovered.Count % 2 != 0)

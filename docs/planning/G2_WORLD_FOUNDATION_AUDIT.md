@@ -1,5 +1,12 @@
 # G2 — WORLD FOUNDATION AUDIT (что фактически уже есть)
 
+> **Обновление G2 (2026-11-17).** Аудит ниже выполнен на canonical `integration/m0-all` @ `4e36f153`.
+> После выбора OPTION C рабочий baseline — `deepseek/g1-00-runtime-baseline-candidate` @ `cb76aab` (P0–P7):
+> в нём уже присутствуют render distance/vertex limit и vegetation `/7` из P1/P2, поэтому пункты
+> «render/visibility distance, vertex budget, растительность отсутствуют» относятся к canonical, а не к
+> baseline. Что реально сделано в G2 поверх baseline — см. [G2 report](../reports/G2_WORLD_FOUNDATION_REPORT.md)
+> и [архитектуру](../architecture/WORLD_GENERATION_ARCHITECTURE.md).
+
 **Дата:** 2026-11-17
 **Этап:** вход в [G2 World Foundation](../planning/ROADMAP_DRAFT.md) после G0/G1
 **Аудируемое дерево:** canonical `integration/m0-all` @ `4e36f1539d787e6a03f85d1f9fc92efcb1b64a79`
