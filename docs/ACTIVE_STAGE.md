@@ -69,7 +69,7 @@ CubeGame — самостоятельная 3D action RPG с кубически�
 
 Зафиксирован в [G0 отчёте](reports/G0_DEVELOPMENT_PIVOT_REPORT.md) и [G1 ТЗ](stages/G1_TECHNICAL_FOUNDATION_STAGE.md): canonical `integration/m0-all` @ `4e36f1539d787e6a03f85d1f9fc92efcb1b64a79`, Unity `6000.3.27f2`, компиляция без ошибок, EditMode/PlayMode прогоны и состояние Windows-сборки.
 
-Важно: каноническая ветка содержит runtime уровня F1–F3. Более поздняя работа P0–P7 находится в отдельных review-ветках (линейная цепь `codex/m0-p1…p7-world-streaming → p3 → p4 → p5 → p6 → p7`). Выбор базовой линии для G1 — первая задача G1, а не скрытое допущение.
+Важно: каноническая ветка содержит runtime уровня F1–F3. Более поздняя работа P0–P7 находится в отдельных review-ветках (линейная цепь `codex/m0-p1-world-streaming` → `m0-p2-environment` → `m0-p3-population-ai` → `m0-p4-action-combat` → `m0-p5-character-items-progression` → `m0-p6-alpha-menu-hud` → `m0-p7-quests-cities-dungeons`). Выбор базовой линии для G1 — первая задача G1, а не скрытое допущение.
 
 ---
 
