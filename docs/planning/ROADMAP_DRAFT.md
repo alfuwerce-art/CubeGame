@@ -1,84 +1,637 @@
-# CubeGame — дорожная карта с критериями приёмки
+# CubeGame — дорожная карта разработки собственной игры
 
 **Наименование:** CubeGame — рабочее название проекта; окончательное название игры не утверждено.
 
-**Статус:** общий документ — ПРОЕКТ; активный M0 переработан решением [D92](../decisions/D92-m0-full-alpha-unity-port.md).  
-**Исполнимая структура M0:** [M0 ALPHA FULL UNITY PORT](../stages/M0_ALPHA_FULL_UNITY_PORT_STAGE.md). D66/D90 и M0_FULL_ALPHA_INTEGRATION сохраняются как исторические планы/доказательная база.  
-**Источник требований:** `DECISIONS_001-036.md`.  
-**Обозначения:** `M0` = полный одиночный Alpha 2013 baseline, перенесённый в Unity; `M1` = визуальная/модельная эволюция; `M2` = расширенная RPG; `M3` = сеть и выпуск. Все художественные решения принимаются через прототипы на соответствующих этапах.
+**Статус:** активная дорожная карта разработки собственной игры.  
+**Решение продюсера:** 2026-11-17 — прекращается цель полного переноса Cube World Alpha 2013. Уже выполненные исследования, код, тесты и перенесённые механики сохраняются как техническая база и библиотека референсов.  
+**Источник игровых требований:** `DECISIONS_001-036.md` и действующие утверждённые проектные решения.  
+**GDD:** не пересобирается этим изменением; идея игры и утверждённые игровые решения сохраняются.  
+**Alpha 2013:** больше не является спецификацией CubeGame. Она используется как исследовательский и инженерный референс там, где это помогает построить собственную систему.
 
-## Обязательное правило для любого этапа
+---
 
-Каждый этап получает: `цель → входные зависимости → список задач → критерии приёмки → тесты → результат в Git → решение о закрытии`. Никаких «этап готов», пока не подтверждены применимые проверки, известные ограничения и работоспособность прежних функций. Изменения вне утверждённого объёма — отдельные запросы.
+## 1. Основной принцип разработки
 
-## Направление M0 — воспроизведение утверждённых систем Alpha 2013
+CubeGame разрабатывается как самостоятельная игра.
 
-**Актуальный реестр неполного переноса:** [M0 Alpha Parity Backlog](M0_ALPHA_PARITY_BACKLOG.md). По D92 это blocking registry: обязательный runtime-path не считается перенесённым при `PARTIAL/UNKNOWN/PLACEHOLDER/CUBEGAME_CONTRACT` без прямого решения продюсера.
+Рабочий цикл:
 
-**Актуальное решение [D92](../decisions/D92-m0-full-alpha-unity-port.md) (2026-11-11):** M0 закрывается только как цельная одиночная Cube World Alpha 2013 в Unity. Работа ведётся системными контурами от reverse engineering оригинального кода до Windows Player и ручной приёмки. Старые F1–F4 — инженерные checkpoint'ы, не parity-certification.
+`ТРЕБОВАНИЕ CUBEGAME → ПРОВЕРКА УЖЕ ГОТОВОГО → RESEARCH ПРИ НЕОБХОДИМОСТИ → СОБСТВЕННЫЙ DESIGN/SPEC → ПРОТОТИП → ИНТЕГРАЦИЯ → PLAYTEST → ПРИЁМКА → МАСШТАБИРОВАНИЕ`.
 
-**Историческое решение [D66](../decisions/D66-m0-full-integration-parallel-agents.md) (2026-11-07):** после S05B-2 полноценная интеграция всей Alpha 2013 в единую Unity-игру по [плану M0-00…M0-09](M0_FULL_ALPHA_INTEGRATION.md). Детализация: 10 этапов / 40 подэтапов; безопасная параллельность Claude (отдельные исследования/контракты/ревью) и DeepSeek (Unity-код/интеграция) только без двух одновременных записей в локальную рабочую директорию. S05B-2 остаётся `READY_FOR_REVIEW`; подготовительный M0-00 возможен, игровая реализация M0-01+ ещё не открыта. Ниже — **историческая укрупнённая схема M0**, её названия S02–S04 не заменяют фактически выполненные технические этапы S02–S04.
+Исследование Alpha, других игр, GDC, технических статей, papers и открытых реализаций выполняется только для конкретной задачи CubeGame. Исследование не является самоцелью и не блокирует разработку всей игры, если неизвестная деталь не нужна текущему продукту.
 
-**D38 (актуальное):** продюсер сообщил путь скачанной Alpha 2013. S00 сначала проверяет фактический клиент (G0), затем исследует Alpha напрямую. Архивы дополняют наблюдения; Steam 2019 необязателен. D37 остаётся историческим решением, частично заменённым D38.
+### Research Loop
 
-| Этап | Результат | Приёмка и зависимости |
-|---|---|---|
-| S00 — проверка и исследование Alpha 2013 | Проверка G0, прямые игровые сценарии Alpha, описание механик, вспомогательные архивы и матрица целевых требований | Клиент/сборка/запуск подтверждены агентом, исследования документированы, неизвестное явно указано. Steam 2019 необязателен. |
-| S01 — Архитектурное решение | Утверждённые версии Unity/рендера, границы модулей, формат данных, симуляционный цикл, сохранения; небольшой технический стенд | Архитектура отдельно утверждена. Здесь **не** утверждаем окончательную стилизацию. |
-| S02 — Ядро и мир | Запуск локального мира, движение/камера, seed-генерация, стриминг регионов, устойчивые ID, сохранение/загрузка, тестовый NPC | Восстановленный участок идентичен по seed; изменения сохраняются; симуляция корректно останавливается при выходе. |
-| S03A — Персонажи и инвентарь Alpha | Выбор исходных классов/рас, базовые параметры, уровни, экипировка, предметы, крафт | Тесты сценариев с оригиналом; сохранения героя стабильны. |
-| S03B — Бой и противники Alpha | Атаки, MP/выносливость, уклонения, способности, обычные противники, боссы и награды | Golden-сценарии боёв; изменения оружия не ломают инвентарь и сохранения. |
-| S03C — Контент и окружение Alpha | Биомы, города, перемещения, NPC, питомцы, подземелья, задания и интерфейсы базовой версии | Матрица покрытия оригинала; исправление расхождений по приоритету. |
-| S04 — Приёмка M0 | Полноценная локальная игра, максимально близкая к Alpha по утверждённой матрице; список сознательно отложенных функций | Сборка, сквозное прохождение, тесты стабильности, профилирование, отсутствие критичных регрессий. Мультиплеер отложен и не трактуется как «готово». |
+Для любого сложного или неизвестного элемента разрешён отдельный исследовательский контур:
 
-**Важно:** временные ассеты/контракты допустимы во время исследования, но по D92 блокируют PASS обязательной системы, пока не заменены Alpha-логикой либо не разрешены прямым решением продюсера. Не выдавать технический стенд за перенесённую игру.
+1. **PROBLEM** — что именно требуется CubeGame.
+2. **CURRENT STATE** — что уже реализовано и что можно переиспользовать.
+3. **CW_ALPHA_REFERENCE** — как соответствующая проблема решена в Alpha, если это полезно.
+4. **EXTERNAL RESEARCH** — открытые источники, другие игры, алгоритмы и практики.
+5. **CUBEGAME DESIGN** — выбранная собственная архитектура/формула/правило.
+6. **PROTOTYPE** — минимальная проверка.
+7. **INTEGRATION** — включение в реальный gameplay.
+8. **PLAYTEST / METRICS** — проверка качества, производительности и поведения.
+9. **LOCK / ITERATE** — принять, изменить или отбросить.
 
-## Направление M1 — модели, анимации и визуал
+Alpha parity не является критерием PASS, если конкретный механизм явно не выбран как `ALPHA_VERIFIED`.
 
-**Документ будущего этапа:** [M1 — эволюция моделей, ригов и анимаций](../stages/M1_MODEL_ANIMATION_EVOLUTION_STAGE.md) — `APPROVED CONCEPT / FUTURE STAGE / NOT_AUTHORIZED`; утверждённая концепция Character / Creature Factory: модульная LEGO-сборка через anatomy/rig archetypes, EntityRecipe, общие animation packages, оружие, IK/procedural-слои и контролируемое масштабирование `1 → 2 → 5 → 10 → 25 → 50 → batch`. Детальная техническая реализация проектируется при фактическом открытии M1.
+---
 
-**Документ S06:** [эволюция материалов, рендера, окружения и погоды](../stages/S06_RENDER_ENVIRONMENT_EVOLUTION_STAGE.md) — `APPROVED CONCEPT / FUTURE STAGE / NOT_AUTHORIZED`; зафиксированы semantic Surface/Material System, детализированные поверхности, shader families, modern water, lighting/shadows/atmosphere, wind, EnvironmentState, Weather System, реакция мира на дождь/снег и архитектурный задел под будущую Season System. Полноценные времена года остаются отдельным будущим обновлением.
+## 2. Категории использования наследия Alpha
 
-**Актуальное решение [D46](../decisions/D46-asset-conversion-first.md):** приоритет — техническая конвертация существующих моделей и исследование переноса анимаций, а не массовое моделирование с нуля. Реальная совместимость и право на распространение не доказаны; оригинальные ресурсы не публиковать в открытом репозитории. Подробный [план S05](../stages/S05_ASSET_CONVERSION_PLAN.md) пока **PLANNED / NOT_AUTHORIZED**. Нумерация крупных фаз этого черновика отличается от текущих технических S02–S04 — ориентироваться на ACTIVE_STAGE.
+Каждая система или элемент относится к одной из трёх категорий:
 
-| Этап | Результат | Приёмка и зависимости |
-|---|---|---|
-| S05A-0 — Пилот конвертации моделей Alpha → Unity | До моделирования с нуля проверить существующие конвертеры и извлечение трёх категорий: персонаж, враг/существо, оружие/предмет. Импорт в Unity, проверка геометрии, цветов, масштаба, материалов, структуры. | Реальная демонстрация импорта трёх образцов либо задокументированные блокеры, матрица совместимости; массовой конвертации нет. |
-| S05A-1 — Пилот анимаций и ригов | Отдельно установить формат анимаций; проверить исходный клип на перенесённом персонаже; если невозможно — зафиксировать причину. Затем одна собственная/переработанная модель и одна новая анимация (D32). | Исходный клип, если переносим, и новая анимация проверены в Unity; при блокере — отдельное решение продюсера. Геометрия не доказывает перенос анимаций. |
-| S05B — Каталоги 3D-контента | Только после приёмки пилотов — решение о пакетной локальной конвертации и производстве собственных моделей персонажей, врагов, оружия, окружения, ригов и анимаций. | **Каждая** переработанная модель лично утверждается продюсером; права на распространяемые ассеты подтверждены; импорт и производительность проверены. |
-| S06 — [Рендер, материалы, окружение и погода](../stages/S06_RENDER_ENVIRONMENT_EVOLUTION_STAGE.md) | Semantic Surface/Material System, детализированные текстуры, shader families, освещение, тени, атмосфера, ветер, объёмная трава/листва, деревья, современная вода, Weather System и реакция мира на погодные условия. Архитектура заранее оставляет seams под будущие времена года, но Season System не входит в первую реализацию S06. | Визуал утверждается итерационно в реальном streamed world; измеренная производительность на quality presets; погода влияет на мир согласованно через EnvironmentState; сезоны остаются отдельным future update до отдельной авторизации. |
-| S07 — Интерфейсы | Новые версии меню, редактора персонажа, инвентаря и игрового HUD | Пользовательские сценарии сохранены; удобство проверено тестированием; художественный вид утверждён продюсером. |
+- **ALPHA_VERIFIED** — намеренно сохраняем конкретный подтверждённый алгоритм, формулу или поведение Alpha.
+- **ALPHA_ADAPTED** — используем принцип или результат исследования Alpha, но архитектура и поведение адаптированы под CubeGame.
+- **CUBEGAME_NATIVE** — собственная система; Alpha может использоваться только как один из референсов.
 
-## Направление M2 — расширение RPG
+Запрещено продолжать reverse engineering только ради закрытия старого parity backlog, если это не требуется активному этапу CubeGame.
 
-| Этап | Результат | Приёмка и зависимости |
-|---|---|---|
-| S08 — Мир и города | Новые биомы, отличающиеся геймплеем; живые города, торговля, расписания NPC; фракции и территориальные события | Стриминг, симуляция вдали, постоянство изменений, нагрузочные тесты. Список биомов утверждается отдельным контентным ТЗ. |
-| S09 — Квесты и RPG | Сюжетные цепочки-шаблоны, пассивная прокачка, прогресс физических навыков, расширенный бой и классы, артефакты | Цепочки имеют последствия; классовые/боевые системы согласованы; уровни без верхнего лимита, пассивное дерево конечно. |
-| S10 — Живые NPC | Диалоги, характер, память, локальная LLM, текстовый и голосовой ввод, мотивированные решения, затем речь NPC при отдельном решении | Изоляция LLM от изменения состояния, задержки и расход RAM/VRAM, устойчивость к недоступности модели, правдивость сведений. |
+---
 
-## Направление M3 — сеть и выпуск
+## 3. Наследие старого M0
 
-| Этап | Результат | Приёмка и зависимости |
-|---|---|---|
-| S11 — Мультиплеер и серверы | Сетевая авторитетная симуляция, синхронизация, пользовательские серверы, конфигурация, основа расширений | Впервые реализуем после одиночной версии; проверка согласованности мира, боёв, NPC, сохранений и входа/выхода игроков. Аренда хостинга не требуется — локальный тестовый сервер. |
-| S12 — Стабилизация и релиз | Оптимизация, проверка производительности, восстановление после ошибок, выпуск | Чек-листы совместимости, регрессии, резервные копии, сборки, открытые решения по выпуску закрыты продюсером. |
+Старый **M0 ALPHA FULL UNITY PORT** прекращается как продуктовая цель и переводится в статус:
 
-## Особые зависимости
+`LEGACY / RESEARCH BASE / NOT A RELEASE TARGET`.
 
-- Нельзя запускать массовую конвертацию или выпуск сотен новых моделей до успешных пилотов S05A-0/S05A-1 и отдельного решения продюсера.
-- Нельзя изменять генерацию регионов без тестов сохранений и миграций.
-- Нельзя делать LLM единственным источником поведения NPC и правды о мире.
-- Нельзя менять механику Alpha на этапе M0 без отдельной записи отклонения.
-- Появление серверной архитектуры предусмотрено на уровне границ модулей, но не означает, что сеть реализована.
-- Вопросы визуального стиля решаются на S05–S07 по игровым прототипам, не словами на S01.
+Сохраняются:
 
-## Что делаем следующим
+- Unity runtime и модульная архитектура;
+- seed/world generation и streaming;
+- world/environment prototypes;
+- NPC/population/AI исследования;
+- combat, items, loot, equipment и progression prototypes;
+- crafting, trading и NPC services prototypes;
+- save/load и persistence experiments;
+- Windows Player проверки;
+- EditMode/PlayMode тесты;
+- декомпиляция, отчёты, таблицы функций, RNG и state исследования;
+- Character/Creature Factory исследования;
+- модельный, rig/animation и ComfyUI pipelines.
 
-1. Утвердить либо скорректировать предложенную архитектуру (`ARCHITECTURE_PROPOSAL.md`) — это **отдельное** решение продюсера.
-2. На S00-G0 проверить скачанный клиент Alpha в `D:\\Games\\Cube world`; после успеха исследовать реальные системы Alpha, архивы использовать дополнительно. Steam 2019 — опционально.
-3. Подготовить S01 как исполнимое ТЗ для локального агента: проект Unity, тестовый стенд, интерфейсы модулей, шаблоны отчётов.
-4. Заводить каждый этап отдельно и закрывать только с артефактами и тестами.
-## Актуальное исключение D40 (2026-11-02)
+Больше не требуется:
 
-По прямому решению продюсера **S00-R01 (статический анализ Alpha) и S01-PILOT (минимальный Unity vertical slice) разрешены параллельно**, несмотря на незавершённое общее исследование/архитектурный черновик. Это **не** открывает массовую реализацию всех систем или полное утверждение архитектуры. Unity Hub/Editor не установлены; их установка требует отдельного согласия продюсера на ПК, Blender пока не требуется. Источник исполнения: [D40](../decisions/D40-static-first-unity-pilot.md), [ACTIVE_STAGE](../ACTIVE_STAGE.md), [S01-PILOT](../stages/S01_UNITY_PILOT.md).
+- точное Alpha menu/HUD parity;
+- точное Alpha audio/VFX parity;
+- полное восстановление старого save format;
+- полное воспроизведение каждой Alpha-функции;
+- точные Alpha timing/RNG вне выбранных `ALPHA_VERIFIED` механизмов;
+- закрытие всех `UNKNOWN/PARTIAL/PLACEHOLDER_NOT_ALPHA` старого M0.
+
+Старые документы M0 остаются историческими и исследовательскими материалами, но не определяют порядок активной разработки.
+
+---
+
+# 4. Производственная дорожная карта
+
+Разработка организована по стандартной схеме game development:
+
+`PRE-PRODUCTION → CORE PROTOTYPE → VERTICAL SLICE → PRODUCTION → ALPHA → BETA → RELEASE CANDIDATE → RELEASE`.
+
+Каждая стадия обязана завершаться играбельной сборкой и проверкой предыдущего функционала.
+
+---
+
+## G0 — DEVELOPMENT PIVOT / BASELINE FREEZE
+
+**Фаза:** переход от порта к собственной игре.
+
+### Цель
+
+Зафиксировать текущую техническую базу и убрать Alpha parity из активного производственного контура.
+
+### Работы
+
+- заморозить состояние старого M0 как legacy/research baseline;
+- составить reuse map уже реализованных систем;
+- разделить код на `KEEP / REWORK / RESEARCH / RETIRE`;
+- убрать из активных задач обязательное восстановление Alpha UI/audio/VFX/save semantics;
+- сохранить все доказательства reverse engineering;
+- зафиксировать, что GDD и игровые решения не меняются;
+- определить текущую стабильную Unity-базу для дальнейшей разработки.
+
+### PASS
+
+- есть один понятный baseline проекта;
+- известно, какие части M0 используются дальше;
+- активные задачи больше не требуют полного Alpha parity;
+- проект собирается и существующие критические тесты проходят.
+
+---
+
+## G1 — TECHNICAL FOUNDATION
+
+**Фаза:** pre-production / foundation.
+
+### Цель
+
+Превратить уже созданный runtime в устойчивую платформу CubeGame.
+
+### Объём
+
+- bootstrap и game states;
+- input abstraction;
+- data definitions и stable IDs;
+- simulation/update boundaries;
+- world loading;
+- save/load foundation;
+- event/message boundaries;
+- diagnostics/logging;
+- test infrastructure;
+- Windows Player build pipeline;
+- профилирование CPU/RAM/GC;
+- миграции данных и versioning save-схемы.
+
+### Что переиспользуем
+
+M0-F2/F3/F4, существующие gameplay contracts, save/load, тесты и runtime infrastructure — после аудита качества.
+
+### PASS
+
+Новая игра стабильно запускается, создаёт/загружает собственный save, входит в игровой мир и не зависит от старого Alpha content path как обязательного runtime-компонента.
+
+---
+
+## G2 — WORLD FOUNDATION
+
+**Фаза:** pre-production / core technology.
+
+### Цель
+
+Сделать существующую процедурную генерацию собственным генератором CubeGame.
+
+### Объём
+
+- deterministic seed;
+- terrain/height;
+- climate;
+- biome/zone rules;
+- rivers/water bodies;
+- chunk/region streaming;
+- visibility/culling/LOD strategy;
+- world object placement foundation;
+- persistent world modifications;
+- generation debug tools;
+- multi-seed regression tests.
+
+### Принцип
+
+Работающая генерация не переписывается ради отличия от Alpha. То, что уже даёт нужный результат, становится технологией CubeGame. Alpha исследуется только для конкретных отсутствующих правил.
+
+### PASS
+
+Несколько seed воспроизводимы; мир стабильно стримится; изменения игрока сохраняются; генератор допускает будущие новые биомы, структуры и правила без зависимости от Alpha parity.
+
+---
+
+## G3 — CHARACTER & CREATURE FACTORY
+
+**Фаза:** production technology R&D.
+
+**Технический референс:** [M1 — эволюция моделей, ригов и анимаций](../stages/M1_MODEL_ANIMATION_EVOLUTION_STAGE.md).
+
+### Цель
+
+Создать масштабируемый производственный конвейер собственных персонажей и существ.
+
+### Объём
+
+- Character/Creature Factory;
+- modular LEGO body parts;
+- EntityRecipe;
+- anatomy/rig archetypes:
+  - Humanoid;
+  - Quadruped;
+  - Floating;
+  - Avian;
+  - Insect;
+  - Arachnid;
+  - Custom;
+- unified skeleton rules;
+- rigging/weights;
+- animation packages;
+- weapon/equipment attachment;
+- IK/procedural correction layers;
+- character editor integration;
+- ComfyUI reference generation;
+- image → 3D/model pipeline experiments;
+- масштабирование эталонов `1 → 2 → 5 → 10 → 25 → 50 → batch`.
+
+### PASS
+
+Один гуманоидный эталон полностью проходит pipeline: concept/reference → model → modular split → rig → weights → базовые animations → equipment → Unity runtime. После этого pipeline подтверждается на нескольких существах разных archetypes.
+
+---
+
+## G4 — CORE COMBAT
+
+**Фаза:** core gameplay prototype.
+
+### Цель
+
+Построить собственную боевую систему CubeGame на основе выбранных механик и исследований.
+
+### Объём
+
+- authoritative action state;
+- `decision → animation → hit window → hit detection → damage → reaction → recovery`;
+- melee/ranged/magic foundations;
+- weapon families;
+- block/dodge;
+- interruption/stagger/death;
+- projectiles;
+- resource costs;
+- damage/armor/resistance formulas;
+- combat AI hooks;
+- animation event contracts;
+- combat debug visualizers.
+
+### Research
+
+Формулы и поведение Alpha можно извлекать как `ALPHA_VERIFIED` или `ALPHA_ADAPTED`, но старый animation dispatcher и fallback timing не обязаны воспроизводиться.
+
+### PASS
+
+Несколько типов оружия и противников дают устойчивый, тестируемый и приятный боевой цикл в Windows Player; формулы документированы и не зависят от magic numbers без причины.
+
+---
+
+## G5 — NPC & LIVING WORLD FOUNDATION
+
+**Фаза:** core gameplay / simulation.
+
+### Цель
+
+Создать архитектуру живых NPC и существ под требования CubeGame.
+
+### Объём
+
+- spawn/population rules;
+- persistent actor identity;
+- activation/despawn/respawn;
+- state machine / utility/behavior architecture;
+- idle/wander/notice/investigate/chase/attack/return;
+- navigation/pathfinding;
+- home/work/service anchors;
+- schedules;
+- city roles;
+- faction hooks;
+- combat behavior;
+- off-screen simulation policy;
+- save/load NPC state.
+
+### Дальнейшее расширение
+
+- relationships;
+- reputation;
+- travel;
+- social behavior;
+- emergent events;
+- локальная LLM и память NPC — только на соответствующем позднем этапе и не как источник истины мира.
+
+### PASS
+
+NPC живёт в мире независимо от игрока в пределах выбранной simulation policy, корректно реагирует на игрока и события, сохраняет важное состояние и не ломает streaming.
+
+---
+
+## G6 — RPG, ITEMS & ECONOMY FOUNDATION
+
+**Фаза:** core systems.
+
+### Цель
+
+Сформировать собственную математическую и data-driven основу RPG.
+
+### Объём
+
+- character stats;
+- XP/level curve;
+- damage/armor/resistance;
+- item power;
+- rarity;
+- affixes/modifiers;
+- equipment;
+- loot tables;
+- enemy rewards;
+- crafting;
+- merchants;
+- pricing;
+- buy/sell/buyback;
+- services;
+- skill/progression hooks.
+
+### Метод
+
+Для спорной формулы: Alpha research + external research + CubeGame balance goals → собственная versioned specification, например `DAMAGE_FORMULA_V1`, `XP_CURVE_V2`.
+
+### PASS
+
+Полный цикл `kill → reward → loot → equip/sell/craft → progression → save/load` работает без ручных заглушек.
+
+---
+
+## G7 — CORE GAMEPLAY PROTOTYPE
+
+**Фаза:** playable prototype.
+
+### Цель
+
+Впервые собрать основные технологии в одну собственную игру.
+
+### Сквозной сценарий
+
+`create character → spawn near settlement → interact with NPC → receive objective/event → explore → fight → loot → equip → return → service/trade → progression → save → exit → load → continue`.
+
+### Ограничение
+
+Качество графики может быть промежуточным. Главный вопрос — работает ли и интересно ли ядро игры.
+
+### PASS
+
+Сквозной цикл проходится в Windows Player без developer shortcuts и критических state-loss ошибок. Продюсер принимает core loop как основу дальнейшей production-разработки.
+
+---
+
+## G8 — VERTICAL SLICE
+
+**Фаза:** pre-production exit / production proof.
+
+### Цель
+
+Создать небольшой, но почти финального качества кусок CubeGame.
+
+### Минимальный состав
+
+- 1 регион;
+- несколько biome/landscape situations;
+- 1 полноценное поселение/город;
+- основные сервисные NPC;
+- несколько обычных и элитных противников;
+- 1 dungeon;
+- 1 boss;
+- несколько weapon families;
+- рабочая RPG progression;
+- UI/HUD;
+- save/load;
+- sound/VFX;
+- модели и анимации production-quality;
+- визуал, близкий к утверждённому voxel north-star проекта.
+
+### Визуальный ориентир
+
+Яркий, насыщенный, современный voxel-мир с крупными читаемыми формами, богатой растительностью, качественной водой, освещением и атмосферной глубиной; детализированные voxel-персонажи и архитектура. Это целевая стилистика CubeGame, а не задача копирования конкретной чужой игры или изображения.
+
+### PASS
+
+Vertical Slice можно дать человеку без объяснений и получить репрезентативную оценку игры, визуала, боя, мира, NPC и progression.
+
+---
+
+# PRODUCTION
+
+После принятого Vertical Slice начинается масштабирование уже доказанных технологий. Крупные архитектурные эксперименты здесь должны быть исключением.
+
+---
+
+## G9 — WORLD & VISUAL PRODUCTION
+
+**Технический референс:** [S06 — рендер, материалы, окружение и погода](../stages/S06_RENDER_ENVIRONMENT_EVOLUTION_STAGE.md).
+
+### Объём
+
+- production terrain/biomes;
+- forests/vegetation;
+- rocks/world props;
+- structures;
+- caves;
+- roads;
+- settlements;
+- dungeons/landmarks;
+- semantic material/surface system;
+- texture/material production;
+- shader families;
+- lighting/shadows/atmosphere;
+- modern water;
+- wind;
+- weather;
+- реакция мира на погодные условия;
+- foundation под будущую Season System;
+- quality presets и performance budgets.
+
+### PASS
+
+Несколько production-регионов выглядят и работают на уровне принятого Vertical Slice; мир остаётся стабильным при длительном перемещении и streaming.
+
+---
+
+## G10 — CHARACTER, CREATURE & ANIMATION PRODUCTION
+
+### Объём
+
+- массовое производство humanoids/creatures;
+- расы/пол/телосложения;
+- faces/hair/accessories;
+- equipment sets;
+- enemy families;
+- boss models;
+- animation families;
+- weapon-specific animation variants;
+- race/body-type motion variation;
+- procedural/IK corrections;
+- runtime editor integration.
+
+### Правило масштабирования
+
+Не запускать сотни моделей, пока pipeline не доказан на меньшей выборке.
+
+### PASS
+
+Factory производит контент предсказуемого качества с минимальным ручным исправлением и выдерживает установленный throughput.
+
+---
+
+## G11 — CONTENT, QUESTS & WORLD SYSTEMS
+
+### Цель
+
+Заполнить доказанные системы содержанием.
+
+### Объём
+
+- cities/settlements;
+- factions;
+- region identities;
+- dungeons;
+- bosses;
+- camps;
+- encounters;
+- world events;
+- exploration rewards;
+- quest framework;
+- NPC stories;
+- regional progression;
+- faction/reputation consequences;
+- pets и иные утверждённые игровые системы.
+
+### Quest rule
+
+Не строить основной контент на примитивном `collect N / kill N`, если это не оправдано контекстом. Предпочтение — ситуации, выборы, последствия, исследование и взаимодействие с миром.
+
+### PASS
+
+Контент использует общие systems/contracts и не требует уникальных hardcoded костылей для каждого задания или региона.
+
+---
+
+## G12 — UI / UX / AUDIO / VFX PRODUCTION
+
+### Объём
+
+- main menu;
+- character creator;
+- HUD;
+- inventory;
+- character/equipment;
+- skills;
+- crafting;
+- merchants/services;
+- map/minimap;
+- journal/navigation;
+- settings;
+- controller/input UX;
+- combat/world/UI audio;
+- music;
+- VFX;
+- accessibility basics;
+- onboarding/tutorialization.
+
+### PASS
+
+Основные пользовательские сценарии понятны без developer knowledge; UX не зависит от старого Alpha UI; presentation соответствует уровню Vertical Slice.
+
+---
+
+# ALPHA / BETA / RELEASE
+
+## G13 — GAME ALPHA
+
+**Определение:** feature complete.
+
+### Требования
+
+- основные игровые системы присутствуют;
+- игра проходится сквозным способом;
+- world generation, combat, NPC, RPG, content, UI и persistence интегрированы;
+- допускаются bugs, balance issues, placeholder content и performance debt;
+- новые крупные механики после Alpha требуют отдельного решения.
+
+### PASS
+
+Полный end-to-end playthrough возможен; нет отсутствующей фундаментальной системы, без которой невозможно оценить продукт.
+
+---
+
+## G14 — GAME BETA
+
+**Определение:** content complete.
+
+### Фокус
+
+- bug fixing;
+- balance;
+- performance;
+- UX;
+- save corruption/state-loss;
+- edge cases;
+- long-session stability;
+- compatibility;
+- input/controller;
+- loading/memory;
+- regression automation.
+
+### PASS
+
+Контент зафиксирован; blocker/critical defects закрыты по beta criteria; изменения преимущественно исправляют, а не расширяют игру.
+
+---
+
+## G15 — RELEASE CANDIDATE / 1.0
+
+### Финальная проверка
+
+`clean install → launch → create character → world → town → NPC → exploration → combat → loot → dungeon/boss → quests/progression → UI/map → save → exit → load → continue → long session`.
+
+Дополнительно:
+
+- crash/regression tests;
+- performance profiles;
+- save migration;
+- build/release reproducibility;
+- hardware/quality presets;
+- known issues;
+- backup/recovery process.
+
+### PASS
+
+Release Candidate не содержит известных blocker/critical проблем и может стать 1.0 без изменения архитектуры или обязательного контента.
+
+---
+
+# 5. Параллельные производственные направления
+
+Этапы выше — milestones, а не запрет параллельной работы. После G1 несколько дисциплин могут идти одновременно при общей интеграции:
+
+- **Engineering** — runtime, tools, performance, saves.
+- **World** — generation, streaming, environment.
+- **Gameplay** — combat, progression, economy.
+- **AI/Simulation** — NPC, creatures, city life.
+- **Character/Creature Factory** — models, rigs, animations.
+- **Art/Rendering** — materials, lighting, weather, VFX.
+- **Content** — quests, dungeons, encounters, cities.
+- **UI/UX**.
+- **Audio**.
+- **QA/Automation/Playtest**.
+
+Каждый production stream обязан регулярно сходиться в общей playable build. Запрещено месяцами развивать систему изолированно без интеграции с реальной игрой.
+
+---
+
+# 6. Критерий готовности любой системы
+
+Система не считается готовой только потому, что код существует.
+
+Минимальный Definition of Done:
+
+`SPEC/DESIGN → IMPLEMENTED → INTEGRATED → TESTED → WINDOWS PLAYER → SAVE/LOAD WHEN APPLICABLE → PERFORMANCE CHECK WHEN APPLICABLE → PLAYTEST → PRODUCER REVIEW`.
+
+Допустимые статусы:
+
+- `RESEARCH`
+- `PROTOTYPE`
+- `INTEGRATED`
+- `READY_FOR_PRODUCER_REVIEW`
+- `ACCEPTED`
+- `REWORK`
+- `DEFERRED`
+
+Старые M0 статусы `UNKNOWN/PARTIAL/PLACEHOLDER_NOT_ALPHA/CUBEGAME_CONTRACT` сохраняются только в legacy parity-документах и больше не являются глобальными blockers CubeGame.
+
+---
+
+# 7. Ближайший порядок работ
+
+Текущий практический маршрут:
+
+1. **G0** — зафиксировать pivot и reuse map существующего M0.
+2. **G1** — стабилизировать технический foundation на текущем Unity-коде.
+3. **G2** — принять существующую генерацию как CubeGame World Foundation и исследовать только реальные пробелы.
+4. Параллельно открыть **G3 Character/Creature Factory**, поскольку pipeline уже исследуется и нужен Vertical Slice.
+5. Довести **G4 Combat**, **G5 NPC/Living World** и **G6 RPG** до интегрируемых собственных систем.
+6. Собрать **G7 Core Gameplay Prototype**.
+7. После принятия core loop сделать **G8 Vertical Slice**.
+8. Только после Vertical Slice переходить к массовому production G9–G12.
+
+Главная ближайшая продуктовая цель — **не “закрыть старый M0”, а получить первый убедительный Vertical Slice собственной CubeGame**.
