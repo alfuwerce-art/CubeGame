@@ -3,7 +3,7 @@
 **Дата:** 2026-11-17
 **Этап:** G0
 **Ветка:** `deepseek/g0-development-pivot` (опубликована в `origin`)
-**Коммиты G0:** `848ef0d` — pivot документации; `6f0b647` — reuse audit, world audit, G1 ТЗ, этот отчёт
+**Коммиты G0:** `848ef0d` — pivot документации; `6f0b647` — reuse audit, world audit, G1 ТЗ, этот отчёт; далее служебные коммиты с записью SHA. Актуальный tip ветки — в `origin/deepseek/g0-development-pivot`.
 **База:** `origin/integration/m0-all` @ `4e36f1539d787e6a03f85d1f9fc92efcb1b64a79`
 **Исполнитель:** DeepSeek Harness
 
