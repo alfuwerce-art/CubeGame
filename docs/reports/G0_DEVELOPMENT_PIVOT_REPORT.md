@@ -103,7 +103,7 @@ Canonical содержит runtime уровня F1–F3. Работа P0–P7 н
 | `docs/planning/G2_WORLD_FOUNDATION_AUDIT.md` | **создан**: фактический аудит генерации мира |
 | `docs/stages/G1_TECHNICAL_FOUNDATION_STAGE.md` | **создан**: исполнимый план G1 (W0–W11, тесты, DoD, blockers) |
 | `docs/reports/G0_DEVELOPMENT_PIVOT_REPORT.md` | **создан**: этот отчёт |
-| `docs/decisions/D93-development-pivot-own-game.md` | **создан**: запись решения о pivot + `PROPOSED CHANGE_REQUEST` к D01/D14/D20 |
+| `docs/decisions/D93-development-pivot-own-game.md` | **создан**: запись решения о pivot + `PROPOSED CHANGE_REQUEST` к D01/D14/D20 (позже утверждён как [CR-001](../planning/DECISIONS_001-036.md#cr-001--parity-больше-не-является-целью-первой-версии-2026-11-17) в G1-00) |
 | `AGENTS.md` | **переписан раздел текущей цели/метода**: агент больше не получает команду «полный перенос Alpha»; добавлены reading list, research loop, правило «что не является blocker» |
 | `PROJECT_MEMORY.md` | новый раздел §0 «G0 DEVELOPMENT PIVOT»; D92/M0-цель/parity backlog помечены как исторические |
 | `README.md` | устаревший статус эпохи D40 («Unity отсутствует», «S00-G0 не завершён») заменён актуальной картой документов |
@@ -184,7 +184,7 @@ DoD и обязательный Player-сценарий — в ТЗ §8–§10.
 ## 7. RISKS
 
 1. **Выбор базовой линии G1 не сделан продюсером.** Цепь P0–P7 — это +29 тыс. строк уже написанного runtime, но merge в canonical не fast-forward (278 файлов, конфликты в `GameBootstrap`, `AlphaContentSource`, шейдерах). Если G1 начнётся от canonical без решения, часть работы будет сделана повторно.
-2. **Реестр решений формально не согласован с pivot.** D01/D14/D20 формулируют parity как критерий первой версии; D93 фиксирует `PROPOSED CHANGE_REQUEST`. До решения продюсера возможна трактовка «parity всё ещё обязателен» при чтении только `DECISIONS_001-036.md`. Митигация: оговорка в `docs/planning/README.md` §3 + D93.
+2. **Реестр решений формально не согласован с pivot.** D01/D14/D20 формулируют parity как критерий первой версии; D93 фиксирует `PROPOSED CHANGE_REQUEST`. ~~До решения продюсера возможна трактовка «parity всё ещё обязателен» при чтении только `DECISIONS_001-036.md`.~~ **Закрыто в G1-00:** запись [CR-001](../planning/DECISIONS_001-036.md#cr-001--parity-больше-не-является-целью-первой-версии-2026-11-17) утверждена, пометки `superseded: CR-001` стоят в реестре.
 3. **Правовой режим Alpha-производных данных не решён.** В репозитории остаются 14 таблиц `Content/Generated/*.g.cs` (~7 060 строк Alpha-чисел), каталоги имён существ/предметов/звуков; локально — `.cubdec`-модели, 93 WAV, атлас иконок. Это блокер продуктового использования, но не блокер разработки.
 4. **Доказательная база частично невоспроизводима в чистом checkout.** 6 zonе-oracle-тестов требуют `.scratch/m0`; 1 PlayMode — `AlphaOutput/icons`. Это ограничение evidence, а не работоспособности.
 5. **Два scene builder'а пишут один `Assets/Scenes/Pilot.unity`** (`PilotSceneBuilder` и `GameSceneBuilder`), а `tools/unity/run_pilot.ps1` вызывает первый — документированный pilot-пайплайн молча заменяет игровую сцену. Риск потери работы; устраняется в G1 W10.
