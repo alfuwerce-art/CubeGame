@@ -554,6 +554,29 @@ namespace CubeGame.Gameplay.Streaming
             return new Vector3(key.X * WorldLayout.ChunkSize - Origin.x, 0f, key.Z * WorldLayout.ChunkSize - Origin.y);
         }
 
+        /// <summary>
+        /// G2-1: a CubeGame plant that was removed (world delta channel 8) is not drawn again. Legacy Alpha plants carry
+        /// index −1 and are never filtered.
+        /// </summary>
+        private bool RemovedPlantFilter(AlphaPlantPlacement plant)
+        {
+            if (plant.StableIndex < 0 || _world == null) return true;
+            ZoneKey zone = WorldLayout.ZoneOf(plant.X, plant.Z);
+            return !_world.Deltas.IsObjectRemoved(zone, CubeGameContentIds.VegetationChannel, plant.StableIndex);
+        }
+
+        /// <summary>Vegetation objects the CubeGame content stage placed in this zone (0 when none/unknown).</summary>
+        public int CubeGameVegetationOf(ZoneKey zone) =>
+            _terrain != null && _terrain.TryGetGeneratedZone(zone.X, zone.Z, out AlphaZone content)
+                ? content.Vegetation.Count
+                : 0;
+
+        /// <summary>Structures the CubeGame content stage placed in this zone (0 when none/unknown).</summary>
+        public int CubeGameStructuresOf(ZoneKey zone) =>
+            _terrain != null && _terrain.TryGetGeneratedZone(zone.X, zone.Z, out AlphaZone content)
+                ? content.Structures.Count
+                : 0;
+
         private void Install(ChunkVoxels generated, ChunkMesher.Result data)
         {
             var buildTimer = System.Diagnostics.Stopwatch.StartNew();
@@ -594,7 +617,7 @@ namespace CubeGame.Gameplay.Streaming
             // mesh and drops the plants (budget status is visible in the debug overlay and the metrics log).
             if (_budget == null || _budget.VegetationBudget <= 0 || LoadedPlants < _budget.VegetationBudget)
             {
-                vegetation = _vegetation.Build(heights, out plantCount);
+                vegetation = _vegetation.Build(heights, RemovedPlantFilter, out plantCount);
             }
             if (vegetation != null)
             {

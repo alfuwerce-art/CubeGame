@@ -21,13 +21,20 @@ namespace CubeGame.Gameplay.Streaming
             if (!string.IsNullOrEmpty(root)) _directory = Path.Combine(root, AlphaContentSource.EnvironmentFolder);
         }
 
-        internal Mesh Build(ChunkVoxels chunk, out int count)
+        internal Mesh Build(ChunkVoxels chunk, out int count) => Build(chunk, null, out count);
+
+        /// <summary>
+        /// Builds the combined plant mesh of a chunk. <paramref name="filter"/> decides whether a placement still exists
+        /// (G2-1: a CubeGame plant removed through the world delta is not drawn any more). Null = draw everything.
+        /// </summary>
+        internal Mesh Build(ChunkVoxels chunk, System.Func<AlphaPlantPlacement, bool> filter, out int count)
         {
             int x0 = chunk.Key.X * ChunkVoxels.Size;
             int z0 = chunk.Key.Z * ChunkVoxels.Size;
             int vertices = 0;
             foreach (AlphaPlantPlacement plant in chunk.Plants)
             {
+                if (filter != null && !filter(plant)) continue;
                 int x = plant.X - x0;
                 int z = plant.Z - z0;
                 VoxelColumn column = chunk.At(x, z);

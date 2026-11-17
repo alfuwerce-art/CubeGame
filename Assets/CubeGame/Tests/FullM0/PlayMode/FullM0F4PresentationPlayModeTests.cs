@@ -107,6 +107,9 @@ namespace CubeGame.Tests.FullM0.PlayMode
 
             _host = new GameObject("F4 GameBootstrap");
             GameBootstrap game = _host.AddComponent<GameBootstrap>();
+            // G2-1: the F4 loop is the Alpha-content city/gameplay scenario; it runs on the historical content world,
+            // while the running default world is the CubeGame content stage (".../10").
+            game.GeneratorIdOverride = AlphaTerrainGenerator.WorldRuntimeId;
             game.SaveDirectory = Path.Combine(_directory, "saves");
             game.SoundContentRoot = string.IsNullOrEmpty(localCorpus) ? _directory : Directory.GetParent(localCorpus).FullName;
             yield return null;

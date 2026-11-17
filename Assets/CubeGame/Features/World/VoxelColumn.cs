@@ -278,6 +278,39 @@ namespace CubeGame.Features.World
         /// <summary>Index = lx + lz · 256 (Alpha Field layout).</summary>
         public VoxelColumn[] Columns { get; }
 
+        // ---- G2-1: CubeGame-owned content of the zone. The Alpha passes do not fill these; the CubeGame providers do.
+
+        /// <summary>CubeGame vegetation objects of the zone (identity, rule, biome, temporary visual binding).</summary>
+        public List<Foundation.VegetationPlacement> Vegetation { get; } = new List<Foundation.VegetationPlacement>();
+
+        /// <summary>CubeGame structures of the zone (pipeline placements with persistent ids).</summary>
+        public List<Foundation.StructurePlacement> Structures { get; } = new List<Foundation.StructurePlacement>();
+
+        /// <summary>Spawn records of CubeGame structures, anchors and portals (structure channel).</summary>
+        public List<Contracts.SpawnDefinition> StructureSpawns { get; } = new List<Contracts.SpawnDefinition>();
+
+        /// <summary>Reserved settlement of this zone (null when the zone holds none).</summary>
+        public Foundation.SettlementBlueprint Settlement { get; internal set; }
+
+        /// <summary>Dungeon prototype of this zone (null when the zone holds no entrance).</summary>
+        public Foundation.DungeonPrototype Dungeon { get; internal set; }
+
+        /// <summary>Biome resolved for the zone centre by the CubeGame content stage (empty for Alpha-content worlds).</summary>
+        public string BiomeId { get; internal set; } = string.Empty;
+
+        public string VegetationProfileId { get; internal set; } = string.Empty;
+
+        public string VegetationRuleSetId { get; internal set; } = string.Empty;
+
+        /// <summary>Vegetation sites the CubeGame policy considered in this zone (diagnostics).</summary>
+        public int VegetationCandidates { get; internal set; }
+
+        /// <summary>Structure candidates rejected by the pipeline in this zone.</summary>
+        public int StructureRejections { get; internal set; }
+
+        /// <summary>Data problems of the CubeGame structure stage (empty when clean).</summary>
+        public List<string> StructureProblems { get; internal set; } = new List<string>();
+
         /// <summary>Candidates recorded by the terrain passes (cave/river content, giant tree position).</summary>
         public List<ZoneSpawnCandidate> Spawns { get; } = new List<ZoneSpawnCandidate>();
 

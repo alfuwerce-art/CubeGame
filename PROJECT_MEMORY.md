@@ -3,33 +3,40 @@
 **Updated:** 2026-11-17
 **Canonical branch:** `integration/m0-all`
 **Текущее направление:** [D93 — CubeGame как собственная игра](docs/decisions/D93-development-pivot-own-game.md) (2026-11-17)
-**Рабочая карта:** [ROADMAP_DRAFT](docs/planning/ROADMAP_DRAFT.md) · **Текущий этап:** [ACTIVE_STAGE — G2 WORLD FOUNDATION](docs/ACTIVE_STAGE.md)
+**Рабочая карта:** [ROADMAP_DRAFT](docs/planning/ROADMAP_DRAFT.md) · **Текущий этап:** [ACTIVE_STAGE — G2-1 CONTENT BINDING](docs/ACTIVE_STAGE.md)
 
-## 0. G2 — WORLD FOUNDATION (2026-11-17)
+## 0. G2-1 — CONTENT BINDING (2026-11-17)
 
-`READY_FOR_REVIEW` в ветке `claude/g2-world-foundation` (база — принятый G1 baseline `cb76aab`). Мир переиспользован
-как основа: генератор высот/климата/зон/рек/дорог/пещер, streaming с выгрузкой, floating origin, дельты и сейв не
-переписывались. Добавлен собственный слой CubeGame:
+`READY_FOR_REVIEW` в ветке `claude/g2-1-content-binding`, база — принятый G2 `d6f84699c5e127ce3823990ebd137b59cf16d09a`.
+Foundation G2 стал владельцем контента мира, Alpha-ассеты — только `TEMPORARY_VISUAL_PLACEHOLDER`:
 
-- **G2-A** multi-seed gate: 8 seed, 3 golden digest, воспроизводимость зоны между экземплярами генератора.
-- **G2-B** `ClimateAxes` + data-driven `BiomeCatalog` (11 биомов; surface/vegetation/spawn/structure/weather профили).
-- **G2-C** `WorldStreamingBudget`: 1 681 запрошенный чанк против ≈1 398 доступных при 12 582 912 вершинах — наблюдаемое
-  «мягкое переполнение» объяснено и измеряется; бюджет применяется в runtime.
-- **G2-D** `WorldDistanceStrategy` (near/mid/far/offscreen: vegetation, structures, simulation, fog).
-- **G2-E** правила растительности отделены от моделей (временная привязка — Alpha-плейсхолдеры).
-- **G2-F** конвейер структур: candidate → validation → placement → persistent id → состояние → удаление через `.world`.
-- **G2-G** city/dungeon seams: settlement site (NPC-якоря, дорожные stub'ы) и dungeon entrance (instance id).
-- **G2-H** debug overlay (F9 / `-cubeDebugOverlay`) + engine-free snapshot.
-- **G2-I** performance recorder + `-cubeWorldMetrics <path>` (JSON, фиксированный порядок ключей).
-- **G2-J** версия профиля генерации + `generationFingerprint` в `.world`; смена профиля даёт явный отказ.
-- **G3 seam** `EntityDefinition`/`EntityVisualRecipe`/registry — мир не знает о фабрике моделей.
+- **G2-1A** `CubeGameVegetationProvider`: biome → vegetation profile → `VegetationPolicy` (склон, вода, влажность,
+  spacing, clustering, density) → растения с persistent id `veg:<seed>:<zone>:<index>:<rule>`; детерминизм,
+  независимость от render distance, удаление через дельту канала 8 и фильтр меша чанка.
+- **G2-1B** `CubeGameStructureProvider`: `StructurePlacementPipeline` → прототипы (camp/ruin/tower/cave/landmark) →
+  spawn-записи канала 7 → `structure:<seed>:<zone>:<rule>:<slot>`; удаление = `ObjectRemoved`, состояние
+  `generated/destroyed`.
+- **Прототипы**: settlement (4 building slots, дорожный stub, 9 NPC/сервисных якорей, persistent id),
+  dungeon (детерминированный вход, тестовая комната 11×11×5, возврат в ту же точку), generic landmark.
+- **G2-1C** `CubeGameEntityCatalog`: 5 CubeGame-native определений (hero/npc/hostile/creature/merchant);
+  `CubeGameVisualBindings` — временная привязка к Alpha-видам; runtime резолвит `EntityVisualRecipe`.
+- **Runtime**: `CubeGameContentRuntime`, `CubeGameStructurePopulation`, overlay-строки контента, Player smoke
+  `-cubeSmokeContent fresh|verify` (vegetation → settlement → dungeon → destroy → save → reload → verify).
+- **Версия мира**: `cubegame.alpha_terrain/10` (CubeGame content stage); `/9` не загружается намеренно.
+- Проверки: EditMode 904/898/0/6 (+11 G2-1 тестов), PlayMode (см. отчёт), Windows Player собран, content smoke
+  fresh/verify PASS. Производительность на том же сценарии: mean frame 30.6 → 9.1 мс, вершины 12.59 M → 8.47 M,
+  зона 1176 → 713 мс; растений меньше (профили биомов), NPC 93.
+- Документы: [этап](docs/stages/G2_1_CONTENT_BINDING_STAGE.md) · [отчёт](docs/reports/G2_1_CONTENT_BINDING_REPORT.md).
 
-Проверки: `error CS = 0`; G2 EditMode 34 PASS; полный EditMode 893 total / 879 passed / 1 известный content-presence
-fail без Alpha-кэша / 11 skipped; PlayMode и Windows Player — см. отчёт. Документы:
-[этап](docs/stages/G2_WORLD_FOUNDATION_STAGE.md) · [отчёт](docs/reports/G2_WORLD_FOUNDATION_REPORT.md) ·
-[архитектура](docs/architecture/WORLD_GENERATION_ARCHITECTURE.md) · [тест-матрица](docs/planning/G2_WORLD_TEST_MATRIX.md).
+## 0a. G2 — WORLD FOUNDATION (2026-11-17, ACCEPTED)
 
-## 0. G1-00 — RUNTIME BASELINE (2026-11-17)
+`ACCEPTED` продюсером. Ветка `claude/g2-world-foundation`, commit `d6f84699c5e127ce3823990ebd137b59cf16d09a`.
+Мир переиспользован как основа; добавлены `ClimateAxes`/`BiomeCatalog`, `WorldStreamingBudget`, `WorldDistanceStrategy`,
+`VegetationRuleSet`, `StructurePlacementPipeline`, settlement/dungeon seams, debug overlay, метрики, generation identity
+(`generationFingerprint` в `.world`), G3 entity seam. EditMode 893/887/0/6, PlayMode 76/76, Player smoke new/load PASS.
+Документы: [этап](docs/stages/G2_WORLD_FOUNDATION_STAGE.md) · [отчёт](docs/reports/G2_WORLD_FOUNDATION_REPORT.md).
+
+## 0b. G1-00 — RUNTIME BASELINE (2026-11-17)
 
 Baseline для дальнейшей разработки — **OPTION C**: полный runtime цепи P0–P7 становится основой CubeGame.
 

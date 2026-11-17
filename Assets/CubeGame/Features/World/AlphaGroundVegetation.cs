@@ -17,8 +17,14 @@ namespace CubeGame.Features.World
         public readonly int X, Y, Z, SurfaceMaterial, AboveMaterial;
         public readonly float HeightOffset, Yaw, Scale;
 
+        /// <summary>
+        /// G2-1: index of a CubeGame-owned plant inside its zone (-1 for the legacy Alpha pass). The index is the
+        /// removal key of the plant in the world delta channel, so a removed plant never returns after regeneration.
+        /// </summary>
+        public readonly int StableIndex;
+
         internal AlphaPlantPlacement(AlphaVegetationModel model, int x, int y, int z, int surface, int above,
-            float heightOffset, float yaw, float scale)
+            float heightOffset, float yaw, float scale, int stableIndex = -1)
         {
             Model = model;
             X = x;
@@ -29,6 +35,7 @@ namespace CubeGame.Features.World
             HeightOffset = heightOffset;
             Yaw = yaw;
             Scale = scale;
+            StableIndex = stableIndex;
         }
     }
 

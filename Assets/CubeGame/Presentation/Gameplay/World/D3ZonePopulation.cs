@@ -5,6 +5,7 @@ using CubeGame.Content;
 using CubeGame.Features.Contracts;
 using CubeGame.Features.Creatures;
 using CubeGame.Features.World;
+using CubeGame.Features.World.Foundation;
 
 namespace CubeGame.Gameplay.Streaming
 {
@@ -26,6 +27,18 @@ namespace CubeGame.Gameplay.Streaming
             if (!Supports(id))
             {
                 return WorldState.TryCreateGenerator(id, seed, out generator);
+            }
+
+            // G2-1: the CubeGame content world owns vegetation and structures itself; the Alpha content providers are
+            // not part of it (their spawns are served by CubeGameStructurePopulation on its own channel).
+            if (AlphaTerrainGenerator.UsesCubeGameContent(id))
+            {
+                var cubeProviders = new IZoneContentProvider[]
+                {
+                    new CubeGameVegetationProvider(),
+                    new CubeGameStructureProvider(),
+                };
+                return WorldState.TryCreateGenerator(id, seed, out generator, cubeProviders);
             }
 
             var settings = new ContentPlanSettings
@@ -61,7 +74,6 @@ namespace CubeGame.Gameplay.Streaming
 
         public static bool Supports(string id) => id == AlphaTerrainGenerator.ContentId ||
             id == AlphaTerrainGenerator.PreviousWorldRuntimeId || AlphaTerrainGenerator.UsesP2Environment(id);
-
         public static bool IsStaticContent(string behaviourKey) => behaviourKey == AlphaZoneContentProvider.PassiveBehaviourKey
             || behaviourKey == AlphaCityContentProvider.ServiceBehaviourKey
             || behaviourKey == AlphaDungeonContentProvider.ChestBehaviourKey;

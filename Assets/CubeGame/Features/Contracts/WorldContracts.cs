@@ -59,6 +59,18 @@ namespace CubeGame.Features.Contracts
 
         /// <summary>Evidence status of this record, e.g. EMULATED_ALPHA_CODE, PLACEHOLDER_NOT_ALPHA.</summary>
         public string Provenance { get; set; } = string.Empty;
+
+        /// <summary>
+        /// G2-1: CubeGame entity definition this spawn realises (<see cref="CubeGameEntityCatalog"/> id), or empty for
+        /// content that the old Alpha path produces. The world never needs to know which pipeline draws it.
+        /// </summary>
+        public string EntityDefinitionId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// G2-1: persistent id of the world object behind this spawn (structure, anchor, portal, vegetation object).
+        /// Empty for legacy Alpha content. Saves and the debug overlay use it; it is not a second identity space.
+        /// </summary>
+        public string PersistentObjectId { get; set; } = string.Empty;
     }
 
     /// <summary>

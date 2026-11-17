@@ -13,6 +13,7 @@ using CubeGame.Features.Creatures;
 using CubeGame.Features.Persistence;
 using CubeGame.Features.Session;
 using CubeGame.Features.World;
+using CubeGame.Features.World.Foundation;
 using CubeGame.Gameplay.Streaming;
 using CubeGame.Persistence;
 using CubeGame.Presentation.CameraRig;
@@ -38,10 +39,21 @@ namespace CubeGame.Gameplay
     public sealed partial class GameBootstrap : MonoBehaviour
     {
         /// <summary>
-        /// World generator in use (M0-02): Alpha terrain reconstruction, see <see cref="AlphaTerrainGenerator"/>.
-        /// Saves record the id; a save made by another generator (e.g. the M0-01 pilot height field) is refused.
+        /// World generator in use: Alpha terrain reconstruction with the CubeGame content stage (G2-1). Saves record the
+        /// id; a world made by another generator (for example the Alpha-content world ".../9") is refused, never
+        /// silently regenerated with another content stage.
         /// </summary>
-        public const string GeneratorId = AlphaTerrainGenerator.WorldRuntimeId;
+        public const string GeneratorId = AlphaTerrainGenerator.CubeGameContentRuntimeId;
+
+        /// <summary>
+        /// Automation only: build the next world with a named historical generator (for example the Alpha-content world
+        /// ".../9"), so legacy content tests can still cover the old stage. The running default stays
+        /// <see cref="GeneratorId"/>.
+        /// </summary>
+        public string GeneratorIdOverride { get; set; }
+
+        public string EffectiveGeneratorId =>
+            string.IsNullOrEmpty(GeneratorIdOverride) ? GeneratorId : GeneratorIdOverride;
 
         public const uint DefaultSeed = 666666u;
 
@@ -310,13 +322,18 @@ namespace CubeGame.Gameplay
 
         // ----- Public game API (UI, automation, PlayMode tests) -----
 
-        public bool StartNewWorld(string slotKey, string worldName, uint seed, string heroName, CharacterClass heroClass, HeroAppearance? appearance = null)
+        /// <param name="generatorId">
+        /// Automation only: build the world with a named historical generator (for example the Alpha-content world
+        /// ".../9"), so the legacy content tests keep covering the old stage. Null = the running CubeGame generator.
+        /// </param>
+        public bool StartNewWorld(string slotKey, string worldName, uint seed, string heroName,
+            CharacterClass heroClass, HeroAppearance? appearance = null, string generatorId = null)
         {
             var request = new NewWorldRequest
             {
                 WorldName = worldName,
                 Seed = seed,
-                GeneratorId = GeneratorId,
+                GeneratorId = string.IsNullOrEmpty(generatorId) ? EffectiveGeneratorId : generatorId,
                 HeroName = heroName,
                 Class = heroClass,
                 Specialization = CharacterSpecialization.Primary,
@@ -819,25 +836,36 @@ namespace CubeGame.Gameplay
             if (_worldState.Generator is AlphaTerrainGenerator terrain && D3ZonePopulation.Supports(terrain.GeneratorId))
             {
                 _population.AddSource(new D3ZonePopulation(terrain, _worldState.Deltas), D3ZonePopulation.Channel);
+                // Missions are gameplay (region pass on this terrain), not Alpha content: they stay on both worlds.
                 AttachMissions(terrain);
-                if (AlphaTerrainGenerator.UsesP2Environment(terrain.GeneratorId))
+                if (AlphaTerrainGenerator.UsesCubeGameContent(terrain.GeneratorId))
                 {
-                    _population.AddSource(new TownNpcPopulation(terrain), TownNpcPopulation.Channel);
-                    var candidates = AlphaCreatureKindSelector.FromClimate(
-                        (x, z) => new AlphaClimateSample(terrain.Humidity(x, z), terrain.Temperature(x, z),
-                            terrain.RareCellTerm(x, z), terrain.Mountain(x, z)),
-                        (x, z) => FirstNonSolid(terrain.Voxels(x, z)));
-                    var source = AlphaTerrainGenerator.UsesRecoveredPopulation(terrain.GeneratorId)
-                        ? new AlphaRecoveredPopulation(terrain)
-                        : AlphaRecoveredPopulation.WithKindSelector(_session.World.Seed, candidates,
-                            (zone, lx, lz) => GroundAt(zone.X * (double)WorldLayout.ZoneSize + lx, zone.Z * (double)WorldLayout.ZoneSize + lz));
-                    _recoveredPopulation = new AlphaSpawnRuntime();
-                    _recoveredPopulation.AddSource(source);
-                    RecoveredSpawnPersistence.Restore(_worldState.Deltas, _recoveredPopulation);
-                    _recoveredPopulation.Created += OnRecoveredSpawned;
-                    _recoveredPopulation.Despawned += OnRecoveredDespawned;
-                    _populationClock = _session.Clock;
-                    _populationClock.Ticked += TickRecoveredPopulation;
+                    // G2-1: CubeGame content own its population channel (structures, settlement anchors, portals and
+                    // the creatures the biome spawn profile asked for).
+                    _structurePopulation ??= new CubeGameStructurePopulation(terrain, _worldState.Deltas);
+                    _population.AddSource(_structurePopulation, CubeGameStructurePopulation.Channel);
+                }
+                else
+                {
+                    if (AlphaTerrainGenerator.UsesP2Environment(terrain.GeneratorId))
+                    {
+                        _population.AddSource(new TownNpcPopulation(terrain), TownNpcPopulation.Channel);
+                        var candidates = AlphaCreatureKindSelector.FromClimate(
+                            (x, z) => new AlphaClimateSample(terrain.Humidity(x, z), terrain.Temperature(x, z),
+                                terrain.RareCellTerm(x, z), terrain.Mountain(x, z)),
+                            (x, z) => FirstNonSolid(terrain.Voxels(x, z)));
+                        var source = AlphaTerrainGenerator.UsesRecoveredPopulation(terrain.GeneratorId)
+                            ? new AlphaRecoveredPopulation(terrain)
+                            : AlphaRecoveredPopulation.WithKindSelector(_session.World.Seed, candidates,
+                                (zone, lx, lz) => GroundAt(zone.X * (double)WorldLayout.ZoneSize + lx, zone.Z * (double)WorldLayout.ZoneSize + lz));
+                        _recoveredPopulation = new AlphaSpawnRuntime();
+                        _recoveredPopulation.AddSource(source);
+                        RecoveredSpawnPersistence.Restore(_worldState.Deltas, _recoveredPopulation);
+                        _recoveredPopulation.Created += OnRecoveredSpawned;
+                        _recoveredPopulation.Despawned += OnRecoveredDespawned;
+                        _populationClock = _session.Clock;
+                        _populationClock.Ticked += TickRecoveredPopulation;
+                    }
                 }
             }
             _population.Spawned += OnSpawnAppeared;
@@ -953,6 +981,15 @@ namespace CubeGame.Gameplay
 
         private void SpawnWorldEntity(StableEntityId id, SpawnDefinition def)
         {
+            EntityDefinition cubeDefinition = null;
+            bool hasContentDefinition = !string.IsNullOrEmpty(def.EntityDefinitionId) && _entityDefinitions != null &&
+                                        _entityDefinitions.TryGet(def.EntityDefinitionId, out cubeDefinition);
+            if (hasContentDefinition && _loggedContentDefinitions.Add(def.EntityDefinitionId))
+            {
+                Debug.Log($"[Content] spawn {def.EntityDefinitionId} recipe={cubeDefinition.Visual?.Id ?? "(none)"} " +
+                          $"object={def.PersistentObjectId} placeholderKind=0x{def.Kind.Value:x2}");
+            }
+
             if (D3ZonePopulation.IsStaticContent(def.BehaviourKey))
             {
                 PublishSpawnVisual(id, def);
@@ -963,6 +1000,14 @@ namespace CubeGame.Gameplay
                 def.BehaviourKey == TownNpcPopulation.BehaviourKey ||
                 def.BehaviourKey == AlphaMissionBossPopulation.BehaviourKey ||
                 D3ZonePopulation.IsDungeonCreature(def.BehaviourKey);
+
+            // G2-1: a CubeGame content spawn carries an entity definition; the definition decides whether it is an
+            // actor, not the legacy behaviour-key list. Visuals still come from the temporary placeholder binding.
+            if (!actor && hasContentDefinition)
+            {
+                actor = cubeDefinition.Disposition != 2;
+            }
+
             if (!actor || def.Faction == (int)CreatureFaction.Passive || _session.Combat == null)
             {
                 return;
@@ -1649,6 +1694,9 @@ namespace CubeGame.Gameplay
                             _smokeSeconds = smokeSeconds;
                         }
 
+                        break;
+                    case "-cubeSmokeContent":
+                        _contentSmokeMode = value;
                         break;
                 }
             }

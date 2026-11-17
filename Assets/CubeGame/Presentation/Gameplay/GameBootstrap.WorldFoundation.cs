@@ -29,6 +29,8 @@ namespace CubeGame.Gameplay
         private WorldStructureProbe _worldStructureProbe;
         private StructureRuleSet _worldStructureRules;
         private EntityDefinitionRegistry _entityDefinitions;
+        private CubeGameContentRuntime _contentRuntime;
+        private CubeGameStructurePopulation _structurePopulation;
         private WorldDebugOverlay _worldDebugOverlay;
         private WorldMetricsProbe _worldMetricsProbe;
         private string _worldMetricsPath = string.Empty;
@@ -45,6 +47,9 @@ namespace CubeGame.Gameplay
         private int _debugZoneZ = int.MinValue;
         private List<StructurePlacement> _debugStructures = new List<StructurePlacement>();
         private readonly List<StructureRejection> _debugRejections = new List<StructureRejection>();
+
+        /// <summary>Content definitions already logged, so a long session does not repeat the same line.</summary>
+        private readonly HashSet<string> _loggedContentDefinitions = new HashSet<string>(StringComparer.Ordinal);
 
         /// <summary>CubeGame biome table of the current session (null before a world is entered).</summary>
         public BiomeCatalog WorldBiomes => _worldBiomes;
@@ -63,7 +68,7 @@ namespace CubeGame.Gameplay
 
         public WorldMetricsProbe MetricsProbe => _worldMetricsProbe;
 
-        /// <summary>Entity definition seam for G3 (empty until the factory supplies definitions).</summary>
+        /// <summary>Entity definition registry of the session (G2-1: filled with the CubeGame catalogue).</summary>
         public EntityDefinitionRegistry EntityDefinitions
         {
             get
@@ -76,6 +81,9 @@ namespace CubeGame.Gameplay
                 return _entityDefinitions;
             }
         }
+
+        /// <summary>Runtime binding of the CubeGame content (structures, vegetation removal, dungeon session).</summary>
+        public CubeGameContentRuntime ContentRuntime => _contentRuntime;
 
         /// <summary>Structural problems of the foundation (computed once per session).</summary>
         public IReadOnlyList<string> WorldFoundationProblems => _foundationProblems;
@@ -113,12 +121,24 @@ namespace CubeGame.Gameplay
                 _worldClimateSource = _worldClimate;
                 _worldStructureProbe = new WorldStructureProbe(_worldClimate,
                     (x, z) => _worldState != null ? _worldState.SurfaceAt(x, z) : int.MinValue, _worldBiomes);
+
+                // G2-1: the CubeGame entity catalogue is the identity source of the session; the content runtime
+                // derives structure/vegetation/dungeon state from the zone content and the world delta.
+                _entityDefinitions = CubeGameEntityCatalog.CreateRegistry(_foundationProblems);
+                List<string> visualProblems = CubeGameVisualBindings.Validate();
+                _foundationProblems.AddRange(visualProblems);
+                _contentRuntime = new CubeGameContentRuntime(terrain, _session.WorldDeltas, _entityDefinitions);
+                _structurePopulation = new CubeGameStructurePopulation(terrain, _session.WorldDeltas);
+                Debug.Log($"[World] content: cubeGame={_contentRuntime.IsCubeGameWorld} " +
+                          $"entities={_entityDefinitions.Count} bindings={CubeGameVisualBindings.Status}");
             }
             else
             {
                 _worldClimate = null;
                 _worldClimateSource = null;
                 _worldStructureProbe = null;
+                _contentRuntime = null;
+                _structurePopulation = null;
             }
 
             if (_worldView != null)
@@ -164,6 +184,8 @@ namespace CubeGame.Gameplay
             _worldClimate = null;
             _worldClimateSource = null;
             _worldStructureProbe = null;
+            _contentRuntime = null;
+            _structurePopulation = null;
             _worldBudget = null;
             _worldDistance = null;
             _debugSampleX = int.MinValue;
@@ -235,6 +257,7 @@ namespace CubeGame.Gameplay
                 StructureCandidates = _debugStructures,
                 NearbySpawns = NearbySpawnLines(voxelX, voxelZ),
                 Problems = _foundationProblems,
+                ContentLines = _contentRuntime?.DebugLines(worldX, worldZ),
             });
         }
 

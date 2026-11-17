@@ -48,6 +48,9 @@ namespace CubeGame.Features.World.Foundation
         public IReadOnlyList<StructurePlacement> StructureCandidates;
         public IReadOnlyList<string> NearbySpawns;
         public IReadOnlyList<string> Problems;
+
+        /// <summary>G2-1: CubeGame content facts (biome of the zone, vegetation policy, structures, settlement, dungeon).</summary>
+        public IReadOnlyList<string> ContentLines;
     }
 
     /// <summary>Text lines of the debug view plus the fields tests assert on.</summary>
@@ -247,6 +250,11 @@ namespace CubeGame.Features.World.Foundation
             else
             {
                 lines.Add("spawns nearby: none");
+            }
+
+            if (request.ContentLines != null && request.ContentLines.Count > 0)
+            {
+                lines.AddRange(request.ContentLines);
             }
 
             if (request.Problems != null && request.Problems.Count > 0)

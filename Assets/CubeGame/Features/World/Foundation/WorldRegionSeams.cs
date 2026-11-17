@@ -327,14 +327,23 @@ namespace CubeGame.Features.World.Foundation
             };
         }
 
-        /// <summary>One dungeon block owns exactly one entrance zone; this answers whether (zoneX, zoneZ) is it.</summary>
-        public static bool IsEntranceZone(int zoneX, int zoneZ, int worldSeed, int blockX, int blockZ)
+        /// <summary>
+        /// Zone of the entrance of a dungeon block (one place per <see cref="RegionsPerBlock"/>² region block).
+        /// Pure integer math: the runtime can locate an entrance without generating any zone.
+        /// </summary>
+        public static void EntranceZone(int worldSeed, int blockX, int blockZ, out int zoneX, out int zoneZ)
         {
             int span = RegionsPerBlock * WorldLayout.ZonesPerRegion;
             uint hashX = DeterministicHash.Combine(worldSeed, blockX, blockZ, 0xD067, 1);
             uint hashZ = DeterministicHash.Combine(worldSeed, blockX, blockZ, 0xD068, 2);
-            int slotX = blockX * span + (int)(hashX % (uint)span);
-            int slotZ = blockZ * span + (int)(hashZ % (uint)span);
+            zoneX = blockX * span + (int)(hashX % (uint)span);
+            zoneZ = blockZ * span + (int)(hashZ % (uint)span);
+        }
+
+        /// <summary>One dungeon block owns exactly one entrance zone; this answers whether (zoneX, zoneZ) is it.</summary>
+        public static bool IsEntranceZone(int zoneX, int zoneZ, int worldSeed, int blockX, int blockZ)
+        {
+            EntranceZone(worldSeed, blockX, blockZ, out int slotX, out int slotZ);
             return zoneX == slotX && zoneZ == slotZ;
         }
     }

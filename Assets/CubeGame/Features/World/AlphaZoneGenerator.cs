@@ -90,14 +90,17 @@ namespace CubeGame.Features.World
                     provider.Populate(context);
                 }
 
+                // G2-1: a CubeGame content world takes its vegetation from the CubeGame providers, not from the
+                // ported Alpha tree/ground scan. The Alpha passes stay for legacy world ids.
+                bool cubeGameContent = AlphaTerrainGenerator.UsesCubeGameContent(terrain.GeneratorId);
                 if (AlphaTerrainGenerator.UsesP2Environment(terrain.GeneratorId))
                 {
                     AlphaZoneFeatures.PlaceRiverStones(context, colors);
-                    AlphaZoneTrees.Populate(context);
+                    if (!cubeGameContent) AlphaZoneTrees.Populate(context);
                     zone.PopulationRandomState = rng.State;
                 }
-                if (AlphaTerrainGenerator.UsesP2Environment(terrain.GeneratorId) ||
-                    terrain.GeneratorId == AlphaTerrainGenerator.PreviousWorldRuntimeId)
+                if (!cubeGameContent && (AlphaTerrainGenerator.UsesP2Environment(terrain.GeneratorId) ||
+                    terrain.GeneratorId == AlphaTerrainGenerator.PreviousWorldRuntimeId))
                     AlphaGroundVegetation.Populate(context);
             }
 

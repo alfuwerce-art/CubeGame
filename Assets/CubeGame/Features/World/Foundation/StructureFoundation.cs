@@ -250,6 +250,12 @@ namespace CubeGame.Features.World.Foundation
         public string BiomeId = string.Empty;
         public string State = StructureRuntimeState.Generated;
 
+        /// <summary>
+        /// Index of this structure inside the zone's spawn channel (assigned by the content provider). It is the
+        /// removal key of the structure: <c>WorldDeltaKind.ObjectRemoved</c> on <c>StructureChannel</c>.
+        /// </summary>
+        public int SpawnIndex = -1;
+
         public override string ToString() =>
             $"{Kind} {PersistentId} at ({X},{SurfaceY},{Z}) {Width}x{Depth}x{Height} rot={Rotation} {State}";
     }

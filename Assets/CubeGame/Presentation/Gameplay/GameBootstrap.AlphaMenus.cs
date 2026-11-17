@@ -424,7 +424,7 @@ namespace CubeGame.Gameplay
             {
                 WorldName = string.Empty,
                 Seed = 0,
-                GeneratorId = GeneratorId,
+                GeneratorId = EffectiveGeneratorId,
                 HeroName = name,
                 Class = CharacterClasses.FromId(_formClass),
                 Specialization = CharacterSpecialization.Primary,
@@ -542,7 +542,7 @@ namespace CubeGame.Gameplay
                 {
                     Name = name,
                     Seed = seed,
-                    GeneratorId = GeneratorId,
+                    GeneratorId = EffectiveGeneratorId,
                     CreatedUtcTicks = now,
                     SavedUtcTicks = now,
                 };

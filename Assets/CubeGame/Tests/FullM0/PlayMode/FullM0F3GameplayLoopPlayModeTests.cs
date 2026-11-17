@@ -44,7 +44,8 @@ namespace CubeGame.Tests.FullM0.PlayMode
             GameBootstrap game = _host.AddComponent<GameBootstrap>();
             game.SaveDirectory = _saveDirectory;
             yield return null;
-            Assert.IsTrue(game.StartNewWorld("slot0", "F3 world", 666666u, "Brena", CharacterClass.Warrior), game.Status);
+            Assert.IsTrue(game.StartNewWorld("slot0", "F3 world", 666666u, "Brena", CharacterClass.Warrior,
+                null, AlphaTerrainGenerator.WorldRuntimeId), game.Status);
             game.TeleportHero(8397145, 8396899);
             yield return null;
             game.Session.Clock.StepTicks(2);

@@ -78,7 +78,7 @@ namespace CubeGame.Tests.FullM0.PlayMode
             yield return null;
 
             Assert.IsTrue(game.StartNewWorld("slot0", "Stream", 20131234u, "Walker", CharacterClass.Ranger), game.Status);
-            Assert.AreEqual(AlphaTerrainGenerator.WorldRuntimeId, game.Session.World.GeneratorId);
+            Assert.AreEqual(GameBootstrap.GeneratorId, game.Session.World.GeneratorId);
             WorldPosition expectedStart = WorldState.StartPosition(game.WorldState.Generator, game.WorldState.Deltas);
             Assert.AreEqual(expectedStart.X, game.Session.Hero.Position.X, 1e-6);
             int sx = (int)game.Session.Hero.Position.X;
@@ -148,7 +148,8 @@ namespace CubeGame.Tests.FullM0.PlayMode
         {
             GameBootstrap game = NewGame();
             yield return null;
-            Assert.IsTrue(game.StartNewWorld("slot0", "Vegetation", 666666u, "Walker", CharacterClass.Ranger), game.Status);
+            Assert.IsTrue(game.StartNewWorld("slot0", "Vegetation", 666666u, "Walker", CharacterClass.Ranger,
+                null, AlphaTerrainGenerator.WorldRuntimeId), game.Status);
             StreamingWorldView view = game.WorldView;
             ChunkKey center = view.Center;
             AlphaPlantPlacement plant = default;
@@ -255,7 +256,8 @@ namespace CubeGame.Tests.FullM0.PlayMode
         {
             GameBootstrap game = NewGame();
             yield return null;
-            Assert.IsTrue(game.StartNewWorld("slot0", "World content", 666666u, "Walker", CharacterClass.Ranger), game.Status);
+            Assert.IsTrue(game.StartNewWorld("slot0", "World content", 666666u, "Walker", CharacterClass.Ranger,
+                null, AlphaTerrainGenerator.WorldRuntimeId), game.Status);
             var terrain = (AlphaTerrainGenerator)game.WorldState.Generator;
             // P7-B: the Alpha dungeon 0x5CC510 draws first on the zone stream; the contract dungeon is gone from /9
             CollectionAssert.AreEqual(new[] { AlphaDungeonZoneProvider.ProviderKey, AlphaZoneContentProvider.ProviderKey,
@@ -369,7 +371,8 @@ namespace CubeGame.Tests.FullM0.PlayMode
         {
             GameBootstrap game = NewGame();
             yield return null;
-            Assert.IsTrue(game.StartNewWorld("slot0", "Recovered population", 666666u, "Walker", CharacterClass.Warrior), game.Status);
+            Assert.IsTrue(game.StartNewWorld("slot0", "Recovered population", 666666u, "Walker",
+                CharacterClass.Warrior, null, AlphaTerrainGenerator.WorldRuntimeId), game.Status);
             game.TeleportHero(8397145, 8396899);
             yield return Frames(2);
             game.Session.Clock.StepTicks(2);

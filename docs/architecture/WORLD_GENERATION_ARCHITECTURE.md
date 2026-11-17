@@ -217,7 +217,6 @@ render distance и измеряется (`WorldBudgetMeasurement`/`WorldBudgetEv
 ---
 
 ## 9. Известные ограничения (не блокируют G2)
-
 1. Две координатные системы (`WorldLayout` и `AlphaWorldScale`) остаются — G1 debt.
 2. `PilotHeightField` (старый pilot-мир) остаётся в Core как legacy, не используется генератором.
 3. Alpha-таблицы `Content/Generated/*.g.cs` и `.cubdec`-модели остаются `TEMPORARY_RUNTIME`.
@@ -225,3 +224,62 @@ render distance и измеряется (`WorldBudgetMeasurement`/`WorldBudgetEv
 5. Города/данжи — seams; их содержимое — G5/G11.
 6. Вода — уровень `0` (гипотеза), визуал — placeholder; G9.
 7. Полные зонные oracle-дампы требуют локального `.scratch/m0` (в чистом checkout эти тесты skip).
+
+---
+
+## 10. G2-1: CONTENT BINDING (CubeGame owns placement)
+
+From G2-1 the world content has a CubeGame owner. The generator id records which content stage produced a world:
+
+| id | content stage |
+|---|---|
+| `cubegame.alpha_terrain/9` | historical (G2 and older): Alpha trees, ground vegetation, houses, Alpha dungeons |
+| `cubegame.alpha_terrain/10` | **current**: same terrain/features, content from `CubeGameVegetationProvider` + `CubeGameStructureProvider` |
+
+### 10.1 Pipeline of a zone (`/10`)
+
+```
+terrain passes (unchanged: surface, caves, lakes, carved rock, rivers, roads)
+        |
+        +--> CubeGameVegetationProvider
+        |       biome (BiomeCatalog) -> vegetation profile -> rule set -> VegetationPolicy
+        |       candidates on a 3-voxel grid (7 225/zone), height/slope/water (zone heightfield + BFS),
+        |       moisture/temperature (column), spacing/cluster/density (integer hash)
+        |       -> AlphaPlantPlacement (StableIndex) + VegetationPlacement (persistent id)
+        |
+        +--> CubeGameStructureProvider
+                StructurePlacementPipeline (camp/ruin/tower/cave/landmark)
+                SettlementSeamPlanner -> SettlementBlueprint (4 slots, road stub, 9 anchors)
+                DungeonSeamPlanner -> DungeonPrototype (entrance + carved 11x11x5 room)
+                -> prototype voxels + StructurePlacement + SpawnDefinition (channel 7)
+```
+
+### 10.2 Identity and state
+
+| object | persistent id | removal key |
+|---|---|---|
+| vegetation | `veg:<seed>:<zoneX>:<zoneZ>:<site>:<rule>` | `ObjectRemoved`, channel 8, `StableIndex` |
+| structure | `structure:<seed>:<zoneX>:<zoneZ>:<rule>:<slot>` | `ObjectRemoved`, channel 7, `SpawnIndex` |
+| settlement | `seam.settlement:<seed>:<regionX>:<regionZ>` | channel 7, marker spawn index |
+| anchor | `seam.anchor:<seed>:<regionX>:<regionZ>:<kind>:<index>` | channel 7, anchor spawn index |
+| dungeon portal | `portal:<seed>:<zoneX>:<zoneZ>` | channel 7, portal spawn index |
+| dungeon instance | `dungeon.instance:<seed>:<blockX>:<blockZ>` | instance id (session) |
+
+`StructurePlacement.SpawnIndex` is assigned by the provider in creation order (structures, settlement marker,
+anchors from 2048, portal from 3048, creatures from 4048), so a structure and its anchors never share a delta key.
+
+### 10.3 Runtime
+
+`CubeGameContentRuntime` (Presentation) is the gameplay side: structure states derived from zone content + delta,
+vegetation removal, dungeon session (enter/exit to the same entrance), and the content lines of the debug overlay.
+`CubeGameStructurePopulation` serves channel 7 to the existing `WorldPopulation`, so streaming, respawn and save
+behaviour stay the same as before.
+
+`StreamingWorldView` filters removed plants when it builds the chunk vegetation mesh; the terrain mesh, budget and
+vertex handling are unchanged.
+
+### 10.4 Entity identity (G3 seam)
+
+`CubeGameEntityCatalog` defines five CubeGame-native entities; `EntityVisualRecipe` carries the (temporary) Alpha
+model key and the rig/animation package. `CubeGameVisualBindings` is the only place that maps a CubeGame definition
+to an Alpha species kind, and it is marked `TEMPORARY_VISUAL_PLACEHOLDER` for G3 to replace.

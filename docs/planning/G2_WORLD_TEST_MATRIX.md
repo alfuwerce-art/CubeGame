@@ -81,3 +81,28 @@
 | Alpha-кэш модели/иконки | dev-контент; G2-тесты намеренно от него не зависят |
 | Финальные биомы/структуры | вне G2 (G9/G11) |
 | Производительность на длинной сессии >15 мин | измеряется прогоном Player, не автотестом |
+
+---
+
+## 6. G2-1 — CONTENT BINDING
+
+Файлы: `Assets/CubeGame/Tests/FullM0/EditMode/G2_1ContentBindingTests.cs`,
+`Assets/CubeGame/Tests/FullM0/PlayMode/G2_1ContentBindingPlayModeTests.cs`.
+Одна зона генерируется один раз и переиспользуется edit-тестами (тяжёлая часть — генерация зоны).
+
+| ID | Тест | Что доказывает | Статус |
+|---|---|---|---|
+| G2-1-U01 | `EntityCatalogueIsCubeGameNativeAndBoundToPlaceholders` | 5 CubeGame-native определений, все с `TemporaryAlpha` recipe и placeholder-привязкой | PASS |
+| G2-1-U02 | `ContentIdsAreStableAndNamespaced` | persistent id формат/стабильность, каналы 7/8 не совпадают | PASS |
+| G2-1-U03 | `VegetationIsPlacedByTheCubeGamePolicy` | биом → профиль → rule set → kind/model; уникальные StableIndex; растения внутри резерва отсутствуют | PASS |
+| G2-1-U04 | `VegetationPlacementIsDeterministicAcrossGenerators` | same seed → те же id/координаты/индексы; другой seed → другой мир | PASS |
+| G2-1-U05 | `VegetationIsNotGeneratedInsideSettlementOrDungeonReserve` | резервы settlement/данжа исключены из vegetation | PASS |
+| G2-1-U06 | `StructuresArePlacedByTheCubeGamePipeline` | структуры с id/spawn index/biome; village/city не из random pipeline | PASS |
+| G2-1-U07 | `StructuresAreDeterministicAcrossGenerators` | структуры воспроизводятся между экземплярами генератора | PASS |
+| G2-1-U08 | `StructurePopulationServesTheZoneAndSkipsRemovedObjects` | population отдаёт зону, удаление через delta убирает spawn | PASS |
+| G2-1-U09 | `SettlementBlueprintReservesAreaSlotsRoadAndAnchors` | 4 слота, дорога, ≥8 якорей, границы резерва | PASS |
+| G2-1-U10 | `DungeonPrototypeCarvesATestRoomAndReturnsToTheEntrance` | один вход на блок, комната/стены/пол/шахта, Contains | PASS |
+| G2-1-U11 | `RemovedVegetationStaysRemovedAfterRegeneration` | удалённое растение не возвращается после перегенерации | PASS |
+| G2-1-P01 | `CubeGameContentIsGeneratedAndStateSurvivesStreaming` | vegetation+s settlement anchors+dungeon enter/exit+destroy+unload/reload+snapshot в живом мире | PASS |
+| G2-1-W01 | `-cubeSmokeContent fresh` | Player: 160 растений, 4 слота/9 якорей, вход/выход данжа, удаление портала и растения, save | PASS |
+| G2-1-W02 | `-cubeSmokeContent verify` | после перезапуска: removed_structures=1, removed_plants=1 | PASS |

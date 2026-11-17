@@ -1,59 +1,52 @@
-# ACTIVE STAGE — G2 WORLD FOUNDATION
+# ACTIVE STAGE — G2-1 CONTENT BINDING
 
-**Canonical branch:** `integration/m0-all` · **G1 baseline branch:** `deepseek/g1-00-runtime-baseline-candidate`
-**Review branch:** `claude/g2-world-foundation` (база `cb76aab`)
-**Статус:** `READY_FOR_REVIEW` — агент не выставляет `ACCEPTED`, решение за продюсером.
+**Canonical branch:** `integration/m0-all` · **G2 baseline:** `claude/g2-world-foundation` @ `d6f84699c5e127ce3823990ebd137b59cf16d09a` (`ACCEPTED`)
+**Review branch:** `claude/g2-1-content-binding`
+**Статус:** `READY_FOR_REVIEW` — агент не выставляет `ACCEPTED`.
 
-**ТЗ этапа:** [G2_WORLD_FOUNDATION_STAGE.md](stages/G2_WORLD_FOUNDATION_STAGE.md)
-**Отчёт:** [G2_WORLD_FOUNDATION_REPORT.md](reports/G2_WORLD_FOUNDATION_REPORT.md)
+**ТЗ этапа:** [G2_1_CONTENT_BINDING_STAGE.md](stages/G2_1_CONTENT_BINDING_STAGE.md)
+**Отчёт:** [G2_1_CONTENT_BINDING_REPORT.md](reports/G2_1_CONTENT_BINDING_REPORT.md)
+**Предыдущий этап:** [G2 World Foundation](stages/G2_WORLD_FOUNDATION_STAGE.md) · [отчёт](reports/G2_WORLD_FOUNDATION_REPORT.md)
 **Архитектура:** [WORLD_GENERATION_ARCHITECTURE.md](architecture/WORLD_GENERATION_ARCHITECTURE.md)
 **Тест-матрица:** [G2_WORLD_TEST_MATRIX.md](planning/G2_WORLD_TEST_MATRIX.md)
-**Входной аудит:** [G2_WORLD_FOUNDATION_AUDIT.md](planning/G2_WORLD_FOUNDATION_AUDIT.md)
 
 ---
 
 ## 1. Что изменено
 
-Существующий мир (P0–P7 runtime из G1-00) **переиспользован**: генератор высот/климата/зон/рек/дорог/пещер,
-streaming с выгрузкой, floating origin, world modifications и сейв не переписывались. Поверх появился
-собственный слой CubeGame:
+Foundation G2 теперь **владеет контентом мира**, Alpha-ассеты остаются визуальными плейсхолдерами:
 
 | Пакет | Результат |
 |---|---|
-| G2-A | multi-seed regression gate: 8 seed, 3 golden digest, зонная воспроизводимость |
-| G2-B | `ClimateAxes` + data-driven `BiomeCatalog` (11 биомов, surface/vegetation/spawn/structure/weather) |
-| G2-C | `WorldStreamingBudget`: 1 681 запрошенный чанк против ≈1 398 доступных (объяснение soft overflow), применение в runtime |
-| G2-D | `WorldDistanceStrategy`: near/mid/far/offscreen (vegetation, structures, simulation, fog) |
-| G2-E | `VegetationRuleSet` + `VegetationPolicy` (где можно) отдельно от `VegetationModelBinding` (что рисуется) |
-| G2-F | конвейер структур: candidate → validation → placement → persistent id → состояние → удаление через дельту |
-| G2-G | `SettlementSite` (якоря NPC + дорожные stub'ы) и `DungeonEntranceSite` (instance id) |
-| G2-H | `WorldDebugOverlay` (F9 / `-cubeDebugOverlay`) + engine-free `WorldDebugSnapshot` |
-| G2-I | `WorldPerformanceRecorder` + `WorldMetricsProbe` (`-cubeWorldMetrics <path>`, JSON) |
-| G2-J | версия профиля генерации + `generationFingerprint` в `.world`, отказ при смене профиля |
-| G3 seam | `EntityDefinition`/`EntityVisualRecipe`/registry — мир не знает о фабрике моделей |
+| G2-1A | `CubeGameVegetationProvider`: seed → biome → vegetation profile → rules → `VegetationPolicy` → placements → persistent id → временная Alpha-модель |
+| G2-1B | `CubeGameStructureProvider`: `StructurePlacementPipeline` → прототипы (camp/ruin/tower/cave/landmark) → spawn-записи → id → state |
+| G2-1C | `CubeGameEntityCatalog` (5 CubeGame-native определений) + `CubeGameVisualBindings` (`TEMPORARY_VISUAL_PLACEHOLDER`) |
+| Прототипы | settlement (4 слота, дорога, 9 якорей), dungeon (вход + комната + возврат), generic landmark/camp/ruin/tower |
+| Runtime | `CubeGameContentRuntime` + `CubeGameStructurePopulation` (канал 7), фильтр удалённых растений в меше чанка (канал 8) |
+| Debug | overlay: biome, vegetation profile/rules, candidates/accepted/removed, структуры id/state, settlement/anchors, dungeon, entity definition + recipe |
+| Save | удаления — существующие world deltas; content world id = `cubegame.alpha_terrain/10` |
+| Automation | `-cubeSmokeContent fresh|verify` — полный Player-сценарий контента с сохранением и проверкой после перезапуска |
 
 ## 2. Проверки
 
 | Проверка | Результат |
 |---|---|
 | Компиляция | `error CS = 0` |
-| G2 EditMode suite | 34 PASS / 0 FAIL / 0 SKIP |
-| Полный EditMode (с Alpha-кэшем) | 893 total / 887 passed / 0 failed / 6 skipped |
-| Полный EditMode (без кэша) | 893 / 879 passed / 1 известный content-presence fail / 11 skipped |
-| G2 PlayMode | 1 PASS / 0 FAIL |
-| Полный PlayMode (с кэшем) | 76 total / 76 passed / 0 failed / 0 skipped |
-| Windows Player | собран (`BUILD_SUCCEEDED`, errors=0), smoke new + load PASS, метрики записаны |
-| Foundation validation | `WorldFoundationValidation.Check()` пуст (покрыто тестом) |
+| G2-1 EditMode | 11 / 11 PASS |
+| Полный EditMode (с Alpha-кэшем) | 904 total / 898 passed / 0 failed / 6 skipped |
+| G2-1 PlayMode | 1 / 1 PASS |
+| Полный PlayMode (с Alpha-кэшем) | [см. отчёт §15](reports/G2_1_CONTENT_BINDING_REPORT.md) |
+| Windows Player | собран (`BUILD_SUCCEEDED`, errors=0); content smoke fresh/verify PASS |
+| Производительность | mean frame 30.6 → 9.1 мс, вершины −33 %, зоны 1176 → 713 мс (тот же сценарий) |
 
-## 3. Что осталось вне этапа
+## 3. Важное следствие для версий мира
 
-- финальные биомы, растительность, вода, погода, сезоны (G9);
-- production города/данжи и их геометрия (G5/G11);
-- подключение правил растительности и структур к фактическому runtime-представлению (следующий work package);
-- замена Alpha-ассетов и чистка legacy parity-кода.
+- Мир `/10` = тот же террейн, но CubeGame-контент; мир `/9` (G2) намеренно не загружается новым клиентом
+  (`GeneratorMismatch`), потому что контентная стадия изменилась.
+- Исторические Alpha-content тесты PlayMode продолжают работать на явно запрошенном `/9` мире
+  (`StartNewWorld(..., generatorId: ...)` — automation-only параметр).
 
-## 4. Предыдущий этап
+## 4. Вне этапа
 
-[G1 TECHNICAL FOUNDATION](stages/G1_TECHNICAL_FOUNDATION_STAGE.md) — baseline `deepseek/g1-00-runtime-baseline-candidate`
-@ `cb76aab` (OPTION C: P0–P7 runtime = основа CubeGame), EditMode 853/859 с Alpha-кэшем, PlayMode 75/75,
-Windows Player собран. G1-00 отчёт: [G1_00_RUNTIME_BASELINE_SELECTION_REPORT](reports/G1_00_RUNTIME_BASELINE_SELECTION_REPORT.md).
+Production city/dungeon/vegetation, разрушение вокселей зданий, фракции, расписания NPC, G3 factory, Alpha cleanup.
+Следующий рекомендуемый пакет: **G2-2 World object lifecycle & destruction** (см. §16 отчёта).
