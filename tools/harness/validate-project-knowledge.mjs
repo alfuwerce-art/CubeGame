@@ -35,6 +35,29 @@ else for (const name of readdirSync(skillsRoot)) {
   }
   valid++;
 }
+// Validate every active Markdown link; historical archive is intentionally excluded.
+const activeFiles = ['AGENTS.md', 'PROJECT_MEMORY.md', 'README.md', 'tools/unity/RUN_INSTRUCTIONS.md'];
+function collectDocs(dir) {
+  if (!existsSync(dir)) return;
+  for (const item of readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, item.name);
+    if (item.isDirectory()) collectDocs(full);
+    else if (item.isFile() && item.name.endsWith('.md')) activeFiles.push(path.relative(root, full));
+  }
+}
+collectDocs(path.join(root, 'docs'));
+for (const rel of activeFiles) {
+  const full = path.join(root, rel);
+  if (!existsSync(full)) continue;
+  const body = readFileSync(full, 'utf8');
+  for (const m of body.matchAll(/\\]\\(([^)]+)\\)/g)) {
+    const target = m[1].trim().split('#')[0].split('?')[0];
+    if (!target || /^(?:[a-z]+:|\\/\\/)/i.test(target)) continue;
+    const linked = path.resolve(path.dirname(full), target);
+    if (!existsSync(linked)) errors.push('BROKEN DOC LINK ' + rel + ' -> ' + target);
+  }
+}
+
 console.log(JSON.stringify({ status: errors.length ? 'FAIL' : 'PASS', skillsValidated: valid, documentsChecked: required.length, errors }, null, 2));
 if (valid < 9) errors.push('Expected at least 9 project skills');
 if (errors.length) process.exitCode = 1;
