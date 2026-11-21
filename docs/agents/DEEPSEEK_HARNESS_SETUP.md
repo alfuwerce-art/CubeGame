@@ -68,7 +68,7 @@
 
 ## Первый локальный запуск (сначала этот шаг)
 
-[WINDOWS_DSH_FIRST_RUN.md](WINDOWS_DSH_FIRST_RUN.md) — фактический план настройки на Windows с read-only PowerShell-аудитом `tools/harness/windows/Inspect-Dsh.ps1`. PR #18/#19/#20 не объединены; **не ожидать** этих файлов в прежнем локальном checkout. Для испытания использовать отдельный worktree того же репозитория, не делать `reset --hard`.
+[WINDOWS_DSH_FIRST_RUN.md](WINDOWS_DSH_FIRST_RUN.md) — фактический план настройки на Windows с read-only PowerShell-аудитом `tools/harness/windows/Inspect-Dsh.ps1`. PR #18/#19/#20 не объединены; **не ожидать** этих файлов в прежнем локальном checkout. Для испытания использовать **существующую** папку `D:\\Projects\\CubeGame`, создать лишь новую локальную ветку после проверки чистого `git status` и выборочно скопировать `.dsh/skills` из review PR, не делать `reset --hard` и не создавать дополнительных рабочих папок. **Прежде чем агент будет писать код, синхронизировать устаревшие AGENTS/ACTIVE_STAGE/PROJECT_MEMORY и поддерживающие документы отдельным проверенным шагом.**
 
 Не включать `dsh-hooks-claude-code` в Desktop по умолчанию: официальная реализация в `packages/experimental/hooks-claude-code` работает с **одним process-wide configPath**, а ошибки запуска могут пропускаться. Сначала проверить навыки, PowerShell/sandbox и встроенные возможности установленной версии; только потом исследовать hook bridge в изолированном профиле. Путь к официальным docs: https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/experimental/hooks-claude-code/README.md .
 
