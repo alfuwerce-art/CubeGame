@@ -1,10 +1,16 @@
-# Factoria
+# CubeGame / Factory
 
-Производственный репозиторий персонажей CubeGame. Здесь хранятся манекены, 3D-модели, визуальные модули, риги, анимационные ресурсы, скрипты и ComfyUI workflows, результаты экспериментов и технические отчёты. CubeGame ведёт GDD, Roadmap, архитектуру, продуктовые решения и контракт интеграции.
+**Factory — внутренний производственный каталог CubeGame, не отдельный репозиторий.**
 
-- [AGENTS.md](AGENTS.md) — полномочия, правила данных, Git и проверок.
-- [Производственная память](docs/PRODUCTION_MEMORY.md) — текущая задача и точка продолжения.
-- [Производственное пространство](docs/CHARACTER_PRODUCTION_WORKSPACE.md) — размещение исходников, референсов, экспортов и пакетов передачи.
-- [HUMAN_MALE_BASE_V1](docs/HUMAN_MALE_BASE_V1_REVIEW.md) — закрытый исторический эксперимент `REVIEW_CLOSED / NOT_SELECTED`.
+Здесь хранятся манекены, модели, визуальные модули, риги, анимации, ComfyUI workflows, скрипты, исследования и технические результаты.
 
-Рабочая база Factoria для ревью — `factory/work`. Канонический продуктовый контекст ведётся в [CubeGame](https://github.com/alfuwerce-art/CubeGame). Изменения контура обсуждаются в [Factoria PR #2](https://github.com/alfuwerce-art/factoria/pull/2) и [CubeGame PR #16](https://github.com/alfuwerce-art/CubeGame/pull/16).
+- [Правила](AGENTS.md)
+- [Производственная память](docs/PRODUCTION_MEMORY.md)
+- [Рабочие каталоги](docs/CHARACTER_PRODUCTION_WORKSPACE.md)
+- [Исторический HUMAN_MALE_BASE_V1](docs/HUMAN_MALE_BASE_V1_REVIEW.md)
+- [Решения CubeGame](../docs/design/DECISIONS.md)
+- [Контракт с Unity](../docs/architecture/CHARACTER_ASSET_HANDOFF.md)
+
+История исходного [Factoria](https://github.com/alfuwerce-art/factoria) импортирована через `git subtree add` **без squash** с SHA `60f984c81b73448d79e8d2e4c57cbc19c20a9393`. Исходный репозиторий остаётся архивным источником для восстановления, но **не местом для новых изменений**.
+
+Старая вложенная `.github/` и прежние документы сохранены как исторический материал; текущий CI находится в корне CubeGame.
