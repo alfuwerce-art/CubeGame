@@ -1,6 +1,6 @@
 # Архивный справочник: наблюдения по редактору Alpha 2013
 
-**Статус:** архивное независимое исследование. Перенесено в единый репозиторий CubeGame по D95. Не является производственным конвейером или игровым каталогом CubeGame.
+**Статус:** архивное независимое исследование. Ссылки на не перенесённые исходные JSON и производственные карточки оставлены как текст, а не как работающие контракты. Предыдущие файлы доступны только в Git-истории закрытого проекта. Перенесено в единый репозиторий CubeGame по D95. Не является производственным конвейером или игровым каталогом CubeGame.
 
 ---
 
@@ -8,26 +8,26 @@
 
 **14 ноября 2026 · READY_FOR_OWNER_REVIEW**
 
-[JSON master](../../data/alpha_character_editor/alpha_character_editor_catalog.json) · [Human Male/Female](HUMAN_EDITOR_ALPHA_REFERENCE.md)
+`JSON master` · `Human Male/Female`
 
 Полный ростер в проверенной сборке содержит **8** позиций. Детально каталогизированы **7 рас × 2 пола, 71 Face и 100 Haircut**. Frogman (race_id=7) остаётся в ростере как OUT_OF_SCOPE по решению владельца.
 
 | Race | Gender | Face count | Haircut count | Color system | Other confirmed modules | Missing assets (UI) |
 |---|---|---:|---:|---|---|---|
-| Human | [Male](../../data/alpha_character_editor/HUMAN/MALE.json) | 6 | 15 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
-| Human | [Female](../../data/alpha_character_editor/HUMAN/FEMALE.json) | 6 | 7 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
-| Elf | [Male](../../data/alpha_character_editor/ELF/MALE.json) | 4 | 10 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
-| Elf | [Female](../../data/alpha_character_editor/ELF/FEMALE.json) | 6 | 10 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
-| Dwarf | [Male](../../data/alpha_character_editor/DWARF/MALE.json) | 5 | 3 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
-| Dwarf | [Female](../../data/alpha_character_editor/DWARF/FEMALE.json) | 5 | 5 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
-| Orc | [Male](../../data/alpha_character_editor/ORC/MALE.json) | 5 | 10 | 112 RGB, Haircut | Body, Head, Hand, Foot | 8, 9, 10 |
-| Orc | [Female](../../data/alpha_character_editor/ORC/FEMALE.json) | 5 | 4 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
-| Goblin | [Male](../../data/alpha_character_editor/GOBLIN/MALE.json) | 5 | 6 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
-| Goblin | [Female](../../data/alpha_character_editor/GOBLIN/FEMALE.json) | 5 | 6 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
-| Lizard | [Male](../../data/alpha_character_editor/LIZARD/MALE.json) | 2 | 6 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
-| Lizard | [Female](../../data/alpha_character_editor/LIZARD/FEMALE.json) | 5 | 6 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
-| Undead | [Male](../../data/alpha_character_editor/UNDEAD/MALE.json) | 6 | 6 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
-| Undead | [Female](../../data/alpha_character_editor/UNDEAD/FEMALE.json) | 6 | 6 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
+| Human | `Male` | 6 | 15 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
+| Human | `Female` | 6 | 7 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
+| Elf | `Male` | 4 | 10 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
+| Elf | `Female` | 6 | 10 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
+| Dwarf | `Male` | 5 | 3 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
+| Dwarf | `Female` | 5 | 5 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
+| Orc | `Male` | 5 | 10 | 112 RGB, Haircut | Body, Head, Hand, Foot | 8, 9, 10 |
+| Orc | `Female` | 5 | 4 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
+| Goblin | `Male` | 5 | 6 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
+| Goblin | `Female` | 5 | 6 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
+| Lizard | `Male` | 2 | 6 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
+| Lizard | `Female` | 5 | 6 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
+| Undead | `Male` | 6 | 6 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
+| Undead | `Female` | 6 | 6 | 112 RGB, Haircut | Body, Head, Hand, Foot | 0 |
 
 Числа включают позиции карусели. Доступны все 71 Face и 97 из 100 Haircut. Body, Hand и Foot приходят из kind. В Creator Face выбирает Head, а Haircut выбирает overlay. Карточки содержат registry ID и ключи моделей, включая базовые части и значения дополнительных слотов.
 

@@ -44,4 +44,4 @@ D92 (2026-11-11) объявлял целью M0 полный перенос Alph
 
 - Активные инструкции агентов (`AGENTS.md`, `ACTIVE_STAGE.md`, `PROJECT_MEMORY.md`, `docs/planning/README.md`) приведены в соответствие с этим решением в рамках G0.
 - Исторические документы M0 получают пометку `LEGACY — superseded as active development target by 2026-11-17 development pivot` и не переписываются.
-- Текущий этап — G0, затем G1 по [G1_TECHNICAL_FOUNDATION_STAGE.md](../stages/G1_TECHNICAL_FOUNDATION_STAGE.md).
+- Текущий этап — G0, затем G1 по [G1_TECHNICAL_FOUNDATION_STAGE.md](../ROADMAP.md).
