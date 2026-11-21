@@ -18,7 +18,7 @@ export function evaluateTool(payload, { branch = '', root = '', cwd = '' } = {})
   const isShell = /(?:bash|pwsh|shell|exec|powershell|terminal|command)/.test(name);
   const fileEdit = /(?:write|edit|patch|create_file|delete_file)/.test(name);
   // Encoded shell commands are not auditable by this lightweight check.
-  if (isShell && /(?:-encodedcommand\\b|-enc\\s|frombase64string\\s*\\()/i.test(command))
+  if (isShell && /(?:-encodedcommand\b|-enc\s|frombase64string\s*\()/i.test(command))
     return 'Закодированная shell-команда требует отдельного разрешения';
   const mutation = fileEdit || (isShell && /(?:git\s+(?:push|reset|clean|switch|checkout|merge|rebase|branch\s+-[dD])|(?:rm|del|erase|rmdir|remove-item|set-content|add-content|move-item|copy-item|mkdir|new-item|\b(?:tee|sed\s+-i)\b)|(?:>>|(?<![<])>(?![>])))/i.test(command));
   if (!mutation) return null;
@@ -27,7 +27,7 @@ export function evaluateTool(payload, { branch = '', root = '', cwd = '' } = {})
   if (isShell) {
     const workdir = input.workdir;
     if (typeof workdir === 'string' && workdir.length) {
-      const pathApi = /^[A-Za-z]:[\\\\/]/.test(root) ? path.win32 : path;
+      const pathApi = path.win32.isAbsolute(root) ? path.win32 : path;
       const target = pathApi.resolve(cwd, workdir);
       const relative = pathApi.relative(root, target);
       if (relative === '..' || relative.startsWith('..' + pathApi.sep) || pathApi.isAbsolute(relative))
