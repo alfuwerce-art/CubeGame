@@ -44,3 +44,7 @@
 - https://dev.epicgames.com/documentation/en-us/unreal-engine/geometry-scripting-users-guide-in-unreal-engine
 - https://dev.epicgames.com/documentation/en-us/unreal-engine/control-rig-editor-in-unreal-engine
 - https://dev.epicgames.com/documentation/en-us/unreal-engine/auto-retargeting-in-unreal-engine
+
+## Сохранённый пример скрипта без запуска
+
+[tools/experiments/unreal/audit_assets.py](../../tools/experiments/unreal/audit_assets.py) — **read-only** проверка списка ассетов в потенциальном тестовом UE-проекте. [README по условиям запуска](../../tools/experiments/unreal/README.md). Хранение примера в Git **не** означает наличия UE на ПК и не является разрешением запускать редактор или подключать этот скрипт к Unity.
