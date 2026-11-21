@@ -19,7 +19,7 @@ P0 **не означает, что нужно установить всё под
 | Компонент | Официальный пакет | Зачем | Ограничения |
 |---|---|---|---|
 | LSP | `dsh-lsp`, `dsh-lsp-stdio`, `dsh-tool-lsp` | точные C#/C++ definitions, references, API navigation | нужны отдельно установленные language servers; без них `LSP_UNAVAILABLE` |
-| Субагент | `dsh-subagent`, `dsh-subagent-spawn-in-process`, `dsh-tool-subagent` | независимый аудит и небольшие read-only исследования | бюджет модели и доступы; один писатель на изменяемый файл |
+| Субагент | `dsh-subagent`, `dsh-subagent-spawn-in-process`, `dsh-tool-subagent` | независимый аудит и небольшие read-only исследования | использовать лишь DeepSeek или Codex; бюджет модели и доступы; один писатель на изменяемый файл |
 | Hook bridge | `dsh-hooks-claude-code` | опциональные PreToolUse/PostToolUse проверки | несовместимость версий возможна; явный `configPath`; хуки не активны только от наличия JSON |
 | MCP manager/client | `dsh-mcp-manager`, `dsh-mcp-client` | подключать строго нужный инструмент | сначала доказать пользу относительно CLI/скрипта; отдельная конфигурация/права |
 
@@ -40,7 +40,7 @@ P0 **не означает, что нужно установить всё под
 3. Для каждого кандидата выяснить, доступен ли он в установленной версии, какие права получает, какой ввод/вывод принимает и нужен ли restart. Начать с `disabled`/dry-run, когда поддерживается.
 4. Подключать **по одному** с разрешения владельца; провести smoke и негативные тесты, сверить логи до/после.
 5. Зафиксировать `AVAILABLE / INSTALLED / ACTIVE / TESTED / BLOCKED` отдельно: это разные факты.
-6. Обновить `docs/agents/experience/` только по реальным измерениям. Ни один способ не гарантирует качества «как Claude» вне сравнимого eval.
+6. Обновить `docs/agents/experience/` только по реальным измерениям. Цель — измеримое качество DeepSeek Harness и Codex на задачах CubeGame, без использования Claude.
 
 ## Проверенные справочники
 
@@ -56,3 +56,7 @@ P0 **не означает, что нужно установить всё под
 Согласно текущему `dsh-base`, для базовых профилей **уже предусмотрены** файловые инструменты, platform PowerShell, sandbox, skills и subagents. Начальный этап — диагностировать их в имеющемся Desktop, **не ставить дубликаты**. Хуки `dsh-hooks-claude-code` относятся к **experimental**; абсолютное право/запрет обеспечивают sandbox и права, не скрипт, который может завершиться fail-open.
 
 [Windows first run](WINDOWS_DSH_FIRST_RUN.md) · [dsh-base](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/bundle/base/README.md) · [hooks experimental](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/experimental/hooks-claude-code/README.md).
+
+## Разрешённые агентные провайдеры
+
+Для CubeGame — только **DeepSeek Harness и Codex**. Не устанавливать и не активировать `dsh-subagent-claude-code`, Claude Code SDK или любые подключаемые Claude credentials. Пакет `dsh-hooks-claude-code`, если когда-либо понадобится, — технический bridge **формата хуков**, а не обращение к Claude; пока experimental/неактивен. Приоритет — штатные permissions/sandbox и проверки Git.
