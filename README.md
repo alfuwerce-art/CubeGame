@@ -18,3 +18,5 @@
 ## Настройка DeepSeek Harness на Windows
 
 [Проверка и первый запуск](docs/agents/WINDOWS_DSH_FIRST_RUN.md): read-only диагностика установленного DSH, обзор девяти навыков, изолированный Git worktree для ревью, тесты без автоматической установки плагинов.
+
+**ИИ-исполнители разработки:** DeepSeek Harness и Codex (без Claude/Claude Code). Использование стороннего hook-формата не добавляет другого агента.
