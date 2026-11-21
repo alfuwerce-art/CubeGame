@@ -30,3 +30,7 @@ CubeGame — самостоятельная локальная Windows-first 3D 
 ## Роли и Git
 
 Владелец принимает продуктовые решения, визуал и merge. ChatGPT — проектирование и ревью; DeepSeek Harness и Codex — исполнители порученных работ. GitHub — источник статуса. Перед задачей читать этот файл, [ACTIVE_STAGE](docs/ACTIVE_STAGE.md) и [AGENTS.md](AGENTS.md). Агент не выдаёт `READY_FOR_OWNER_REVIEW` за `ACCEPTED`. История экспериментов доступна через Git, но не определяет активные решения.
+
+## AI harness — ревью 21.11.2026
+
+По запросу владельца подготовлен отдельный **кандидат** разделённой обвязки в ветке `review/harness-layering-20261121`, поверх D95 review. Общий вход [Concept](docs/CONCEPT.md), метод [HARNESS_ARCHITECTURE](docs/agents/HARNESS_ARCHITECTURE.md), [HARNESS_EVALUATION](docs/agents/HARNESS_EVALUATION.md); локальная интеграция в [DEEPSEEK_HARNESS_SETUP](docs/agents/DEEPSEEK_HARNESS_SETUP.md). Skills, preflight и пример hook **не означают изменения установленного DSH**: нужны версии, установка/проверка в локальном `cubegame-dev`, негативные тесты и решение владельца. GDD/игровые механики не менялись. Не возвращать закрытый конвейер.
