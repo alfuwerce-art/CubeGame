@@ -50,9 +50,9 @@ for (const rel of activeFiles) {
   const full = path.join(root, rel);
   if (!existsSync(full)) continue;
   const body = readFileSync(full, 'utf8');
-  for (const m of body.matchAll(/\\]\\(([^)]+)\\)/g)) {
+  for (const m of body.matchAll(/\]\(([^)]+)\)/g)) {
     const target = m[1].trim().split('#')[0].split('?')[0];
-    if (!target || /^(?:[a-z]+:|\\/\\/)/i.test(target)) continue;
+    if (!target || /^[a-z]+:/i.test(target) || target.startsWith('//')) continue;
     const linked = path.resolve(path.dirname(full), target);
     if (!existsSync(linked)) errors.push('BROKEN DOC LINK ' + rel + ' -> ' + target);
   }
