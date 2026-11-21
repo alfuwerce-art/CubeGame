@@ -1,4 +1,4 @@
-> Историческая запись. Текущая задача и способы работы описаны в [производственном пространстве Factoria](docs/CHARACTER_PRODUCTION_WORKSPACE.md).
+> Архив. Актуальные инструкции — [AGENTS.md](AGENTS.md), текущая работа — [производственная память Factoria](docs/PRODUCTION_MEMORY.md).
 
 # CubeGame Asset & Animation Factory — спецификация работы и конечной цели
 ## Как должен функционировать конвейер в зрелом состоянии

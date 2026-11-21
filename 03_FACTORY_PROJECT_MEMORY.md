@@ -1,4 +1,4 @@
-> Историческая запись. Текущая задача и способы работы описаны в [производственном пространстве Factoria](docs/CHARACTER_PRODUCTION_WORKSPACE.md).
+> Архив. Актуальные инструкции — [AGENTS.md](AGENTS.md), текущая работа — [производственная память Factoria](docs/PRODUCTION_MEMORY.md).
 
 **DESIGN-01 · READY_FOR_OWNER_ARCHITECTURE_REVIEW · 18.11.2026.** Предложен Hybrid с 3D-шаблоном по умолчанию: Blender владеет размерами, камерами и ригом; ComfyUI предлагает внешний вид. STYLE_LOCK_V1 остаётся экспериментальным; кандидат SDXL/VoxelXL/Union проверялся на V3, с превышением +2048 MiB VRAM в 12/15 прогонах. Новый конвейер остаётся проектом. Первое решение владельца — архитектура и приёмка MANNEQUIN-RIG-01; затем GEOMETRY-01 для мужского пакета. Минимальный сравнительный пилот — оригинальная туника на одном shell с контролем памяти, UV, поз и отделимости. [Ревью DESIGN-01](docs/design/character_visual_generation/DESIGN_REVIEW.md).
 
