@@ -1,5 +1,5 @@
 # CubeGame — межчатовая память
-**Дата:** 2026-11-21. **Один репозиторий:** alfuwerce-art/CubeGame. **Workspace:** `D:\Projects\CubeGame`.
+**Дата:** 2026-11-22. **Один репозиторий:** alfuwerce-art/CubeGame. **Workspace:** `D:\Projects\CubeGame`.
 
 **Игра:** самостоятельная Windows-first 3D action RPG. Сейчас приоритет — Unreal-first C++ игровой эксперимент; рабочий Unity-проект сохраняется. Авторский детализированный voxel/pixel 3D, процедурные миры, контактный бой, развитие, экипировка, живые NPC, фракции, экономика, квесты и постоянные последствия. Точные правила в [GDD](docs/GDD.md), стадии в [Roadmap](docs/ROADMAP.md), утверждения в [Decisions](docs/design/DECISIONS.md).
 
@@ -7,6 +7,6 @@
 
 **Агенты:** DeepSeek Harness и Codex — реализация; ChatGPT — проектирование/ревью; владелец — решения и приёмка. По отчётам пользователя локальный DSH 0.2.2-rc.1, preset `cubegame-dev`, 9 навыков обнаружены, preflight/validator и Unity smoke прошли. Права `danger-full-access`/`approval: never` — выбор владельца. Реальное подключение hook не доказано. Скрипт последнего Unity CI пока локальный, в GitHub отсутствует.
 
-**Активный эксперимент:** [UNREAL_FIRST_PLAYABLE](docs/experiments/UNREAL_FIRST_PLAYABLE.md). Измеряем, способен ли DeepSeek посредством C++/Python/MCP создать и протестировать маленький игровой фрагмент. Unreal-first Roadmap — кандидат на решение, не утверждённый перенос игры. C++ — основа логики, Blueprint — дополнительный инструмент.
+**Активный эксперимент:** [UNREAL_FIRST_PLAYABLE](docs/experiments/UNREAL_FIRST_PLAYABLE.md). Измеряем, способен ли DeepSeek посредством C++/Python/MCP создать и протестировать маленький игровой фрагмент. Производственный [Roadmap G0–G16](docs/ROADMAP.md) переработан 2026-11-22 под реальные стадии: First Playable → Vertical Slice → масштабируемое производство → Alpha → Beta → RC → публичный релиз; статус `PROPOSED_FOR_OWNER_REVIEW`, не утверждённый перенос игры. Первые практические задачи по порядку U1 (Editor Python) и U2 (C++/MCP); использовать результаты для выбора инструмента, не объявлять сравнение двух разных задач чистым A/B-тестом. C++ — основа игровой логики в Unreal, Blueprint — дополнительный инструмент.
 
 **Перед задачей:** [AGENTS](AGENTS.md) → [ACTIVE_STAGE](docs/ACTIVE_STAGE.md) → конкретное ТЗ/релевантный skill. Проверять Git HEAD и логи. Архивные документы не дают разрешений.
