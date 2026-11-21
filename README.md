@@ -14,3 +14,7 @@
 - [Навыки DeepSeek Harness](docs/agents/SKILLS_INDEX.md), [оценка плагинов](docs/agents/DSH_PLUGIN_EVALUATION.md), [настройка DSH](docs/agents/DEEPSEEK_HARNESS_SETUP.md).
 - [Реестр технических имён](docs/architecture/NAME_REGISTRY.md) и [карта зависимостей](docs/architecture/DEPENDENCY_MAP.md).
 - [Unreal scripting spike](docs/research/UNREAL_SCRIPTING_SPIKE.md) — отдельное исследование, **не** миграция игры и **не** разрешение на установку.
+
+## Настройка DeepSeek Harness на Windows
+
+[Проверка и первый запуск](docs/agents/WINDOWS_DSH_FIRST_RUN.md): read-only диагностика установленного DSH, обзор девяти навыков, изолированный Git worktree для ревью, тесты без автоматической установки плагинов.
