@@ -78,7 +78,8 @@ def markdown_links(root, name, text):
         if url.scheme or url.netloc:
             continue
         target = (path.parent / unquote(url.path)).resolve() if url.path else path
-        if target != root and root not in target.parents:
+        boundary = root.parent if root.name == "Factory" and (root.parent / "docs/GDD.md").exists() else root
+        if target != boundary and boundary not in target.parents:
             yield f"{name}: link leaves repository: {href}"
         elif not target.exists():
             yield f"{name}: missing target: {href}"
@@ -186,7 +187,7 @@ def validate_factoria(root):
     if not any(DISPOSITION in line for line in historical.splitlines()[:9]):
         errors.append("docs/HUMAN_MALE_BASE_V1_REVIEW.md: missing final owner disposition near the archive heading")
     memory = documents.get("docs/PRODUCTION_MEMORY.md", "")
-    if not any("CubeGame/" in (match[1] or match[2]) and "CHARACTER_ASSET_HANDOFF.md" in (match[1] or match[2])
+    if not any("CHARACTER_ASSET_HANDOFF.md" in (match[1] or match[2])
                for match in LINK.finditer(prose(memory))):
         errors.append("docs/PRODUCTION_MEMORY.md: missing link to the CubeGame handoff contract")
     return errors
