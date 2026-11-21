@@ -18,3 +18,10 @@ The owner sets the task and accepts the result. ChatGPT supports architecture/re
 ## Closed work
 
 No agent may restart or port the discarded asset factory or its previous approved workflow. Relevant experiments are history, not an approved stage. New content is developed inside CubeGame after an explicit task.
+
+## Layered harness, context and handoff
+
+- Общий проектный слой — [HARNESS_ARCHITECTURE](HARNESS_ARCHITECTURE.md); локальный DSH runtime — [DEEPSEEK_HARNESS_SETUP](DEEPSEEK_HARNESS_SETUP.md). Эти правила дополняют, а не заменяют `AGENTS.md` и `ACTIVE_STAGE.md`.
+- Для каждой задачи свежая сессия со сжатым HANDOFF: task ID, scope, документы, branch/SHA, уже выполненные проверки и блокеры. Не передавать всю переписку как постоянные инструкции.
+- Процедуры вызываются по задаче через skill. Субагент получает только чтение по умолчанию; редактирование — через отдельный контракт и изолированные файлы/worktree. Тесты, отчёты и Git-операции сводить скриптами.
+- Варианты новых skill/hook проверяются в отдельном PR по [Harness evaluation](HARNESS_EVALUATION.md). Никакого автоматического изменения глобальных инструкций, прав или производственных планов.
