@@ -1,85 +1,12 @@
-# AGENTS.md — CubeGame current rules
+# CubeGame — работа в репозитории
 
-## Перед началом любой работы
+CubeGame — самостоятельная Unity action RPG. В этом репозитории находятся требования, игровая архитектура и контракты интеграции. Производственные исходники персонажей, риги, анимации и инструменты находятся в [Factoria](https://github.com/alfuwerce-art/factoria).
 
-Прочитать:
-1. `PROJECT_MEMORY.md`
-2. `docs/ACTIVE_STAGE.md`
-3. `docs/decisions/D92-m0-full-alpha-unity-port.md`
-4. `docs/stages/M0_ALPHA_FULL_UNITY_PORT_STAGE.md`
-5. релевантные Alpha research/reports и parity backlog.
-
-GitHub — основной источник актуального состояния.
-
-## Текущая цель
-
-M0 = **полный перенос одиночной Cube World Alpha 2013 в Unity как связанной игры**.
-
-Прежние D90 F1–F4 являются инженерными checkpoint'ами, а не доказательством полного переноса мира, боя, UI или gameplay.
-
-## Метод работы
-
-Для каждой системы:
-
-`FIND ORIGINAL CODE → TRACE CALL GRAPH → IDENTIFY DATA/STATE/RNG → SPEC → IMPLEMENT → CONNECT RUNTIME → WINDOWS PLAYER → COMPARE → REVIEW`.
-
-Не реализовывать неизвестную Alpha-механику предположением только ради рабочего стенда.
-
-## Доказательность
-
-Использовать:
-- `ALPHA_CODE_STATIC`
-- `ALPHA_DECOMPILED`
-- `EMULATED_ALPHA_CODE`
-- `CUBEGAME_CONTRACT`
-- `PLACEHOLDER_NOT_ALPHA`
-- `PARTIAL`
-- `UNKNOWN`
-
-Но наличие кода или теста не означает parity.
-
-Обязательная лестница:
-`ORIGINAL LOGIC UNDERSTOOD → UNITY RUNTIME CONNECTED → SYSTEMS LINKED → WINDOWS PLAYER VERIFIED → PRODUCER REVIEW`.
-
-## Blocking rule
-
-Если на обязательном Alpha runtime-path остаётся:
-- `UNKNOWN`;
-- существенный `PARTIAL`;
-- `PLACEHOLDER_NOT_ALPHA`;
-- непринятый `CUBEGAME_CONTRACT`;
-
-система не получает PASS.
-
-Пример: отдельные AI, animation и damage PASS не закрывают combat, пока `decision → action → animation → strike → hit/damage → recovery` не являются одной восстановленной цепочкой.
-
-## Работа с кодом
-
-- Сначала использовать уже сделанное; не переписывать без причины.
-- Исправлять ошибочные интерпретации старых исследований.
-- Не смешивать ID-space actor/world-object/vegetation/item/structure.
-- Не писать плагины, editor tools и frameworks вместо игрового runtime.
-- Одноразовый диагностический script допустим только для доказательства конкретного факта.
-- Один Unity slot.
-- Одни и те же файлы параллельно не редактировать.
-- Force-push запрещён без прямого решения продюсера.
-- Alpha original read-only.
-- Alpha assets не коммитить и не публиковать.
-
-## Windows build / пользовательская версия
-
-Editor недостаточен. Видимые и игровые системы проверяются в Windows Player.
-
-Постоянный пользовательский launcher один. После успешной сборки и smoke-test последняя версия заменяет единственную live-версию; старые пользовательские builds не являются отдельными версиями проекта.
-
-## Приёмка
-
-Агент завершает задачу максимум `READY_FOR_PRODUCER_REVIEW` / `PARTIAL`.
-
-`PASS` системного блока и `ACCEPTED` этапа ставит только продюсер.
-
-После утверждённого изменения этапа синхронизировать:
-- `PROJECT_MEMORY.md`
-- `docs/ACTIVE_STAGE.md`
-- stage/decision/report;
-- parity backlog.
+- Начните с [PROJECT_MEMORY](PROJECT_MEMORY.md), [активной задачи](docs/ACTIVE_STAGE.md), [GDD](docs/GDD.md) и [Roadmap](docs/ROADMAP.md). Изменения утверждённых решений фиксирует владелец.
+- Текущая задача ограничена производством персонажей и документацией. Игровой код, сцены, интерфейс, боёвку, генерацию и NPC оставляйте вне этой задачи. Найденные проблемы записывайте с путём и воспроизведением.
+- Codex отвечает за согласование контрактов, проверку поставки и отчёт. DeepSeek Harness работает по назначенной задаче Factoria и передаёт воспроизводимый технический пакет. Авторство и ответственность за отдельную поставку записываются в её отчёте.
+- CubeGame использует `integration/m0-all` как базу ревью. Сверяйте ветку, удалённый SHA, PR и рабочие файлы. Работайте в отдельной ветке. Слияние, удаление refs и очистка ценных данных требуют отдельного разрешения.
+- Для проверки манекена используйте отдельный проект Unity, один Editor и только импорт, Avatar, ручную оценку клипа в Editor и измерения. PlayMode в текущей задаче не используется.
+- Прототипы, референсы владельца, кэши, веса моделей и закрытые Alpha-ассеты хранятся локально. Перенос в продукт требует разрешения, проверенного источника и приёмки.
+- Указывайте команду, версии, выходные файлы и ограничения. Техническая проверка подтверждает измеренный результат. Визуальный статус — `READY_FOR_OWNER_REVIEW` до решения владельца.
+- Обновляйте текущие данные в памяти заменой, история остаётся в Git и отчётах. [Контракт ассетов](docs/architecture/CHARACTER_ASSET_HANDOFF.md) задаёт состав передачи.
