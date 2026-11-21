@@ -71,3 +71,7 @@
 [WINDOWS_DSH_FIRST_RUN.md](WINDOWS_DSH_FIRST_RUN.md) — фактический план настройки на Windows с read-only PowerShell-аудитом `tools/harness/windows/Inspect-Dsh.ps1`. PR #18/#19/#20 не объединены; **не ожидать** этих файлов в прежнем локальном checkout. Для испытания использовать отдельный worktree того же репозитория, не делать `reset --hard`.
 
 Не включать `dsh-hooks-claude-code` в Desktop по умолчанию: официальная реализация в `packages/experimental/hooks-claude-code` работает с **одним process-wide configPath**, а ошибки запуска могут пропускаться. Сначала проверить навыки, PowerShell/sandbox и встроенные возможности установленной версии; только потом исследовать hook bridge в изолированном профиле. Путь к официальным docs: https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/experimental/hooks-claude-code/README.md .
+
+## Уточнение состава исполнителей
+
+**Только DeepSeek Harness и Codex.** Внешний Claude Code, его SDK/аккаунт, credential и subagent-provider не подключать. Не предлагать Claude в будущем плане настройки или тестирования CubeGame. Наличие `dsh-hooks-claude-code` в каталоге DSH не обязывает его устанавливать; это лишь имя совместимого формата, и bridge пока неактивен.
