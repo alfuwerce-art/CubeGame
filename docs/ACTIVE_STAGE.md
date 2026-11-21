@@ -1,9 +1,14 @@
-# Активная задача — ревизия документации и репозиториев
+# ACTIVE_STAGE — объединение репозиториев
 
-**Код этапа** `REPOSITORY_CONSOLIDATION_FINAL`
-**Результат ревизии** `READY_FOR_OWNER_REVIEW`
+**Код этапа** `REPOSITORY_UNIFICATION`
+**Результат ревизии** `IN_PROGRESS`
 
-- Разрешённый объём — сверка решений, документации, GitHub и локальной организации. Ревизии идут через [CubeGame PR #16](https://github.com/alfuwerce-art/CubeGame/pull/16) и [Factoria PR #2](https://github.com/alfuwerce-art/factoria/pull/2).
-- `HUMAN_MALE_BASE_V1` — `REVIEW_CLOSED / NOT_SELECTED` по [решению от 21.11.2026](decisions/2026-11-21-human-male-base-v1.md). Модель и замеры в архиве. Производство другого манекена начинается по новому заданию владельца.
-- [Roadmap](ROADMAP.md) содержит последовательность G0–G15. Текущий аудит не открывает G3 или другой производственный/игровой этап. Применяются [границы работы](../AGENTS.md).
-- Следующее разрешённое действие — владелец рассматривает ревизии и открытые продуктовые вопросы. [Результаты и проверки](reports/REPOSITORY_CONSOLIDATION_FINAL.md).
+CubeGame — единый активный репозиторий. Factoria импортирована в `Factory/` через `git subtree` без squash, с сохранением Git-истории. Ветка `codex/factoria-unification`, [PR #17](https://github.com/alfuwerce-art/CubeGame/pull/17). База `integration/m0-all` не изменена.
+
+**Разрешено:** проверить Git-файлы, сравнить SHA, согласовать инструкции, внутренние ссылки, CI и отчёт. **Запрещено:** разработка игры, Unity-сцен, манекенов, генераторов и новых производственных моделей.
+
+**HUMAN_MALE_BASE_V1:** `REVIEW_CLOSED / NOT_SELECTED` (21.11.2026), [исторический отчёт](../Factory/docs/HUMAN_MALE_BASE_V1_REVIEW.md). Новый вариант пока не выбран.
+
+[Roadmap G0–G15](ROADMAP.md) и [открытые вопросы](design/OPEN_DECISIONS.md) сохраняются. Новые игровые стадии не открыты.
+
+**Ограничение:** неотслеживаемые и игнорируемые файлы локального D: не доступны для Git-переноса. Отдельную Factoria и резервные копии сохранять. Ни merge, ни архивирование оригинала без решения владельца.
