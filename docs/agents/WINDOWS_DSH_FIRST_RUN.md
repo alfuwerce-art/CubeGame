@@ -30,26 +30,35 @@ Get-Command dsh,node,git -ErrorAction SilentlyContinue | Select-Object Name,Comm
 
 9 skills лежат в `.dsh/skills/<skill>/SKILL.md` **только в ревью-ветке #20** (7 добавлены в #20 поверх 2 из #19). На рантайме выбирать директорию, где лежат эти файлы.
 
-Рекомендуемый способ без нарушения текущей рабочей копии: сначала из `D:\Projects\CubeGame` выполнить `git fetch origin review/ai-game-development-suite-20261121`, затем создать **отдельный Git worktree** как sibling, если папка свободна:
+Владелец решил использовать **только существующее рабочее пространство** `D:\Projects\CubeGame`, без дополнительного каталога и worktree. Факт: установлен DSH Desktop `0.2.2-rc.1`, команды `node` и `dsh` не найдены в PATH, каталог `.dsh/skills` отсутствует в текущей ветке `codex/character-production-contracts`. В этой ветке старые AGENTS/ACTIVE_STAGE ещё описывают Factoria; это **не** текущий утверждённый режим работы.
+
+**Сначала только навыки и read-only discovery**, без перезаписи старых документов:
 
 ```powershell
-git -C 'D:\Projects\CubeGame' worktree add -b local/harness-eval 'D:\Projects\CubeGame-Harness-Review' 'origin/review/ai-game-development-suite-20261121'
+cd 'D:\Projects\CubeGame'
+git status --short --branch
+# Если есть изменения — не переключать ветку, сначала разобраться.
+git switch -c local/dsh-setup-20261121
+git restore --source=origin/review/ai-game-development-suite-20261121 --worktree -- .dsh/skills
+Get-ChildItem '.dsh\skills' -Directory | Select-Object Name
+git status --short --branch
 ```
 
-Это новая рабочая папка **того же Git-репозитория**, не новый самостоятельный проект Factoria. Не выполнять без просмотра `git status`, версии Git и существующих worktree. Не перезаписывать существующий путь. Дальнейшие тесты/CLI выполнять в новой папке (а не слепо в `D:\Projects\CubeGame`).
+`git switch -c` создаёт лишь новую **ветку в том же каталоге**, оставляя исходный `codex/character-production-contracts` неизменным. `git restore --worktree` копирует **только** каталог навыков из PR #20; файлы проекта, AGENTS и память не перезаписываются, а новые файлы будут видны как untracked. Ожидается **9** навыков. Для первой проверки использовать только обзор каталога — не разрешать производство игровых ассетов и кодирование до синхронизации текущих AGENTS/ACTIVE_STAGE и зависимых документов. Ветка `local/dsh-setup-20261121` не каноническая и не требует push.
+
 
 ## 3. Проверка в DSH Desktop
 
-1. Открыть DeepSeek Harness Desktop → выбранную рабочую папку review worktree.
+1. Открыть DeepSeek Harness Desktop → уже существующую рабочую папку `D:\Projects\CubeGame`.
 2. Зафиксировать фактическую версию из **About DeepSeek Harness** (не ориентироваться на README из master как на установленную версию).
-3. Проверить наличие skills через модельный каталог или явный вызов `/cubegame-doc-audit`; убедиться, что DSH прочитал полный `SKILL.md`, а не придумал содержание.
+3. Проверить **только обнаружение имён девяти skills** в каталоге и загрузку одного без исполнения. Не запускать `cubegame-doc-audit` до обновления AGENTS/ACTIVE_STAGE и поддерживающих документов.
 4. Дать сначала **read-only** задачу: `Прочитай AGENTS, ACTIVE_STAGE и CONCEPT. Расскажи список доступных project skills, не меняй файлы.`
 5. Затем проверить возможности PowerShell и sandbox в UI. Не повышать права без необходимости.
 6. Плагины, отсутствующие в установленной версии, сначала искать через локальный менеджер; устанавливать только после отдельного решения и проверки совместимости, пакетов и лицензий.
 
 ## 4. Проверки скриптов и прав
 
-В *review worktree* (`D:\Projects\CubeGame-Harness-Review`), после установки Node:
+В **существующей папке CubeGame** после выборочного переноса `tools/harness` в отдельной рабочей ветке и установки Node:
 
 ```powershell
 node --test tools/harness/hook-pretool.test.mjs
