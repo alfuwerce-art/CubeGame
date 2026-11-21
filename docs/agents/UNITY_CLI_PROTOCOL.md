@@ -1,7 +1,7 @@
 # CubeGame — Unity CLI: инструкция для DeepSeek
 
 **Дата:** 2026-11-02
-**Статус:** ACTIVE tooling protocol. Не является подтверждением успешных Unity-тестов.
+**Статус:** исторический протокол диагностики CLI. Команды проверяются на текущем окружении; для активной разработки действуют [AGENTS](../../AGENTS.md), [ACTIVE_STAGE](../ACTIVE_STAGE.md), [D96](../decisions/D96-ai-harness-unreal-research.md). Не является подтверждением успешных Unity-тестов.
 **Источник фактов:** команды и вывод PowerShell, предоставленные продюсером, плюс отчёты агента.
 
 ## Что уже известно и что НЕ надо повторять
@@ -18,9 +18,9 @@
 
 ## 1. Правила запуска в DSH
 
-1. Сначала `AGENTS.md`, `docs/ACTIVE_STAGE.md`, `docs/stages/S01_UNITY_PILOT.md`, этот документ.
+1. Сначала `AGENTS.md`, `PROJECT_MEMORY.md`, `docs/ACTIVE_STAGE.md`, `docs/CONCEPT.md`, этот документ и профильный [Unity skill](../../.dsh/skills/cubegame-unity-editor-automation/SKILL.md). Исторический S01 читать только при работе с этим старым пилотом.
 2. Новая сессия только `cubegame-dev`, `workspace-write` + `ask`; не включать `danger-full-access`/never ради Unity.
-3. Работать на ветке `stage/s01-unity-pilot` для кода пилота. Перед переключением проверять `git status` и несохранённые файлы, особенно `plugins/` и `.unity-install/`.
+3. Рабочую ветку брать **из разрешённого текущего TASK**, не автоматически `stage/s01-unity-pilot` (эта ветка историческая). Проверить `git status` до любых переключений и не трогать несохранённые файлы, особенно `plugins/` и `.unity-install/`.
 4. Unity Editor пишет в `AppData/Local/Unity` и `AppData/LocalLow/Unity`; если sandbox запрещает доступ — **BLOCKED_SANDBOX**, попросить продюсера запустить одобренную команду в обычном PowerShell. Не ослаблять защиту компьютера.
 5. Для Unity-аккаунта пользователь сам входит в Hub и активирует Unity Personal. Не запрашивать пароль, ключи/токены не записывать в Git. Проверку лицензии выполнять лишь безопасными командами CLI.
 6. Не использовать Unity Cloud, Unity VCS, платные сервисы, сторонние MCP или `unity setup` без отдельного обоснования и разрешения.
@@ -45,7 +45,7 @@ unity doctor --help
 
 Убедиться, что текущая ветка содержит Unity-проект и `ProjectSettings/ProjectVersion.txt` фиксирует 6000.3.27f2. Если лицензия не активна, указать точные UI-действия пользователю для Unity Hub и **не** заявлять успех.
 
-## 3. Реальный пилот: что надо сделать
+## 3. Исторический S01-пилот — только при отдельном разрешении
 
 1. Не менять версию Editor и не открывать проект в 6.6. Для открытия выбрать 6.3 в Hub или через `unity open`, уточнив аргументы `unity open --help`; указать точный путь проекта.
 2. Сначала успешный импорт/компиляция проекта в Unity 6.3. Только потом EditMode и PlayMode тесты, сборка сцены и Windows player.
@@ -88,3 +88,9 @@ COMMIT=
 Официальные материалы:
 - https://docs.unity.com/en-us/unity-cli/use-unity-cli
 - https://docs.unity.com/en-us/unity-cli/unity-pipeline/unity-pipeline-package
+
+## D96 — дополнение для работы через скрипты
+
+Сначала сравнить возможности уже доступного Unity CLI и Editor scripting для конкретного `TASK`. Создание одного узкого C# Editor скрипта допускается только по разрешённому scope, с dry-run/идемпотентностью, записью изменяемых ассетов и подтверждённым логом импорта/сборки. Протокол тестирования и ручного Windows Player сохраняется. Не ставить Unity MCP или пакеты редактора автоматически ради «удобства».
+
+[Навыки](SKILLS_INDEX.md) · [DSH plugins](DSH_PLUGIN_EVALUATION.md) · [Dependency Map](../architecture/DEPENDENCY_MAP.md). Unreal scripting исследуется отдельно по [UE spike](../research/UNREAL_SCRIPTING_SPIKE.md) и **не** заменяет Unity CLI.
