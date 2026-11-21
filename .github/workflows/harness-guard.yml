@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'tools/harness/**'
+      - 'tools/experiments/unreal/**'
+      - '.github/workflows/harness-guard.yml'
       - '.dsh/**'
       - 'docs/**'
       - 'AGENTS.md'
