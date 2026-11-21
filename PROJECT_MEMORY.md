@@ -24,7 +24,7 @@ CubeGame — самостоятельная локальная Windows-first 3D 
 ## Текущая задача и передача
 
 **Код этапа** `REPOSITORY_UNIFICATION`
-**Результат ревизии** `IN_PROGRESS`
+**Результат ревизии** `READY_FOR_OWNER_REVIEW`
 
 Выполнен Git subtree импорт Factoria `60f984c81b73448d79e8d2e4c57cbc19c20a9393` в CubeGame `Factory/`, с сохранением обеих линий истории и бинарных файлов. Текущая работа — единый [PR #17](https://github.com/alfuwerce-art/CubeGame/pull/17), сверка файлов, документации и CI. Старые PR #16 и Factoria #2 — исторические предшественники, не сливать отдельно до решения владельца. Игровая разработка не разрешена. Локальные ignored/untracked файлы D: остаются вне Git-переноса. [Отчёт](docs/reports/FACTORY_REPOSITORY_UNIFICATION.md).
 
