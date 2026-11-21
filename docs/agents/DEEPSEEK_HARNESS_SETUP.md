@@ -65,3 +65,9 @@
 - Перед потенциальным подключением PreToolUse: испытать актуальное имя инструмента `pwsh` (а не только `bash`) и `tool_input.command/workdir`; убедиться в реальном hook dispatch, deny и sandbox. Пример JSON сам ничего не включает.
 - Отсутствующий Blender, Unreal, Visual Studio toolchain, сторонний Skill/MCP или специализированный LSP означает `NOT_INSTALLED`, а не успешную работу. Не требовать инструменты, которые **не нужны** конкретной Unity-задаче.
 - Для оценки качества ИИ использовать [HARNESS_EVALUATION](HARNESS_EVALUATION.md) и [QUALITY_ATTRIBUTES](../QUALITY_ATTRIBUTES.md): одинаковый SHA, фиксированные критерии, измерение ошибок и ручных исправлений, независимая игровая проверка.
+
+## Первый локальный запуск (сначала этот шаг)
+
+[WINDOWS_DSH_FIRST_RUN.md](WINDOWS_DSH_FIRST_RUN.md) — фактический план настройки на Windows с read-only PowerShell-аудитом `tools/harness/windows/Inspect-Dsh.ps1`. PR #18/#19/#20 не объединены; **не ожидать** этих файлов в прежнем локальном checkout. Для испытания использовать отдельный worktree того же репозитория, не делать `reset --hard`.
+
+Не включать `dsh-hooks-claude-code` в Desktop по умолчанию: официальная реализация в `packages/experimental/hooks-claude-code` работает с **одним process-wide configPath**, а ошибки запуска могут пропускаться. Сначала проверить навыки, PowerShell/sandbox и встроенные возможности установленной версии; только потом исследовать hook bridge в изолированном профиле. Путь к официальным docs: https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/experimental/hooks-claude-code/README.md .
