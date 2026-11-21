@@ -4,7 +4,7 @@
 
 CubeGame — самостоятельная локальная Windows-first 3D action RPG на Unity. Основной цикл: создать героя → исследовать процедурные регионы → сражаться, добывать ресурсы, торговать и развиваться → взаимодействовать с NPC и фракциями → увидеть последствия. Мир даёт цели, но выбор пути и союзников остаётся за игроком. [GDD](docs/GDD.md) · [D93](docs/decisions/D93-development-pivot-own-game.md).
 
-CubeGame владеет GDD, Roadmap, архитектурой, продуктовыми решениями и игровым экспортом после интеграционного ревью. Factoria владеет производственными моделями, модульными элементами, ригами, анимациями, DCC-скриптами, ComfyUI workflows и техническими измерениями. Общий контракт зафиксирован в [CubeGame](docs/architecture/CHARACTER_ASSET_HANDOFF.md) и применяется Factoria. [Ревизия Factoria](https://github.com/alfuwerce-art/factoria/pull/2).
+**Единственный активный репозиторий — CubeGame.** CubeGame владеет дизайном, архитектурой, игрой и встроенным производством. Бывшая Factoria находится в [`Factory/`](Factory/README.md): модели, риги, модули, DCC-скрипты, ComfyUI workflows и измерения. [Контракт](docs/architecture/CHARACTER_ASSET_HANDOFF.md) теперь внутренний. Отдельный [Factoria](https://github.com/alfuwerce-art/factoria) сохранён как исторический источник, не как рабочий репозиторий.
 
 ## Архитектура и действующий дизайн
 
@@ -23,13 +23,13 @@ CubeGame владеет GDD, Roadmap, архитектурой, продукто
 
 ## Текущая задача и передача
 
-**Код этапа** `REPOSITORY_CONSOLIDATION_FINAL`
-**Результат ревизии** `READY_FOR_OWNER_REVIEW`
+**Код этапа** `REPOSITORY_UNIFICATION`
+**Результат ревизии** `IN_PROGRESS`
 
-Сейчас разрешены аудит, документация, организация и проверки документов. Игровой код, Unity, PlayMode, модели, риги, новый генератор и ComfyUI не задействуются. Следующее разрешённое действие — ревью владельцем [CubeGame PR #16](https://github.com/alfuwerce-art/CubeGame/pull/16) и [Factoria PR #2](https://github.com/alfuwerce-art/factoria/pull/2). Для дальнейших работ получить конкретный объём. [Активная задача](docs/ACTIVE_STAGE.md) · [Финальная ревизия](docs/reports/REPOSITORY_CONSOLIDATION_FINAL.md).
+Выполнен Git subtree импорт Factoria `60f984c81b73448d79e8d2e4c57cbc19c20a9393` в CubeGame `Factory/`, с сохранением обеих линий истории и бинарных файлов. Текущая работа — единый [PR #17](https://github.com/alfuwerce-art/CubeGame/pull/17), сверка файлов, документации и CI. Старые PR #16 и Factoria #2 — исторические предшественники, не сливать отдельно до решения владельца. Игровая разработка не разрешена. Локальные ignored/untracked файлы D: остаются вне Git-переноса. [Отчёт](docs/reports/FACTORY_REPOSITORY_UNIFICATION.md).
 
 ## Роли и обновление
 
-Владелец принимает решения, этапы, визуал и merge. ChatGPT помогает с дизайном/архитектурой и ревью. Codex ведёт проверку документации, контракта и Git. DeepSeek Harness выполняет отдельно поручённые задачи Factoria и замеры. Базы ревью — `integration/m0-all` и `factory/work`, рабочие ветки — `codex/character-production-contracts` и `codex/character-production-workspace`. Перед новыми изменениями сверяйте GitHub и рабочее дерево.
+Владелец принимает решения, этапы, визуал и merge. ChatGPT помогает с дизайном/архитектурой и ревью. Codex ведёт проверку документации, контракта и Git. DeepSeek Harness выполняет отдельно поручённые задачи Factoria и замеры. Единственная база ревью — `integration/m0-all`, новая ветка — `codex/factoria-unification`; прошлые ветки Factoria сохранены исторически. Перед новыми изменениями сверяйте GitHub и рабочее дерево.
 
 После явного решения обновить факт и следующий шаг в этой памяти, записать дату и источник в реестре и синхронизировать GDD, Roadmap, активную задачу и производственную память, если они затронуты. Технические доказательства, старые статусы и отклонённые кандидаты остаются в отчётах, решениях и Git.
