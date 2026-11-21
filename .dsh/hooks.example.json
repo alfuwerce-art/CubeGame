@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/harness/hook-pretool.mjs",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
