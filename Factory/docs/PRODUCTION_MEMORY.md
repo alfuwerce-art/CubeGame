@@ -1,7 +1,7 @@
 # Производственная память Factoria
 
 **Код этапа** `REPOSITORY_UNIFICATION`
-**Результат ревизии** `IN_PROGRESS`
+**Результат ревизии** `READY_FOR_OWNER_REVIEW`
 
 ## Что ведёт Factory
 
