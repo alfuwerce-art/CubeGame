@@ -1,0 +1,123 @@
+{
+  "stage": "PREP-03/comfyui_api_smoke",
+  "url": "http://127.0.0.1:8188",
+  "python": "3.13.14",
+  "stages": {
+    "server_ready": {
+      "ok": true,
+      "detail": "waited=0.0s version=0.45.0"
+    },
+    "web_ui_available": {
+      "ok": true,
+      "detail": "status=200 bytes=19885"
+    },
+    "nodes_available": {
+      "ok": true,
+      "detail": "{\"EmptyImage\": [\"batch_size\", \"color\", \"height\", \"width\"], \"SaveImage\": [\"filename_prefix\", \"images\"]}"
+    },
+    "submit_prompt": {
+      "ok": true,
+      "detail": "status=200 prompt_id=644328f4-fa41-4002-a22e-4f755a87f1e2"
+    },
+    "workflow_executed": {
+      "ok": true,
+      "detail": "1.0s status=success"
+    },
+    "result_saved": {
+      "ok": true,
+      "detail": "D:\\Projects\\CubeGame Factory\\outputs\\comfyui\\prep03_smoke_from_api.png dims=[96, 96] bytes=504"
+    },
+    "queue_idle": {
+      "ok": true,
+      "detail": "running=0 pending=0"
+    }
+  },
+  "numbers": {
+    "server_ready_after_s": 0.0,
+    "system_stats": {
+      "comfyui_version": "0.45.0",
+      "python_version": "3.13.14 (tags/v3.13.14:fd17997, Jun 10 2026, 13:03:48) [MSC v.1944 64 bit (AMD64)]",
+      "pytorch_version": "2.14.1+cu130",
+      "os": "win32",
+      "ram_total": 33546633216,
+      "ram_free": 19920166912,
+      "device_name": "cpu",
+      "device_type": "cpu",
+      "vram_total": 33546633216,
+      "vram_free": 19920093184,
+      "torch_vram_total": 33546633216
+    },
+    "ui_bytes": 19885,
+    "ui_has_root_div": false,
+    "node_schemas": {
+      "EmptyImage": [
+        "batch_size",
+        "color",
+        "height",
+        "width"
+      ],
+      "SaveImage": [
+        "filename_prefix",
+        "images"
+      ]
+    },
+    "prompt_response": {
+      "prompt_id": "644328f4-fa41-4002-a22e-4f755a87f1e2",
+      "number": 0,
+      "node_errors": {}
+    },
+    "execution_seconds": 1.0,
+    "job_status": {
+      "status_str": "success",
+      "completed": true,
+      "messages": [
+        [
+          "execution_start",
+          {
+            "prompt_id": "644328f4-fa41-4002-a22e-4f755a87f1e2",
+            "timestamp": 1794570125428
+          }
+        ],
+        [
+          "execution_cached",
+          {
+            "nodes": [],
+            "prompt_id": "644328f4-fa41-4002-a22e-4f755a87f1e2",
+            "timestamp": 1794570125429
+          }
+        ],
+        [
+          "execution_success",
+          {
+            "prompt_id": "644328f4-fa41-4002-a22e-4f755a87f1e2",
+            "timestamp": 1794570125462
+          }
+        ]
+      ]
+    },
+    "output_images": [
+      {
+        "filename": "factoria_prep03_smoke_00007_.png",
+        "subfolder": "",
+        "type": "output",
+        "metadata": {
+          "kind": "image",
+          "width": 96,
+          "height": 96
+        },
+        "id": "171346b8-d977-4b24-873b-6047fccb7db9"
+      }
+    ],
+    "image_bytes": 504,
+    "image_dimensions": [
+      96,
+      96
+    ]
+  },
+  "issues": [],
+  "artifacts": {
+    "image_from_api": "D:\\Projects\\CubeGame Factory\\outputs\\comfyui\\prep03_smoke_from_api.png"
+  },
+  "seconds_total": 1.06,
+  "result": "PASS"
+}

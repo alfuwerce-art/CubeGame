@@ -10,7 +10,9 @@ on:
       - 'README.md'
   push:
     branches:
-      - 'review/harness-layering-20261121'
+      - main
+      - integration/m0-all
+      - 'review/**'
     paths:
       - 'tools/harness/**'
       - '.dsh/**'

@@ -1,0 +1,177 @@
+{
+  "task": "COMFY-STYLE-12",
+  "workflow_name": "MANNEQUIN_V1",
+  "date": "2026-11-17",
+  "scope": {
+    "race": "HUMAN",
+    "gender": "MALE",
+    "view": "FRONT",
+    "pose": "T-POSE"
+  },
+  "contract": "docs/tasks/COMFY-STYLE-12_MANNEQUIN_V1.md",
+  "stack": {
+    "checkpoint": "sd_xl_base_1.0.safetensors",
+    "checkpoint_sha256": "31e35c80fc4829d14f90153f4c74cd59c90b779f6afe05a74cd6120b893f7e5b",
+    "lora": "VoxelXL_v1.safetensors",
+    "lora_sha256": "7d9a5f11e1b38d97f75d2b84bfb5bb3bf95cd0e5f2500b002d13374eb4f88b5c",
+    "lora_license": "openrail (Fictiverse VoxelXL) - the only voxel LoRA allowed here",
+    "controlnet": "controlnet-union-sdxl-1.0.safetensors",
+    "controlnet_sha256": "a9e13fd61f3193887791c8a0dd07a07202174dc47d5ddaea94ea1344f07c7467",
+    "controlnet_union_type": "canny/lineart/anime_lineart/mlsd",
+    "ipadapter": "NOT_CONNECTED",
+    "img2img": "NOT_CONNECTED",
+    "initial_latent": "EmptyLatentImage",
+    "ral_vxl": "NOT_USED (FACT-D21 production license blocker)",
+    "new_weights_downloaded": false
+  },
+  "sampling": {
+    "width": 768,
+    "height": 1024,
+    "batch": 1,
+    "seed": 20261117,
+    "steps": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "scheduler": "karras",
+    "denoise": 1.0,
+    "lora_model": 0.6,
+    "lora_clip": 0.6,
+    "controlnet_strength": 0.6,
+    "controlnet_start": 0.0,
+    "controlnet_end": 1.0,
+    "canny_low": 0.35,
+    "canny_high": 0.75
+  },
+  "runtime": {
+    "comfyui": "0.45.0",
+    "python": "3.13.14",
+    "pytorch": "2.14.1+cu130",
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "vram_total_mb": 8188,
+    "install": "D:\\programs\\ComfyUI",
+    "launch_flags": [
+      "--windows-standalone-build",
+      "--disable-auto-launch",
+      "--port 8188",
+      "--novram",
+      "--reserve-vram 5",
+      "--disable-assets",
+      "--disable-all-custom-nodes",
+      "--offline"
+    ],
+    "custom_nodes_required": false,
+    "cold_start_seconds": 255.4,
+    "cli_help_verified": "main.py --help of the installed 0.45.0 lists --novram, --reserve-vram, --disable-assets, --disable-all-custom-nodes, --offline"
+  },
+  "guide_plates": {
+    "V1_planes": {
+      "file": "outputs/factory/mannequin_v1/MANNEQUIN_GUIDE_V1_PLANES.png",
+      "sha256": "88dd31927552157ecff9fc27359050d8f5b0d20ece17af1d73c96ac1b6cd2d29",
+      "variant": "planes",
+      "note": "per-part top/side/bottom bands; archived byte-identical copy of the plate used by the PRIMARY run"
+    },
+    "V2_solid": {
+      "file": "outputs/factory/mannequin_v1/MANNEQUIN_GUIDE_V2.png",
+      "sha256": "571e4fb8068b112423f388ebc20528489bf1c0f739dbcf46d02dd06f73868de7",
+      "variant": "solid"
+    },
+    "V3_stepped_ring": {
+      "file": "outputs/factory/mannequin_v1/MANNEQUIN_GUIDE_V3.png",
+      "sha256": "b22a75279dc7c466f0ac1ab7078e47e4473a0a2d38fc7a2c002dcf0f0238bba1",
+      "variant": "ring"
+    },
+    "V4_approved_ring": {
+      "file": "outputs/factory/mannequin_v1/MANNEQUIN_GUIDE_V4.png",
+      "sha256": "269d974dc6bd7bf987c85cd912ce6649cb47da24eb69c792d1b765354fb112ad",
+      "variant": "mask_ring",
+      "silhouette_source": "outputs/factory/human_base_front_v2/HUMAN_MALE_FRONT_POSE_SILHOUETTE.png",
+      "silhouette_sha256": "c849c7d5998c99f512e8c6eac6098d3d27b617776c64be2117d15f4f6e735bca",
+      "canny_sha256": "ccd27239a40bdf43e5224ba9b07ed8b49d7c66ecd7208934da056de213355c94",
+      "role": "control input of the review candidate MANNEQUIN_V1_DIAG3"
+    }
+  },
+  "cases": [
+    {
+      "case": "MANNEQUIN_V1_PRIMARY",
+      "role": "primary run with the contract parameters",
+      "guide": "V1_planes",
+      "api_json": "measurements/comfy_style_12/MANNEQUIN_V1_PRIMARY.api.json",
+      "manifest": "measurements/comfy_style_12/MANNEQUIN_V1_PRIMARY.manifest.json",
+      "result_png": "outputs/factory/mannequin_v1/run1/MANNEQUIN_V1_00001_.png",
+      "result_sha256": "20fe48b3c32d3b30befd72992cd91bed12709399f736abd79f0262aeb6b021cb",
+      "seconds": 64.0,
+      "peak_rss_mb": 13635,
+      "vram_before_mb": 1619,
+      "vram_peak_mb": 3710,
+      "vram_delta_mb": 2091,
+      "min_free_ram_gb": 5.37,
+      "verdict": "volumetric and clearly voxel, but the body reads as separate floating slabs: the guide's per-part rectangles were followed literally"
+    },
+    {
+      "case": "MANNEQUIN_V1_DIAG1",
+      "role": "diagnostic 1 - guide without inner boxes (variant solid)",
+      "guide": "V2_solid",
+      "api_json": "measurements/comfy_style_12/MANNEQUIN_V1_DIAG1.api.json",
+      "manifest": "measurements/comfy_style_12/MANNEQUIN_V1_DIAG1.manifest.json",
+      "result_png": "outputs/factory/mannequin_v1/run_diag1/MANNEQUIN_V1_DIAG1_00001_.png",
+      "result_sha256": "5ff20f69bead27954a737047dbe88345930f4cf7390c458ac1c2af70f00d5802",
+      "seconds": 43.1,
+      "peak_rss_mb": 13654,
+      "vram_before_mb": 1700,
+      "vram_peak_mb": 3769,
+      "vram_delta_mb": 2069,
+      "min_free_ram_gb": 6.07,
+      "verdict": "REJECTED: single thin contour was too weak - the frame drifted to a smooth realistic mannequin, arms down, face and hair present"
+    },
+    {
+      "case": "MANNEQUIN_V1_DIAG2",
+      "role": "diagnostic 2 - stepped block silhouette with one inset bevel ring",
+      "guide": "V3_stepped_ring",
+      "api_json": "measurements/comfy_style_12/MANNEQUIN_V1_DIAG2.api.json",
+      "manifest": "measurements/comfy_style_12/MANNEQUIN_V1_DIAG2.manifest.json",
+      "result_png": "outputs/factory/mannequin_v1/run_diag2/MANNEQUIN_V1_DIAG2_00001_.png",
+      "result_sha256": "a869e57baccdfd0f96638e0d8815f2c2e58ed79db86425701f2e202d1aa8d9fc",
+      "seconds": 42.2,
+      "peak_rss_mb": 13657,
+      "vram_before_mb": 1698,
+      "vram_peak_mb": 3767,
+      "vram_delta_mb": 2069,
+      "min_free_ram_gb": 5.92,
+      "verdict": "T-pose, empty head and single grey material held, but the stepped silhouette still split the body into detached slabs"
+    },
+    {
+      "case": "MANNEQUIN_V1_DIAG3",
+      "role": "diagnostic 3 - approved FRONT silhouette + one inset bevel ring",
+      "guide": "V4_approved_ring",
+      "api_json": "measurements/comfy_style_12/MANNEQUIN_V1_DIAG3.api.json",
+      "manifest": "measurements/comfy_style_12/MANNEQUIN_V1_DIAG3.manifest.json",
+      "result_png": "outputs/factory/mannequin_v1/run_diag3/MANNEQUIN_V1_DIAG3_00001_.png",
+      "result_sha256": "b36a9eb4f9651568618b2344d9a9192dfac2898eae4fdf0370b67d1b8313979f",
+      "seconds": 43.1,
+      "peak_rss_mb": 13657,
+      "vram_before_mb": 1694,
+      "vram_peak_mb": 3767,
+      "vram_delta_mb": 2073,
+      "min_free_ram_gb": 5.93,
+      "verdict": "REVIEW CANDIDATE: one coherent full-body block figure, T-pose, empty head, one grey material, readable volumes"
+    }
+  ],
+  "review_candidate": {
+    "case": "MANNEQUIN_V1_DIAG3",
+    "workflow": "workflows/character_factory/mannequin/MANNEQUIN_V1.json",
+    "workflow_sha256": "3028c5fad07a17309291d53ef535bb1dd4e553b7fa0ecb6ee11c8f1ff9b9a28f",
+    "graph_is_identical_to": "measurements/comfy_style_12/MANNEQUIN_V1_DIAG3.api.json (only filename_prefix differs)",
+    "result_png": "outputs/factory/mannequin_v1/run_diag3/MANNEQUIN_V1_DIAG3_00001_.png",
+    "comparison_sheet": "outputs/factory/mannequin_v1/MANNEQUIN_V1_COMPARISON.jpg"
+  },
+  "budget": {
+    "ram_limit_gb": 15,
+    "ram_peak_gb": 13.66,
+    "ram_verdict": "WITHIN",
+    "vram_limit_delta_gb": 2,
+    "vram_delta_gb": 2.02,
+    "vram_verdict": "EXCEEDED_BY_25_MIB (whole-card measurement, includes desktop/other-app noise)"
+  },
+  "status": "READY_FOR_OWNER_VISUAL_REVIEW",
+  "owner_decision": "PENDING"
+}

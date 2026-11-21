@@ -1,46 +1,10 @@
-# CubeGame — PROJECT MEMORY
+# CubeGame — краткая межчатовая память
+**Обновлено:** 2026-11-21. **Репозиторий:** alfuwerce-art/CubeGame.
 
-**Дата обновления:** 2026-11-21  
-**Единственный рабочий репозиторий:** `alfuwerce-art/CubeGame`  
-**Действующее решение:** [D95 — закрытие производственного конвейера](docs/decisions/D95-single-repository-close-model-pipeline.md).  
-**Активная задача:** [REPOSITORY_SINGLE_SOURCE_CLEANUP](docs/ACTIVE_STAGE.md) — пакет на ревью владельца.
+**Игра:** самостоятельная PC/Windows-first 3D action RPG на Unity. Авторский детализированный voxel/pixel 3D, процедурные регионы, бой, прогрессия, экипировка, поселения, живые NPC, фракции, квесты, последствия и долговременные сохранения. [GDD](docs/GDD.md) содержит детали, [Roadmap](docs/ROADMAP.md) — G0–G15.
 
-## Игра
+**Канон:** `docs/GDD.md` + `docs/design/DECISIONS.md`; архитектура — модульный монолит ADR-0001. Не подменять открытые решения догадками. `archive/` — только история, не рабочие инструкции и не источник ассетов релиза.
 
-CubeGame — самостоятельная локальная Windows-first 3D action RPG на Unity. Главные направления: процедурные регионы, исследование, контактный бой, добыча, RPG-прогрессия, живые NPC, фракции, торговля, квесты и последствия действий. Авторский визуал — детализированный voxel/pixel с атмосферным светом. Подробности: [GDD](docs/GDD.md), [Roadmap](docs/ROADMAP.md), [решения](docs/design/DECISIONS.md).
+**Рабочие агенты:** DeepSeek Harness и Codex; ChatGPT — проектирование и ревью. Пресет DSH `cubegame-dev`, каталог `D:\Projects\CubeGame`. По локальному отчёту: DSH 0.2.2-rc.1, девять skills доступны, preflight/validate пройдены, Unity 6000.3.27f2 собирается и проходит EditMode/PlayMode. Это отчёт агента, а не независимая проверка ChatGPT. Права DSH `danger-full-access`/`approval: never` выбраны владельцем; ограничения рабочих задач обязательны. Подключение PreToolUse hook в реальном DSH не доказано. Отчёт Unity CI и скрипт `unity_ci.ps1` пока локальны.
 
-## Главное решение 21.11.2026
-
-- Разработка игры и всех будущих материалов ведётся в **CubeGame**, не в отдельном производственном репозитории.
-- Автоматизированный конвейер создания моделей **закрыт**; прежние производственные ТЗ, Factory, ComfyUI Style Lock, Tripo, манекены и пакеты автоматизированных ригов **не являются действующей архитектурой, разрешёнными работами или принятым результатом**.
-- [D94](https://github.com/alfuwerce-art/CubeGame/commits/codex/character-production-contracts/docs/decisions/D94-g3-humanoid-modular-appearance.md) отменён как техническая стратегия. Способ создания моделей **не выбран**.
-- Требования к расам, редактору персонажа, разнообразию внешности NPC, анимациям, оружию и визуальному стилю остаются требованиями **к игре**, а не обязательствами использовать какую-либо фабрику.
-
-## Архитектура и этапы
-
-- Одобрен модульный монолит одного Unity-проекта ([ADR-0001](docs/architecture/ADR-0001-modular-monolith.md)).
-- Действует разворот к собственной игре [D93](docs/decisions/D93-development-pivot-own-game.md); перенос Alpha больше не является целью релиза. Старые M0/Alpha-отчёты — историческая доказательная база.
-- Стадии G0–G15 перечислены в [Roadmap](docs/ROADMAP.md). G3 — **персонажи и игровой редактор**, без предварительно утверждённого производственного конвейера и без принятого манекена.
-- Расовая основа: семь рас из D63; Frogman исключён. Редкие NPC Фильдор — первый публичный одиночный релиз по игровым решениям D80/D92. Конкретный состав редактора остаётся открытым.
-
-## Текущая работа
-
-Сверить и очистить активные документы от отменённых обязательств, перенести только пригодные независимые исследовательские данные в CubeGame и закрыть несоответствующие производственные PR. Не запускать Unity/ComfyUI/Blender/Tripo как часть документационного аудита. Действие после ревью — отдельный выбор дальнейшего пути производства первого игрового персонажа и текущей игровой задачи.
-
-## Роли и Git
-
-Владелец принимает продуктовые решения, визуал и merge. ChatGPT — проектирование и ревью; DeepSeek Harness и Codex — исполнители порученных работ. GitHub — источник статуса. Перед задачей читать этот файл, [ACTIVE_STAGE](docs/ACTIVE_STAGE.md) и [AGENTS.md](AGENTS.md). Агент не выдаёт `READY_FOR_OWNER_REVIEW` за `ACCEPTED`. История экспериментов доступна через Git, но не определяет активные решения.
-
-## AI harness — ревью 21.11.2026
-
-По запросу владельца подготовлен отдельный **кандидат** разделённой обвязки в ветке `review/harness-layering-20261121`, поверх D95 review. Общий вход [Concept](docs/CONCEPT.md), метод [HARNESS_ARCHITECTURE](docs/agents/HARNESS_ARCHITECTURE.md), [HARNESS_EVALUATION](docs/agents/HARNESS_EVALUATION.md); локальная интеграция в [DEEPSEEK_HARNESS_SETUP](docs/agents/DEEPSEEK_HARNESS_SETUP.md). Skills, preflight и пример hook **не означают изменения установленного DSH**: нужны версии, установка/проверка в локальном `cubegame-dev`, негативные тесты и решение владельца. GDD/игровые механики не менялись. Не возвращать закрытый конвейер.
-
-## D96 — обобщение трёх подходов (кандидат на ревью)
-
-21.11.2026 владелец поручил сохранить архитектуру документации из первого видео, Harness² из второго, Unreal scripting и словарь имён из третьего; подготовить skills/plugins для DeepSeek. В ветке `review/ai-game-development-suite-20261121` зафиксированы [D96](docs/decisions/D96-ai-harness-unreal-research.md), [сравнение](docs/agents/AI_WORKFLOW_COMPARISON.md), [skills](docs/agents/SKILLS_INDEX.md), [plugins](docs/agents/DSH_PLUGIN_EVALUATION.md), [Unreal spike](docs/research/UNREAL_SCRIPTING_SPIKE.md), [Art](docs/art/ART_DIRECTION.md), [Quality](docs/QUALITY_ATTRIBUTES.md), [Name Registry](docs/architecture/NAME_REGISTRY.md) и [Dependency Map](docs/architecture/DEPENDENCY_MAP.md). Игра остаётся Unity; Unreal-эксперимент требует отдельного разрешения. Factory остаётся закрытой; никакой skill/plugin не считается установленным на Windows без фактической проверки.
-
-**AI-исполнители:** DeepSeek Harness и Codex. Claude/Claude Code исключены из активного рабочего стека и сравнения; старые видео — лишь источники идей. Официальное имя hook-bridge, если упоминается, не означает использование Claude.
-
-## D97 — установленный DeepSeek Harness на Windows
-
-DSH Desktop 0.2.2-rc.1, workspace `D:\\Projects\\CubeGame`, preset `cubegame-dev`, модель `deepseek-official/deepseek-flash`; 9 проектных skills обнаружены. Пользователь намеренно оставляет `danger-full-access` + `approval: never`; не менять права без его решения. Требуется изоляция глобальных Rogalik-инструментов только для CubeGame, не нарушая работу другого проекта, и перенос проверок `tools/harness`. [D97](docs/decisions/D97-dsh-local-profile-configuration.md) · [локальное задание](docs/agents/DSH_LOCAL_SETUP_03.md).
+**Состояние:** документация и история интегрируются в один GitHub; G1/G2 имеют рабочие кандидаты, но их принятие не подтверждено. G3 — персонажи и редактор, производственный способ ещё не утверждён. Применять [ACTIVE_STAGE](docs/ACTIVE_STAGE.md), [AGENTS](AGENTS.md), task-specific skill и проверенный SHA. Не объявлять этап принятым самостоятельно.

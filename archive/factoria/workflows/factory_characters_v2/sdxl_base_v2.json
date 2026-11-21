@@ -1,0 +1,71 @@
+{
+  "id": "FACTORIA_SDXL_BASE_V2",
+  "version": "1.0",
+  "date": "2026-11-14",
+  "stage": "COMFY-STYLE-06",
+  "status": "EXPERIMENTAL — приёмка только владельцем",
+  "why": "COMFY-STYLE-05 провалил визуальную приёмку: на SDXL-Turbo при CFG 2.0 LoRA Fictiverse не влияет, RAL даёт игрушечный вид. Здесь тот же стилевой блок проверяется на обычном SDXL Base 1.0 при CFG 5–7 и 25–30 шагах.",
+
+  "model": {
+    "checkpoint": "sd_xl_base_1.0.safetensors",
+    "family": "Stability AI SDXL Base 1.0 (openrail++)",
+    "size_bytes": 6938078334,
+    "sha256": "31e35c80fc4829d14f90153f4c74cd59c90b779f6afe05a74cd6120b893f7e5b",
+    "source": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0"
+  },
+
+  "style_module": {
+    "file": "VoxelXL_v1.safetensors",
+    "trigger": "voxel style",
+    "strengths": [0.4, 0.6, 0.8],
+    "license": "openrail — коммерческое использование требует отдельной проверки",
+    "ral_policy": "RAL LoRA (ral-vxl) в этом этапе и в производственном контуре НЕ применяется (FACT-D21)"
+  },
+
+  "sampling_sweep": {
+    "steps": [25, 28, 30],
+    "steps_default": 28,
+    "cfg": [5, 6, 7],
+    "cfg_default": 6.0,
+    "samplers": [
+      { "sampler_name": "dpmpp_2m", "scheduler": "karras" },
+      { "sampler_name": "dpmpp_sde", "scheduler": "karras" },
+      { "sampler_name": "euler_ancestral", "scheduler": "normal" }
+    ],
+    "denoise": 1.0,
+    "batch_size": 1,
+    "seed": 777001
+  },
+
+  "resolution": {
+    "main": { "width": 768, "height": 1024 },
+    "diagnostic": { "width": 512, "height": 768 },
+    "note": "1024x1024 не проверяется: на 8 ГБ VRAM при занятых ~1.5 ГБ сторонними приложениями не влезает"
+  },
+
+  "diagnostic_prompt": {
+    "positive": "voxel style, blocky 3D orc warrior, full body, neutral A-pose, pixel textures, plain studio background",
+    "negative": "character sheet, turnaround, multiple views, multiple characters, two characters, collage, cropped head, cropped feet, weapon, text, watermark",
+    "why": "короткий промпт для проверки связности и утечки нескольких фигур; без длинных списков"
+  },
+
+  "character_prompt": {
+    "race_species": "male orc warrior",
+    "body_type": "massive broad-shouldered body, thick neck",
+    "head_face": "heavy protruding lower jaw, two large lower tusks, deep brow ridge, flat broad nose",
+    "clothing_armor": "rough leather tunic, iron-studded left shoulder plate, simple bracers",
+    "palette": "muted green-grey skin, brown leather, dark iron",
+    "pose": "neutral A-pose with arms slightly away from the body",
+    "camera": "three-quarter front view, full body from head to feet",
+    "background": "plain neutral studio background, soft even lighting"
+  },
+
+  "blocks": {
+    "BODY_STYLE_LOCK": "block-built voxel 3D body, cubes of varied sizes (large blocks for the silhouette, medium blocks for anatomy and clothing, small blocks for details), hard-edged planar surfaces, pixel-textured materials over the whole body, chunky readable humanoid proportions, separate readable arms and legs, separated hands and feet, modular body parts",
+    "FACE_STYLE_LOCK": "fully voxel face geometry, skull, brow ridge, cheekbones, nose, jaw and chin built from blocks of different sizes, pixel-textured face consistent with the body materials, adult facial proportions, visible eyes with solid block pupils (not oversized), defined nose bridge, readable mouth, face readable when the model is scaled down to game size",
+    "COMPOSITION": "single character only, one figure, full body from head to feet, neutral A-pose, three-quarter front view, plain neutral studio background, soft even lighting, no props, no weapon, nothing cropped",
+    "NEGATIVE": "character sheet, turnaround, multiple views, multiple characters, two characters, three characters, collage, split image, repeated figures, duplicate, chibi, childlike proportions, oversized eyes, tiny nose, doll face, anime proportions, smooth rounded face, organic realistic skin, plastic cartoon, painterly, primitive face made of a few pixels, caricature, flat 2d pixel art sprite, fused limbs, extra limbs, deformed hands, missing fingers, cropped head, cropped feet, realistic photo, photorealistic, weapon, sword, axe, helmet covering the face, cluttered background, motion blur, extreme perspective, watermark, text, signature"
+  },
+
+  "prompt_long_template": "voxel style, {BODY_STYLE_LOCK}, {FACE_STYLE_LOCK}, {race_species}, {body_type}, face: {head_face}, clothing and armor: {clothing_armor}, palette: {palette}, {pose}, {camera}, {COMPOSITION}"
+}

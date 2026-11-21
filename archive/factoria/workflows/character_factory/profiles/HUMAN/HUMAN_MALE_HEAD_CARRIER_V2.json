@@ -1,0 +1,32 @@
+{
+  "id": "HUMAN_MALE_HEAD_CARRIER_V2",
+  "socket_id": "HUMAN_MALE_HEAD_SOCKET_V1",
+  "status": "FRONT_DESIGN_PROXY",
+  "profile": "workflows/character_factory/profiles/HUMAN/MALE.json",
+  "frame": {
+    "size": [768, 1024],
+    "axis_x": 384,
+    "crown_y": 118,
+    "pixels_per_voxel": 28,
+    "neck_join_y": 359
+  },
+  "planes": {
+    "crown": [[-4.65, 0], [4.65, 0], [4.65, 0.45], [-4.65, 0.45]],
+    "side_left": [[-4.65, 0.27], [-4, 0.27], [-4, 6.99], [-2.8, 6.99], [-2.8, 8], [-3.2, 8], [-3.2, 7.05], [-4.05, 7.05], [-4.05, 6.55], [-4.65, 6.55]],
+    "face_plane": [[-4.05, 0.43], [4.05, 0.43], [4.05, 6.98], [2.9, 6.98], [2.9, 8], [-2.9, 8], [-2.9, 6.98], [-4.05, 6.98]],
+    "ear_left_shape_relative_to_measured_centre": [[-2, -2.07], [0.35, -2.07], [0.35, 1.8], [-0.1, 2], [-1.95, 2]],
+    "ear_left_plane_relative_to_measured_centre": [[-1.78, -1.8], [-0.18, -1.8], [-0.18, 1.55], [-1.73, 1.55]]
+  },
+  "measurements": {
+    "human_v1_approximate_screen_px": {
+      "ears_outer_x": [197, 591],
+      "ears_top_bottom_y": [446, 562],
+      "outer_jaw_step_x": [285, 510],
+      "chin_x": [315, 477],
+      "jaw_step_and_chin_y": [588, 616]
+    },
+    "hidden_crown": "Reference hair occludes the skull crown. Straight top follows the observed rectangular shape of the original Alpha head. Crown height and plane breaks remain design choices.",
+    "source_alpha_asset": "human-head-m01.cub",
+    "source_alpha_stored_blob_sha256": "d0194ecdc946a82fb5110a5b96619081805b6556f53ee80cec9acb343d8b1bff"
+  }
+}

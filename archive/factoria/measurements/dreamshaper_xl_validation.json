@@ -1,0 +1,104 @@
+{
+  "workflows": {
+    "DREAMSHAPER_XL_BASE.json": {
+      "status": "PASS",
+      "prompt_nodes": 7,
+      "outputs": [
+        "8"
+      ],
+      "notes": [],
+      "error": null,
+      "node_errors": null
+    },
+    "DREAMSHAPER_XL_CIVITAI_VOXEL.json": {
+      "status": "PASS",
+      "prompt_nodes": 8,
+      "outputs": [
+        "9"
+      ],
+      "notes": [],
+      "error": null,
+      "node_errors": null
+    },
+    "DREAMSHAPER_XL_CIVITAI_VOXEL_ELF.json": {
+      "status": "PASS",
+      "prompt_nodes": 8,
+      "outputs": [
+        "9"
+      ],
+      "notes": [],
+      "error": null,
+      "node_errors": null
+    },
+    "DREAMSHAPER_XL_CIVITAI_VOXEL_HUMAN.json": {
+      "status": "PASS",
+      "prompt_nodes": 8,
+      "outputs": [
+        "9"
+      ],
+      "notes": [],
+      "error": null,
+      "node_errors": null
+    },
+    "DREAMSHAPER_XL_PIXEL_STYLE.json": {
+      "status": "PASS",
+      "prompt_nodes": 8,
+      "outputs": [
+        "9"
+      ],
+      "notes": [],
+      "error": null,
+      "node_errors": null
+    },
+    "DREAMSHAPER_XL_POSE_CONTROL.json": {
+      "status": "PASS",
+      "prompt_nodes": 8,
+      "outputs": [
+        "14"
+      ],
+      "notes": [
+        "muted (not queued): Canny#7, LineArtPreprocessor#8, DWPreprocessor#9, ControlNetLoader#10",
+        "bypassed (pass-through): ControlNetApplyAdvanced#11"
+      ],
+      "error": null,
+      "node_errors": null
+    },
+    "DREAMSHAPER_XL_REFERENCE_LOCK.json": {
+      "status": "PASS_WITH_OWNER_ACTION",
+      "prompt_nodes": 10,
+      "outputs": [],
+      "notes": [],
+      "error": {
+        "type": "prompt_outputs_failed_validation",
+        "message": "Prompt outputs failed validation",
+        "details": "",
+        "extra_info": {}
+      },
+      "node_errors": {
+        "6": {
+          "errors": [
+            {
+              "type": "custom_validation_failed",
+              "message": "Custom validation failed for node",
+              "details": "image - Invalid image file: factoria_xl_style_reference.png",
+              "extra_info": {
+                "input_name": "image"
+              }
+            }
+          ],
+          "dependent_outputs": [
+            "11"
+          ],
+          "class_type": "LoadImage"
+        }
+      },
+      "needs_owner_action": [
+        "LoadImage#6"
+      ],
+      "expected_gap_hint": {
+        "LoadImage#6": "style/control reference image is not in ComfyUI/input yet (owner step)"
+      }
+    }
+  },
+  "ckpt_substituted": null
+}

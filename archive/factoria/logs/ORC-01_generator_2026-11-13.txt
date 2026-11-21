@@ -1,0 +1,8 @@
+﻿=== ORC-01 generator run 2026-11-13 16:37:18 ===
+python=Python 3.13.14
+workdir=D:\Projects\CubeGame Factory
+exit_code= elapsed_s=0.18 peak_ws_MB=12.9
+stdout:
+{"box_count": 211, "part_count": 20, "triangle_count": 2532, "vertex_count": 1688, "glb_bytes": 71572}
+
+stderr: 

@@ -1,0 +1,645 @@
+{
+  "schema_version": "0.1.0",
+  "example": true,
+  "id": "HUMAN_MALE_V3_CHEST_PACK",
+  "version": "0.1.0",
+  "mannequin_id": "HUMAN_MALE_V3",
+  "race": "HUMAN",
+  "body_form": "MALE_V3",
+  "visual_target": {
+    "path": "references/private/HUMAN_MALE_FEMALE_V3.png",
+    "sha256": "b95e4666a3b3caae543e3ba4663cce8d7f9ad3d026f381cca2231fee04d841c5"
+  },
+  "geometry_source": {
+    "path": "prototypes/mannequin_v3_rig.blend",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "provenance": "PROTOTYPE",
+  "rig": {
+    "id": "HUMAN_RIG_V3",
+    "version": "0.1.0",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "pose": "T_POSE",
+  "units": "m",
+  "axes": "BLENDER_X_LEFT_NEG_Y_FORWARD_Z_UP",
+  "extent_m": [
+    1.4821,
+    0.6,
+    1.8
+  ],
+  "camera_revision": "CHEST_ORTHO_V1",
+  "joints": [
+    {
+      "id": "root",
+      "parent": null,
+      "deform": false,
+      "head_m": [
+        0,
+        0,
+        0
+      ],
+      "tail_m": [
+        0,
+        0,
+        0.14
+      ],
+      "rest_to_root": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "spine_02",
+      "parent": "root",
+      "deform": true,
+      "head_m": [
+        0,
+        0,
+        0.775
+      ],
+      "tail_m": [
+        0,
+        0,
+        1.118
+      ],
+      "rest_to_root": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0.775,
+        0,
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "segments": [
+    {
+      "id": "torso_upper",
+      "bone_id": "spine_02",
+      "center_m": [
+        0,
+        0,
+        0.94
+      ],
+      "extent_m": [
+        0.463,
+        0.28,
+        0.343
+      ]
+    }
+  ],
+  "sockets": [
+    {
+      "id": "CHEST",
+      "bone_id": "spine_02",
+      "bone_local_transform": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0.16,
+        0,
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "slots": [
+    {
+      "id": "CHEST_SLOT",
+      "sockets": [
+        "CHEST"
+      ],
+      "fit_policy": "SEGMENTED_RIGID",
+      "bounds_m": {
+        "min": [
+          -0.6,
+          -0.22,
+          0.72
+        ],
+        "max": [
+          0.6,
+          0.22,
+          1.18
+        ]
+      },
+      "clearance_m": [
+        0.005,
+        0.035
+      ],
+      "landmark_ids": [
+        "collar",
+        "hem"
+      ],
+      "constraints": {
+        "path": "pack/chest_shape_constraints.json",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "collar",
+      "point_m": [
+        0,
+        -0.14,
+        1.115
+      ]
+    },
+    {
+      "id": "hem",
+      "point_m": [
+        0,
+        -0.14,
+        0.76
+      ]
+    }
+  ],
+  "views": [
+    {
+      "id": "FRONT",
+      "slot_id": "CHEST_SLOT",
+      "camera": {
+        "projection": "ORTHO",
+        "target_m": [
+          0,
+          0,
+          0.95
+        ],
+        "target_to_camera": [
+          0,
+          -1,
+          0
+        ],
+        "up": [
+          0,
+          0,
+          1
+        ],
+        "distance_m": 2,
+        "span_m": [
+          1.28,
+          1.28
+        ],
+        "resolution_px": [
+          768,
+          768
+        ],
+        "px_per_m": 600,
+        "near_m": 0.1,
+        "far_m": 5,
+        "world_to_camera": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          -0.95,
+          0,
+          -1,
+          0,
+          -2,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "files": {
+        "carrier_rgb": {
+          "path": "pack/chest/front/carrier.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "silhouette": {
+          "path": "pack/chest/front/silhouette.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "component_id": {
+          "path": "pack/chest/front/component_id.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "material_id": {
+          "path": "pack/chest/front/material_id.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "edit_mask": {
+          "path": "pack/chest/front/edit.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "allowed_mask": {
+          "path": "pack/chest/front/allowed.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "protected_mask": {
+          "path": "pack/chest/front/protected.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "required_mask": {
+          "path": "pack/chest/front/required.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "expected_matte": {
+          "path": "pack/chest/front/expected_matte.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "canny_plate": {
+          "path": "pack/chest/front/canny_plate.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "depth_conditioning": {
+          "file": {
+            "path": "pack/chest/front/control_depth.png",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "near_is_white": true
+        },
+        "depth_metric": {
+          "file": {
+            "path": "pack/chest/front/depth.exr",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "validity": {
+            "path": "pack/chest/front/valid.png",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "units": "m",
+          "space": "camera_axial"
+        }
+      }
+    },
+    {
+      "id": "BACK",
+      "slot_id": "CHEST_SLOT",
+      "camera": {
+        "projection": "ORTHO",
+        "target_m": [
+          0,
+          0,
+          0.95
+        ],
+        "target_to_camera": [
+          0,
+          1,
+          0
+        ],
+        "up": [
+          0,
+          0,
+          1
+        ],
+        "distance_m": 2,
+        "span_m": [
+          1.28,
+          1.28
+        ],
+        "resolution_px": [
+          768,
+          768
+        ],
+        "px_per_m": 600,
+        "near_m": 0.1,
+        "far_m": 5,
+        "world_to_camera": [
+          -1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          -0.95,
+          0,
+          1,
+          0,
+          -2,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "files": {
+        "carrier_rgb": {
+          "path": "pack/chest/back/carrier.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "silhouette": {
+          "path": "pack/chest/back/silhouette.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "component_id": {
+          "path": "pack/chest/back/component_id.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "material_id": {
+          "path": "pack/chest/back/material_id.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "edit_mask": {
+          "path": "pack/chest/back/edit.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "allowed_mask": {
+          "path": "pack/chest/back/allowed.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "protected_mask": {
+          "path": "pack/chest/back/protected.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "required_mask": {
+          "path": "pack/chest/back/required.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "expected_matte": {
+          "path": "pack/chest/back/expected_matte.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "canny_plate": {
+          "path": "pack/chest/back/canny_plate.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "depth_conditioning": {
+          "file": {
+            "path": "pack/chest/back/control_depth.png",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "near_is_white": true
+        },
+        "depth_metric": {
+          "file": {
+            "path": "pack/chest/back/depth.exr",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "validity": {
+            "path": "pack/chest/back/valid.png",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "units": "m",
+          "space": "camera_axial"
+        }
+      }
+    },
+    {
+      "id": "LEFT",
+      "slot_id": "CHEST_SLOT",
+      "camera": {
+        "projection": "ORTHO",
+        "target_m": [
+          0,
+          0,
+          0.95
+        ],
+        "target_to_camera": [
+          1,
+          0,
+          0
+        ],
+        "up": [
+          0,
+          0,
+          1
+        ],
+        "distance_m": 2,
+        "span_m": [
+          1.28,
+          1.28
+        ],
+        "resolution_px": [
+          768,
+          768
+        ],
+        "px_per_m": 600,
+        "near_m": 0.1,
+        "far_m": 5,
+        "world_to_camera": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          -0.95,
+          1,
+          0,
+          0,
+          -2,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "files": {
+        "carrier_rgb": {
+          "path": "pack/chest/left/carrier.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "silhouette": {
+          "path": "pack/chest/left/silhouette.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "component_id": {
+          "path": "pack/chest/left/component_id.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "material_id": {
+          "path": "pack/chest/left/material_id.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "edit_mask": {
+          "path": "pack/chest/left/edit.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "allowed_mask": {
+          "path": "pack/chest/left/allowed.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "protected_mask": {
+          "path": "pack/chest/left/protected.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "required_mask": {
+          "path": "pack/chest/left/required.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "expected_matte": {
+          "path": "pack/chest/left/expected_matte.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "canny_plate": {
+          "path": "pack/chest/left/canny_plate.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "depth_conditioning": {
+          "file": {
+            "path": "pack/chest/left/control_depth.png",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "near_is_white": true
+        },
+        "depth_metric": {
+          "file": {
+            "path": "pack/chest/left/depth.exr",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "validity": {
+            "path": "pack/chest/left/valid.png",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "units": "m",
+          "space": "camera_axial"
+        }
+      }
+    },
+    {
+      "id": "RIGHT",
+      "slot_id": "CHEST_SLOT",
+      "camera": {
+        "projection": "ORTHO",
+        "target_m": [
+          0,
+          0,
+          0.95
+        ],
+        "target_to_camera": [
+          -1,
+          0,
+          0
+        ],
+        "up": [
+          0,
+          0,
+          1
+        ],
+        "distance_m": 2,
+        "span_m": [
+          1.28,
+          1.28
+        ],
+        "resolution_px": [
+          768,
+          768
+        ],
+        "px_per_m": 600,
+        "near_m": 0.1,
+        "far_m": 5,
+        "world_to_camera": [
+          0,
+          -1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          -0.95,
+          -1,
+          0,
+          0,
+          -2,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "files": {
+        "carrier_rgb": {
+          "path": "pack/chest/right/carrier.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "silhouette": {
+          "path": "pack/chest/right/silhouette.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "component_id": {
+          "path": "pack/chest/right/component_id.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "material_id": {
+          "path": "pack/chest/right/material_id.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "edit_mask": {
+          "path": "pack/chest/right/edit.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "allowed_mask": {
+          "path": "pack/chest/right/allowed.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "protected_mask": {
+          "path": "pack/chest/right/protected.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "required_mask": {
+          "path": "pack/chest/right/required.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "expected_matte": {
+          "path": "pack/chest/right/expected_matte.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "canny_plate": {
+          "path": "pack/chest/right/canny_plate.png",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "depth_conditioning": {
+          "file": {
+            "path": "pack/chest/right/control_depth.png",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "near_is_white": true
+        },
+        "depth_metric": {
+          "file": {
+            "path": "pack/chest/right/depth.exr",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "validity": {
+            "path": "pack/chest/right/valid.png",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "units": "m",
+          "space": "camera_axial"
+        }
+      }
+    }
+  ]
+}

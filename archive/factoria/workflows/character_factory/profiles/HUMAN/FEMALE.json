@@ -1,0 +1,144 @@
+{
+  "race": "HUMAN",
+  "gender": "FEMALE",
+  "catalog_path": "data/alpha_character_editor/HUMAN/FEMALE.json",
+  "anatomy": {
+    "body_build": "adult human female, compact cuboid limbs and torso, clean joint separations; use the supplied base body guide for shoulder and limb proportions",
+    "head_shape": "rectangular voxel head with stepped chin and short round-profile ears",
+    "ears": "small bilateral voxel ears; preserve index-0 landmarks",
+    "jaw": "short tapered lower jaw",
+    "skin": "light warm default from Face 01; Face generation uses the chosen Face record for its actual tones",
+    "racial_features": [],
+    "proportions": {
+      "alpha_occupied_head_voxels_xyz": [
+        14,
+        8,
+        8
+      ],
+      "alpha_base_body_voxels_xyz": [
+        10,
+        8,
+        10
+      ],
+      "source": "Alpha catalog; occupied part sizes, not assembled rig or world-height dimensions",
+      "assembled_limb_lengths": "PENDING_OWNER_GUIDE",
+      "assembled_shoulder_width": "PENDING_OWNER_GUIDE"
+    }
+  },
+  "permitted_face": {
+    "source": "catalog_path#/faces",
+    "existing_only": true,
+    "observed_count": 6
+  },
+  "permitted_haircut": {
+    "source": "catalog_path#/haircuts",
+    "existing_only": true,
+    "observed_count": 7
+  },
+  "head_socket": {
+    "id": "HUMAN_FEMALE_HEAD_SOCKET_V1",
+    "status": "PROPOSAL; coordinate basis measured on Alpha Face 01",
+    "reference_face": {
+      "index": 0,
+      "ui_number": 1,
+      "asset_id": "0x4F3",
+      "asset_path": "data1.db/blobs/human-head-f01.cub"
+    },
+    "coordinate_order": "X, depth (+front), Z (+up); +X anatomical right",
+    "units": "one source voxel edge; points are in voxel-boundary coordinates",
+    "occupied_bounds_inclusive": [
+      [
+        2,
+        4,
+        2
+      ],
+      [
+        15,
+        11,
+        9
+      ]
+    ],
+    "local_origin_grid": [
+      9,
+      8,
+      6
+    ],
+    "size_xyz": [
+      14,
+      8,
+      8
+    ],
+    "planes_grid": {
+      "crown_z": 10,
+      "front_depth": 12,
+      "occiput_depth": 4,
+      "neck_z": 2
+    },
+    "forehead_grid_guide": {
+      "z_span": [
+        7,
+        10
+      ],
+      "front_depth_plane": 12,
+      "status": "DESIGN_PROXY"
+    },
+    "ear_centres_grid_left_right": [
+      [
+        4,
+        7,
+        6
+      ],
+      [
+        14,
+        7,
+        6
+      ]
+    ],
+    "ear_landmark": "bbox centres of measured ear-colour regions",
+    "eye_centres_grid_left_right": [
+      [
+        6.5,
+        11.5,
+        5
+      ],
+      [
+        11.5,
+        11.5,
+        5
+      ]
+    ],
+    "eye_landmark": "centres of measured iris voxels in Face 01",
+    "neck_centre_grid": [
+      9,
+      8,
+      2
+    ],
+    "anchor_grid": [
+      9,
+      8,
+      2
+    ],
+    "anchor_status": "DESIGN_PROXY; fit later against body",
+    "scale": "keep reference grid and units constant across views; output px per voxel supplied by reference framing"
+  },
+  "body_socket": {
+    "id": "HUMAN_FEMALE_BODY_SOCKET_V1",
+    "status": "PROPOSAL",
+    "source_body_registry_id": "0x001",
+    "origin": "midpoint between soles at ground plane",
+    "facing": "+depth",
+    "up": "+Z",
+    "neck_anchor": "midpoint of neckline on body guide; align to head socket neck centre",
+    "guide_landmarks": [
+      "sole_plane",
+      "hip_centre",
+      "shoulder_L_R",
+      "elbow_L_R",
+      "wrist_L_R",
+      "knee_L_R",
+      "ankle_L_R",
+      "neck_anchor"
+    ],
+    "scale": "fixed orthographic units per pixel across the four full-body plates"
+  }
+}

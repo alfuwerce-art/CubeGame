@@ -1,0 +1,109 @@
+{
+  "status": "TECHNICAL_PASS / OWNER_VISUAL_REVIEW",
+  "style": "STYLE_LOCK_V1",
+  "style_source_sha256": "b380616fae8931513a176b7c6bccc25aa09b4e26f879b245859010a92aa1356a",
+  "template": "BASE_BODY_V1",
+  "race": "HUMAN",
+  "gender": "FEMALE",
+  "asset_type": "BASE_BODY",
+  "view": "FRONT",
+  "socket": "HUMAN_FEMALE_BODY_SOCKET_V1",
+  "identity_id": "human_female_body_v1",
+  "geometry_revision": "HUMAN_FEMALE_BASE_FRONT_GUIDE_V1",
+  "camera_revision": "COMFY_STYLE_11_BODY_ORTHO_FRONT_V1",
+  "catalog": "data/alpha_character_editor/HUMAN/FEMALE.json",
+  "catalog_sha256": "5a9522ddc5a3fa95a42b81f4785b6a1c365557a7907fd2e8fcf773d681f8a203",
+  "profile_sha256": "f49cc79d111e2940f1246ea72ceaad265b47c0cb85b60e2b5e33c328900f589c",
+  "reference_pack_sha256": "2837db12df9deeddd3cf5d226b785d0c2d3fd9d43ad83fdf9b87a3d3cbba7bb7",
+  "socket_pack_sha256": null,
+  "alpha_option": null,
+  "inputs": {
+    "geometry_guide": {
+      "file": "HUMAN_FEMALE_BASE_FRONT_GUIDE_V1.png",
+      "sha256": "29a7627bd4c480577d9e09a44248735907d1e2482049e027359edbd54a85f3fe"
+    },
+    "anchor_plate": {
+      "file": "HUMAN_FEMALE_BASE_FRONT_GUIDE_V1.png",
+      "sha256": "29a7627bd4c480577d9e09a44248735907d1e2482049e027359edbd54a85f3fe"
+    }
+  },
+  "model": {
+    "checkpoint": "DreamShaperXL_Turbo_v2_1.safetensors",
+    "checkpoint_sha256": "4496b36d48bfd7cfe4e5dbce3485db567bcefa2bef7238d290dbd45612125083",
+    "lora": "ral-vxl.safetensors",
+    "lora_sha256": "9dc480ee98c12a499bee1fc19ee0e13969a3c6b14be0e6ec133a11d563e83a25",
+    "lora_author": "RalFinger",
+    "strength_model": 0.6,
+    "strength_clip": 0.6,
+    "license_decision": "docs/decisions/FACT-D21-civitai-voxel-lora-license.md"
+  },
+  "sampling": {
+    "seed": 20261114,
+    "seed_mode": "fixed",
+    "steps": 28,
+    "cfg": 5,
+    "sampler_name": "dpmpp_2m",
+    "scheduler": "normal",
+    "denoise": 0.35
+  },
+  "controlnet": {
+    "model": "controlnet-union-sdxl-1.0.safetensors",
+    "sha256": "a9e13fd61f3193887791c8a0dd07a07202174dc47d5ddaea94ea1344f07c7467",
+    "union_type": "canny/lineart/anime_lineart/mlsd",
+    "low_threshold": 0.35,
+    "high_threshold": 0.75,
+    "strength": 0.9,
+    "start_percent": 0,
+    "end_percent": 1,
+    "resize_method": "nearest-exact",
+    "crop": "disabled"
+  },
+  "ipadapter": null,
+  "hair_color": null,
+  "output_prefix": "HUMAN_FEMALE_BASE_FRONT_V1",
+  "production_status": "EXPERIMENTAL / LICENSE_BLOCKED_FOR_PRODUCTION",
+  "graph_sha256": "2ac9d211c626dee784c66f586aac7dc9dd41d50b516279636f0a6970d9064c35",
+  "result": {
+    "file": "HUMAN_FEMALE_BASE_FRONT_V1.png",
+    "sha256": "fcd9908a36a084755875713942fd4f08ac3b9257f93949c154e4fafe5515748e",
+    "prompt_id": "803d303c-578d-4393-af21-17d6db5f9eda",
+    "size": [
+      768,
+      1024
+    ],
+    "seconds": 43.3,
+    "memory_mib": {
+      "vram_card_start": 5082,
+      "vram_card_peak": 7168,
+      "comfy_rss_start": 13009,
+      "comfy_rss_peak": 13044,
+      "system_available_ram_start": 5244,
+      "system_available_ram_min": 5170
+    }
+  },
+  "checks_numeric": {
+    "foreground_method": "largest 8-connected component with >=16 lower median RGB brightness than measured background",
+    "background_rgb_median": [
+      159,
+      159,
+      158
+    ],
+    "guide_bbox_xyxy_exclusive": [
+      92,
+      174,
+      677,
+      851
+    ],
+    "bbox_xyxy_exclusive": [
+      92,
+      173,
+      678,
+      852
+    ],
+    "rendered_silhouette_iou_vs_guide": 0.9828,
+    "left_right_mirror_iou_about_x384": 0.9891,
+    "wrist_x90_134_center_y": 416.01,
+    "wrist_x634_678_center_y": 416.52,
+    "foreground_components_over_100_px": 1
+  }
+}

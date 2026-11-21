@@ -1,0 +1,46 @@
+{
+  "reference_id": "OWNER_GOBLIN",
+  "source_filename": "гоблин.png",
+  "source_resolution": [
+    1670,
+    942
+  ],
+  "source_sha256": "dc7abb6a919e167dfea0b5108ab4b610bce341892d9ec2a2a29c286fe1d2d922",
+  "source_rect_xyxy": [
+    676,
+    347,
+    994,
+    730
+  ],
+  "crop_xyxy": [
+    652,
+    323,
+    1018,
+    754
+  ],
+  "mask_bbox_xyxy_source": [
+    691,
+    353,
+    980,
+    693
+  ],
+  "landmarks_px": {
+    "top_y": 357,
+    "chin_y": 556,
+    "shoulders_y": 569,
+    "crotch_y": 660,
+    "sole_y": 726,
+    "width_at_shoulder": 229
+  },
+  "landmarks_method": "Approximate manual landmarks; crown includes hair or headgear where it occludes the skull.",
+  "preprocessing": "COMFY-STYLE-07 prepare_character_reference.segment; OpenCV RNG seed 20261114; largest component; manual boot masks for Elf/Dwarf and full contour for Fildor; 6px margin; nearest-neighbour to fit 736x872; bottom margin 52px; background #9e9e9e",
+  "scale": 2.445183,
+  "input_filename": "style08_goblin.png",
+  "input_sha256": "1083a347a5856ee79cf4aff869f855e2b7161998889aa658b570034a845551db",
+  "input_resolution": [
+    768,
+    1024
+  ],
+  "local_only": true,
+  "mask_correction": null
+}

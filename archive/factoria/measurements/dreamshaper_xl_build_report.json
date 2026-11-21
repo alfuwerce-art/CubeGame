@@ -1,0 +1,44 @@
+{
+  "object_info_source": "measurements\\comfyui_object_info_2026-11-13_full.json",
+  "config": "workflows\\dreamshaper_xl\\prompt_orc_v1.json",
+  "workflows": {
+    "DREAMSHAPER_XL_BASE.json": {
+      "status": "PASS",
+      "nodes": 8,
+      "links": 9,
+      "problems": [],
+      "warnings": [
+        "CheckpointLoaderSimple#2: widget ckpt_name='DreamShaperXL_Turbo_v2_1.safetensors' not in options (file not present locally yet)"
+      ]
+    },
+    "DREAMSHAPER_XL_PIXEL_STYLE.json": {
+      "status": "PASS",
+      "nodes": 9,
+      "links": 11,
+      "problems": [],
+      "warnings": [
+        "CheckpointLoaderSimple#2: widget ckpt_name='DreamShaperXL_Turbo_v2_1.safetensors' not in options (file not present locally yet)"
+      ]
+    },
+    "DREAMSHAPER_XL_REFERENCE_LOCK.json": {
+      "status": "PASS",
+      "nodes": 11,
+      "links": 13,
+      "problems": [],
+      "warnings": [
+        "CheckpointLoaderSimple#2: widget ckpt_name='DreamShaperXL_Turbo_v2_1.safetensors' not in options (file not present locally yet)",
+        "LoadImage#6: widget image='factoria_xl_style_reference.png' not in options (file not present locally yet)"
+      ]
+    },
+    "DREAMSHAPER_XL_POSE_CONTROL.json": {
+      "status": "PASS",
+      "nodes": 14,
+      "links": 16,
+      "problems": [],
+      "warnings": [
+        "CheckpointLoaderSimple#2: widget ckpt_name='DreamShaperXL_Turbo_v2_1.safetensors' not in options (file not present locally yet)",
+        "LoadImage#6: widget image='factoria_xl_pose_source.png' not in options (file not present locally yet)"
+      ]
+    }
+  }
+}

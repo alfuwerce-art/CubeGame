@@ -1,0 +1,76 @@
+﻿=== ORC-01 evidence 2026-11-13 16:44:26 ===
+python=Python 3.13.14
+generated_glb_sha256=e710f317bfd00bd62e0bfcd694cc848071ef8a1e9f6f536ef32bfc3a5368e38f
+roundtrip_glb_sha256=5f6995365d83c2e009f92552de5bbeddd7b5239e6eff21738a2113f0a704f632
+handoff_glb_sha256=a6b0b871f9000100d6caed2ffd16d5d616250489acb3be8b4d5918142d55dd3e
+determinism: run1 == run2 (seed 17) == True; handoff == pre-fix generator output == True; seed 23 differs == True
+--- generator output (последний прогон) ---
+{
+  "status": "EXPERIMENTAL_GEOMETRY_ONLY_NOT_GAME_READY",
+  "input": "NEW_ORIGINAL_PARAMETRIC_ORC_NOT_EXISTING_MESH",
+  "seed": 17,
+  "coordinate_system": "Y_UP_Z_FORWARD_METERS",
+  "style": "modular voxel hard surface, intentional unconnected limbs",
+  "body_parts": {
+    "pelvis": 2,
+    "torso": 78,
+    "head": 9,
+    "eyes": 4,
+    "brows": 2,
+    "mouth": 1,
+    "beard": 10,
+    "hair": 9,
+    "upper_arm_L": 24,
+    "forearm_L": 8,
+    "hand_L": 4,
+    "upper_arm_R": 24,
+    "forearm_R": 8,
+    "hand_R": 4,
+    "thigh_L": 5,
+    "shin_L": 5,
+    "foot_L": 2,
+    "thigh_R": 5,
+    "shin_R": 5,
+    "foot_R": 2
+  },
+  "has_skeleton": false,
+  "has_animation": false,
+  "has_emotions": false,
+  "artist_approved": false,
+  "status_note": "Do not assert visual acceptance or conversion of Alpha/CubeGame assets.",
+  "metrics": {
+    "box_count": 211,
+    "part_count": 20,
+    "triangle_count": 2532,
+    "vertex_count": 1688,
+    "glb_bytes": 71904
+  }
+}
+--- glb_inspect_handoff_original ---
+issues=6 notes=1 boxes=211 verts=1688 tris=2532 colors=60
+  ISSUE: unexpected cross-part intersections: 4 pairs
+  ISSUE: COLOR_0 Р±РµР· normalized=true: 20 РјРѕРґСѓР»РµР№ (С†РІРµС‚Р° Р±СѓРґСѓС‚ Р±РµР»С‹РјРё)
+  ISSUE: СЃРµРіРјРµРЅС‚С‹ СЃРѕРїСЂРёРєР°СЃР°СЋС‚СЃСЏ РёР»Рё РїРµСЂРµСЃРµРєР°СЋС‚СЃСЏ: upper_arm_L->forearm_L
+  ISSUE: СЃРµРіРјРµРЅС‚С‹ СЃРѕРїСЂРёРєР°СЃР°СЋС‚СЃСЏ РёР»Рё РїРµСЂРµСЃРµРєР°СЋС‚СЃСЏ: upper_arm_R->forearm_R
+  ISSUE: СЃРµРіРјРµРЅС‚С‹ СЃРѕРїСЂРёРєР°СЃР°СЋС‚СЃСЏ РёР»Рё РїРµСЂРµСЃРµРєР°СЋС‚СЃСЏ: shin_L->foot_L
+  ISSUE: СЃРµРіРјРµРЅС‚С‹ СЃРѕРїСЂРёРєР°СЃР°СЋС‚СЃСЏ РёР»Рё РїРµСЂРµСЃРµРєР°СЋС‚СЃСЏ: shin_R->foot_R
+  NOTE: hair: РІСЃРµ 9 Р±РѕРєСЃРѕРІ РѕРґРЅРѕРіРѕ СЂР°Р·РјРµСЂР° (РґРёР·Р°Р№РЅ, РЅРµ РґРµС„РµРєС‚)
+--- glb_inspect_generated ---
+issues=0 notes=1 boxes=211 verts=1688 tris=2532 colors=60
+  NOTE: hair: РІСЃРµ 9 Р±РѕРєСЃРѕРІ РѕРґРЅРѕРіРѕ СЂР°Р·РјРµСЂР° (РґРёР·Р°Р№РЅ, РЅРµ РґРµС„РµРєС‚)
+--- glb_inspect_roundtrip ---
+issues=0 notes=1 boxes=0 verts=5064 tris=2532 colors=60
+  NOTE: coarse AABB mode: РІРµСЂС€РёРЅС‹ СЂР°Р·Р±РёС‚С‹ РїРѕ РЅРѕСЂРјР°Р»СЏРј (Blender-СЌРєСЃРїРѕСЂС‚), Р°РЅР°Р»РёР· РїРµСЂРµСЃРµС‡РµРЅРёР№ РїРѕ РѕС‚РґРµР»СЊРЅС‹Рј Р±РѕРєСЃР°Рј РЅРµРґРѕСЃС‚СѓРїРµРЅ
+--- Blender run summary ---
+ORC01_REPORT=D:\Projects\CubeGame Factory\outputs\prototypes\orc_01\reports\blender_roundtrip.json
+ORC01_RESULT=PASS
+ORC01_STAGE import_glb=PASS :: 20 mesh objects, 0.1s
+ORC01_STAGE geometry_integrity=PASS :: verts=1688 tris=2532 min_face_area=0.00077 degenerate=[]
+ORC01_STAGE materials_and_colors=PASS :: materials=1 parts_with_vertex_colors=20
+ORC01_STAGE axes_and_scale=PASS :: dimensions(XYZ)=[2.09, 0.9357, 3.13] (ожидается 2.09 × 0.9357 × 3.13)
+ORC01_STAGE independent_editing=PASS :: forearm_L moved, others max delta=0.0m
+ORC01_STAGE limb_gaps_visible=PASS :: {"arm_L": {"upper_arm_L->forearm_L": {"gap_z_m": 0.0275, "separated": true}, "forearm_L->hand_L": {"gap_z_m": 0.045, "separated": true}}, "arm_R": {"upper_arm_R->forearm_R": {"gap_z_m": 0.0275, "separated": true}, "forearm_R->hand_R": {"gap_z_m": 0.045, "separated": true}}, "leg_L": {"thigh_L->shin_L": {"gap_z_m": 0.0425, "separated": true}, "shin_L->foot_L": {"gap_z_m": 0.02, "separated": true}}, "leg_R": {"thigh_R->shin_R": {"gap_z_m": 0.0425, "separated": true}, "shin_R->foot_R": {"gap_z_m": 0.02, "separated": true}}}
+ORC01_STAGE save_blend=PASS :: D:\Projects\CubeGame Factory\outputs\prototypes\orc_01\blender\orc01_modular.blend (118424 B)
+ORC01_STAGE export_glb=PASS :: D:\Projects\CubeGame Factory\outputs\prototypes\orc_01\blender\orc01_roundtrip.glb (207336 B, 0.07s)
+ORC01_STAGE glb_roundtrip=PASS :: {"object_count": 20, "object_names_match": true, "raw_vertices": 5064, "unique_positions": 1688, "unique_positions_original": 1688, "positions_identical": true, "triangles": 2532, "per_part_triangles_match": true, "dimensions": [2.09, 0.9357, 3.13], "materials": 1, "parts_with_vertex_colors": 20, "bbox_min": [-1.045, -0.53, 0.0], "bbox_max": [1.045, 0.4057, 3.13]}
+ORC01_STAGE render_three_views=PASS :: {"front": {"path": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_front.png", "seconds": 1.98, "bytes": 1027636}, "side": {"path": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_side.png", "seconds": 1.46, "bytes": 1002964}, "three_quarter": {"path": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_three_quarter.png", "seconds": 1.93, "bytes": 1059266}}

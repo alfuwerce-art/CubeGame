@@ -1,0 +1,280 @@
+{
+  "id": "BASE_BODY_V2",
+  "asset_type": "BASE_BODY",
+  "allowed_views": [
+    "FRONT"
+  ],
+  "positive": "(one full-body adult human male stylized voxel character base:1.2), (exact straight-on orthographic front view, symmetric T-pose with both full arms straight out horizontally at shoulder height:1.3), open gap below each arm, straight legs, both block hands and bare block feet fully visible, square feature-free head, short distinct neck, compact solid body with broad shoulders, (large coherent cuboid masses with visible depth and deliberate stepped voxel silhouettes:1.25), coarse volumetric cuboids with visible top and side planes, broad flat planes that catch soft directional light, contact occlusion between stepped volumes, neutral warm stone-gray matte surface on the entire figure, a few large modular contour steps, plain neutral grey studio background, soft grounding shadow",
+  "negative": "(eyes, eyebrows, mouth, nose mark, facial features, hair, beard, headgear:1.3), (sword, weapon, costume, shirt, tunic, trousers, shorts, underwear, belt, armour, shoulder pads, gloves, boots, shoes, straps, accessories:1.3), paper cutout, flat low-poly, cardboard, extrusion of a flat silhouette, thick outline, cel border, Minecraft, tiny noisy cubes, large bevels, muscle definition, anatomical markings, realistic skin, angled arms, A-pose, bent knees, extra limbs, multiple characters, cropped extremities, three-quarter camera",
+  "graph": {
+    "checkpoint": {
+      "class_type": "CheckpointLoaderSimple",
+      "_meta": {
+        "title": "DreamShaper XL Turbo v2.1"
+      },
+      "inputs": {
+        "ckpt_name": "$checkpoint"
+      }
+    },
+    "lora": {
+      "class_type": "LoraLoader",
+      "_meta": {
+        "title": "ral-vxl (experimental only)"
+      },
+      "inputs": {
+        "model": [
+          "checkpoint",
+          0
+        ],
+        "clip": [
+          "checkpoint",
+          1
+        ],
+        "lora_name": "$lora",
+        "strength_model": "$strength_model",
+        "strength_clip": "$strength_clip"
+      }
+    },
+    "positive": {
+      "class_type": "CLIPTextEncode",
+      "_meta": {
+        "title": "Style + profile + requested module + view"
+      },
+      "inputs": {
+        "clip": [
+          "lora",
+          1
+        ],
+        "text": "$positive_prompt"
+      }
+    },
+    "negative": {
+      "class_type": "CLIPTextEncode",
+      "_meta": {
+        "title": "Style and module exclusions"
+      },
+      "inputs": {
+        "clip": [
+          "lora",
+          1
+        ],
+        "text": "$negative_prompt"
+      }
+    },
+    "geometry_guide": {
+      "class_type": "LoadImage",
+      "_meta": {
+        "title": "Pose only: binary FRONT silhouette"
+      },
+      "inputs": {
+        "image": "$geometry_guide"
+      }
+    },
+    "guide_scale": {
+      "class_type": "ImageScale",
+      "_meta": {
+        "title": "Fixed framing (no crop)"
+      },
+      "inputs": {
+        "image": [
+          "geometry_guide",
+          0
+        ],
+        "upscale_method": "$resize_method",
+        "width": "$width",
+        "height": "$height",
+        "crop": "$crop"
+      }
+    },
+    "edges": {
+      "class_type": "Canny",
+      "_meta": {
+        "title": "External silhouette edges (pose control)"
+      },
+      "inputs": {
+        "image": [
+          "guide_scale",
+          0
+        ],
+        "low_threshold": "$low_threshold",
+        "high_threshold": "$high_threshold"
+      }
+    },
+    "controlnet": {
+      "class_type": "ControlNetLoader",
+      "_meta": {
+        "title": "ControlNet Union SDXL"
+      },
+      "inputs": {
+        "control_net_name": "$controlnet"
+      }
+    },
+    "canny_mode": {
+      "class_type": "SetUnionControlNetType",
+      "_meta": {
+        "title": "Canny / lineart union type"
+      },
+      "inputs": {
+        "control_net": [
+          "controlnet",
+          0
+        ],
+        "type": "$union_type"
+      }
+    },
+    "guide_conditioning": {
+      "class_type": "ControlNetApplyAdvanced",
+      "_meta": {
+        "title": "Geometry conditioning"
+      },
+      "inputs": {
+        "positive": [
+          "positive",
+          0
+        ],
+        "negative": [
+          "negative",
+          0
+        ],
+        "control_net": [
+          "canny_mode",
+          0
+        ],
+        "image": [
+          "edges",
+          0
+        ],
+        "strength": "$control_strength",
+        "start_percent": "$control_start",
+        "end_percent": "$control_end"
+      }
+    },
+    "sampler": {
+      "class_type": "KSampler",
+      "_meta": {
+        "title": "One controlled view"
+      },
+      "inputs": {
+        "model": [
+          "style_conditioning",
+          0
+        ],
+        "positive": [
+          "guide_conditioning",
+          0
+        ],
+        "negative": [
+          "guide_conditioning",
+          1
+        ],
+        "latent_image": [
+          "latent",
+          0
+        ],
+        "seed": "$seed",
+        "steps": "$steps",
+        "cfg": "$cfg",
+        "sampler_name": "$sampler_name",
+        "scheduler": "$scheduler",
+        "denoise": "$denoise"
+      }
+    },
+    "decode": {
+      "class_type": "VAEDecode",
+      "_meta": {
+        "title": "Decoded RGB view"
+      },
+      "inputs": {
+        "samples": [
+          "sampler",
+          0
+        ],
+        "vae": [
+          "checkpoint",
+          2
+        ]
+      }
+    },
+    "latent": {
+      "class_type": "EmptyLatentImage",
+      "_meta": {
+        "title": "Single frame"
+      },
+      "inputs": {
+        "width": "$width",
+        "height": "$height",
+        "batch_size": "$batch_size"
+      }
+    },
+    "save_reference": {
+      "class_type": "SaveImage",
+      "_meta": {
+        "title": "Base body view"
+      },
+      "inputs": {
+        "images": [
+          "decode",
+          0
+        ],
+        "filename_prefix": "$reference_prefix"
+      }
+    },
+    "style_reference": {
+      "class_type": "LoadImage",
+      "_meta": {
+        "title": "Style only: archived Human V1"
+      },
+      "inputs": {
+        "image": "$style_reference"
+      }
+    },
+    "ipadapter_model": {
+      "class_type": "IPAdapterModelLoader",
+      "_meta": {
+        "title": "Installed IPAdapter Plus SDXL ViT-H"
+      },
+      "inputs": {
+        "ipadapter_file": "$ipadapter_model"
+      }
+    },
+    "style_clip": {
+      "class_type": "CLIPVisionLoader",
+      "_meta": {
+        "title": "Installed CLIP Vision ViT-H"
+      },
+      "inputs": {
+        "clip_name": "$clip_vision"
+      }
+    },
+    "style_conditioning": {
+      "class_type": "IPAdapterAdvanced",
+      "_meta": {
+        "title": "Human V1 style attention only"
+      },
+      "inputs": {
+        "model": [
+          "lora",
+          0
+        ],
+        "ipadapter": [
+          "ipadapter_model",
+          0
+        ],
+        "image": [
+          "style_reference",
+          0
+        ],
+        "clip_vision": [
+          "style_clip",
+          0
+        ],
+        "weight": "$style_weight",
+        "weight_type": "style transfer",
+        "combine_embeds": "concat",
+        "start_at": 0.0,
+        "end_at": 0.8,
+        "embeds_scaling": "V only"
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-const required = ['AGENTS.md', 'PROJECT_MEMORY.md', 'docs/ACTIVE_STAGE.md', 'docs/GDD.md', 'docs/ROADMAP.md', 'docs/decisions/D95-single-repository-close-model-pipeline.md'];
+const required = ['AGENTS.md', 'PROJECT_MEMORY.md', 'docs/ACTIVE_STAGE.md', 'docs/GDD.md', 'docs/ROADMAP.md', 'docs/design/DECISIONS.md'];
 const run = (args, cwd) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
 const fail = m => { console.error('BLOCKED:', m); process.exitCode = 2; };
 

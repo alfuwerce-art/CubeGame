@@ -1,0 +1,352 @@
+﻿=== PREP-01 diagnostics 2026-11-13 12:27:46 ===
+--- env_info ---
+PREP01_ENV_JSON={
+  "blender_version": "5.2.4 LTS",
+  "python_version": "3.13.13",
+  "system_info": "Windows",
+  "build_hash": "cd5dc428cce1",
+  "build_date": "2026-11-10",
+  "scripts_dir": "D:\\programs\\Blender\\5.2\\5.2",
+  "user_config_dir": "D:\\Projects\\CubeGame Factory\\environments\\blender\\config",
+  "addons": {
+    "rigify": {
+      "found": true,
+      "version": [
+        0,
+        6,
+        10
+      ],
+      "file": "D:\\programs\\Blender\\5.2\\5.2\\scripts\\addons_core\\rigify\\__init__.py",
+      "enabled": false
+    },
+    "io_scene_fbx": {
+      "found": true,
+      "version": [
+        5,
+        15,
+        0
+      ],
+      "file": "D:\\programs\\Blender\\5.2\\5.2\\scripts\\addons_core\\io_scene_fbx\\__init__.py",
+      "enabled": true
+    },
+    "io_scene_gltf2": {
+      "found": true,
+      "version": [
+        5,
+        2,
+        41
+      ],
+      "file": "D:\\programs\\Blender\\5.2\\5.2\\scripts\\addons_core\\io_scene_gltf2\\__init__.py",
+      "enabled": true
+    },
+    "bl_pkg": {
+      "found": true,
+      "version": [
+        0,
+        0,
+        1
+      ],
+      "file": "D:\\programs\\Blender\\5.2\\5.2\\scripts\\addons_core\\bl_pkg\\__init__.py",
+      "enabled": true
+    },
+    "pose_library": {
+      "found": true,
+      "version": [
+        2,
+        0
+      ],
+      "file": "D:\\programs\\Blender\\5.2\\5.2\\scripts\\addons_core\\pose_library\\__init__.py",
+      "enabled": true
+    }
+  },
+  "fbx_export_available": true,
+  "fbx_import_available": true
+}
+Blender 5.2.4 LTS (hash cd5dc428cce1 built 2026-11-10 01:34:34)
+
+Blender quit
+
+--- prep01_diag_weights.py ---
+Reloading external rigs...
+Reloading external metarigs...
+Fetch rig.
+Clear rig animation data.
+Create widgets collection: 0.001
+Duplicate rig: 0.010
+Instantiate rigs: 0.003
+Initialize rigs: 0.000
+Prepare bones: 0.002
+Generate bones: 5.726
+Parent bones: 0.044
+Configure bones: 0.042
+Preapply bones: 0.015
+Apply bones: 0.006
+Rig bones: 0.057
+Generate widgets: 0.047
+Assign layers: 0.059
+Finalize: 0.061
+The rest: 0.051
+Info: Successfully generated: "rig"
+Warning: Bone Heat Weighting: failed to find solution for one or more bones
+PREP01_DIAG3_JSON={
+  "rig_bones": 706,
+  "rig_deform": 160,
+  "rig_matrix": [
+    [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "case_A_small_cube": {
+    "parent_result": "{'FINISHED'}",
+    "stats": {
+      "groups": 160,
+      "groups_with_weights": 4,
+      "vertices": 8,
+      "unweighted": 0
+    }
+  },
+  "case_B_whole_block": {
+    "parent_result": "{'FINISHED'}",
+    "stats": {
+      "groups": 160,
+      "groups_with_weights": 5,
+      "vertices": 8,
+      "unweighted": 0
+    }
+  },
+  "case_C_boxes": {
+    "parent_result": "{'FINISHED'}",
+    "stats": {
+      "groups": 160,
+      "groups_with_weights": 0,
+      "vertices": 1280,
+      "unweighted": 1280
+    }
+  }
+}
+Blender 5.2.4 LTS (hash cd5dc428cce1 built 2026-11-10 01:34:34)
+
+Blender quit
+
+--- prep01_diag_remesh.py ---
+Reloading external rigs...
+Reloading external metarigs...
+Fetch rig.
+Clear rig animation data.
+Create widgets collection: 0.001
+Duplicate rig: 0.010
+Instantiate rigs: 0.003
+Initialize rigs: 0.000
+Prepare bones: 0.002
+Generate bones: 5.487
+Parent bones: 0.043
+Configure bones: 0.043
+Preapply bones: 0.015
+Apply bones: 0.006
+Rig bones: 0.057
+Generate widgets: 0.046
+Assign layers: 0.058
+Finalize: 0.057
+The rest: 0.051
+Info: Successfully generated: "rig"
+PREP01_DIAG4_JSON={
+  "deform_bones": 160,
+  "verts_before_remesh": 1280,
+  "components_before_remesh": 160,
+  "verts_after_remesh": 4190,
+  "components_after_remesh": 1,
+  "parent_result": "{'FINISHED'}",
+  "groups": 160,
+  "groups_with_weights": 146,
+  "unweighted_vertices": 0,
+  "max_displacement_m": 0.0,
+  "result": "FAIL"
+}
+Blender 5.2.4 LTS (hash cd5dc428cce1 built 2026-11-10 01:34:34)
+
+Blender quit
+
+--- prep01_diag_controls.py ---
+00:00.500  blend            | Read blend: "D:\Projects\CubeGame Factory\outputs\blender\prep01_rigify_skinned.blend"
+PREP01_DIAG5_JSON={
+  "rig": "rig",
+  "mesh": "CG_PREP01_Mannequin",
+  "bones_total": 706,
+  "bone_name_samples": {
+    "arm": [
+      "DEF-forearm.L",
+      "DEF-forearm.L.001",
+      "DEF-forearm.R",
+      "DEF-forearm.R.001",
+      "DEF-upper_arm.L",
+      "DEF-upper_arm.L.001",
+      "DEF-upper_arm.R",
+      "DEF-upper_arm.R.001",
+      "MCH-forearm_ik.L",
+      "MCH-forearm_ik.R",
+      "MCH-forearm_tweak.L",
+      "MCH-forearm_tweak.L.001",
+      "MCH-forearm_tweak.R",
+      "MCH-forearm_tweak.R.001",
+      "MCH-upper_arm_ik_swing.L",
+      "MCH-upper_arm_ik_swing.R",
+      "MCH-upper_arm_ik_target.L",
+      "MCH-upper_arm_ik_target.R",
+      "MCH-upper_arm_ik_target.parent.L",
+      "MCH-upper_arm_ik_target.parent.R",
+      "MCH-upper_arm_parent.L",
+      "MCH-upper_arm_parent.R",
+      "MCH-upper_arm_parent_widget.L",
+      "MCH-upper_arm_parent_widget.R"
+    ],
+    "thigh": [
+      "DEF-thigh.L",
+      "DEF-thigh.L.001",
+      "DEF-thigh.R",
+      "DEF-thigh.R.001",
+      "MCH-thigh_ik_swing.L",
+      "MCH-thigh_ik_swing.R",
+      "MCH-thigh_ik_target.L",
+      "MCH-thigh_ik_target.R",
+      "MCH-thigh_ik_target.parent.L",
+      "MCH-thigh_ik_target.parent.R",
+      "MCH-thigh_parent.L",
+      "MCH-thigh_parent.R"
+    ],
+    "hand": [
+      "DEF-hand.L",
+      "DEF-hand.R",
+      "MCH-hand_fk.L",
+      "MCH-hand_fk.R",
+      "MCH-hand_ik.parent.L",
+      "MCH-hand_ik.parent.R",
+      "MCH-hand_tweak.L",
+      "MCH-hand_tweak.R",
+      "ORG-hand.L",
+      "ORG-hand.R",
+      "hand_fk.L",
+      "hand_fk.R"
+    ]
+  },
+  "bone_collections": [
+    "Face",
+    "Face (Primary)",
+    "Face (Secondary)",
+    "Torso",
+    "Torso (Tweak)",
+    "Fingers",
+    "Fingers (Detail)",
+    "Arm.L (IK)",
+    "Arm.L (FK)",
+    "Arm.L (Tweak)",
+    "Arm.R (IK)",
+    "Arm.R (FK)",
+    "Arm.R (Tweak)",
+    "Leg.L (IK)",
+    "Leg.L (FK)",
+    "Leg.L (Tweak)",
+    "Leg.R (IK)",
+    "Leg.R (FK)",
+    "Leg.R (Tweak)",
+    "Root",
+    "ORG",
+    "MCH",
+    "DEF"
+  ],
+  "weights": {
+    "verts": 3926,
+    "min": 0.7323,
+    "p50": 0.9711,
+    "max": 0.9999,
+    "below_0_98": 2426,
+    "above_1_02": 0
+  },
+  "groups_with_weights": 145,
+  "control_bone_rotation_displacement_m": {
+    "VIS_thigh_ik_pole.L": 0.3805,
+    "VIS_thigh_ik_pole.R": 0.3805,
+    "VIS_upper_arm_ik_pole.L": 0.3805,
+    "VIS_upper_arm_ik_pole.R": 0.3805,
+    "forearm_fk.L": 0.3805,
+    "forearm_fk.R": 0.3805,
+    "forearm_tweak.L": 0.3805,
+    "forearm_tweak.L.001": 0.3805,
+    "forearm_tweak.R": 0.3805,
+    "forearm_tweak.R.001": 0.3805,
+    "shin_fk.L": 0.3805,
+    "shin_fk.R": 0.3805,
+    "shin_tweak.L": 0.3805,
+    "shin_tweak.L.001": 0.3805,
+    "shin_tweak.R": 0.3805,
+    "shin_tweak.R.001": 0.3805,
+    "thigh_fk.L": 0.3805,
+    "thigh_fk.R": 0.691,
+    "thigh_ik.L": 0.3805,
+    "thigh_ik.R": 0.3805,
+    "thigh_ik_target.L": 0.3805,
+    "thigh_ik_target.R": 0.3805,
+    "thigh_parent.L": 0.3805,
+    "thigh_parent.R": 0.3805,
+    "thigh_tweak.L": 0.3805,
+    "thigh_tweak.L.001": 0.3805,
+    "thigh_tweak.R": 0.3805,
+    "thigh_tweak.R.001": 0.3805,
+    "upper_arm_fk.L": 0.4169,
+    "upper_arm_fk.R": 0.3805,
+    "upper_arm_ik.L": 0.3805,
+    "upper_arm_ik.R": 0.3805,
+    "upper_arm_ik_target.L": 0.3805,
+    "upper_arm_ik_target.R": 0.3805,
+    "upper_arm_parent.L": 0.3805,
+    "upper_arm_parent.R": 0.3805,
+    "upper_arm_tweak.L": 0.3805,
+    "upper_arm_tweak.L.001": 0.3805,
+    "upper_arm_tweak.R": 0.3805,
+    "upper_arm_tweak.R.001": 0.3805
+  }
+}
+Blender 5.2.4 LTS (hash cd5dc428cce1 built 2026-11-10 01:34:34)
+scripts disabled for "D:\Projects\CubeGame Factory\outputs\blender\prep01_rigify_skinned.blend", skipping 'rig_ui.py'
+
+Blender quit
+
+--- prep01_diag_controls2.py ---
+00:00.500  blend            | Read blend: "D:\Projects\CubeGame Factory\outputs\blender\prep01_rigify_skinned.blend"
+PREP01_DIAG6_JSON={
+  "trials": {
+    "ik_targets_location": 0.5623,
+    "fk_mode_rotation": 0.3319,
+    "torso_head_rotation": 0.1906
+  },
+  "best": "ik_targets_location",
+  "ik_fk_props": {
+    "upper_arm_parent.L": 0.0,
+    "thigh_parent.R": 0.0
+  }
+}
+Blender 5.2.4 LTS (hash cd5dc428cce1 built 2026-11-10 01:34:34)
+scripts disabled for "D:\Projects\CubeGame Factory\outputs\blender\prep01_rigify_skinned.blend", skipping 'rig_ui.py'
+
+Blender quit
+

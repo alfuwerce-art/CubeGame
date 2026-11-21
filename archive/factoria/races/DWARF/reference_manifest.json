@@ -1,0 +1,98 @@
+{
+  "reference_id": "OWNER_DWARF",
+  "source_filename": "дворф.png",
+  "source_resolution": [
+    1672,
+    941
+  ],
+  "source_sha256": "2c7ace0084d56161f20ad99cd6c7991c7c80d7018ac3ee13a8473e5a39cab0e1",
+  "source_rect_xyxy": [
+    668,
+    344,
+    1000,
+    731
+  ],
+  "crop_xyxy": [
+    644,
+    320,
+    1024,
+    755
+  ],
+  "mask_bbox_xyxy_source": [
+    671,
+    353,
+    986,
+    723
+  ],
+  "landmarks_px": {
+    "top_y": 353,
+    "chin_y": 580,
+    "shoulders_y": 568,
+    "crotch_y": 657,
+    "sole_y": 724,
+    "width_at_shoulder": 280
+  },
+  "landmarks_method": "Approximate manual landmarks; crown includes hair or headgear where it occludes the skull.",
+  "preprocessing": "COMFY-STYLE-07 prepare_character_reference.segment; OpenCV RNG seed 20261114; largest component; manual boot masks for Elf/Dwarf and full contour for Fildor; 6px margin; nearest-neighbour to fit 736x872; bottom margin 52px; background #9e9e9e",
+  "scale": 2.250765,
+  "input_filename": "style08_dwarf.png",
+  "input_sha256": "12f292bc1e719ce9fddb2e0b075a6e59a2f00c1ef5185b5e732a4cb6832153c6",
+  "input_resolution": [
+    768,
+    1024
+  ],
+  "local_only": true,
+  "mask_correction": {
+    "method": "add",
+    "polygon_source_px": [
+      [
+        771,
+        639
+      ],
+      [
+        911,
+        639
+      ],
+      [
+        926,
+        687
+      ],
+      [
+        927,
+        704
+      ],
+      [
+        921,
+        720
+      ],
+      [
+        847,
+        721
+      ],
+      [
+        838,
+        675
+      ],
+      [
+        828,
+        675
+      ],
+      [
+        816,
+        722
+      ],
+      [
+        745,
+        720
+      ],
+      [
+        742,
+        702
+      ],
+      [
+        748,
+        679
+      ]
+    ]
+  }
+}

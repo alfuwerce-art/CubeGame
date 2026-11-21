@@ -7,8 +7,8 @@ const skillsRoot = path.join(root, '.dsh', 'skills');
 const required = [
   'AGENTS.md', 'PROJECT_MEMORY.md', 'docs/ACTIVE_STAGE.md',
   'docs/CONCEPT.md', 'docs/GDD.md', 'docs/ROADMAP.md',
-  'docs/agents/SKILLS_INDEX.md', 'docs/agents/DSH_PLUGIN_EVALUATION.md',
-  'docs/agents/AI_WORKFLOW_COMPARISON.md', 'docs/research/UNREAL_SCRIPTING_SPIKE.md',
+  'docs/agents/SKILLS_INDEX.md', 'docs/agents/HARNESS_ARCHITECTURE.md',
+  'docs/agents/DEEPSEEK_HARNESS_SETUP.md', 'docs/design/DECISIONS.md',
   'docs/architecture/NAME_REGISTRY.md', 'docs/architecture/DEPENDENCY_MAP.md',
   'docs/QUALITY_ATTRIBUTES.md', 'docs/art/ART_DIRECTION.md'
 ];

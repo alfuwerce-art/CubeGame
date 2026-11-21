@@ -1,0 +1,85 @@
+{
+  "id": "FACTORY_TEST_MATRIX_V1",
+  "url": "http://127.0.0.1:8190",
+  "server_pid": 24460,
+  "checkpoint": "DreamShaperXL_Turbo_v2_1.safetensors",
+  "license_notes": {
+    "FICTIVERSE": "REVIEW_REQUIRED — openrail допускает коммерческое использование с use-based restrictions, но это НЕ означает автоматического разрешения; проверять отдельно",
+    "RAL": "FORBIDDEN_FOR_PRODUCTION — только эксперимент; выходы нельзя использовать коммерчески, обучать на них нельзя, в Tripo-конвейер не передавать"
+  },
+  "runs": [
+    {
+      "run_id": "diag_base_512x768",
+      "status": "PASS",
+      "character": "orc",
+      "mode": "BASE",
+      "lora": null,
+      "lora_trigger": null,
+      "lora_strength": null,
+      "lora_license": null,
+      "checkpoint": "DreamShaperXL_Turbo_v2_1.safetensors",
+      "seed": 424242,
+      "resolution": {
+        "width": 512,
+        "height": 768,
+        "preset": "diagnostic"
+      },
+      "steps": 8,
+      "cfg": 2.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "batch_size": 1,
+      "positive_prompt": "block-built voxel 3D body, cubes of varied sizes (large blocks for the silhouette, medium blocks for anatomy and clothing, small blocks for details), hard-edged planar surfaces, pixel-textured materials over the whole body, chunky readable humanoid proportions, separate readable arms and legs, separated hands and feet, modular body parts, fully voxel face geometry, skull, brow ridge, cheekbones, nose, jaw and chin built from blocks of different sizes, pixel-textured face consistent with the body materials, adult facial proportions, visible eyes with solid block pupils (not oversized), defined nose bridge, readable mouth, face readable when the model is scaled down to game size, male orc warrior, male, massive, broad-shouldered, heavy build, thick neck, wide torso, face: heavy protruding lower jaw with underbite, two large lower tusks, deep heavy brow ridge, flat broad nose, scarred green-grey blocky skin, clothing: rough leather tunic with stitched panels, wide belt with metal buckle, armor: iron-studded shoulder plate on the left shoulder, simple bracers, accessories: tribal bone necklace, leather wrist wraps, palette: muted green-grey skin, brown leather, dark iron, ochre accents, neutral A-pose, three-quarter front view, full body from head to feet, neutral A-pose with arms slightly away from the body, legs apart, three-quarter front view, plain neutral studio background, soft even lighting, no props, no weapon, nothing cropped",
+      "negative_prompt": "chibi, childlike proportions, oversized eyes, tiny nose, doll face, anime proportions, smooth rounded face, organic realistic skin, soft sculpted features, plastic cartoon, painterly, primitive face made of a few pixels, caricature, flat 2d pixel art sprite, fused limbs, extra limbs, deformed hands, missing fingers, cropped head, cropped feet, realistic photo, weapon, sword, axe, helmet covering the face, cluttered background, motion blur, extreme perspective, watermark, text, signature, multiple characters",
+      "seconds": 10.3,
+      "peak_rss_mb": 2522,
+      "peak_gpu_used_mb_whole_card": -1,
+      "min_free_ram_gb": 15.41,
+      "samples": 21,
+      "image": "outputs\\factory\\characters\\diag_base_512x768.png",
+      "image_sha256": "8aa1ac4070d4a4c8ba37a78515f4320c74d9a4a9fa1a28c594ebad316dea2b7a",
+      "purpose": "diagnostic",
+      "production_use": "OK"
+    },
+    {
+      "run_id": "diag_fictiverse06_512x768",
+      "status": "PASS",
+      "character": "orc",
+      "mode": "FICTIVERSE",
+      "lora": "VoxelXL_v1.safetensors",
+      "lora_trigger": "voxel style",
+      "lora_strength": 0.6,
+      "lora_license": "REVIEW_REQUIRED — openrail допускает коммерческое использование с use-based restrictions, но это НЕ означает автоматического разрешения; проверять отдельно",
+      "checkpoint": "DreamShaperXL_Turbo_v2_1.safetensors",
+      "seed": 424242,
+      "resolution": {
+        "width": 512,
+        "height": 768,
+        "preset": "diagnostic"
+      },
+      "steps": 8,
+      "cfg": 2.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "batch_size": 1,
+      "positive_prompt": "voxel style, block-built voxel 3D body, cubes of varied sizes (large blocks for the silhouette, medium blocks for anatomy and clothing, small blocks for details), hard-edged planar surfaces, pixel-textured materials over the whole body, chunky readable humanoid proportions, separate readable arms and legs, separated hands and feet, modular body parts, fully voxel face geometry, skull, brow ridge, cheekbones, nose, jaw and chin built from blocks of different sizes, pixel-textured face consistent with the body materials, adult facial proportions, visible eyes with solid block pupils (not oversized), defined nose bridge, readable mouth, face readable when the model is scaled down to game size, male orc warrior, male, massive, broad-shouldered, heavy build, thick neck, wide torso, face: heavy protruding lower jaw with underbite, two large lower tusks, deep heavy brow ridge, flat broad nose, scarred green-grey blocky skin, clothing: rough leather tunic with stitched panels, wide belt with metal buckle, armor: iron-studded shoulder plate on the left shoulder, simple bracers, accessories: tribal bone necklace, leather wrist wraps, palette: muted green-grey skin, brown leather, dark iron, ochre accents, neutral A-pose, three-quarter front view, full body from head to feet, neutral A-pose with arms slightly away from the body, legs apart, three-quarter front view, plain neutral studio background, soft even lighting, no props, no weapon, nothing cropped",
+      "negative_prompt": "chibi, childlike proportions, oversized eyes, tiny nose, doll face, anime proportions, smooth rounded face, organic realistic skin, soft sculpted features, plastic cartoon, painterly, primitive face made of a few pixels, caricature, flat 2d pixel art sprite, fused limbs, extra limbs, deformed hands, missing fingers, cropped head, cropped feet, realistic photo, weapon, sword, axe, helmet covering the face, cluttered background, motion blur, extreme perspective, watermark, text, signature, multiple characters",
+      "seconds": 8.0,
+      "peak_rss_mb": 2826,
+      "peak_gpu_used_mb_whole_card": -1,
+      "min_free_ram_gb": 14.95,
+      "samples": 17,
+      "image": "outputs\\factory\\characters\\diag_fictiverse06_512x768.png",
+      "image_sha256": "88f330b2ea5016659e4e540585341a5443a7a80eedf3fc649184d8e9b8fb9937",
+      "purpose": "diagnostic",
+      "production_use": "REVIEW_REQUIRED"
+    }
+  ],
+  "summary": {
+    "runs": 2,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "total_seconds": 18.3
+  }
+}

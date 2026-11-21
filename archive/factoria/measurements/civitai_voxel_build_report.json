@@ -1,0 +1,36 @@
+{
+  "object_info_source": "measurements\\comfyui_object_info_2026-11-13_full.json",
+  "config": "workflows\\dreamshaper_xl\\prompt_voxel_face_lock_v1.json",
+  "workflows": {
+    "DREAMSHAPER_XL_CIVITAI_VOXEL.json": {
+      "status": "PASS",
+      "nodes": 9,
+      "links": 11,
+      "problems": [],
+      "warnings": [
+        "CheckpointLoaderSimple#2: widget ckpt_name='DreamShaperXL_Turbo_v2_1.safetensors' not in options (file not present locally yet)"
+      ],
+      "positive_prompt_chars": 1080
+    },
+    "DREAMSHAPER_XL_CIVITAI_VOXEL_HUMAN.json": {
+      "status": "PASS",
+      "nodes": 9,
+      "links": 11,
+      "problems": [],
+      "warnings": [
+        "CheckpointLoaderSimple#2: widget ckpt_name='DreamShaperXL_Turbo_v2_1.safetensors' not in options (file not present locally yet)"
+      ],
+      "positive_prompt_chars": 1015
+    },
+    "DREAMSHAPER_XL_CIVITAI_VOXEL_ELF.json": {
+      "status": "PASS",
+      "nodes": 9,
+      "links": 11,
+      "problems": [],
+      "warnings": [
+        "CheckpointLoaderSimple#2: widget ckpt_name='DreamShaperXL_Turbo_v2_1.safetensors' not in options (file not present locally yet)"
+      ],
+      "positive_prompt_chars": 1053
+    }
+  }
+}

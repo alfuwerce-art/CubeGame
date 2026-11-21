@@ -1,0 +1,46 @@
+{
+  "reference_id": "OWNER_SKELETON",
+  "source_filename": "скелет .png",
+  "source_resolution": [
+    1670,
+    942
+  ],
+  "source_sha256": "f70bf62af736512c8ca051fab6d6422874b1ed3102c3090ac9b3a55c7a711335",
+  "source_rect_xyxy": [
+    645,
+    317,
+    985,
+    725
+  ],
+  "crop_xyxy": [
+    621,
+    293,
+    1009,
+    749
+  ],
+  "mask_bbox_xyxy_source": [
+    640,
+    309,
+    973,
+    724
+  ],
+  "landmarks_px": {
+    "top_y": 368,
+    "chin_y": 528,
+    "shoulders_y": 563,
+    "crotch_y": 650,
+    "sole_y": 714,
+    "width_at_shoulder": 235
+  },
+  "landmarks_method": "Approximate manual landmarks; crown includes hair or headgear where it occludes the skull.",
+  "preprocessing": "COMFY-STYLE-07 prepare_character_reference.segment; OpenCV RNG seed 20261114; largest component; manual boot masks for Elf/Dwarf and full contour for Fildor; 6px margin; nearest-neighbour to fit 736x872; bottom margin 52px; background #9e9e9e",
+  "scale": 2.042155,
+  "input_filename": "style08_skeleton.png",
+  "input_sha256": "7dc75b87572b65e783fdf922e5c60a5cfc4b3e9c7b7d598d9d737ba66a432e2a",
+  "input_resolution": [
+    768,
+    1024
+  ],
+  "local_only": true,
+  "mask_correction": null
+}

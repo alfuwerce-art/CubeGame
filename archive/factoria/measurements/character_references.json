@@ -1,0 +1,232 @@
+{
+  "references": {
+    "human_warrior": {
+      "name": "human_warrior",
+      "source": "D:\\Projects\\референсы для CudeGame\\человек без шейдеров.png",
+      "source_sha256": "ffc009dab54bf8f8a37c87ee5c3966cbd14026b51d8109c737b25f3a1c832eeb",
+      "source_size": [
+        1670,
+        942
+      ],
+      "character_rect_source": [
+        700,
+        350,
+        1000,
+        710
+      ],
+      "crop_pad": 30,
+      "crop_box": [
+        670,
+        320,
+        1030,
+        740
+      ],
+      "crop_size": [
+        360,
+        420
+      ],
+      "character_bbox_in_crop": [
+        12,
+        12,
+        316,
+        360
+      ],
+      "character_size_px": [
+        304,
+        348
+      ],
+      "aspect_h_over_w": 1.145,
+      "proportions_from_silhouette": {
+        "head_px": 154,
+        "head_fraction": 0.443,
+        "neck_y": 166,
+        "shoulder_px": 198,
+        "total_px": 348
+      },
+      "tight_size": [
+        316,
+        360
+      ],
+      "reference_scale_integer": 2,
+      "reference_size": [
+        768,
+        1024
+      ],
+      "outputs": {
+        "cutout": {
+          "path": "D:\\Projects\\CubeGame Factory\\references\\characters_v1\\human_warrior_cutout.png",
+          "sha256": "6c921f2067134ee3f922980e8526e6e71d1e66abaf6956066f0a06922fbd4563",
+          "bytes": 271512
+        },
+        "on_neutral": {
+          "path": "D:\\Projects\\CubeGame Factory\\references\\characters_v1\\human_warrior_on_neutral.png",
+          "sha256": "e8673459ed7d35fcfeccf2da902beb20ea184068d7f2b7cf263f0adf558d53fc",
+          "bytes": 101933
+        },
+        "reference": {
+          "path": "D:\\Projects\\CubeGame Factory\\references\\characters_v1\\human_warrior_reference_768x1024.png",
+          "sha256": "569ef0b5a79b24fe9fbb886508a06d50900c25f91738699c0b3bfdb4843d1a08",
+          "bytes": 145372
+        }
+      },
+      "segmentation": "cv2.grabCut (GC_INIT_WITH_MASK), largest component + hole fill, no resampling",
+      "neutral_color_rgb": [
+        158,
+        158,
+        158
+      ]
+    },
+    "elf_ranger": {
+      "name": "elf_ranger",
+      "source": "D:\\Projects\\референсы для CudeGame\\эльф.png",
+      "source_sha256": "245e96156e5e6dc2822ae565b93f8f9b572943d6a72d0e65fc12eba8c467598d",
+      "source_size": [
+        1672,
+        941
+      ],
+      "character_rect_source": [
+        700,
+        340,
+        980,
+        705
+      ],
+      "crop_pad": 30,
+      "crop_box": [
+        670,
+        310,
+        1010,
+        735
+      ],
+      "crop_size": [
+        340,
+        425
+      ],
+      "character_bbox_in_crop": [
+        30,
+        32,
+        302,
+        361
+      ],
+      "character_size_px": [
+        272,
+        329
+      ],
+      "aspect_h_over_w": 1.21,
+      "proportions_from_silhouette": {
+        "head_px": 131,
+        "head_fraction": 0.398,
+        "neck_y": 163,
+        "shoulder_px": 169,
+        "total_px": 329
+      },
+      "tight_size": [
+        284,
+        341
+      ],
+      "reference_scale_integer": 2,
+      "reference_size": [
+        768,
+        1024
+      ],
+      "outputs": {
+        "cutout": {
+          "path": "D:\\Projects\\CubeGame Factory\\references\\characters_v1\\elf_ranger_cutout.png",
+          "sha256": "4638a5c9a582d8eb60cab576a330f93df65d3b63c1d383acac7540d2cfa3cce6",
+          "bytes": 283786
+        },
+        "on_neutral": {
+          "path": "D:\\Projects\\CubeGame Factory\\references\\characters_v1\\elf_ranger_on_neutral.png",
+          "sha256": "983139247d0fdf27898f20dc77c5fc33847a3679a6f01cb996688a1b3f25b584",
+          "bytes": 100156
+        },
+        "reference": {
+          "path": "D:\\Projects\\CubeGame Factory\\references\\characters_v1\\elf_ranger_reference_768x1024.png",
+          "sha256": "c0deaac31245445bf9eb775dbff291f23bdcd7ba3efe4a3c209a0dcbf01aefae",
+          "bytes": 144274
+        }
+      },
+      "segmentation": "cv2.grabCut (GC_INIT_WITH_MASK), largest component + hole fill, no resampling",
+      "neutral_color_rgb": [
+        158,
+        158,
+        158
+      ]
+    },
+    "dwarf_warrior": {
+      "name": "dwarf_warrior",
+      "source": "D:\\Projects\\референсы для CudeGame\\дворф.png",
+      "source_sha256": "2c7ace0084d56161f20ad99cd6c7991c7c80d7018ac3ee13a8473e5a39cab0e1",
+      "source_size": [
+        1672,
+        941
+      ],
+      "character_rect_source": [
+        690,
+        355,
+        990,
+        720
+      ],
+      "crop_pad": 30,
+      "crop_box": [
+        660,
+        325,
+        1020,
+        750
+      ],
+      "crop_size": [
+        360,
+        425
+      ],
+      "character_bbox_in_crop": [
+        25,
+        28,
+        326,
+        370
+      ],
+      "character_size_px": [
+        301,
+        342
+      ],
+      "aspect_h_over_w": 1.136,
+      "proportions_from_silhouette": {
+        "head_px": 61,
+        "head_fraction": 0.178,
+        "neck_y": 89,
+        "shoulder_px": 154,
+        "total_px": 342
+      },
+      "tight_size": [
+        313,
+        354
+      ],
+      "reference_scale_integer": 2,
+      "reference_size": [
+        768,
+        1024
+      ],
+      "outputs": {
+        "cutout": {
+          "path": "D:\\Projects\\CubeGame Factory\\references\\characters_v1\\dwarf_warrior_cutout.png",
+          "sha256": "fbb2c730cf8666b025c88a79ac0ed860607dd90ba486d74bb0b182e389127e8d",
+          "bytes": 251442
+        },
+        "on_neutral": {
+          "path": "D:\\Projects\\CubeGame Factory\\references\\characters_v1\\dwarf_warrior_on_neutral.png",
+          "sha256": "f5c15fc051103791d59c3c0e8d9deaa5beaf81f0da1858ff209e179163052e23",
+          "bytes": 101929
+        },
+        "reference": {
+          "path": "D:\\Projects\\CubeGame Factory\\references\\characters_v1\\dwarf_warrior_reference_768x1024.png",
+          "sha256": "f98731b0c0b11e0f7db6decbadf9705257d025144083d1278b92859cb635a7c8",
+          "bytes": 144299
+        }
+      },
+      "segmentation": "cv2.grabCut (GC_INIT_WITH_MASK), largest component + hole fill, no resampling",
+      "neutral_color_rgb": [
+        158,
+        158,
+        158
+      ]
+    }
+  }
+}

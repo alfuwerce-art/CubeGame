@@ -1,0 +1,118 @@
+16:42:00 | INFO: Data are loaded, start creating Blender stuff
+16:42:00 | INFO: Blender create Mesh node pelvis
+16:42:00 | INFO: Blender create Mesh node torso
+16:42:00 | INFO: Blender create Mesh node head
+16:42:00 | INFO: Blender create Mesh node eyes
+16:42:00 | INFO: Blender create Mesh node brows
+16:42:00 | INFO: Blender create Mesh node mouth
+16:42:00 | INFO: Blender create Mesh node beard
+16:42:00 | INFO: Blender create Mesh node hair
+16:42:00 | INFO: Blender create Mesh node upper_arm_L
+16:42:00 | INFO: Blender create Mesh node forearm_L
+16:42:00 | INFO: Blender create Mesh node hand_L
+16:42:00 | INFO: Blender create Mesh node upper_arm_R
+16:42:00 | INFO: Blender create Mesh node forearm_R
+16:42:00 | INFO: Blender create Mesh node hand_R
+16:42:00 | INFO: Blender create Mesh node thigh_L
+16:42:00 | INFO: Blender create Mesh node shin_L
+16:42:00 | INFO: Blender create Mesh node foot_L
+16:42:00 | INFO: Blender create Mesh node thigh_R
+16:42:00 | INFO: Blender create Mesh node shin_R
+16:42:00 | INFO: Blender create Mesh node foot_R
+16:42:00 | INFO: glTF import finished in 0.02s
+STAGE import_glb: OK 20 mesh objects, 0.1s
+STAGE geometry_integrity: OK verts=1688 tris=2532 min_face_area=0.00077 degenerate=[]
+STAGE materials_and_colors: OK materials=1 parts_with_vertex_colors=20
+STAGE axes_and_scale: OK dimensions(XYZ)=[2.09, 0.9357, 3.13] (ожидается 2.09 × 0.9357 × 3.13)
+STAGE independent_editing: OK forearm_L moved, others max delta=0.0m
+STAGE limb_gaps_visible: OK {"arm_L": {"upper_arm_L->forearm_L": {"gap_z_m": 0.0275, "separated": true}, "forearm_L->hand_L": {"gap_z_m": 0.045, "separated": true}}, "arm_R": {"upper_arm_R->forearm_R": {"gap_z_m": 0.0275, "separated": true}, "forearm_R->hand_R": {"gap_z_m": 0.045, "separated": true}}, "leg_L": {"thigh_L->shin_L": {"gap_z_m": 0.0425, "separated": true}, "shin_L->foot_L": {"gap_z_m": 0.02, "separated": true}}, "leg_R": {"thigh_R->shin_R": {"gap_z_m": 0.0425, "separated": true}, "shin_R->foot_R": {"gap_z_m": 0.02, "separated": true}}}
+Info: Saved as "orc01_modular.blend"
+STAGE save_blend: OK D:\Projects\CubeGame Factory\outputs\prototypes\orc_01\blender\orc01_modular.blend (118424 B)
+INFO Draco is available, use library at D:\programs\Blender\5.2\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at D:\programs\Blender\5.2\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+16:42:00 | INFO: Starting glTF 2.0 export
+16:42:00 | INFO: Extracting primitive: beard
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: brows
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: eyes
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: foot_L
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: foot_R
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: forearm_L
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: forearm_R
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: hair
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: hand_L
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: hand_R
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: head
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: mouth
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: pelvis
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: shin_L
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: shin_R
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: thigh_L
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: thigh_R
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: torso
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: upper_arm_L
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Extracting primitive: upper_arm_R
+16:42:00 | INFO: Primitives created: 1
+16:42:00 | INFO: Finished glTF 2.0 export in 0.040593624114990234 s
+
+STAGE export_glb: OK D:\Projects\CubeGame Factory\outputs\prototypes\orc_01\blender\orc01_roundtrip.glb (207336 B, 0.07s)
+16:42:00 | INFO: Data are loaded, start creating Blender stuff
+16:42:00 | INFO: Blender create Mesh node beard
+16:42:00 | INFO: Blender create Mesh node brows
+16:42:00 | INFO: Blender create Mesh node eyes
+16:42:00 | INFO: Blender create Mesh node foot_L
+16:42:00 | INFO: Blender create Mesh node foot_R
+16:42:00 | INFO: Blender create Mesh node forearm_L
+16:42:00 | INFO: Blender create Mesh node forearm_R
+16:42:00 | INFO: Blender create Mesh node hair
+16:42:00 | INFO: Blender create Mesh node hand_L
+16:42:00 | INFO: Blender create Mesh node hand_R
+16:42:00 | INFO: Blender create Mesh node head
+16:42:00 | INFO: Blender create Mesh node mouth
+16:42:00 | INFO: Blender create Mesh node pelvis
+16:42:00 | INFO: Blender create Mesh node shin_L
+16:42:00 | INFO: Blender create Mesh node shin_R
+16:42:00 | INFO: Blender create Mesh node thigh_L
+16:42:00 | INFO: Blender create Mesh node thigh_R
+16:42:00 | INFO: Blender create Mesh node torso
+16:42:00 | INFO: Blender create Mesh node upper_arm_L
+16:42:00 | INFO: Blender create Mesh node upper_arm_R
+16:42:00 | INFO: glTF import finished in 0.03s
+00:02.890  render           | Saved: 'D:\Projects\CubeGame Factory\outputs\prototypes\orc_01\blender\orc01_front.png'
+00:04.344  render           | Saved: 'D:\Projects\CubeGame Factory\outputs\prototypes\orc_01\blender\orc01_side.png'
+00:06.281  render           | Saved: 'D:\Projects\CubeGame Factory\outputs\prototypes\orc_01\blender\orc01_three_quarter.png'
+STAGE glb_roundtrip: OK {"object_count": 20, "object_names_match": true, "raw_vertices": 5064, "unique_positions": 1688, "unique_positions_original": 1688, "positions_identical": true, "triangles": 2532, "per_part_triangles_match": true, "dimensions": [2.09, 0.9357, 3.13], "materials": 1, "parts_with_vertex_colors": 20, "bbox_min": [-1.045, -0.53, 0.0], "bbox_max": [1.045, 0.4057, 3.13]}
+STAGE render_three_views: OK {"front": {"path": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_front.png", "seconds": 1.98, "bytes": 1027636}, "side": {"path": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_side.png", "seconds": 1.46, "bytes": 1002964}, "three_quarter": {"path": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_three_quarter.png", "seconds": 1.93, "bytes": 1059266}}
+ORC01_REPORT=D:\Projects\CubeGame Factory\outputs\prototypes\orc_01\reports\blender_roundtrip.json
+ORC01_RESULT=PASS
+ORC01_STAGE import_glb=PASS :: 20 mesh objects, 0.1s
+ORC01_STAGE geometry_integrity=PASS :: verts=1688 tris=2532 min_face_area=0.00077 degenerate=[]
+ORC01_STAGE materials_and_colors=PASS :: materials=1 parts_with_vertex_colors=20
+ORC01_STAGE axes_and_scale=PASS :: dimensions(XYZ)=[2.09, 0.9357, 3.13] (ожидается 2.09 × 0.9357 × 3.13)
+ORC01_STAGE independent_editing=PASS :: forearm_L moved, others max delta=0.0m
+ORC01_STAGE limb_gaps_visible=PASS :: {"arm_L": {"upper_arm_L->forearm_L": {"gap_z_m": 0.0275, "separated": true}, "forearm_L->hand_L": {"gap_z_m": 0.045, "separated": true}}, "arm_R": {"upper_arm_R->forearm_R": {"gap_z_m": 0.0275, "separated": true}, "forearm_R->hand_R": {"gap_z_m": 0.045, "separated": true}}, "leg_L": {"thigh_L->shin_L": {"gap_z_m": 0.0425, "separated": true}, "shin_L->foot_L": {"gap_z_m": 0.02, "separated": true}}, "leg_R": {"thigh_R->shin_R": {"gap_z_m": 0.0425, "separated": true}, "shin_R->foot_R": {"gap_z_m": 0.02, "separated": true}}}
+ORC01_STAGE save_blend=PASS :: D:\Projects\CubeGame Factory\outputs\prototypes\orc_01\blender\orc01_modular.blend (118424 B)
+ORC01_STAGE export_glb=PASS :: D:\Projects\CubeGame Factory\outputs\prototypes\orc_01\blender\orc01_roundtrip.glb (207336 B, 0.07s)
+ORC01_STAGE glb_roundtrip=PASS :: {"object_count": 20, "object_names_match": true, "raw_vertices": 5064, "unique_positions": 1688, "unique_positions_original": 1688, "positions_identical": true, "triangles": 2532, "per_part_triangles_match": true, "dimensions": [2.09, 0.9357, 3.13], "materials": 1, "parts_with_vertex_colors": 20, "bbox_min": [-1.045, -0.53, 0.0], "bbox_max": [1.045, 0.4057, 3.13]}
+ORC01_STAGE render_three_views=PASS :: {"front": {"path": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_front.png", "seconds": 1.98, "bytes": 1027636}, "side": {"path": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_side.png", "seconds": 1.46, "bytes": 1002964}, "three_quarter": {"path": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_three_quarter.png", "seconds": 1.93, "bytes": 1059266}}
+Blender 5.2.4 LTS (hash cd5dc428cce1 built 2026-11-10 01:34:34)
+
+Blender quit

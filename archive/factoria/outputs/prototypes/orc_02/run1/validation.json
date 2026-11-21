@@ -1,0 +1,169 @@
+{
+  "artifacts": {
+    "blend": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02\\run1\\blender\\orc02_modular.blend",
+    "renders": {
+      "front": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02\\run1\\blender\\orc02_front.png",
+      "side": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02\\run1\\blender\\orc02_side.png",
+      "three_quarter": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02\\run1\\blender\\orc02_three_quarter.png"
+    },
+    "roundtrip_glb": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02\\run1\\blender\\orc02_roundtrip.glb"
+  },
+  "blender": "5.2.4 LTS",
+  "issues": [],
+  "numbers": {
+    "bbox_max": [
+      1.365,
+      1.712,
+      1.494
+    ],
+    "bbox_min": [
+      -0.638,
+      -0.437,
+      -0.799
+    ],
+    "blend_bytes": 153477,
+    "degenerate_parts": [],
+    "dimensions_m": [
+      2.003,
+      2.149,
+      2.292
+    ],
+    "gaps_z": {
+      "arm_L": {
+        "forearm_L->hand_L": {
+          "gap_z_m": 0.011,
+          "no_overlap": true,
+          "separated": true
+        },
+        "upper_arm_L->forearm_L": {
+          "gap_z_m": 0.012,
+          "no_overlap": true,
+          "separated": true
+        }
+      },
+      "arm_R": {
+        "forearm_R->hand_R": {
+          "gap_z_m": 0.011,
+          "no_overlap": true,
+          "separated": true
+        },
+        "upper_arm_R->forearm_R": {
+          "gap_z_m": 0.012,
+          "no_overlap": true,
+          "separated": true
+        }
+      },
+      "leg_L": {
+        "shin_L->foot_L": {
+          "gap_z_m": 0.0108,
+          "no_overlap": true,
+          "separated": true
+        },
+        "thigh_L->shin_L": {
+          "gap_z_m": 0.012,
+          "no_overlap": true,
+          "separated": true
+        }
+      },
+      "leg_R": {
+        "shin_R->foot_R": {
+          "gap_z_m": 0.1897,
+          "no_overlap": true,
+          "separated": true
+        },
+        "thigh_R->shin_R": {
+          "gap_z_m": 0.012,
+          "no_overlap": true,
+          "separated": true
+        }
+      }
+    },
+    "import_seconds": 0.11,
+    "materials": [
+      "voxel_vertex_colors"
+    ],
+    "object_names": [
+      "foot_L",
+      "foot_R",
+      "forearm_L",
+      "forearm_R",
+      "hair",
+      "hand_L",
+      "hand_R",
+      "head",
+      "pelvis",
+      "shin_L",
+      "shin_R",
+      "thigh_L",
+      "thigh_R",
+      "torso",
+      "upper_arm_L",
+      "upper_arm_R"
+    ],
+    "objects": 16,
+    "parts_with_vertex_colors": 16,
+    "render_seconds": {
+      "front": 1.94,
+      "side": 1.87,
+      "three_quarter": 1.91
+    },
+    "roundtrip": {
+      "dimensions": [
+        2.003,
+        2.149,
+        2.292
+      ],
+      "materials_match": true,
+      "names_match": true,
+      "objects": 16,
+      "positions_identical": true,
+      "triangles_match": true,
+      "unique_positions": 1964
+    },
+    "roundtrip_bytes": 465388,
+    "triangles": 5844,
+    "vertices": 3896
+  },
+  "result": "PASS",
+  "seconds_total": 6.2,
+  "source_glb": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02\\run1\\orc02_modular.glb",
+  "stage": "ORC-02/blender_validation",
+  "stages": {
+    "axes_scale": {
+      "detail": "dimensions(XYZ)=[2.003, 2.149, 2.292] (макс. габарит = высота существа)",
+      "ok": true
+    },
+    "geometry_integrity": {
+      "detail": "verts=3896 tris=5844 degenerate=[]",
+      "ok": true
+    },
+    "glb_roundtrip": {
+      "detail": "{\"objects\": 16, \"names_match\": true, \"unique_positions\": 1964, \"positions_identical\": true, \"triangles_match\": true, \"materials_match\": true, \"dimensions\": [2.003, 2.149, 2.292]}",
+      "ok": true
+    },
+    "import": {
+      "detail": "16 модулей за 0.11s",
+      "ok": true
+    },
+    "independent_editing": {
+      "detail": "forearm_L moved 0.1 m, others max 0.0 m",
+      "ok": true
+    },
+    "limb_gaps": {
+      "detail": "{\"arm_L\": {\"upper_arm_L->forearm_L\": {\"gap_z_m\": 0.012, \"separated\": true, \"no_overlap\": true}, \"forearm_L->hand_L\": {\"gap_z_m\": 0.011, \"separated\": true, \"no_overlap\": true}}, \"arm_R\": {\"upper_arm_R->forearm_R\": {\"gap_z_m\": 0.012, \"separated\": true, \"no_overlap\": true}, \"forearm_R->hand_R\": {\"gap_z_m\": 0.011, \"separated\": true, \"no_overlap\": true}}, \"leg_L\": {\"thigh_L->shin_L\": {\"gap_z_m\": 0.012, \"separated\": true, \"no_overlap\": true}, \"shin_L->foot_L\": {\"gap_z_m\": 0.0108, \"separated\": true, \"no_overlap\": true}}, \"leg_R\": {\"thigh_R->shin_R\": {\"gap_z_m\": 0.012, \"separated\": true, \"no_overlap\": true}, \"shin_R->foot_R\": {\"gap_z_m\": 0.1897, \"separated\": true, \"no_overlap\": true}}}",
+      "ok": true
+    },
+    "materials_colors": {
+      "detail": "materials=['voxel_vertex_colors'] colored=16",
+      "ok": true
+    },
+    "save_blend": {
+      "detail": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02\\run1\\blender\\orc02_modular.blend (153477 B)",
+      "ok": true
+    },
+    "three_views": {
+      "detail": "{\"front\": 1.94, \"side\": 1.87, \"three_quarter\": 1.91}",
+      "ok": true
+    }
+  }
+}

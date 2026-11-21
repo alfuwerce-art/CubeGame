@@ -1,0 +1,127 @@
+18:54:30 | INFO: Data are loaded, start creating Blender stuff
+18:54:30 | INFO: Blender create Mesh node head
+18:54:30 | INFO: Blender create Mesh node eyes
+18:54:30 | INFO: Blender create Mesh node brows
+18:54:30 | INFO: Blender create Mesh node mouth
+18:54:30 | INFO: Blender create Mesh node hair
+18:54:30 | INFO: Blender create Mesh node torso
+18:54:30 | INFO: Blender create Mesh node pelvis
+18:54:30 | INFO: Blender create Mesh node upper_arm_L
+18:54:30 | INFO: Blender create Mesh node forearm_L
+18:54:30 | INFO: Blender create Mesh node hand_L
+18:54:30 | INFO: Blender create Mesh node upper_arm_R
+18:54:30 | INFO: Blender create Mesh node forearm_R
+18:54:30 | INFO: Blender create Mesh node hand_R
+18:54:30 | INFO: Blender create Mesh node thigh_L
+18:54:30 | INFO: Blender create Mesh node shin_L
+18:54:30 | INFO: Blender create Mesh node foot_L
+18:54:30 | INFO: Blender create Mesh node thigh_R
+18:54:30 | INFO: Blender create Mesh node shin_R
+18:54:30 | INFO: Blender create Mesh node foot_R
+18:54:30 | INFO: Blender create Mesh node pouch
+18:54:30 | INFO: Blender create Mesh node weapon_club
+18:54:30 | INFO: glTF import finished in 0.02s
+STAGE import: OK 21 РјРѕРґСѓР»РµР№ Р·Р° 0.11s, РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‚: []
+STAGE geometry_integrity: OK verts=9568 tris=14352 degenerate=[] nan=[]
+STAGE materials_colors: OK materials=['orc_voxel_colors'] colored=21
+STAGE axes_scale: OK dimensions(XYZ)=[1.099, 0.536, 1.93] РЅРёР· РјРѕРґРµР»Рё z=0.0 (РїРѕР» Р·=0, Y-upв†’Z-up РєРѕСЂСЂРµРєС‚РµРЅ)
+STAGE independent_editing: OK forearm_L moved 0.1 m, others max 0.0 m
+STAGE joint_gaps: OK РјРёРЅРёРјР°Р»СЊРЅС‹Р№ Р·Р°Р·РѕСЂ ok=True, РїРµСЂРµСЃРµС‡РµРЅРёСЏ=[]
+Info: Saved as "orc_new.blend"
+STAGE save_blend: OK D:\Projects\CubeGame Factory\outputs\prototypes\orc_02r\run1\blender\orc_new.blend (214560 B)
+INFO Draco is available, use library at D:\programs\Blender\5.2\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at D:\programs\Blender\5.2\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+18:54:30 | INFO: Starting glTF 2.0 export
+18:54:30 | INFO: Extracting primitive: brows
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: eyes
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: foot_L
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: foot_R
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: forearm_L
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: forearm_R
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: hair
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: hand_L
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: hand_R
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: head
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: mouth
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: pelvis
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: pouch
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: shin_L
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: shin_R
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: thigh_L
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: thigh_R
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: torso
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: upper_arm_L
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: upper_arm_R
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Extracting primitive: weapon_club
+18:54:30 | INFO: Primitives created: 1
+18:54:30 | INFO: Finished glTF 2.0 export in 0.33659934997558594 s
+00:01.188  blend            | Read blend: "D:\Projects\CubeGame Factory\outputs\prototypes\orc_02r\run1\blender\orc_new.blend"
+
+STAGE blend_reopen: OK 21 РѕР±СЉРµРєС‚РѕРІ РїРѕСЃР»Рµ reopen
+18:54:30 | INFO: Data are loaded, start creating Blender stuff
+18:54:30 | INFO: Blender create Mesh node brows
+18:54:30 | INFO: Blender create Mesh node eyes
+18:54:30 | INFO: Blender create Mesh node foot_L
+18:54:30 | INFO: Blender create Mesh node foot_R
+18:54:30 | INFO: Blender create Mesh node forearm_L
+18:54:30 | INFO: Blender create Mesh node forearm_R
+18:54:30 | INFO: Blender create Mesh node hair
+18:54:30 | INFO: Blender create Mesh node hand_L
+18:54:30 | INFO: Blender create Mesh node hand_R
+18:54:30 | INFO: Blender create Mesh node head
+18:54:30 | INFO: Blender create Mesh node mouth
+18:54:30 | INFO: Blender create Mesh node pelvis
+18:54:30 | INFO: Blender create Mesh node pouch
+18:54:30 | INFO: Blender create Mesh node shin_L
+18:54:30 | INFO: Blender create Mesh node shin_R
+18:54:30 | INFO: Blender create Mesh node thigh_L
+18:54:30 | INFO: Blender create Mesh node thigh_R
+18:54:30 | INFO: Blender create Mesh node torso
+18:54:30 | INFO: Blender create Mesh node upper_arm_L
+18:54:30 | INFO: Blender create Mesh node upper_arm_R
+18:54:30 | INFO: Blender create Mesh node weapon_club
+18:54:30 | INFO: glTF import finished in 0.08s
+D:\Projects\CubeGame Factory\scripts\blender\orc02r_validate.py:217: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  world.use_nodes = True
+D:\Projects\CubeGame Factory\scripts\blender\orc02r_validate.py:236: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  floor_mat.use_nodes = True
+00:27.313  render           | Saved: 'D:\Projects\CubeGame Factory\outputs\prototypes\orc_02r\run1\blender\orc_new_front.png'
+00:44.156  render           | Saved: 'D:\Projects\CubeGame Factory\outputs\prototypes\orc_02r\run1\blender\orc_new_side.png'
+01:13.516  render           | Saved: 'D:\Projects\CubeGame Factory\outputs\prototypes\orc_02r\run1\blender\orc_new_three_quarter.png'
+STAGE glb_roundtrip: OK {"objects": 21, "names_match": true, "unique_positions": 5280, "positions_identical": true, "triangles_match": true, "materials_match": true, "dimensions": [1.099, 0.536, 1.93]}
+STAGE three_views: OK {"front": 25.93, "side": 16.84, "three_quarter": 29.36}
+ORC02R_VALIDATION=PASS
+ORC02R_STAGE import=PASS :: 21 РјРѕРґСѓР»РµР№ Р·Р° 0.11s, РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‚: []
+ORC02R_STAGE geometry_integrity=PASS :: verts=9568 tris=14352 degenerate=[] nan=[]
+ORC02R_STAGE materials_colors=PASS :: materials=['orc_voxel_colors'] colored=21
+ORC02R_STAGE axes_scale=PASS :: dimensions(XYZ)=[1.099, 0.536, 1.93] РЅРёР· РјРѕРґРµР»Рё z=0.0 (РїРѕР» Р·=0, Y-upв†’Z-up РєРѕСЂСЂРµРєС‚РµРЅ)
+ORC02R_STAGE independent_editing=PASS :: forearm_L moved 0.1 m, others max 0.0 m
+ORC02R_STAGE joint_gaps=PASS :: РјРёРЅРёРјР°Р»СЊРЅС‹Р№ Р·Р°Р·РѕСЂ ok=True, РїРµСЂРµСЃРµС‡РµРЅРёСЏ=[]
+ORC02R_STAGE save_blend=PASS :: D:\Projects\CubeGame Factory\outputs\prototypes\orc_02r\run1\blender\orc_new.blend (214560 B)
+ORC02R_STAGE blend_reopen=PASS :: 21 РѕР±СЉРµРєС‚РѕРІ РїРѕСЃР»Рµ reopen
+ORC02R_STAGE glb_roundtrip=PASS :: {"objects": 21, "names_match": true, "unique_positions": 5280, "positions_identical": true, "triangles_match": true, "materials_match": true, "dimensions": [1.099, 0.536, 1.93]}
+ORC02R_STAGE three_views=PASS :: {"front": 25.93, "side": 16.84, "three_quarter": 29.36}
+ORC02R_REPORT=D:\Projects\CubeGame Factory\outputs\prototypes\orc_02r\run1\validation.json
+Blender 5.2.4 LTS (hash cd5dc428cce1 built 2026-11-10 01:34:34)
+
+Blender quit

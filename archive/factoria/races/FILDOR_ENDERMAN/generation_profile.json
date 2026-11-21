@@ -1,0 +1,75 @@
+{
+  "race_id": "FILDOR_ENDERMAN",
+  "race_anatomy": "compact dark humanoid with long pointed ears, high tied hair and slim angular face",
+  "appearance": "deep charcoal skin, white block hair tied high, bright violet square eyes, subtle purple cheek markings, dark purple robes with sparse gold trim",
+  "reference_id": "OWNER_FILDOR_ENDERMAN",
+  "prepared_reference": "style08_fildor_enderman.png",
+  "prepared_reference_sha256": "c9c5a6f61ec85e752caf70f69d13beb9f19937763b616d392aa87dc2c568cf72",
+  "prompt": "compact dark humanoid with long pointed ears, high tied hair and slim angular face, deep charcoal skin, white block hair tied high, bright violet square eyes, subtle purple cheek markings, dark purple robes with sparse gold trim, voxel fantasy RPG character creator avatar, single adult character, exact straight-on front view, full body centered, neutral stance, short cuboid limbs, compact proportions, oversized block head, clean hard-edged voxel geometry made of cubes of several sizes, restrained pixel texture, simple face, neutral plain grey background, soft even studio lighting",
+  "negative_prompt": "turnaround, multiple views, duplicate figure, extra limbs, cropped feet, cropped head, three-quarter view, side view, long limbs, child, anime, large eyes, fluffy hair, photorealism, plastic figurine, pedestal, smooth organic surfaces, flat sprite, landscape, foliage, HUD, watermark, text, motion blur, dynamic pose, weapon in front of body, elaborate armor",
+  "checkpoint": "DreamShaperXL_Turbo_v2_1.safetensors",
+  "lora": {
+    "name": "ral-vxl.safetensors",
+    "model_strength": 0.6,
+    "clip_strength": 0.6,
+    "author": "RalFinger",
+    "license_status": "EXPERIMENTAL / LICENSE_BLOCKED_FOR_PRODUCTION (FACT-D21)",
+    "sha256": "9dc480ee98c12a499bee1fc19ee0e13969a3c6b14be0e6ec133a11d563e83a25"
+  },
+  "reference_control": {
+    "mode": "ControlNet Canny",
+    "model": "controlnet-union-sdxl-1.0.safetensors",
+    "union_type": "canny/lineart/anime_lineart/mlsd",
+    "strength": 0.6,
+    "start_percent": 0,
+    "end_percent": 1,
+    "low_threshold": 0.35,
+    "high_threshold": 0.75,
+    "resize": "nearest-exact",
+    "ipadapter": null,
+    "img2img": null,
+    "sha256": "a9e13fd61f3193887791c8a0dd07a07202174dc47d5ddaea94ea1344f07c7467",
+    "license": "Apache-2.0"
+  },
+  "seed": 20261114,
+  "steps": 28,
+  "cfg": 5,
+  "sampler": "dpmpp_2m",
+  "scheduler": "normal",
+  "denoise": 1,
+  "width": 768,
+  "height": 1024,
+  "batch_size": 1,
+  "validation": "TECHNICAL_PASS / OWNER_VISUAL_REVIEW",
+  "result": {
+    "prompt_id": "4b18b9f5-7b5c-47c7-bc98-cdbe761fcb76",
+    "file": "fildor_enderman_00001_.png",
+    "sha256": "899965763a27ee80a43e740f0cae796aebfb54b835394c86542a485de4bb7482",
+    "size": [
+      768,
+      1024
+    ],
+    "seconds": 52.3,
+    "vram_baseline_whole_card_mib": 5475,
+    "vram_peak_whole_card_mib": 7558,
+    "rss_baseline_mib": 12815,
+    "rss_peak_mib": 12835,
+    "available_ram_baseline_mib": 5284,
+    "available_ram_min_mib": 5089,
+    "sampling_interval_seconds": 1
+  },
+  "checkpoint_sha256": "4496b36d48bfd7cfe4e5dbce3485db567bcefa2bef7238d290dbd45612125083",
+  "checkpoint_license": "CreativeML OpenRAIL++-M",
+  "runtime": {
+    "comfyui": "0.45.0",
+    "torch": "2.14.1+cu130",
+    "device": "RTX 4060 Laptop",
+    "args": [
+      "--novram",
+      "--reserve-vram",
+      "5",
+      "--disable-all-custom-nodes",
+      "--offline"
+    ]
+  }
+}

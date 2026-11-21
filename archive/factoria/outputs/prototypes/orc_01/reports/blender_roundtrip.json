@@ -1,0 +1,437 @@
+{
+  "stage": "ORC-01/blender_import_roundtrip",
+  "blender": "5.2.4 LTS",
+  "source_glb": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\generated\\orc_modular_v01.glb",
+  "stages": {
+    "import_glb": {
+      "ok": true,
+      "detail": "20 mesh objects, 0.1s"
+    },
+    "geometry_integrity": {
+      "ok": true,
+      "detail": "verts=1688 tris=2532 min_face_area=0.00077 degenerate=[]"
+    },
+    "materials_and_colors": {
+      "ok": true,
+      "detail": "materials=1 parts_with_vertex_colors=20"
+    },
+    "axes_and_scale": {
+      "ok": true,
+      "detail": "dimensions(XYZ)=[2.09, 0.9357, 3.13] (ожидается 2.09 × 0.9357 × 3.13)"
+    },
+    "independent_editing": {
+      "ok": true,
+      "detail": "forearm_L moved, others max delta=0.0m"
+    },
+    "limb_gaps_visible": {
+      "ok": true,
+      "detail": "{\"arm_L\": {\"upper_arm_L->forearm_L\": {\"gap_z_m\": 0.0275, \"separated\": true}, \"forearm_L->hand_L\": {\"gap_z_m\": 0.045, \"separated\": true}}, \"arm_R\": {\"upper_arm_R->forearm_R\": {\"gap_z_m\": 0.0275, \"separated\": true}, \"forearm_R->hand_R\": {\"gap_z_m\": 0.045, \"separated\": true}}, \"leg_L\": {\"thigh_L->shin_L\": {\"gap_z_m\": 0.0425, \"separated\": true}, \"shin_L->foot_L\": {\"gap_z_m\": 0.02, \"separated\": true}}, \"leg_R\": {\"thigh_R->shin_R\": {\"gap_z_m\": 0.0425, \"separated\": true}, \"shin_R->foot_R\": {\"gap_z_m\": 0.02, \"separated\": true}}}"
+    },
+    "save_blend": {
+      "ok": true,
+      "detail": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_modular.blend (118424 B)"
+    },
+    "export_glb": {
+      "ok": true,
+      "detail": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_roundtrip.glb (207336 B, 0.07s)"
+    },
+    "glb_roundtrip": {
+      "ok": true,
+      "detail": "{\"object_count\": 20, \"object_names_match\": true, \"raw_vertices\": 5064, \"unique_positions\": 1688, \"unique_positions_original\": 1688, \"positions_identical\": true, \"triangles\": 2532, \"per_part_triangles_match\": true, \"dimensions\": [2.09, 0.9357, 3.13], \"materials\": 1, \"parts_with_vertex_colors\": 20, \"bbox_min\": [-1.045, -0.53, 0.0], \"bbox_max\": [1.045, 0.4057, 3.13]}"
+    },
+    "render_three_views": {
+      "ok": true,
+      "detail": "{\"front\": {\"path\": \"D:\\\\Projects\\\\CubeGame Factory\\\\outputs\\\\prototypes\\\\orc_01\\\\blender\\\\orc01_front.png\", \"seconds\": 1.98, \"bytes\": 1027636}, \"side\": {\"path\": \"D:\\\\Projects\\\\CubeGame Factory\\\\outputs\\\\prototypes\\\\orc_01\\\\blender\\\\orc01_side.png\", \"seconds\": 1.46, \"bytes\": 1002964}, \"three_quarter\": {\"path\": \"D:\\\\Projects\\\\CubeGame Factory\\\\outputs\\\\prototypes\\\\orc_01\\\\blender\\\\orc01_three_quarter.png\", \"seconds\": 1.93, \"bytes\": 1059266}}"
+    }
+  },
+  "numbers": {
+    "import_seconds": 0.1,
+    "object_count": 20,
+    "object_names": [
+      "beard",
+      "brows",
+      "eyes",
+      "foot_L",
+      "foot_R",
+      "forearm_L",
+      "forearm_R",
+      "hair",
+      "hand_L",
+      "hand_R",
+      "head",
+      "mouth",
+      "pelvis",
+      "shin_L",
+      "shin_R",
+      "thigh_L",
+      "thigh_R",
+      "torso",
+      "upper_arm_L",
+      "upper_arm_R"
+    ],
+    "total_vertices": 1688,
+    "total_triangles": 2532,
+    "bbox_min": [
+      -1.045,
+      -0.53,
+      0.0
+    ],
+    "bbox_max": [
+      1.045,
+      0.4057,
+      3.13
+    ],
+    "dimensions": [
+      2.09,
+      0.9357,
+      3.13
+    ],
+    "per_part": {
+      "pelvis": {
+        "vertices": 16,
+        "triangles": 24,
+        "min_face_area": 0.03419999,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "torso": {
+        "vertices": 624,
+        "triangles": 936,
+        "min_face_area": 0.00245,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "head": {
+        "vertices": 72,
+        "triangles": 108,
+        "min_face_area": 0.00599999,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "eyes": {
+        "vertices": 32,
+        "triangles": 48,
+        "min_face_area": 0.00084,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "brows": {
+        "vertices": 16,
+        "triangles": 24,
+        "min_face_area": 0.00243749,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "mouth": {
+        "vertices": 8,
+        "triangles": 12,
+        "min_face_area": 0.00077,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "beard": {
+        "vertices": 80,
+        "triangles": 120,
+        "min_face_area": 0.00224,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "hair": {
+        "vertices": 72,
+        "triangles": 108,
+        "min_face_area": 0.00663001,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "upper_arm_L": {
+        "vertices": 192,
+        "triangles": 288,
+        "min_face_area": 0.00245,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "forearm_L": {
+        "vertices": 64,
+        "triangles": 96,
+        "min_face_area": 0.00165,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "hand_L": {
+        "vertices": 32,
+        "triangles": 48,
+        "min_face_area": 0.004875,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "upper_arm_R": {
+        "vertices": 192,
+        "triangles": 288,
+        "min_face_area": 0.00245,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "forearm_R": {
+        "vertices": 64,
+        "triangles": 96,
+        "min_face_area": 0.00165,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "hand_R": {
+        "vertices": 32,
+        "triangles": 48,
+        "min_face_area": 0.004875,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "thigh_L": {
+        "vertices": 40,
+        "triangles": 60,
+        "min_face_area": 0.002975,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "shin_L": {
+        "vertices": 40,
+        "triangles": 60,
+        "min_face_area": 0.0013,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "foot_L": {
+        "vertices": 16,
+        "triangles": 24,
+        "min_face_area": 0.00585,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "thigh_R": {
+        "vertices": 40,
+        "triangles": 60,
+        "min_face_area": 0.002975,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "shin_R": {
+        "vertices": 40,
+        "triangles": 60,
+        "min_face_area": 0.0013,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      },
+      "foot_R": {
+        "vertices": 16,
+        "triangles": 24,
+        "min_face_area": 0.00585,
+        "has_nan": false,
+        "color_attributes": [
+          "Color"
+        ],
+        "materials": [
+          "voxel_vertex_colors"
+        ]
+      }
+    },
+    "material_count": 1,
+    "color_attribute_parts": 20,
+    "edit_test_forearm_move_m": 0.1,
+    "edit_test_others_max_delta_m": 0.0,
+    "gaps_z": {
+      "arm_L": {
+        "upper_arm_L->forearm_L": {
+          "gap_z_m": 0.0275,
+          "separated": true
+        },
+        "forearm_L->hand_L": {
+          "gap_z_m": 0.045,
+          "separated": true
+        }
+      },
+      "arm_R": {
+        "upper_arm_R->forearm_R": {
+          "gap_z_m": 0.0275,
+          "separated": true
+        },
+        "forearm_R->hand_R": {
+          "gap_z_m": 0.045,
+          "separated": true
+        }
+      },
+      "leg_L": {
+        "thigh_L->shin_L": {
+          "gap_z_m": 0.0425,
+          "separated": true
+        },
+        "shin_L->foot_L": {
+          "gap_z_m": 0.02,
+          "separated": true
+        }
+      },
+      "leg_R": {
+        "thigh_R->shin_R": {
+          "gap_z_m": 0.0425,
+          "separated": true
+        },
+        "shin_R->foot_R": {
+          "gap_z_m": 0.02,
+          "separated": true
+        }
+      }
+    },
+    "blend_bytes": 118424,
+    "export_seconds": 0.07,
+    "roundtrip_glb_bytes": 207336,
+    "roundtrip": {
+      "object_count": 20,
+      "object_names_match": true,
+      "raw_vertices": 5064,
+      "unique_positions": 1688,
+      "unique_positions_original": 1688,
+      "positions_identical": true,
+      "triangles": 2532,
+      "per_part_triangles_match": true,
+      "dimensions": [
+        2.09,
+        0.9357,
+        3.13
+      ],
+      "materials": 1,
+      "parts_with_vertex_colors": 20,
+      "bbox_min": [
+        -1.045,
+        -0.53,
+        0.0
+      ],
+      "bbox_max": [
+        1.045,
+        0.4057,
+        3.13
+      ]
+    },
+    "renders": {
+      "front": {
+        "path": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_front.png",
+        "seconds": 1.98,
+        "bytes": 1027636
+      },
+      "side": {
+        "path": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_side.png",
+        "seconds": 1.46,
+        "bytes": 1002964
+      },
+      "three_quarter": {
+        "path": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_three_quarter.png",
+        "seconds": 1.93,
+        "bytes": 1059266
+      }
+    }
+  },
+  "issues": [],
+  "artifacts": {
+    "blend": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_modular.blend",
+    "roundtrip_glb": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_roundtrip.glb",
+    "renders": {
+      "front": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_front.png",
+      "side": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_side.png",
+      "three_quarter": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_01\\blender\\orc01_three_quarter.png"
+    }
+  },
+  "seconds_total": 5.8,
+  "result": "PASS"
+}

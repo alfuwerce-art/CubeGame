@@ -1,0 +1,245 @@
+{
+  "checkpoint": {
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "SDXL Base 1.0"
+    },
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    }
+  },
+  "lora": {
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Fictiverse VoxelXL (frozen strengths)"
+    },
+    "inputs": {
+      "model": [
+        "checkpoint",
+        0
+      ],
+      "clip": [
+        "checkpoint",
+        1
+      ],
+      "lora_name": "VoxelXL_v1.safetensors",
+      "strength_model": 0.6,
+      "strength_clip": 0.6
+    }
+  },
+  "positive": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "POSITIVE mannequin contract"
+    },
+    "inputs": {
+      "clip": [
+        "lora",
+        1
+      ],
+      "text": "voxel style, matte ash-grey production character mannequin, integrated angular anatomy, small angular ear folds, soft studio key light from upper left and contact shadows. voxel 3d, single full body neutral gray stylized humanoid game base character, front view slight elevation, relaxed symmetrical stance, hands visible, enormous square bald cuboid head with flat top, beveled angular chin, smooth detail-free blank front plane, two small shaped ears with a recessed angular inner fold, compact tapered ribcage and small pelvis, short legs, faceted knees, simple short bare block-shaped feet, compact palms, five articulated narrow digits on each hand, one thumb and four separate fingers, flush integrated facets, one uniform neutral gray material, orthographic game asset render, crisp sharp voxel corners, large planar facets, soft studio light, neutral gray background, entire figure and soles visible"
+    }
+  },
+  "negative": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "NEGATIVE mannequin contract"
+    },
+    "inputs": {
+      "clip": [
+        "lora",
+        1
+      ],
+      "text": "hair, eyebrows, eyes, nose, mouth, face details, facial lines, beard, expression, ears shaped like cubes, helmet, hood, gloves, clothes, shoulder pads, armor, belt, buckle, shirt, pants, skirt, boots, shoes, sword, equipment, accessories, nipples, genitals, saturated color, skin texture, round skull, smooth organic anatomy, round joints, ball joints, mechanical seams, robot, segmented torso plates, six fingers, missing digits, fused fingers, large hands, long legs, detailed toes, missing limbs, multiple figures, side profile, text, watermark, photographic, blur"
+    }
+  },
+  "latent": {
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "Neutral reblocking from source landmarks"
+    },
+    "inputs": {
+      "pixels": [
+        "guide",
+        0
+      ],
+      "vae": [
+        "checkpoint",
+        2
+      ]
+    }
+  },
+  "guide": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Owner landmark plate with studio shading"
+    },
+    "inputs": {
+      "image": "mannequin_13_owner_landmarks_lit.png"
+    }
+  },
+  "guide_scale": {
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "Fixed framing, no crop"
+    },
+    "inputs": {
+      "image": [
+        "guide",
+        0
+      ],
+      "upscale_method": "nearest-exact",
+      "width": 768,
+      "height": 1024,
+      "crop": "disabled"
+    }
+  },
+  "edges": {
+    "class_type": "Canny",
+    "_meta": {
+      "title": "Silhouette + block plane edges"
+    },
+    "inputs": {
+      "image": [
+        "guide_scale",
+        0
+      ],
+      "low_threshold": 0.18,
+      "high_threshold": 0.42
+    }
+  },
+  "controlnet": {
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "ControlNet Union SDXL"
+    },
+    "inputs": {
+      "control_net_name": "controlnet-union-sdxl-1.0.safetensors"
+    }
+  },
+  "union_mode": {
+    "class_type": "SetUnionControlNetType",
+    "_meta": {
+      "title": "Canny / lineart union mode"
+    },
+    "inputs": {
+      "control_net": [
+        "controlnet",
+        0
+      ],
+      "type": "canny/lineart/anime_lineart/mlsd"
+    }
+  },
+  "guide_conditioning": {
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Pose and proportion conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "positive",
+        0
+      ],
+      "negative": [
+        "negative",
+        0
+      ],
+      "control_net": [
+        "union_mode",
+        0
+      ],
+      "image": [
+        "edges",
+        0
+      ],
+      "strength": 0.63,
+      "start_percent": 0,
+      "end_percent": 0.98
+    }
+  },
+  "sampler": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Single mannequin frame"
+    },
+    "inputs": {
+      "model": [
+        "lora",
+        0
+      ],
+      "positive": [
+        "guide_conditioning",
+        0
+      ],
+      "negative": [
+        "guide_conditioning",
+        1
+      ],
+      "latent_image": [
+        "masked_latent",
+        0
+      ],
+      "seed": 20261118,
+      "steps": 28,
+      "cfg": 5.6,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 0.57
+    }
+  },
+  "decode": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decoded RGB frame"
+    },
+    "inputs": {
+      "samples": [
+        "sampler",
+        0
+      ],
+      "vae": [
+        "checkpoint",
+        2
+      ]
+    }
+  },
+  "save": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Mannequin frame"
+    },
+    "inputs": {
+      "images": [
+        "decode",
+        0
+      ],
+      "filename_prefix": "M13_F"
+    }
+  },
+  "mask_image": {
+    "class_type": "LoadImageMask",
+    "_meta": {
+      "title": "Soft preservation masks for face, ears, hands and pelvis"
+    },
+    "inputs": {
+      "image": "mannequin_13_shape_mask.png",
+      "channel": "red"
+    }
+  },
+  "masked_latent": {
+    "class_type": "SetLatentNoiseMask",
+    "_meta": {
+      "title": "Preserve source landmark proportions and digit gaps"
+    },
+    "inputs": {
+      "samples": [
+        "latent",
+        0
+      ],
+      "mask": [
+        "mask_image",
+        0
+      ]
+    }
+  }
+}

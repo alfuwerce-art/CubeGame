@@ -1,0 +1,18 @@
+﻿PREP03_CUDA_JSON={
+  "torch": "2.14.1+cu130",
+  "cuda_build": "13.0",
+  "cuda_available": true,
+  "device_count": 1,
+  "device_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "capability": "8.9",
+  "total_vram_MB": 8187.5,
+  "matmul_size": [
+    2048,
+    2048
+  ],
+  "matmul_seconds": 0.1197,
+  "matmul_checksum": -33.212,
+  "peak_allocated_MB": 56.1,
+  "peak_reserved_MB": 68.0,
+  "result": "PASS"
+}

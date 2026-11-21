@@ -1,0 +1,36 @@
+{
+  "id": "FACTORY_VIEWS_V1",
+  "note": "four independent generations, NOT a consistent 3D turnaround",
+  "runs": [
+    {
+      "id": "views_orc_front_fictiverse06",
+      "mode": "FICTIVERSE",
+      "character": "orc",
+      "view": "front",
+      "resolution": "main",
+      "strength": 0.6,
+      "seed": 424242,
+      "purpose": "views"
+    },
+    {
+      "id": "views_orc_side_fictiverse06",
+      "mode": "FICTIVERSE",
+      "character": "orc",
+      "view": "side",
+      "resolution": "main",
+      "strength": 0.6,
+      "seed": 424242,
+      "purpose": "views"
+    },
+    {
+      "id": "views_orc_back_fictiverse06",
+      "mode": "FICTIVERSE",
+      "character": "orc",
+      "view": "back",
+      "resolution": "main",
+      "strength": 0.6,
+      "seed": 424242,
+      "purpose": "views"
+    }
+  ]
+}

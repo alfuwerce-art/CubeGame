@@ -1,0 +1,16 @@
+STAGE server_ready: OK waited=0.0s version=0.45.0
+STAGE web_ui_available: OK status=200 bytes=19885
+STAGE nodes_available: OK {"EmptyImage": ["batch_size", "color", "height", "width"], "SaveImage": ["filename_prefix", "images"]}
+STAGE submit_prompt: OK status=200 prompt_id=779857bc-9fa3-427d-83bd-f8367376042a
+STAGE workflow_executed: OK 1.0s status=success
+STAGE result_saved: OK D:\Projects\CubeGame Factory\outputs\comfyui\prep03_smoke_from_api.png dims=[96, 96] bytes=504
+STAGE queue_idle: OK running=0 pending=0
+PREP03_REPORT=D:\Projects\CubeGame Factory\outputs\reports\prep03_comfyui_smoke_gpu_reserve5.json
+PREP03_RESULT=PASS
+PREP03_STAGE server_ready=PASS :: waited=0.0s version=0.45.0
+PREP03_STAGE web_ui_available=PASS :: status=200 bytes=19885
+PREP03_STAGE nodes_available=PASS :: {"EmptyImage": ["batch_size", "color", "height", "width"], "SaveImage": ["filename_prefix", "images"]}
+PREP03_STAGE submit_prompt=PASS :: status=200 prompt_id=779857bc-9fa3-427d-83bd-f8367376042a
+PREP03_STAGE workflow_executed=PASS :: 1.0s status=success
+PREP03_STAGE result_saved=PASS :: D:\Projects\CubeGame Factory\outputs\comfyui\prep03_smoke_from_api.png dims=[96, 96] bytes=504
+PREP03_STAGE queue_idle=PASS :: running=0 pending=0

@@ -1,0 +1,24 @@
+{
+  "object_info_source": "measurements\\comfyui_object_info_2026-11-14_full.json",
+  "config": "workflows\\factory_characters_v2\\sdxl_base_v2.json",
+  "workflows": {
+    "FACTORY_CHARACTER_SDXL_BASE_V2.json": {
+      "status": "PASS",
+      "nodes": 9,
+      "links": 11,
+      "problems": [],
+      "warnings": [
+        "CheckpointLoaderSimple#2: widget ckpt_name='sd_xl_base_1.0.safetensors' not in options (file not present locally yet)"
+      ]
+    },
+    "FACTORY_CHARACTER_SDXL_BASE_V2_DIAG.json": {
+      "status": "PASS",
+      "nodes": 9,
+      "links": 11,
+      "problems": [],
+      "warnings": [
+        "CheckpointLoaderSimple#2: widget ckpt_name='sd_xl_base_1.0.safetensors' not in options (file not present locally yet)"
+      ]
+    }
+  }
+}

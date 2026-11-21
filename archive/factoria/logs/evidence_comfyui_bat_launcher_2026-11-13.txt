@@ -1,0 +1,16 @@
+[FACTORIA] ComfyUI SAFE_BASELINE  (--novram)
+[FACTORIA] UI: http://127.0.0.1:8188
+[Crystools [0;32mINFO[0m] Crystools version: 1.27.4
+[Crystools [0;32mINFO[0m] Platform release: 11
+[Crystools [0;32mINFO[0m] JETSON: Not detected.
+[Crystools [0;32mINFO[0m] CPU: AMD Ryzen 5 7535HS with Radeon Graphics - Arch: AMD64 - OS: Windows 11
+[Crystools [0;32mINFO[0m] pynvml (NVIDIA) initialized.
+[Crystools [0;32mINFO[0m] GPU/s:
+[Crystools [0;32mINFO[0m] 0) NVIDIA GeForce RTX 4060 Laptop GPU
+[Crystools [0;32mINFO[0m] NVIDIA Driver: 610.47
+DWPose: Onnxruntime with acceleration providers detected
+
+[rgthree-comfy] Loaded 48 magnificent nodes. 🎉
+
+[rgthree-comfy] ComfyUI's new Node 2.0 rendering may be incompatible with some rgthree-comfy nodes and features, breaking some rendering as well as losing the ability to access a node's properties (a vital part of many nodes). It also appears to run MUCH more slowly spiking CPU usage and causing jankiness and unresponsiveness, especially with large workflows. Personally I am not planning to use the new Nodes 2.0 and, unfortunately, am not able to invest the time to investigate and overhaul rgthree-comfy where needed. If you have issues when Nodes 2.0 is enabled, I'd urge you to switch it off as well and join me in hoping ComfyUI is not planning to deprecate the existing, stable canvas rendering all together.
+

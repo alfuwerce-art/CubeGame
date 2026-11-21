@@ -1,0 +1,222 @@
+{
+  "checkpoint": {
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "DreamShaper XL Turbo v2.1"
+    },
+    "inputs": {
+      "ckpt_name": "DreamShaperXL_Turbo_v2_1.safetensors"
+    }
+  },
+  "lora": {
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "ral-vxl (experimental only)"
+    },
+    "inputs": {
+      "model": [
+        "checkpoint",
+        0
+      ],
+      "clip": [
+        "checkpoint",
+        1
+      ],
+      "lora_name": "ral-vxl.safetensors",
+      "strength_model": 0.6,
+      "strength_clip": 0.6
+    }
+  },
+  "positive": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Style + profile + requested module + view"
+    },
+    "inputs": {
+      "clip": [
+        "lora",
+        1
+      ],
+      "text": "hard-edged voxel geometry with clean axial cuboids, large contiguous surfaces, low contour noise, large primary volumes, medium contour steps, few small accents, compact adult game-scale silhouette; race proportions come from the profile and reference guide, unlit-looking matte game model with enough even light to read depth, simple diffuse shading, orthographic, cardinal axis, fixed scale and target per reference pack, level horizon, plain neutral grey, no floor line, no scenery, soft even studio lighting, no hard cast shadows or bloom, exact orthographic front view of the same subject, (single adult human technical voxel mannequin, full body:1.15), (strict T-pose with both arms rigid, straight and horizontal at shoulder height:1.25), mirror-symmetric stance, straight legs and separated feet flat on one baseline, whole square hands and integral block feet visible, centred full-height silhouette, (featureless blank rectangular head with a flat forehead and a simple visible neck:1.2), (one continuous desaturated neutral-grey matte material across head, torso, hands and feet:1.2), minimal large joined cuboid volumes, flat planes, a few large stepped edges, plain neutral grey background, simplified non-anatomical geometry and smooth monochrome areas, adult human male, compact cuboid limbs and torso, clean joint separations; use the supplied base body guide for shoulder and limb proportions"
+    }
+  },
+  "negative": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Style and module exclusions"
+    },
+    "inputs": {
+      "clip": [
+        "lora",
+        1
+      ],
+      "text": "photorealistic skin, rounded organic sculpting, painterly brushwork, plastic toy, fine noisy surface detail, busy gradients, excessive bevels, large anime eyes, cinematic rim lighting, bloom, cast shadows, scenery, text, watermark, collage, multiple figures, multi-view sheet, perspective distortion, cropped silhouette, (clothes, costume, shirt, trousers, underwear, shorts, armor, shoes, boots, gloves, belts, seams, collar, cuffs, straps, socket caps:1.25), weapon, accessories, (eyes, pupils, eyebrows, eyelashes, nose, lips, mouth, expression, hair, beard, mustache, headwear:1.25), other face details, anatomy definition, muscles, skin texture, anatomical markings, gendered chest detailing, small cubes, clutter, movable attachments, extra limbs, A-pose, bent wrists, sloped arms, bent knees, hidden hands, hidden feet, ground-plane perspective, asymmetric silhouette"
+    }
+  },
+  "geometry_guide": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Same-object, same-view geometry guide"
+    },
+    "inputs": {
+      "image": "HUMAN_MALE_BASE_FRONT_GUIDE_V1.png"
+    }
+  },
+  "guide_scale": {
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "Fixed framing (no crop)"
+    },
+    "inputs": {
+      "image": [
+        "geometry_guide",
+        0
+      ],
+      "upscale_method": "nearest-exact",
+      "width": 768,
+      "height": 1024,
+      "crop": "disabled"
+    }
+  },
+  "edges": {
+    "class_type": "Canny",
+    "_meta": {
+      "title": "View-specific contours"
+    },
+    "inputs": {
+      "image": [
+        "guide_scale",
+        0
+      ],
+      "low_threshold": 0.35,
+      "high_threshold": 0.75
+    }
+  },
+  "controlnet": {
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "ControlNet Union SDXL"
+    },
+    "inputs": {
+      "control_net_name": "controlnet-union-sdxl-1.0.safetensors"
+    }
+  },
+  "canny_mode": {
+    "class_type": "SetUnionControlNetType",
+    "_meta": {
+      "title": "Canny / lineart union type"
+    },
+    "inputs": {
+      "control_net": [
+        "controlnet",
+        0
+      ],
+      "type": "canny/lineart/anime_lineart/mlsd"
+    }
+  },
+  "guide_conditioning": {
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Geometry conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "positive",
+        0
+      ],
+      "negative": [
+        "negative",
+        0
+      ],
+      "control_net": [
+        "canny_mode",
+        0
+      ],
+      "image": [
+        "edges",
+        0
+      ],
+      "strength": 0.9,
+      "start_percent": 0,
+      "end_percent": 1
+    }
+  },
+  "sampler": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "One controlled view"
+    },
+    "inputs": {
+      "model": [
+        "lora",
+        0
+      ],
+      "positive": [
+        "guide_conditioning",
+        0
+      ],
+      "negative": [
+        "guide_conditioning",
+        1
+      ],
+      "latent_image": [
+        "latent",
+        0
+      ],
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 5,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "normal",
+      "denoise": 0.35
+    }
+  },
+  "decode": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decoded RGB view"
+    },
+    "inputs": {
+      "samples": [
+        "sampler",
+        0
+      ],
+      "vae": [
+        "checkpoint",
+        2
+      ]
+    }
+  },
+  "latent": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "anchor_plate",
+        0
+      ],
+      "vae": [
+        "checkpoint",
+        2
+      ]
+    }
+  },
+  "save_reference": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Base body view"
+    },
+    "inputs": {
+      "images": [
+        "decode",
+        0
+      ],
+      "filename_prefix": "HUMAN_MALE_BASE_FRONT_V1"
+    }
+  },
+  "anchor_plate": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "HUMAN_MALE_BASE_FRONT_GUIDE_V1.png"
+    }
+  }
+}
