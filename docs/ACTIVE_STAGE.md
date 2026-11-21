@@ -27,3 +27,5 @@
 ## D96 — исследовательские документы и навыки на ревью
 
 Отдельный пакет `review/ai-game-development-suite-20261121` сохраняет три подхода к ИИ-разработке, готовит 7 новых DSH skills, документы Art/Quality/Dependencies и изолированный [Unreal spike](research/UNREAL_SCRIPTING_SPIKE.md). **Это документация и вспомогательные тесты, не запуск игровых этапов и не миграция движка.** UE/Blender/DSH plugins не устанавливались, hooks не включались на Windows. См. [D96](decisions/D96-ai-harness-unreal-research.md).
+
+**Уточнение AI-стека:** по прямому решению владельца использовать только DeepSeek Harness и Codex; Claude/Claude Code не подключать. Это не меняет приёмку и не даёт прав на игровые этапы.
