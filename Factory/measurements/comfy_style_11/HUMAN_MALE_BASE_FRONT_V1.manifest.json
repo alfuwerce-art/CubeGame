@@ -1,0 +1,103 @@
+{
+  "status": "TECHNICAL_PASS / OWNER_VISUAL_REVIEW",
+  "style": "STYLE_LOCK_V1",
+  "style_source_sha256": "b380616fae8931513a176b7c6bccc25aa09b4e26f879b245859010a92aa1356a",
+  "template": "BASE_BODY_V1",
+  "race": "HUMAN",
+  "gender": "MALE",
+  "asset_type": "BASE_BODY",
+  "view": "FRONT",
+  "socket": "HUMAN_MALE_BODY_SOCKET_V1",
+  "identity_id": "human_male_body_v1",
+  "geometry_revision": "HUMAN_MALE_BASE_FRONT_GUIDE_V1",
+  "camera_revision": "COMFY_STYLE_11_BODY_ORTHO_FRONT_V1",
+  "catalog": "data/alpha_character_editor/HUMAN/MALE.json",
+  "catalog_sha256": "3f966d24b14e5e05cb25414884cae552aa502585160079c69244f55a474a433c",
+  "profile_sha256": "8e76617074b52d16fa178073f10b217fcedc83c9a16f2265ba188fae20ce1f3f",
+  "reference_pack_sha256": "23e873f7083a1faa54809be9ed9474570ebc698f7a085dbf9d5c8096439ae712",
+  "socket_pack_sha256": null,
+  "alpha_option": null,
+  "inputs": {
+    "geometry_guide": {
+      "file": "HUMAN_MALE_BASE_FRONT_GUIDE_V1.png",
+      "sha256": "9b618a41dda4b57989c0ec96be4718f099b29969bf8c9e88b7cd2a1de97a4ff7"
+    },
+    "anchor_plate": {
+      "file": "HUMAN_MALE_BASE_FRONT_GUIDE_V1.png",
+      "sha256": "9b618a41dda4b57989c0ec96be4718f099b29969bf8c9e88b7cd2a1de97a4ff7"
+    }
+  },
+  "model": {
+    "checkpoint": "DreamShaperXL_Turbo_v2_1.safetensors",
+    "checkpoint_sha256": "4496b36d48bfd7cfe4e5dbce3485db567bcefa2bef7238d290dbd45612125083",
+    "lora": "ral-vxl.safetensors",
+    "lora_sha256": "9dc480ee98c12a499bee1fc19ee0e13969a3c6b14be0e6ec133a11d563e83a25",
+    "lora_author": "RalFinger",
+    "strength_model": 0.6,
+    "strength_clip": 0.6,
+    "license_decision": "docs/decisions/FACT-D21-civitai-voxel-lora-license.md"
+  },
+  "sampling": {
+    "seed": 20261114,
+    "seed_mode": "fixed",
+    "steps": 28,
+    "cfg": 5,
+    "sampler_name": "dpmpp_2m",
+    "scheduler": "normal",
+    "denoise": 0.35
+  },
+  "controlnet": {
+    "model": "controlnet-union-sdxl-1.0.safetensors",
+    "sha256": "a9e13fd61f3193887791c8a0dd07a07202174dc47d5ddaea94ea1344f07c7467",
+    "union_type": "canny/lineart/anime_lineart/mlsd",
+    "low_threshold": 0.35,
+    "high_threshold": 0.75,
+    "strength": 0.9,
+    "start_percent": 0,
+    "end_percent": 1,
+    "resize_method": "nearest-exact",
+    "crop": "disabled"
+  },
+  "ipadapter": null,
+  "hair_color": null,
+  "output_prefix": "HUMAN_MALE_BASE_FRONT_V1",
+  "production_status": "EXPERIMENTAL / LICENSE_BLOCKED_FOR_PRODUCTION",
+  "graph_sha256": "db79831fc878f1efd38f77ef03b490cde1109359c8025bbdea9794d57572da09",
+  "result": {
+    "file": "HUMAN_MALE_BASE_FRONT_V1.png",
+    "sha256": "a5785c9db2d5dba39d74253d9a0ea6b51a158d5ae6613d1e6884d23f79dda755",
+    "prompt_id": "da9ed909-47f8-45b0-b509-204bc4a12a30",
+    "size": [
+      768,
+      1024
+    ],
+    "seconds": 53.7,
+    "time_source": "ComfyUI history execution start and success",
+    "memory_mib": null
+  },
+  "checks_numeric": {
+    "foreground_method": "largest 8-connected component with >=16 lower median RGB brightness than measured background",
+    "background_rgb_median": [
+      159,
+      159,
+      158
+    ],
+    "guide_bbox_xyxy_exclusive": [
+      92,
+      174,
+      677,
+      851
+    ],
+    "bbox_xyxy_exclusive": [
+      92,
+      173,
+      678,
+      852
+    ],
+    "rendered_silhouette_iou_vs_guide": 0.9826,
+    "left_right_mirror_iou_about_x384": 0.9934,
+    "wrist_x90_134_center_y": 416.0,
+    "wrist_x634_678_center_y": 416.0,
+    "foreground_components_over_100_px": 1
+  }
+}

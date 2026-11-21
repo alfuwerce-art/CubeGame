@@ -1,0 +1,341 @@
+{
+  "id": "HAIRCUT_MODULE_V1",
+  "asset_type": "HAIRCUT_MODULE",
+  "allowed_views": [
+    "FRONT",
+    "LEFT",
+    "RIGHT",
+    "BACK",
+    "TOP"
+  ],
+  "positive": "one volumetric interchangeable Haircut overlay following the catalog option, neutral warm grey matte module (base #A8A29A), edge and silhouettes visibly distinct from plain head carrier, existing forehead, crown, ear landmarks and neck unchanged, no accessory unless described by the option",
+  "negative": "face recolor, skin painted on module, facial identity change, replacement head, glued or merged carrier, garment, accessories not in option, strong colorful material",
+  "graph": {
+    "checkpoint": {
+      "class_type": "CheckpointLoaderSimple",
+      "_meta": {
+        "title": "DreamShaper XL Turbo v2.1"
+      },
+      "inputs": {
+        "ckpt_name": "$checkpoint"
+      }
+    },
+    "lora": {
+      "class_type": "LoraLoader",
+      "_meta": {
+        "title": "ral-vxl (experimental only)"
+      },
+      "inputs": {
+        "model": [
+          "checkpoint",
+          0
+        ],
+        "clip": [
+          "checkpoint",
+          1
+        ],
+        "lora_name": "$lora",
+        "strength_model": "$strength_model",
+        "strength_clip": "$strength_clip"
+      }
+    },
+    "positive": {
+      "class_type": "CLIPTextEncode",
+      "_meta": {
+        "title": "Style + profile + requested module + view"
+      },
+      "inputs": {
+        "clip": [
+          "lora",
+          1
+        ],
+        "text": "$positive_prompt"
+      }
+    },
+    "negative": {
+      "class_type": "CLIPTextEncode",
+      "_meta": {
+        "title": "Style and module exclusions"
+      },
+      "inputs": {
+        "clip": [
+          "lora",
+          1
+        ],
+        "text": "$negative_prompt"
+      }
+    },
+    "geometry_guide": {
+      "class_type": "LoadImage",
+      "_meta": {
+        "title": "Same-object, same-view geometry guide"
+      },
+      "inputs": {
+        "image": "$geometry_guide"
+      }
+    },
+    "guide_scale": {
+      "class_type": "ImageScale",
+      "_meta": {
+        "title": "Fixed framing (no crop)"
+      },
+      "inputs": {
+        "image": [
+          "geometry_guide",
+          0
+        ],
+        "upscale_method": "$resize_method",
+        "width": "$width",
+        "height": "$height",
+        "crop": "$crop"
+      }
+    },
+    "edges": {
+      "class_type": "Canny",
+      "_meta": {
+        "title": "View-specific contours"
+      },
+      "inputs": {
+        "image": [
+          "guide_scale",
+          0
+        ],
+        "low_threshold": "$low_threshold",
+        "high_threshold": "$high_threshold"
+      }
+    },
+    "controlnet": {
+      "class_type": "ControlNetLoader",
+      "_meta": {
+        "title": "ControlNet Union SDXL"
+      },
+      "inputs": {
+        "control_net_name": "$controlnet"
+      }
+    },
+    "canny_mode": {
+      "class_type": "SetUnionControlNetType",
+      "_meta": {
+        "title": "Canny / lineart union type"
+      },
+      "inputs": {
+        "control_net": [
+          "controlnet",
+          0
+        ],
+        "type": "$union_type"
+      }
+    },
+    "guide_conditioning": {
+      "class_type": "ControlNetApplyAdvanced",
+      "_meta": {
+        "title": "Geometry conditioning"
+      },
+      "inputs": {
+        "positive": [
+          "positive",
+          0
+        ],
+        "negative": [
+          "negative",
+          0
+        ],
+        "control_net": [
+          "canny_mode",
+          0
+        ],
+        "image": [
+          "edges",
+          0
+        ],
+        "strength": "$control_strength",
+        "start_percent": "$control_start",
+        "end_percent": "$control_end"
+      }
+    },
+    "sampler": {
+      "class_type": "KSampler",
+      "_meta": {
+        "title": "One controlled view"
+      },
+      "inputs": {
+        "model": [
+          "lora",
+          0
+        ],
+        "positive": [
+          "guide_conditioning",
+          0
+        ],
+        "negative": [
+          "guide_conditioning",
+          1
+        ],
+        "latent_image": [
+          "latent",
+          0
+        ],
+        "seed": "$seed",
+        "steps": "$steps",
+        "cfg": "$cfg",
+        "sampler_name": "$sampler_name",
+        "scheduler": "$scheduler",
+        "denoise": "$denoise"
+      }
+    },
+    "decode": {
+      "class_type": "VAEDecode",
+      "_meta": {
+        "title": "Decoded RGB view"
+      },
+      "inputs": {
+        "samples": [
+          "sampler",
+          0
+        ],
+        "vae": [
+          "checkpoint",
+          2
+        ]
+      }
+    },
+    "carrier": {
+      "class_type": "LoadImage",
+      "_meta": {
+        "title": "Registered immutable head carrier"
+      },
+      "inputs": {
+        "image": "$carrier"
+      }
+    },
+    "edit_mask": {
+      "class_type": "LoadImageMask",
+      "_meta": {
+        "title": "White edits; black retains carrier"
+      },
+      "inputs": {
+        "image": "$edit_mask",
+        "channel": "red"
+      }
+    },
+    "encode_carrier": {
+      "class_type": "VAEEncode",
+      "_meta": {
+        "title": "Carrier in the same camera"
+      },
+      "inputs": {
+        "pixels": [
+          "carrier",
+          0
+        ],
+        "vae": [
+          "checkpoint",
+          2
+        ]
+      }
+    },
+    "latent": {
+      "class_type": "SetLatentNoiseMask",
+      "_meta": {
+        "title": "Local diffusion mask"
+      },
+      "inputs": {
+        "samples": [
+          "encode_carrier",
+          0
+        ],
+        "mask": [
+          "edit_mask",
+          0
+        ]
+      }
+    },
+    "composite": {
+      "class_type": "ImageCompositeMasked",
+      "_meta": {
+        "title": "Restore carrier outside edit mask"
+      },
+      "inputs": {
+        "destination": [
+          "carrier",
+          0
+        ],
+        "source": [
+          "decode",
+          0
+        ],
+        "mask": [
+          "edit_mask",
+          0
+        ],
+        "x": 0,
+        "y": 0,
+        "resize_source": false
+      }
+    },
+    "matte": {
+      "class_type": "LoadImageMask",
+      "_meta": {
+        "title": "Manual module-only matte; white keeps foreground"
+      },
+      "inputs": {
+        "image": "$module_matte",
+        "channel": "red"
+      }
+    },
+    "invert_matte": {
+      "class_type": "InvertMask",
+      "_meta": {
+        "title": "Convert foreground matte to ComfyUI alpha mask"
+      },
+      "inputs": {
+        "mask": [
+          "matte",
+          0
+        ]
+      }
+    },
+    "cutout": {
+      "class_type": "JoinImageWithAlpha",
+      "_meta": {
+        "title": "Separate module RGBA"
+      },
+      "inputs": {
+        "image": [
+          "composite",
+          0
+        ],
+        "alpha": [
+          "invert_matte",
+          0
+        ]
+      }
+    },
+    "save_reference": {
+      "class_type": "SaveImage",
+      "_meta": {
+        "title": "Placement check on carrier"
+      },
+      "inputs": {
+        "images": [
+          "composite",
+          0
+        ],
+        "filename_prefix": "$reference_prefix"
+      }
+    },
+    "save_module": {
+      "class_type": "SaveImage",
+      "_meta": {
+        "title": "Module alone; carrier excluded by matte"
+      },
+      "inputs": {
+        "images": [
+          "cutout",
+          0
+        ],
+        "filename_prefix": "$module_prefix"
+      }
+    }
+  }
+}

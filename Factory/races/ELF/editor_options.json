@@ -1,0 +1,67 @@
+{
+  "race_id": "ELF",
+  "alpha": {
+    "binding": "PLAYABLE_LABEL_MATCH",
+    "race": "Elf",
+    "race_index": 1,
+    "fields": [
+      "Race",
+      "Gender",
+      "Class",
+      "Face",
+      "Haircut",
+      "Hair color"
+    ],
+    "options_source": "../../docs/tasks/COMFY-STYLE-08_ALPHA_MATRIX.json",
+    "variants": {
+      "Male": {
+        "style_id": 0,
+        "face_indices": [
+          0,
+          3
+        ],
+        "haircut_indices": [
+          0,
+          9
+        ]
+      },
+      "Female": {
+        "style_id": 1,
+        "face_indices": [
+          0,
+          5
+        ],
+        "haircut_indices": [
+          0,
+          9
+        ]
+      }
+    },
+    "class_filter": "No class branch in the face/hair lookup.",
+    "provenance": "ALPHA_DECOMPILED + ASSET_CONFIRMED",
+    "detail": null
+  },
+  "owner_screenshot": {
+    "status": "SCREENSHOT_OBSERVED",
+    "selected": "Elf / Male / Ranger / Face 1 / Haircut 1",
+    "color_control": "Hair color"
+  },
+  "future_extensions": {
+    "status": "CUBEGAME_CONTRACT / PROPOSAL",
+    "slots": [
+      "Head",
+      "Face",
+      "Eyes",
+      "Torso",
+      "Arms",
+      "Hands",
+      "Legs",
+      "Feet",
+      "Equipment",
+      "Ears",
+      "Hair"
+    ],
+    "independent_eye_colors": true,
+    "racial_effects_proposed": false
+  }
+}

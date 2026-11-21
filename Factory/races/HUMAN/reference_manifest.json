@@ -1,0 +1,46 @@
+{
+  "reference_id": "OWNER_HUMAN",
+  "source_filename": "человек без шейдеров.png",
+  "source_resolution": [
+    1670,
+    942
+  ],
+  "source_sha256": "ffc009dab54bf8f8a37c87ee5c3966cbd14026b51d8109c737b25f3a1c832eeb",
+  "source_rect_xyxy": [
+    660,
+    315,
+    990,
+    715
+  ],
+  "crop_xyxy": [
+    636,
+    291,
+    1014,
+    739
+  ],
+  "mask_bbox_xyxy_source": [
+    681,
+    327,
+    986,
+    710
+  ],
+  "landmarks_px": {
+    "top_y": 349,
+    "chin_y": 513,
+    "shoulders_y": 570,
+    "crotch_y": 638,
+    "sole_y": 699,
+    "width_at_shoulder": 208
+  },
+  "landmarks_method": "Approximate manual landmarks; crown includes hair or headgear where it occludes the skull.",
+  "preprocessing": "COMFY-STYLE-07 prepare_character_reference.segment; OpenCV RNG seed 20261114; largest component; manual boot masks for Elf/Dwarf and full contour for Fildor; 6px margin; nearest-neighbour to fit 736x872; bottom margin 52px; background #9e9e9e",
+  "scale": 2.207595,
+  "input_filename": "style08_human.png",
+  "input_sha256": "6aafcde65648644d351b71ba51fa867e50de3beff351a0d177bd03c0d3df34f2",
+  "input_resolution": [
+    768,
+    1024
+  ],
+  "local_only": true,
+  "mask_correction": null
+}

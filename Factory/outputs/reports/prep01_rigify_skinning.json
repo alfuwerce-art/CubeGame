@@ -1,0 +1,207 @@
+{
+  "stage": "PREP-01/rigify_skinning",
+  "blender_version": "5.2.4 LTS",
+  "python_version": "3.13.13",
+  "background": true,
+  "stages": {
+    "enable_rigify": {
+      "ok": true,
+      "detail": "before=[False, False] after=[True, True]"
+    },
+    "add_human_metarig": {
+      "ok": true,
+      "detail": "object=metarig bones=159"
+    },
+    "rigify_generate": {
+      "ok": true,
+      "detail": "via=object_mode rig=rig deform=160 control=546"
+    },
+    "build_mannequin": {
+      "ok": true,
+      "detail": "segments=160 verts_raw=1280 verts_remeshed=3926 components=1"
+    },
+    "automatic_weights": {
+      "ok": true,
+      "detail": "groups=160 unweighted=0 weight_sum_min=0.7323 sum_off_from_1=2426 modifier=True"
+    },
+    "pose_deformation": {
+      "ok": true,
+      "detail": "ik=0.562m fk=0.332m def_direct=0.0m"
+    },
+    "render_evidence": {
+      "ok": true,
+      "detail": "rest=1.28s posed=0.69s distinct_images=True"
+    },
+    "save_blend": {
+      "ok": true,
+      "detail": "D:\\Projects\\CubeGame Factory\\outputs\\blender\\prep01_rigify_skinned.blend"
+    },
+    "export_fbx": {
+      "ok": true,
+      "detail": "D:\\Projects\\CubeGame Factory\\outputs\\blender\\prep01_rigify_skinned.fbx bytes=1577084"
+    },
+    "fbx_roundtrip": {
+      "ok": true,
+      "detail": "{\"armatures\": 1, \"meshes\": 1, \"bones\": 706, \"vertex_groups\": 145, \"max_displacement_after_rotation_m\": 0.5659896444790915}"
+    }
+  },
+  "checks": {
+    "available_metarig_ops": [
+      "armature_basic_human_metarig_add",
+      "armature_basic_quadruped_metarig_add",
+      "armature_bird_metarig_add",
+      "armature_cat_metarig_add",
+      "armature_horse_metarig_add",
+      "armature_human_metarig_add",
+      "armature_shark_metarig_add",
+      "armature_wolf_metarig_add"
+    ],
+    "available_rigify_pose_ops": [
+      "rigify_collection_ref_add",
+      "rigify_collection_ref_remove",
+      "rigify_copy_parameters",
+      "rigify_copy_single_parameter",
+      "rigify_generate",
+      "rigify_mirror_parameters",
+      "rigify_upgrade_face",
+      "rigify_upgrade_types"
+    ],
+    "deform_bone_examples": [
+      "DEF-spine",
+      "DEF-spine.001",
+      "DEF-spine.002",
+      "DEF-spine.003",
+      "DEF-spine.004",
+      "DEF-spine.005",
+      "DEF-spine.006",
+      "DEF-pelvis.L",
+      "DEF-pelvis.R",
+      "DEF-thigh.L",
+      "DEF-thigh.L.001",
+      "DEF-shin.L"
+    ],
+    "control_bone_examples": [
+      "root",
+      "MCH-eyes_parent",
+      "eyes",
+      "eye.L",
+      "eye.R",
+      "VIS_upper_arm_ik_pole.L",
+      "VIS_upper_arm_ik_pole.R",
+      "VIS_thigh_ik_pole.L",
+      "VIS_thigh_ik_pole.R",
+      "MCH-torso.parent",
+      "torso",
+      "hips"
+    ],
+    "armature_modifier_target": "rig",
+    "fbx_export_ops": [
+      "fbx"
+    ]
+  },
+  "numbers": {
+    "metarig_bones": 159,
+    "generated_bones_total": 706,
+    "generated_deform_bones": 160,
+    "generated_control_bones": 546,
+    "mannequin_segments": 160,
+    "mannequin_vertices_raw": 1280,
+    "mannequin_vertices": 3926,
+    "mannequin_components": 1,
+    "vertex_groups_total": 160,
+    "vertex_groups_deform": 160,
+    "vertices_unweighted": 0,
+    "vertices_weight_sum_off": 2426,
+    "weight_sum_min": 0.7323,
+    "weight_sum_p50": 0.9711,
+    "weight_sum_max": 0.9999,
+    "rest_max_abs_z": 2.0221,
+    "pose_deform_max_disp_m": 0.0,
+    "pose_ik_max_disp_m": 0.5623,
+    "pose_fk_max_disp_m": 0.3319,
+    "render": {
+      "engine": "CYCLES",
+      "device": "CPU",
+      "samples": 24,
+      "resolution": [
+        640,
+        800
+      ],
+      "seconds_rest": 1.28,
+      "seconds_posed": 0.69,
+      "rest_png": "D:\\Projects\\CubeGame Factory\\outputs\\blender\\prep01_rest_pose.png",
+      "posed_png": "D:\\Projects\\CubeGame Factory\\outputs\\blender\\prep01_control_pose.png",
+      "rest_md5": "92eb685337e5845125d41dc22f4f0df3",
+      "posed_md5": "462f3b7368f88506b1eb651503ab1a2a"
+    },
+    "pose_tests": {
+      "deform_bone_direct": {
+        "bones": [
+          "DEF-upper_arm.L"
+        ],
+        "missing": [],
+        "max_displacement_m": 0.0,
+        "note": "0 ожидаемо: DEF-кости Rigify управляются constraints"
+      },
+      "ik_controls": {
+        "bones": [
+          "hand_ik.L",
+          "hand_ik.R",
+          "foot_ik.R"
+        ],
+        "max_displacement_m": 0.5623
+      },
+      "fk_controls": {
+        "bones": [
+          "upper_arm_parent.L[IK_FK=1]",
+          "thigh_parent.R[IK_FK=1]",
+          "upper_arm_fk.L",
+          "forearm_fk.L",
+          "thigh_fk.R",
+          "shin_fk.R"
+        ],
+        "max_displacement_m": 0.3319
+      },
+      "render_pose": {
+        "bones": [
+          "hand_ik.L",
+          "hand_ik.R",
+          "foot_ik.R",
+          "upper_arm_parent.L[IK_FK=1]",
+          "thigh_parent.R[IK_FK=1]",
+          "upper_arm_fk.L",
+          "forearm_fk.L",
+          "thigh_fk.R",
+          "shin_fk.R"
+        ],
+        "max_displacement_m": 0.3805
+      }
+    },
+    "blend_size_bytes": 587676,
+    "fbx": {
+      "export": {
+        "path": "D:\\Projects\\CubeGame Factory\\outputs\\blender\\prep01_rigify_skinned.fbx",
+        "bytes": 1577084,
+        "ops": [
+          "fbx"
+        ]
+      },
+      "import": {
+        "armatures": 1,
+        "meshes": 1,
+        "bones": 706,
+        "vertex_groups": 145,
+        "max_displacement_after_rotation_m": 0.5659896444790915
+      }
+    }
+  },
+  "issues": [],
+  "artifacts": {
+    "blend": "D:\\Projects\\CubeGame Factory\\outputs\\blender\\prep01_rigify_skinned.blend",
+    "fbx": "D:\\Projects\\CubeGame Factory\\outputs\\blender\\prep01_rigify_skinned.fbx",
+    "render_rest": "D:\\Projects\\CubeGame Factory\\outputs\\blender\\prep01_rest_pose.png",
+    "render_posed": "D:\\Projects\\CubeGame Factory\\outputs\\blender\\prep01_control_pose.png"
+  },
+  "seconds_total": 10.8,
+  "result": "PASS"
+}

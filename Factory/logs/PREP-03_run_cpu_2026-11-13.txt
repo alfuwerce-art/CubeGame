@@ -1,0 +1,29 @@
+﻿comfyui_pid=7188 mode=cpu
+ram_before_GB=19.47 vram_before_MiB=1348
+server_ready=True after_s=10.7
+report_result=PASS smoke_seconds=1.7 samples=3
+peak_working_set_MB=859
+peak_gpu_used_MiB=1355 (вся карта, включая прочие приложения; до теста было 1348)
+peak_gpu_pid_MiB=0 (память процесса ComfyUI по nvidia-smi compute-apps)
+min_free_ram_GB=18.55
+server_stopped=True
+ram_after_GB=19.43 vram_after_MiB=1354
+total_seconds=14.5
+server_log=D:\Projects\CubeGame Factory\logs\PREP-03_comfyui_server_2026-11-13_cpu.txt
+smoke_log=D:\Projects\CubeGame Factory\logs\PREP-03_comfyui_smoke_2026-11-13_cpu.txt
+STAGE server_ready: OK waited=0.0s version=0.45.0
+STAGE web_ui_available: OK status=200 bytes=19885
+STAGE nodes_available: OK {"EmptyImage": ["batch_size", "color", "height", "width"], "SaveImage": ["filename_prefix", "images"]}
+STAGE submit_prompt: OK status=200 prompt_id=644328f4-fa41-4002-a22e-4f755a87f1e2
+STAGE workflow_executed: OK 1.0s status=success
+STAGE result_saved: OK D:\Projects\CubeGame Factory\outputs\comfyui\prep03_smoke_from_api.png dims=[96, 96] bytes=504
+STAGE queue_idle: OK running=0 pending=0
+PREP03_REPORT=D:\Projects\CubeGame Factory\outputs\reports\prep03_comfyui_smoke_cpu.json
+PREP03_RESULT=PASS
+PREP03_STAGE server_ready=PASS :: waited=0.0s version=0.45.0
+PREP03_STAGE web_ui_available=PASS :: status=200 bytes=19885
+PREP03_STAGE nodes_available=PASS :: {"EmptyImage": ["batch_size", "color", "height", "width"], "SaveImage": ["filename_prefix", "images"]}
+PREP03_STAGE submit_prompt=PASS :: status=200 prompt_id=644328f4-fa41-4002-a22e-4f755a87f1e2
+PREP03_STAGE workflow_executed=PASS :: 1.0s status=success
+PREP03_STAGE result_saved=PASS :: D:\Projects\CubeGame Factory\outputs\comfyui\prep03_smoke_from_api.png dims=[96, 96] bytes=504
+PREP03_STAGE queue_idle=PASS :: running=0 pending=0

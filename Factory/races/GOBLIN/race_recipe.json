@@ -1,0 +1,83 @@
+{
+  "race_id": "GOBLIN",
+  "display_name": "Goblin",
+  "reference_ids": [
+    "OWNER_GOBLIN"
+  ],
+  "height_ratio": 1.054,
+  "head_to_body_ratio": 0.539,
+  "shoulder_width_ratio": 0.621,
+  "leg_length_ratio": 0.179,
+  "ratio_basis": "Pixels in the reference. Height normalized to Human image height, other ratios to own top-to-sole height. Camera and garments affect measurement. Leg length estimated from visible pelvis/crotch line.",
+  "anatomy_from_reference": "short goblin with wide triangular ears, block nose and small lower tusks",
+  "starting_palette_and_features_from_reference": "lime-green skin, dark square eyes under heavy brows, reddish nose, dark green cap, brown neutral tunic and dark boots",
+  "rig_archetype": "PROPOSAL: humanoid",
+  "animation_family": "PROPOSAL: humanoid locomotion; Mecanim Avatar, sockets and clips pending validation",
+  "body_parts": [
+    "head",
+    "torso",
+    "pelvis",
+    "upper_arm_L",
+    "upper_arm_R",
+    "forearm_L",
+    "forearm_R",
+    "hand_L",
+    "hand_R",
+    "thigh_L",
+    "thigh_R",
+    "shin_L",
+    "shin_R",
+    "foot_L",
+    "foot_R"
+  ],
+  "special_parts": [
+    "Ears",
+    "Tusks",
+    "Equipment"
+  ],
+  "face_recipe": {
+    "eye_sockets": "head-local paired sockets",
+    "eyes_pupils": "separate voxel geometry and material",
+    "eyebrows": "face preset geometry",
+    "nose_mouth_jaw": "face preset geometry; use jaw anchor when split",
+    "face_texture_variants": "PROPOSAL: optional masks for detail beside independently editable geometry"
+  },
+  "material_slots": [
+    "base_surface",
+    "clothing",
+    "skin",
+    "eye"
+  ],
+  "palette_channels": {
+    "skin": {
+      "alpha": "Independent control not established",
+      "cube_game": "PROPOSAL"
+    },
+    "hair": {
+      "alpha": "Hair color affects overlay",
+      "cube_game": "UNSPECIFIED"
+    },
+    "eye": {
+      "alpha": "Independent control not established",
+      "cube_game": "PROPOSAL"
+    },
+    "beard": {
+      "alpha": "Independent control not established",
+      "cube_game": "UNSPECIFIED"
+    },
+    "scales": {
+      "alpha": "Independent control not established",
+      "cube_game": "UNSPECIFIED"
+    },
+    "clothing": {
+      "alpha": "Independent control not established",
+      "cube_game": "PROPOSAL"
+    },
+    "effects": {
+      "alpha": "Independent control not established",
+      "cube_game": "UNSPECIFIED"
+    }
+  },
+  "compatibility_notes": "сохранить широкие уши, маленькие бивни и контраст носа",
+  "alpha_comparison": "То же название расы в редакторе Alpha."
+}

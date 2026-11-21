@@ -1,0 +1,65 @@
+{
+  "id": "FACTORY_REFERENCE_LORA_V1",
+  "runs": [
+    {
+      "character": "human_warrior",
+      "resolution": "main",
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 6.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "workflow": "FACTORY_REFERENCE_IPADAPTER.json",
+      "ipadapter_weight": 0.8,
+      "ipadapter_weight_type": "linear",
+      "id": "ref_lora_000",
+      "lora_strength": 0.0,
+      "purpose": "VoxelXL LoRA strength 0.0 (IPAdapter 0.8 fixed)"
+    },
+    {
+      "character": "human_warrior",
+      "resolution": "main",
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 6.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "workflow": "FACTORY_REFERENCE_IPADAPTER.json",
+      "ipadapter_weight": 0.8,
+      "ipadapter_weight_type": "linear",
+      "id": "ref_lora_040",
+      "lora_strength": 0.4,
+      "purpose": "VoxelXL LoRA strength 0.4 (IPAdapter 0.8 fixed)"
+    },
+    {
+      "character": "human_warrior",
+      "resolution": "main",
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 6.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "workflow": "FACTORY_REFERENCE_IPADAPTER.json",
+      "ipadapter_weight": 0.8,
+      "ipadapter_weight_type": "linear",
+      "id": "ref_lora_060",
+      "lora_strength": 0.6,
+      "purpose": "VoxelXL LoRA strength 0.6 (IPAdapter 0.8 fixed)"
+    },
+    {
+      "character": "human_warrior",
+      "resolution": "main",
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 6.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "workflow": "FACTORY_REFERENCE_IPADAPTER.json",
+      "ipadapter_weight": 0.8,
+      "ipadapter_weight_type": "linear",
+      "id": "ref_lora_080",
+      "lora_strength": 0.8,
+      "purpose": "VoxelXL LoRA strength 0.8 (IPAdapter 0.8 fixed)"
+    }
+  ]
+}

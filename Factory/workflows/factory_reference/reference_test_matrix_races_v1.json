@@ -1,0 +1,59 @@
+{
+  "id": "FACTORY_REFERENCE_RACES_V1",
+  "runs": [
+    {
+      "id": "ref_elf_ranger_cn060",
+      "workflow": "FACTORY_REFERENCE_CONTROLNET.json",
+      "character": "elf_ranger",
+      "resolution": "main",
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 6.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "controlnet_strength": 0.6,
+      "purpose": "cross-character consistency: ControlNet Canny 0.6"
+    },
+    {
+      "id": "ref_elf_ranger_ipa08",
+      "workflow": "FACTORY_REFERENCE_IPADAPTER.json",
+      "character": "elf_ranger",
+      "resolution": "main",
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 6.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "ipadapter_weight": 0.8,
+      "ipadapter_weight_type": "linear",
+      "purpose": "cross-character consistency: IPAdapter 0.8"
+    },
+    {
+      "id": "ref_dwarf_warrior_cn060",
+      "workflow": "FACTORY_REFERENCE_CONTROLNET.json",
+      "character": "dwarf_warrior",
+      "resolution": "main",
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 6.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "controlnet_strength": 0.6,
+      "purpose": "cross-character consistency: ControlNet Canny 0.6"
+    },
+    {
+      "id": "ref_dwarf_warrior_ipa08",
+      "workflow": "FACTORY_REFERENCE_IPADAPTER.json",
+      "character": "dwarf_warrior",
+      "resolution": "main",
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 6.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "ipadapter_weight": 0.8,
+      "ipadapter_weight_type": "linear",
+      "purpose": "cross-character consistency: IPAdapter 0.8"
+    }
+  ]
+}

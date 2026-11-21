@@ -1,0 +1,61 @@
+{
+  "id": "FACTORY_REFERENCE_TUNING_V1",
+  "runs": [
+    {
+      "character": "human_warrior",
+      "resolution": "main",
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 6.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "controlnet_strength": 0.35,
+      "id": "ref_cn_canny_035",
+      "workflow": "FACTORY_REFERENCE_CONTROLNET.json",
+      "purpose": "ControlNet lower strength - check duplicate figure"
+    },
+    {
+      "character": "human_warrior",
+      "resolution": "main",
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 6.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "controlnet_strength": 0.45,
+      "id": "ref_cn_canny_045",
+      "workflow": "FACTORY_REFERENCE_CONTROLNET.json",
+      "purpose": "ControlNet lower strength - check duplicate figure"
+    },
+    {
+      "character": "human_warrior",
+      "resolution": "main",
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 6.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "ipadapter_weight": 0.4,
+      "ipadapter_weight_type": "linear",
+      "controlnet_strength": 0.5,
+      "id": "ref_ipa_cn_040_050",
+      "workflow": "FACTORY_REFERENCE_IPADAPTER_CONTROLNET.json",
+      "purpose": "tuned pair IPA 0.4 + CN 0.5"
+    },
+    {
+      "character": "human_warrior",
+      "resolution": "main",
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 6.0,
+      "sampler": "dpmpp_2m",
+      "scheduler": "karras",
+      "ipadapter_weight": 0.5,
+      "ipadapter_weight_type": "linear",
+      "controlnet_strength": 0.6,
+      "id": "ref_ipa_cn_050_060",
+      "workflow": "FACTORY_REFERENCE_IPADAPTER_CONTROLNET.json",
+      "purpose": "tuned pair IPA 0.5 + CN 0.6"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "race_id": "SKELETON",
+  "alpha": {
+    "binding": "NO_MATCH_IN_CREATOR",
+    "race": null,
+    "race_index": null,
+    "fields": [],
+    "options_source": null,
+    "variants": {},
+    "class_filter": null,
+    "provenance": "ALPHA_DECOMPILED creator roster",
+    "detail": "Skeleton 0x11 — существо Alpha. В редакторе выбирается Undead с другими моделями."
+  },
+  "owner_screenshot": {
+    "status": "SCREENSHOT_OBSERVED",
+    "selected": "Skeleton / Male / Warrior / Face 1 / None",
+    "color_control": "Hair color"
+  },
+  "future_extensions": {
+    "status": "CUBEGAME_CONTRACT / PROPOSAL",
+    "slots": [
+      "Head",
+      "Face",
+      "Eyes",
+      "Torso",
+      "Arms",
+      "Hands",
+      "Legs",
+      "Feet",
+      "Equipment",
+      "Skull",
+      "Jaw"
+    ],
+    "independent_eye_colors": true,
+    "racial_effects_proposed": false
+  }
+}

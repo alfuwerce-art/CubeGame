@@ -1,0 +1,46 @@
+{
+  "reference_id": "OWNER_DRAGONKIN",
+  "source_filename": "дркон гуманоид .png",
+  "source_resolution": [
+    1670,
+    942
+  ],
+  "source_sha256": "154e64e3addfdef9fdf47535ba429ca0c25552c1b7197e83a5129d8bc2f8a9e0",
+  "source_rect_xyxy": [
+    662,
+    333,
+    1026,
+    728
+  ],
+  "crop_xyxy": [
+    638,
+    309,
+    1050,
+    752
+  ],
+  "mask_bbox_xyxy_source": [
+    662,
+    337,
+    1012,
+    728
+  ],
+  "landmarks_px": {
+    "top_y": 338,
+    "chin_y": 545,
+    "shoulders_y": 557,
+    "crotch_y": 653,
+    "sole_y": 726,
+    "width_at_shoulder": 239
+  },
+  "landmarks_method": "Approximate manual landmarks; crown includes hair or headgear where it occludes the skull.",
+  "preprocessing": "COMFY-STYLE-07 prepare_character_reference.segment; OpenCV RNG seed 20261114; largest component; manual boot masks for Elf/Dwarf and full contour for Fildor; 6px margin; nearest-neighbour to fit 736x872; bottom margin 52px; background #9e9e9e",
+  "scale": 2.033149,
+  "input_filename": "style08_dragonkin.png",
+  "input_sha256": "5b9b513f4a27e69c66e202f9353455b6ba7f3fc069d38e16cb90e69f83c2ea50",
+  "input_resolution": [
+    768,
+    1024
+  ],
+  "local_only": true,
+  "mask_correction": null
+}

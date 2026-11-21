@@ -1,0 +1,627 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Factoria DESIGN-01 geometry-reference",
+  "description": "Project schema, not a production API. Cross-contract rules are in ASSET_DATA_CONTRACTS.md.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "example": {
+      "type": "boolean"
+    },
+    "mannequin_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "race": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "body_form": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "visual_target": {
+      "$ref": "#/$defs/artifact"
+    },
+    "geometry_source": {
+      "$ref": "#/$defs/artifact"
+    },
+    "provenance": {
+      "enum": [
+        "PROTOTYPE",
+        "OWNER_APPROVED"
+      ]
+    },
+    "rig": {
+      "$ref": "#/$defs/pin"
+    },
+    "pose": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "units": {
+      "const": "m"
+    },
+    "axes": {
+      "const": "BLENDER_X_LEFT_NEG_Y_FORWARD_Z_UP"
+    },
+    "extent_m": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "camera_revision": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "joints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "deform": {
+            "type": "boolean"
+          },
+          "head_m": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "tail_m": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "rest_to_root": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 16,
+            "maxItems": 16
+          }
+        },
+        "required": [
+          "id",
+          "parent",
+          "deform",
+          "head_m",
+          "tail_m",
+          "rest_to_root"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+          },
+          "bone_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+          },
+          "center_m": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "extent_m": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "required": [
+          "id",
+          "bone_id",
+          "center_m",
+          "extent_m"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "sockets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+          },
+          "bone_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+          },
+          "bone_local_transform": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 16,
+            "maxItems": 16
+          }
+        },
+        "required": [
+          "id",
+          "bone_id",
+          "bone_local_transform"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "slots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+          },
+          "sockets": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "fit_policy": {
+            "$ref": "#/$defs/binding"
+          },
+          "bounds_m": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "max": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+              }
+            },
+            "required": [
+              "min",
+              "max"
+            ],
+            "additionalProperties": false
+          },
+          "clearance_m": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "landmark_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "constraints": {
+            "$ref": "#/$defs/artifact"
+          }
+        },
+        "required": [
+          "id",
+          "sockets",
+          "fit_policy",
+          "bounds_m",
+          "clearance_m",
+          "landmark_ids",
+          "constraints"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "landmarks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+          },
+          "point_m": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "required": [
+          "id",
+          "point_m"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "views": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/view"
+          },
+          "camera": {
+            "type": "object",
+            "properties": {
+              "projection": {
+                "const": "ORTHO"
+              },
+              "target_m": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "target_to_camera": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "up": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "distance_m": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "span_m": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "resolution_px": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "px_per_m": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "near_m": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "far_m": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "world_to_camera": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 16,
+                "maxItems": 16
+              },
+              "crop_to_parent": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 9,
+                "maxItems": 9
+              }
+            },
+            "required": [
+              "projection",
+              "target_m",
+              "target_to_camera",
+              "up",
+              "distance_m",
+              "span_m",
+              "resolution_px",
+              "px_per_m",
+              "near_m",
+              "far_m",
+              "world_to_camera"
+            ],
+            "additionalProperties": false
+          },
+          "slot_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+          },
+          "files": {
+            "type": "object",
+            "properties": {
+              "carrier_rgb": {
+                "$ref": "#/$defs/artifact"
+              },
+              "silhouette": {
+                "$ref": "#/$defs/artifact"
+              },
+              "component_id": {
+                "$ref": "#/$defs/artifact"
+              },
+              "material_id": {
+                "$ref": "#/$defs/artifact"
+              },
+              "edit_mask": {
+                "$ref": "#/$defs/artifact"
+              },
+              "allowed_mask": {
+                "$ref": "#/$defs/artifact"
+              },
+              "protected_mask": {
+                "$ref": "#/$defs/artifact"
+              },
+              "required_mask": {
+                "$ref": "#/$defs/artifact"
+              },
+              "expected_matte": {
+                "$ref": "#/$defs/artifact"
+              },
+              "canny_plate": {
+                "$ref": "#/$defs/artifact"
+              },
+              "depth_conditioning": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "$ref": "#/$defs/artifact"
+                  },
+                  "near_is_white": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "file",
+                  "near_is_white"
+                ],
+                "additionalProperties": false
+              },
+              "depth_metric": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "$ref": "#/$defs/artifact"
+                  },
+                  "validity": {
+                    "$ref": "#/$defs/artifact"
+                  },
+                  "units": {
+                    "const": "m"
+                  },
+                  "space": {
+                    "const": "camera_axial"
+                  }
+                },
+                "required": [
+                  "file",
+                  "validity",
+                  "units",
+                  "space"
+                ],
+                "additionalProperties": false
+              },
+              "normal": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "$ref": "#/$defs/artifact"
+                  },
+                  "validity": {
+                    "$ref": "#/$defs/artifact"
+                  },
+                  "space": {
+                    "enum": [
+                      "world",
+                      "camera"
+                    ]
+                  }
+                },
+                "required": [
+                  "file",
+                  "validity",
+                  "space"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "carrier_rgb",
+              "silhouette",
+              "component_id",
+              "edit_mask",
+              "allowed_mask",
+              "protected_mask",
+              "required_mask",
+              "expected_matte"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "camera",
+          "slot_id",
+          "files"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "version",
+    "example",
+    "mannequin_id",
+    "race",
+    "body_form",
+    "visual_target",
+    "geometry_source",
+    "provenance",
+    "rig",
+    "pose",
+    "units",
+    "axes",
+    "extent_m",
+    "camera_revision",
+    "joints",
+    "segments",
+    "sockets",
+    "slots",
+    "landmarks",
+    "views"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "pin": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "view": {
+      "enum": [
+        "FRONT",
+        "BACK",
+        "LEFT",
+        "RIGHT",
+        "TOP",
+        "THREE_QUARTER"
+      ]
+    },
+    "binding": {
+      "enum": [
+        "NONE",
+        "UV_OVERLAY",
+        "RIGID_SOCKET",
+        "SEGMENTED_RIGID",
+        "SKINNED"
+      ]
+    }
+  }
+}

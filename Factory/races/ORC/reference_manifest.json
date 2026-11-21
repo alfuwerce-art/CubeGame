@@ -1,0 +1,46 @@
+{
+  "reference_id": "OWNER_ORC",
+  "source_filename": "орк.png",
+  "source_resolution": [
+    1671,
+    941
+  ],
+  "source_sha256": "80364af8c40eb3bb61879be2177f85f963798313e31e095947dee9a81fc28aab",
+  "source_rect_xyxy": [
+    674,
+    340,
+    1032,
+    723
+  ],
+  "crop_xyxy": [
+    650,
+    316,
+    1056,
+    747
+  ],
+  "mask_bbox_xyxy_source": [
+    706,
+    375,
+    996,
+    719
+  ],
+  "landmarks_px": {
+    "top_y": 367,
+    "chin_y": 544,
+    "shoulders_y": 565,
+    "crotch_y": 664,
+    "sole_y": 720,
+    "width_at_shoulder": 262
+  },
+  "landmarks_method": "Approximate manual landmarks; crown includes hair or headgear where it occludes the skull.",
+  "preprocessing": "COMFY-STYLE-07 prepare_character_reference.segment; OpenCV RNG seed 20261114; largest component; manual boot masks for Elf/Dwarf and full contour for Fildor; 6px margin; nearest-neighbour to fit 736x872; bottom margin 52px; background #9e9e9e",
+  "scale": 2.437086,
+  "input_filename": "style08_orc.png",
+  "input_sha256": "4599b8db996d700ca20a68e65b3ab075ca79da650bc63037b21afab27d524bd1",
+  "input_resolution": [
+    768,
+    1024
+  ],
+  "local_only": true,
+  "mask_correction": null
+}

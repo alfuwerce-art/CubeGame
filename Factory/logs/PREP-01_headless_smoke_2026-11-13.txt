@@ -1,0 +1,6 @@
+Info: Saved as "prep01_bg_smoke.blend"
+PREP01_BG_SMOKE_REPORT_JSON={"stage": "PREP-01/bg_smoke", "blender_version": "5.2.4 LTS", "blender_version_tuple": [5, 2, 4], "python_version": "3.13.13", "background": true, "output_blend": "D:\\Projects\\CubeGame Factory\\outputs\\blender\\prep01_bg_smoke.blend", "checks": {"empty_scene": "PASS", "mesh_created": "PASS", "mesh_vertices": 8, "blend_saved": "PASS", "blend_size_bytes": 86583, "rigify_addon_present": true, "rigify_addon_enabled": false, "fbx_exporter_ops": "export_scene.fbx", "metarig_object_ops": [], "rigify_pose_ops": []}, "issues": []}
+PREP01_BG_SMOKE_RESULT=PASS
+Blender 5.2.4 LTS (hash cd5dc428cce1 built 2026-11-10 01:34:34)
+
+Blender quit

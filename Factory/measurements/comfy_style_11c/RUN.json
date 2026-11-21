@@ -1,0 +1,62 @@
+{
+  "graph_sha256": "a0a9592f8d4d8334f32ba9dafa85755dac4b9fe0179d888db4e56ba2b820b87b",
+  "inputs": {
+    "geometry_guide": {
+      "name": "HUMAN_MALE_BASE_FRONT_V3_BODY_GUIDE.png",
+      "sha256": "15ba04fca1e3a6775d735357a65923e87d6265867d93608f1e8608d3cf2a4110"
+    },
+    "style_reference": {
+      "name": "HUMAN_V1_STYLE_REFERENCE.png",
+      "sha256": "b9f3d6e41e68e8239ab61f70fc5ddf81f95e0e85124903841bdd2e1195977e77"
+    },
+    "head_guide": {
+      "name": "HUMAN_MALE_HEAD_CARRIER_V1_GEOMETRY.png",
+      "sha256": "a45c1693cc3de13ea4e51d7b636527f443eedc8ff7a7ffe76955c9fa704cd7d0"
+    },
+    "anchor": {
+      "name": "HUMAN_MALE_BASE_FRONT_V3_ANCHOR.png",
+      "sha256": "0b8a08189a97a18b1e7d91427f776f035a299c5ee80c75cead6cb362eb95b4b6"
+    },
+    "head_mask_image": {
+      "name": "HUMAN_MALE_HEAD_CARRIER_V1_MASK.png",
+      "sha256": "01d8c9ebf9f8367ba3d0cad3b55c2722a6e6bf084ceecc58cbf13d57f51fe91a"
+    }
+  },
+  "sample": {
+    "file": "HUMAN_MALE_BASE_FRONT_V3_HEAD_SAMPLE.png",
+    "sha256": "ded1459eda762647b71b99302ba0e57fd6d58b6105368de32d73a6ceb70b731c"
+  },
+  "prompt_id": "c23347e5-b9ae-4a6c-b2c1-fc2cabfa0a13",
+  "seconds": 78.5,
+  "initial_card_vram_mib": 3972,
+  "peak_card_vram_mib": 5531,
+  "initial_comfy_rss_mib": 919,
+  "peak_comfy_rss_mib": 15119,
+  "initial_available_ram_mib": 16653,
+  "min_available_ram_mib": 3135,
+  "task": "COMFY-STYLE-11C",
+  "count": 1,
+  "server_seconds": 76.94,
+  "local_review_dir": "outputs/factory/human_base_front_v3",
+  "runtime": {
+    "comfyui": "0.45.0",
+    "ipadapter_plus": "2.0.0",
+    "pytorch": "2.14.1+cu130",
+    "gpu": "RTX 4060 Laptop",
+    "flags": [
+      "--novram",
+      "--reserve-vram",
+      "5",
+      "--disable-auto-launch",
+      "--disable-assets",
+      "--disable-all-custom-nodes",
+      "--whitelist-custom-nodes",
+      "ComfyUI_IPAdapter_plus",
+      "--offline"
+    ]
+  },
+  "carrier": {
+    "file": "HUMAN_MALE_HEAD_CARRIER_V1.png",
+    "sha256": "6871b2c802827767d5597d91ce3f461e7326d8830d8ce3de57a1a2bba286ce6b"
+  }
+}

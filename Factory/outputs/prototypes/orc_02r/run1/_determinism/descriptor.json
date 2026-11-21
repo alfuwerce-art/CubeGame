@@ -1,0 +1,763 @@
+{
+  "generator": "Factoria HumanoidBase v1 + orc profile (ORC-02R new geometry)",
+  "inputs": {
+    "measurements": {
+      "path": "D:\\Projects\\CubeGame Factory\\measurements\\orc_reference.json",
+      "sha256": "832fc08c56f382cec333475b3bf305bf219734ecec21fba3e18d274f924fbbcb"
+    },
+    "profile": {
+      "name": "orc_heavy_compact",
+      "overrides": [],
+      "path": "D:\\Projects\\CubeGame Factory\\scripts\\orc02r\\profiles\\orc.json",
+      "sha256": "99109d28e35ec5fb4eb47be7765b80a8bd2f8fa55c1a0210e6424be87092cc96"
+    }
+  },
+  "joint_cuts": [
+    {
+      "dropped_voxels": 46,
+      "part": "head",
+      "z": 45
+    },
+    {
+      "dropped_voxels": 46,
+      "part": "torso",
+      "z": 27
+    },
+    {
+      "dropped_voxels": 48,
+      "part": "pelvis",
+      "z": 20
+    },
+    {
+      "dropped_voxels": 36,
+      "part": "thigh_L",
+      "z": 13
+    },
+    {
+      "dropped_voxels": 28,
+      "part": "shin_L",
+      "z": 5
+    },
+    {
+      "dropped_voxels": 24,
+      "part": "upper_arm_L",
+      "z": 36
+    },
+    {
+      "dropped_voxels": 26,
+      "part": "forearm_L",
+      "z": 31
+    },
+    {
+      "dropped_voxels": 36,
+      "part": "thigh_R",
+      "z": 13
+    },
+    {
+      "dropped_voxels": 28,
+      "part": "shin_R",
+      "z": 5
+    },
+    {
+      "dropped_voxels": 24,
+      "part": "upper_arm_R",
+      "z": 36
+    },
+    {
+      "dropped_voxels": 26,
+      "part": "forearm_R",
+      "z": 31
+    },
+    {
+      "clamped_skin_voxels": 112
+    }
+  ],
+  "joints": {
+    "gaps_voxels": {
+      "foot_L->shin_L": 0,
+      "foot_R->shin_R": 0,
+      "forearm_L->upper_arm_L": 0,
+      "forearm_R->upper_arm_R": 0,
+      "hand_L->forearm_L": 1,
+      "hand_R->forearm_R": 1,
+      "pelvis->torso": 0,
+      "shin_L->thigh_L": 0,
+      "shin_R->thigh_R": 0,
+      "torso->head": 0
+    },
+    "z_ranges_voxels": {
+      "brows": [
+        56,
+        58
+      ],
+      "eyes": [
+        54,
+        54
+      ],
+      "foot_L": [
+        0,
+        4
+      ],
+      "foot_R": [
+        0,
+        4
+      ],
+      "forearm_L": [
+        31,
+        35
+      ],
+      "forearm_R": [
+        31,
+        35
+      ],
+      "hair": [
+        69,
+        71
+      ],
+      "hand_L": [
+        24,
+        29
+      ],
+      "hand_R": [
+        24,
+        29
+      ],
+      "head": [
+        45,
+        68
+      ],
+      "mouth": [
+        48,
+        49
+      ],
+      "pelvis": [
+        14,
+        26
+      ],
+      "pouch": [
+        21,
+        25
+      ],
+      "shin_L": [
+        5,
+        12
+      ],
+      "shin_R": [
+        5,
+        12
+      ],
+      "thigh_L": [
+        13,
+        19
+      ],
+      "thigh_R": [
+        13,
+        19
+      ],
+      "torso": [
+        27,
+        44
+      ],
+      "upper_arm_L": [
+        36,
+        42
+      ],
+      "upper_arm_R": [
+        36,
+        42
+      ],
+      "weapon_club": [
+        30,
+        48
+      ]
+    }
+  },
+  "label": "ORC-02R determinism",
+  "levels": {
+    "LARGE": {
+      "boxes": 362,
+      "voxels": 7235
+    },
+    "MEDIUM": {
+      "boxes": 644,
+      "voxels": 10681
+    },
+    "SMALL": {
+      "boxes": 190,
+      "voxels": 1624
+    }
+  },
+  "measured_fields_used": [
+    "measurements.voxel_size_m (масштаб сетки)",
+    "measurements.total_height_m (проверка роста)",
+    "measurements.torso.*, head.*, hand.*, foot.* (проверка пропорций)",
+    "measurements.foot_stance_m, hand_span_m (ширина стойки)"
+  ],
+  "module_order": [
+    "head",
+    "eyes",
+    "brows",
+    "mouth",
+    "hair",
+    "torso",
+    "pelvis",
+    "upper_arm_L",
+    "forearm_L",
+    "hand_L",
+    "upper_arm_R",
+    "forearm_R",
+    "hand_R",
+    "thigh_L",
+    "shin_L",
+    "foot_L",
+    "thigh_R",
+    "shin_R",
+    "foot_R",
+    "pouch",
+    "weapon_club"
+  ],
+  "modules": {
+    "brows": {
+      "bbox_m": {
+        "x": [
+          -0.107,
+          0.107
+        ],
+        "y": [
+          -0.322,
+          -0.268
+        ],
+        "z": [
+          1.501,
+          1.581
+        ]
+      },
+      "boxes": 5,
+      "unique_box_sizes": 5,
+      "voxels": 24,
+      "voxels_by_level": {
+        "LARGE": 0,
+        "MEDIUM": 0,
+        "SMALL": 24
+      }
+    },
+    "eyes": {
+      "bbox_m": {
+        "x": [
+          -0.134,
+          0.134
+        ],
+        "y": [
+          -0.268,
+          -0.241
+        ],
+        "z": [
+          1.447,
+          1.474
+        ]
+      },
+      "boxes": 4,
+      "unique_box_sizes": 1,
+      "voxels": 4,
+      "voxels_by_level": {
+        "LARGE": 0,
+        "MEDIUM": 0,
+        "SMALL": 4
+      }
+    },
+    "foot_L": {
+      "bbox_m": {
+        "x": [
+          0.08,
+          0.348
+        ],
+        "y": [
+          -0.295,
+          0.107
+        ],
+        "z": [
+          0.0,
+          0.134
+        ]
+      },
+      "boxes": 30,
+      "unique_box_sizes": 21,
+      "voxels": 646,
+      "voxels_by_level": {
+        "LARGE": 404,
+        "MEDIUM": 60,
+        "SMALL": 182
+      }
+    },
+    "foot_R": {
+      "bbox_m": {
+        "x": [
+          -0.348,
+          -0.08
+        ],
+        "y": [
+          -0.295,
+          0.107
+        ],
+        "z": [
+          0.0,
+          0.134
+        ]
+      },
+      "boxes": 30,
+      "unique_box_sizes": 21,
+      "voxels": 646,
+      "voxels_by_level": {
+        "LARGE": 404,
+        "MEDIUM": 60,
+        "SMALL": 182
+      }
+    },
+    "forearm_L": {
+      "bbox_m": {
+        "x": [
+          0.268,
+          0.509
+        ],
+        "y": [
+          -0.188,
+          0.107
+        ],
+        "z": [
+          0.831,
+          0.965
+        ]
+      },
+      "boxes": 19,
+      "unique_box_sizes": 18,
+      "voxels": 370,
+      "voxels_by_level": {
+        "LARGE": 74,
+        "MEDIUM": 282,
+        "SMALL": 14
+      }
+    },
+    "forearm_R": {
+      "bbox_m": {
+        "x": [
+          -0.509,
+          -0.268
+        ],
+        "y": [
+          -0.188,
+          0.107
+        ],
+        "z": [
+          0.831,
+          0.965
+        ]
+      },
+      "boxes": 19,
+      "unique_box_sizes": 18,
+      "voxels": 370,
+      "voxels_by_level": {
+        "LARGE": 74,
+        "MEDIUM": 282,
+        "SMALL": 14
+      }
+    },
+    "hair": {
+      "bbox_m": {
+        "x": [
+          -0.054,
+          0.054
+        ],
+        "y": [
+          -0.054,
+          0.054
+        ],
+        "z": [
+          1.849,
+          1.93
+        ]
+      },
+      "boxes": 3,
+      "unique_box_sizes": 3,
+      "voxels": 26,
+      "voxels_by_level": {
+        "LARGE": 0,
+        "MEDIUM": 22,
+        "SMALL": 4
+      }
+    },
+    "hand_L": {
+      "bbox_m": {
+        "x": [
+          0.241,
+          0.509
+        ],
+        "y": [
+          -0.161,
+          0.08
+        ],
+        "z": [
+          0.643,
+          0.804
+        ]
+      },
+      "boxes": 22,
+      "unique_box_sizes": 11,
+      "voxels": 348,
+      "voxels_by_level": {
+        "LARGE": 306,
+        "MEDIUM": 12,
+        "SMALL": 30
+      }
+    },
+    "hand_R": {
+      "bbox_m": {
+        "x": [
+          -0.509,
+          -0.241
+        ],
+        "y": [
+          -0.161,
+          0.08
+        ],
+        "z": [
+          0.643,
+          0.804
+        ]
+      },
+      "boxes": 22,
+      "unique_box_sizes": 11,
+      "voxels": 348,
+      "voxels_by_level": {
+        "LARGE": 306,
+        "MEDIUM": 12,
+        "SMALL": 30
+      }
+    },
+    "head": {
+      "bbox_m": {
+        "x": [
+          -0.322,
+          0.322
+        ],
+        "y": [
+          -0.322,
+          0.214
+        ],
+        "z": [
+          1.206,
+          1.849
+        ]
+      },
+      "boxes": 331,
+      "unique_box_sizes": 64,
+      "voxels": 6053,
+      "voxels_by_level": {
+        "LARGE": 4338,
+        "MEDIUM": 1649,
+        "SMALL": 66
+      }
+    },
+    "mouth": {
+      "bbox_m": {
+        "x": [
+          -0.054,
+          0.054
+        ],
+        "y": [
+          -0.295,
+          -0.241
+        ],
+        "z": [
+          1.286,
+          1.34
+        ]
+      },
+      "boxes": 2,
+      "unique_box_sizes": 1,
+      "voxels": 8,
+      "voxels_by_level": {
+        "LARGE": 0,
+        "MEDIUM": 0,
+        "SMALL": 8
+      }
+    },
+    "pelvis": {
+      "bbox_m": {
+        "x": [
+          -0.241,
+          0.241
+        ],
+        "y": [
+          -0.214,
+          0.188
+        ],
+        "z": [
+          0.375,
+          0.724
+        ]
+      },
+      "boxes": 74,
+      "unique_box_sizes": 35,
+      "voxels": 1484,
+      "voxels_by_level": {
+        "LARGE": 691,
+        "MEDIUM": 629,
+        "SMALL": 164
+      }
+    },
+    "pouch": {
+      "bbox_m": {
+        "x": [
+          -0.295,
+          -0.188
+        ],
+        "y": [
+          0.027,
+          0.188
+        ],
+        "z": [
+          0.563,
+          0.697
+        ]
+      },
+      "boxes": 10,
+      "unique_box_sizes": 9,
+      "voxels": 104,
+      "voxels_by_level": {
+        "LARGE": 0,
+        "MEDIUM": 77,
+        "SMALL": 27
+      }
+    },
+    "shin_L": {
+      "bbox_m": {
+        "x": [
+          0.08,
+          0.348
+        ],
+        "y": [
+          -0.134,
+          0.188
+        ],
+        "z": [
+          0.134,
+          0.348
+        ]
+      },
+      "boxes": 21,
+      "unique_box_sizes": 14,
+      "voxels": 752,
+      "voxels_by_level": {
+        "LARGE": 0,
+        "MEDIUM": 752,
+        "SMALL": 0
+      }
+    },
+    "shin_R": {
+      "bbox_m": {
+        "x": [
+          -0.348,
+          -0.08
+        ],
+        "y": [
+          -0.134,
+          0.188
+        ],
+        "z": [
+          0.134,
+          0.348
+        ]
+      },
+      "boxes": 21,
+      "unique_box_sizes": 14,
+      "voxels": 752,
+      "voxels_by_level": {
+        "LARGE": 0,
+        "MEDIUM": 752,
+        "SMALL": 0
+      }
+    },
+    "thigh_L": {
+      "bbox_m": {
+        "x": [
+          0.027,
+          0.402
+        ],
+        "y": [
+          -0.214,
+          0.188
+        ],
+        "z": [
+          0.348,
+          0.536
+        ]
+      },
+      "boxes": 65,
+      "unique_box_sizes": 23,
+      "voxels": 1033,
+      "voxels_by_level": {
+        "LARGE": 64,
+        "MEDIUM": 953,
+        "SMALL": 16
+      }
+    },
+    "thigh_R": {
+      "bbox_m": {
+        "x": [
+          -0.402,
+          -0.027
+        ],
+        "y": [
+          -0.214,
+          0.188
+        ],
+        "z": [
+          0.348,
+          0.536
+        ]
+      },
+      "boxes": 67,
+      "unique_box_sizes": 22,
+      "voxels": 1033,
+      "voxels_by_level": {
+        "LARGE": 64,
+        "MEDIUM": 953,
+        "SMALL": 16
+      }
+    },
+    "torso": {
+      "bbox_m": {
+        "x": [
+          -0.59,
+          0.375
+        ],
+        "y": [
+          -0.268,
+          0.161
+        ],
+        "z": [
+          0.724,
+          1.206
+        ]
+      },
+      "boxes": 284,
+      "unique_box_sizes": 46,
+      "voxels": 4181,
+      "voxels_by_level": {
+        "LARGE": 188,
+        "MEDIUM": 3228,
+        "SMALL": 765
+      }
+    },
+    "upper_arm_L": {
+      "bbox_m": {
+        "x": [
+          0.268,
+          0.509
+        ],
+        "y": [
+          -0.188,
+          0.161
+        ],
+        "z": [
+          0.965,
+          1.152
+        ]
+      },
+      "boxes": 73,
+      "unique_box_sizes": 23,
+      "voxels": 562,
+      "voxels_by_level": {
+        "LARGE": 161,
+        "MEDIUM": 401,
+        "SMALL": 0
+      }
+    },
+    "upper_arm_R": {
+      "bbox_m": {
+        "x": [
+          -0.509,
+          -0.268
+        ],
+        "y": [
+          -0.188,
+          0.161
+        ],
+        "z": [
+          0.965,
+          1.152
+        ]
+      },
+      "boxes": 73,
+      "unique_box_sizes": 23,
+      "voxels": 562,
+      "voxels_by_level": {
+        "LARGE": 161,
+        "MEDIUM": 401,
+        "SMALL": 0
+      }
+    },
+    "weapon_club": {
+      "bbox_m": {
+        "x": [
+          -0.563,
+          -0.375
+        ],
+        "y": [
+          -0.188,
+          0.0
+        ],
+        "z": [
+          0.804,
+          1.313
+        ]
+      },
+      "boxes": 21,
+      "unique_box_sizes": 17,
+      "voxels": 234,
+      "voxels_by_level": {
+        "LARGE": 0,
+        "MEDIUM": 156,
+        "SMALL": 78
+      }
+    }
+  },
+  "outputs": {
+    "glb": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02r\\run1\\_determinism\\orc_new.glb",
+    "glb_bytes": 340328,
+    "glb_sha256": "937e1f09af0c090934ce4f463a538ffcd30b60cb8663573cdbb16dcbb3522691"
+  },
+  "overlap_resolution": {
+    "by_module": {},
+    "count": 0,
+    "examples": []
+  },
+  "reference_check": {
+    "deviation_percent": 0.06,
+    "generated_anatomical_height_m": 1.849,
+    "generated_total_height_with_hair_m": 1.93,
+    "note": "рост (по макушке черепа) сверяется с измерениями старого Orc; силуэтные пропорции (крупная голова, короткие конечности, широкие плечи) взяты с УТВЕРЖДЁННОГО визуального эталона ORC-02R, а не из старой модели",
+    "reference_head_m": {
+      "clip_scale": 0.9,
+      "depth_m": 1.17,
+      "height_m": 0.9193,
+      "width_m": 1.5043
+    },
+    "reference_torso_m": {
+      "depth_m": 0.7429,
+      "height_m": 0.9286,
+      "width_m": 0.9286
+    },
+    "reference_total_height_m": 1.8479
+  },
+  "seed": 20261113,
+  "source_geometry_note": "источник CubeGame читает только measure_reference.py; генератор получает исключительно числа измерений",
+  "source_geometry_reused": false,
+  "task": "ORC-02R",
+  "totals": {
+    "boxes": 1196,
+    "modules": 21,
+    "voxels": 19540
+  },
+  "voxel_size_m": 0.0268
+}

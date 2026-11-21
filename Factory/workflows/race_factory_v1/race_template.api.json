@@ -1,0 +1,217 @@
+{
+  "2": {
+    "inputs": {
+      "ckpt_name": "DreamShaperXL_Turbo_v2_1.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "A. MODEL - SDXL Base 1.0"
+    }
+  },
+  "3": {
+    "inputs": {
+      "lora_name": "ral-vxl.safetensors",
+      "strength_model": 0.6,
+      "strength_clip": 0.6,
+      "model": [
+        "2",
+        0
+      ],
+      "clip": [
+        "2",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "STYLE LoRA - VoxelXL (strength editable, 0.0 = off)"
+    }
+  },
+  "4": {
+    "inputs": {
+      "text": "{race_anatomy}, {appearance}, voxel fantasy RPG character creator avatar, single adult character, exact straight-on front view, full body centered, neutral stance, short cuboid limbs, compact proportions, oversized block head, clean hard-edged voxel geometry made of cubes of several sizes, restrained pixel texture, simple face, neutral plain grey background, soft even studio lighting",
+      "clip": [
+        "3",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "B. POSITIVE"
+    }
+  },
+  "5": {
+    "inputs": {
+      "text": "turnaround, multiple views, duplicate figure, extra limbs, cropped feet, cropped head, three-quarter view, side view, long limbs, child, anime, large eyes, fluffy hair, photorealism, plastic figurine, pedestal, smooth organic surfaces, flat sprite, landscape, foliage, HUD, watermark, text, motion blur, dynamic pose, weapon in front of body, elaborate armor",
+      "clip": [
+        "3",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "C. NEGATIVE"
+    }
+  },
+  "6": {
+    "inputs": {
+      "image": "{prepared_reference}"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "REFERENCE. Load Image (owner cutout)"
+    },
+    "is_changed": [
+      "569ef0b5a79b24fe9fbb886508a06d50900c25f91738699c0b3bfdb4843d1a08"
+    ]
+  },
+  "7": {
+    "inputs": {
+      "upscale_method": "nearest-exact",
+      "width": 768,
+      "height": 1024,
+      "crop": "disabled",
+      "image": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "Scale reference to latent size"
+    }
+  },
+  "8": {
+    "inputs": {
+      "low_threshold": 0.35,
+      "high_threshold": 0.75,
+      "image": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "Canny",
+    "_meta": {
+      "title": "Canny contour"
+    }
+  },
+  "9": {
+    "inputs": {
+      "control_net_name": "controlnet-union-sdxl-1.0.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "ControlNet union SDXL"
+    }
+  },
+  "10": {
+    "inputs": {
+      "type": "canny/lineart/anime_lineart/mlsd",
+      "control_net": [
+        "9",
+        0
+      ]
+    },
+    "class_type": "SetUnionControlNetType",
+    "_meta": {
+      "title": "Union type: canny/lineart"
+    }
+  },
+  "11": {
+    "inputs": {
+      "strength": 0.6,
+      "start_percent": 0.0,
+      "end_percent": 1.0,
+      "positive": [
+        "4",
+        0
+      ],
+      "negative": [
+        "5",
+        0
+      ],
+      "control_net": [
+        "10",
+        0
+      ],
+      "image": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "ControlNet Apply (strength editable)"
+    }
+  },
+  "12": {
+    "inputs": {
+      "width": 768,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "F. latent 768x1024"
+    }
+  },
+  "13": {
+    "inputs": {
+      "seed": 20261114,
+      "steps": 28,
+      "cfg": 5.0,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "normal",
+      "denoise": 1.0,
+      "model": [
+        "3",
+        0
+      ],
+      "positive": [
+        "11",
+        0
+      ],
+      "negative": [
+        "11",
+        1
+      ],
+      "latent_image": [
+        "12",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "F. KSampler (28 steps / CFG 6)"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "2",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Декодировать VAE"
+    }
+  },
+  "15": {
+    "inputs": {
+      "filename_prefix": "{output_prefix}",
+      "images": [
+        "14",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "G. OUTPUT"
+    }
+  }
+}

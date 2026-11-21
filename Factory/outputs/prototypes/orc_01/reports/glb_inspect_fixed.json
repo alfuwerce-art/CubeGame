@@ -1,0 +1,908 @@
+{
+  "path": "outputs\\prototypes\\orc_01\\generated\\orc_modular_v01.glb",
+  "glb_bytes": 71544,
+  "asset": {
+    "version": "2.0",
+    "generator": "Factoria procedural voxel prototype v0.1"
+  },
+  "extensions_used": [
+    "KHR_materials_unlit"
+  ],
+  "nodes": 20,
+  "meshes": 20,
+  "materials": [
+    "voxel_vertex_colors"
+  ],
+  "parts": {
+    "pelvis": {
+      "boxes": 2,
+      "vertices": 16,
+      "triangles": 24,
+      "bbox_min": [
+        -0.385,
+        0.97,
+        -0.17
+      ],
+      "bbox_max": [
+        0.385,
+        1.38,
+        0.26
+      ],
+      "size_min": [
+        0.68,
+        0.18,
+        0.34
+      ],
+      "size_max": [
+        0.77,
+        0.32,
+        0.38
+      ],
+      "unique_sizes": 2,
+      "material": 0,
+      "extras": {
+        "body_part": "pelvis",
+        "rig_ready": false
+      }
+    },
+    "torso": {
+      "boxes": 78,
+      "vertices": 624,
+      "triangles": 936,
+      "bbox_min": [
+        -0.6824,
+        1.38,
+        -0.4057
+      ],
+      "bbox_max": [
+        0.6439,
+        2.4784,
+        0.355
+      ],
+      "size_min": [
+        0.07,
+        0.07,
+        0.07
+      ],
+      "size_max": [
+        1.18,
+        0.93,
+        0.51
+      ],
+      "unique_sizes": 51,
+      "material": 0,
+      "extras": {
+        "body_part": "torso",
+        "rig_ready": false
+      }
+    },
+    "head": {
+      "boxes": 9,
+      "vertices": 72,
+      "triangles": 108,
+      "bbox_min": [
+        -0.595,
+        2.335,
+        -0.355
+      ],
+      "bbox_max": [
+        0.595,
+        3.065,
+        0.46
+      ],
+      "size_min": [
+        0.13,
+        0.1,
+        0.12
+      ],
+      "size_max": [
+        0.86,
+        0.71,
+        0.69
+      ],
+      "unique_sizes": 6,
+      "material": 0,
+      "extras": {
+        "body_part": "head",
+        "rig_ready": false
+      }
+    },
+    "eyes": {
+      "boxes": 4,
+      "vertices": 32,
+      "triangles": 48,
+      "bbox_min": [
+        -0.305,
+        2.69,
+        0.3265
+      ],
+      "bbox_max": [
+        0.305,
+        2.81,
+        0.385
+      ],
+      "size_min": [
+        0.06,
+        0.09,
+        0.028
+      ],
+      "size_max": [
+        0.17,
+        0.12,
+        0.035
+      ],
+      "unique_sizes": 2,
+      "material": 0,
+      "extras": {
+        "body_part": "eyes",
+        "rig_ready": false
+      }
+    },
+    "brows": {
+      "boxes": 2,
+      "vertices": 16,
+      "triangles": 24,
+      "bbox_min": [
+        -0.335,
+        2.8175,
+        0.3275
+      ],
+      "bbox_max": [
+        0.335,
+        2.8825,
+        0.4025
+      ],
+      "size_min": [
+        0.23,
+        0.065,
+        0.075
+      ],
+      "size_max": [
+        0.23,
+        0.065,
+        0.075
+      ],
+      "unique_sizes": 1,
+      "material": 0,
+      "extras": {
+        "body_part": "brows",
+        "rig_ready": false
+      }
+    },
+    "mouth": {
+      "boxes": 1,
+      "vertices": 8,
+      "triangles": 12,
+      "bbox_min": [
+        -0.14,
+        2.4625,
+        0.33
+      ],
+      "bbox_max": [
+        0.14,
+        2.5175,
+        0.358
+      ],
+      "size_min": [
+        0.28,
+        0.055,
+        0.028
+      ],
+      "size_max": [
+        0.28,
+        0.055,
+        0.028
+      ],
+      "unique_sizes": 1,
+      "material": 0,
+      "extras": {
+        "body_part": "mouth",
+        "rig_ready": false
+      }
+    },
+    "beard": {
+      "boxes": 10,
+      "vertices": 80,
+      "triangles": 120,
+      "bbox_min": [
+        -0.248,
+        2.06,
+        0.215
+      ],
+      "bbox_max": [
+        0.248,
+        2.475,
+        0.345
+      ],
+      "size_min": [
+        0.056,
+        0.13,
+        0.08
+      ],
+      "size_max": [
+        0.47,
+        0.26,
+        0.13
+      ],
+      "unique_sizes": 3,
+      "material": 0,
+      "extras": {
+        "body_part": "beard",
+        "rig_ready": false
+      }
+    },
+    "hair": {
+      "boxes": 9,
+      "vertices": 72,
+      "triangles": 108,
+      "bbox_min": [
+        -0.431,
+        3.0,
+        -0.395
+      ],
+      "bbox_max": [
+        0.431,
+        3.13,
+        0.235
+      ],
+      "size_min": [
+        0.102,
+        0.13,
+        0.63
+      ],
+      "size_max": [
+        0.102,
+        0.13,
+        0.63
+      ],
+      "unique_sizes": 1,
+      "material": 0,
+      "extras": {
+        "body_part": "hair",
+        "rig_ready": false
+      }
+    },
+    "upper_arm_L": {
+      "boxes": 24,
+      "vertices": 192,
+      "triangles": 288,
+      "bbox_min": [
+        -1.045,
+        1.6575,
+        -0.2901
+      ],
+      "bbox_max": [
+        -0.515,
+        2.295,
+        0.245
+      ],
+      "size_min": [
+        0.07,
+        0.07,
+        0.07
+      ],
+      "size_max": [
+        0.53,
+        0.53,
+        0.52
+      ],
+      "unique_sizes": 19,
+      "material": 0,
+      "extras": {
+        "body_part": "upper_arm_L",
+        "rig_ready": false
+      }
+    },
+    "forearm_L": {
+      "boxes": 8,
+      "vertices": 64,
+      "triangles": 96,
+      "bbox_min": [
+        -0.985,
+        1.175,
+        -0.185
+      ],
+      "bbox_max": [
+        -0.575,
+        1.63,
+        0.284
+      ],
+      "size_min": [
+        0.08,
+        0.055,
+        0.06
+      ],
+      "size_max": [
+        0.41,
+        0.43,
+        0.43
+      ],
+      "unique_sizes": 4,
+      "material": 0,
+      "extras": {
+        "body_part": "forearm_L",
+        "rig_ready": false
+      }
+    },
+    "hand_L": {
+      "boxes": 4,
+      "vertices": 32,
+      "triangles": 48,
+      "bbox_min": [
+        -0.93,
+        0.835,
+        -0.13
+      ],
+      "bbox_max": [
+        -0.63,
+        1.13,
+        0.235
+      ],
+      "size_min": [
+        0.075,
+        0.15,
+        0.13
+      ],
+      "size_max": [
+        0.3,
+        0.23,
+        0.32
+      ],
+      "unique_sizes": 2,
+      "material": 0,
+      "extras": {
+        "body_part": "hand_L",
+        "rig_ready": false
+      }
+    },
+    "upper_arm_R": {
+      "boxes": 24,
+      "vertices": 192,
+      "triangles": 288,
+      "bbox_min": [
+        0.515,
+        1.6575,
+        -0.28
+      ],
+      "bbox_max": [
+        1.045,
+        2.295,
+        0.2595
+      ],
+      "size_min": [
+        0.07,
+        0.07,
+        0.07
+      ],
+      "size_max": [
+        0.53,
+        0.53,
+        0.52
+      ],
+      "unique_sizes": 17,
+      "material": 0,
+      "extras": {
+        "body_part": "upper_arm_R",
+        "rig_ready": false
+      }
+    },
+    "forearm_R": {
+      "boxes": 8,
+      "vertices": 64,
+      "triangles": 96,
+      "bbox_min": [
+        0.575,
+        1.175,
+        -0.185
+      ],
+      "bbox_max": [
+        0.985,
+        1.63,
+        0.284
+      ],
+      "size_min": [
+        0.08,
+        0.055,
+        0.06
+      ],
+      "size_max": [
+        0.41,
+        0.43,
+        0.43
+      ],
+      "unique_sizes": 4,
+      "material": 0,
+      "extras": {
+        "body_part": "forearm_R",
+        "rig_ready": false
+      }
+    },
+    "hand_R": {
+      "boxes": 4,
+      "vertices": 32,
+      "triangles": 48,
+      "bbox_min": [
+        0.63,
+        0.835,
+        -0.13
+      ],
+      "bbox_max": [
+        0.93,
+        1.13,
+        0.235
+      ],
+      "size_min": [
+        0.075,
+        0.15,
+        0.13
+      ],
+      "size_max": [
+        0.3,
+        0.23,
+        0.32
+      ],
+      "unique_sizes": 2,
+      "material": 0,
+      "extras": {
+        "body_part": "hand_R",
+        "rig_ready": false
+      }
+    },
+    "thigh_L": {
+      "boxes": 5,
+      "vertices": 40,
+      "triangles": 60,
+      "bbox_min": [
+        -0.48,
+        0.6525,
+        -0.21
+      ],
+      "bbox_max": [
+        -0.08,
+        1.215,
+        0.285
+      ],
+      "size_min": [
+        0.07,
+        0.085,
+        0.1
+      ],
+      "size_max": [
+        0.4,
+        0.53,
+        0.42
+      ],
+      "unique_sizes": 3,
+      "material": 0,
+      "extras": {
+        "body_part": "thigh_L",
+        "rig_ready": false
+      }
+    },
+    "shin_L": {
+      "boxes": 5,
+      "vertices": 40,
+      "triangles": 60,
+      "bbox_min": [
+        -0.475,
+        0.23,
+        -0.19
+      ],
+      "bbox_max": [
+        -0.085,
+        0.61,
+        0.305
+      ],
+      "size_min": [
+        0.34,
+        0.052,
+        0.05
+      ],
+      "size_max": [
+        0.39,
+        0.38,
+        0.36
+      ],
+      "unique_sizes": 3,
+      "material": 0,
+      "extras": {
+        "body_part": "shin_L",
+        "rig_ready": false
+      }
+    },
+    "foot_L": {
+      "boxes": 2,
+      "vertices": 16,
+      "triangles": 24,
+      "bbox_min": [
+        -0.49,
+        0.0,
+        -0.15
+      ],
+      "bbox_max": [
+        -0.07,
+        0.21,
+        0.53
+      ],
+      "size_min": [
+        0.42,
+        0.09,
+        0.13
+      ],
+      "size_max": [
+        0.42,
+        0.21,
+        0.68
+      ],
+      "unique_sizes": 2,
+      "material": 0,
+      "extras": {
+        "body_part": "foot_L",
+        "rig_ready": false
+      }
+    },
+    "thigh_R": {
+      "boxes": 5,
+      "vertices": 40,
+      "triangles": 60,
+      "bbox_min": [
+        0.08,
+        0.6525,
+        -0.21
+      ],
+      "bbox_max": [
+        0.48,
+        1.215,
+        0.285
+      ],
+      "size_min": [
+        0.07,
+        0.085,
+        0.1
+      ],
+      "size_max": [
+        0.4,
+        0.53,
+        0.42
+      ],
+      "unique_sizes": 3,
+      "material": 0,
+      "extras": {
+        "body_part": "thigh_R",
+        "rig_ready": false
+      }
+    },
+    "shin_R": {
+      "boxes": 5,
+      "vertices": 40,
+      "triangles": 60,
+      "bbox_min": [
+        0.085,
+        0.23,
+        -0.19
+      ],
+      "bbox_max": [
+        0.475,
+        0.61,
+        0.305
+      ],
+      "size_min": [
+        0.34,
+        0.052,
+        0.05
+      ],
+      "size_max": [
+        0.39,
+        0.38,
+        0.36
+      ],
+      "unique_sizes": 3,
+      "material": 0,
+      "extras": {
+        "body_part": "shin_R",
+        "rig_ready": false
+      }
+    },
+    "foot_R": {
+      "boxes": 2,
+      "vertices": 16,
+      "triangles": 24,
+      "bbox_min": [
+        0.07,
+        0.0,
+        -0.15
+      ],
+      "bbox_max": [
+        0.49,
+        0.21,
+        0.53
+      ],
+      "size_min": [
+        0.42,
+        0.09,
+        0.13
+      ],
+      "size_max": [
+        0.42,
+        0.21,
+        0.68
+      ],
+      "unique_sizes": 2,
+      "material": 0,
+      "extras": {
+        "body_part": "foot_R",
+        "rig_ready": false
+      }
+    }
+  },
+  "totals": {
+    "boxes": 211,
+    "vertices": 1688,
+    "triangles": 2532
+  },
+  "bounding_box": {
+    "min": [
+      -1.045,
+      0.0,
+      -0.4057
+    ],
+    "max": [
+      1.045,
+      3.13,
+      0.53
+    ],
+    "size": [
+      2.09,
+      3.13,
+      0.9357
+    ]
+  },
+  "gaps": {
+    "arm_L": {
+      "upper_arm_L->forearm_L": {
+        "min_gap_m": 0.0275,
+        "separated": true,
+        "intersecting_box_pairs": 0
+      },
+      "forearm_L->hand_L": {
+        "min_gap_m": 0.045,
+        "separated": true,
+        "intersecting_box_pairs": 0
+      }
+    },
+    "arm_R": {
+      "upper_arm_R->forearm_R": {
+        "min_gap_m": 0.0275,
+        "separated": true,
+        "intersecting_box_pairs": 0
+      },
+      "forearm_R->hand_R": {
+        "min_gap_m": 0.045,
+        "separated": true,
+        "intersecting_box_pairs": 0
+      }
+    },
+    "leg_L": {
+      "thigh_L->shin_L": {
+        "min_gap_m": 0.0425,
+        "separated": true,
+        "intersecting_box_pairs": 0
+      },
+      "shin_L->foot_L": {
+        "min_gap_m": 0.02,
+        "separated": true,
+        "intersecting_box_pairs": 0
+      }
+    },
+    "leg_R": {
+      "thigh_R->shin_R": {
+        "min_gap_m": 0.0425,
+        "separated": true,
+        "intersecting_box_pairs": 0
+      },
+      "shin_R->foot_R": {
+        "min_gap_m": 0.02,
+        "separated": true,
+        "intersecting_box_pairs": 0
+      }
+    }
+  },
+  "issues": [],
+  "unique_box_sizes_total": 104,
+  "unique_box_sizes_sample": [
+    [
+      0.056,
+      0.16,
+      0.08
+    ],
+    [
+      0.056,
+      0.26,
+      0.08
+    ],
+    [
+      0.06,
+      0.09,
+      0.028
+    ],
+    [
+      0.07,
+      0.07,
+      0.07
+    ],
+    [
+      0.07,
+      0.07,
+      0.1
+    ],
+    [
+      0.77,
+      0.18,
+      0.38
+    ],
+    [
+      0.79,
+      0.71,
+      0.65
+    ],
+    [
+      0.86,
+      0.19,
+      0.69
+    ],
+    [
+      1.06,
+      0.93,
+      0.49
+    ],
+    [
+      1.18,
+      0.63,
+      0.51
+    ]
+  ],
+  "cross_part_intersections": [
+    {
+      "parts": [
+        "pelvis",
+        "torso"
+      ],
+      "intersecting_box_pairs": 1
+    },
+    {
+      "parts": [
+        "pelvis",
+        "thigh_L"
+      ],
+      "intersecting_box_pairs": 2
+    },
+    {
+      "parts": [
+        "pelvis",
+        "thigh_R"
+      ],
+      "intersecting_box_pairs": 2
+    },
+    {
+      "parts": [
+        "torso",
+        "head"
+      ],
+      "intersecting_box_pairs": 7
+    },
+    {
+      "parts": [
+        "torso",
+        "beard"
+      ],
+      "intersecting_box_pairs": 4
+    },
+    {
+      "parts": [
+        "torso",
+        "upper_arm_L"
+      ],
+      "intersecting_box_pairs": 15
+    },
+    {
+      "parts": [
+        "torso",
+        "upper_arm_R"
+      ],
+      "intersecting_box_pairs": 12
+    },
+    {
+      "parts": [
+        "head",
+        "brows"
+      ],
+      "intersecting_box_pairs": 2
+    },
+    {
+      "parts": [
+        "head",
+        "mouth"
+      ],
+      "intersecting_box_pairs": 2
+    },
+    {
+      "parts": [
+        "head",
+        "beard"
+      ],
+      "intersecting_box_pairs": 3
+    },
+    {
+      "parts": [
+        "head",
+        "hair"
+      ],
+      "intersecting_box_pairs": 18
+    },
+    {
+      "parts": [
+        "mouth",
+        "beard"
+      ],
+      "intersecting_box_pairs": 1
+    }
+  ],
+  "unexpected_intersections": [],
+  "expected_attachments": [
+    [
+      "pelvis",
+      "thigh_L"
+    ],
+    [
+      "pelvis",
+      "thigh_R"
+    ],
+    [
+      "hair",
+      "head"
+    ],
+    [
+      "eyes",
+      "head"
+    ],
+    [
+      "head",
+      "torso"
+    ],
+    [
+      "torso",
+      "upper_arm_R"
+    ],
+    [
+      "pelvis",
+      "torso"
+    ],
+    [
+      "head",
+      "mouth"
+    ],
+    [
+      "beard",
+      "mouth"
+    ],
+    [
+      "brows",
+      "head"
+    ],
+    [
+      "beard",
+      "head"
+    ],
+    [
+      "torso",
+      "upper_arm_L"
+    ],
+    [
+      "beard",
+      "torso"
+    ]
+  ],
+  "notes": [
+    "hair: все 9 боксов одного размера (дизайн, не дефект)"
+  ]
+}

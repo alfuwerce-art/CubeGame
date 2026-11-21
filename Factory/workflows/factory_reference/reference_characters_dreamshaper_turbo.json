@@ -1,0 +1,138 @@
+{
+  "id": "FACTORY_REFERENCE_DREAMSHAPER_TURBO_V1",
+  "version": "1.0",
+  "date": "2026-11-14",
+  "stage": "COMFY-STYLE-07",
+  "status": "EXPERIMENTAL вЂ” РїСЂРёС‘РјРєР° С‚РѕР»СЊРєРѕ РІР»Р°РґРµР»СЊС†РµРј",
+  "why": "COMFY-STYLE-05/06 РіРµРЅРµСЂРёСЂРѕРІР°Р»Рё РїРµСЂСЃРѕРЅР°Р¶РµР№ С‚РѕР»СЊРєРѕ РїРѕ С‚РµРєСЃС‚Сѓ; СЃС‚РёР»СЊ СЂР°СЃС…РѕРґРёР»СЃСЏ. Р—РґРµСЃСЊ РїРµСЂСЃРѕРЅР°Р¶ РїСЂРёРІСЏР·С‹РІР°РµС‚СЃСЏ Рє СѓС‚РІРµСЂР¶РґС‘РЅРЅС‹Рј СЂРµС„РµСЂРµРЅСЃР°Рј CubeGame: РїРѕРґРіРѕС‚РѕРІР»РµРЅРЅС‹Рµ РІС‹СЂРµР·РєРё С‡РµР»РѕРІРµРєР°/СЌР»СЊС„Р°/РґРІРѕСЂС„Р° РїРѕРґР°СЋС‚СЃСЏ РІ SDXL С‡РµСЂРµР· IPAdapter, ControlNet (Canny) Рё img2img.",
+  "model": {
+    "checkpoint": "DreamShaperXL_Turbo_v2_1.safetensors",
+    "family": "DreamShaper XL Turbo v2.1 (openrail++, доступный локально)",
+    "size_bytes": 6938078334,
+    "sha256": "4496b36d",
+    "source": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0",
+    "turbo_settings": true,
+    "note": "РћР±С‹С‡РЅС‹Р№ SDXL: 25вЂ“30 С€Р°РіРѕРІ, CFG 5вЂ“7. РќР°СЃС‚СЂРѕР№РєРё Turbo (CFG 2 / 4вЂ“8 С€Р°РіРѕРІ) Р·РґРµСЃСЊ РЅРµ РїСЂРёРјРµРЅСЏСЋС‚СЃСЏ."
+  },
+  "sampling": {
+    "steps_default": 8,
+    "cfg_default": 2.0,
+    "sampler_name": "dpmpp_2m",
+    "scheduler": "karras",
+    "denoise_txt2img": 1.0,
+    "seed": 20261114,
+    "batch_size": 1
+  },
+  "resolution": {
+    "main": {
+      "width": 768,
+      "height": 1024
+    },
+    "note": "1024Г—1024 РЅР° 8 Р“Р‘ VRAM РЅРµ РїСЂРѕРІРµСЂСЏРµС‚СЃСЏ; РїСЂРё РЅРµС…РІР°С‚РєРµ VRAM вЂ” 640Г—832"
+  },
+  "ipadapter": {
+    "model": "ip-adapter-plus_sdxl_vit-h.safetensors",
+    "model_size_bytes": 847517512,
+    "model_license": "apache-2.0",
+    "clip_vision": "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors",
+    "clip_vision_size_bytes": 2528373448,
+    "weights": [
+      0.6,
+      0.8,
+      1.0
+    ],
+    "weight_type_default": "linear",
+    "weight_type_style": "style transfer",
+    "combine_embeds": "concat",
+    "start_at": 0.0,
+    "end_at": 1.0,
+    "embeds_scaling": "V only",
+    "note": "weight_type=style transfer РїСЂРѕРІРµСЂСЏРµС‚СЃСЏ РѕС‚РґРµР»СЊРЅС‹Рј РїСЂРѕРіРѕРЅРѕРј: РїРµСЂРµРЅРѕСЃРёС‚ РїР°Р»РёС‚СЂСѓ/С‚РµС…РЅРёРєСѓ, РЅРѕ РЅРµ С„РѕСЂРјСѓ."
+  },
+  "controlnet": {
+    "model": "controlnet-union-sdxl-1.0.safetensors",
+    "model_size_bytes": 2512030408,
+    "model_license": "apache-2.0",
+    "union_type": "canny/lineart/anime_lineart/mlsd",
+    "preprocessor": "Canny",
+    "canny_low": 0.35,
+    "canny_high": 0.75,
+    "strengths": [
+      0.6,
+      0.9
+    ],
+    "start_percent": 0.0,
+    "end_percent": 1.0
+  },
+  "img2img": {
+    "denoise_set": [
+      0.25,
+      0.4,
+      0.55
+    ],
+    "denoise_default": 0.4,
+    "steps": 8,
+    "cfg": 2.0,
+    "note": "Load Image в†’ VAE Encode в†’ KSampler(denoise) в†’ VAE Decode: РїСЂРѕРІРµСЂСЏРµС‚СЃСЏ Р±Р»РёР·РѕСЃС‚СЊ Рє РёСЃС…РѕРґРЅРѕРјСѓ СЂРµС„РµСЂРµРЅСЃСѓ."
+  },
+  "references": {
+    "human_warrior": {
+      "image": "factoria_ref_human_warrior_768x1024.png",
+      "local_reference": "references/characters_v1/human_warrior_reference_768x1024.png",
+      "local_cutout": "references/characters_v1/human_warrior_cutout.png",
+      "source_screenshot": "D:\\Projects\\СЂРµС„РµСЂРµРЅСЃС‹ РґР»СЏ CudeGame\\С‡РµР»РѕРІРµРє Р±РµР· С€РµР№РґРµСЂРѕРІ.png",
+      "source_rect": [
+        700,
+        350,
+        1000,
+        710
+      ]
+    },
+    "elf_ranger": {
+      "image": "factoria_ref_elf_ranger_768x1024.png",
+      "local_reference": "references/characters_v1/elf_ranger_reference_768x1024.png",
+      "local_cutout": "references/characters_v1/elf_ranger_cutout.png",
+      "source_screenshot": "D:\\Projects\\СЂРµС„РµСЂРµРЅСЃС‹ РґР»СЏ CudeGame\\СЌР»СЊС„.png",
+      "source_rect": [
+        700,
+        340,
+        980,
+        705
+      ]
+    },
+    "dwarf_warrior": {
+      "image": "factoria_ref_dwarf_warrior_768x1024.png",
+      "local_reference": "references/characters_v1/dwarf_warrior_reference_768x1024.png",
+      "local_cutout": "references/characters_v1/dwarf_warrior_cutout.png",
+      "source_screenshot": "D:\\Projects\\СЂРµС„РµСЂРµРЅСЃС‹ РґР»СЏ CudeGame\\РґРІРѕСЂС„.png",
+      "source_rect": [
+        690,
+        355,
+        990,
+        720
+      ]
+    }
+  },
+  "blocks": {
+    "PROPORTION_LOCK": "compact chunky voxel proportions, large head relative to the body, short arms, short legs, wide torso, blocky hands and boots, whole figure fits head to feet",
+    "MATERIAL_LOCK": "voxel geometry built from cubes of several sizes, hard planar edges, pixel-textured surfaces, flat readable colours, no organic smooth skin",
+    "FACE_LOCK": "simple adult blocky face, small solid block eyes, defined brow, block nose and jaw, neutral adult expression, face readable at game scale",
+    "COMPOSITION": "single character only, one figure, full body from head to feet, A-pose, front view, plain neutral grey background, soft even lighting, nothing cropped",
+    "NEGATIVE": "character sheet, turnaround, multiple views, multiple characters, two characters, three characters, collage, split image, repeated figures, duplicate, chibi, childlike proportions, oversized eyes, doll face, anime proportions, smooth rounded face, organic realistic skin, plastic cartoon, painterly, flat 2d pixel art sprite, fused limbs, extra limbs, deformed hands, missing fingers, cropped head, cropped feet, realistic photo, photorealistic, helmet covering the face, cluttered background, motion blur, extreme perspective, watermark, text, signature, ui, menu, hud, landscape, building, trees, grass field"
+  },
+  "characters": {
+    "human_warrior": {
+      "identity": "male human warrior",
+      "prompt": "voxel style, cube-built adult human warrior, golden-orange block hair, blue eyes, light skin, grey wool tunic, brown leather belt with iron buckle, leather shoulder guards, two-handed sword carried on the back, compact chunky proportions, large head, short arms and short legs, blocky hands and boots, pixel-textured materials, A-pose, front view, full body, plain neutral grey background, soft even lighting, single character"
+    },
+    "elf_ranger": {
+      "identity": "male elf ranger",
+      "prompt": "voxel style, cube-built adult elf ranger, silver block hair, long pointed ears, purple eyes, dark violet cloak with gold trim, leather belt and bracers, dark trousers and boots, compact chunky proportions, large head, short arms and short legs, blocky hands and boots, pixel-textured materials, A-pose, front view, full body, plain neutral grey background, soft even lighting, single character"
+    },
+    "dwarf_warrior": {
+      "identity": "male dwarf warrior",
+      "prompt": "voxel style, cube-built adult dwarf warrior, orange block hair and braided beard, wide leather hat brim, brown leather apron, iron shoulder plates and greaves, broad heavy body, very short legs, blocky hands and boots, compact chunky proportions, large head, pixel-textured materials, A-pose, front view, full body, plain neutral grey background, soft even lighting, single character"
+    }
+  },
+  "note": "ВРЕМЕННЫЙ конфиг: используется единственный доступный SDXL-чекпоинт DreamShaper XL Turbo v2.1, пока официальный SDXL Base 1.0 докачивается. Turbo-сэмплинг (8 шагов, CFG 2.0) соответствует этой модели; это НЕ финальное сравнение этапа."
+}

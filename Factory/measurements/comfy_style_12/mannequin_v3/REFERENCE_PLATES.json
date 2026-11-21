@@ -1,0 +1,181 @@
+{
+  "task": "COMFY-STYLE-12",
+  "role": "ControlNet-only plate derived from the owner-approved MANNEQUIN V3 render",
+  "reference": "outputs/factory/mannequin_v3/REFERENCE_MANNEQUIN_V3_OWNER.png",
+  "reference_sha256": "b95e4666a3b3caae543e3ba4663cce8d7f9ad3d026f381cca2231fee04d841c5",
+  "canvas": [
+    768,
+    1024
+  ],
+  "crown_y": 174,
+  "sole_y": 850,
+  "symmetry_axis_x": 383.5,
+  "note": "One figure cropped from the approved render, scaled by the same transform as the block plates. Technical control input only, never a sampler image.",
+  "generator": "scripts/comfyui/prepare_mannequin_v3_ref_plate.py",
+  "plates": {
+    "HUMAN_MALE_MANNEQUIN_REFPLATE": {
+      "bbox_xyxy_ref": [
+        240,
+        97,
+        782,
+        754
+      ],
+      "file": "outputs/factory/mannequin_v3\\HUMAN_MALE_MANNEQUIN_REFPLATE.png",
+      "sha256": "6bccf92d95f63af979c59b5ebf737f24f86f740b54f2b3f25d6ef3e6584c9ced",
+      "scale": 1.027356,
+      "background_cleaned": true,
+      "canny": {
+        "file": "outputs/factory/mannequin_v3\\HUMAN_MALE_MANNEQUIN_REFPLATE_CANNY.png",
+        "sha256": "553473fd19834f297aa7c33e146e7d1b664a1adda49c3679e39598ebdef75ef9",
+        "low": 0.35,
+        "high": 0.75,
+        "edge_pixels": 9109,
+        "bbox_xyxy": [
+          103,
+          173,
+          662,
+          850
+        ]
+      },
+      "torso_reinforced": {
+        "file": "outputs/factory/mannequin_v3\\HUMAN_MALE_MANNEQUIN_REFPLATE_TORSO.png",
+        "sha256": "b857599faddf4683df2812b972e57d090fc91d83bd460a8e4cb2568743aff907",
+        "tone": 96,
+        "line_px": 2,
+        "parts": [
+          "abdomen",
+          "chest",
+          "pelvis",
+          "waist"
+        ],
+        "boundaries": [
+          {
+            "name": "chest",
+            "side": "C",
+            "rect": [
+              299,
+              419,
+              469,
+              557
+            ]
+          },
+          {
+            "name": "abdomen",
+            "side": "C",
+            "rect": [
+              326,
+              557,
+              441,
+              588
+            ]
+          },
+          {
+            "name": "pelvis",
+            "side": "C",
+            "rect": [
+              299,
+              588,
+              469,
+              642
+            ]
+          }
+        ],
+        "canny": {
+          "file": "outputs/factory/mannequin_v3\\HUMAN_MALE_MANNEQUIN_REFPLATE_TORSO_CANNY.png",
+          "sha256": "e739ca0e3af7cfc656be20e0338f163c53e198213560930aa4b8a7f8df3e4629",
+          "low": 0.35,
+          "high": 0.75,
+          "edge_pixels": 10184,
+          "bbox_xyxy": [
+            103,
+            173,
+            662,
+            850
+          ]
+        }
+      }
+    },
+    "HUMAN_FEMALE_MANNEQUIN_REFPLATE": {
+      "bbox_xyxy_ref": [
+        1023,
+        113,
+        1505,
+        754
+      ],
+      "file": "outputs/factory/mannequin_v3\\HUMAN_FEMALE_MANNEQUIN_REFPLATE.png",
+      "sha256": "6f73a4381334229b3ac1a910d19d5068cc71a2aa651543c1c70a04333f4189fc",
+      "scale": 1.05296,
+      "background_cleaned": true,
+      "canny": {
+        "file": "outputs/factory/mannequin_v3\\HUMAN_FEMALE_MANNEQUIN_REFPLATE_CANNY.png",
+        "sha256": "f1af6cca9c6254a894e6897588c5a63be3a9b15f27d0753c4b8d5bbc6a42b0cd",
+        "low": 0.35,
+        "high": 0.75,
+        "edge_pixels": 9073,
+        "bbox_xyxy": [
+          128,
+          174,
+          638,
+          850
+        ]
+      },
+      "torso_reinforced": {
+        "file": "outputs/factory/mannequin_v3\\HUMAN_FEMALE_MANNEQUIN_REFPLATE_TORSO.png",
+        "sha256": "70773ed57eb0de29018f5a4edba7ed329e81130b1fe8f9a6539b16661983f94f",
+        "tone": 96,
+        "line_px": 2,
+        "parts": [
+          "abdomen",
+          "chest",
+          "pelvis",
+          "waist"
+        ],
+        "boundaries": [
+          {
+            "name": "chest",
+            "side": "C",
+            "rect": [
+              309,
+              419,
+              456,
+              508
+            ]
+          },
+          {
+            "name": "waist",
+            "side": "C",
+            "rect": [
+              323,
+              508,
+              444,
+              581
+            ]
+          },
+          {
+            "name": "pelvis",
+            "side": "C",
+            "rect": [
+              306,
+              581,
+              462,
+              637
+            ]
+          }
+        ],
+        "canny": {
+          "file": "outputs/factory/mannequin_v3\\HUMAN_FEMALE_MANNEQUIN_REFPLATE_TORSO_CANNY.png",
+          "sha256": "efed177e6ce2e9078bb7c3fa0e4b8f3b70354717d35f6d2eb3bf98876958a445",
+          "low": 0.35,
+          "high": 0.75,
+          "edge_pixels": 10049,
+          "bbox_xyxy": [
+            128,
+            174,
+            638,
+            850
+          ]
+        }
+      }
+    }
+  }
+}

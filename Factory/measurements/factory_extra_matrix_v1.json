@@ -1,0 +1,38 @@
+{
+  "id": "FACTORY_EXTRA_TUNING_V1",
+  "runs": [
+    {
+      "character": "orc",
+      "view": "three_quarter",
+      "resolution": "main",
+      "seed": 424242,
+      "purpose": "tuning",
+      "id": "tune_fictiverse06_single",
+      "mode": "FICTIVERSE",
+      "strength": 0.6,
+      "negative_extra": "single character only, one figure, character sheet, turnaround, multiple views, three identical characters, collage, split image, repeated figures, female character"
+    },
+    {
+      "character": "orc",
+      "view": "three_quarter",
+      "resolution": "main",
+      "seed": 424242,
+      "purpose": "tuning",
+      "id": "tune_fictiverse10_single",
+      "mode": "FICTIVERSE",
+      "strength": 1.0,
+      "negative_extra": "single character only, one figure, character sheet, turnaround, multiple views, three identical characters, collage, split image, repeated figures, female character"
+    },
+    {
+      "character": "orc",
+      "view": "three_quarter",
+      "resolution": "main",
+      "seed": 424242,
+      "purpose": "tuning",
+      "id": "tune_ral06_single",
+      "mode": "RAL",
+      "strength": 0.6,
+      "negative_extra": "single character only, one figure, character sheet, turnaround, multiple views, three identical characters, collage, split image, repeated figures, female character"
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+{
+  "checkpoint": {
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "SDXL Base 1.0"
+    },
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    }
+  },
+  "lora": {
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Fictiverse VoxelXL (frozen strengths)"
+    },
+    "inputs": {
+      "model": [
+        "checkpoint",
+        0
+      ],
+      "clip": [
+        "checkpoint",
+        1
+      ],
+      "lora_name": "VoxelXL_v1.safetensors",
+      "strength_model": 0.6,
+      "strength_clip": 0.6
+    }
+  },
+  "positive": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "POSITIVE MANNEQUIN V3 contract"
+    },
+    "inputs": {
+      "clip": [
+        "lora",
+        1
+      ],
+      "text": "one single full-body adult male humanoid game mannequin, exact straight-on orthographic front view, symmetric T-pose, both arms horizontal at shoulder height, straight legs, full hands and feet visible, oversized cubic head occupying one third of the total body height, perfectly flat smooth crown, nothing above the crown, small separate cube ears attached at the sides of the head, stepped chin block under the head, completely blank featureless face, broad shoulder blocks, compact chest box, moderately narrow torso, narrow small pelvis, short massive legs, small blocky hands, separate arm and leg segments, hard-edged cuboid body volumes, large coherent block surfaces, visible front and side planes, stepped voxel silhouette, neutral matte light-gray material over the entire body, soft even studio lighting, plain neutral gray background, centered, full body"
+    }
+  },
+  "negative": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "NEGATIVE MANNEQUIN V3 contract"
+    },
+    "inputs": {
+      "clip": [
+        "lora",
+        1
+      ],
+      "text": "eyes, pupils, eyebrows, eyelashes, mouth, lips, teeth, nose detail, facial expression, facial features, hair, fringe, hair block, topknot, bun, ponytail, plate on top of the head, second layer above the head, helmet, cap, hat, hood, brim, headband, band around the head, rim, crown ornament, ears detail, beard, moustache, helmet, clothes, shirt, tunic, trousers, underwear, belt, armor, gloves, boots, shoes, weapon, sword, staff, accessory, jewelry, skin texture, realistic skin, muscles, veins, anatomy markings, nipples, genitals, photorealistic, organic sculpt, rounded body, smooth toy, chibi, anime, large eyes, tiny noisy cubes, excessive bevels, multiple characters, character sheet, collage, extra limbs, missing limbs, bent arms, A-pose, bent knees, perspective camera, three-quarter view, cropped hands, cropped feet, floor props, scenery, text, watermark, logo"
+    }
+  },
+  "latent": {
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty latent - no img2img"
+    },
+    "inputs": {
+      "width": 768,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "guide": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "MANNEQUIN V3 technical guide (control input only)"
+    },
+    "inputs": {
+      "image": "HUMAN_MALE_MANNEQUIN_REFPLATE_TORSO.png"
+    }
+  },
+  "guide_scale": {
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "Fixed framing, no crop"
+    },
+    "inputs": {
+      "image": [
+        "guide",
+        0
+      ],
+      "upscale_method": "nearest-exact",
+      "width": 768,
+      "height": 1024,
+      "crop": "disabled"
+    }
+  },
+  "edges": {
+    "class_type": "Canny",
+    "_meta": {
+      "title": "Silhouette + block plane edges"
+    },
+    "inputs": {
+      "image": [
+        "guide_scale",
+        0
+      ],
+      "low_threshold": 0.35,
+      "high_threshold": 0.75
+    }
+  },
+  "controlnet": {
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "ControlNet Union SDXL"
+    },
+    "inputs": {
+      "control_net_name": "controlnet-union-sdxl-1.0.safetensors"
+    }
+  },
+  "union_mode": {
+    "class_type": "SetUnionControlNetType",
+    "_meta": {
+      "title": "Canny / lineart union mode"
+    },
+    "inputs": {
+      "control_net": [
+        "controlnet",
+        0
+      ],
+      "type": "canny/lineart/anime_lineart/mlsd"
+    }
+  },
+  "guide_conditioning": {
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Pose and proportion conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "positive",
+        0
+      ],
+      "negative": [
+        "negative",
+        0
+      ],
+      "control_net": [
+        "union_mode",
+        0
+      ],
+      "image": [
+        "edges",
+        0
+      ],
+      "strength": 0.6,
+      "start_percent": 0.0,
+      "end_percent": 1.0
+    }
+  },
+  "sampler": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Single mannequin frame"
+    },
+    "inputs": {
+      "model": [
+        "lora",
+        0
+      ],
+      "positive": [
+        "guide_conditioning",
+        0
+      ],
+      "negative": [
+        "guide_conditioning",
+        1
+      ],
+      "latent_image": [
+        "latent",
+        0
+      ],
+      "seed": 20261117,
+      "steps": 28,
+      "cfg": 6.0,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 1.0
+    }
+  },
+  "decode": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decoded RGB frame"
+    },
+    "inputs": {
+      "samples": [
+        "sampler",
+        0
+      ],
+      "vae": [
+        "checkpoint",
+        2
+      ]
+    }
+  },
+  "save": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Mannequin V3 frame"
+    },
+    "inputs": {
+      "images": [
+        "decode",
+        0
+      ],
+      "filename_prefix": "MANNEQUIN_V3_MALE"
+    }
+  }
+}
