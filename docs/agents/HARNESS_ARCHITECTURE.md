@@ -47,3 +47,12 @@
 - Официальное исследование: https://github.com/google-research/harness2 и https://arxiv.org/abs/2610.14224 .
 - DSH skill provider: https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/skill/skill-filesystem/README.md .
 - DSH Claude hook bridge: https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/hooks/hooks-claude-code/src/index.ts . У bridge конфиг может быть process-wide и не обнаруживается автоматически по проекту.
+
+## 7. Развитие системы по трём видео (D96)
+
+- [Сравнение и исходные подходы](AI_WORKFLOW_COMPARISON.md): Concept → GDD → Art → Architecture → Roadmap; сохранение контекста через Git, не через многократное копирование промпта.
+- При планировании читать актуальный [NAME_REGISTRY](../architecture/NAME_REGISTRY.md) и [DEPENDENCY_MAP](../architecture/DEPENDENCY_MAP.md), **но только если они подтверждены кодом**. Пример названия из видео не является существующим классом.
+- [Skills Index](SKILLS_INDEX.md): Unity features/scripts/debug, voxel asset, rig/animation, art validation, отдельно Unreal study. Вызывать по одному, с `allowed_paths` и измеримым результатом.
+- [Plugins Review](DSH_PLUGIN_EVALUATION.md): DSH PowerShell sandbox, filesystem/skills; по необходимости LSP, subagents, hook bridge и MCP. Не включать новые плагины «на всякий случай».
+- [Unreal experiment](../research/UNREAL_SCRIPTING_SPIKE.md) — исследование автоматизации и качества, **не** решение о миграции проекта.
+- [Quality Attributes](../QUALITY_ATTRIBUTES.md) — проверяемые критерии результата. Цель «на уровне Claude» — измеряемая гипотеза, не обещание результата от одних лишь skills.
