@@ -1,15 +1,26 @@
-# Источники утверждённых игровых решений
+# Источники действующих игровых решений
 
-[GDD](../GDD.md) описывает действующий дизайн. [D01–D36 и CR-001](../planning/DECISIONS_001-036.md) сохраняют ранние решения и их изменения.
+[GDD](../GDD.md) собирает продуктовые решения. [D01–D36 и CR-001](../planning/DECISIONS_001-036.md) сохраняют основания и смену направления. [Серия D59–D82](https://github.com/alfuwerce-art/CubeGame/tree/6f994aa483f8fd73542c3ea577909c4e7b13adbe/docs/decisions) и [исходный GDD](https://github.com/alfuwerce-art/CubeGame/blob/6f994aa483f8fd73542c3ea577909c4e7b13adbe/docs/game-design/GDD_DRAFT.md) фиксируют решения владельца и проектные варианты.
 
-Поздние решения зафиксированы владельцем в [исходной серии D59–D82](https://github.com/alfuwerce-art/CubeGame/tree/6f994aa483f8fd73542c3ea577909c4e7b13adbe/docs/decisions). Дата и явно утверждённый объём имеют приоритет над предложениями в [исходном рабочем GDD](https://github.com/alfuwerce-art/CubeGame/blob/6f994aa483f8fd73542c3ea577909c4e7b13adbe/docs/game-design/GDD_DRAFT.md).
-
-| Решения | Предмет |
+| Решения | Действующий предмет |
 |---|---|
-| D59–D64 | Концепция, кампания, сон, право собственности, культуры и свобода фракций. |
-| D65, D66, D70, D71, D75 | Контактный бой, смерть, магическое дерево, мастерство от практики, гибридная магия, возврат вещей и сохранение мира. D66 заменяет часть D65 о дереве боя. |
-| D67, D68, D72–D74, D76–D78 | Художественное ревью, первый час, социальный AI, экономика, мирные события и квесты, HUD, звук и вертикальный срез. |
-| D79–D82 | Расширение биомов, Фильдор, демография и сезоны. D82 утверждает каталог и откладывает производство расширения и сезонов. |
-| D93, D94 | [Самостоятельная игра](../decisions/D93-development-pivot-own-game.md) и [модульные персонажи](../decisions/D94-g3-humanoid-modular-appearance.md). |
+| D59–D62 и D64 | Концепция, кампания, сон, право собственности и свобода личности/фракций. |
+| D65, D66, D70, D71, D75 | Контактный бой, смерть, одно магическое дерево, рост мастерства от практики, гибридная магия и постоянство мира. D66 уточняет часть D65 о дереве боя. |
+| D67, D68, D72–D74, D76–D78 | Художественное ревью, первый час, социальный AI, экономика, события, квесты, интерфейс, звук и вертикальный срез. |
+| D79–D82 | Климат и разнообразие, Фильдор, демография и сезоны. D82 подтверждает каталог и откладывает расширение и сезоны. |
+| [D93](../decisions/D93-development-pivot-own-game.md) | Самостоятельная игра. Полный перенос Alpha остаётся историческим направлением. |
+| [D94](../decisions/D94-g3-humanoid-modular-appearance.md) | Модульный Character Factory, единая сборка игрока/NPC, детерминированная внешность NPC и выпуск существ под нужды контента. |
+| [Решение 21.11.2026](../decisions/2026-11-21-human-male-base-v1.md) | `HUMAN_MALE_BASE_V1` — `REVIEW_CLOSED / NOT_SELECTED`. |
 
-Отдельный [CHANGE_REQUEST об NPC и задачах](https://github.com/alfuwerce-art/CubeGame/blob/fca63ce8ed3bee83390d7bb96314005c5b7caaa7/docs/planning/NPC_AI_EMERGENT_NARRATIVE.md) уточняет D12, D13, D28–D30. Черновики управления мышью, технические предложения рига и художественные спецификации в том же проекте остаются материалами проектирования.
+[Решение о живых NPC и задачах](https://github.com/alfuwerce-art/CubeGame/blob/fca63ce8ed3bee83390d7bb96314005c5b7caaa7/docs/planning/NPC_AI_EMERGENT_NARRATIVE.md) уточняет D12/D13/D28–D30. Идентификаторы, повторённые в разных исторических сериях, следует читать по заголовку, дате и исходному коммиту.
+
+## Дизайн рас и первого выпуска
+
+| Источник | Утверждено | Граница |
+|---|---|---|
+| [D63 — состав рас](https://github.com/alfuwerce-art/CubeGame/blob/6f994aa483f8fd73542c3ea577909c4e7b13adbe/docs/decisions/D63-race-identity-and-factions.md), D64 | Human, Orc, Goblin, Lizard, Elf, Dwarf и Undead как расовая основа дизайна. Frogman исключён окончательно без нового прямого решения. | D63 охватывает расы и NPC первого акта. Он не утверждает полный состав редактора первого релиза. Отношение Skeleton к Undead оставлено открытым. |
+| [D80 — Фильдор](https://github.com/alfuwerce-art/CubeGame/blob/6f994aa483f8fd73542c3ea577909c4e7b13adbe/docs/decisions/D80-hidden-ancient-race.md) | Фильдор — утверждённое имя скрытой дополнительной расы. Долголетие, особая магическая традиция, редкие NPC. | Выбор Фильдора в редакторе планируется для будущего DLC. Рабочий вход Factoria с именем Enderman не переименовывает канон. |
+| [D91 — выпуск по вехам](https://github.com/alfuwerce-art/CubeGame/blob/5ef4206fee2e26dffab9a5cf18a89329ba26af61/docs/decisions/D91-document-consolidation-release-batches.md), [D92 — Фильдор в первом релизе](https://github.com/alfuwerce-art/CubeGame/blob/fb8e3e9f323c7bf83f2e1bf0c093c2708ae9328b/docs/decisions/D92-fildor-first-solo-release.md) | Редкие NPC Фильдор входят в первый публичный одиночный релиз. Заморский континент и четырёхактная кампания — отдельная крупная веха после первого выпуска. | D92 о сроке появления Фильдора и одноимённый исторический D92 о переносе Alpha — разные записи. |
+| [Матрица редактора Alpha](https://github.com/alfuwerce-art/factoria/blob/9a2273a6dc90700e33f4af9b02fd0632c7eb3c47/docs/tasks/ALPHA_CHARACTER_EDITOR_CATALOG.md), [производственные сравнения](https://github.com/alfuwerce-art/factoria/blob/9a2273a6dc90700e33f4af9b02fd0632c7eb3c47/docs/tasks/COMFY-STYLE-08_RUN_REPORT.md) | Исторически восемь позиций, включая Frogman, и шестнадцать сочетаний раса × пол. Отдельные карточки Factoria используют Lizard как сравнение для Dragonkin. | Восемь рас Alpha, восемь карточек опыта Factoria и стартовый игровой редактор CubeGame — три разных множества. |
+
+[Открытые вопросы владельцу](OPEN_DECISIONS.md).

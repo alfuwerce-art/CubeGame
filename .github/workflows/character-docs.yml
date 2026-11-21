@@ -1,0 +1,32 @@
+name: CubeGame character documentation
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'AGENTS.md'
+      - 'README.md'
+      - 'PROJECT_MEMORY.md'
+      - '.github/workflows/character-docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check out the pinned Factoria validator
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: alfuwerce-art/factoria
+          ref: 60f984c81b73448d79e8d2e4c57cbc19c20a9393
+          path: .factoria-doc-validator
+          sparse-checkout: |
+            scripts/verify_character_docs.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - run: python3 .factoria-doc-validator/scripts/verify_character_docs.py --cubegame-only --cubegame .
