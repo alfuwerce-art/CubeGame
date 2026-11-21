@@ -21,3 +21,18 @@ status: PLANNED
 **Отчёт:** `TASK_ID`, `BRANCH`, `SHA`, `FILES`, `CHECKS+RESULTS`, `WINDOWS_PLAYER`, `BLOCKERS`, `EVIDENCE`, `READY_FOR_OWNER_REVIEW` или `PARTIAL`. `ACCEPTED` и merge — решение владельца.
 
 Новая задача — новая сессия или явный handoff; передавать короткий снимок состояния, а не всю переписку.
+
+## Дополнительные поля для D96 (при релевантности)
+
+```yaml
+skill: cubegame-feature-planning # другой из SKILLS_INDEX по задаче
+requires: [] # реально существующие системы/контракты
+supplies: [] # что создаёт задача
+does_not_touch: [] # запрещённые соседние модули
+actual_symbols_checked: [] # exact name -> source code path
+test_oracle: [] # независимое доказательство
+tool_versions: [] # только реальные версии DSH/Unity/Blender/UE
+runtime_or_editor_only: runtime # не путать редактор и игру
+```
+
+[Name Registry](../architecture/NAME_REGISTRY.md), [Dependency Map](../architecture/DEPENDENCY_MAP.md), [Quality Attributes](../QUALITY_ATTRIBUTES.md). Сохранять только поля, реально нужные задаче.
