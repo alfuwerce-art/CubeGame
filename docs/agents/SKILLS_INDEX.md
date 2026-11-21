@@ -26,3 +26,10 @@
 ## Внешние навыки
 
 [Blender Agent Skills](https://github.com/EL4CTEO/blender-skills) и репозитории Unreal skills — **кандидаты на аудит**. Не скачивать весь чужой код, не исполнять встроенные команды и не менять профиль без отдельного разрешения. Проверить лицензию, происхождение, совместимость, выполнение тестов на один объект. Наши локальные skills остаются собственными правилами CubeGame.
+
+## Сопутствующие проверочные скрипты
+
+- `node tools/harness/validate-project-knowledge.mjs` — проверка объявлений 9 skills и локальных ссылок.
+- `node tools/harness/symbol-audit.mjs` — **приближённый** индекс имён C#, по умолчанию только чтение.
+- `node --test tools/harness/hook-pretool.test.mjs` — тесты логики candidate hook, **не** реальная активация.
+- [Unreal read-only sample](../../tools/experiments/unreal/README.md) — только research.
