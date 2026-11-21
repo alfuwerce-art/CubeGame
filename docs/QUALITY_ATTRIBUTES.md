@@ -22,4 +22,4 @@
 
 Для одного и того же TASK, одинакового исходного SHA и тестового оракула сравнить только `DeepSeek Harness` и `Codex`, фиксируя: выполненные критерии, ошибки, повторные попытки, объём ручных правок, время/лимиты, нарушения scope. Не оценивать агентов по чужим рейтингам или внешними рейтингами; сравнивать результат с игровым эталоном владельца. Harness даёт инструменты и процесс, но не гарантирует безошибочную реализацию.
 
-Связи: [AI workflow](agents/AI_WORKFLOW_COMPARISON.md), [Harness evaluation](agents/HARNESS_EVALUATION.md), [Art direction](art/ART_DIRECTION.md).
+Связи: [Harness](agents/HARNESS_ARCHITECTURE.md), [Harness evaluation](agents/HARNESS_EVALUATION.md), [Art direction](art/ART_DIRECTION.md).
