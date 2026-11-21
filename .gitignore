@@ -40,7 +40,8 @@ samples/**/*.glb
 *.log
 
 # РћРЎ / СЂРµРґР°РєС‚РѕСЂС‹
-Thumbs.dbdesktop.ini
+Thumbs.db
+desktop.ini
 .vs/
 .vscode/
 *.swp
@@ -69,7 +70,7 @@ measurements/comfyui_object_info_*_full.json
 # СЃРєР°С‡Р°РЅС‹ Р»РѕРєР°Р»СЊРЅРѕ С‚РѕР»СЊРєРѕ РґР»СЏ РѕС†РµРЅРєРё СЃС‚РёР»СЏ РґРѕ СѓСЃС‚Р°РЅРѕРІРєРё; РІ РїСѓР±Р»РёС‡РЅС‹Р№ СЂРµРїРѕР·РёС‚РѕСЂРёР№ РЅРµ РёРґСѓС‚
 outputs/comfyui/style_samples/
 
-# COMFY-STYLE-05: сгенерированные изображения (в т.ч. экспериментальные RAL) — только локально
+# COMFY-STYLE-05: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅ пїЅ.пїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ RAL) пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 outputs/factory/characters/*.png
 
 # COMFY-STYLE-07: owner references (Unity screenshots) and derived cutouts - local only
@@ -103,3 +104,6 @@ outputs/prototypes/mannequin_v3_rig/run1/compare/
 outputs/prototypes/mannequin_v3_rig/run1/*.blend
 outputs/prototypes/mannequin_v3_rig/run1/*.blend1
 outputs/prototypes/mannequin_v3_rig/run1/*.glb
+
+# Local source, reference, export and review workspace
+/local/
