@@ -33,3 +33,7 @@
 - `node tools/harness/symbol-audit.mjs` — **приближённый** индекс имён C#, по умолчанию только чтение.
 - `node --test tools/harness/hook-pretool.test.mjs` — тесты логики candidate hook, **не** реальная активация.
 - [Unreal read-only sample](../../tools/experiments/unreal/README.md) — только research.
+
+## Первый запуск на ПК
+
+[Пошаговая Windows-проверка](WINDOWS_DSH_FIRST_RUN.md): каталог навыков не подтверждён до открытия правильного worktree в Desktop. Если DSH старой версии не обнаружит Markdown skill, не считать существование файла достаточным доказательством.
