@@ -50,3 +50,9 @@ P0 **не означает, что нужно установить всё под
 - https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/subagent/README.md
 - https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/mcp/README.md
 - https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/boot/plugin-manager/README.md
+
+## Результат первичного ревью официального base bundle
+
+Согласно текущему `dsh-base`, для базовых профилей **уже предусмотрены** файловые инструменты, platform PowerShell, sandbox, skills и subagents. Начальный этап — диагностировать их в имеющемся Desktop, **не ставить дубликаты**. Хуки `dsh-hooks-claude-code` относятся к **experimental**; абсолютное право/запрет обеспечивают sandbox и права, не скрипт, который может завершиться fail-open.
+
+[Windows first run](WINDOWS_DSH_FIRST_RUN.md) · [dsh-base](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/bundle/base/README.md) · [hooks experimental](https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/experimental/hooks-claude-code/README.md).
