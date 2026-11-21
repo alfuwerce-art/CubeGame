@@ -1,0 +1,68 @@
+{
+  "race_id": "ORC",
+  "alpha": {
+    "binding": "PLAYABLE_LABEL_MATCH",
+    "race": "Orc",
+    "race_index": 3,
+    "fields": [
+      "Race",
+      "Gender",
+      "Class",
+      "Face",
+      "Haircut",
+      "Hair color"
+    ],
+    "options_source": "../../docs/tasks/COMFY-STYLE-08_ALPHA_MATRIX.json",
+    "variants": {
+      "Male": {
+        "style_id": 11,
+        "face_indices": [
+          0,
+          4
+        ],
+        "haircut_indices": [
+          0,
+          9
+        ]
+      },
+      "Female": {
+        "style_id": 12,
+        "face_indices": [
+          0,
+          4
+        ],
+        "haircut_indices": [
+          0,
+          3
+        ]
+      }
+    },
+    "class_filter": "No class branch in the face/hair lookup.",
+    "provenance": "ALPHA_DECOMPILED + ASSET_CONFIRMED",
+    "detail": null
+  },
+  "owner_screenshot": {
+    "status": "SCREENSHOT_OBSERVED",
+    "selected": "Orc / Male / Warrior / Face 1 / Headband 1",
+    "color_control": "Skin color"
+  },
+  "future_extensions": {
+    "status": "CUBEGAME_CONTRACT / PROPOSAL",
+    "slots": [
+      "Head",
+      "Face",
+      "Eyes",
+      "Torso",
+      "Arms",
+      "Hands",
+      "Legs",
+      "Feet",
+      "Equipment",
+      "Ears",
+      "Tusks",
+      "Jaw"
+    ],
+    "independent_eye_colors": true,
+    "racial_effects_proposed": false
+  }
+}

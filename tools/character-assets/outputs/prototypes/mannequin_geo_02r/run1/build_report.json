@@ -1,0 +1,1352 @@
+{
+  "actions": {
+    "attack": {
+      "bones": 40,
+      "fcurves": 163,
+      "frames": [
+        1,
+        5,
+        9,
+        13,
+        15
+      ],
+      "ground_bake_samples": 113,
+      "ground_snap_m": {
+        "1": 0.018,
+        "5": 0.0143,
+        "9": -0.0143,
+        "13": 0.018,
+        "15": 0.018
+      }
+    },
+    "attack_grip": {
+      "bones": 40,
+      "fcurves": 163,
+      "finger_keys": [
+        1,
+        5,
+        9,
+        13,
+        15
+      ],
+      "frames": [
+        1,
+        5,
+        9,
+        13,
+        15
+      ],
+      "ground_bake_samples": 113,
+      "ground_snap_m": {
+        "1": 0.018,
+        "5": 0.0143,
+        "9": -0.0143,
+        "13": 0.018,
+        "15": 0.018
+      }
+    },
+    "grip_test": {
+      "bones": 40,
+      "fcurves": 163,
+      "frames": [
+        1,
+        7,
+        13,
+        19,
+        25
+      ],
+      "ground_snap_m": {
+        "1": -0.0,
+        "7": -0.0,
+        "13": -0.0,
+        "19": -0.0,
+        "25": -0.0
+      }
+    },
+    "idle": {
+      "bones": 40,
+      "fcurves": 163,
+      "frames": [
+        1,
+        7,
+        13,
+        19,
+        25
+      ],
+      "ground_bake_samples": 193,
+      "ground_snap_m": {
+        "1": -0.0008,
+        "7": 0.0005,
+        "13": -0.0008,
+        "19": 0.0017,
+        "25": -0.0008
+      }
+    },
+    "walk": {
+      "bones": 40,
+      "fcurves": 163,
+      "frames": [
+        1,
+        5,
+        9,
+        13,
+        17
+      ],
+      "ground_bake_samples": 129,
+      "ground_snap_m": {
+        "1": -0.0279,
+        "5": 0.0025,
+        "9": -0.0279,
+        "13": 0.0025,
+        "17": -0.0279
+      }
+    }
+  },
+  "artifacts": {
+    "blend": "outputs/prototypes/mannequin_geo_02r/run1/mannequin_v3_rig.blend",
+    "blend_bytes": 230247,
+    "glb": "outputs/prototypes/mannequin_geo_02r/run1/mannequin_v3_male_rig.glb",
+    "glb_bytes": 723980,
+    "hierarchy": "outputs/prototypes/mannequin_geo_02r/run1/rig_hierarchy.txt"
+  },
+  "blender": "5.2.4 LTS",
+  "bones": [
+    {
+      "connected": false,
+      "deform": false,
+      "head": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "name": "root",
+      "parent": null,
+      "tail": [
+        0.0,
+        0.0,
+        0.14
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        0.0,
+        0.0,
+        0.5616
+      ],
+      "name": "pelvis",
+      "parent": "root",
+      "tail": [
+        0.0,
+        0.0,
+        0.7534
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.0,
+        0.0,
+        0.7534
+      ],
+      "name": "spine_01",
+      "parent": "pelvis",
+      "tail": [
+        0.0,
+        0.0,
+        0.7753
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.0,
+        0.0,
+        0.7753
+      ],
+      "name": "spine_02",
+      "parent": "spine_01",
+      "tail": [
+        0.0,
+        0.0,
+        1.1178
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.0,
+        0.0,
+        1.1178
+      ],
+      "name": "neck",
+      "parent": "spine_02",
+      "tail": [
+        0.0,
+        0.0,
+        1.1726
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.0,
+        0.0,
+        1.1726
+      ],
+      "name": "head",
+      "parent": "neck",
+      "tail": [
+        0.0,
+        0.0,
+        1.8
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        0.03,
+        0.0,
+        1.0978
+      ],
+      "name": "clavicle_l",
+      "parent": "spine_02",
+      "tail": [
+        0.2315,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.2315,
+        0.0,
+        1.0192
+      ],
+      "name": "upperarm_l",
+      "parent": "clavicle_l",
+      "tail": [
+        0.3932,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.3932,
+        0.0,
+        1.0192
+      ],
+      "name": "lowerarm_l",
+      "parent": "upperarm_l",
+      "tail": [
+        0.5342,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.5342,
+        0.0,
+        1.0192
+      ],
+      "name": "hand_l",
+      "parent": "lowerarm_l",
+      "tail": [
+        0.7411,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        0.1356,
+        0.0,
+        0.7397
+      ],
+      "name": "thigh_l",
+      "parent": "pelvis",
+      "tail": [
+        0.1356,
+        0.0,
+        0.3288
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.1356,
+        0.0,
+        0.3288
+      ],
+      "name": "calf_l",
+      "parent": "thigh_l",
+      "tail": [
+        0.1356,
+        0.0,
+        0.137
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.1356,
+        0.0,
+        0.137
+      ],
+      "name": "foot_l",
+      "parent": "calf_l",
+      "tail": [
+        0.1356,
+        -0.22,
+        0.03
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        -0.03,
+        0.0,
+        1.0978
+      ],
+      "name": "clavicle_r",
+      "parent": "spine_02",
+      "tail": [
+        -0.2315,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.2315,
+        0.0,
+        1.0192
+      ],
+      "name": "upperarm_r",
+      "parent": "clavicle_r",
+      "tail": [
+        -0.3932,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.3932,
+        0.0,
+        1.0192
+      ],
+      "name": "lowerarm_r",
+      "parent": "upperarm_r",
+      "tail": [
+        -0.5342,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.5342,
+        0.0,
+        1.0192
+      ],
+      "name": "hand_r",
+      "parent": "lowerarm_r",
+      "tail": [
+        -0.7411,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        -0.1356,
+        0.0,
+        0.7397
+      ],
+      "name": "thigh_r",
+      "parent": "pelvis",
+      "tail": [
+        -0.1356,
+        0.0,
+        0.3288
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.1356,
+        0.0,
+        0.3288
+      ],
+      "name": "calf_r",
+      "parent": "thigh_r",
+      "tail": [
+        -0.1356,
+        0.0,
+        0.137
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.1356,
+        0.0,
+        0.137
+      ],
+      "name": "foot_r",
+      "parent": "calf_r",
+      "tail": [
+        -0.1356,
+        -0.22,
+        0.03
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        0.5789999961853027,
+        -0.07400000095367432,
+        1.0099999904632568
+      ],
+      "name": "thumb_01_l",
+      "parent": "hand_l",
+      "tail": [
+        0.6159999966621399,
+        -0.10199999809265137,
+        0.9909999966621399
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.6159999966621399,
+        -0.10199999809265137,
+        0.9909999966621399
+      ],
+      "name": "thumb_02_l",
+      "parent": "thumb_01_l",
+      "tail": [
+        0.6510000228881836,
+        -0.11800000071525574,
+        0.9789999723434448
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        0.6380000114440918,
+        -0.052000001072883606,
+        1.0219999551773071
+      ],
+      "name": "index_01_l",
+      "parent": "hand_l",
+      "tail": [
+        0.6880000233650208,
+        -0.052000001072883606,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.6880000233650208,
+        -0.052000001072883606,
+        1.0219999551773071
+      ],
+      "name": "index_02_l",
+      "parent": "index_01_l",
+      "tail": [
+        0.7279999852180481,
+        -0.052000001072883606,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        0.6380000114440918,
+        -0.017000000923871994,
+        1.0219999551773071
+      ],
+      "name": "middle_01_l",
+      "parent": "hand_l",
+      "tail": [
+        0.6940000057220459,
+        -0.017000000923871994,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.6940000057220459,
+        -0.017000000923871994,
+        1.0219999551773071
+      ],
+      "name": "middle_02_l",
+      "parent": "middle_01_l",
+      "tail": [
+        0.7419999837875366,
+        -0.017000000923871994,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        0.6380000114440918,
+        0.01899999938905239,
+        1.0219999551773071
+      ],
+      "name": "ring_01_l",
+      "parent": "hand_l",
+      "tail": [
+        0.6899999976158142,
+        0.01899999938905239,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.6899999976158142,
+        0.01899999938905239,
+        1.0219999551773071
+      ],
+      "name": "ring_02_l",
+      "parent": "ring_01_l",
+      "tail": [
+        0.7329999804496765,
+        0.01899999938905239,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        0.6380000114440918,
+        0.05000000074505806,
+        1.0219999551773071
+      ],
+      "name": "pinky_01_l",
+      "parent": "hand_l",
+      "tail": [
+        0.6800000071525574,
+        0.05000000074505806,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.6800000071525574,
+        0.05000000074505806,
+        1.0219999551773071
+      ],
+      "name": "pinky_02_l",
+      "parent": "pinky_01_l",
+      "tail": [
+        0.7149999737739563,
+        0.05000000074505806,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        -0.5789999961853027,
+        -0.07400000095367432,
+        1.0099999904632568
+      ],
+      "name": "thumb_01_r",
+      "parent": "hand_r",
+      "tail": [
+        -0.6159999966621399,
+        -0.10199999809265137,
+        0.9909999966621399
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.6159999966621399,
+        -0.10199999809265137,
+        0.9909999966621399
+      ],
+      "name": "thumb_02_r",
+      "parent": "thumb_01_r",
+      "tail": [
+        -0.6510000228881836,
+        -0.11800000071525574,
+        0.9789999723434448
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        -0.6380000114440918,
+        -0.052000001072883606,
+        1.0219999551773071
+      ],
+      "name": "index_01_r",
+      "parent": "hand_r",
+      "tail": [
+        -0.6880000233650208,
+        -0.052000001072883606,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.6880000233650208,
+        -0.052000001072883606,
+        1.0219999551773071
+      ],
+      "name": "index_02_r",
+      "parent": "index_01_r",
+      "tail": [
+        -0.7279999852180481,
+        -0.052000001072883606,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        -0.6380000114440918,
+        -0.017000000923871994,
+        1.0219999551773071
+      ],
+      "name": "middle_01_r",
+      "parent": "hand_r",
+      "tail": [
+        -0.6940000057220459,
+        -0.017000000923871994,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.6940000057220459,
+        -0.017000000923871994,
+        1.0219999551773071
+      ],
+      "name": "middle_02_r",
+      "parent": "middle_01_r",
+      "tail": [
+        -0.7419999837875366,
+        -0.017000000923871994,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        -0.6380000114440918,
+        0.01899999938905239,
+        1.0219999551773071
+      ],
+      "name": "ring_01_r",
+      "parent": "hand_r",
+      "tail": [
+        -0.6899999976158142,
+        0.01899999938905239,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.6899999976158142,
+        0.01899999938905239,
+        1.0219999551773071
+      ],
+      "name": "ring_02_r",
+      "parent": "ring_01_r",
+      "tail": [
+        -0.7329999804496765,
+        0.01899999938905239,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        -0.6380000114440918,
+        0.05000000074505806,
+        1.0219999551773071
+      ],
+      "name": "pinky_01_r",
+      "parent": "hand_r",
+      "tail": [
+        -0.6800000071525574,
+        0.05000000074505806,
+        1.0219999551773071
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.6800000071525574,
+        0.05000000074505806,
+        1.0219999551773071
+      ],
+      "name": "pinky_02_r",
+      "parent": "pinky_01_r",
+      "tail": [
+        -0.7149999737739563,
+        0.05000000074505806,
+        1.0219999551773071
+      ]
+    }
+  ],
+  "counts": {
+    "actions": 5,
+    "bones": 40,
+    "deform_bones": 39,
+    "parts": 38,
+    "polygons": 4032,
+    "vertices": 3972
+  },
+  "export_args": [
+    "export_animations",
+    "export_apply",
+    "export_extras",
+    "export_format",
+    "export_skins",
+    "filepath",
+    "use_selection"
+  ],
+  "glb_sampling_hz": 192.0,
+  "hierarchy_text": "root  head=(+0.0000, +0.0000, +0.0000) tail=(+0.0000, +0.0000, +0.1400) [offset]\n  pelvis  head=(+0.0000, +0.0000, +0.5616) tail=(+0.0000, +0.0000, +0.7534) [offset]\n    spine_01  head=(+0.0000, +0.0000, +0.7534) tail=(+0.0000, +0.0000, +0.7753) [connected]\n      spine_02  head=(+0.0000, +0.0000, +0.7753) tail=(+0.0000, +0.0000, +1.1178) [connected]\n        neck  head=(+0.0000, +0.0000, +1.1178) tail=(+0.0000, +0.0000, +1.1726) [connected]\n          head  head=(+0.0000, +0.0000, +1.1726) tail=(+0.0000, +0.0000, +1.8000) [connected]\n        clavicle_l  head=(+0.0300, +0.0000, +1.0978) tail=(+0.2315, +0.0000, +1.0192) [offset]\n          upperarm_l  head=(+0.2315, +0.0000, +1.0192) tail=(+0.3932, +0.0000, +1.0192) [connected]\n            lowerarm_l  head=(+0.3932, +0.0000, +1.0192) tail=(+0.5342, +0.0000, +1.0192) [connected]\n              hand_l  head=(+0.5342, +0.0000, +1.0192) tail=(+0.7411, +0.0000, +1.0192) [connected]\n                thumb_01_l  head=(+0.5790, -0.0740, +1.0100) tail=(+0.6160, -0.1020, +0.9910) [offset]\n                  thumb_02_l  head=(+0.6160, -0.1020, +0.9910) tail=(+0.6510, -0.1180, +0.9790) [connected]\n                index_01_l  head=(+0.6380, -0.0520, +1.0220) tail=(+0.6880, -0.0520, +1.0220) [offset]\n                  index_02_l  head=(+0.6880, -0.0520, +1.0220) tail=(+0.7280, -0.0520, +1.0220) [connected]\n                middle_01_l  head=(+0.6380, -0.0170, +1.0220) tail=(+0.6940, -0.0170, +1.0220) [offset]\n                  middle_02_l  head=(+0.6940, -0.0170, +1.0220) tail=(+0.7420, -0.0170, +1.0220) [connected]\n                ring_01_l  head=(+0.6380, +0.0190, +1.0220) tail=(+0.6900, +0.0190, +1.0220) [offset]\n                  ring_02_l  head=(+0.6900, +0.0190, +1.0220) tail=(+0.7330, +0.0190, +1.0220) [connected]\n                pinky_01_l  head=(+0.6380, +0.0500, +1.0220) tail=(+0.6800, +0.0500, +1.0220) [offset]\n                  pinky_02_l  head=(+0.6800, +0.0500, +1.0220) tail=(+0.7150, +0.0500, +1.0220) [connected]\n        clavicle_r  head=(-0.0300, +0.0000, +1.0978) tail=(-0.2315, +0.0000, +1.0192) [offset]\n          upperarm_r  head=(-0.2315, +0.0000, +1.0192) tail=(-0.3932, +0.0000, +1.0192) [connected]\n            lowerarm_r  head=(-0.3932, +0.0000, +1.0192) tail=(-0.5342, +0.0000, +1.0192) [connected]\n              hand_r  head=(-0.5342, +0.0000, +1.0192) tail=(-0.7411, +0.0000, +1.0192) [connected]\n                thumb_01_r  head=(-0.5790, -0.0740, +1.0100) tail=(-0.6160, -0.1020, +0.9910) [offset]\n                  thumb_02_r  head=(-0.6160, -0.1020, +0.9910) tail=(-0.6510, -0.1180, +0.9790) [connected]\n                index_01_r  head=(-0.6380, -0.0520, +1.0220) tail=(-0.6880, -0.0520, +1.0220) [offset]\n                  index_02_r  head=(-0.6880, -0.0520, +1.0220) tail=(-0.7280, -0.0520, +1.0220) [connected]\n                middle_01_r  head=(-0.6380, -0.0170, +1.0220) tail=(-0.6940, -0.0170, +1.0220) [offset]\n                  middle_02_r  head=(-0.6940, -0.0170, +1.0220) tail=(-0.7420, -0.0170, +1.0220) [connected]\n                ring_01_r  head=(-0.6380, +0.0190, +1.0220) tail=(-0.6900, +0.0190, +1.0220) [offset]\n                  ring_02_r  head=(-0.6900, +0.0190, +1.0220) tail=(-0.7330, +0.0190, +1.0220) [connected]\n                pinky_01_r  head=(-0.6380, +0.0500, +1.0220) tail=(-0.6800, +0.0500, +1.0220) [offset]\n                  pinky_02_r  head=(-0.6800, +0.0500, +1.0220) tail=(-0.7150, +0.0500, +1.0220) [connected]\n    thigh_l  head=(+0.1356, +0.0000, +0.7397) tail=(+0.1356, +0.0000, +0.3288) [offset]\n      calf_l  head=(+0.1356, +0.0000, +0.3288) tail=(+0.1356, +0.0000, +0.1370) [connected]\n        foot_l  head=(+0.1356, +0.0000, +0.1370) tail=(+0.1356, -0.2200, +0.0300) [connected]\n    thigh_r  head=(-0.1356, +0.0000, +0.7397) tail=(-0.1356, +0.0000, +0.3288) [offset]\n      calf_r  head=(-0.1356, +0.0000, +0.3288) tail=(-0.1356, +0.0000, +0.1370) [connected]\n        foot_r  head=(-0.1356, +0.0000, +0.1370) tail=(-0.1356, -0.2200, +0.0300) [connected]\n",
+  "issues": [],
+  "parts": {
+    "ear_l": {
+      "bbox": [
+        0.298,
+        -0.0615,
+        1.3575,
+        0.418,
+        0.0955,
+        1.547
+      ],
+      "blocks": 6,
+      "bone": "head",
+      "mesh_note": "bevel_disabled",
+      "polygons": 548,
+      "vertices": 550
+    },
+    "ear_r": {
+      "bbox": [
+        -0.418,
+        -0.0615,
+        1.3575,
+        -0.298,
+        0.0955,
+        1.547
+      ],
+      "blocks": 6,
+      "bone": "head",
+      "mesh_note": "bevel_disabled",
+      "polygons": 548,
+      "vertices": 550
+    },
+    "foot_l": {
+      "bbox": [
+        0.0184,
+        -0.1605,
+        0.0,
+        0.2584,
+        0.0705,
+        0.1465
+      ],
+      "blocks": 2,
+      "bone": "foot_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 186,
+      "vertices": 184
+    },
+    "foot_r": {
+      "bbox": [
+        -0.2584,
+        -0.1605,
+        0.0,
+        -0.0184,
+        0.0705,
+        0.1465
+      ],
+      "blocks": 2,
+      "bone": "foot_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 186,
+      "vertices": 184
+    },
+    "forearm_l": {
+      "bbox": [
+        0.403,
+        -0.076,
+        0.9445,
+        0.557,
+        0.076,
+        1.0955
+      ],
+      "blocks": 2,
+      "bone": "lowerarm_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 186,
+      "vertices": 184
+    },
+    "forearm_r": {
+      "bbox": [
+        -0.557,
+        -0.076,
+        0.9445,
+        -0.403,
+        0.076,
+        1.0955
+      ],
+      "blocks": 2,
+      "bone": "lowerarm_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 186,
+      "vertices": 184
+    },
+    "hand_l": {
+      "bbox": [
+        0.534,
+        -0.0735,
+        0.9832,
+        0.638,
+        0.0735,
+        1.0552
+      ],
+      "blocks": 1,
+      "bone": "hand_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "hand_r": {
+      "bbox": [
+        -0.638,
+        -0.0735,
+        0.9832,
+        -0.534,
+        0.0735,
+        1.0552
+      ],
+      "blocks": 1,
+      "bone": "hand_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "head": {
+      "bbox": [
+        -0.3082,
+        -0.286,
+        1.1726,
+        0.3082,
+        0.286,
+        1.8
+      ],
+      "blocks": 2,
+      "bone": "head",
+      "mesh_note": "bevel_applied",
+      "polygons": 146,
+      "vertices": 144
+    },
+    "index_01_l": {
+      "bbox": [
+        0.6355,
+        -0.065,
+        1.0095,
+        0.6895,
+        -0.039,
+        1.0345
+      ],
+      "blocks": 1,
+      "bone": "index_01_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "index_01_r": {
+      "bbox": [
+        -0.6895,
+        -0.065,
+        1.0095,
+        -0.6355,
+        -0.039,
+        1.0345
+      ],
+      "blocks": 1,
+      "bone": "index_01_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "index_02_l": {
+      "bbox": [
+        0.6855,
+        -0.064,
+        1.011,
+        0.728,
+        -0.04,
+        1.033
+      ],
+      "blocks": 1,
+      "bone": "index_02_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "index_02_r": {
+      "bbox": [
+        -0.728,
+        -0.064,
+        1.011,
+        -0.6855,
+        -0.04,
+        1.033
+      ],
+      "blocks": 1,
+      "bone": "index_02_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "middle_01_l": {
+      "bbox": [
+        0.6355,
+        -0.0315,
+        1.009,
+        0.6955,
+        -0.0025,
+        1.035
+      ],
+      "blocks": 1,
+      "bone": "middle_01_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "middle_01_r": {
+      "bbox": [
+        -0.6955,
+        -0.0315,
+        1.009,
+        -0.6355,
+        -0.0025,
+        1.035
+      ],
+      "blocks": 1,
+      "bone": "middle_01_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "middle_02_l": {
+      "bbox": [
+        0.6915,
+        -0.0295,
+        1.0105,
+        0.742,
+        -0.0045,
+        1.0335
+      ],
+      "blocks": 1,
+      "bone": "middle_02_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "middle_02_r": {
+      "bbox": [
+        -0.742,
+        -0.0295,
+        1.0105,
+        -0.6915,
+        -0.0045,
+        1.0335
+      ],
+      "blocks": 1,
+      "bone": "middle_02_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "neck": {
+      "bbox": [
+        -0.133,
+        -0.106,
+        1.1067,
+        0.133,
+        0.106,
+        1.1837
+      ],
+      "blocks": 1,
+      "bone": "neck",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "pinky_01_l": {
+      "bbox": [
+        0.6355,
+        0.039,
+        1.011,
+        0.6815,
+        0.061,
+        1.033
+      ],
+      "blocks": 1,
+      "bone": "pinky_01_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "pinky_01_r": {
+      "bbox": [
+        -0.6815,
+        0.039,
+        1.011,
+        -0.6355,
+        0.061,
+        1.033
+      ],
+      "blocks": 1,
+      "bone": "pinky_01_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "pinky_02_l": {
+      "bbox": [
+        0.6775,
+        0.04,
+        1.0125,
+        0.715,
+        0.06,
+        1.0315
+      ],
+      "blocks": 1,
+      "bone": "pinky_02_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "pinky_02_r": {
+      "bbox": [
+        -0.715,
+        0.04,
+        1.0125,
+        -0.6775,
+        0.06,
+        1.0315
+      ],
+      "blocks": 1,
+      "bone": "pinky_02_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "ring_01_l": {
+      "bbox": [
+        0.6355,
+        0.0055,
+        1.0095,
+        0.6915,
+        0.0325,
+        1.0345
+      ],
+      "blocks": 1,
+      "bone": "ring_01_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "ring_01_r": {
+      "bbox": [
+        -0.6915,
+        0.0055,
+        1.0095,
+        -0.6355,
+        0.0325,
+        1.0345
+      ],
+      "blocks": 1,
+      "bone": "ring_01_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "ring_02_l": {
+      "bbox": [
+        0.6875,
+        0.007,
+        1.011,
+        0.733,
+        0.031,
+        1.033
+      ],
+      "blocks": 1,
+      "bone": "ring_02_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "ring_02_r": {
+      "bbox": [
+        -0.733,
+        0.007,
+        1.011,
+        -0.6875,
+        0.031,
+        1.033
+      ],
+      "blocks": 1,
+      "bone": "ring_02_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "shin_l": {
+      "bbox": [
+        0.058,
+        -0.073,
+        0.128,
+        0.2,
+        0.073,
+        0.317
+      ],
+      "blocks": 1,
+      "bone": "calf_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "shin_r": {
+      "bbox": [
+        -0.2,
+        -0.073,
+        0.128,
+        -0.058,
+        0.073,
+        0.317
+      ],
+      "blocks": 1,
+      "bone": "calf_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "thigh_l": {
+      "bbox": [
+        0.049,
+        -0.088,
+        0.2955,
+        0.215,
+        0.098,
+        0.75
+      ],
+      "blocks": 4,
+      "bone": "thigh_l",
+      "mesh_note": "bevel_disabled",
+      "polygons": 246,
+      "vertices": 248
+    },
+    "thigh_r": {
+      "bbox": [
+        -0.215,
+        -0.088,
+        0.2955,
+        -0.049,
+        0.098,
+        0.75
+      ],
+      "blocks": 4,
+      "bone": "thigh_r",
+      "mesh_note": "bevel_disabled",
+      "polygons": 246,
+      "vertices": 248
+    },
+    "thumb_01_l": {
+      "bbox": [
+        0.5655,
+        -0.1131,
+        0.978,
+        0.6276,
+        -0.0615,
+        1.024
+      ],
+      "blocks": 1,
+      "bone": "thumb_01_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "thumb_01_r": {
+      "bbox": [
+        -0.6276,
+        -0.1131,
+        0.978,
+        -0.5655,
+        -0.0615,
+        1.024
+      ],
+      "blocks": 1,
+      "bone": "thumb_01_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "thumb_02_l": {
+      "bbox": [
+        0.6071,
+        -0.1282,
+        0.969,
+        0.6577,
+        -0.0908,
+        1.0018
+      ],
+      "blocks": 1,
+      "bone": "thumb_02_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "thumb_02_r": {
+      "bbox": [
+        -0.6577,
+        -0.1282,
+        0.969,
+        -0.6071,
+        -0.0908,
+        1.0018
+      ],
+      "blocks": 1,
+      "bone": "thumb_02_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "torso_pelvis": {
+      "bbox": [
+        -0.1585,
+        -0.1305,
+        0.521,
+        0.1585,
+        0.1305,
+        0.792
+      ],
+      "blocks": 3,
+      "bone": "pelvis",
+      "mesh_note": "bevel_applied",
+      "polygons": 506,
+      "vertices": 504
+    },
+    "torso_upper": {
+      "bbox": [
+        -0.2315,
+        -0.163,
+        0.777,
+        0.2315,
+        0.163,
+        1.12
+      ],
+      "blocks": 1,
+      "bone": "spine_02",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "upper_arm_l": {
+      "bbox": [
+        0.2155,
+        -0.102,
+        0.9175,
+        0.4175,
+        0.102,
+        1.1225
+      ],
+      "blocks": 2,
+      "bone": "upperarm_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 186,
+      "vertices": 184
+    },
+    "upper_arm_r": {
+      "bbox": [
+        -0.4175,
+        -0.102,
+        0.9175,
+        -0.2155,
+        0.102,
+        1.1225
+      ],
+      "blocks": 2,
+      "bone": "upperarm_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 186,
+      "vertices": 184
+    }
+  },
+  "profile": "scripts/character/profiles/mannequin_geo_02r_male.json",
+  "profile_sha256": "a11a2889361aa8eb1bf50d95f9546dc7ed144f8e983645e8534c7b86ab93fb7a",
+  "seconds": 6.2,
+  "stage": "MANNEQUIN-GEO-02R/build",
+  "status": "BUILD_DONE"
+}

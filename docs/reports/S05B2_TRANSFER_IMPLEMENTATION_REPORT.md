@@ -68,4 +68,4 @@ python -m tools.alpha_models.catalog.d69_catalogs                 оба кат�
 `transfer/unity/Editor/AlphaTransferEditor.cs`, `review/unity/Runtime/ReviewSpecimen.cs`; тесты
 `tests/test_d69_transfer_fixes.py` (новый), `tests/test_npc_actions.py`.
 
-Следующий этап проекта — [ТЗ M0-00](../stages/M0_00_FULL_ALPHA_GAME_TZ.md) (DRAFT, на утверждение).
+Следующий этап проекта — [ТЗ M0-00](../stages/archive/M0_00_FULL_ALPHA_GAME_TZ.md) (DRAFT, на утверждение).

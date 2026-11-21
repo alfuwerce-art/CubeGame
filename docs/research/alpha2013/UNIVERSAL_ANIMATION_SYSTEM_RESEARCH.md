@@ -2,7 +2,7 @@
 
 **Дата:** 2026-11-05. **Исполнитель:** Claude Code (архитектор). **Ветка:** `claude/universal-animation-pipeline` (от `deepseek/s05a2-animation-transfer-review` @ `d8bd51c`).
 **Основание:** задание продюсера «универсальный конвейер переноса моделей и анимаций»; D46, D51, D54, D55, D57, D58. **Не S05B**: массовой конвертации не было.
-**Статус:** `READY_FOR_REVIEW`. Архитектура — [UNIVERSAL_ASSET_ANIMATION_PIPELINE.md](../../architecture/UNIVERSAL_ASSET_ANIMATION_PIPELINE.md) (DRAFT). Методичка — [UNIVERSAL_TRANSFER_PLAYBOOK.md](../../agents/UNIVERSAL_TRANSFER_PLAYBOOK.md). Результаты прототипа — [UNIVERSAL_TRANSFER_PROTOTYPE_REPORT.md](UNIVERSAL_TRANSFER_PROTOTYPE_REPORT.md).
+**Статус:** `READY_FOR_REVIEW`. Архитектура — [UNIVERSAL_ASSET_ANIMATION_PIPELINE.md](../../architecture/UNIVERSAL_ASSET_ANIMATION_PIPELINE.md) (DRAFT). Методичка — [UNIVERSAL_TRANSFER_PLAYBOOK.md](../../agents/archive/UNIVERSAL_TRANSFER_PLAYBOOK.md). Результаты прототипа — [UNIVERSAL_TRANSFER_PROTOTYPE_REPORT.md](UNIVERSAL_TRANSFER_PROTOTYPE_REPORT.md).
 
 Обозначения: **ДОКАЗАНО** — байты `Cube.exe` + сверка с рантаймом; **КОД** — прочитано в коде, в рантайме не проверено; **ГИПОТЕЗА**; **НЕИЗВЕСТНО**.
 

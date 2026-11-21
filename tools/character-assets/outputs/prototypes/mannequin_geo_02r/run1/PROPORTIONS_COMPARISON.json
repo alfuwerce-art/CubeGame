@@ -1,0 +1,48 @@
+{
+  "task": "MANNEQUIN-GEO-02R",
+  "reference": "outputs/factory/mannequin_v3/REFERENCE_MANNEQUIN_V3_OWNER.png",
+  "model_height_m": 1.8,
+  "table": {
+    "reference": {
+      "head_cube_over_height": 0.3425,
+      "ear_span_over_height": 0.4627,
+      "arm_span_over_height": 0.825,
+      "chest_over_height": 0.2511,
+      "waist_over_height": 0.1613,
+      "pelvis_over_height": 0.2496,
+      "thigh_over_height": 0.2146,
+      "foot_over_height": 0.2922
+    },
+    "model": {
+      "head_cube_over_height": 0.3422,
+      "ear_span_over_height": 0.4644,
+      "arm_span_over_height": 0.8248,
+      "chest_over_height": 0.2566,
+      "waist_over_height": 0.1609,
+      "pelvis_over_height": 0.2383,
+      "thigh_over_height": 0.2159,
+      "foot_over_height": 0.2872
+    },
+    "delta": {
+      "head_cube_over_height": -0.0003,
+      "ear_span_over_height": 0.0017,
+      "arm_span_over_height": -0.0002,
+      "chest_over_height": 0.0055,
+      "waist_over_height": -0.0004,
+      "pelvis_over_height": -0.0113,
+      "thigh_over_height": 0.0013,
+      "foot_over_height": -0.005
+    },
+    "meta": {
+      "reference_px": {
+        "height": 657,
+        "width": 542
+      },
+      "model_px": {
+        "height": 982,
+        "width": 810,
+        "arm_span_m": 1.4846
+      }
+    }
+  }
+}

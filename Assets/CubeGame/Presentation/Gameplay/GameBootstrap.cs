@@ -297,15 +297,15 @@ namespace CubeGame.Gameplay
             if (_screenshotFrame >= 0 && _frames >= _screenshotFrame)
             {
                 _screenshotFrame = -1;
-                if (Application.isBatchMode)
+                if (!string.IsNullOrEmpty(_screenshotPath))
                 {
-                    CaptureWorldCamera(_screenshotPath);
+                    if (Application.isBatchMode)
+                        CaptureWorldCamera(_screenshotPath);
+                    else
+                        ScreenCapture.CaptureScreenshot(_screenshotPath);
                 }
-                else
-                {
-                    ScreenCapture.CaptureScreenshot(_screenshotPath);
-                }
-                Debug.Log($"[Game] screenshot -> {_screenshotPath} state={_session.State} tick={_session.Clock?.Tick} " +
+                string action = string.IsNullOrEmpty(_screenshotPath) ? "frame limit reached" : $"screenshot -> {_screenshotPath}";
+                Debug.Log($"[Game] {action} state={_session.State} tick={_session.Clock?.Tick} " +
                           $"chunks={_worldView?.LoadedCount} pending={_worldView?.PendingCount} released={_worldView?.TotalReleased} " +
                           $"vertices={_worldView?.LoadedVertices}/{_worldView?.VertexBudget} plants={_worldView?.LoadedPlants} horizon={_worldView?.HorizonRange:F1}");
                 LogPopulationSnapshot();
@@ -1624,7 +1624,8 @@ namespace CubeGame.Gameplay
                         break;
                     case "-cubeScreenshot":
                         _screenshotPath = value;
-                        _screenshotFrame = 120;
+                        if (_screenshotFrame < 0)
+                            _screenshotFrame = 120;
                         break;
                     case "-cubeTeleport":
                         if (i + 2 < args.Length

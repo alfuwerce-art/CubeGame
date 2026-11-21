@@ -1,0 +1,12 @@
+{
+  "socket_probes": 25,
+  "animated_samples": 12,
+  "maximum_matrix_error": 1.1920928955078125e-07,
+  "hide_restore_slots": 25,
+  "face_overlay_m": [
+    0.6,
+    0.405
+  ],
+  "face_samples": 25,
+  "maximum_plane_error_m": 4.315376281663341e-08
+}

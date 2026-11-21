@@ -8,7 +8,7 @@
 > и [архитектуру](../architecture/WORLD_GENERATION_ARCHITECTURE.md).
 
 **Дата:** 2026-11-17
-**Этап:** вход в [G2 World Foundation](../planning/ROADMAP_DRAFT.md) после G0/G1
+**Этап:** вход в [G2 World Foundation](../archive/ROADMAP_DRAFT.md) после G0/G1
 **Аудируемое дерево:** canonical `integration/m0-all` @ `4e36f1539d787e6a03f85d1f9fc92efcb1b64a79`
 **Unity:** `6000.3.27f2`
 

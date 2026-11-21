@@ -3,7 +3,7 @@
 **TASK:** S05A2-UNIVERSAL-CONTINUE-01 (2026-11-06, исполнитель — Claude Code, ведущий разработчик/архитектор задачи).
 **STATUS:** `READY_FOR_REVIEW`. Этап **S05A-2 — IN_PROGRESS / REVIEW OPEN**, **S05B — NOT_AUTHORIZED**.
 **Ветка:** `claude/s05a2-universal-continuation` от `e4f5be6` (`codex/s05a2-action-lifecycle`).
-**Архитектура:** [UNIVERSAL_ENTITY_CONTRACT](../architecture/UNIVERSAL_ENTITY_CONTRACT.md) (DRAFT). **Методичка:** [UNIVERSAL_TRANSFER_PLAYBOOK §7](../agents/UNIVERSAL_TRANSFER_PLAYBOOK.md). **Матрица:** [UNIVERSAL_TRANSFER_COVERAGE.csv](../research/alpha2013/UNIVERSAL_TRANSFER_COVERAGE.csv) (только метаданные).
+**Архитектура:** [UNIVERSAL_ENTITY_CONTRACT](../architecture/UNIVERSAL_ENTITY_CONTRACT.md) (DRAFT). **Методичка:** [UNIVERSAL_TRANSFER_PLAYBOOK §7](../agents/archive/UNIVERSAL_TRANSFER_PLAYBOOK.md). **Матрица:** [UNIVERSAL_TRANSFER_COVERAGE.csv](../research/alpha2013/UNIVERSAL_TRANSFER_COVERAGE.csv) (только метаданные).
 
 ---
 

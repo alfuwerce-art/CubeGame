@@ -3,7 +3,7 @@
 **Status:** PLANNED / PRODUCER DIRECTION APPROVED  
 **Decision:** [D94 — humanoid modular appearance and NPC generation](../decisions/D94-g3-humanoid-modular-appearance.md)  
 **Input:** accepted G2/G2-1 world/entity seams; M1 Character / Creature Factory concept  
-**Primary reference:** [M1_MODEL_ANIMATION_EVOLUTION_STAGE.md](M1_MODEL_ANIMATION_EVOLUTION_STAGE.md)
+**Primary reference:** [M1_MODEL_ANIMATION_EVOLUTION_STAGE.md](archive/M1_MODEL_ANIMATION_EVOLUTION_STAGE.md)
 
 ## Goal
 

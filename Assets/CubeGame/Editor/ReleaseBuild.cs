@@ -23,7 +23,24 @@ namespace CubeGame.EditorTools
         public const string DefaultOutputDirectory = ".unity-install/build/Release";
 
         [MenuItem("CubeGame/Build Windows release")]
-        public static void BuildWindows64()
+        public static void BuildWindows64() => BuildWindows64(includeLocalContent: true);
+
+        [MenuItem("CubeGame/Build Windows development player")]
+        public static void BuildWindowsDevelopment64()
+        {
+            string originalBypass = Environment.GetEnvironmentVariable(AlphaContentStaging.BypassVariable);
+            try
+            {
+                Environment.SetEnvironmentVariable(AlphaContentStaging.BypassVariable, "1");
+                BuildWindows64(includeLocalContent: false);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(AlphaContentStaging.BypassVariable, originalBypass);
+            }
+        }
+
+        private static void BuildWindows64(bool includeLocalContent)
         {
             string projectRoot = Path.GetDirectoryName(Application.dataPath);
 
@@ -46,13 +63,20 @@ namespace CubeGame.EditorTools
             string outputDirectory = Environment.GetEnvironmentVariable(OutputDirectoryVariable);
             if (string.IsNullOrEmpty(outputDirectory))
             {
-                outputDirectory = Path.Combine(projectRoot, DefaultOutputDirectory);
+                string defaultPath = includeLocalContent ? DefaultOutputDirectory : ".unity-install/build/Development";
+                outputDirectory = Path.Combine(projectRoot, defaultPath);
             }
 
             outputDirectory = Path.GetFullPath(outputDirectory);
-            Directory.CreateDirectory(outputDirectory);
-
             string executable = Path.Combine(outputDirectory, ExecutableName);
+            string contentRoot = AlphaContentStaging.PlayerContentRoot(executable);
+            if (!includeLocalContent && Directory.Exists(contentRoot))
+            {
+                BatchMode.Fail($"development output contains a previous local content payload ({contentRoot}); use a clean directory");
+                return;
+            }
+
+            Directory.CreateDirectory(outputDirectory);
             var options = new BuildPlayerOptions
             {
                 scenes = scenes,
@@ -92,6 +116,12 @@ namespace CubeGame.EditorTools
                 return;
             }
 
+            if (!includeLocalContent)
+            {
+                Debug.Log($"[ReleaseBuild] DEVELOPMENT_PLAYER_READY output={executable}");
+                return;
+            }
+
             // M0 runtime recovery R2: a release without the staged Alpha content is a failed build, not a
             // "test stand with capsules". The staging callback has already run; this re-checks its result on disk.
             if (AlphaContentStaging.Bypassed)
@@ -100,7 +130,6 @@ namespace CubeGame.EditorTools
                 return;
             }
 
-            string contentRoot = AlphaContentStaging.PlayerContentRoot(executable);
             var staged = CubeGame.AlphaModels.AlphaContentInventory.Scan(contentRoot);
             var missing = staged.MissingForRelease();
             if (missing.Count > 0)

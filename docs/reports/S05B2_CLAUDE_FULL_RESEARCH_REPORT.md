@@ -4,7 +4,7 @@
 **Решение:** [D64](../decisions/D64-claude-full-catalog-research-handoff.md), ТЗ [S05B2_CLAUDE_FULL_CATALOG_RESEARCH_TASK](../stages/S05B2_CLAUDE_FULL_CATALOG_RESEARCH_TASK.md).
 **База:** `review/d64-claude-full-research-handoff` @ `a4a4c56245abf9ac725b762acae9424d98ec5fb7`. **Ветка:** `claude/s05b2-full-catalog-research`.
 **Дата:** 2026-11-06. **Исполнитель:** Claude Code.
-**Для DeepSeek:** [FULL_CATALOG_DEEPSEEK_PLAYBOOK](../agents/FULL_CATALOG_DEEPSEEK_PLAYBOOK.md). Код: [tools/alpha_models/catalog](../../tools/alpha_models/catalog/README.md).
+**Для DeepSeek:** [FULL_CATALOG_DEEPSEEK_PLAYBOOK](../agents/archive/FULL_CATALOG_DEEPSEEK_PLAYBOOK.md). Код: [tools/alpha_models/catalog](../../tools/alpha_models/catalog/README.md).
 
 S04, `main`, чужие ветки, `D:\Games\Cube world` не менялись; данные Alpha и производные — только в `.scratch`.
 

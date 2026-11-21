@@ -126,7 +126,7 @@
 | `TerrainEditSurvivesSaveExitAndLoad` | 80 | 86 |
 | `VoxelEditBuildsColliderAndSurvivesSaveLoad` | 88 | 85 |
 
-Обе проверки `WorldState.SurfaceAt` проходят до raycast. Та же пара падений с теми же числами есть в прежнем `AlphaOutput/c6_playmode.xml` и зарегистрирована как P1 в [отложенных проверках](../planning/M0_PLAYMODE_DEFERRED_CHECKS.md#L9). В `Pump` готовые новые чанки получают бюджет раньше `_dirty`. Из 169 запрошенных чанков 25 ставятся синхронно, остальные могут занять все 4 установки на кадр. Это проверяемая гипотеза задержки, фактический размер очередей на кадре падения не измерялся. [Перестройка](../../Assets/CubeGame/Presentation/Gameplay/World/StreamingWorldView.cs#L302), [проверки](../../Assets/CubeGame/Tests/FullM0/PlayMode/FullM0WorldStreamingPlayModeTests.cs#L136).
+Обе проверки `WorldState.SurfaceAt` проходят до raycast. Та же пара падений с теми же числами есть в прежнем `AlphaOutput/c6_playmode.xml` и зарегистрирована как P1 в [отложенных проверках](../planning/archive/M0_PLAYMODE_DEFERRED_CHECKS.md#L9). В `Pump` готовые новые чанки получают бюджет раньше `_dirty`. Из 169 запрошенных чанков 25 ставятся синхронно, остальные могут занять все 4 установки на кадр. Это проверяемая гипотеза задержки, фактический размер очередей на кадре падения не измерялся. [Перестройка](../../Assets/CubeGame/Presentation/Gameplay/World/StreamingWorldView.cs#L302), [проверки](../../Assets/CubeGame/Tests/FullM0/PlayMode/FullM0WorldStreamingPlayModeTests.cs#L136).
 
 ## SAFE FIXES APPLIED
 

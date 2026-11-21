@@ -1,6 +1,6 @@
 # D61 TECHNICAL-FIX — COLOR/TINT-FIX, S05B-A REVIEW-FIX-01, сцена просмотра (отчёт)
 
-**Статус: `READY_FOR_REVIEW`** (не ACCEPTED). **Решение:** [D61](../decisions/D61-mass-transfer-visual-approval.md) §2, [handoff](../agents/S05B2_CLAUDE_DEEPSEEK_HANDOFF.md) шаг 1.
+**Статус: `READY_FOR_REVIEW`** (не ACCEPTED). **Решение:** [D61](../decisions/D61-mass-transfer-visual-approval.md) §2, [handoff](../agents/archive/S05B2_CLAUDE_DEEPSEEK_HANDOFF.md) шаг 1.
 **Дата:** 2026-11-06. **Исполнитель:** Claude Code. **Ветка:** `claude/d61-tint-review-fix` (от `review/d61-scale-transfer-color-fix` @ `dc23e04`).
 S05B-2 не запускался, S04 и `main` не менялись, ассеты/кадры Alpha не коммитились (всё изображения — локально в `.scratch`).
 

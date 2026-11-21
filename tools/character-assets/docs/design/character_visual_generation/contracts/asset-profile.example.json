@@ -1,0 +1,100 @@
+{
+  "schema_version": "0.1.0",
+  "example": true,
+  "id": "HUMAN_MALE_V3_MEDIEVAL_TUNIC",
+  "version": "0.1.0",
+  "category": "CLOTHING",
+  "type": "MEDIEVAL_TUNIC",
+  "slot": "CHEST_SLOT",
+  "description": "A block-cut tunic with straight hem, compact neckline and separate left/right sleeves.",
+  "style_lock": {
+    "id": "CHARACTER_ASSET_STYLE_LOCK",
+    "version": "0.1.0",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "geometry_reference": {
+    "id": "HUMAN_MALE_V3_CHEST_PACK",
+    "version": "0.1.0",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "template": {
+    "id": "CLOTHING_GENERATOR",
+    "version": "0.1.0",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "compatible_races": [
+    "HUMAN"
+  ],
+  "compatible_body_forms": [
+    "MALE_V3"
+  ],
+  "compatible_rigs": [
+    {
+      "id": "HUMAN_RIG_V3",
+      "version": "0.1.0",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "geometry": {
+    "fit_policy": "SEGMENTED_RIGID",
+    "sockets": [
+      "CHEST"
+    ],
+    "landmark_ids": [
+      "collar",
+      "hem"
+    ],
+    "symmetry": "REQUIRED",
+    "requires_pose_check": true,
+    "geometry_route": "TEMPLATE"
+  },
+  "material": {
+    "class": "CLOTH",
+    "palette": {
+      "id": "FIBER_NEUTRAL",
+      "version": "0.1.0",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "colorway": "UNDYED"
+  },
+  "required_views": [
+    "FRONT",
+    "BACK",
+    "LEFT",
+    "RIGHT"
+  ],
+  "generate_views": [
+    "FRONT"
+  ],
+  "prompt_terms": [
+    "fitted matte fabric",
+    "clear neckline",
+    "block-cut cuffs"
+  ],
+  "negative_terms": [
+    "duplicated sleeves",
+    "fused body",
+    "skin patches"
+  ],
+  "seed": 20261117,
+  "outputs": {
+    "image": [
+      "rgb_raw",
+      "rgb_worn",
+      "rgba_preview"
+    ],
+    "technical": [
+      "texture_uv",
+      "alpha",
+      "component_id",
+      "material_id",
+      "silhouette",
+      "depth_metric",
+      "camera",
+      "landmarks",
+      "blend",
+      "glb",
+      "validation"
+    ]
+  }
+}

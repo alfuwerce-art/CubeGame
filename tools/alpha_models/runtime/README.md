@@ -53,7 +53,7 @@ python -m unittest tools.alpha_models.tests.test_model_read_scan
 незавершённый single-step доводится до конца (снимается trap-флаг), и перед
 `DebugActiveProcessStop` ставится `DebugSetProcessKillOnExit(FALSE)`.
 
-Перенос анимаций целиком — [ANIMATION_TRANSFER_PLAYBOOK.md](../../../docs/agents/ANIMATION_TRANSFER_PLAYBOOK.md).
+Перенос анимаций целиком — [ANIMATION_TRANSFER_PLAYBOOK.md](../../../docs/agents/archive/ANIMATION_TRANSFER_PLAYBOOK.md).
 
 ## Границы достоверности
 

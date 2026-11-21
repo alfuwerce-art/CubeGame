@@ -2,7 +2,7 @@
 
 **Дата:** 2026-11-05. **Исполнитель:** Claude Code. **Ветка:** `claude/universal-animation-pipeline` (от `deepseek/s05a2-animation-transfer-review` @ `d8bd51c3`).
 **Статус:** `READY_FOR_REVIEW` (не ACCEPTED). S05B — NOT_AUTHORIZED; массовой конвертации не было (2857 `.cub` не обрабатывались; модели читались только для 5 выбранных видов).
-**Документы:** [исследование](UNIVERSAL_ANIMATION_SYSTEM_RESEARCH.md) · [архитектура (DRAFT)](../../architecture/UNIVERSAL_ASSET_ANIMATION_PIPELINE.md) · [методичка DeepSeek](../../agents/UNIVERSAL_TRANSFER_PLAYBOOK.md) · код [`tools/alpha_models/universal`](../../../tools/alpha_models/universal/README.md).
+**Документы:** [исследование](UNIVERSAL_ANIMATION_SYSTEM_RESEARCH.md) · [архитектура (DRAFT)](../../architecture/UNIVERSAL_ASSET_ANIMATION_PIPELINE.md) · [методичка DeepSeek](../../agents/archive/UNIVERSAL_TRANSFER_PLAYBOOK.md) · код [`tools/alpha_models/universal`](../../../tools/alpha_models/universal/README.md).
 
 ## 0. Маркеры
 

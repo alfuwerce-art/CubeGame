@@ -2,7 +2,7 @@
 
 **Дата:** 2026-11-17
 **Решение продюсера:** да — прекращён active target полного переноса Cube World Alpha 2013; CubeGame разрабатывается как самостоятельная игра.
-**Источник:** [ROADMAP_DRAFT.md](../planning/ROADMAP_DRAFT.md), коммит `4e36f1539d787e6a03f85d1f9fc92efcb1b64a79`; задача G0 (`docs/ACTIVE_STAGE.md`).
+**Источник:** [ROADMAP_DRAFT.md](../archive/ROADMAP_DRAFT.md), коммит `4e36f1539d787e6a03f85d1f9fc92efcb1b64a79`; задача G0 (`docs/ACTIVE_STAGE.md`).
 **Статус направления:** `APPROVED`
 **Статус записи в реестре решений:** `APPROVED` — оформлено как [CR-001](../planning/DECISIONS_001-036.md) (2026-11-17), см. §4.
 

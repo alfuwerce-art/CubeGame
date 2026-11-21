@@ -4,7 +4,7 @@
 **Автор решения:** продюсер CubeGame  
 **Статус:** APPROVED (планирование и безопасное разделение работ); **M0 IMPLEMENTATION — NOT_STARTED**  
 **Предшественник:** D65, `stage/d65-full-catalog` — `READY_FOR_REVIEW`, личная визуальная приёмка не завершена.
-**Канонический план:** [M0_FULL_ALPHA_INTEGRATION.md](../planning/M0_FULL_ALPHA_INTEGRATION.md)
+**Канонический план:** [M0_FULL_ALPHA_INTEGRATION.md](../planning/archive/M0_FULL_ALPHA_INTEGRATION.md)
 
 ## Решение
 

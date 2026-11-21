@@ -1,0 +1,280 @@
+{
+  "profile": "MANNEQUIN-GEO-02",
+  "baseline": "mannequin_v3_male.json",
+  "baseline_reference_sha256": "b95e4666a3b3caae543e3ba4663cce8d7f9ad3d026f381cca2231fee04d841c5",
+  "notes": "Revised rest-space block dimensions in metres. Inherit the MANNEQUIN-RIG-01 armature, axes and animation recipes. Faces use +X across the FRONT view and +Z upward.",
+  "bevel_m": 0.0025,
+  "parts": {
+    "head": [
+      {"source_block":"head_skull","x":0,"y":0,"z":1.5125,"sx":0.6164,"sy":0.572,"sz":0.575},
+      {"source_block":"head_chin","x":0,"y":-0.056,"z":1.2026,"sx":0.332,"sy":0.46,"sz":0.06}
+    ],
+    "neck": [
+      {"source_block":"neck","x":0,"y":0,"z":1.1452,"sx":0.266,"sy":0.212,"sz":0.077}
+    ],
+    "torso_upper": [
+      {"source_block":"chest","x":0,"y":0,"z":0.9485,"sx":0.463,"sy":0.326,"sz":0.343}
+    ],
+    "torso_pelvis": [
+      {"source_block":"waist","x":0,"y":0,"z":0.768,"sx":0.284,"sy":0.237,"sz":0.046},
+      {"source_block":"pelvis","x":0,"y":0,"z":0.658,"sx":0.324,"sy":0.278,"sz":0.199},
+      {"source_block":"crotch","x":0,"y":0,"z":0.54,"sx":0.192,"sy":0.211,"sz":0.055}
+    ],
+    "ear_l": [
+      {"source_block":"ear","x":0.358,"y":0.023,"z":1.452,"sx":0.12,"sy":0.151,"sz":0.188}
+    ],
+    "upper_arm_l": [
+      {"source_block":"upper_arm","x":0.3,"y":0,"z":1.021,"sx":0.166,"sy":0.206,"sz":0.209},
+      {"source_block":"elbow","x":0.391,"y":0,"z":1.0192,"sx":0.045,"sy":0.146,"sz":0.134}
+    ],
+    "forearm_l": [
+      {"source_block":"forearm","x":0.469,"y":0,"z":1.02,"sx":0.128,"sy":0.157,"sz":0.155},
+      {"source_block":"wrist","x":0.534,"y":0,"z":1.0192,"sx":0.049,"sy":0.139,"sz":0.118}
+    ],
+    "hand_l": [
+      {"source_block":"hand","x":0.641,"y":0,"z":1.0192,"sx":0.2001,"sy":0.185,"sz":0.197}
+    ],
+    "thigh_l": [
+      {"source_block":"thigh","x":0.135,"y":0.005,"z":0.483,"sx":0.176,"sy":0.192,"sz":0.316},
+      {"source_block":"hip_bridge","x":0.115,"y":0.006,"z":0.684,"sx":0.09,"sy":0.149,"sz":0.132},
+      {"source_block":"knee","x":0.135,"y":0,"z":0.325,"sx":0.112,"sy":0.111,"sz":0.061}
+    ],
+    "shin_l": [
+      {"source_block":"shin","x":0.133,"y":0,"z":0.2225,"sx":0.148,"sy":0.151,"sz":0.189}
+    ],
+    "foot_l": [
+      {"source_block":"foot","x":0.1384,"y":-0.046,"z":0.052,"sx":0.238,"sy":0.258,"sz":0.104},
+      {"source_block":"ankle","x":0.133,"y":0,"z":0.117,"sx":0.128,"sy":0.145,"sz":0.059}
+    ],
+    "ear_r": [
+      {"source_block":"ear","x":-0.358,"y":0.023,"z":1.452,"sx":0.12,"sy":0.151,"sz":0.188}
+    ],
+    "upper_arm_r": [
+      {"source_block":"upper_arm","x":-0.3,"y":0,"z":1.021,"sx":0.166,"sy":0.206,"sz":0.209},
+      {"source_block":"elbow","x":-0.391,"y":0,"z":1.0192,"sx":0.045,"sy":0.146,"sz":0.134}
+    ],
+    "forearm_r": [
+      {"source_block":"forearm","x":-0.469,"y":0,"z":1.02,"sx":0.128,"sy":0.157,"sz":0.155},
+      {"source_block":"wrist","x":-0.534,"y":0,"z":1.0192,"sx":0.049,"sy":0.139,"sz":0.118}
+    ],
+    "hand_r": [
+      {"source_block":"hand","x":-0.641,"y":0,"z":1.0192,"sx":0.2001,"sy":0.185,"sz":0.197}
+    ],
+    "thigh_r": [
+      {"source_block":"thigh","x":-0.135,"y":0.005,"z":0.483,"sx":0.176,"sy":0.192,"sz":0.316},
+      {"source_block":"hip_bridge","x":-0.115,"y":0.006,"z":0.684,"sx":0.09,"sy":0.149,"sz":0.132},
+      {"source_block":"knee","x":-0.135,"y":0,"z":0.325,"sx":0.112,"sy":0.111,"sz":0.061}
+    ],
+    "shin_r": [
+      {"source_block":"shin","x":-0.133,"y":0,"z":0.2225,"sx":0.148,"sy":0.151,"sz":0.189}
+    ],
+    "foot_r": [
+      {"source_block":"foot","x":-0.1384,"y":-0.046,"z":0.052,"sx":0.238,"sy":0.258,"sz":0.104},
+      {"source_block":"ankle","x":-0.133,"y":0,"z":0.117,"sx":0.128,"sy":0.145,"sz":0.059}
+    ]
+  },
+  "sockets": {
+    "FACE": {
+      "group": "FACE",
+      "bone": "head",
+      "part": "head",
+      "block": "head_skull",
+      "at": [0, -0.5, -0.09],
+      "orientation": "front",
+      "fit": "uv_overlay",
+      "covers": [],
+      "face_size_m": [0.488, 0.3],
+      "offset_m": 0.0015
+    },
+    "SCALP": {
+      "group": "SCALP",
+      "bone": "head",
+      "part": "head",
+      "block": "head_skull",
+      "at": [0, 0, 0.5],
+      "orientation": "top",
+      "fit": "rigid_socket",
+      "covers": []
+    },
+    "BEARD": {
+      "group": "BEARD",
+      "bone": "head",
+      "part": "head",
+      "block": "head_chin",
+      "at": [0, -0.5, 0.17],
+      "orientation": "front",
+      "fit": "rigid_socket",
+      "covers": []
+    },
+    "CHEST": {
+      "group": "CHEST",
+      "bone": "spine_02",
+      "part": "torso_upper",
+      "block": "chest",
+      "at": [0, -0.5, 0.05],
+      "orientation": "front",
+      "fit": "segmented_rigid",
+      "covers": ["torso_upper", "neck"]
+    },
+    "WAIST": {
+      "group": "WAIST",
+      "bone": "pelvis",
+      "part": "torso_pelvis",
+      "block": "pelvis",
+      "at": [0, -0.5, 0.3],
+      "orientation": "front",
+      "fit": "segmented_rigid",
+      "covers": ["torso_pelvis"]
+    },
+    "BACK": {
+      "group": "BACK",
+      "bone": "spine_02",
+      "part": "torso_upper",
+      "block": "chest",
+      "at": [0, 0.5, 0.28],
+      "orientation": "back",
+      "fit": "rigid_socket",
+      "covers": []
+    },
+    "EAR_L": {
+      "group": "EAR",
+      "bone": "head",
+      "part": "ear_l",
+      "block": "ear",
+      "at": [0.5, 0, 0],
+      "orientation": "left",
+      "fit": "rigid_socket",
+      "covers": ["ear_l"]
+    },
+    "SHOULDER_L": {
+      "group": "SHOULDERS",
+      "bone": "upperarm_l",
+      "part": "upper_arm_l",
+      "block": "upper_arm",
+      "at": [0, 0, 0.5],
+      "orientation": "top",
+      "fit": "segmented_rigid",
+      "covers": ["upper_arm_l"]
+    },
+    "ARM_L": {
+      "group": "ARMS",
+      "bone": "lowerarm_l",
+      "part": "forearm_l",
+      "block": "forearm",
+      "at": [0, -0.5, 0],
+      "orientation": "front",
+      "fit": "segmented_rigid",
+      "covers": ["forearm_l", "hand_l"]
+    },
+    "LEG_L": {
+      "group": "LEGS",
+      "bone": "thigh_l",
+      "part": "thigh_l",
+      "block": "thigh",
+      "at": [0, -0.5, 0],
+      "orientation": "front",
+      "fit": "segmented_rigid",
+      "covers": ["thigh_l"]
+    },
+    "SHIN_L": {
+      "group": "LEGS",
+      "bone": "calf_l",
+      "part": "shin_l",
+      "block": "shin",
+      "at": [0, -0.5, 0],
+      "orientation": "front",
+      "fit": "segmented_rigid",
+      "covers": ["shin_l"]
+    },
+    "FOOT_L": {
+      "group": "FEET",
+      "bone": "foot_l",
+      "part": "foot_l",
+      "block": "foot",
+      "at": [0, -0.5, 0],
+      "orientation": "front",
+      "fit": "segmented_rigid",
+      "covers": ["foot_l"]
+    },
+    "OFF_HAND": {
+      "group": "OFF_HAND",
+      "bone": "hand_l",
+      "part": "hand_l",
+      "block": "hand",
+      "at": [0, 0, -0.31],
+      "orientation": "grip",
+      "fit": "rigid_socket",
+      "covers": []
+    },
+    "EAR_R": {
+      "group": "EAR",
+      "bone": "head",
+      "part": "ear_r",
+      "block": "ear",
+      "at": [-0.5, 0, 0],
+      "orientation": "right",
+      "fit": "rigid_socket",
+      "covers": ["ear_r"]
+    },
+    "SHOULDER_R": {
+      "group": "SHOULDERS",
+      "bone": "upperarm_r",
+      "part": "upper_arm_r",
+      "block": "upper_arm",
+      "at": [0, 0, 0.5],
+      "orientation": "top",
+      "fit": "segmented_rigid",
+      "covers": ["upper_arm_r"]
+    },
+    "ARM_R": {
+      "group": "ARMS",
+      "bone": "lowerarm_r",
+      "part": "forearm_r",
+      "block": "forearm",
+      "at": [0, -0.5, 0],
+      "orientation": "front",
+      "fit": "segmented_rigid",
+      "covers": ["forearm_r", "hand_r"]
+    },
+    "LEG_R": {
+      "group": "LEGS",
+      "bone": "thigh_r",
+      "part": "thigh_r",
+      "block": "thigh",
+      "at": [0, -0.5, 0],
+      "orientation": "front",
+      "fit": "segmented_rigid",
+      "covers": ["thigh_r"]
+    },
+    "SHIN_R": {
+      "group": "LEGS",
+      "bone": "calf_r",
+      "part": "shin_r",
+      "block": "shin",
+      "at": [0, -0.5, 0],
+      "orientation": "front",
+      "fit": "segmented_rigid",
+      "covers": ["shin_r"]
+    },
+    "FOOT_R": {
+      "group": "FEET",
+      "bone": "foot_r",
+      "part": "foot_r",
+      "block": "foot",
+      "at": [0, -0.5, 0],
+      "orientation": "front",
+      "fit": "segmented_rigid",
+      "covers": ["foot_r"]
+    },
+    "MAIN_HAND": {
+      "group": "MAIN_HAND",
+      "bone": "hand_r",
+      "part": "hand_r",
+      "block": "hand",
+      "at": [0, 0, -0.31],
+      "orientation": "grip",
+      "fit": "rigid_socket",
+      "covers": []
+    }
+  }
+}

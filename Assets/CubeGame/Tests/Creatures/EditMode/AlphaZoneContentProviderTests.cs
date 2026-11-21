@@ -100,6 +100,9 @@ namespace CubeGame.Tests.Creatures.EditMode
         public void SettingsFromLibrarySplitPassiveObjectsFromCreatures()
         {
             var library = CubeGame.AlphaModels.AlphaActorLibrary.Shared;
+            if (library.State == CubeGame.AlphaModels.AlphaContentState.NotConfigured)
+                Assert.Ignore("local compatibility content is required: " + library.Diagnosis);
+
             var settings = ContentPlanSettings.FromLibrary(library);
             Assert.IsNotEmpty(settings.StagedObjectKinds, "staged passive objects feed the W-18 selection");
             Assert.IsNotEmpty(settings.CreatureKinds, "staged combat kinds feed the creature slots");

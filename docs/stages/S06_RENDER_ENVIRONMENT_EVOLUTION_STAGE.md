@@ -809,7 +809,7 @@ World/game state требуется, когда изменение должно 
 
 # 26. Связь с M1 Character / Creature Factory
 
-S06 и [M1 Character / Creature Factory](M1_MODEL_ANIMATION_EVOLUTION_STAGE.md) являются соседними системами, а не одной системой.
+S06 и [M1 Character / Creature Factory](archive/M1_MODEL_ANIMATION_EVOLUTION_STAGE.md) являются соседними системами, а не одной системой.
 
 M1 отвечает за:
 
@@ -1078,8 +1078,8 @@ SPRING / SUMMER / AUTUMN / WINTER
 
 # 32. Связанные документы
 
-- [ROADMAP_DRAFT](../planning/ROADMAP_DRAFT.md)
-- [M1 — модели, риги и анимации](M1_MODEL_ANIMATION_EVOLUTION_STAGE.md)
+- [ROADMAP_DRAFT](../archive/ROADMAP_DRAFT.md)
+- [M1 — модели, риги и анимации](archive/M1_MODEL_ANIMATION_EVOLUTION_STAGE.md)
 - [ACTIVE_STAGE](../ACTIVE_STAGE.md)
 - [PROJECT_MEMORY](../../PROJECT_MEMORY.md)
 

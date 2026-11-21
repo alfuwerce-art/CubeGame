@@ -5,7 +5,7 @@
 **Базовый коммит:** `claude/d61-tint-review-fix` @ `31799a90d399bc31a99af89286beeeab86d80e1d`.
 **Исполнитель:** DeepSeek Harness; Claude Code — только отдельные сложные блокеры/архитектурное ревью.
 **ТЗ:** [S05B2_DEEPSEEK_BATCH_SPEC.md](../stages/S05B2_DEEPSEEK_BATCH_SPEC.md).
-**Передача:** [S05B2_CLAUDE_DEEPSEEK_HANDOFF.md](../agents/S05B2_CLAUDE_DEEPSEEK_HANDOFF.md).
+**Передача:** [S05B2_CLAUDE_DEEPSEEK_HANDOFF.md](../agents/archive/S05B2_CLAUDE_DEEPSEEK_HANDOFF.md).
 **Ветка решения:** `review/d62-s05b2-deepseek-handoff` (основана на принятых изменениях Claude, не `main`).
 
 ## 1. Принято по D61

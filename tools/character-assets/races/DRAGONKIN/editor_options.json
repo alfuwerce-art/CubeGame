@@ -1,0 +1,70 @@
+{
+  "race_id": "DRAGONKIN",
+  "alpha": {
+    "binding": "COMPARISON_ONLY",
+    "race": "Lizard",
+    "race_index": 5,
+    "fields": [
+      "Race",
+      "Gender",
+      "Class",
+      "Face",
+      "Haircut",
+      "Hair color"
+    ],
+    "options_source": "../../docs/tasks/COMFY-STYLE-08_ALPHA_MATRIX.json",
+    "variants": {
+      "Male": {
+        "style_id": 7,
+        "face_indices": [
+          0,
+          1
+        ],
+        "haircut_indices": [
+          0,
+          5
+        ]
+      },
+      "Female": {
+        "style_id": 8,
+        "face_indices": [
+          0,
+          4
+        ],
+        "haircut_indices": [
+          0,
+          5
+        ]
+      }
+    },
+    "class_filter": "No class branch in the face/hair lookup.",
+    "provenance": "ALPHA_DECOMPILED + ASSET_CONFIRMED",
+    "detail": "Lizard/Lizardman — сравнительный источник. Тождество Dragonkin остаётся UNKNOWN."
+  },
+  "owner_screenshot": {
+    "status": "SCREENSHOT_OBSERVED",
+    "selected": "Dragonkin / Male / Warrior / Face 1 / Crest 1",
+    "color_control": "Scale color"
+  },
+  "future_extensions": {
+    "status": "CUBEGAME_CONTRACT / PROPOSAL",
+    "slots": [
+      "Head",
+      "Face",
+      "Eyes",
+      "Torso",
+      "Arms",
+      "Hands",
+      "Legs",
+      "Feet",
+      "Equipment",
+      "Ears",
+      "Horns",
+      "Crest",
+      "Tail",
+      "Jaw"
+    ],
+    "independent_eye_colors": true,
+    "racial_effects_proposed": false
+  }
+}

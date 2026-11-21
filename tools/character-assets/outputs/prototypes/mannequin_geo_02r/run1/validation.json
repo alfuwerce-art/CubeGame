@@ -1,0 +1,2104 @@
+{
+  "artifacts": {
+    "renders": "outputs/prototypes/mannequin_geo_02r/run1/renders",
+    "sha256": {
+      "blend": "46e95ac4d7f56efe79eaf16b872d3c801c6257a520b6d4b8f225a3d3313f4b7c",
+      "glb": "af0f9c07ac889d5dee56a6da93b71b44b9822a9918f64af6afb035287c3817e5"
+    }
+  },
+  "blender": "5.2.4 LTS",
+  "issues": [],
+  "numbers": {
+    "bbox_max": [
+      0.742,
+      0.286,
+      1.8
+    ],
+    "bbox_min": [
+      -0.742,
+      -0.286,
+      0.0
+    ],
+    "blend_finger_qa": {
+      "collisions": [],
+      "contacts_mm": {
+        "attack_grip:15:r": {
+          "index": 1.4,
+          "middle": 1.32,
+          "pinky": 1.32,
+          "ring": 1.41,
+          "thumb": 0.85
+        },
+        "attack_grip:1:r": {
+          "index": 1.4,
+          "middle": 1.32,
+          "pinky": 1.32,
+          "ring": 1.41,
+          "thumb": 0.85
+        },
+        "attack_grip:9:r": {
+          "index": 1.4,
+          "middle": 1.32,
+          "pinky": 1.32,
+          "ring": 1.41,
+          "thumb": 0.85
+        },
+        "grip_test:19:l": {
+          "index": 1.4,
+          "middle": 1.32,
+          "pinky": 1.32,
+          "ring": 1.41,
+          "thumb": 0.85
+        },
+        "grip_test:19:r": {
+          "index": 1.4,
+          "middle": 1.32,
+          "pinky": 1.32,
+          "ring": 1.41,
+          "thumb": 0.85
+        }
+      },
+      "grip_errors": [],
+      "max_seam_m": 0.0
+    },
+    "blend_walk_subframes": {
+      "max_z_m": 0.0006392933428287506,
+      "min_z_m": 0.0002814270555973053,
+      "samples": 240
+    },
+    "bones": 40,
+    "clip_sweep": {
+      "foot_min_z_range_m": [
+        0.0,
+        0.00032005750108510256
+      ],
+      "frames": 57,
+      "worst_collision_over_allowance_m": [
+        0.0,
+        "",
+        0,
+        ""
+      ],
+      "worst_joint_gap_m": [
+        -0.011099980198428939,
+        "attack",
+        9,
+        "neck|head"
+      ]
+    },
+    "dimensions_m": [
+      1.484,
+      0.572,
+      1.8
+    ],
+    "glb_finger_qa": {
+      "collisions": [],
+      "contacts_mm": {
+        "attack_grip:15:r": {
+          "index": 1.4,
+          "middle": 1.32,
+          "pinky": 1.32,
+          "ring": 1.41,
+          "thumb": 0.85
+        },
+        "attack_grip:1:r": {
+          "index": 1.4,
+          "middle": 1.32,
+          "pinky": 1.32,
+          "ring": 1.41,
+          "thumb": 0.85
+        },
+        "attack_grip:9:r": {
+          "index": 1.4,
+          "middle": 1.32,
+          "pinky": 1.32,
+          "ring": 1.41,
+          "thumb": 0.85
+        },
+        "grip_test:19:l": {
+          "index": 1.4,
+          "middle": 1.32,
+          "pinky": 1.32,
+          "ring": 1.41,
+          "thumb": 0.85
+        },
+        "grip_test:19:r": {
+          "index": 1.4,
+          "middle": 1.32,
+          "pinky": 1.32,
+          "ring": 1.41,
+          "thumb": 0.85
+        }
+      },
+      "grip_errors": [],
+      "max_seam_m": 0.0
+    },
+    "glb_walk_subframes": {
+      "max_z_m": 0.0006325356662273407,
+      "min_z_m": 0.00027889013290405273,
+      "samples": 240
+    },
+    "object_names": [
+      "ear_l",
+      "ear_r",
+      "foot_l",
+      "foot_r",
+      "forearm_l",
+      "forearm_r",
+      "hand_l",
+      "hand_r",
+      "head",
+      "index_01_l",
+      "index_01_r",
+      "index_02_l",
+      "index_02_r",
+      "middle_01_l",
+      "middle_01_r",
+      "middle_02_l",
+      "middle_02_r",
+      "neck",
+      "pinky_01_l",
+      "pinky_01_r",
+      "pinky_02_l",
+      "pinky_02_r",
+      "ring_01_l",
+      "ring_01_r",
+      "ring_02_l",
+      "ring_02_r",
+      "shin_l",
+      "shin_r",
+      "thigh_l",
+      "thigh_r",
+      "thumb_01_l",
+      "thumb_01_r",
+      "thumb_02_l",
+      "thumb_02_r",
+      "torso_pelvis",
+      "torso_upper",
+      "upper_arm_l",
+      "upper_arm_r"
+    ],
+    "objects": 38,
+    "pair_classes": {
+      "checked_collision_pairs": 115,
+      "designed_joint_pairs": 30,
+      "tolerated_pairs": 8
+    },
+    "polygons": 4032,
+    "pose_semantics": {
+      "attack_lunge_foot_spread": true,
+      "attack_strike_hand_forward": true,
+      "attack_swing_arc": true,
+      "attack_windup_hand_back": true,
+      "idle_arms_down": true,
+      "idle_body_upright": true,
+      "idle_feet_on_ground": true,
+      "idle_hands_beside_body": true,
+      "walk_contact_contralateral_arms": true,
+      "walk_contact_grounded": true,
+      "walk_contact_left_forward": true,
+      "walk_pass_feet_close": true,
+      "walk_pass_swing_foot_lifted": true
+    },
+    "render_files": [
+      "ATTACK.png",
+      "ATTACK_GRIP.png",
+      "ATTACK_RECOVER.png",
+      "ATTACK_WINDUP.png",
+      "BACK.png",
+      "FEET.png",
+      "FRONT.png",
+      "HAND_FIST.png",
+      "HAND_GRIP.png",
+      "HAND_NEUTRAL.png",
+      "HAND_OPEN.png",
+      "HAND_RELEASE.png",
+      "HEAD_EAR.png",
+      "HEAD_FRONT.png",
+      "IDLE.png",
+      "LEFT.png",
+      "RIGHT.png",
+      "THREE_QUARTER.png",
+      "WALK.png",
+      "WALK_PASS.png",
+      "tpose_front_silhouette.png"
+    ],
+    "render_ok": true,
+    "render_seconds": {
+      "ATTACK.png": 15.56,
+      "ATTACK_GRIP.png": 15.89,
+      "ATTACK_RECOVER.png": 15.56,
+      "ATTACK_WINDUP.png": 15.37,
+      "BACK.png": 8.53,
+      "FEET.png": 12.43,
+      "FRONT.png": 8.84,
+      "HAND_FIST.png": 9.51,
+      "HAND_GRIP.png": 9.95,
+      "HAND_NEUTRAL.png": 10.2,
+      "HAND_OPEN.png": 10.83,
+      "HAND_RELEASE.png": 10.35,
+      "HEAD_EAR.png": 12.09,
+      "HEAD_FRONT.png": 11.1,
+      "IDLE.png": 15.49,
+      "LEFT.png": 7.71,
+      "RIGHT.png": 7.59,
+      "THREE_QUARTER.png": 15.59,
+      "WALK.png": 15.48,
+      "WALK_PASS.png": 15.62,
+      "tpose_front_silhouette.png": 7.77
+    },
+    "roundtrip": {
+      "actions": [
+        "attack",
+        "attack_grip",
+        "grip_test",
+        "idle",
+        "walk"
+      ],
+      "bones": 40,
+      "parts": 38,
+      "weight_bad": []
+    },
+    "vertices": 3972
+  },
+  "poses": {
+    "ATTACK_RECOVER": {
+      "action": "attack",
+      "centroids": {
+        "ear_l": [
+          0.3536,
+          0.001,
+          1.4859
+        ],
+        "ear_r": [
+          -0.354,
+          -0.0732,
+          1.4824
+        ],
+        "foot_l": [
+          0.1382,
+          -0.1173,
+          0.0949
+        ],
+        "foot_r": [
+          -0.1386,
+          0.1303,
+          0.0975
+        ],
+        "forearm_l": [
+          0.3513,
+          -0.0503,
+          0.8351
+        ],
+        "forearm_r": [
+          -0.3506,
+          -0.1184,
+          0.8395
+        ],
+        "hand_l": [
+          0.3927,
+          -0.1111,
+          0.7672
+        ],
+        "hand_r": [
+          -0.389,
+          -0.1845,
+          0.7749
+        ],
+        "head": [
+          -0.003,
+          -0.0065,
+          1.4171
+        ],
+        "index_01_l": [
+          0.4124,
+          -0.1987,
+          0.7449
+        ],
+        "index_01_r": [
+          -0.4025,
+          -0.2741,
+          0.7562
+        ],
+        "index_02_l": [
+          0.4308,
+          -0.2256,
+          0.7149
+        ],
+        "index_02_r": [
+          -0.4196,
+          -0.3033,
+          0.7277
+        ],
+        "middle_01_l": [
+          0.4235,
+          -0.1728,
+          0.724
+        ],
+        "middle_01_r": [
+          -0.4161,
+          -0.2498,
+          0.7347
+        ],
+        "middle_02_l": [
+          0.4448,
+          -0.2039,
+          0.6893
+        ],
+        "middle_02_r": [
+          -0.4359,
+          -0.2836,
+          0.7018
+        ],
+        "neck": [
+          0.0012,
+          -0.0341,
+          1.1621
+        ],
+        "pinky_01_l": [
+          0.4394,
+          -0.1153,
+          0.6926
+        ],
+        "pinky_01_r": [
+          -0.4372,
+          -0.1949,
+          0.7019
+        ],
+        "pinky_02_l": [
+          0.4552,
+          -0.1382,
+          0.6671
+        ],
+        "pinky_02_r": [
+          -0.4518,
+          -0.2198,
+          0.6776
+        ],
+        "ring_01_l": [
+          0.4328,
+          -0.143,
+          0.7059
+        ],
+        "ring_01_r": [
+          -0.4281,
+          -0.2215,
+          0.716
+        ],
+        "ring_02_l": [
+          0.4523,
+          -0.1713,
+          0.6743
+        ],
+        "ring_02_r": [
+          -0.4462,
+          -0.2523,
+          0.6859
+        ],
+        "shin_l": [
+          0.1323,
+          -0.0911,
+          0.2531
+        ],
+        "shin_r": [
+          -0.1328,
+          0.1066,
+          0.2548
+        ],
+        "thigh_l": [
+          0.1291,
+          -0.0572,
+          0.4947
+        ],
+        "thigh_r": [
+          -0.1287,
+          0.0463,
+          0.4924
+        ],
+        "thumb_01_l": [
+          0.3568,
+          -0.1875,
+          0.7979
+        ],
+        "thumb_01_r": [
+          -0.3466,
+          -0.2568,
+          0.8072
+        ],
+        "thumb_02_l": [
+          0.352,
+          -0.2274,
+          0.7778
+        ],
+        "thumb_02_r": [
+          -0.3393,
+          -0.2969,
+          0.7883
+        ],
+        "torso_pelvis": [
+          -0.0001,
+          0.0019,
+          0.6854
+        ],
+        "torso_upper": [
+          0.0006,
+          -0.017,
+          0.9661
+        ],
+        "upper_arm_l": [
+          0.2784,
+          0.0004,
+          0.958
+        ],
+        "upper_arm_r": [
+          -0.2788,
+          -0.0495,
+          0.9582
+        ]
+      },
+      "collisions_mm": {},
+      "frame": 13,
+      "joint_insertion_mm": {
+        "ear_l|head": 10.2,
+        "ear_r|head": 10.2,
+        "foot_l|shin_l": 21.04,
+        "foot_r|shin_r": 26.08,
+        "forearm_l|hand_l": 23.0,
+        "forearm_l|upper_arm_l": 53.76,
+        "forearm_r|hand_r": 23.0,
+        "forearm_r|upper_arm_r": 49.11,
+        "head|neck": 14.79,
+        "neck|torso_upper": 13.3,
+        "shin_l|thigh_l": 35.23,
+        "shin_r|thigh_r": 32.1,
+        "thigh_l|torso_pelvis": 106.72,
+        "thigh_r|torso_pelvis": 101.02,
+        "torso_pelvis|torso_upper": 25.4,
+        "torso_upper|upper_arm_l": 96.07,
+        "torso_upper|upper_arm_r": 94.73
+      },
+      "joint_separation_mm": {
+        "forearm_l|hand_l": -23.0,
+        "forearm_r|hand_r": -23.0,
+        "neck|head": -14.79,
+        "shin_l|foot_l": -21.04,
+        "shin_r|foot_r": -26.08,
+        "thigh_l|shin_l": -35.23,
+        "thigh_r|shin_r": -32.1,
+        "torso_pelvis|thigh_l": -106.72,
+        "torso_pelvis|thigh_r": -101.02,
+        "torso_pelvis|torso_upper": -25.4,
+        "torso_upper|neck": -13.3,
+        "torso_upper|upper_arm_l": -96.07,
+        "torso_upper|upper_arm_r": -94.73,
+        "upper_arm_l|forearm_l": -53.76,
+        "upper_arm_r|forearm_r": -49.11
+      },
+      "max_collision_mm": 0.0,
+      "min_z_m": 0.0003,
+      "rigid_max_deviation_m": 1.7e-07,
+      "tolerated_contact_mm": {
+        "forearm_l|torso_upper": 5.63
+      }
+    },
+    "ATTACK_STRIKE": {
+      "action": "attack",
+      "centroids": {
+        "ear_l": [
+          0.335,
+          0.0873,
+          1.4579
+        ],
+        "ear_r": [
+          -0.2934,
+          -0.2459,
+          1.4391
+        ],
+        "foot_l": [
+          0.1779,
+          -0.1926,
+          0.0934
+        ],
+        "foot_r": [
+          -0.1871,
+          0.2356,
+          0.1144
+        ],
+        "forearm_l": [
+          0.2789,
+          0.2487,
+          0.824
+        ],
+        "forearm_r": [
+          -0.1186,
+          -0.4048,
+          0.8743
+        ],
+        "hand_l": [
+          0.3337,
+          0.2852,
+          0.7486
+        ],
+        "hand_r": [
+          -0.0748,
+          -0.4834,
+          0.8304
+        ],
+        "head": [
+          0.0058,
+          -0.0475,
+          1.3841
+        ],
+        "index_01_l": [
+          0.413,
+          0.2783,
+          0.7013
+        ],
+        "index_01_r": [
+          0.0055,
+          -0.5236,
+          0.8081
+        ],
+        "index_02_l": [
+          0.4373,
+          0.2945,
+          0.6681
+        ],
+        "index_02_r": [
+          0.0249,
+          -0.5584,
+          0.7889
+        ],
+        "middle_01_l": [
+          0.3905,
+          0.304,
+          0.6934
+        ],
+        "middle_01_r": [
+          -0.0246,
+          -0.5403,
+          0.8011
+        ],
+        "middle_02_l": [
+          0.4187,
+          0.3228,
+          0.655
+        ],
+        "middle_02_r": [
+          -0.0022,
+          -0.5806,
+          0.7788
+        ],
+        "neck": [
+          0.0153,
+          -0.0509,
+          1.1276
+        ],
+        "pinky_01_l": [
+          0.3404,
+          0.3487,
+          0.6879
+        ],
+        "pinky_01_r": [
+          -0.0878,
+          -0.5622,
+          0.7932
+        ],
+        "pinky_02_l": [
+          0.3611,
+          0.3626,
+          0.6596
+        ],
+        "pinky_02_r": [
+          -0.0713,
+          -0.5919,
+          0.7767
+        ],
+        "ring_01_l": [
+          0.3645,
+          0.3287,
+          0.6891
+        ],
+        "ring_01_r": [
+          -0.0578,
+          -0.5534,
+          0.7961
+        ],
+        "ring_02_l": [
+          0.3902,
+          0.3458,
+          0.654
+        ],
+        "ring_02_r": [
+          -0.0374,
+          -0.5902,
+          0.7757
+        ],
+        "shin_l": [
+          0.1652,
+          -0.1566,
+          0.2504
+        ],
+        "shin_r": [
+          -0.1696,
+          0.1775,
+          0.2582
+        ],
+        "thigh_l": [
+          0.1482,
+          -0.0862,
+          0.481
+        ],
+        "thigh_r": [
+          -0.1442,
+          0.0676,
+          0.4729
+        ],
+        "thumb_01_l": [
+          0.3913,
+          0.2164,
+          0.743
+        ],
+        "thumb_01_r": [
+          0.0073,
+          -0.4476,
+          0.824
+        ],
+        "thumb_02_l": [
+          0.419,
+          0.2045,
+          0.7097
+        ],
+        "thumb_02_r": [
+          0.0422,
+          -0.4595,
+          0.7982
+        ],
+        "torso_pelvis": [
+          -0.0004,
+          0.0019,
+          0.6531
+        ],
+        "torso_upper": [
+          0.0074,
+          -0.025,
+          0.9328
+        ],
+        "upper_arm_l": [
+          0.2087,
+          0.1743,
+          0.9467
+        ],
+        "upper_arm_r": [
+          -0.1603,
+          -0.2705,
+          0.9473
+        ]
+      },
+      "collisions_mm": {},
+      "frame": 9,
+      "joint_insertion_mm": {
+        "ear_l|head": 10.2,
+        "ear_r|head": 10.2,
+        "foot_l|shin_l": 20.45,
+        "foot_r|shin_r": 35.89,
+        "forearm_l|hand_l": 23.0,
+        "forearm_l|upper_arm_l": 36.29,
+        "forearm_r|hand_r": 23.0,
+        "forearm_r|upper_arm_r": 40.96,
+        "head|neck": 11.1,
+        "neck|torso_upper": 13.3,
+        "shin_l|thigh_l": 39.49,
+        "shin_r|thigh_r": 38.13,
+        "thigh_l|torso_pelvis": 109.5,
+        "thigh_r|torso_pelvis": 109.5,
+        "torso_pelvis|torso_upper": 32.74,
+        "torso_upper|upper_arm_l": 115.73,
+        "torso_upper|upper_arm_r": 110.16
+      },
+      "joint_separation_mm": {
+        "forearm_l|hand_l": -23.0,
+        "forearm_r|hand_r": -23.0,
+        "neck|head": -11.1,
+        "shin_l|foot_l": -20.45,
+        "shin_r|foot_r": -35.89,
+        "thigh_l|shin_l": -39.49,
+        "thigh_r|shin_r": -38.13,
+        "torso_pelvis|thigh_l": -109.5,
+        "torso_pelvis|thigh_r": -109.5,
+        "torso_pelvis|torso_upper": -32.74,
+        "torso_upper|neck": -13.3,
+        "torso_upper|upper_arm_l": -115.73,
+        "torso_upper|upper_arm_r": -110.16,
+        "upper_arm_l|forearm_l": -36.29,
+        "upper_arm_r|forearm_r": -40.96
+      },
+      "max_collision_mm": 0.0,
+      "min_z_m": 0.0003,
+      "rigid_max_deviation_m": 1.9e-07,
+      "tolerated_contact_mm": {
+        "thigh_l|torso_upper": 11.49
+      }
+    },
+    "ATTACK_WINDUP": {
+      "action": "attack",
+      "centroids": {
+        "ear_l": [
+          0.3366,
+          -0.1591,
+          1.4713
+        ],
+        "ear_r": [
+          -0.3321,
+          0.0833,
+          1.4894
+        ],
+        "foot_l": [
+          0.1138,
+          -0.1532,
+          0.0949
+        ],
+        "foot_r": [
+          -0.1087,
+          0.1898,
+          0.1047
+        ],
+        "forearm_l": [
+          0.3205,
+          -0.2226,
+          0.8284
+        ],
+        "forearm_r": [
+          -0.2158,
+          0.3345,
+          1.0616
+        ],
+        "hand_l": [
+          0.3485,
+          -0.2773,
+          0.7494
+        ],
+        "hand_r": [
+          -0.1736,
+          0.4248,
+          1.0696
+        ],
+        "head": [
+          0.0107,
+          -0.0095,
+          1.4133
+        ],
+        "index_01_l": [
+          0.332,
+          -0.3534,
+          0.6994
+        ],
+        "index_01_r": [
+          -0.1885,
+          0.5156,
+          1.0801
+        ],
+        "index_02_l": [
+          0.3444,
+          -0.3777,
+          0.6646
+        ],
+        "index_02_r": [
+          -0.1698,
+          0.5555,
+          1.0838
+        ],
+        "middle_01_l": [
+          0.3595,
+          -0.3331,
+          0.6913
+        ],
+        "middle_01_r": [
+          -0.1555,
+          0.5035,
+          1.0794
+        ],
+        "middle_02_l": [
+          0.3739,
+          -0.3613,
+          0.6509
+        ],
+        "middle_02_r": [
+          -0.1338,
+          0.5498,
+          1.0837
+        ],
+        "neck": [
+          -0.0048,
+          -0.0338,
+          1.1584
+        ],
+        "pinky_01_l": [
+          0.4086,
+          -0.2873,
+          0.6858
+        ],
+        "pinky_01_r": [
+          -0.0977,
+          0.469,
+          1.0771
+        ],
+        "pinky_02_l": [
+          0.4192,
+          -0.3081,
+          0.6561
+        ],
+        "pinky_02_r": [
+          -0.0818,
+          0.503,
+          1.0803
+        ],
+        "ring_01_l": [
+          0.3864,
+          -0.3095,
+          0.6869
+        ],
+        "ring_01_r": [
+          -0.1237,
+          0.4865,
+          1.0783
+        ],
+        "ring_02_l": [
+          0.3995,
+          -0.3351,
+          0.6501
+        ],
+        "ring_02_r": [
+          -0.104,
+          0.5287,
+          1.0822
+        ],
+        "shin_l": [
+          0.1125,
+          -0.1264,
+          0.2531
+        ],
+        "shin_r": [
+          -0.1089,
+          0.152,
+          0.2586
+        ],
+        "thigh_l": [
+          0.1159,
+          -0.0879,
+          0.4933
+        ],
+        "thigh_r": [
+          -0.1175,
+          0.0771,
+          0.4906
+        ],
+        "thumb_01_l": [
+          0.2743,
+          -0.3277,
+          0.7446
+        ],
+        "thumb_01_r": [
+          -0.248,
+          0.4728,
+          1.0545
+        ],
+        "thumb_02_l": [
+          0.2583,
+          -0.3526,
+          0.7107
+        ],
+        "thumb_02_r": [
+          -0.2529,
+          0.5158,
+          1.0425
+        ],
+        "torso_pelvis": [
+          0.0003,
+          0.0019,
+          0.6817
+        ],
+        "torso_upper": [
+          -0.0024,
+          -0.0168,
+          0.9624
+        ],
+        "upper_arm_l": [
+          0.2512,
+          -0.1607,
+          0.9547
+        ],
+        "upper_arm_r": [
+          -0.2312,
+          0.1857,
+          1.049
+        ]
+      },
+      "collisions_mm": {},
+      "frame": 5,
+      "joint_insertion_mm": {
+        "ear_l|head": 10.2,
+        "ear_r|head": 10.2,
+        "foot_l|shin_l": 21.04,
+        "foot_r|shin_r": 28.57,
+        "forearm_l|hand_l": 23.0,
+        "forearm_l|upper_arm_l": 45.24,
+        "forearm_r|hand_r": 23.0,
+        "forearm_r|upper_arm_r": 55.47,
+        "head|neck": 14.79,
+        "neck|torso_upper": 13.3,
+        "shin_l|thigh_l": 36.71,
+        "shin_r|thigh_r": 35.23,
+        "thigh_l|torso_pelvis": 109.5,
+        "thigh_r|torso_pelvis": 105.03,
+        "torso_pelvis|torso_upper": 25.4,
+        "torso_upper|upper_arm_l": 88.19,
+        "torso_upper|upper_arm_r": 75.41
+      },
+      "joint_separation_mm": {
+        "forearm_l|hand_l": -23.0,
+        "forearm_r|hand_r": -23.0,
+        "neck|head": -14.79,
+        "shin_l|foot_l": -21.04,
+        "shin_r|foot_r": -28.57,
+        "thigh_l|shin_l": -36.71,
+        "thigh_r|shin_r": -35.23,
+        "torso_pelvis|thigh_l": -109.5,
+        "torso_pelvis|thigh_r": -105.03,
+        "torso_pelvis|torso_upper": -25.4,
+        "torso_upper|neck": -13.3,
+        "torso_upper|upper_arm_l": -88.19,
+        "torso_upper|upper_arm_r": -75.41,
+        "upper_arm_l|forearm_l": -45.24,
+        "upper_arm_r|forearm_r": -55.47
+      },
+      "max_collision_mm": 0.0,
+      "min_z_m": 0.0003,
+      "rigid_max_deviation_m": 1.8e-07,
+      "tolerated_contact_mm": {}
+    },
+    "IDLE": {
+      "action": "idle",
+      "centroids": {
+        "ear_l": [
+          0.3558,
+          -0.0159,
+          1.4663
+        ],
+        "ear_r": [
+          -0.3558,
+          -0.0159,
+          1.4663
+        ],
+        "foot_l": [
+          0.134,
+          -0.0408,
+          0.0645
+        ],
+        "foot_r": [
+          -0.134,
+          -0.0408,
+          0.0645
+        ],
+        "forearm_l": [
+          0.3258,
+          -0.0512,
+          0.7876
+        ],
+        "forearm_r": [
+          -0.3258,
+          -0.0512,
+          0.7876
+        ],
+        "hand_l": [
+          0.3615,
+          -0.0834,
+          0.6998
+        ],
+        "hand_r": [
+          -0.3615,
+          -0.0834,
+          0.6998
+        ],
+        "head": [
+          -0.0,
+          0.0126,
+          1.3987
+        ],
+        "index_01_l": [
+          0.3863,
+          -0.1572,
+          0.6498
+        ],
+        "index_01_r": [
+          -0.3863,
+          -0.1572,
+          0.6498
+        ],
+        "index_02_l": [
+          0.4022,
+          -0.1715,
+          0.611
+        ],
+        "index_02_r": [
+          -0.4022,
+          -0.1715,
+          0.611
+        ],
+        "middle_01_l": [
+          0.391,
+          -0.1251,
+          0.6364
+        ],
+        "middle_01_r": [
+          -0.391,
+          -0.1251,
+          0.6364
+        ],
+        "middle_02_l": [
+          0.4094,
+          -0.1416,
+          0.5916
+        ],
+        "middle_02_r": [
+          -0.4094,
+          -0.1416,
+          0.5916
+        ],
+        "neck": [
+          0.0,
+          -0.0201,
+          1.1442
+        ],
+        "pinky_01_l": [
+          0.3954,
+          -0.0594,
+          0.6221
+        ],
+        "pinky_01_r": [
+          -0.3954,
+          -0.0594,
+          0.6221
+        ],
+        "pinky_02_l": [
+          0.409,
+          -0.0715,
+          0.589
+        ],
+        "pinky_02_r": [
+          -0.409,
+          -0.0715,
+          0.589
+        ],
+        "ring_01_l": [
+          0.394,
+          -0.0903,
+          0.6272
+        ],
+        "ring_01_r": [
+          -0.394,
+          -0.0903,
+          0.6272
+        ],
+        "ring_02_l": [
+          0.4108,
+          -0.1054,
+          0.5863
+        ],
+        "ring_02_r": [
+          -0.4108,
+          -0.1054,
+          0.5863
+        ],
+        "shin_l": [
+          0.129,
+          -0.0159,
+          0.2227
+        ],
+        "shin_r": [
+          -0.129,
+          -0.0159,
+          0.2227
+        ],
+        "thigh_l": [
+          0.127,
+          -0.0103,
+          0.4689
+        ],
+        "thigh_r": [
+          -0.127,
+          -0.0103,
+          0.4689
+        ],
+        "thumb_01_l": [
+          0.3394,
+          -0.1698,
+          0.7104
+        ],
+        "thumb_01_r": [
+          -0.3394,
+          -0.1698,
+          0.7104
+        ],
+        "thumb_02_l": [
+          0.3355,
+          -0.2027,
+          0.68
+        ],
+        "thumb_02_r": [
+          -0.3355,
+          -0.2027,
+          0.68
+        ],
+        "torso_pelvis": [
+          -0.0,
+          0.0019,
+          0.6665
+        ],
+        "torso_upper": [
+          0.0,
+          -0.0098,
+          0.9477
+        ],
+        "upper_arm_l": [
+          0.2668,
+          -0.018,
+          0.9333
+        ],
+        "upper_arm_r": [
+          -0.2668,
+          -0.018,
+          0.9333
+        ]
+      },
+      "collisions_mm": {},
+      "frame": 1,
+      "joint_insertion_mm": {
+        "ear_l|head": 10.2,
+        "ear_r|head": 10.2,
+        "foot_l|shin_l": 22.31,
+        "foot_r|shin_r": 22.31,
+        "forearm_l|hand_l": 23.0,
+        "forearm_l|upper_arm_l": 32.3,
+        "forearm_r|hand_r": 23.0,
+        "forearm_r|upper_arm_r": 32.3,
+        "head|neck": 12.95,
+        "neck|torso_upper": 13.3,
+        "shin_l|thigh_l": 27.01,
+        "shin_r|thigh_r": 27.01,
+        "thigh_l|torso_pelvis": 88.5,
+        "thigh_r|torso_pelvis": 88.5,
+        "torso_pelvis|torso_upper": 21.28,
+        "torso_upper|upper_arm_l": 100.29,
+        "torso_upper|upper_arm_r": 100.29
+      },
+      "joint_separation_mm": {
+        "forearm_l|hand_l": -23.0,
+        "forearm_r|hand_r": -23.0,
+        "neck|head": -12.95,
+        "shin_l|foot_l": -22.31,
+        "shin_r|foot_r": -22.31,
+        "thigh_l|shin_l": -27.01,
+        "thigh_r|shin_r": -27.01,
+        "torso_pelvis|thigh_l": -88.5,
+        "torso_pelvis|thigh_r": -88.5,
+        "torso_pelvis|torso_upper": -21.28,
+        "torso_upper|neck": -13.3,
+        "torso_upper|upper_arm_l": -100.29,
+        "torso_upper|upper_arm_r": -100.29,
+        "upper_arm_l|forearm_l": -32.3,
+        "upper_arm_r|forearm_r": -32.3
+      },
+      "max_collision_mm": 0.0,
+      "min_z_m": 0.0003,
+      "rigid_max_deviation_m": 1.9e-07,
+      "tolerated_contact_mm": {
+        "forearm_l|torso_upper": 13.01,
+        "forearm_r|torso_upper": 13.01
+      }
+    },
+    "T_POSE": {
+      "action": null,
+      "centroids": {
+        "ear_l": [
+          0.3558,
+          0.0159,
+          1.4669
+        ],
+        "ear_r": [
+          -0.3558,
+          0.0159,
+          1.4669
+        ],
+        "foot_l": [
+          0.134,
+          -0.0293,
+          0.0642
+        ],
+        "foot_r": [
+          -0.134,
+          -0.0293,
+          0.0642
+        ],
+        "forearm_l": [
+          0.4859,
+          0.0,
+          1.0196
+        ],
+        "forearm_r": [
+          -0.4859,
+          0.0,
+          1.0196
+        ],
+        "hand_l": [
+          0.586,
+          0.0,
+          1.0192
+        ],
+        "hand_r": [
+          -0.586,
+          0.0,
+          1.0192
+        ],
+        "head": [
+          -0.0,
+          0.0421,
+          1.3984
+        ],
+        "index_01_l": [
+          0.6625,
+          -0.052,
+          1.022
+        ],
+        "index_01_r": [
+          -0.6625,
+          -0.052,
+          1.022
+        ],
+        "index_02_l": [
+          0.7068,
+          -0.052,
+          1.022
+        ],
+        "index_02_r": [
+          -0.7068,
+          -0.052,
+          1.022
+        ],
+        "middle_01_l": [
+          0.6655,
+          -0.017,
+          1.022
+        ],
+        "middle_01_r": [
+          -0.6655,
+          -0.017,
+          1.022
+        ],
+        "middle_02_l": [
+          0.7168,
+          -0.017,
+          1.022
+        ],
+        "middle_02_r": [
+          -0.7168,
+          -0.017,
+          1.022
+        ],
+        "neck": [
+          0.0,
+          0.0,
+          1.1452
+        ],
+        "pinky_01_l": [
+          0.6585,
+          0.05,
+          1.022
+        ],
+        "pinky_01_r": [
+          -0.6585,
+          0.05,
+          1.022
+        ],
+        "pinky_02_l": [
+          0.6962,
+          0.05,
+          1.022
+        ],
+        "pinky_02_r": [
+          -0.6962,
+          0.05,
+          1.022
+        ],
+        "ring_01_l": [
+          0.6635,
+          0.019,
+          1.022
+        ],
+        "ring_01_r": [
+          -0.6635,
+          0.019,
+          1.022
+        ],
+        "ring_02_l": [
+          0.7103,
+          0.019,
+          1.022
+        ],
+        "ring_02_r": [
+          -0.7103,
+          0.019,
+          1.022
+        ],
+        "shin_l": [
+          0.129,
+          0.0,
+          0.2225
+        ],
+        "shin_r": [
+          -0.129,
+          0.0,
+          0.2225
+        ],
+        "thigh_l": [
+          0.127,
+          0.0038,
+          0.4692
+        ],
+        "thigh_r": [
+          -0.127,
+          0.0038,
+          0.4692
+        ],
+        "thumb_01_l": [
+          0.5966,
+          -0.0873,
+          1.001
+        ],
+        "thumb_01_r": [
+          -0.5966,
+          -0.0873,
+          1.001
+        ],
+        "thumb_02_l": [
+          0.6324,
+          -0.1095,
+          0.9854
+        ],
+        "thumb_02_r": [
+          -0.6324,
+          -0.1095,
+          0.9854
+        ],
+        "torso_pelvis": [
+          -0.0,
+          0.0019,
+          0.6671
+        ],
+        "torso_upper": [
+          0.0,
+          -0.0,
+          0.9485
+        ],
+        "upper_arm_l": [
+          0.3237,
+          -0.0,
+          1.02
+        ],
+        "upper_arm_r": [
+          -0.3237,
+          -0.0,
+          1.02
+        ]
+      },
+      "collisions_mm": {},
+      "frame": 1,
+      "joint_insertion_mm": {
+        "ear_l|head": 10.2,
+        "ear_r|head": 10.2,
+        "foot_l|shin_l": 18.5,
+        "foot_r|shin_r": 18.5,
+        "forearm_l|hand_l": 23.0,
+        "forearm_l|upper_arm_l": 14.5,
+        "forearm_r|hand_r": 23.0,
+        "forearm_r|upper_arm_r": 14.5,
+        "head|neck": 11.1,
+        "neck|torso_upper": 13.3,
+        "shin_l|thigh_l": 21.5,
+        "shin_r|thigh_r": 21.5,
+        "thigh_l|torso_pelvis": 88.5,
+        "thigh_r|torso_pelvis": 88.5,
+        "torso_pelvis|torso_upper": 15.0,
+        "torso_upper|upper_arm_l": 16.0,
+        "torso_upper|upper_arm_r": 16.0
+      },
+      "joint_separation_mm": {
+        "forearm_l|hand_l": -23.0,
+        "forearm_r|hand_r": -23.0,
+        "neck|head": -11.1,
+        "shin_l|foot_l": -18.5,
+        "shin_r|foot_r": -18.5,
+        "thigh_l|shin_l": -21.5,
+        "thigh_r|shin_r": -21.5,
+        "torso_pelvis|thigh_l": -88.5,
+        "torso_pelvis|thigh_r": -88.5,
+        "torso_pelvis|torso_upper": -15.0,
+        "torso_upper|neck": -13.3,
+        "torso_upper|upper_arm_l": -16.0,
+        "torso_upper|upper_arm_r": -16.0,
+        "upper_arm_l|forearm_l": -14.5,
+        "upper_arm_r|forearm_r": -14.5
+      },
+      "max_collision_mm": 0.0,
+      "min_z_m": 0.0,
+      "rigid_max_deviation_m": 1.4e-07,
+      "tolerated_contact_mm": {}
+    },
+    "WALK_CONTACT": {
+      "action": "walk",
+      "centroids": {
+        "ear_l": [
+          0.3588,
+          -0.0168,
+          1.4371
+        ],
+        "ear_r": [
+          -0.3517,
+          -0.0541,
+          1.4393
+        ],
+        "foot_l": [
+          0.1559,
+          -0.2441,
+          0.083
+        ],
+        "foot_r": [
+          -0.1583,
+          0.2713,
+          0.1144
+        ],
+        "forearm_l": [
+          0.3242,
+          0.0406,
+          0.7642
+        ],
+        "forearm_r": [
+          -0.3199,
+          -0.1312,
+          0.7876
+        ],
+        "hand_l": [
+          0.3581,
+          0.0404,
+          0.67
+        ],
+        "hand_r": [
+          -0.3512,
+          -0.201,
+          0.7229
+        ],
+        "head": [
+          0.0018,
+          -0.0058,
+          1.3711
+        ],
+        "index_01_l": [
+          0.3806,
+          -0.0118,
+          0.597
+        ],
+        "index_01_r": [
+          -0.3673,
+          -0.2911,
+          0.7096
+        ],
+        "index_02_l": [
+          0.3957,
+          -0.0119,
+          0.5554
+        ],
+        "index_02_r": [
+          -0.3813,
+          -0.3219,
+          0.681
+        ],
+        "middle_01_l": [
+          0.3859,
+          0.0229,
+          0.5956
+        ],
+        "middle_01_r": [
+          -0.3754,
+          -0.2683,
+          0.6841
+        ],
+        "middle_02_l": [
+          0.4035,
+          0.0228,
+          0.5475
+        ],
+        "middle_02_r": [
+          -0.3915,
+          -0.304,
+          0.6511
+        ],
+        "neck": [
+          0.0025,
+          -0.0337,
+          1.1161
+        ],
+        "pinky_01_l": [
+          0.3917,
+          0.0894,
+          0.605
+        ],
+        "pinky_01_r": [
+          -0.3868,
+          -0.2156,
+          0.6437
+        ],
+        "pinky_02_l": [
+          0.4047,
+          0.0893,
+          0.5695
+        ],
+        "pinky_02_r": [
+          -0.3987,
+          -0.2419,
+          0.6194
+        ],
+        "ring_01_l": [
+          0.3896,
+          0.0586,
+          0.599
+        ],
+        "ring_01_r": [
+          -0.382,
+          -0.2412,
+          0.6613
+        ],
+        "ring_02_l": [
+          0.4057,
+          0.0585,
+          0.5551
+        ],
+        "ring_02_r": [
+          -0.3968,
+          -0.2738,
+          0.6311
+        ],
+        "shin_l": [
+          0.1456,
+          -0.1844,
+          0.2345
+        ],
+        "shin_r": [
+          -0.1474,
+          0.2049,
+          0.2521
+        ],
+        "thigh_l": [
+          0.1358,
+          -0.095,
+          0.4634
+        ],
+        "thigh_r": [
+          -0.1349,
+          0.0847,
+          0.4592
+        ],
+        "thumb_01_l": [
+          0.334,
+          -0.0438,
+          0.6503
+        ],
+        "thumb_01_r": [
+          -0.3199,
+          -0.2721,
+          0.768
+        ],
+        "thumb_02_l": [
+          0.329,
+          -0.0639,
+          0.6104
+        ],
+        "thumb_02_r": [
+          -0.3122,
+          -0.3141,
+          0.7541
+        ],
+        "torso_pelvis": [
+          -0.0002,
+          0.0019,
+          0.6394
+        ],
+        "torso_upper": [
+          0.0012,
+          -0.0166,
+          0.9202
+        ],
+        "upper_arm_l": [
+          0.2675,
+          0.0153,
+          0.9109
+        ],
+        "upper_arm_r": [
+          -0.2651,
+          -0.0495,
+          0.9096
+        ]
+      },
+      "collisions_mm": {},
+      "frame": 1,
+      "joint_insertion_mm": {
+        "ear_l|head": 10.2,
+        "ear_r|head": 10.2,
+        "foot_l|shin_l": 28.08,
+        "foot_r|shin_r": 42.92,
+        "forearm_l|hand_l": 23.0,
+        "forearm_l|upper_arm_l": 38.2,
+        "forearm_r|hand_r": 23.0,
+        "forearm_r|upper_arm_r": 45.24,
+        "head|neck": 14.79,
+        "neck|torso_upper": 13.3,
+        "shin_l|thigh_l": 28.76,
+        "shin_r|thigh_r": 42.02,
+        "thigh_l|torso_pelvis": 109.5,
+        "thigh_r|torso_pelvis": 109.5,
+        "torso_pelvis|torso_upper": 25.57,
+        "torso_upper|upper_arm_l": 100.29,
+        "torso_upper|upper_arm_r": 100.29
+      },
+      "joint_separation_mm": {
+        "forearm_l|hand_l": -23.0,
+        "forearm_r|hand_r": -23.0,
+        "neck|head": -14.79,
+        "shin_l|foot_l": -28.08,
+        "shin_r|foot_r": -42.92,
+        "thigh_l|shin_l": -28.76,
+        "thigh_r|shin_r": -42.02,
+        "torso_pelvis|thigh_l": -109.5,
+        "torso_pelvis|thigh_r": -109.5,
+        "torso_pelvis|torso_upper": -25.57,
+        "torso_upper|neck": -13.3,
+        "torso_upper|upper_arm_l": -100.29,
+        "torso_upper|upper_arm_r": -100.29,
+        "upper_arm_l|forearm_l": -38.2,
+        "upper_arm_r|forearm_r": -45.24
+      },
+      "max_collision_mm": 0.0,
+      "min_z_m": 0.0003,
+      "rigid_max_deviation_m": 2.2e-07,
+      "tolerated_contact_mm": {
+        "forearm_l|torso_upper": 15.95,
+        "forearm_r|torso_upper": 19.74,
+        "thigh_l|torso_upper": 4.89
+      }
+    },
+    "WALK_PASS": {
+      "action": "walk",
+      "centroids": {
+        "ear_l": [
+          0.3558,
+          -0.0111,
+          1.4694
+        ],
+        "ear_r": [
+          -0.3558,
+          -0.0111,
+          1.4694
+        ],
+        "foot_l": [
+          0.134,
+          -0.018,
+          0.0668
+        ],
+        "foot_r": [
+          -0.134,
+          -0.0116,
+          0.0944
+        ],
+        "forearm_l": [
+          0.3251,
+          -0.0132,
+          0.7889
+        ],
+        "forearm_r": [
+          -0.3246,
+          -0.0566,
+          0.7935
+        ],
+        "hand_l": [
+          0.3599,
+          -0.035,
+          0.6976
+        ],
+        "hand_r": [
+          -0.359,
+          -0.0971,
+          0.7087
+        ],
+        "head": [
+          -0.0,
+          0.0162,
+          1.4014
+        ],
+        "index_01_l": [
+          0.3828,
+          -0.1024,
+          0.6386
+        ],
+        "index_01_r": [
+          -0.3809,
+          -0.1756,
+          0.6647
+        ],
+        "index_02_l": [
+          0.3984,
+          -0.1121,
+          0.5983
+        ],
+        "index_02_r": [
+          -0.3963,
+          -0.1935,
+          0.6273
+        ],
+        "middle_01_l": [
+          0.3883,
+          -0.069,
+          0.6294
+        ],
+        "middle_01_r": [
+          -0.3869,
+          -0.1448,
+          0.6489
+        ],
+        "middle_02_l": [
+          0.4064,
+          -0.0801,
+          0.5828
+        ],
+        "middle_02_r": [
+          -0.4047,
+          -0.1655,
+          0.6055
+        ],
+        "neck": [
+          0.0,
+          -0.0205,
+          1.1475
+        ],
+        "pinky_01_l": [
+          0.3945,
+          -0.0021,
+          0.6235
+        ],
+        "pinky_01_r": [
+          -0.3938,
+          -0.0807,
+          0.6294
+        ],
+        "pinky_02_l": [
+          0.4078,
+          -0.0104,
+          0.5891
+        ],
+        "pinky_02_r": [
+          -0.4069,
+          -0.0959,
+          0.5975
+        ],
+        "ring_01_l": [
+          0.3923,
+          -0.0334,
+          0.6246
+        ],
+        "ring_01_r": [
+          -0.3912,
+          -0.111,
+          0.6369
+        ],
+        "ring_02_l": [
+          0.4087,
+          -0.0436,
+          0.5821
+        ],
+        "ring_02_r": [
+          -0.4075,
+          -0.1299,
+          0.5974
+        ],
+        "shin_l": [
+          0.129,
+          0.0056,
+          0.2254
+        ],
+        "shin_r": [
+          -0.129,
+          -0.0355,
+          0.2467
+        ],
+        "thigh_l": [
+          0.127,
+          0.0038,
+          0.472
+        ],
+        "thigh_r": [
+          -0.127,
+          -0.0525,
+          0.4772
+        ],
+        "thumb_01_l": [
+          0.3356,
+          -0.1214,
+          0.6972
+        ],
+        "thumb_01_r": [
+          -0.3336,
+          -0.1815,
+          0.726
+        ],
+        "thumb_02_l": [
+          0.3309,
+          -0.15,
+          0.6629
+        ],
+        "thumb_02_r": [
+          -0.3284,
+          -0.2165,
+          0.6983
+        ],
+        "torso_pelvis": [
+          -0.0,
+          0.0019,
+          0.6698
+        ],
+        "torso_upper": [
+          0.0,
+          -0.0102,
+          0.951
+        ],
+        "upper_arm_l": [
+          0.2668,
+          -0.0021,
+          0.9373
+        ],
+        "upper_arm_r": [
+          -0.2668,
+          -0.0169,
+          0.9365
+        ]
+      },
+      "collisions_mm": {},
+      "frame": 5,
+      "joint_insertion_mm": {
+        "ear_l|head": 10.2,
+        "ear_r|head": 10.2,
+        "foot_l|shin_l": 21.04,
+        "foot_r|shin_r": 40.62,
+        "forearm_l|hand_l": 23.0,
+        "forearm_l|upper_arm_l": 36.29,
+        "forearm_r|hand_r": 23.0,
+        "forearm_r|upper_arm_r": 38.2,
+        "head|neck": 14.79,
+        "neck|torso_upper": 13.3,
+        "shin_l|thigh_l": 24.31,
+        "shin_r|thigh_r": 48.74,
+        "thigh_l|torso_pelvis": 88.5,
+        "thigh_r|torso_pelvis": 102.95,
+        "torso_pelvis|torso_upper": 21.28,
+        "torso_upper|upper_arm_l": 100.29,
+        "torso_upper|upper_arm_r": 100.29
+      },
+      "joint_separation_mm": {
+        "forearm_l|hand_l": -23.0,
+        "forearm_r|hand_r": -23.0,
+        "neck|head": -14.79,
+        "shin_l|foot_l": -21.04,
+        "shin_r|foot_r": -40.62,
+        "thigh_l|shin_l": -24.31,
+        "thigh_r|shin_r": -48.74,
+        "torso_pelvis|thigh_l": -88.5,
+        "torso_pelvis|thigh_r": -102.95,
+        "torso_pelvis|torso_upper": -21.28,
+        "torso_upper|neck": -13.3,
+        "torso_upper|upper_arm_l": -100.29,
+        "torso_upper|upper_arm_r": -100.29,
+        "upper_arm_l|forearm_l": -36.29,
+        "upper_arm_r|forearm_r": -38.2
+      },
+      "max_collision_mm": 0.0,
+      "min_z_m": 0.0003,
+      "rigid_max_deviation_m": 2e-07,
+      "tolerated_contact_mm": {
+        "forearm_l|torso_upper": 14.97,
+        "forearm_r|torso_upper": 15.95
+      }
+    }
+  },
+  "result": "PASS",
+  "seconds_total": 256.6,
+  "stage": "MANNEQUIN-GEO-02R/validation",
+  "stages": {
+    "baseline_rest_bones": {
+      "detail": "40 rest pivots and deform flags, errors=[]",
+      "ok": true
+    },
+    "blend_actions_exact": {
+      "detail": "['attack', 'attack_grip', 'grip_test', 'idle', 'walk']",
+      "ok": true
+    },
+    "blend_coverage_ids": {
+      "detail": "38 independent segment IDs, each with its expected rigid bone",
+      "ok": true
+    },
+    "blend_face_plane": {
+      "detail": "25 rays over FACE, maximum depth error=1.0490417480437525e-08 m, UV=True",
+      "ok": true
+    },
+    "blend_finger_clearance": {
+      "detail": "80 hand poses + T-pose, first failures=[]",
+      "ok": true
+    },
+    "blend_grip_contact": {
+      "detail": "2 static and 15 attack holds, first failures=[]",
+      "ok": true
+    },
+    "blend_grounded_frames": {
+      "detail": "72 exported integer frames, min/max supporting sole = 0.0003200/0.0003201 m",
+      "ok": true
+    },
+    "blend_landing_sites": {
+      "detail": "surface rays and interior grip points for 25 sockets, errors=[]",
+      "ok": true
+    },
+    "blend_socket_motion": {
+      "detail": "bone-relative transform, max matrix error=2.38e-07",
+      "ok": true
+    },
+    "blend_socket_rest": {
+      "detail": "nodes=25 max matrix error=2.17e-07 errors=[]",
+      "ok": true
+    },
+    "blend_walk_subframes": {
+      "detail": "{\"samples\": 240, \"min_z_m\": 0.0002814270555973053, \"max_z_m\": 0.0006392933428287506}",
+      "ok": true
+    },
+    "body_joint_range": {
+      "detail": "14 body range poses, worst joint separation (-0.011100010946393013, 'neck|head')",
+      "ok": true
+    },
+    "bone_hierarchy": {
+      "detail": "40 bones, parents and connections match the profile",
+      "ok": true
+    },
+    "bone_list": {
+      "detail": "40 bones, missing=[]",
+      "ok": true
+    },
+    "clip_joint_sweep": {
+      "detail": "{\"frames\": 57, \"worst_joint_gap_m\": [-0.011099980198428939, \"attack\", 9, \"neck|head\"], \"worst_collision_over_allowance_m\": [0.0, \"\", 0, \"\"], \"foot_min_z_range_m\": [0.0, 0.00032005750108510256]}",
+      "ok": true
+    },
+    "closed_block_segments": {
+      "detail": "closed and outward-oriented, errors=[]",
+      "ok": true
+    },
+    "geometry": {
+      "detail": "verts=3972 polys=4032 dims=[1.484, 0.572, 1.8] floor_z=0.0 nan=[] degenerate=[]",
+      "ok": true
+    },
+    "glb_actions_exact": {
+      "detail": "['attack', 'attack_grip', 'grip_test', 'idle', 'walk']",
+      "ok": true
+    },
+    "glb_animation_match": {
+      "detail": "225 matched Blender/GLB socket transforms, max matrix error=7.15e-07",
+      "ok": true
+    },
+    "glb_coverage_ids": {
+      "detail": "38 independent segment IDs, each with its expected rigid bone",
+      "ok": true
+    },
+    "glb_face_plane": {
+      "detail": "25 rays over FACE, maximum depth error=1.0490417480437525e-08 m, UV=True",
+      "ok": true
+    },
+    "glb_finger_clearance": {
+      "detail": "80 hand poses + T-pose, first failures=[]",
+      "ok": true
+    },
+    "glb_grip_contact": {
+      "detail": "2 static and 15 attack holds, first failures=[]",
+      "ok": true
+    },
+    "glb_grounded_frames": {
+      "detail": "72 exported integer frames, min/max supporting sole = 0.0003199/0.0003201 m",
+      "ok": true
+    },
+    "glb_landing_sites": {
+      "detail": "surface rays and interior grip points for 25 sockets, errors=[]",
+      "ok": true
+    },
+    "glb_roundtrip": {
+      "detail": "parts=38 extra_meshes=[] bones=40 skinned_weights_bad=[] actions=['attack', 'attack_grip', 'grip_test', 'idle', 'walk']",
+      "ok": true
+    },
+    "glb_socket_motion": {
+      "detail": "bone-relative transform, max matrix error=2.38e-07",
+      "ok": true
+    },
+    "glb_socket_rest": {
+      "detail": "nodes=25 max matrix error=4.71e-07 errors=[]",
+      "ok": true
+    },
+    "glb_walk_subframes": {
+      "detail": "{\"samples\": 240, \"min_z_m\": 0.00027889013290405273, \"max_z_m\": 0.0006325356662273407}",
+      "ok": true
+    },
+    "hip_insertion_stable": {
+      "detail": "joint insertions stay within 30 mm of the rest pose",
+      "ok": true
+    },
+    "independent_coverage": {
+      "detail": "coverage candidates hide by object without hiding the head or armature",
+      "ok": true
+    },
+    "joint_connectivity": {
+      "detail": "all 15 joints stay closed (<= 25 mm gap) in every pose",
+      "ok": true
+    },
+    "part_intersections": {
+      "detail": "115 non-joint block pairs checked; worst pose T_POSE: 0.0 mm (no collision)",
+      "ok": true
+    },
+    "part_list": {
+      "detail": "38 parts, missing=[]",
+      "ok": true
+    },
+    "pose_semantics": {
+      "detail": "idle_arms_down=ok, idle_feet_on_ground=ok, idle_body_upright=ok, idle_hands_beside_body=ok, walk_contact_left_forward=ok, walk_contact_contralateral_arms=ok, walk_pass_feet_close=ok, walk_pass_swing_foot_lifted=ok, walk_contact_grounded=ok, attack_windup_hand_back=ok, attack_strike_hand_forward=ok, attack_swing_arc=ok, attack_lunge_foot_spread=ok",
+      "ok": true
+    },
+    "renders": {
+      "detail": "{\"FRONT.png\": 8.84, \"BACK.png\": 8.53, \"LEFT.png\": 7.71, \"RIGHT.png\": 7.59, \"THREE_QUARTER.png\": 15.59, \"tpose_front_silhouette.png\": 7.77, \"IDLE.png\": 15.49, \"WALK.png\": 15.48, \"WALK_PASS.png\": 15.62, \"ATTACK_WINDUP.png\": 15.37, \"ATTACK.png\": 15.56, \"ATTACK_RECOVER.png\": 15.56, \"HEAD_EAR.png\": 12.09, \"HEAD_FRONT.png\": 11.1, \"FEET.png\": 12.43, \"HAND_NEUTRAL.png\": 10.2, \"HAND_OPEN.png\": 10.83, \"HAND_FIST.png\": 9.51, \"HAND_GRIP.png\": 9.95, \"HAND_RELEASE.png\": 10.35, \"ATTACK_GRIP.png\": 15.89}",
+      "ok": true
+    },
+    "replaceable_ears": {
+      "detail": "two socket proxies, head yaw ±28 deg, max error 0.00e+00 m",
+      "ok": true
+    },
+    "rigid_deformation": {
+      "detail": "max deviation from the analytic bone transform = 2.20e-07 m",
+      "ok": true
+    },
+    "rigid_vertex_groups": {
+      "detail": "38 parts, exactly one vertex group each, all weights 1.0",
+      "ok": true
+    },
+    "validated_artifact_identity": {
+      "detail": "Build hashes are unchanged through validation and rendering",
+      "ok": true
+    }
+  }
+}

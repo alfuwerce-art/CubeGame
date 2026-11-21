@@ -2,7 +2,7 @@
 
 **Статус: `READY_FOR_REVIEW`** — не `ACCEPTED`. Финальная визуальная и техническая приёмка — за продюсером.
 **Решение:** [D65](../decisions/D65-d64-result-approved-deepseek-full-catalog-run.md) (утверждён результат D64), масштаб — [D63](../decisions/D63-full-catalog-bulk-transfer.md), метод — [отчёт D64](S05B2_CLAUDE_FULL_RESEARCH_REPORT.md).
-**ТЗ:** [FULL_CATALOG_DEEPSEEK_PLAYBOOK](../agents/FULL_CATALOG_DEEPSEEK_PLAYBOOK.md).
+**ТЗ:** [FULL_CATALOG_DEEPSEEK_PLAYBOOK](../agents/archive/FULL_CATALOG_DEEPSEEK_PLAYBOOK.md).
 **База:** `claude/s05b2-full-catalog-research` @ `a89d99a092695e2852ce9b41e1fa9d781e9ddb36`. **Ветка:** `stage/d65-full-catalog`.
 **Дата:** 2026-11-06/07. **Исполнитель:** DeepSeek Harness.
 

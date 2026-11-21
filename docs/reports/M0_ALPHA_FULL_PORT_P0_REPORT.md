@@ -2,7 +2,7 @@
 
 **Дата:** 2026-11-11 · **Ветка:** `deepseek/m0-full-port-p0` · **База:** `0764a211f18cc3298f9301e1b8b16a5404d6d9f0` (`review/m0-full-unity-port-rework`)
 **Unity:** 6000.3.27f2 · **Оригинал:** `D:\Games\Cube world\Cube.exe` SHA-256 `84a7a132…6dc30bf` (read-only)
-**Решение:** D92 · **ТЗ:** [M0 ALPHA FULL UNITY PORT](../stages/M0_ALPHA_FULL_UNITY_PORT_STAGE.md)
+**Решение:** D92 · **ТЗ:** [M0 ALPHA FULL UNITY PORT](../stages/archive/M0_ALPHA_FULL_UNITY_PORT_STAGE.md)
 **Исследование:** [ALPHA_STARTUP_MENU_AND_SAVE_FLOW](../research/alpha2013/ALPHA_STARTUP_MENU_AND_SAVE_FLOW.md)
 
 ```text

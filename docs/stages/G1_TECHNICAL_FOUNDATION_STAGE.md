@@ -1,6 +1,6 @@
 # G1 — TECHNICAL FOUNDATION
 
-**Этап:** G1 дорожной карты ([ROADMAP_DRAFT](../planning/ROADMAP_DRAFT.md#g1--technical-foundation))
+**Этап:** G1 дорожной карты ([ROADMAP_DRAFT](../archive/ROADMAP_DRAFT.md#g1--technical-foundation))
 **Предыдущий этап:** [G0 — DEVELOPMENT PIVOT / BASELINE FREEZE](../ACTIVE_STAGE.md)
 **Статус:** `PLANNED` — ТЗ готово к исполнению, реализация не начата
 **Цель:** превратить существующий runtime в устойчивую платформу **CubeGame**, а не в «лучший Alpha port».

@@ -4,7 +4,7 @@
 **Статус:** **ACCEPTED** — решение продюсера: «Утверждаю» (ответ на вопрос «Утверждаете результат D64 для массового прогона DeepSeek?»).
 **Утверждённый результат:** Claude Code, ветка `claude/s05b2-full-catalog-research` @ `b3bc1026d819df66078bbabb978c715be49500f1`,
 отчёт [S05B2_CLAUDE_FULL_RESEARCH_REPORT](../reports/S05B2_CLAUDE_FULL_RESEARCH_REPORT.md).
-**Исполнитель дальше:** DeepSeek Harness, по [FULL_CATALOG_DEEPSEEK_PLAYBOOK](../agents/FULL_CATALOG_DEEPSEEK_PLAYBOOK.md).
+**Исполнитель дальше:** DeepSeek Harness, по [FULL_CATALOG_DEEPSEEK_PLAYBOOK](../agents/archive/FULL_CATALOG_DEEPSEEK_PLAYBOOK.md).
 
 ## 1. Что утверждено
 

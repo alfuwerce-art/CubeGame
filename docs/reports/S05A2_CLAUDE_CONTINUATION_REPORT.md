@@ -89,7 +89,7 @@
 
 ## 6. Передача DeepSeek
 
-[ANIMATION_SYSTEM_PLAYBOOK](../agents/ANIMATION_SYSTEM_PLAYBOOK.md) содержит команды, статусы, артефакты и разбор отказов. [ALPHA_ANIMATION_SYSTEM](../research/alpha2013/ALPHA_ANIMATION_SYSTEM.md) описывает механизм и границу доказательств. До отдельного решения продюсера использовать систему только для текущего гуманоида.
+[ANIMATION_SYSTEM_PLAYBOOK](../agents/archive/ANIMATION_SYSTEM_PLAYBOOK.md) содержит команды, статусы, артефакты и разбор отказов. [ALPHA_ANIMATION_SYSTEM](../research/alpha2013/ALPHA_ANIMATION_SYSTEM.md) описывает механизм и границу доказательств. До отдельного решения продюсера использовать систему только для текущего гуманоида.
 
 Сохранены чужие незакоммиченные изменения: `CharacterPilotGripAttack.cs` (line ending) и `Assets/CubeGame/Core/Domain.meta`; в коммиты Codex не включаются. Единственная рабочая директория — D:, без новых копий или worktree.
 

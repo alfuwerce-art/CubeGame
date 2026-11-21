@@ -2,7 +2,7 @@
 
 **2026-11-05—06. S05A-2, Codex; продолжение Claude `43a1ba6` через стабилизацию `3d4a2fb`. READY_FOR_REVIEW, не ACCEPTED.**
 Итоги запусков: [отчёт продолжения](../../reports/S05A2_CLAUDE_CONTINUATION_REPORT.md).
-Воспроизведение: [ANIMATION_SYSTEM_PLAYBOOK](../../agents/ANIMATION_SYSTEM_PLAYBOOK.md).
+Воспроизведение: [ANIMATION_SYSTEM_PLAYBOOK](../../agents/archive/ANIMATION_SYSTEM_PLAYBOOK.md).
 
 ## Что уже существовало и сохранено
 

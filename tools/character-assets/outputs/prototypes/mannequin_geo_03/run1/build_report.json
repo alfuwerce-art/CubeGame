@@ -1,0 +1,37 @@
+{
+  "profile": "MANNEQUIN-GEO-03",
+  "profile_sha256": "8590fe6bee206ecf65729ae66d3cb1180e24146f8227353327e90cc0aad0ab12",
+  "blender": "5.2.4 LTS",
+  "mesh_count": 38,
+  "vertices": 1498,
+  "polygons": 1282,
+  "bones": 40,
+  "sockets": 25,
+  "clips_at_24_fps": {
+    "idle": 25,
+    "walk": 17,
+    "attack": 15,
+    "grip_test": 25,
+    "attack_grip": 15,
+    "two_hand_grip": 9,
+    "grip_small": 9,
+    "grip_large": 9
+  },
+  "export_sampling_hz": 192,
+  "rest_bounds_m": [
+    [
+      -0.742232,
+      -0.282,
+      0.0
+    ],
+    [
+      0.742232,
+      0.238,
+      1.8
+    ]
+  ],
+  "artifacts": {
+    "mannequin_geo_03.blend": "efee7fd49f49877a795264609fd1e6bab72255fb4f30acd583a9797b01172e04",
+    "mannequin_geo_03.glb": "832ef65840cc70cf6af1ba5c5d42a15eb403a436190993b8762a6ed00a8cad10"
+  }
+}

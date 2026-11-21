@@ -1,0 +1,658 @@
+{
+  "profile": "MANNEQUIN-GEO-03",
+  "tests": {
+    "inventory": {
+      "passed": true,
+      "detail": {
+        "parts": 38,
+        "sockets": 25,
+        "bones": 40
+      }
+    },
+    "base_bind_pose": {
+      "passed": true,
+      "detail": "20 rest matrices, head/tail, flags and parents"
+    },
+    "base_animation": {
+      "passed": true,
+      "detail": {
+        "sampled_rotations": 1140,
+        "max_component_norm": 0.0
+      }
+    },
+    "clip_intervals": {
+      "passed": true,
+      "detail": {
+        "attack": [
+          1.0,
+          15.0
+        ],
+        "attack_grip": [
+          1.0,
+          15.0
+        ],
+        "grip_large": [
+          1.0,
+          9.0
+        ],
+        "grip_small": [
+          1.0,
+          9.0
+        ],
+        "grip_test": [
+          1.0,
+          25.0
+        ],
+        "idle": [
+          1.0,
+          25.0
+        ],
+        "two_hand_grip": [
+          1.0,
+          9.0
+        ],
+        "walk": [
+          1.0,
+          17.0
+        ]
+      }
+    },
+    "clean_weighted_meshes": {
+      "passed": true,
+      "detail": []
+    },
+    "rest_pose_scale_and_support": {
+      "passed": true,
+      "detail": [
+        [
+          -0.742232,
+          -0.282,
+          0.0
+        ],
+        [
+          0.742232,
+          0.238,
+          1.8
+        ]
+      ]
+    },
+    "socket_surface_landing": {
+      "passed": true,
+      "detail": {
+        "missed": [],
+        "max_m": 2.9802322387695485e-08
+      }
+    },
+    "face_planar_uv": {
+      "passed": true,
+      "detail": {
+        "samples": 25,
+        "errors": []
+      }
+    },
+    "replaceable_ears": {
+      "passed": true,
+      "detail": {
+        "max_m": 0.0,
+        "yaw_deg": [
+          -28,
+          0,
+          28
+        ]
+      }
+    },
+    "independent_coverage": {
+      "passed": true,
+      "detail": "Hide declared body parts by ID while head and rig remain visible"
+    },
+    "base_clip_semantics": {
+      "passed": true,
+      "detail": {
+        "idle_arms_down": true,
+        "idle_upright": true,
+        "idle_hands_beside_body": true,
+        "walk_opposite_arm": true,
+        "walk_left_foot_ahead": true,
+        "walk_pass_lift": true,
+        "attack_reach": true,
+        "attack_swing": true,
+        "attack_lunge": true
+      }
+    },
+    "interpart_clearance": {
+      "passed": true,
+      "detail": {
+        "critical_samples_over_1mm": 0,
+        "worst": []
+      }
+    },
+    "deformed_shared_joint_rings": {
+      "passed": true,
+      "detail": {
+        "sampled_poses": 241,
+        "seams": 19,
+        "maximum_gap_m": 0
+      }
+    },
+    "animated_socket_binding": {
+      "passed": true,
+      "detail": {
+        "max_matrix_error": 4.842877388000488e-07
+      }
+    },
+    "finite_shaft_holds": {
+      "passed": true,
+      "detail": {
+        "samples": 35,
+        "errors": {}
+      }
+    },
+    "support_and_walk_subframes": {
+      "passed": true,
+      "detail": {
+        "pose_min_max_mm": [
+          1.862645149230957e-06,
+          0.3200545907020569
+        ],
+        "walk_samples": 257,
+        "walk_min_max_mm": [
+          0.2813972532749176,
+          0.4579374217428267
+        ]
+      }
+    },
+    "glb_parts_skin_and_inventory": {
+      "passed": true,
+      "detail": []
+    },
+    "glb_action_durations": {
+      "passed": true,
+      "detail": {
+        "attack": 0.5833333333333334,
+        "attack_grip": 0.5833333333333334,
+        "grip_large": 0.3333333333333333,
+        "grip_small": 0.3333333333333333,
+        "grip_test": 1.0,
+        "idle": 1.0,
+        "two_hand_grip": 0.3333333333333333,
+        "walk": 0.6666666666666666
+      }
+    },
+    "glb_socket_rest": {
+      "passed": true,
+      "detail": {
+        "missed": [],
+        "max_m": 1.2287812309317896e-07
+      }
+    },
+    "glb_face_uv": {
+      "passed": true,
+      "detail": {
+        "errors": []
+      }
+    },
+    "glb_pose_and_socket_roundtrip": {
+      "passed": true,
+      "detail": {
+        "samples": 241,
+        "max_vertex_error_m": [
+          1.014264626064687e-06,
+          "walk:5.0:pinky_02_l"
+        ],
+        "max_socket_error": 5.513429641723633e-07
+      }
+    },
+    "glb_walk_support_roundtrip": {
+      "passed": true,
+      "detail": {
+        "samples": 257,
+        "range_mm": [
+          0.27884915471076965,
+          0.46546373050659895
+        ],
+        "max_bake_delta_mm": 0.054426491260528564
+      }
+    },
+    "source_hashes_unchanged": {
+      "passed": true,
+      "detail": {
+        "blend": "efee7fd49f49877a795264609fd1e6bab72255fb4f30acd583a9797b01172e04",
+        "glb": "832ef65840cc70cf6af1ba5c5d42a15eb403a436190993b8762a6ed00a8cad10"
+      }
+    }
+  },
+  "metrics": {
+    "non_neighbour_intersections": [
+      [
+        "grip_test",
+        14.0,
+        "thumb_02_l",
+        "index_02_l",
+        0.2347
+      ],
+      [
+        "grip_test",
+        14.0,
+        "thumb_02_r",
+        "index_02_r",
+        0.2347
+      ]
+    ],
+    "grip_mm": {
+      "grip_test:18:l": [
+        {
+          "thumb": 0.942,
+          "index": 0.6796,
+          "middle": 0.697,
+          "ring": 0.6904,
+          "pinky": 0.6482
+        },
+        0.6482,
+        null
+      ],
+      "grip_test:18:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6794,
+          "middle": 0.6969,
+          "ring": 0.6906,
+          "pinky": 0.6482
+        },
+        0.6482,
+        null
+      ],
+      "attack_grip:0:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6795,
+          "middle": 0.6971,
+          "ring": 0.6905,
+          "pinky": 0.6482
+        },
+        0.6482,
+        null
+      ],
+      "attack_grip:1:r": [
+        {
+          "thumb": 0.9421,
+          "index": 0.6795,
+          "middle": 0.697,
+          "ring": 0.6906,
+          "pinky": 0.6482
+        },
+        0.6482,
+        null
+      ],
+      "attack_grip:2:r": [
+        {
+          "thumb": 0.9421,
+          "index": 0.6794,
+          "middle": 0.6972,
+          "ring": 0.6905,
+          "pinky": 0.6482
+        },
+        0.6482,
+        null
+      ],
+      "attack_grip:3:r": [
+        {
+          "thumb": 0.9421,
+          "index": 0.6795,
+          "middle": 0.6971,
+          "ring": 0.6907,
+          "pinky": 0.6482
+        },
+        0.6482,
+        null
+      ],
+      "attack_grip:4:r": [
+        {
+          "thumb": 0.9421,
+          "index": 0.6796,
+          "middle": 0.697,
+          "ring": 0.6907,
+          "pinky": 0.6481
+        },
+        0.6481,
+        null
+      ],
+      "attack_grip:5:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6796,
+          "middle": 0.6972,
+          "ring": 0.6907,
+          "pinky": 0.6483
+        },
+        0.6483,
+        null
+      ],
+      "attack_grip:6:r": [
+        {
+          "thumb": 0.9421,
+          "index": 0.6795,
+          "middle": 0.6972,
+          "ring": 0.6906,
+          "pinky": 0.6481
+        },
+        0.6481,
+        null
+      ],
+      "attack_grip:7:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6795,
+          "middle": 0.6972,
+          "ring": 0.6907,
+          "pinky": 0.6481
+        },
+        0.6481,
+        null
+      ],
+      "attack_grip:8:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6796,
+          "middle": 0.6971,
+          "ring": 0.6907,
+          "pinky": 0.6482
+        },
+        0.6482,
+        null
+      ],
+      "attack_grip:9:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6796,
+          "middle": 0.697,
+          "ring": 0.6905,
+          "pinky": 0.6481
+        },
+        0.6481,
+        null
+      ],
+      "attack_grip:10:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6795,
+          "middle": 0.6971,
+          "ring": 0.6906,
+          "pinky": 0.6481
+        },
+        0.6481,
+        null
+      ],
+      "attack_grip:11:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6796,
+          "middle": 0.6971,
+          "ring": 0.6906,
+          "pinky": 0.6483
+        },
+        0.6483,
+        null
+      ],
+      "attack_grip:12:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6795,
+          "middle": 0.6971,
+          "ring": 0.6905,
+          "pinky": 0.6482
+        },
+        0.6482,
+        null
+      ],
+      "attack_grip:13:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6794,
+          "middle": 0.697,
+          "ring": 0.6904,
+          "pinky": 0.6482
+        },
+        0.6482,
+        null
+      ],
+      "attack_grip:14:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6795,
+          "middle": 0.6971,
+          "ring": 0.6905,
+          "pinky": 0.6482
+        },
+        0.6482,
+        null
+      ],
+      "two_hand_grip:0:l": [
+        {
+          "thumb": 0.942,
+          "index": 0.6795,
+          "middle": 0.6969,
+          "ring": 0.6904,
+          "pinky": 0.648
+        },
+        0.648,
+        {
+          "radial_mm": 9e-05,
+          "axis_error": 0.0,
+          "separation_mm": 286.00005
+        }
+      ],
+      "two_hand_grip:0:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6794,
+          "middle": 0.6969,
+          "ring": 0.6905,
+          "pinky": 0.6483
+        },
+        0.6483,
+        {
+          "radial_mm": 9e-05,
+          "axis_error": 0.0,
+          "separation_mm": 286.00005
+        }
+      ],
+      "two_hand_grip:4:l": [
+        {
+          "thumb": 0.942,
+          "index": 0.6795,
+          "middle": 0.6969,
+          "ring": 0.6904,
+          "pinky": 0.648
+        },
+        0.648,
+        {
+          "radial_mm": 9e-05,
+          "axis_error": 0.0,
+          "separation_mm": 286.00005
+        }
+      ],
+      "two_hand_grip:4:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6794,
+          "middle": 0.6969,
+          "ring": 0.6905,
+          "pinky": 0.6483
+        },
+        0.6483,
+        {
+          "radial_mm": 9e-05,
+          "axis_error": 0.0,
+          "separation_mm": 286.00005
+        }
+      ],
+      "two_hand_grip:8:l": [
+        {
+          "thumb": 0.942,
+          "index": 0.6795,
+          "middle": 0.6969,
+          "ring": 0.6904,
+          "pinky": 0.648
+        },
+        0.648,
+        {
+          "radial_mm": 9e-05,
+          "axis_error": 0.0,
+          "separation_mm": 286.00005
+        }
+      ],
+      "two_hand_grip:8:r": [
+        {
+          "thumb": 0.942,
+          "index": 0.6794,
+          "middle": 0.6969,
+          "ring": 0.6905,
+          "pinky": 0.6483
+        },
+        0.6483,
+        {
+          "radial_mm": 9e-05,
+          "axis_error": 0.0,
+          "separation_mm": 286.00005
+        }
+      ],
+      "grip_small:0:l": [
+        {
+          "thumb": 1.8394,
+          "index": 0.6957,
+          "middle": 0.6973,
+          "ring": 0.6988,
+          "pinky": 0.6809
+        },
+        0.6809,
+        null
+      ],
+      "grip_small:0:r": [
+        {
+          "thumb": 1.8394,
+          "index": 0.6958,
+          "middle": 0.6973,
+          "ring": 0.6988,
+          "pinky": 0.6811
+        },
+        0.6811,
+        null
+      ],
+      "grip_small:4:l": [
+        {
+          "thumb": 1.8394,
+          "index": 0.6957,
+          "middle": 0.6973,
+          "ring": 0.6988,
+          "pinky": 0.6809
+        },
+        0.6809,
+        null
+      ],
+      "grip_small:4:r": [
+        {
+          "thumb": 1.8394,
+          "index": 0.6958,
+          "middle": 0.6973,
+          "ring": 0.6988,
+          "pinky": 0.6811
+        },
+        0.6811,
+        null
+      ],
+      "grip_small:8:l": [
+        {
+          "thumb": 1.8394,
+          "index": 0.6957,
+          "middle": 0.6973,
+          "ring": 0.6988,
+          "pinky": 0.6809
+        },
+        0.6809,
+        null
+      ],
+      "grip_small:8:r": [
+        {
+          "thumb": 1.8394,
+          "index": 0.6958,
+          "middle": 0.6973,
+          "ring": 0.6988,
+          "pinky": 0.6811
+        },
+        0.6811,
+        null
+      ],
+      "grip_large:0:l": [
+        {
+          "thumb": 1.8214,
+          "index": 0.6588,
+          "middle": 0.6922,
+          "ring": 0.6707,
+          "pinky": 0.6406
+        },
+        0.6406,
+        null
+      ],
+      "grip_large:0:r": [
+        {
+          "thumb": 1.8212,
+          "index": 0.6587,
+          "middle": 0.6922,
+          "ring": 0.6707,
+          "pinky": 0.6406
+        },
+        0.6406,
+        null
+      ],
+      "grip_large:4:l": [
+        {
+          "thumb": 1.8214,
+          "index": 0.6588,
+          "middle": 0.6922,
+          "ring": 0.6707,
+          "pinky": 0.6406
+        },
+        0.6406,
+        null
+      ],
+      "grip_large:4:r": [
+        {
+          "thumb": 1.8212,
+          "index": 0.6587,
+          "middle": 0.6922,
+          "ring": 0.6707,
+          "pinky": 0.6406
+        },
+        0.6406,
+        null
+      ],
+      "grip_large:8:l": [
+        {
+          "thumb": 1.8214,
+          "index": 0.6588,
+          "middle": 0.6922,
+          "ring": 0.6707,
+          "pinky": 0.6406
+        },
+        0.6406,
+        null
+      ],
+      "grip_large:8:r": [
+        {
+          "thumb": 1.8212,
+          "index": 0.6587,
+          "middle": 0.6922,
+          "ring": 0.6707,
+          "pinky": 0.6406
+        },
+        0.6406,
+        null
+      ]
+    }
+  },
+  "sha256": {
+    "blend": "efee7fd49f49877a795264609fd1e6bab72255fb4f30acd583a9797b01172e04",
+    "glb": "832ef65840cc70cf6af1ba5c5d42a15eb403a436190993b8762a6ed00a8cad10"
+  },
+  "result": "PASS"
+}

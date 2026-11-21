@@ -1,0 +1,22 @@
+name: Repository checks
+on:
+  pull_request:
+  push:
+    branches: [main, integration/m0-all]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repository:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: python3 tools/verify_repository.py
+      - name: Check pull request for conflict markers
+        if: github.event_name == 'pull_request'
+        run: git -c core.whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab diff --check "origin/$GITHUB_BASE_REF"...HEAD

@@ -1,6 +1,6 @@
 # G2 — WORLD FOUNDATION (ТЗ этапа)
 
-**Этап:** G2 дорожной карты ([ROADMAP_DRAFT](../planning/ROADMAP_DRAFT.md))
+**Этап:** G2 дорожной карты ([ROADMAP_DRAFT](../archive/ROADMAP_DRAFT.md))
 **Предыдущий этап:** [G1 TECHNICAL FOUNDATION](G1_TECHNICAL_FOUNDATION_STAGE.md)
 **Review-ветка:** `claude/g2-world-foundation`
 **База:** `deepseek/g1-00-runtime-baseline-candidate` @ `cb76aab` (OPTION C: P0–P7 runtime = основа CubeGame)

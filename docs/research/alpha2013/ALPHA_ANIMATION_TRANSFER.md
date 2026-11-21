@@ -2,7 +2,7 @@
 
 **Дата:** 2026-11-05. **Исполнитель:** Claude Code (архитектор/исследование). **Ветка:** `claude/s05a2-animation-transfer` (от `codex/s05a2-channel-binding` + `infra/multi-agent-workflow`).
 **Основание:** [D51](../../decisions/D51-s05a2-authorized-evidence-first.md), [D52](../../decisions/D52-weapon-grip-animation-direction.md), [D53](../../decisions/D53-original-animation-extraction-priority.md), [D54](../../decisions/D54-internal-alpha-research-prototype-policy.md), [D55](../../decisions/D55-animation-tooling-and-interactive-capture.md), [D57](../../decisions/D57-continuous-animation-transfer-authorization.md), [D58](../../decisions/D58-animation-research-autonomy.md).
-**Методичка для DeepSeek:** [ANIMATION_TRANSFER_PLAYBOOK.md](../../agents/ANIMATION_TRANSFER_PLAYBOOK.md).
+**Методичка для DeepSeek:** [ANIMATION_TRANSFER_PLAYBOOK.md](../../agents/archive/ANIMATION_TRANSFER_PLAYBOOK.md).
 **Статус:** `READY_FOR_REVIEW` (не ACCEPTED). S05B — NOT_AUTHORIZED, массовая конвертация не запускалась.
 
 ## 0. Маркеры

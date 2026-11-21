@@ -1,0 +1,65 @@
+{
+  "schema_version": "0.1.0",
+  "example": true,
+  "asset_profile": {
+    "id": "HUMAN_MALE_V3_MEDIEVAL_TUNIC",
+    "version": "0.1.0",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "style_lock": {
+    "id": "CHARACTER_ASSET_STYLE_LOCK",
+    "version": "0.1.0",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "geometry_reference": {
+    "id": "HUMAN_MALE_V3_CHEST_PACK",
+    "version": "0.1.0",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "template": {
+    "id": "CLOTHING_GENERATOR",
+    "version": "0.1.0",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "effective_seed": 20261117,
+  "run_id": "0000000000000000000000000000000000000000000000000000000000000000",
+  "attempt": 0,
+  "git_commit": "6ff03c1b8126ff894038d6983417309f6d0be998",
+  "view": "FRONT",
+  "camera_revision": "CHEST_ORTHO_V1",
+  "graph": {
+    "path": "runs/example/front/graph.api.json",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "inputs": [
+    {
+      "path": "pack/chest/front/carrier.png",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "path": "pack/chest/front/edit.png",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "outputs": [],
+  "software": {
+    "comfyui": "0.45.0",
+    "python": "3.13.14",
+    "torch": "2.14.1+cu130",
+    "blender": "5.2.4",
+    "gpu": "RTX 4060 Laptop",
+    "precision": "pending pilot",
+    "node_packs": [],
+    "launch_flags": [
+      "--novram",
+      "--reserve-vram",
+      "5",
+      "--disable-all-custom-nodes"
+    ]
+  },
+  "validation": {
+    "image": "PENDING",
+    "fit": "PENDING",
+    "review": "PENDING"
+  }
+}

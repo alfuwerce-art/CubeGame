@@ -4,7 +4,7 @@
 
 
 **Дата:** 2026-11-09. **Исполнитель:** DeepSeek Harness. **Ветка:** `deepseek/m0-content`
-(каталог `D:\Projects\CubeGame-deepseek`, план [M0_D88_FULL_WORK_PLAN](../planning/M0_D88_FULL_WORK_PLAN.md) §3 D1).
+(каталог `D:\Projects\CubeGame-deepseek`, план [M0_D88_FULL_WORK_PLAN](../planning/archive/M0_D88_FULL_WORK_PLAN.md) §3 D1).
 **STATUS: `READY_FOR_REVIEW`** — закрыта доказательная часть (таблица спавна исполнена из Alpha);
 позиции/плотность — `CUBEGAME_CONTRACT` до исполнения `Chunk_generateObjects`.
 

@@ -2,7 +2,7 @@
 
 Исследование и инструменты Claude Code по [D64](../../../docs/decisions/D64-claude-full-catalog-research-handoff.md).
 Отчёт: [S05B2_CLAUDE_FULL_RESEARCH_REPORT](../../../docs/reports/S05B2_CLAUDE_FULL_RESEARCH_REPORT.md) ·
-методичка массового прогона: [FULL_CATALOG_DEEPSEEK_PLAYBOOK](../../../docs/agents/FULL_CATALOG_DEEPSEEK_PLAYBOOK.md).
+методичка массового прогона: [FULL_CATALOG_DEEPSEEK_PLAYBOOK](../../../docs/agents/archive/FULL_CATALOG_DEEPSEEK_PLAYBOOK.md).
 
 Принцип тот же, что у анимаций: **исполнять байты `Cube.exe`** (`x86emu`/`drawmodel_emu`), а не угадывать
 по декомпиляции и не требовать живого захвата. Все производные данные Alpha — только в `.scratch/catalog`

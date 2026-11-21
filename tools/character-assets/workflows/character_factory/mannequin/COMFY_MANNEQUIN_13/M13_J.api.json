@@ -1,0 +1,277 @@
+{
+  "checkpoint": {
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "SDXL Base 1.0"
+    },
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    }
+  },
+  "lora": {
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Fictiverse VoxelXL (frozen strengths)"
+    },
+    "inputs": {
+      "model": [
+        "checkpoint",
+        0
+      ],
+      "clip": [
+        "checkpoint",
+        1
+      ],
+      "lora_name": "VoxelXL_v1.safetensors",
+      "strength_model": 0.64,
+      "strength_clip": 0.64
+    }
+  },
+  "positive": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "POSITIVE mannequin contract"
+    },
+    "inputs": {
+      "clip": [
+        "lora",
+        1
+      ],
+      "text": "voxel style, one full body blank neutral-grey adult humanoid game mannequin, 3D pixel voxel character from a game character editor, entirely built from rectangular cubic masses and tiny right-angle voxel steps, big square head with squared top and stepped chin, small ears with deep angular recess, uninterrupted blank face, clean narrow one-voxel chamfers, distinctive dense subtly pixelated planes, chunky straight edges, visibly deep front and side blocks, warm neutral graphite gray, small palms with thin segmented digits, short block feet standing on flat ground, short legs and narrow pelvis, soft key light with strong contact shadows, straight-on slightly elevated view, quiet medium gray background, clean render, single centered character fully in frame"
+    }
+  },
+  "negative": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "NEGATIVE mannequin contract"
+    },
+    "inputs": {
+      "clip": [
+        "lora",
+        1
+      ],
+      "text": "hair, eyebrows, eyes, nose, mouth, face details, facial lines, beard, expression, ears shaped like cubes, helmet, hood, gloves, clothes, shoulder pads, armor, belt, buckle, shirt, pants, skirt, boots, shoes, sword, equipment, accessories, nipples, genitals, saturated color, skin texture, round skull, smooth organic anatomy, round joints, ball joints, mechanical seams, robot, segmented torso plates, six fingers, missing digits, fused fingers, large hands, long legs, detailed toes, missing limbs, multiple figures, side profile, text, watermark, photographic, blur, triangular large bevels, huge diagonal chamfers, smooth spherical bevel, low poly papercraft, origami, tapering oval head, shiny clay, fabric, ankle cuffs, disconnected slabs"
+    }
+  },
+  "latent": {
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "Neutral reblocking from source landmarks"
+    },
+    "inputs": {
+      "pixels": [
+        "guide",
+        0
+      ],
+      "vae": [
+        "checkpoint",
+        2
+      ]
+    }
+  },
+  "guide": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Stepped voxel plate in exact owner-reference coordinates"
+    },
+    "inputs": {
+      "image": "mannequin_13_volume_owner_landmarks.png"
+    }
+  },
+  "guide_scale": {
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "Fixed framing, no crop"
+    },
+    "inputs": {
+      "image": [
+        "guide",
+        0
+      ],
+      "upscale_method": "nearest-exact",
+      "width": 768,
+      "height": 1024,
+      "crop": "disabled"
+    }
+  },
+  "edges": {
+    "class_type": "Canny",
+    "_meta": {
+      "title": "Silhouette + block plane edges"
+    },
+    "inputs": {
+      "image": [
+        "guide_scale",
+        0
+      ],
+      "low_threshold": 0.24,
+      "high_threshold": 0.52
+    }
+  },
+  "controlnet": {
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "ControlNet Union SDXL"
+    },
+    "inputs": {
+      "control_net_name": "controlnet-union-sdxl-1.0.safetensors"
+    }
+  },
+  "union_mode": {
+    "class_type": "SetUnionControlNetType",
+    "_meta": {
+      "title": "Canny / lineart union mode"
+    },
+    "inputs": {
+      "control_net": [
+        "controlnet",
+        0
+      ],
+      "type": "canny/lineart/anime_lineart/mlsd"
+    }
+  },
+  "guide_conditioning": {
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Pose and proportion conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "positive",
+        0
+      ],
+      "negative": [
+        "negative",
+        0
+      ],
+      "control_net": [
+        "union_mode",
+        0
+      ],
+      "image": [
+        "edges",
+        0
+      ],
+      "strength": 0.72,
+      "start_percent": 0,
+      "end_percent": 0.98
+    }
+  },
+  "sampler": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Single mannequin frame"
+    },
+    "inputs": {
+      "model": [
+        "lora",
+        0
+      ],
+      "positive": [
+        "guide_conditioning",
+        0
+      ],
+      "negative": [
+        "guide_conditioning",
+        1
+      ],
+      "latent_image": [
+        "masked_latent",
+        0
+      ],
+      "seed": 20261118,
+      "steps": 28,
+      "cfg": 5.6,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 0.42
+    }
+  },
+  "decode": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decoded RGB frame"
+    },
+    "inputs": {
+      "samples": [
+        "sampler",
+        0
+      ],
+      "vae": [
+        "checkpoint",
+        2
+      ]
+    }
+  },
+  "save": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Mannequin frame"
+    },
+    "inputs": {
+      "images": [
+        "pixel_scale",
+        0
+      ],
+      "filename_prefix": "M13_J"
+    }
+  },
+  "mask_image": {
+    "class_type": "LoadImageMask",
+    "_meta": {
+      "title": "Preserve blank face, ear recesses, fingers, pelvis"
+    },
+    "inputs": {
+      "image": "mannequin_13_voxel_protection_mask.png",
+      "channel": "red"
+    }
+  },
+  "masked_latent": {
+    "class_type": "SetLatentNoiseMask",
+    "_meta": {
+      "title": "Masked img2img on the source-derived geometry"
+    },
+    "inputs": {
+      "samples": [
+        "latent",
+        0
+      ],
+      "mask": [
+        "mask_image",
+        0
+      ]
+    }
+  },
+  "pixel_grid": {
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "384 × 512 pixel grid"
+    },
+    "inputs": {
+      "image": [
+        "decode",
+        0
+      ],
+      "upscale_method": "area",
+      "width": 384,
+      "height": 512,
+      "crop": "disabled"
+    }
+  },
+  "pixel_scale": {
+    "class_type": "ImageScale",
+    "_meta": {
+      "title": "2× pixel-preserving output"
+    },
+    "inputs": {
+      "image": [
+        "pixel_grid",
+        0
+      ],
+      "upscale_method": "nearest-exact",
+      "width": 768,
+      "height": 1024,
+      "crop": "disabled"
+    }
+  }
+}

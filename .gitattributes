@@ -1,0 +1,4 @@
+# Preserve upstream Factoria bytes and hashes on every checkout.
+tools/character-assets/** -text whitespace=cr-at-eol,-blank-at-eol,-blank-at-eof
+tools/character-assets/provenance.json text eol=lf !whitespace
+tools/character-assets/README.md text eol=lf !whitespace

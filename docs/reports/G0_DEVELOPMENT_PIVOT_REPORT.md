@@ -139,7 +139,7 @@ GDD не изменялся: `docs/planning/DECISIONS_001-036.md` не трон�
 - `M0 ALPHA FULL UNITY PORT` → `LEGACY / RESEARCH BASE / NOT A RELEASE TARGET`.
 - P7/P8/P9/P10 **не продолжаются**.
 - Ничего не удалено: код в ветках, отчёты в `docs/reports`, исследования в `docs/research/alpha2013`, фикстуры в тестах, decompilation evidence и таблицы на месте.
-- [M0_ALPHA_PARITY_BACKLOG.md](../planning/M0_ALPHA_PARITY_BACKLOG.md) остаётся полезным **реестром знаний**: он показывает, что именно в Alpha было понято не до конца. Он больше не является blocker-списком.
+- [M0_ALPHA_PARITY_BACKLOG.md](../planning/archive/M0_ALPHA_PARITY_BACKLOG.md) остаётся полезным **реестром знаний**: он показывает, что именно в Alpha было понято не до конца. Он больше не является blocker-списком.
 - Как пользоваться evidence: когда CubeGame нужен конкретный механизм, сначала проверяется существующая реализация, затем — backlog/research; решение принимается в формате research loop (`ACTIVE_STAGE` §6).
 
 ---
@@ -247,5 +247,5 @@ DoD и обязательный Player-сценарий — в ТЗ §8–§10.
 
 ## 12. Ссылки
 
-- [ACTIVE_STAGE](../ACTIVE_STAGE.md) · [Roadmap](../planning/ROADMAP_DRAFT.md) · [D93](../decisions/D93-development-pivot-own-game.md)
+- [ACTIVE_STAGE](../ACTIVE_STAGE.md) · [Roadmap](../archive/ROADMAP_DRAFT.md) · [D93](../decisions/D93-development-pivot-own-game.md)
 - [G0 reuse audit](../planning/G0_EXISTING_WORK_REUSE_AUDIT.md) · [G2 audit](../planning/G2_WORLD_FOUNDATION_AUDIT.md) · [G1 ТЗ](../stages/G1_TECHNICAL_FOUNDATION_STAGE.md)

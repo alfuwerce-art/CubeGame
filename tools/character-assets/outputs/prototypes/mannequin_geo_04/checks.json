@@ -1,0 +1,19 @@
+{
+  "glb_roundtrip": true,
+  "mesh_count": 38,
+  "bones": 40,
+  "sockets": 25,
+  "orthogonal_rest_faces": true,
+  "clips": [
+    "attack",
+    "editor_idle",
+    "grip_test",
+    "idle",
+    "walk"
+  ],
+  "support_m": [
+    0.00031982362270355225,
+    0.00032016204204410315
+  ],
+  "sha256": "8f65404ddeaa08ceec044cfcc395e453b9368bb45d29c55168f269c514bc836e"
+}

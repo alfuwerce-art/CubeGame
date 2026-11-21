@@ -1,11 +1,11 @@
 # tools/alpha_models/universal — универсальный конвейер Alpha → Unity (прототип)
 
-Продолжение системы одного гуманоида (Codex, 2026-11-06): [ANIMATION_SYSTEM_PLAYBOOK](../../../docs/agents/ANIMATION_SYSTEM_PLAYBOOK.md), [отчёт](../../../docs/reports/S05A2_CLAUDE_CONTINUATION_REPORT.md).
+Продолжение системы одного гуманоида (Codex, 2026-11-06): [ANIMATION_SYSTEM_PLAYBOOK](../../../docs/agents/archive/ANIMATION_SYSTEM_PLAYBOOK.md), [отчёт](../../../docs/reports/S05A2_CLAUDE_CONTINUATION_REPORT.md).
 `action_baker.py` автоматизирует существующий oracle и ведёт полный реестр отказов; `validate_oracle.py` проверяет его по живым pre-draw захватам; `weapon_locomotion.py` — отдельный слой оружия. S05B не разрешён.
 
 Исследование: [UNIVERSAL_ANIMATION_SYSTEM_RESEARCH.md](../../../docs/research/alpha2013/UNIVERSAL_ANIMATION_SYSTEM_RESEARCH.md) ·
 архитектура (DRAFT): [UNIVERSAL_ASSET_ANIMATION_PIPELINE.md](../../../docs/architecture/UNIVERSAL_ASSET_ANIMATION_PIPELINE.md) ·
-методичка: [UNIVERSAL_TRANSFER_PLAYBOOK.md](../../../docs/agents/UNIVERSAL_TRANSFER_PLAYBOOK.md) ·
+методичка: [UNIVERSAL_TRANSFER_PLAYBOOK.md](../../../docs/agents/archive/UNIVERSAL_TRANSFER_PLAYBOOK.md) ·
 результаты: [UNIVERSAL_TRANSFER_PROTOTYPE_REPORT.md](../../../docs/research/alpha2013/UNIVERSAL_TRANSFER_PROTOTYPE_REPORT.md).
 
 | Модуль | Назначение |
@@ -14,7 +14,7 @@
 | `alpha_static.py` | вид → внешность (эмуляция), реестр индекс → `.cub`, размеры моделей, имена-подсказки; закреплённый SHA256 сборки |
 | `creature_rig.py` | блоки отрисовки `drawModel`, правила якорей, разрешение рига, семейства движения, исключения |
 | `uclip.py` | захват → клипы любого проверенного плана тела (ходьба, покой), проверки |
-| `param_walk.py` | **параметрическая ходьба**: формулы `drawModel` состояния 0 (эталон для C#), члены формулы и их доказательность, классификатор `classify`/`coverage`, клип/спецификация для Unity, проверка против захвата ([исследование](../../../docs/research/alpha2013/PARAMETRIC_WALK_SYSTEM.md), [спецификация](../../../docs/architecture/PARAMETRIC_LOCOMOTION_SPEC.md), [методичка](../../../docs/agents/PARAMETRIC_WALK_PLAYBOOK.md)) |
+| `param_walk.py` | **параметрическая ходьба**: формулы `drawModel` состояния 0 (эталон для C#), члены формулы и их доказательность, классификатор `classify`/`coverage`, клип/спецификация для Unity, проверка против захвата ([исследование](../../../docs/research/alpha2013/PARAMETRIC_WALK_SYSTEM.md), [спецификация](../../../docs/architecture/PARAMETRIC_LOCOMOTION_SPEC.md), [методичка](../../../docs/agents/archive/PARAMETRIC_WALK_PLAYBOOK.md)) |
 | `pipeline.py` | CLI: `scan`, `build-clips`, `prepare-unity` (+ `"locomotion": "formula"`, пишет `Data/contract.json`), `batch`, `param-walk-validate`, `param-walk-coverage` |
 | `contract.py` | **единый контракт** сущности/частей/анимаций (`cubegame.entity_contract/1`): категория по структуре, роли частей, каналы walk/idle/actions/equipment/visibility/lifecycle, происхождение, профили действий как записи доказательств ([архитектура](../../../docs/architecture/UNIVERSAL_ENTITY_CONTRACT.md)) |
 | `transfer_planner.py` | **планировщик переноса**: `scan`, `plan` (AUTO_READY / NEEDS_RESEARCH / BLOCKED, задания, `coverage.csv`), `validate`, `pilot` (только allowlist эталонов), `batch` (отказ до S05B) |

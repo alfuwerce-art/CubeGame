@@ -1,7 +1,7 @@
 # Параметрическая локомоция Alpha → Unity: техническая спецификация и интерфейсы
 
 **Статус: DRAFT** (предложение архитектора, не утверждено продюсером). **Дата:** 2026-11-05. **Автор:** Claude Code.
-**Основание:** [PARAMETRIC_WALK_SYSTEM.md](../research/alpha2013/PARAMETRIC_WALK_SYSTEM.md) (формулы, точность, покрытие). **Расширяет:** [UNIVERSAL_ASSET_ANIMATION_PIPELINE.md](UNIVERSAL_ASSET_ANIMATION_PIPELINE.md) §4 (подход B теперь реализован для ходьбы). **Методичка исполнителя:** [PARAMETRIC_WALK_PLAYBOOK.md](../agents/PARAMETRIC_WALK_PLAYBOOK.md).
+**Основание:** [PARAMETRIC_WALK_SYSTEM.md](../research/alpha2013/PARAMETRIC_WALK_SYSTEM.md) (формулы, точность, покрытие). **Расширяет:** [UNIVERSAL_ASSET_ANIMATION_PIPELINE.md](UNIVERSAL_ASSET_ANIMATION_PIPELINE.md) §4 (подход B теперь реализован для ходьбы). **Методичка исполнителя:** [PARAMETRIC_WALK_PLAYBOOK.md](../agents/archive/PARAMETRIC_WALK_PLAYBOOK.md).
 **Границы:** локальный исследовательский прототип (D54). Не S05B, не production-Unity; данные Alpha (внешности, захваты, модели) — только `.scratch`. Перед релизом — собственные/лицензированные ассеты.
 
 ---

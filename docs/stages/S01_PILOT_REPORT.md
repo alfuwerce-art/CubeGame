@@ -172,7 +172,7 @@ PlayMode-кейсы: `WorldViewBuildsChunksWithColliders` (0.036 с) — 4 ча�
 
 Пакет `com.unity.pipeline` **не установлен** (`PIPELINE=NOT_INSTALLED`). Предложение с точными
 изменениями (`Packages/manifest.json` + `packages-lock.json`), командой установки, проверкой и
-откатом — в [UNITY_PIPELINE_PROPOSAL.md](../agents/UNITY_PIPELINE_PROPOSAL.md). Актуальная
+откатом — в [UNITY_PIPELINE_PROPOSAL.md](../agents/archive/UNITY_PIPELINE_PROPOSAL.md). Актуальная
 версия пакета по CLI — `0.9.1-exp.1` (experimental), требует явного разрешения продюсера.
 
 ## 9. Следующие шаги

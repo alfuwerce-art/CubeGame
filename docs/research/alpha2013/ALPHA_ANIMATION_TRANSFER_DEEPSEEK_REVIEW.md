@@ -1,7 +1,7 @@
 # S05A-2: приёмка техники переноса анимаций Claude и проверка воспроизводимости (DeepSeek)
 
 **Дата:** 2026-11-05. **Исполнитель:** DeepSeek Harness (основной локальный разработчик). **Ветка:** `deepseek/s05a2-animation-transfer-review` (от `claude/s05a2-animation-transfer`).
-**Основание:** результаты Claude Code по S05A-2 ([ALPHA_ANIMATION_TRANSFER.md](ALPHA_ANIMATION_TRANSFER.md), [ANIMATION_TRANSFER_PLAYBOOK.md](../../agents/ANIMATION_TRANSFER_PLAYBOOK.md)); решения D51–D58.
+**Основание:** результаты Claude Code по S05A-2 ([ALPHA_ANIMATION_TRANSFER.md](ALPHA_ANIMATION_TRANSFER.md), [ANIMATION_TRANSFER_PLAYBOOK.md](../../agents/archive/ANIMATION_TRANSFER_PLAYBOOK.md)); решения D51–D58.
 **Статус:** `READY_FOR_REVIEW` (не ACCEPTED). S05B — NOT_AUTHORIZED, массовая обработка не запускалась.
 
 ## 0. Маркеры (итог приёмки)

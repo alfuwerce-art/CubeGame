@@ -1,0 +1,25 @@
+{
+  "result": "PASS",
+  "bone_count": 20,
+  "clip_frames": 57,
+  "sampled_base_rotations": 1140,
+  "max_quaternion_component_error": 0.0,
+  "rest_matrices_exact": true,
+  "clip_ranges_exact": {
+    "idle": [
+      1.0,
+      25.0
+    ],
+    "walk": [
+      1.0,
+      17.0
+    ],
+    "attack": [
+      1.0,
+      15.0
+    ]
+  },
+  "baseline_blend_sha256": "a844883bb62fa8324e253ef0b513a5429e427fce259f7ebbd2b9a94be9742087",
+  "current_blend_sha256": "46e95ac4d7f56efe79eaf16b872d3c801c6257a520b6d4b8f225a3d3313f4b7c",
+  "scope": "Local rotations and rest rig are compared. Pelvis location is separately validated with the new ground solve."
+}

@@ -14,8 +14,8 @@
 
 ## Ссылки
 
-- [Задание M0-00U](../stages/M0_00U_UNITY_PARITY_VALIDATION_TASK.md)
-- [План M0](../planning/M0_FULL_ALPHA_INTEGRATION.md)
+- [Задание M0-00U](../stages/archive/M0_00U_UNITY_PARITY_VALIDATION_TASK.md)
+- [План M0](../planning/archive/M0_FULL_ALPHA_INTEGRATION.md)
 - [D71](D71-parallel-isolated-worktrees.md)
 
 **Контрольный статус:** `UNITY_VALIDATION_AUTHORIZED / INTEGRATION_NOT_VERIFIED`. До реальных запусков Unity нельзя писать `UNITY_PASS`.

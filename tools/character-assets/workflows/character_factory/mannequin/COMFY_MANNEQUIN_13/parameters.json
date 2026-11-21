@@ -1,0 +1,167 @@
+{
+  "task": "COMFY-MANNEQUIN-13",
+  "status": "READY_FOR_OWNER_VISUAL_REVIEW",
+  "selected_case": "M13_F",
+  "seed": 20261118,
+  "canvas": [
+    768,
+    1024
+  ],
+  "batch": 1,
+  "steps": 28,
+  "cfg": 5.6,
+  "sampler": "dpmpp_2m",
+  "scheduler": "karras",
+  "denoise": 0.57,
+  "controlnet": {
+    "mode": "canny/lineart/anime_lineart/mlsd",
+    "strength": 0.63,
+    "start": 0,
+    "end": 0.98,
+    "canny_low": 0.18,
+    "canny_high": 0.42
+  },
+  "style_lora": {
+    "model_strength": 0.6,
+    "clip_strength": 0.6
+  },
+  "inpainting": "VAEEncode + LoadImageMask (red) + SetLatentNoiseMask",
+  "reference": {
+    "name": "human_warrior_reference_768x1024.png",
+    "sha256": "569ef0b5a79b24fe9fbb886508a06d50900c25f91738699c0b3bfdb4843d1a08"
+  },
+  "guide": {
+    "name": "mannequin_13_owner_landmarks_lit.png",
+    "sha256": "ef8e3f527eac58db54af565b36dcd3b1af1d841e32e3b371b9f03f85f62ec99a"
+  },
+  "mask": {
+    "name": "mannequin_13_shape_mask.png",
+    "sha256": "fd080af6cd7e36384663ab226c74d58146668083c7ec5a74783bc786c3f74673"
+  },
+  "png_sha256": "2af4f54795dfe57b13c9657bf0ca3a77928e279a4951deb7a3815cecb1dca347",
+  "models": {
+    "checkpoint": {
+      "file": "checkpoints\\sd_xl_base_1.0.safetensors",
+      "bytes": 6938078334,
+      "sha256": "31e35c80fc4829d14f90153f4c74cd59c90b779f6afe05a74cd6120b893f7e5b"
+    },
+    "lora": {
+      "file": "loras\\VoxelXL_v1.safetensors",
+      "bytes": 912554516,
+      "sha256": "7d9a5f11e1b38d97f75d2b84bfb5bb3bf95cd0e5f2500b002d13374eb4f88b5c"
+    },
+    "controlnet": {
+      "file": "controlnet\\controlnet-union-sdxl-1.0.safetensors",
+      "bytes": 2512030408,
+      "sha256": "a9e13fd61f3193887791c8a0dd07a07202174dc47d5ddaea94ea1344f07c7467"
+    }
+  },
+  "runtime": {
+    "comfyui": "0.45.0",
+    "frontend": "1.58.5",
+    "python": "3.13.14",
+    "torch": "2.14.1+cu130",
+    "gpu": "RTX 4060 Laptop GPU, 8188 MiB",
+    "driver": "610.47",
+    "profile": "--novram --reserve-vram 5 --offline --disable-all-custom-nodes"
+  },
+  "sampling": "psutil process working set and system available RAM, NVML whole-GPU dedicated VRAM, every 0.25 s",
+  "runs": [
+    {
+      "case": "A",
+      "seconds": 67.93,
+      "rss_before": 923,
+      "rss_peak": 14224,
+      "vram_before": 1835,
+      "vram_peak": 3983,
+      "vram_delta": 2148,
+      "ram_min": 3.06,
+      "denoise": 0.52,
+      "cn": 0.65,
+      "sha": "a6a0b2173f45322dd48bd247bfd65882fb9d38708d3289379a2377eedb3afd67",
+      "guide": "92fedadc305be69299426a1da2810efce9ab4eaf6c1b82c9bf09229ed4d441dd",
+      "api": "4cf8dd0b887595c8c8539958827d9a72d1fdccd49ad7cf7b8f15d38b4460cfc0",
+      "samples": 271
+    },
+    {
+      "case": "B",
+      "seconds": 38.35,
+      "rss_before": 13664,
+      "rss_peak": 13683,
+      "vram_before": 1903,
+      "vram_peak": 3983,
+      "vram_delta": 2080,
+      "ram_min": 3.76,
+      "denoise": 0.35,
+      "cn": 0.65,
+      "sha": "c2878b7bb59caf4abf4cdce858fd0ac112327238f54d6801fadc8e2c4d9f5ace",
+      "guide": "92fedadc305be69299426a1da2810efce9ab4eaf6c1b82c9bf09229ed4d441dd",
+      "api": "026b0b9cbdaf07d8c7d6cd354c84e1f85f5fe1722d5cc52f27fa92fda2816de7",
+      "samples": 153
+    },
+    {
+      "case": "C",
+      "seconds": 45.37,
+      "rss_before": 13673,
+      "rss_peak": 13708,
+      "vram_before": 1903,
+      "vram_peak": 3986,
+      "vram_delta": 2083,
+      "ram_min": 3.77,
+      "denoise": 0.75,
+      "cn": 0.44,
+      "sha": "c59f39c1f1ad94216abfd0b4e9e711920d75d93b48e29f4febe870ff1f12430d",
+      "guide": "92fedadc305be69299426a1da2810efce9ab4eaf6c1b82c9bf09229ed4d441dd",
+      "api": "0fd006690543fd87bd39b4b0e6ae13e0c14bb01556ff4493acd0c5b9f26e4323",
+      "samples": 181
+    },
+    {
+      "case": "D",
+      "seconds": 43.36,
+      "rss_before": 13674,
+      "rss_peak": 13675,
+      "vram_before": 1903,
+      "vram_peak": 3981,
+      "vram_delta": 2078,
+      "ram_min": 3.82,
+      "denoise": 1,
+      "cn": 0.62,
+      "sha": "c1a6c9fefa569e10fba44e93105f86d3735e4acd416a218ba86ce6e94d88cb89",
+      "guide": "92fedadc305be69299426a1da2810efce9ab4eaf6c1b82c9bf09229ed4d441dd",
+      "api": "7862d1154e215c4c21b7b84d8d3ae3b4f7cd05abab526bc6b89a72793627f1a6",
+      "samples": 173
+    },
+    {
+      "case": "E",
+      "seconds": 47.37,
+      "rss_before": 13675,
+      "rss_peak": 13710,
+      "vram_before": 1888,
+      "vram_peak": 3956,
+      "vram_delta": 2068,
+      "ram_min": 4.25,
+      "denoise": 0.62,
+      "cn": 0.57,
+      "sha": "3df3e2ab10521cbdd7bafb1d0df3952c445c0ad7ea7591c7a46e7bc9dbfc77bb",
+      "guide": "ef8e3f527eac58db54af565b36dcd3b1af1d841e32e3b371b9f03f85f62ec99a",
+      "api": "752d74147a702e38ee26ce71ed35c9826183c973cfc25e114c846e25909b2dda",
+      "samples": 189
+    },
+    {
+      "case": "F",
+      "seconds": 43.36,
+      "rss_before": 13690,
+      "rss_peak": 13693,
+      "vram_before": 1876,
+      "vram_peak": 3959,
+      "vram_delta": 2083,
+      "ram_min": 4.2,
+      "denoise": 0.57,
+      "cn": 0.63,
+      "sha": "2af4f54795dfe57b13c9657bf0ca3a77928e279a4951deb7a3815cecb1dca347",
+      "guide": "ef8e3f527eac58db54af565b36dcd3b1af1d841e32e3b371b9f03f85f62ec99a",
+      "api": "c98a345a33a6736b72bcff8226738978227b2d4800e0c9ee2af18d1fd2d103a0",
+      "samples": 173
+    }
+  ]
+}

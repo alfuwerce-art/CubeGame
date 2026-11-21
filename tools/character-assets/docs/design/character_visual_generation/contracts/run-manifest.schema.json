@@ -1,0 +1,334 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Factoria DESIGN-01 run-manifest",
+  "description": "Project schema, not a production API. Cross-contract rules are in ASSET_DATA_CONTRACTS.md.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "example": {
+      "type": "boolean"
+    },
+    "asset_profile": {
+      "$ref": "#/$defs/pin"
+    },
+    "style_lock": {
+      "$ref": "#/$defs/pin"
+    },
+    "geometry_reference": {
+      "$ref": "#/$defs/pin"
+    },
+    "template": {
+      "$ref": "#/$defs/pin"
+    },
+    "effective_seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "git_commit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "view": {
+      "$ref": "#/$defs/view"
+    },
+    "camera_revision": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "graph": {
+      "$ref": "#/$defs/artifact"
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/artifact"
+      },
+      "minItems": 1
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "$ref": "#/$defs/role"
+          },
+          "source": {
+            "enum": [
+              "COMFYUI_RGB",
+              "BLENDER_METRIC",
+              "TEMPLATE",
+              "SEGMENTATION",
+              "COMFYUI_ESTIMATE"
+            ]
+          },
+          "file": {
+            "$ref": "#/$defs/artifact"
+          },
+          "view": {
+            "$ref": "#/$defs/view"
+          }
+        },
+        "required": [
+          "role",
+          "source",
+          "file"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "software": {
+      "type": "object",
+      "properties": {
+        "comfyui": {
+          "type": "string",
+          "minLength": 1
+        },
+        "python": {
+          "type": "string",
+          "minLength": 1
+        },
+        "torch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blender": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gpu": {
+          "type": "string",
+          "minLength": 1
+        },
+        "precision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "node_packs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "launch_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "comfyui",
+        "python",
+        "torch",
+        "blender",
+        "gpu",
+        "precision",
+        "node_packs",
+        "launch_flags"
+      ],
+      "additionalProperties": false
+    },
+    "memory": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "const": "MiB"
+        },
+        "rss_peak": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ram_available_min": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gpu_cold_baseline": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gpu_submit_baseline": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gpu_peak": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "interval_ms": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "elapsed_s": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "unit",
+        "rss_peak",
+        "ram_available_min",
+        "gpu_cold_baseline",
+        "gpu_submit_baseline",
+        "gpu_peak",
+        "interval_ms",
+        "elapsed_s"
+      ],
+      "additionalProperties": false
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "enum": [
+            "PENDING",
+            "REJECTED",
+            "CANDIDATE"
+          ]
+        },
+        "fit": {
+          "enum": [
+            "NOT_APPLICABLE",
+            "PENDING",
+            "FAILED",
+            "PASS"
+          ]
+        },
+        "review": {
+          "enum": [
+            "PENDING",
+            "REWORK",
+            "OWNER_APPROVED"
+          ]
+        },
+        "report": {
+          "$ref": "#/$defs/artifact"
+        }
+      },
+      "required": [
+        "image",
+        "fit",
+        "review"
+      ],
+      "additionalProperties": false
+    },
+    "mesh_revision": {
+      "$ref": "#/$defs/pin"
+    },
+    "parent_run_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "changed_parameter": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "example",
+    "asset_profile",
+    "style_lock",
+    "geometry_reference",
+    "template",
+    "effective_seed",
+    "run_id",
+    "attempt",
+    "git_commit",
+    "view",
+    "camera_revision",
+    "graph",
+    "inputs",
+    "outputs",
+    "software",
+    "validation"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "pin": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "view": {
+      "enum": [
+        "FRONT",
+        "BACK",
+        "LEFT",
+        "RIGHT",
+        "TOP",
+        "THREE_QUARTER"
+      ]
+    },
+    "role": {
+      "enum": [
+        "rgb_raw",
+        "rgb_worn",
+        "rgba_preview",
+        "texture_uv",
+        "alpha",
+        "component_id",
+        "material_id",
+        "silhouette",
+        "depth_metric",
+        "normal",
+        "camera",
+        "landmarks",
+        "blend",
+        "glb",
+        "validation"
+      ]
+    }
+  }
+}
