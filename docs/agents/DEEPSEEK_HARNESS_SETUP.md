@@ -13,3 +13,10 @@
 
 ## Границы
 Профиль и плагины вне задачи не изменять; не устанавливать инструменты по умолчанию. Инструкции проверки Unity — [UNITY_CLI_PROTOCOL](UNITY_CLI_PROTOCOL.md); распределение исполнителей — [MULTI_AGENT_WORKFLOW](MULTI_AGENT_WORKFLOW.md).
+
+## Unreal-first (текущая задача)
+Контракт [U0–U4](../experiments/UNREAL_FIRST_PLAYABLE.md). Настройки `cubegame-dev` не переписывать; отдельный `cubegame-unreal` preset возможен после проверки реальной версии/формата DSH. Сначала проверить установленную UE, Unreal MCP, Editor Python, C++ toolchain и реальное MCP-соединение. Наличие документа или теста hook не означает, что инструмент подключён.
+
+Весь экспериментальный проект — `Unreal/CubeGameTrial/` внутри CubeGame. C++-first: источники `Source/` с осмысленными комментариями и тестами; Editor Python — для повторяемых изменений контента. Blueprint только при объективной пользе. Не менять `Assets/`, `Packages/`, `ProjectSettings/` Unity и глобальные DSH-плагины в рамках этого эксперимента.
+
+MCP включать только локально, после проверки конфигурации и реальной безопасности endpoint. Командные hooks только как дополнительная эвристика. Отчёт `ENGINE_VERSION / TOOLCHAIN / MCP_CALL / C++_BUILD / PYTHON_RUN / PIE / WIN64_BUILD / FPS / RAM / VRAM / BLOCKERS`.
