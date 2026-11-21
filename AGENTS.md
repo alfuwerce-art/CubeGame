@@ -4,7 +4,7 @@
 Перед задачей прочитать `PROJECT_MEMORY.md`, `docs/ACTIVE_STAGE.md`, этот файл. Затем только относящиеся к задаче разделы `docs/GDD.md`, `docs/ROADMAP.md`, ADR, реестр решений и один профильный skill. Не загружать всю документацию.
 
 ## Проект
-Самостоятельная Windows-first 3D voxel/pixel action RPG на Unity. Единственный репозиторий `alfuwerce-art/CubeGame`, рабочий каталог `D:\Projects\CubeGame`.
+Самостоятельная Windows-first 3D voxel/pixel action RPG. Ближайшая работа — Unreal-first игровой пилот; Unity-проект сохраняется. Движок релиза не меняется без итогового решения владельца. Единственный репозиторий `alfuwerce-art/CubeGame`, рабочий каталог `D:\Projects\CubeGame`.
 `archive/` хранит исторические материалы, не содержит активных инструкций. Не использовать архив как ТЗ, исходную игру, готовый игровой контент или источник разрешений.
 
 ## Полномочия
@@ -23,4 +23,4 @@
 6. Собственные ветки; не выполнять force-push, удаление истории или merge без явной операции владельца. Рабочая задача максимум `READY_FOR_OWNER_REVIEW`.
 
 ## Технология
-Unity Editor строго по `ProjectSettings/ProjectVersion.txt`; одна сессия Editor на проект. Архитектурный принцип — [ADR-0001](docs/architecture/ADR-0001-modular-monolith.md). Локальный DSH-профиль и проверки — [DSH setup](docs/agents/DEEPSEEK_HARNESS_SETUP.md). Скрипты и хуки не заменяют права ОС и независимую проверку.
+Архитектурный принцип — модульный монолит [ADR-0001](docs/architecture/ADR-0001-modular-monolith.md). Unreal-пилот: [U0–U4](docs/experiments/UNREAL_FIRST_PLAYABLE.md), [C++-first ADR-кандидат](docs/architecture/ADR-0002-unreal-cpp-first-proposal.md). В игре C++ по умолчанию; Blueprint — для проверенных редакторских нужд, Python — только редактор. Unreal хранится в `Unreal/CubeGameTrial/`; Unity Assets/Packages/ProjectSettings не изменять. Фактическую версию движка определять локально. Локальный DSH-профиль и проверки — [DSH setup](docs/agents/DEEPSEEK_HARNESS_SETUP.md). Скрипты и хуки не заменяют права ОС и независимую проверку.

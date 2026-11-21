@@ -1,9 +1,11 @@
 # CubeGame
-Самостоятельная 3D voxel/pixel action RPG на Unity, Windows-first. Процедурный мир, исследование, боёвка, NPC, прогрессия и последствия действий.
+Самостоятельная 3D voxel/pixel action RPG для Windows. Сохранённая техническая база — Unity; ближайший эксперимент — Unreal C++-first. Движок релиза определяется по результатам испытания. Процедурный мир, исследование, боёвка, NPC, прогрессия и последствия действий.
 
 **Старт для разработчика:** [AGENTS](AGENTS.md) · [Memory](PROJECT_MEMORY.md) · [Active Stage](docs/ACTIVE_STAGE.md).
 
 **Игра:** [Concept](docs/CONCEPT.md) · [GDD](docs/GDD.md) · [Roadmap](docs/ROADMAP.md) · [Decisions](docs/design/DECISIONS.md) · [Art](docs/art/ART_DIRECTION.md).
+
+**Unreal-пилот:** [First Playable](docs/experiments/UNREAL_FIRST_PLAYABLE.md) · [C++-first архитектура](docs/architecture/ADR-0002-unreal-cpp-first-proposal.md) · [Roadmap](docs/ROADMAP.md).
 
 **Технология:** [ADR-0001](docs/architecture/ADR-0001-modular-monolith.md) · [Harness](docs/agents/HARNESS_ARCHITECTURE.md) · [Skills](docs/agents/SKILLS_INDEX.md) · [Unity CLI](docs/agents/UNITY_CLI_PROTOCOL.md).
 
