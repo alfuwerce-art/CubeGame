@@ -13,7 +13,8 @@
 ## Карта источников истины
 
 - [GDD](GDD.md) — утверждённый игровой опыт и механики; `UNDECIDED` не означает разрешённую импровизацию.
-- [Art direction (исторический кандидат)](https://github.com/alfuwerce-art/CubeGame/blob/docs/gdd-first-draft-20261106/docs/art/ART_DIRECTION_DRAFT.md) — направление для ревизии, **не** актуальный эталон всех ассетов.
+- [Art Direction](art/ART_DIRECTION.md) — текущая сводка-кандидат; художественные эталоны принимает владелец; исторические источники там же.
+- [Quality attributes](QUALITY_ATTRIBUTES.md) — что требуется реально проверять.
 - [Roadmap](ROADMAP.md) — G0–G15, последовательность игровых результатов.
 - [Decisions](design/DECISIONS.md) и [D93](decisions/D93-development-pivot-own-game.md) / [D95](decisions/D95-single-repository-close-model-pipeline.md) — решения и отмены.
 - [Architecture ADR-0001](architecture/ADR-0001-modular-monolith.md) — модульный монолит. [ADR-0002 (отдельный PR)](https://github.com/alfuwerce-art/CubeGame/pull/1) — слои Data / Game Logic / View / Input / UI / Save-Load / Utils; не считать реализацию завершённой.
@@ -29,3 +30,7 @@ D95 закрывает Factoria как отдельный производств
 ## Правило навигации
 
 Concept объясняет, **что и зачем** мы делаем, но не дублирует детальный GDD. Правила процесса находятся в AGENTS/Harness, кодовые контракты — в ADR. При конфликте выводить конкретные источники на согласование владельца; не менять игру молча.
+
+## Исследовательские направления и инструменты
+
+[Сравнение трёх подходов к ИИ-разработке](agents/AI_WORKFLOW_COMPARISON.md): документация Markdown/Obsidian, Harness² и Unreal scripting. [D96](decisions/D96-ai-harness-unreal-research.md) фиксирует исследовательское направление, не изменение выбранного Unity-движка. [Индекс навыков](agents/SKILLS_INDEX.md) и [оценка плагинов](agents/DSH_PLUGIN_EVALUATION.md) — инструменты для задач. [Unreal spike](research/UNREAL_SCRIPTING_SPIKE.md) проводится отдельно и только по разрешению.
