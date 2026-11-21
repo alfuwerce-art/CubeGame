@@ -7,6 +7,8 @@ from urllib.parse import unquote, urlsplit
 
 STAGE = "REPOSITORY_CONSOLIDATION_FINAL"
 REVIEW = "READY_FOR_OWNER_REVIEW"
+RESULT_CODES = {REVIEW, "IN_PROGRESS", "BLOCKED_ON_OWNER_DECISION"}
+PHASE_FIELDS = ("Код этапа", "Результат ревизии")
 DISPOSITION = "REVIEW_CLOSED / NOT_SELECTED"
 OWNER_DECISION = "docs/decisions/2026-11-21-human-male-base-v1.md"
 FACTORY_ACTIVE = (
@@ -125,13 +127,40 @@ def required_values(documents, name, values):
             yield f"{name}: missing required current value: {value}"
 
 
+def phase_values(text):
+    current = prose(text)
+    values = []
+    for field in PHASE_FIELDS:
+        matches = re.findall(r"(?m)^\*\*" + field + r"\*\*\s+`([A-Z][A-Z0-9_]+)`[ \t]*$", current)
+        values.append(matches[0] if len(matches) == 1 else None)
+    return tuple(values)
+
+
+def check_phases(entries):
+    errors = []
+    phases = set()
+    for name, content in entries:
+        phase, result = phase_values(content)
+        if phase is None or result not in RESULT_CODES:
+            errors.append(f"{name}: expected exactly one stage and a recognized review status")
+            continue
+        phases.add((phase, result))
+        if phase == STAGE:
+            for value in ("HUMAN_MALE_BASE_V1", DISPOSITION):
+                if value not in prose(content):
+                    errors.append(f"{name}: current audit is missing the closed mannequin decision")
+    if len(phases) > 1:
+        names = ", ".join(name for name, _ in entries)
+        errors.append(f"Stage or review status conflict: {names}")
+    return errors
+
+
 def validate_game(root):
     documents, errors = read_documents(root, GAME_ACTIVE, GAME_ARCHIVE)
-    shared = (STAGE, REVIEW, "HUMAN_MALE_BASE_V1", DISPOSITION)
-    for name in ("docs/ACTIVE_STAGE.md", "PROJECT_MEMORY.md"):
-        errors.extend(required_values(documents, name, shared))
+    stages = ("docs/ACTIVE_STAGE.md", "PROJECT_MEMORY.md")
+    errors.extend(check_phases([(name, documents.get(name, "")) for name in stages]))
     errors.extend(required_values(documents, OWNER_DECISION, ("21.11.2026", DISPOSITION)))
-    errors.extend(required_values(documents, "AGENTS.md", ("CubeGame владеет", "Factoria производит", STAGE)))
+    errors.extend(required_values(documents, "AGENTS.md", ("CubeGame владеет", "Factoria производит")))
     errors.extend(required_values(documents, "docs/GDD.md", ("D63", "D80", "D92", "D94", "UNDECIDED")))
     decisions = documents.get("docs/design/DECISIONS.md", "")
     for decision, reference in (
@@ -151,8 +180,8 @@ def validate_game(root):
 
 def validate_factoria(root):
     documents, errors = read_documents(root, FACTORY_ACTIVE, FACTORY_ARCHIVE)
-    errors.extend(required_values(documents, "AGENTS.md", ("CubeGame владеет", "Factoria производит", STAGE)))
-    errors.extend(required_values(documents, "docs/PRODUCTION_MEMORY.md", (STAGE, REVIEW, "HUMAN_MALE_BASE_V1", DISPOSITION)))
+    errors.extend(required_values(documents, "AGENTS.md", ("CubeGame владеет", "Factoria производит")))
+    errors.extend(check_phases([("docs/PRODUCTION_MEMORY.md", documents.get("docs/PRODUCTION_MEMORY.md", ""))]))
     historical = documents.get("docs/HUMAN_MALE_BASE_V1_REVIEW.md", "")
     if not any(DISPOSITION in line for line in historical.splitlines()[:9]):
         errors.append("docs/HUMAN_MALE_BASE_V1_REVIEW.md: missing final owner disposition near the archive heading")
@@ -175,6 +204,9 @@ def main():
     errors = [] if args.cubegame_only else validate_factoria(args.factoria.resolve())
     if args.cubegame:
         errors.extend(validate_game(args.cubegame.resolve()))
+    if args.cubegame and not args.cubegame_only and not errors:
+        paths = (args.cubegame / "docs/ACTIVE_STAGE.md", args.factoria / "docs/PRODUCTION_MEMORY.md")
+        errors.extend(check_phases([(str(path), path.read_text(encoding="utf-8-sig")) for path in paths]))
     if errors:
         print("\n".join(errors))
         return 1
