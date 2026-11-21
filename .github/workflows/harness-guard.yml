@@ -4,7 +4,10 @@ on:
     paths:
       - 'tools/harness/**'
       - '.dsh/**'
-      - 'docs/agents/HARNESS_*.md'
+      - 'docs/**'
+      - 'AGENTS.md'
+      - 'PROJECT_MEMORY.md'
+      - 'README.md'
   push:
     branches:
       - 'review/harness-layering-20261121'
