@@ -1,0 +1,27 @@
+name: Harness self-check
+on:
+  pull_request:
+    paths:
+      - 'tools/harness/**'
+      - '.dsh/**'
+      - 'docs/agents/HARNESS_*.md'
+  push:
+    branches:
+      - 'review/harness-layering-20261121'
+    paths:
+      - 'tools/harness/**'
+      - '.dsh/**'
+jobs:
+  node-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify hook syntax
+        run: node --check tools/harness/hook-pretool.mjs && node --check tools/harness/preflight.mjs
+      - name: Test hook decisions
+        run: node --test tools/harness/hook-pretool.test.mjs
+      - name: Validate example JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('.dsh/hooks.example.json', 'utf8'))"
