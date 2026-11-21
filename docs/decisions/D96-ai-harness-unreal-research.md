@@ -25,8 +25,12 @@
 
 - Сначала ревью [D95 PR #18](https://github.com/alfuwerce-art/CubeGame/pull/18), затем [Harness PR #19](https://github.com/alfuwerce-art/CubeGame/pull/19), затем текущий пакет D96. Canonical не изменять без решения владельца.
 - На локальном ПК после разрешения: версия/пресет, smoke базовых skills, preflight, hook dry-run, негативные тесты, профильные инструменты и один небольшой тестовый проект.
-- Любые сравнения «качество как Claude», «скрипты быстрее MCP» — **гипотезы**, измеряются на одинаковых задачах по [QUALITY_ATTRIBUTES](../QUALITY_ATTRIBUTES.md).
+- Любые сравнения реальных результатов DeepSeek/Codex и утверждения «скрипты быстрее MCP» — **гипотезы**, измеряются на одинаковых задачах по [QUALITY_ATTRIBUTES](../QUALITY_ATTRIBUTES.md).
 
 ## Связанные документы
 
 [AI workflow comparison](../agents/AI_WORKFLOW_COMPARISON.md) · [Harness architecture](../agents/HARNESS_ARCHITECTURE.md) · [Plugins](../agents/DSH_PLUGIN_EVALUATION.md) · [Skills](../agents/SKILLS_INDEX.md) · [Unreal spike](../research/UNREAL_SCRIPTING_SPIKE.md).
+
+## Уточнение владельца — ограничение AI-стека
+
+**Единственные рабочие AI-исполнители проекта: DeepSeek Harness и Codex.** Claude/Claude Code не использовать ни как исполнитель, ни как субагент, ни как эталон оценки, ни как внешний API. Упоминания Claude в оригинальных транскриптах сохранять лишь как историю источника; слово Claude в официальном имени `dsh-hooks-claude-code` означает совместимость формата и **не** требует установки или подключения Claude. В исследовании Unreal и сравнительных экспериментах участвуют DeepSeek Harness и Codex; приёмку выполняет владелец.
