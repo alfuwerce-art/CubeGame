@@ -15,13 +15,24 @@ export function evaluateTool(payload, { branch = '', root = '', cwd = '' } = {})
   const name = String(payload.tool_name || '').toLowerCase();
   const input = payload.tool_input && typeof payload.tool_input === 'object' ? payload.tool_input : {};
   const command = ['command', 'cmd', 'script'].filter(k => typeof input[k] === 'string').map(k => input[k]).join('\n');
-  const isShell = /(?:bash|shell|exec|powershell|terminal|command)/.test(name);
+  const isShell = /(?:bash|pwsh|shell|exec|powershell|terminal|command)/.test(name);
   const fileEdit = /(?:write|edit|patch|create_file|delete_file)/.test(name);
+  // Encoded shell commands are not auditable by this lightweight check.
+  if (isShell && /(?:-encodedcommand\\b|-enc\\s|frombase64string\\s*\\()/i.test(command))
+    return 'Закодированная shell-команда требует отдельного разрешения';
   const mutation = fileEdit || (isShell && /(?:git\s+(?:push|reset|clean|switch|checkout|merge|rebase|branch\s+-[dD])|(?:rm|del|erase|rmdir|remove-item|set-content|add-content|move-item|copy-item|mkdir|new-item|\b(?:tee|sed\s+-i)\b)|(?:>>|(?<![<])>(?![>])))/i.test(command));
   if (!mutation) return null;
   if (!root || !cwd) return 'Не удалось подтвердить корень Git workspace';
   if (PROTECTED.has(branch) || !branch) return `Запись запрещена в ветке ${branch || '(detached HEAD)'}`;
   if (isShell) {
+    const workdir = input.workdir;
+    if (typeof workdir === 'string' && workdir.length) {
+      const pathApi = /^[A-Za-z]:[\\\\/]/.test(root) ? path.win32 : path;
+      const target = pathApi.resolve(cwd, workdir);
+      const relative = pathApi.relative(root, target);
+      if (relative === '..' || relative.startsWith('..' + pathApi.sep) || pathApi.isAbsolute(relative))
+        return 'Рабочий каталог mutating shell находится вне CubeGame workspace';
+    }
     const prohibited = [
       /git\s+push\b[^\n]*(?:--force|-f\b|\bmain\b|\bintegration\/m0-all\b)/i,
       /git\s+reset\s+--hard/i,
