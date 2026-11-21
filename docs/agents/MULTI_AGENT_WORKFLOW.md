@@ -1,69 +1,20 @@
-# Протокол D71 — параллельные изолированные рабочие копии (новое действующее правило)
+# Multi-agent workflow — CubeGame
 
-**Приоритет с 2026-11-08: [D71](../decisions/D71-parallel-isolated-worktrees.md), лично разрешено продюсером.** Этот раздел **заменяет** прежние запреты на второй worktree и одновременную локальную работу в разных рабочих директориях, изложенные ниже для истории. Claude: `D:\Projects\CubeGame`; DeepSeek: `D:\Projects\CubeGame-deepseek` (`git worktree`, свой branch + index + Unity cache). Совместная работа разрешена только при полной изоляции записи и ресурсных конфликтов. Коммуникация: GitHub issue comments + свои SHA, не общий изменяемый файл.
+**Status:** active general collaboration rules. Project and scope: [AGENTS](../../AGENTS.md), [PROJECT_MEMORY](../../PROJECT_MEMORY.md), [ACTIVE_STAGE](../ACTIVE_STAGE.md). Model automation pipeline is closed under [D95](../decisions/D95-single-repository-close-model-pipeline.md).
 
-Нельзя одновременно переключать чужую ветку, менять чужой worktree или один и тот же Unity проект/Library, использовать `git add .` без проверки. **Каждый коммитит и пушит только свою ветку; последний агент не объединяет/пушит за обоих.** Интеграция — отдельный контролируемый этап с проверками и решением продюсера. Начало M0-01+ и приёмка S05B-2 этим протоколом НЕ разрешены. Подробные команды установки: [PARALLEL_WORKTREE_SETUP](PARALLEL_WORKTREE_SETUP.md).
+## Roles
 
----
+The owner sets the task and accepts the result. ChatGPT supports architecture/review. DeepSeek Harness and Codex implement only separately authorized tasks; the owner assigns the executor. Their output is evidence for review, not owner acceptance.
 
-# CubeGame — протокол совместной работы нескольких ИИ-агентов
+## Workspaces and Git
 
-**Статус:** постоянный рабочий протокол (инфраструктурный документ; не игровое решение и не разрешение на новый этап).
-**Агенты:** DeepSeek Harness (исполнитель) и Claude Code (архитектор / технический ревьюер). Продюсер — пользователь.
-**Единая рабочая директория:** `D:\Projects\CubeGame`.
+- Only one project repository: `alfuwerce-art/CubeGame`. Local root: `D:\Projects\CubeGame`.
+- Parallel work is allowed only in isolated worktrees/branches with separate Unity caches and ownership of files; never let two agents operate on the same Editor/Library or switch each other's branch.
+- Read `PROJECT_MEMORY.md`, `docs/ACTIVE_STAGE.md`, `AGENTS.md` and task-specific contracts before editing.
+- Verify `git status`, remote HEAD, diff and report before push. Do not overwrite uncommitted changes, delete remote refs, force-push or merge without the owner's explicit authorization.
+- Task handoff: task ID, branch, exact SHA, changed paths, tests and reproduced errors, limitations and blockers, proposed next steps, `READY_FOR_OWNER_REVIEW`.
+- A passed test is not a model's visual approval nor `ACCEPTED`. No new feature, production framework or tool installation is implicitly authorized by a successful technical check.
 
-**Актуальное уточнение D66 (2026-11-07):** утверждён [план M0](../planning/M0_FULL_ALPHA_INTEGRATION.md) и **ограниченная параллельность независимых задач**. Запрет на одновременную **запись/переключение Git/запуск Unity в `D:\\Projects\\CubeGame` остаётся в силе**. Claude может одновременно с локальной работой DeepSeek анализировать зафиксированные версии кода/Alpha в read-only режиме и готовить архитектурные/исследовательские отчёты **в отдельной удалённой GitHub-ветке** через доступный API, без локальных файловых изменений; DeepSeek в это время изменяет только свой локальный рабочий код. Нет удалённого способа записать отчёт — сделать handoff последовательно, а не писать вдвоём в одну папку. Не создавать дополнительные клоны/worktree без отдельного разрешения. Любая совместная правка кодовых контрактов, `Assets/`, `Packages/`, `ProjectSettings/`, `.scratch/` и тестовый запуск Unity — **только SERIAL**. Старые разделы ниже продолжают действовать для локальной разработки; разрешённые пары перечислены в плане M0.
+## Closed work
 
----
-
-## 1. Назначение и ответственность
-
-| Роль | Кто | Ответственность |
-|---|---|---|
-| Продюсер | пользователь | утверждает геймплей, визуал, содержание и начало/закрытие этапов |
-| Архитектор / тех. ревьюер | **Claude Code** (ранее ChatGPT) | архитектура, техническое ревью кода и контрактов, приёмка |
-| Исполнитель | **DeepSeek Harness** | анализ Alpha 2013, Unity/C#, инструменты и тесты, отчёты, GitHub |
-| (опционально) Codex | — | контролёр качества моделей/графики; роль пока не активирована |
-
-Ключевое разделение: продюсер решает **«что»**, Claude решает **«как технически»**, DeepSeek делает **«руками»** и доказывает результат тестами. Claude и DeepSeek — исполнители одного проекта: они **не** меняют архитектурные решения самостоятельно и **не** считают свои предложения утверждёнными. Исполнитель никогда не присваивает этапу статус `ACCEPTED` — максимум `READY_FOR_REVIEW`.
-
-## 2. Единая рабочая директория
-
-- Рабочий каталог проекта — **только** `D:\Projects\CubeGame`. Дополнительные копии проекта и Git worktree для обычной разработки или ревью **не создаются**.
-- Источник Alpha 2013 — `D:\Games\Cube world` — **только чтение**.
-- `C:\Users\bow\Desktop\CubeGame` — исторический C:-резерв после миграции D56; это **не** рабочий каталог, удалять его без отдельного разрешения продюсера нельзя.
-- `D:\Projects\CubeGame-review` — выведен из эксплуатации (см. §5); отдельный локальный каталог ревью больше не является частью постоянной структуры.
-
-## 3. Порядок последовательной передачи задач
-
-1. Claude Code и DeepSeek Harness работают непосредственно в `D:\Projects\CubeGame`.
-2. **Одновременная работа в этой директории запрещена** — только последовательная передача задач.
-3. Перед началом работы каждый агент проверяет `git status`, активную ветку, последние коммиты, отчёты и документацию.
-4. Каждая самостоятельная задача выполняется в **своей Git-ветке**.
-5. Незавершённые изменения другого агента запрещено перезаписывать.
-6. Ревью выполняется через Git-ветки, diff, тесты и отчёты **внутри единственного репозитория**.
-7. По окончании задачи агент коммитит результаты и публикует свою рабочую ветку в GitHub после проверки безопасности.
-8. Следующий агент начинает работу с актуального состояния Git и предыдущего отчёта.
-9. Merge в `main`, force push и принятие этапов — только с разрешения продюсера.
-10. Оба агента обязаны соблюдать уже утверждённые решения, архитектуру и границы этапов.
-
-## 4. Git-протокол и правила ревью
-
-- **Ветки.** Отдельная ветка на задачу: игровые этапы — `stage/…`, исследовательские/служебные — `codex/…`, `review/…`, `infra/…`. Ветка создаётся от принятого HEAD предыдущей работы.
-- **Push.** После локального коммита агент публикует свою рабочую ветку в GitHub (постоянное разрешение продюсера), предварительно проверив `git status`, состав коммитов и отсутствие закрытых ассетов, исходных бинарников, секретов и личных данных. Push ≠ `ACCEPTED`.
-- **Ревью.** Архитектор ревьюит через ветку, `git diff`, тесты и отчёт. Приёмка этапа — только продюсером.
-- **Запрещено без отдельного решения продюсера:** merge в `main`, force push, удаление веток, публикация запрещённых материалов.
-- **Незавершённое.** Чужие незакоммиченные изменения не перезаписывать; при конфликте — остановиться и запросить решение, а не «разруливать молча».
-
-## 5. История отдельной папки ревью (`D:\Projects\CubeGame-review`)
-
-- **Почему появилась:** отдельное изолированное пространство для ревью, позволявшее проверять ветку без переключения основной рабочей копии (удобно, когда ревьюер и исполнитель могли бы работать параллельно).
-- **Почему отказались:** два последовательных агента могут использовать **один** рабочий каталог и получать изоляцию через **Git-ветки**, не создавая лишних копий проекта. Отдельная папка вносила дублирование и риск расхождения локальных данных.
-- **Правило:** история ревью сохраняется в Git (ветки `codex/s05a2-channel-binding` и `review/s05a2-alpha-pose-audit` опубликованы в GitHub и доступны из основного репозитория); отдельный локальный каталог ревью больше **не** является частью постоянной структуры.
-
-## 6. Обновление отчётов и памяти
-
-- После существенного результата/приёмки агент обновляет `PROJECT_MEMORY.md` и `docs/ACTIVE_STAGE.md` в рабочей ветке; статус `ACCEPTED` не объявляется самостоятельно.
-- Отчёты — в `docs/research/alpha2013/`, `docs/stages/` или `docs/reports/`; формат исполнителя: `TASK / STATUS / ИЗМЕНЕНО / КОМАНДЫ-ТЕСТЫ / НЕПОДТВЕРЖДЕНО / ВЕТКА-КОММИТ`.
-- Устаревшие решения не переписывать: добавляются новые Dxx/ADR со ссылками.
-- Документы для агентов — в `docs/agents/` (этот файл, `CLAUDE_ONBOARDING.md`, `DEEPSEEK_HARNESS_SETUP.md`, `UNITY_CLI_PROTOCOL.md`).
+No agent may restart or port the discarded asset factory or its previous approved workflow. Relevant experiments are history, not an approved stage. New content is developed inside CubeGame after an explicit task.
