@@ -50,3 +50,18 @@
 ### Ограничения
 
 `hook-pretool.mjs` — эвристика для известных команд и инструментов, не универсальная защита от сложного shell и не замена песочнице. Тесты скрипта **не** означают, что hook подключён. Контроль прав, безопасные рабочие ветки, diff, защита GitHub остаются обязательными. Не применять цикл саморедактирования Harness² без безопасного испытания на копии проекта и решения владельца.
+
+## Дополнительный набор для профессиональной разработки (D96)
+
+- [Каталог skills](SKILLS_INDEX.md): 9 узких задач, `.dsh/skills/<name>/SKILL.md`. Скилл для создания **одного** оригинального ассета не отменяет D95. `cubegame-unreal-spike` без отдельного задания остаётся только методичкой.
+- [Плагины-кандидаты](DSH_PLUGIN_EVALUATION.md): сначала audit установленных компонентов и версии, затем PowerShell sandbox, skill discovery, файловые инструменты; LSP/subagent только при необходимости. `dsh-plugin-manager` не использовать для автоматической установки.
+- Проверки после синхронизации одобренной ветки с Windows workspace:
+  ```powershell
+  node --test tools/harness/hook-pretool.test.mjs
+  node tools/harness/validate-project-knowledge.mjs
+  node tools/harness/preflight.mjs
+  ```
+  Preflight **специально блокирует защищённую ветку**. Выполнить его только в разрешённом task/worktree. Fail не обходить ради зелёной галочки.
+- Перед потенциальным подключением PreToolUse: испытать актуальное имя инструмента `pwsh` (а не только `bash`) и `tool_input.command/workdir`; убедиться в реальном hook dispatch, deny и sandbox. Пример JSON сам ничего не включает.
+- Отсутствующий Blender, Unreal, Visual Studio toolchain, сторонний Skill/MCP или специализированный LSP означает `NOT_INSTALLED`, а не успешную работу. Не требовать инструменты, которые **не нужны** конкретной Unity-задаче.
+- Для оценки качества ИИ использовать [HARNESS_EVALUATION](HARNESS_EVALUATION.md) и [QUALITY_ATTRIBUTES](../QUALITY_ATTRIBUTES.md): одинаковый SHA, фиксированные критерии, измерение ошибок и ручных исправлений, независимая игровая проверка.
