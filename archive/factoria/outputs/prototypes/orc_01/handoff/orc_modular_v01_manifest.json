@@ -1,0 +1,41 @@
+{
+  "status": "EXPERIMENTAL_GEOMETRY_ONLY_NOT_GAME_READY",
+  "input": "NEW_ORIGINAL_PARAMETRIC_ORC_NOT_EXISTING_MESH",
+  "seed": 17,
+  "coordinate_system": "Y_UP_Z_FORWARD_METERS",
+  "style": "modular voxel hard surface, intentional unconnected limbs",
+  "body_parts": {
+    "pelvis": 2,
+    "torso": 78,
+    "head": 9,
+    "eyes": 4,
+    "brows": 2,
+    "mouth": 1,
+    "beard": 10,
+    "hair": 9,
+    "upper_arm_L": 24,
+    "forearm_L": 8,
+    "hand_L": 4,
+    "upper_arm_R": 24,
+    "forearm_R": 8,
+    "hand_R": 4,
+    "thigh_L": 5,
+    "shin_L": 5,
+    "foot_L": 2,
+    "thigh_R": 5,
+    "shin_R": 5,
+    "foot_R": 2
+  },
+  "has_skeleton": false,
+  "has_animation": false,
+  "has_emotions": false,
+  "artist_approved": false,
+  "status_note": "Do not assert visual acceptance or conversion of Alpha/CubeGame assets.",
+  "metrics": {
+    "box_count": 211,
+    "part_count": 20,
+    "triangle_count": 2532,
+    "vertex_count": 1688,
+    "glb_bytes": 71572
+  }
+}

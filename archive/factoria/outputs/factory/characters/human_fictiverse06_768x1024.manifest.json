@@ -1,0 +1,33 @@
+{
+  "run_id": "human_fictiverse06_768x1024",
+  "status": "PASS",
+  "character": "human",
+  "mode": "FICTIVERSE",
+  "lora": "VoxelXL_v1.safetensors",
+  "lora_trigger": "voxel style",
+  "lora_strength": 0.6,
+  "lora_license": "REVIEW_REQUIRED — openrail допускает коммерческое использование с use-based restrictions, но это НЕ означает автоматического разрешения; проверять отдельно",
+  "checkpoint": "DreamShaperXL_Turbo_v2_1.safetensors",
+  "seed": 424242,
+  "resolution": {
+    "width": 768,
+    "height": 1024,
+    "preset": "main"
+  },
+  "steps": 8,
+  "cfg": 2.0,
+  "sampler": "dpmpp_2m",
+  "scheduler": "karras",
+  "batch_size": 1,
+  "positive_prompt": "voxel style, block-built voxel 3D body, cubes of varied sizes (large blocks for the silhouette, medium blocks for anatomy and clothing, small blocks for details), hard-edged planar surfaces, pixel-textured materials over the whole body, chunky readable humanoid proportions, separate readable arms and legs, separated hands and feet, modular body parts, fully voxel face geometry, skull, brow ridge, cheekbones, nose, jaw and chin built from blocks of different sizes, pixel-textured face consistent with the body materials, adult facial proportions, visible eyes with solid block pupils (not oversized), defined nose bridge, readable mouth, face readable when the model is scaled down to game size, adult human fighter, male, athletic, balanced proportions, broad shoulders, medium build, face: pronounced cheekbones, straight defined nose, strong square chin, short blocky hair, adult face, clothing: layered linen tunic, leather belt, cloth trousers, armor: leather chest piece with metal clasps, simple vambraces, accessories: small belt pouch, fingerless gloves, palette: warm tan skin, dark blue cloth, brown leather, steel accents, neutral A-pose, three-quarter front view, full body from head to feet, neutral A-pose with arms slightly away from the body, legs apart, three-quarter front view, plain neutral studio background, soft even lighting, no props, no weapon, nothing cropped",
+  "negative_prompt": "chibi, childlike proportions, oversized eyes, tiny nose, doll face, anime proportions, smooth rounded face, organic realistic skin, soft sculpted features, plastic cartoon, painterly, primitive face made of a few pixels, caricature, flat 2d pixel art sprite, fused limbs, extra limbs, deformed hands, missing fingers, cropped head, cropped feet, realistic photo, weapon, sword, axe, helmet covering the face, cluttered background, motion blur, extreme perspective, watermark, text, signature, multiple characters",
+  "seconds": 8.2,
+  "peak_rss_mb": 2834,
+  "peak_gpu_used_mb_whole_card": 7697,
+  "min_free_ram_gb": 15.04,
+  "samples": 17,
+  "image": "outputs\\factory\\characters\\human_fictiverse06_768x1024.png",
+  "image_sha256": "c10ea5ccbcc85fa67db7d41160f3ba7add09dae62c09f866e9d26ebe915d4518",
+  "purpose": "race_test",
+  "production_use": "REVIEW_REQUIRED"
+}

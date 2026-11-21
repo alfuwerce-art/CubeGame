@@ -1,0 +1,25 @@
+{
+  "workflows": {
+    "FACTORY_CHARACTER_SDXL_BASE_V2.json": {
+      "status": "PASS",
+      "prompt_nodes": 8,
+      "outputs": [
+        "9"
+      ],
+      "notes": [],
+      "error": null,
+      "node_errors": null
+    },
+    "FACTORY_CHARACTER_SDXL_BASE_V2_DIAG.json": {
+      "status": "PASS",
+      "prompt_nodes": 8,
+      "outputs": [
+        "9"
+      ],
+      "notes": [],
+      "error": null,
+      "node_errors": null
+    }
+  },
+  "ckpt_substituted": null
+}

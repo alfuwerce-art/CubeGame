@@ -1,0 +1,75 @@
+{
+  "id": "STYLE_LOCK_V1",
+  "status": "EXPERIMENTAL / LICENSE_BLOCKED_FOR_PRODUCTION",
+  "source_sha256": "b380616fae8931513a176b7c6bccc25aa09b4e26f879b245859010a92aa1356a",
+  "geometry": {
+    "language": "hard-edged voxel geometry with clean axial cuboids",
+    "block_density": "large contiguous surfaces, low contour noise",
+    "block_size_hierarchy": "large primary volumes, medium contour steps, few small accents",
+    "proportions": "compact adult game-scale silhouette; race proportions come from the profile and reference guide",
+    "texture": "restrained low-frequency pixel colors, aligned texture blocks, few tiny accents",
+    "render": "unlit-looking matte game model with enough even light to read depth, simple diffuse shading"
+  },
+  "frame": {
+    "width": 768,
+    "height": 1024,
+    "batch_size": 1,
+    "camera": "orthographic, cardinal axis, fixed scale and target per reference pack, level horizon",
+    "background": {
+      "description": "plain neutral grey, no floor line, no scenery",
+      "rgb_hex": "9E9E9E"
+    },
+    "lighting": "soft even studio lighting, no hard cast shadows or bloom"
+  },
+  "model": {
+    "checkpoint": "DreamShaperXL_Turbo_v2_1.safetensors",
+    "checkpoint_sha256": "4496b36d48bfd7cfe4e5dbce3485db567bcefa2bef7238d290dbd45612125083",
+    "lora": "ral-vxl.safetensors",
+    "lora_sha256": "9dc480ee98c12a499bee1fc19ee0e13969a3c6b14be0e6ec133a11d563e83a25",
+    "lora_author": "RalFinger",
+    "strength_model": 0.6,
+    "strength_clip": 0.6,
+    "license_decision": "docs/decisions/FACT-D21-civitai-voxel-lora-license.md"
+  },
+  "sampling": {
+    "seed": 20261114,
+    "seed_mode": "fixed",
+    "steps": 28,
+    "cfg": 5,
+    "sampler_name": "dpmpp_2m",
+    "scheduler": "normal",
+    "denoise": 1
+  },
+  "controlnet": {
+    "model": "controlnet-union-sdxl-1.0.safetensors",
+    "sha256": "a9e13fd61f3193887791c8a0dd07a07202174dc47d5ddaea94ea1344f07c7467",
+    "union_type": "canny/lineart/anime_lineart/mlsd",
+    "low_threshold": 0.35,
+    "high_threshold": 0.75,
+    "strength": 0.9,
+    "start_percent": 0,
+    "end_percent": 1,
+    "resize_method": "nearest-exact",
+    "crop": "disabled"
+  },
+  "initial_experiment": {
+    "denoise": {
+      "BASE_BODY_IMG2IMG": 0.35,
+      "FACE_MODULE": 0.35,
+      "HAIRCUT_MODULE": 0.65
+    },
+    "ipadapter": {
+      "file": "ip-adapter-plus_sdxl_vit-h.safetensors",
+      "sha256": "3f5062b8400c94b7159665b21ba5c62acdcd7682262743d7f2aefedef00e6581",
+      "clip_vision": "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors",
+      "clip_vision_sha256": "6ca9667da1ca9e0b0f75e46bb030f7e011f44f86cbfb8d5a36590fcd7507b030",
+      "weight": 0.4,
+      "weight_type": "linear",
+      "combine_embeds": "concat",
+      "start_at": 0.0,
+      "end_at": 0.8,
+      "embeds_scaling": "V only"
+    }
+  },
+  "negative_prompt": "photorealistic skin, rounded organic sculpting, painterly brushwork, plastic toy, fine noisy surface detail, busy gradients, excessive bevels, large anime eyes, cinematic rim lighting, bloom, cast shadows, scenery, text, watermark, collage, multiple figures, multi-view sheet, perspective distortion, cropped silhouette"
+}

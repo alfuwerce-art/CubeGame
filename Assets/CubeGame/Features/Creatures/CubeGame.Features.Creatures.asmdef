@@ -1,0 +1,19 @@
+{
+    "name": "CubeGame.Features.Creatures",
+    "rootNamespace": "CubeGame.Features.Creatures",
+    "references": [
+        "CubeGame.Core",
+        "CubeGame.Content",
+        "CubeGame.AlphaModels",
+        "CubeGame.Features"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

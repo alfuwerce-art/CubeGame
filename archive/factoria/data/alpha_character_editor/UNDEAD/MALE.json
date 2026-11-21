@@ -1,0 +1,2047 @@
+{
+  "source": "Cube World Alpha",
+  "catalog_schema_version": 1,
+  "build": {
+    "exe": "Cube.exe",
+    "exe_sha256": "84a7a132a84d4282338e7ea45a1940d32066d64e39cbafed8f2418d5a6dc30bf",
+    "assets_db": "data1.db",
+    "assets_db_sha256": "0e482f6d628414db017d983f62843e5dbdc52c5b54fd478f6f0e06c786639b9d"
+  },
+  "race_id": 6,
+  "display_name": "Undead",
+  "male_available": true,
+  "female_available": true,
+  "gender": "MALE",
+  "gender_id": 0,
+  "style_id": 15,
+  "style_id_hex": "0x0F",
+  "base": {
+    "initial_face_index": 0,
+    "initial_haircut_index": 0,
+    "default_color_ui_rgb": [
+      255,
+      200,
+      50
+    ],
+    "slots": {
+      "head": {
+        "appearance_offset": "0x14",
+        "registry_index": 303,
+        "asset": {
+          "asset_id": "0x12F",
+          "registry_index": 303,
+          "asset_path": "data1.db/blobs/undead-head-m01.cub",
+          "loader_id": "0x4F36D0",
+          "load_flag": 1,
+          "exists": true,
+          "evidence": [
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+              "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+            },
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x4F36D0 -> 0x4E7290",
+              "detail": "Registry 0x12f, key undead-head-m01.cub, flag 1."
+            },
+            {
+              "status": "ASSET_CONFIRMED",
+              "reference": "data1.db/blobs/undead-head-m01.cub",
+              "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+            },
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+              "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+            }
+          ],
+          "stored_blob_sha256": "79823d9052be816f2b43e218417b41ff078fdc621618ba0bc8c4e89a893d4e98",
+          "grid_size": [
+            18,
+            20,
+            16
+          ],
+          "occupied_bounds_inclusive": [
+            [
+              4,
+              5,
+              0
+            ],
+            [
+              13,
+              15,
+              11
+            ]
+          ],
+          "occupied_size": [
+            10,
+            11,
+            12
+          ],
+          "raw_nonblack_voxel_count": 783,
+          "nontransparent_voxel_count": 783,
+          "visible_rgb_count": 18,
+          "mirror_geometry_agreement": 0.9936
+        }
+      },
+      "hair": {
+        "appearance_offset": "0x16",
+        "registry_index": 309,
+        "asset": {
+          "asset_id": "0x135",
+          "registry_index": 309,
+          "asset_path": "data1.db/blobs/undead-hair-m01.cub",
+          "loader_id": "0x4F388C",
+          "load_flag": 0,
+          "exists": true,
+          "evidence": [
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+              "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+            },
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x4F388C -> 0x4E7290",
+              "detail": "Registry 0x135, key undead-hair-m01.cub, flag 0."
+            },
+            {
+              "status": "ASSET_CONFIRMED",
+              "reference": "data1.db/blobs/undead-hair-m01.cub",
+              "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+            },
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+              "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+            }
+          ],
+          "stored_blob_sha256": "fe5692853077ad51ae66a7baeb52e4da10276dd5e0f995137ce3a5c7655e748f",
+          "grid_size": [
+            18,
+            20,
+            16
+          ],
+          "occupied_bounds_inclusive": [
+            [
+              5,
+              6,
+              1
+            ],
+            [
+              12,
+              14,
+              10
+            ]
+          ],
+          "occupied_size": [
+            8,
+            9,
+            10
+          ],
+          "raw_nonblack_voxel_count": 781,
+          "nontransparent_voxel_count": 412,
+          "visible_rgb_count": 10,
+          "mirror_geometry_agreement": 0.9903
+        }
+      },
+      "hand": {
+        "appearance_offset": "0x18",
+        "registry_index": 327,
+        "asset": {
+          "asset_id": "0x147",
+          "registry_index": 327,
+          "asset_path": "data1.db/blobs/undead-hand.cub",
+          "loader_id": "0x4F3DC0",
+          "load_flag": 1,
+          "exists": true,
+          "evidence": [
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+              "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+            },
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x4F3DC0 -> 0x4E7290",
+              "detail": "Registry 0x147, key undead-hand.cub, flag 1."
+            },
+            {
+              "status": "ASSET_CONFIRMED",
+              "reference": "data1.db/blobs/undead-hand.cub",
+              "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+            },
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+              "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+            }
+          ],
+          "stored_blob_sha256": "765517436db4803c23f92ed4ecbbeea7b3ccb54712c557abe7a29524796d51e6",
+          "grid_size": [
+            5,
+            6,
+            4
+          ],
+          "occupied_bounds_inclusive": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              5,
+              3
+            ]
+          ],
+          "occupied_size": [
+            5,
+            6,
+            4
+          ],
+          "raw_nonblack_voxel_count": 76,
+          "nontransparent_voxel_count": 76,
+          "visible_rgb_count": 5,
+          "mirror_geometry_agreement": 1.0
+        }
+      },
+      "foot": {
+        "appearance_offset": "0x1A",
+        "registry_index": 432,
+        "asset": {
+          "asset_id": "0x1B0",
+          "registry_index": 432,
+          "asset_path": "data1.db/blobs/foot.cub",
+          "loader_id": "0x4EE7AF",
+          "load_flag": 1,
+          "exists": true,
+          "evidence": [
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+              "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+            },
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x4EE7AF -> 0x4E7290",
+              "detail": "Registry 0x1b0, key foot.cub, flag 1."
+            },
+            {
+              "status": "ASSET_CONFIRMED",
+              "reference": "data1.db/blobs/foot.cub",
+              "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+            },
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+              "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+            }
+          ],
+          "stored_blob_sha256": "d21775cdaac34c02140912bd5261d47d65fed429a4d8dbdeee6527c9f551d86d",
+          "grid_size": [
+            5,
+            8,
+            4
+          ],
+          "occupied_bounds_inclusive": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              4,
+              7,
+              2
+            ]
+          ],
+          "occupied_size": [
+            5,
+            8,
+            3
+          ],
+          "raw_nonblack_voxel_count": 98,
+          "nontransparent_voxel_count": 98,
+          "visible_rgb_count": 2,
+          "mirror_geometry_agreement": 1.0
+        }
+      },
+      "body": {
+        "appearance_offset": "0x1C",
+        "registry_index": 0,
+        "asset": {
+          "asset_id": "0x000",
+          "registry_index": 0,
+          "asset_path": "data1.db/blobs/body2.cub",
+          "loader_id": "0x4EE56C",
+          "load_flag": 1,
+          "exists": true,
+          "evidence": [
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+              "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+            },
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x4EE56C -> 0x4E7290",
+              "detail": "Registry 0x0, key body2.cub, flag 1."
+            },
+            {
+              "status": "ASSET_CONFIRMED",
+              "reference": "data1.db/blobs/body2.cub",
+              "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+            },
+            {
+              "status": "CODE_CONFIRMED",
+              "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+              "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+            }
+          ],
+          "stored_blob_sha256": "ccdb24062754254f06e37b65a2d1406a80fe6cc21774883fc46863046ff6ad78",
+          "grid_size": [
+            10,
+            8,
+            10
+          ],
+          "occupied_bounds_inclusive": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              9,
+              7,
+              9
+            ]
+          ],
+          "occupied_size": [
+            10,
+            8,
+            10
+          ],
+          "raw_nonblack_voxel_count": 560,
+          "nontransparent_voxel_count": 560,
+          "visible_rgb_count": 21,
+          "mirror_geometry_agreement": 1.0
+        }
+      },
+      "tail": {
+        "appearance_offset": "0x1E",
+        "registry_index": -1,
+        "asset": null
+      },
+      "slot_98": {
+        "appearance_offset": "0x20",
+        "registry_index": -1,
+        "asset": null
+      },
+      "slot_9a": {
+        "appearance_offset": "0x22",
+        "registry_index": -1,
+        "asset": null
+      }
+    },
+    "appearance_flags": 0,
+    "size_xyz": [
+      0.9600000381469727,
+      0.9600000381469727,
+      2.1600000858306885
+    ],
+    "scale_head": 0.9,
+    "scale_body": 1.0,
+    "evidence": [
+      {
+        "status": "CODE_CONFIRMED",
+        "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+        "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+      }
+    ]
+  },
+  "faces": [
+    {
+      "asset_id": "0x12F",
+      "registry_index": 303,
+      "asset_path": "data1.db/blobs/undead-head-m01.cub",
+      "loader_id": "0x4F36D0",
+      "load_flag": 1,
+      "exists": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+          "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4F36D0 -> 0x4E7290",
+          "detail": "Registry 0x12f, key undead-head-m01.cub, flag 1."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-head-m01.cub",
+          "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+          "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-head-m01.cub",
+          "detail": "Pair of visible eye regions in Face-only front projection. Form described from front and profile. Feature names reflect visual reading of voxel geometry."
+        }
+      ],
+      "stored_blob_sha256": "79823d9052be816f2b43e218417b41ff078fdc621618ba0bc8c4e89a893d4e98",
+      "grid_size": [
+        18,
+        20,
+        16
+      ],
+      "occupied_bounds_inclusive": [
+        [
+          4,
+          5,
+          0
+        ],
+        [
+          13,
+          15,
+          11
+        ]
+      ],
+      "occupied_size": [
+        10,
+        11,
+        12
+      ],
+      "raw_nonblack_voxel_count": 783,
+      "nontransparent_voxel_count": 783,
+      "visible_rgb_count": 18,
+      "mirror_geometry_agreement": 0.9936,
+      "index": 0,
+      "ui_number": 1,
+      "description": "Серо-белая округлая форма с выраженными глазницами и узкой нижней челюстью. Бирюзовые глаза и прямой тёмный разрез рта в серо-белой челюсти.",
+      "contains_eyes": true,
+      "contains_ears": "UNKNOWN",
+      "contains_other_geometry": [
+        "EYE_SOCKETS",
+        "SKULL_JAW"
+      ],
+      "frontal_projection_rgb_count": 11,
+      "same_occupied_geometry_as_face_1": true,
+      "frontal_pixels_changed_vs_face_1": 0
+    },
+    {
+      "asset_id": "0x130",
+      "registry_index": 304,
+      "asset_path": "data1.db/blobs/undead-head-m02.cub",
+      "loader_id": "0x4F371A",
+      "load_flag": 1,
+      "exists": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+          "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4F371A -> 0x4E7290",
+          "detail": "Registry 0x130, key undead-head-m02.cub, flag 1."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-head-m02.cub",
+          "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+          "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-head-m02.cub",
+          "detail": "Pair of visible eye regions in Face-only front projection. Form described from front and profile. Feature names reflect visual reading of voxel geometry."
+        }
+      ],
+      "stored_blob_sha256": "c061cd3808ab6e6868b5e1d88b2ea54510a8f5c8439098342a4977078f8bde44",
+      "grid_size": [
+        18,
+        20,
+        16
+      ],
+      "occupied_bounds_inclusive": [
+        [
+          4,
+          5,
+          0
+        ],
+        [
+          13,
+          15,
+          11
+        ]
+      ],
+      "occupied_size": [
+        10,
+        11,
+        12
+      ],
+      "raw_nonblack_voxel_count": 783,
+      "nontransparent_voxel_count": 783,
+      "visible_rgb_count": 18,
+      "mirror_geometry_agreement": 0.9936,
+      "index": 1,
+      "ui_number": 2,
+      "description": "Серо-белая округлая форма с выраженными глазницами и узкой нижней челюстью. Зелёные глаза и прямой тёмный разрез рта в серо-белой челюсти.",
+      "contains_eyes": true,
+      "contains_ears": "UNKNOWN",
+      "contains_other_geometry": [
+        "EYE_SOCKETS",
+        "SKULL_JAW"
+      ],
+      "frontal_projection_rgb_count": 11,
+      "same_occupied_geometry_as_face_1": true,
+      "frontal_pixels_changed_vs_face_1": 4
+    },
+    {
+      "asset_id": "0x131",
+      "registry_index": 305,
+      "asset_path": "data1.db/blobs/undead-head-m03.cub",
+      "loader_id": "0x4F3764",
+      "load_flag": 1,
+      "exists": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+          "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4F3764 -> 0x4E7290",
+          "detail": "Registry 0x131, key undead-head-m03.cub, flag 1."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-head-m03.cub",
+          "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+          "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-head-m03.cub",
+          "detail": "Pair of visible eye regions in Face-only front projection. Form described from front and profile. Feature names reflect visual reading of voxel geometry."
+        }
+      ],
+      "stored_blob_sha256": "cb44af6179a55b37e0bcfa93386b50dc815188e766e83b4c7826b3cd9bfc5656",
+      "grid_size": [
+        18,
+        20,
+        16
+      ],
+      "occupied_bounds_inclusive": [
+        [
+          4,
+          5,
+          0
+        ],
+        [
+          13,
+          15,
+          11
+        ]
+      ],
+      "occupied_size": [
+        10,
+        11,
+        12
+      ],
+      "raw_nonblack_voxel_count": 783,
+      "nontransparent_voxel_count": 783,
+      "visible_rgb_count": 18,
+      "mirror_geometry_agreement": 0.9936,
+      "index": 2,
+      "ui_number": 3,
+      "description": "Серо-белая округлая форма с выраженными глазницами и узкой нижней челюстью. Красные глаза и прямой тёмный разрез рта в серо-белой челюсти.",
+      "contains_eyes": true,
+      "contains_ears": "UNKNOWN",
+      "contains_other_geometry": [
+        "EYE_SOCKETS",
+        "SKULL_JAW"
+      ],
+      "frontal_projection_rgb_count": 11,
+      "same_occupied_geometry_as_face_1": true,
+      "frontal_pixels_changed_vs_face_1": 4
+    },
+    {
+      "asset_id": "0x132",
+      "registry_index": 306,
+      "asset_path": "data1.db/blobs/undead-head-m04.cub",
+      "loader_id": "0x4F37AE",
+      "load_flag": 1,
+      "exists": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+          "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4F37AE -> 0x4E7290",
+          "detail": "Registry 0x132, key undead-head-m04.cub, flag 1."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-head-m04.cub",
+          "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+          "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-head-m04.cub",
+          "detail": "Pair of visible eye regions in Face-only front projection. Form described from front and profile. Feature names reflect visual reading of voxel geometry."
+        }
+      ],
+      "stored_blob_sha256": "eb8ae2c38ac6ba80286828c069bd9d95022ce66a4f003891b733209cfa9fd6be",
+      "grid_size": [
+        18,
+        20,
+        16
+      ],
+      "occupied_bounds_inclusive": [
+        [
+          4,
+          5,
+          0
+        ],
+        [
+          13,
+          15,
+          11
+        ]
+      ],
+      "occupied_size": [
+        10,
+        11,
+        12
+      ],
+      "raw_nonblack_voxel_count": 781,
+      "nontransparent_voxel_count": 781,
+      "visible_rgb_count": 18,
+      "mirror_geometry_agreement": 0.9936,
+      "index": 3,
+      "ui_number": 4,
+      "description": "Серо-белая округлая форма с выраженными глазницами и узкой нижней челюстью. Бирюзовые глаза, изменённый контур глазницы и рот с вертикальной деталью.",
+      "contains_eyes": true,
+      "contains_ears": "UNKNOWN",
+      "contains_other_geometry": [
+        "EYE_SOCKETS",
+        "SKULL_JAW"
+      ],
+      "frontal_projection_rgb_count": 11,
+      "same_occupied_geometry_as_face_1": false,
+      "frontal_pixels_changed_vs_face_1": 2
+    },
+    {
+      "asset_id": "0x133",
+      "registry_index": 307,
+      "asset_path": "data1.db/blobs/undead-head-m05.cub",
+      "loader_id": "0x4F37F8",
+      "load_flag": 1,
+      "exists": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+          "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4F37F8 -> 0x4E7290",
+          "detail": "Registry 0x133, key undead-head-m05.cub, flag 1."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-head-m05.cub",
+          "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+          "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-head-m05.cub",
+          "detail": "Pair of visible eye regions in Face-only front projection. Form described from front and profile. Feature names reflect visual reading of voxel geometry."
+        }
+      ],
+      "stored_blob_sha256": "074e88fc479302f89b275e4dfc842560430646af163411de8ca9864e2b1c7347",
+      "grid_size": [
+        18,
+        20,
+        16
+      ],
+      "occupied_bounds_inclusive": [
+        [
+          4,
+          5,
+          0
+        ],
+        [
+          13,
+          15,
+          11
+        ]
+      ],
+      "occupied_size": [
+        10,
+        11,
+        12
+      ],
+      "raw_nonblack_voxel_count": 781,
+      "nontransparent_voxel_count": 781,
+      "visible_rgb_count": 18,
+      "mirror_geometry_agreement": 0.9936,
+      "index": 4,
+      "ui_number": 5,
+      "description": "Серо-белая округлая форма с выраженными глазницами и узкой нижней челюстью. Зелёные глаза, изменённый контур глазницы и рот с вертикальной деталью.",
+      "contains_eyes": true,
+      "contains_ears": "UNKNOWN",
+      "contains_other_geometry": [
+        "EYE_SOCKETS",
+        "SKULL_JAW"
+      ],
+      "frontal_projection_rgb_count": 11,
+      "same_occupied_geometry_as_face_1": false,
+      "frontal_pixels_changed_vs_face_1": 6
+    },
+    {
+      "asset_id": "0x134",
+      "registry_index": 308,
+      "asset_path": "data1.db/blobs/undead-head-m06.cub",
+      "loader_id": "0x4F3842",
+      "load_flag": 1,
+      "exists": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+          "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4F3842 -> 0x4E7290",
+          "detail": "Registry 0x134, key undead-head-m06.cub, flag 1."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-head-m06.cub",
+          "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+          "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-head-m06.cub",
+          "detail": "Pair of visible eye regions in Face-only front projection. Form described from front and profile. Feature names reflect visual reading of voxel geometry."
+        }
+      ],
+      "stored_blob_sha256": "05cb383331cc49f669961fae692143a4f5917380408f0bd3dd58f2090bd0da2f",
+      "grid_size": [
+        18,
+        20,
+        16
+      ],
+      "occupied_bounds_inclusive": [
+        [
+          4,
+          5,
+          0
+        ],
+        [
+          13,
+          15,
+          11
+        ]
+      ],
+      "occupied_size": [
+        10,
+        11,
+        12
+      ],
+      "raw_nonblack_voxel_count": 781,
+      "nontransparent_voxel_count": 781,
+      "visible_rgb_count": 18,
+      "mirror_geometry_agreement": 0.9936,
+      "index": 5,
+      "ui_number": 6,
+      "description": "Серо-белая округлая форма с выраженными глазницами и узкой нижней челюстью. Красные глаза, изменённый контур глазницы и рот с вертикальной деталью.",
+      "contains_eyes": true,
+      "contains_ears": "UNKNOWN",
+      "contains_other_geometry": [
+        "EYE_SOCKETS",
+        "SKULL_JAW"
+      ],
+      "frontal_projection_rgb_count": 11,
+      "same_occupied_geometry_as_face_1": false,
+      "frontal_pixels_changed_vs_face_1": 6
+    }
+  ],
+  "haircuts": [
+    {
+      "asset_id": "0x135",
+      "registry_index": 309,
+      "asset_path": "data1.db/blobs/undead-hair-m01.cub",
+      "loader_id": "0x4F388C",
+      "load_flag": 0,
+      "exists": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+          "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4F388C -> 0x4E7290",
+          "detail": "Registry 0x135, key undead-hair-m01.cub, flag 0."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-hair-m01.cub",
+          "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+          "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-hair-m01.cub",
+          "detail": "Measured marker-filtered silhouette; compared front, side and back to Face 1."
+        },
+        {
+          "status": "INFERRED",
+          "reference": "data1.db/blobs/undead-hair-m01.cub",
+          "detail": "Visual type and semantic overlay descriptions from orthographic geometry; Alpha uses the field name Haircut."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4206C2, 0x420A38, 0x448280, world VS 0x6FD928 c32",
+          "detail": "Haircut drawn with a per-draw RGB material multiplier from appearance +0x02..04; the head and body do not consume Hair color. Creature colour/status and lighting can affect the final pixel. All visible overlay geometry is in the tinted draw, including coloured decoration or beard voxels when present."
+        }
+      ],
+      "stored_blob_sha256": "fe5692853077ad51ae66a7baeb52e4da10276dd5e0f995137ce3a5c7655e748f",
+      "grid_size": [
+        18,
+        20,
+        16
+      ],
+      "occupied_bounds_inclusive": [
+        [
+          5,
+          6,
+          1
+        ],
+        [
+          12,
+          14,
+          10
+        ]
+      ],
+      "occupied_size": [
+        8,
+        9,
+        10
+      ],
+      "raw_nonblack_voxel_count": 781,
+      "nontransparent_voxel_count": 412,
+      "visible_rgb_count": 10,
+      "mirror_geometry_agreement": 0.9903,
+      "index": 0,
+      "ui_number": 1,
+      "visual_type": "OTHER",
+      "description": "Видимые воксели ресурса совпадают с контуром базовой головы в проекциях; отдельная прядь не различима.",
+      "classification_status": "INFERRED",
+      "secondary_features": [],
+      "covers": [],
+      "geometry_symmetry": "ASYMMETRIC",
+      "length_observation": "AT_OR_ABOVE_BASE_FACE_BOTTOM",
+      "ear_coverage_semantics": "UNKNOWN",
+      "coverage_basis": "Centered voxel comparison with Face index 0 only; quantitative projection and plane tests, not a rendered mesh.",
+      "geometry_comparison": {
+        "base_face_index": 0,
+        "projected_front_overlap_pixels": 0,
+        "overlap_at_outer_sides_pixels": 0,
+        "voxels_at_or_behind_face_back_plane": 0,
+        "voxels_below_face": 0,
+        "voxels_above_face": 0,
+        "voxels_beyond_face_width": 0,
+        "extends_forward_of_face": false
+      },
+      "color_material": "HAIRCUT_DRAW_MULTIPLIER"
+    },
+    {
+      "asset_id": "0x136",
+      "registry_index": 310,
+      "asset_path": "data1.db/blobs/undead-hair-m02.cub",
+      "loader_id": "0x4F38D6",
+      "load_flag": 0,
+      "exists": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+          "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4F38D6 -> 0x4E7290",
+          "detail": "Registry 0x136, key undead-hair-m02.cub, flag 0."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-hair-m02.cub",
+          "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+          "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-hair-m02.cub",
+          "detail": "Measured marker-filtered silhouette; compared front, side and back to Face 1."
+        },
+        {
+          "status": "INFERRED",
+          "reference": "data1.db/blobs/undead-hair-m02.cub",
+          "detail": "Visual type and semantic overlay descriptions from orthographic geometry; Alpha uses the field name Haircut."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4206C2, 0x420A38, 0x448280, world VS 0x6FD928 c32",
+          "detail": "Haircut drawn with a per-draw RGB material multiplier from appearance +0x02..04; the head and body do not consume Hair color. Creature colour/status and lighting can affect the final pixel. All visible overlay geometry is in the tinted draw, including coloured decoration or beard voxels when present."
+        }
+      ],
+      "stored_blob_sha256": "058db0166b87371fda324cf58767d985cfe34cbc1b5ae9b3e94920ef904138a4",
+      "grid_size": [
+        18,
+        20,
+        16
+      ],
+      "occupied_bounds_inclusive": [
+        [
+          5,
+          6,
+          1
+        ],
+        [
+          14,
+          14,
+          12
+        ]
+      ],
+      "occupied_size": [
+        10,
+        9,
+        12
+      ],
+      "raw_nonblack_voxel_count": 834,
+      "nontransparent_voxel_count": 465,
+      "visible_rgb_count": 10,
+      "mirror_geometry_agreement": 0.9075,
+      "index": 1,
+      "ui_number": 2,
+      "visual_type": "HAIR",
+      "description": "Несколько длинных параллельных полос сбоку и короткая часть на макушке.",
+      "classification_status": "INFERRED",
+      "secondary_features": [],
+      "covers": [],
+      "geometry_symmetry": "ASYMMETRIC",
+      "length_observation": "AT_OR_ABOVE_BASE_FACE_BOTTOM",
+      "ear_coverage_semantics": "UNKNOWN",
+      "coverage_basis": "Centered voxel comparison with Face index 0 only; quantitative projection and plane tests, not a rendered mesh.",
+      "geometry_comparison": {
+        "base_face_index": 0,
+        "projected_front_overlap_pixels": 0,
+        "overlap_at_outer_sides_pixels": 0,
+        "voxels_at_or_behind_face_back_plane": 0,
+        "voxels_below_face": 0,
+        "voxels_above_face": 14,
+        "voxels_beyond_face_width": 20,
+        "extends_forward_of_face": false
+      },
+      "color_material": "HAIRCUT_DRAW_MULTIPLIER"
+    },
+    {
+      "asset_id": "0x137",
+      "registry_index": 311,
+      "asset_path": "data1.db/blobs/undead-hair-m03.cub",
+      "loader_id": "0x4F3920",
+      "load_flag": 0,
+      "exists": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+          "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4F3920 -> 0x4E7290",
+          "detail": "Registry 0x137, key undead-hair-m03.cub, flag 0."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-hair-m03.cub",
+          "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+          "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-hair-m03.cub",
+          "detail": "Measured marker-filtered silhouette; compared front, side and back to Face 1."
+        },
+        {
+          "status": "INFERRED",
+          "reference": "data1.db/blobs/undead-hair-m03.cub",
+          "detail": "Visual type and semantic overlay descriptions from orthographic geometry; Alpha uses the field name Haircut."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4206C2, 0x420A38, 0x448280, world VS 0x6FD928 c32",
+          "detail": "Haircut drawn with a per-draw RGB material multiplier from appearance +0x02..04; the head and body do not consume Hair color. Creature colour/status and lighting can affect the final pixel. All visible overlay geometry is in the tinted draw, including coloured decoration or beard voxels when present."
+        }
+      ],
+      "stored_blob_sha256": "9d8acdbcfa3ea2ef37ca8971ff6c187f7a631a78b0f34db90001e51bb87fcfa6",
+      "grid_size": [
+        18,
+        20,
+        16
+      ],
+      "occupied_bounds_inclusive": [
+        [
+          5,
+          6,
+          1
+        ],
+        [
+          14,
+          14,
+          13
+        ]
+      ],
+      "occupied_size": [
+        10,
+        9,
+        13
+      ],
+      "raw_nonblack_voxel_count": 817,
+      "nontransparent_voxel_count": 448,
+      "visible_rgb_count": 10,
+      "mirror_geometry_agreement": 0.9554,
+      "index": 2,
+      "ui_number": 3,
+      "visual_type": "HAIR",
+      "description": "Одиночный короткий пучок, выступающий над макушкой.",
+      "classification_status": "INFERRED",
+      "secondary_features": [],
+      "covers": [
+        "FRONTAL_HEAD_VOXELS"
+      ],
+      "geometry_symmetry": "ASYMMETRIC",
+      "length_observation": "AT_OR_ABOVE_BASE_FACE_BOTTOM",
+      "ear_coverage_semantics": "UNKNOWN",
+      "coverage_basis": "Centered voxel comparison with Face index 0 only; quantitative projection and plane tests, not a rendered mesh.",
+      "geometry_comparison": {
+        "base_face_index": 0,
+        "projected_front_overlap_pixels": 5,
+        "overlap_at_outer_sides_pixels": 0,
+        "voxels_at_or_behind_face_back_plane": 0,
+        "voxels_below_face": 0,
+        "voxels_above_face": 31,
+        "voxels_beyond_face_width": 1,
+        "extends_forward_of_face": false
+      },
+      "color_material": "HAIRCUT_DRAW_MULTIPLIER"
+    },
+    {
+      "asset_id": "0x138",
+      "registry_index": 312,
+      "asset_path": "data1.db/blobs/undead-hair-m04.cub",
+      "loader_id": "0x4F396A",
+      "load_flag": 0,
+      "exists": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+          "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4F396A -> 0x4E7290",
+          "detail": "Registry 0x138, key undead-hair-m04.cub, flag 0."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-hair-m04.cub",
+          "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+          "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-hair-m04.cub",
+          "detail": "Measured marker-filtered silhouette; compared front, side and back to Face 1."
+        },
+        {
+          "status": "INFERRED",
+          "reference": "data1.db/blobs/undead-hair-m04.cub",
+          "detail": "Visual type and semantic overlay descriptions from orthographic geometry; Alpha uses the field name Haircut."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4206C2, 0x420A38, 0x448280, world VS 0x6FD928 c32",
+          "detail": "Haircut drawn with a per-draw RGB material multiplier from appearance +0x02..04; the head and body do not consume Hair color. Creature colour/status and lighting can affect the final pixel. All visible overlay geometry is in the tinted draw, including coloured decoration or beard voxels when present."
+        }
+      ],
+      "stored_blob_sha256": "411d14597185ff33dd3bd6f6e0ffc1912c531671b5e23e5a8fb03118b8d6789f",
+      "grid_size": [
+        18,
+        20,
+        16
+      ],
+      "occupied_bounds_inclusive": [
+        [
+          4,
+          4,
+          0
+        ],
+        [
+          13,
+          14,
+          10
+        ]
+      ],
+      "occupied_size": [
+        10,
+        11,
+        11
+      ],
+      "raw_nonblack_voxel_count": 874,
+      "nontransparent_voxel_count": 505,
+      "visible_rgb_count": 14,
+      "mirror_geometry_agreement": 0.9901,
+      "index": 3,
+      "ui_number": 4,
+      "visual_type": "HAIR",
+      "description": "Редкие боковые пряди и широкая масса на затылке.",
+      "classification_status": "INFERRED",
+      "secondary_features": [],
+      "covers": [
+        "BACK_PLANE_OR_BEHIND"
+      ],
+      "geometry_symmetry": "ASYMMETRIC",
+      "length_observation": "AT_OR_ABOVE_BASE_FACE_BOTTOM",
+      "ear_coverage_semantics": "UNKNOWN",
+      "coverage_basis": "Centered voxel comparison with Face index 0 only; quantitative projection and plane tests, not a rendered mesh.",
+      "geometry_comparison": {
+        "base_face_index": 0,
+        "projected_front_overlap_pixels": 0,
+        "overlap_at_outer_sides_pixels": 0,
+        "voxels_at_or_behind_face_back_plane": 63,
+        "voxels_below_face": 0,
+        "voxels_above_face": 0,
+        "voxels_beyond_face_width": 0,
+        "extends_forward_of_face": false
+      },
+      "color_material": "HAIRCUT_DRAW_MULTIPLIER"
+    },
+    {
+      "asset_id": "0x139",
+      "registry_index": 313,
+      "asset_path": "data1.db/blobs/undead-hair-m05.cub",
+      "loader_id": "0x4F39B4",
+      "load_flag": 0,
+      "exists": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+          "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4F39B4 -> 0x4E7290",
+          "detail": "Registry 0x139, key undead-hair-m05.cub, flag 0."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-hair-m05.cub",
+          "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+          "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-hair-m05.cub",
+          "detail": "Measured marker-filtered silhouette; compared front, side and back to Face 1."
+        },
+        {
+          "status": "INFERRED",
+          "reference": "data1.db/blobs/undead-hair-m05.cub",
+          "detail": "Visual type and semantic overlay descriptions from orthographic geometry; Alpha uses the field name Haircut."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4206C2, 0x420A38, 0x448280, world VS 0x6FD928 c32",
+          "detail": "Haircut drawn with a per-draw RGB material multiplier from appearance +0x02..04; the head and body do not consume Hair color. Creature colour/status and lighting can affect the final pixel. All visible overlay geometry is in the tinted draw, including coloured decoration or beard voxels when present."
+        }
+      ],
+      "stored_blob_sha256": "ecc7adb1a7eb92e0d2f266dc92988ce239c2a49fbf3f519cff30eefea37491a3",
+      "grid_size": [
+        18,
+        20,
+        16
+      ],
+      "occupied_bounds_inclusive": [
+        [
+          5,
+          4,
+          1
+        ],
+        [
+          12,
+          15,
+          13
+        ]
+      ],
+      "occupied_size": [
+        8,
+        12,
+        13
+      ],
+      "raw_nonblack_voxel_count": 812,
+      "nontransparent_voxel_count": 443,
+      "visible_rgb_count": 10,
+      "mirror_geometry_agreement": 0.9661,
+      "index": 4,
+      "ui_number": 5,
+      "visual_type": "CREST",
+      "description": "Узкая вертикальная центральная полоса и один выступ на макушке.",
+      "classification_status": "INFERRED",
+      "secondary_features": [],
+      "covers": [
+        "FRONTAL_HEAD_VOXELS",
+        "BACK_PLANE_OR_BEHIND"
+      ],
+      "geometry_symmetry": "ASYMMETRIC",
+      "length_observation": "AT_OR_ABOVE_BASE_FACE_BOTTOM",
+      "ear_coverage_semantics": "UNKNOWN",
+      "coverage_basis": "Centered voxel comparison with Face index 0 only; quantitative projection and plane tests, not a rendered mesh.",
+      "geometry_comparison": {
+        "base_face_index": 0,
+        "projected_front_overlap_pixels": 2,
+        "overlap_at_outer_sides_pixels": 0,
+        "voxels_at_or_behind_face_back_plane": 6,
+        "voxels_below_face": 0,
+        "voxels_above_face": 18,
+        "voxels_beyond_face_width": 0,
+        "extends_forward_of_face": false
+      },
+      "color_material": "HAIRCUT_DRAW_MULTIPLIER"
+    },
+    {
+      "asset_id": "0x13A",
+      "registry_index": 314,
+      "asset_path": "data1.db/blobs/undead-hair-m06.cub",
+      "loader_id": "0x4F39FE",
+      "load_flag": 0,
+      "exists": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42C0A9–0x42C3C2; generator 0x43F7C0",
+          "detail": "Executed original x86 selection and appearance generation; external widget setup and D3D were out of scope."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4F39FE -> 0x4E7290",
+          "detail": "Registry 0x13a, key undead-hair-m06.cub, flag 0."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-hair-m06.cub",
+          "detail": "Decoded original .cub; dimensions, visible occupancy and RGB measured from original blob."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4E7650, 0x4E7870, 0x4E71D0",
+          "detail": "Flag 0 skips black and exact red/green/blue marker voxels; flag 1 skips black only. Numerical metrics count nontransparent voxels; this is not an emitted-face or vertex count."
+        },
+        {
+          "status": "ASSET_CONFIRMED",
+          "reference": "data1.db/blobs/undead-hair-m06.cub",
+          "detail": "Measured marker-filtered silhouette; compared front, side and back to Face 1."
+        },
+        {
+          "status": "INFERRED",
+          "reference": "data1.db/blobs/undead-hair-m06.cub",
+          "detail": "Visual type and semantic overlay descriptions from orthographic geometry; Alpha uses the field name Haircut."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4206C2, 0x420A38, 0x448280, world VS 0x6FD928 c32",
+          "detail": "Haircut drawn with a per-draw RGB material multiplier from appearance +0x02..04; the head and body do not consume Hair color. Creature colour/status and lighting can affect the final pixel. All visible overlay geometry is in the tinted draw, including coloured decoration or beard voxels when present."
+        }
+      ],
+      "stored_blob_sha256": "106393fedce9b8db6bf83081ed1d562ae183244e4edc667871623c863c08f3f0",
+      "grid_size": [
+        18,
+        20,
+        16
+      ],
+      "occupied_bounds_inclusive": [
+        [
+          2,
+          4,
+          1
+        ],
+        [
+          15,
+          14,
+          13
+        ]
+      ],
+      "occupied_size": [
+        14,
+        11,
+        13
+      ],
+      "raw_nonblack_voxel_count": 833,
+      "nontransparent_voxel_count": 464,
+      "visible_rgb_count": 10,
+      "mirror_geometry_agreement": 0.9009,
+      "index": 5,
+      "ui_number": 6,
+      "visual_type": "HAIR",
+      "description": "Короткие разрозненные пряди с зубчатым верхом и точками на затылке.",
+      "classification_status": "INFERRED",
+      "secondary_features": [],
+      "covers": [
+        "FRONTAL_HEAD_VOXELS",
+        "LATERAL_EDGE_AT_BASE_FACE",
+        "BACK_PLANE_OR_BEHIND"
+      ],
+      "geometry_symmetry": "ASYMMETRIC",
+      "length_observation": "AT_OR_ABOVE_BASE_FACE_BOTTOM",
+      "ear_coverage_semantics": "UNKNOWN",
+      "coverage_basis": "Centered voxel comparison with Face index 0 only; quantitative projection and plane tests, not a rendered mesh.",
+      "geometry_comparison": {
+        "base_face_index": 0,
+        "projected_front_overlap_pixels": 4,
+        "overlap_at_outer_sides_pixels": 1,
+        "voxels_at_or_behind_face_back_plane": 11,
+        "voxels_below_face": 0,
+        "voxels_above_face": 10,
+        "voxels_beyond_face_width": 15,
+        "extends_forward_of_face": false
+      },
+      "color_material": "HAIRCUT_DRAW_MULTIPLIER"
+    }
+  ],
+  "colors": {
+    "ui_field": "Hair color",
+    "encoding": "RGB888",
+    "default_committed_rgb": [
+      255,
+      200,
+      50
+    ],
+    "columns": 16,
+    "rows": 7,
+    "unique_color_count": 112,
+    "hex_rgb_columns_top_to_bottom": [
+      [
+        "330000",
+        "720000",
+        "B20000",
+        "FF0000",
+        "FF3F3F",
+        "FF7F7F",
+        "FFBFBF"
+      ],
+      [
+        "330C00",
+        "721C00",
+        "B22C00",
+        "FF3F00",
+        "FF6F3F",
+        "FF9F7F",
+        "FFCFBF"
+      ],
+      [
+        "331900",
+        "723900",
+        "B25900",
+        "FF7F00",
+        "FF9F3F",
+        "FFBF7F",
+        "FFDFBF"
+      ],
+      [
+        "333300",
+        "727200",
+        "B2B200",
+        "FFFF00",
+        "FFFF3F",
+        "FFFF7F",
+        "FFFFBF"
+      ],
+      [
+        "193300",
+        "397200",
+        "59B200",
+        "7FFF00",
+        "9FFF3F",
+        "BFFF7F",
+        "DFFFBF"
+      ],
+      [
+        "003300",
+        "007200",
+        "00B200",
+        "00FF00",
+        "3FFF3F",
+        "7FFF7F",
+        "BFFFBF"
+      ],
+      [
+        "003319",
+        "007239",
+        "00B259",
+        "00FF7F",
+        "3FFF9F",
+        "7FFFBF",
+        "BFFFDF"
+      ],
+      [
+        "003333",
+        "007272",
+        "00B2B2",
+        "00FFFF",
+        "3FFFFF",
+        "7FFFFF",
+        "BFFFFF"
+      ],
+      [
+        "001933",
+        "003972",
+        "0059B2",
+        "007FFF",
+        "3F9FFF",
+        "7FBFFF",
+        "BFDFFF"
+      ],
+      [
+        "000C33",
+        "001C72",
+        "002CB2",
+        "003FFF",
+        "3F6FFF",
+        "7F9FFF",
+        "BFCFFF"
+      ],
+      [
+        "000033",
+        "000072",
+        "0000B2",
+        "0000FF",
+        "3F3FFF",
+        "7F7FFF",
+        "BFBFFF"
+      ],
+      [
+        "0C0033",
+        "1C0072",
+        "2C00B2",
+        "3F00FF",
+        "6F3FFF",
+        "9F7FFF",
+        "CFBFFF"
+      ],
+      [
+        "190033",
+        "390072",
+        "5900B2",
+        "7F00FF",
+        "9F3FFF",
+        "BF7FFF",
+        "DFBFFF"
+      ],
+      [
+        "260033",
+        "560072",
+        "8500B2",
+        "BF00FF",
+        "CF3FFF",
+        "DF7FFF",
+        "EFBFFF"
+      ],
+      [
+        "330033",
+        "720072",
+        "B200B2",
+        "FF00FF",
+        "FF3FFF",
+        "FF7FFF",
+        "FFBFFF"
+      ],
+      [
+        "191919",
+        "393939",
+        "595959",
+        "7F7F7F",
+        "9F9F9F",
+        "BFBFBF",
+        "DFDFDF"
+      ]
+    ],
+    "same_widgets_across_roster": true,
+    "evidence": [
+      {
+        "status": "CODE_CONFIRMED",
+        "reference": "Cube.exe 0x428E40; inner loop 0x42B421–0x42B6F7; apply 0x42B8B0",
+        "detail": "Hit-tested y origins 197,214,231,248,265,282,299, next 316 stops. 16 base hue columns. Float32 shade math and truncation reproduced."
+      },
+      {
+        "status": "CODE_CONFIRMED",
+        "reference": "Cube.exe 0x42BD90",
+        "detail": "Reset stores committed FFC832; preview scratch FFFFFF."
+      },
+      {
+        "status": "SAVE_CONFIRMED",
+        "reference": "Save/characters.db, blob 0",
+        "detail": "Default saved RGB FFC832."
+      }
+    ],
+    "preview": {
+      "state_offsets": "widget+0x1A3..0x1A5",
+      "committed_offsets": "widget+0x1A0..0x1A2",
+      "behavior": "Click/apply copies preview bytes to committed bytes. The shipped refresh reaches the preview arm for a non-null widget address because it tests the address widget+0x1A3, including when called with parameter zero.",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42C2D0, 0x42C318, 0x42B8D9–0x42B904",
+          "detail": "Verified as encoded: LEA EDX,[EDI+0x1A3], TEST EDX,EDX, and RGB byte reads; do not reinterpret the branch as a check on RGB value."
+        }
+      ]
+    },
+    "applied_to": [
+      "Haircut overlay"
+    ],
+    "not_applied_to": [
+      "Face",
+      "body",
+      "hands",
+      "feet"
+    ],
+    "sample_rgb_in": [
+      7,
+      129,
+      211
+    ],
+    "sample_overlay_rgb_out": [
+      7,
+      129,
+      211
+    ],
+    "sample_default_overlay_rgb_out": [
+      255,
+      200,
+      50
+    ],
+    "render_evidence": {
+      "status": "CODE_CONFIRMED",
+      "reference": "Cube.exe 0x4206C2, 0x420A38, 0x448280, world VS 0x6FD928 c32",
+      "detail": "Haircut drawn with a per-draw RGB material multiplier from appearance +0x02..04; the head and body do not consume Hair color. Creature colour/status and lighting can affect the final pixel. All visible overlay geometry is in the tinted draw, including coloured decoration or beard voxels when present."
+    }
+  },
+  "eyes": {
+    "editor_slot": false,
+    "embedded_in_face": true,
+    "separate_geometry": false,
+    "separate_texture": false,
+    "color_editable": false,
+    "runtime_effect_as_editor_option": false,
+    "runtime_effect_outside_creator": "UNKNOWN",
+    "examined_face_count": 6,
+    "evidence": [
+      {
+        "status": "CODE_CONFIRMED",
+        "reference": "Cube.exe 0x428E40, 0x42C080, 0x43F7C0, render 0x4206C2/0x420A38",
+        "detail": "No separate player eye selector, slot or texture in traced creator-to-appearance path."
+      },
+      {
+        "status": "ASSET_CONFIRMED",
+        "reference": "data1.db",
+        "detail": "All listed Face .cub assets display eye voxels when rendered alone. .cub stores RGB voxels with no UV/texture reference."
+      }
+    ]
+  },
+  "editor_fields": {
+    "Race": {
+      "widget_offset": "0x18C",
+      "options_count": 8,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x428F1E and 0x42BA60/0x42BAB0",
+          "detail": "Back/forward wraps 0..7; display switch gives eight playable labels."
+        }
+      ]
+    },
+    "Gender": {
+      "widget_offset": "0x194",
+      "values": [
+        "Male",
+        "Female"
+      ],
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42B990 and 0x42C0A9",
+          "detail": "Both arrows toggle 0/1; kind uses the gender offset."
+        }
+      ]
+    },
+    "Class": {
+      "widget_offset": "0x190",
+      "options_count": 4,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42B810/0x42B860; 0x42C132–0x42C16C",
+          "detail": "Class cycles 0..3 independently. Refresh writes class+1 before switching by kind alone. Tested bounds for the four class indices."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x43F7C0",
+          "detail": "Generator receives kind, appearance buffer and appearance seed, with no class field in its inputs."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4772B0, class switch 0x47742E",
+          "detail": "Class-specific weapon and starter equipment."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x4DF880 and Creature+0x140",
+          "detail": "Class is used for progression/skills and is persisted separately."
+        }
+      ]
+    },
+    "Face": {
+      "widget_offset": "0x198",
+      "fields_are_race_and_gender_dependent": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42B910/0x42B950, 0x42C16C",
+          "detail": "Face index uses a kind-specific range and wraps; UI prints index+1."
+        }
+      ]
+    },
+    "Haircut": {
+      "widget_offset": "0x19C",
+      "fields_are_race_and_gender_dependent": true,
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42B9E0/0x42BA20, 0x42C16C",
+          "detail": "Haircut has its own kind-specific range and wraps; UI prints index+1."
+        }
+      ]
+    },
+    "Hair color": {
+      "widget_offset": "0x1A0",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x428E40; inner loop 0x42B421–0x42B6F7; apply 0x42B8B0",
+          "detail": "Hit-tested y origins 197,214,231,248,265,282,299, next 316 stops. 16 base hue columns. Float32 shade math and truncation reproduced."
+        },
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x42BD90",
+          "detail": "Reset stores committed FFC832; preview scratch FFFFFF."
+        },
+        {
+          "status": "SAVE_CONFIRMED",
+          "reference": "Save/characters.db, blob 0",
+          "detail": "Default saved RGB FFC832."
+        }
+      ]
+    },
+    "Name": {
+      "category": "IDENTITY",
+      "kind": "TEXT",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe UI Name / charactername; NameInput_handle_key 0x43A0D0; 0x44D790",
+          "detail": "Text control on character creation screen. Persisted independently from the appearance block."
+        }
+      ]
+    }
+  },
+  "separate_fields_absent": {
+    "Skin Color": {
+      "independent_editor_field": false,
+      "evidence_scope": "Stock character creator panel/bindings and save field map",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x428E40, 0x42C080, 0x44D790",
+          "detail": "No independently bound input or dedicated field in creator appearance payload."
+        }
+      ]
+    },
+    "Eye Color": {
+      "independent_editor_field": false,
+      "evidence_scope": "Stock character creator panel/bindings and save field map",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x428E40, 0x42C080, 0x44D790",
+          "detail": "No independently bound input or dedicated field in creator appearance payload."
+        }
+      ]
+    },
+    "Beard": {
+      "independent_editor_field": false,
+      "evidence_scope": "Stock character creator panel/bindings and save field map",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x428E40, 0x42C080, 0x44D790",
+          "detail": "No independently bound input or dedicated field in creator appearance payload."
+        }
+      ]
+    },
+    "Mustache": {
+      "independent_editor_field": false,
+      "evidence_scope": "Stock character creator panel/bindings and save field map",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x428E40, 0x42C080, 0x44D790",
+          "detail": "No independently bound input or dedicated field in creator appearance payload."
+        }
+      ]
+    },
+    "Headgear": {
+      "independent_editor_field": false,
+      "evidence_scope": "Stock character creator panel/bindings and save field map",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x428E40, 0x42C080, 0x44D790",
+          "detail": "No independently bound input or dedicated field in creator appearance payload."
+        }
+      ]
+    },
+    "Ears": {
+      "independent_editor_field": false,
+      "evidence_scope": "Stock character creator panel/bindings and save field map",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x428E40, 0x42C080, 0x44D790",
+          "detail": "No independently bound input or dedicated field in creator appearance payload."
+        }
+      ]
+    },
+    "Horns": {
+      "independent_editor_field": false,
+      "evidence_scope": "Stock character creator panel/bindings and save field map",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x428E40, 0x42C080, 0x44D790",
+          "detail": "No independently bound input or dedicated field in creator appearance payload."
+        }
+      ]
+    },
+    "Crest": {
+      "independent_editor_field": false,
+      "evidence_scope": "Stock character creator panel/bindings and save field map",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x428E40, 0x42C080, 0x44D790",
+          "detail": "No independently bound input or dedicated field in creator appearance payload."
+        }
+      ]
+    },
+    "Tail": {
+      "independent_editor_field": false,
+      "evidence_scope": "Stock character creator panel/bindings and save field map",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x428E40, 0x42C080, 0x44D790",
+          "detail": "No independently bound input or dedicated field in creator appearance payload."
+        }
+      ]
+    },
+    "Scale Color": {
+      "independent_editor_field": false,
+      "evidence_scope": "Stock character creator panel/bindings and save field map",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x428E40, 0x42C080, 0x44D790",
+          "detail": "No independently bound input or dedicated field in creator appearance payload."
+        }
+      ]
+    },
+    "Effect": {
+      "independent_editor_field": false,
+      "evidence_scope": "Stock character creator panel/bindings and save field map",
+      "evidence": [
+        {
+          "status": "CODE_CONFIRMED",
+          "reference": "Cube.exe 0x428E40, 0x42C080, 0x44D790",
+          "detail": "No independently bound input or dedicated field in creator appearance payload."
+        }
+      ]
+    }
+  },
+  "classes": {
+    "options": [
+      {
+        "ui_index": 0,
+        "class_id": 1,
+        "display_name": "Warrior",
+        "main_hand_item_type_subtype": [
+          3,
+          17
+        ]
+      },
+      {
+        "ui_index": 1,
+        "class_id": 2,
+        "display_name": "Ranger",
+        "main_hand_item_type_subtype": [
+          3,
+          6
+        ]
+      },
+      {
+        "ui_index": 2,
+        "class_id": 3,
+        "display_name": "Mage",
+        "main_hand_item_type_subtype": [
+          3,
+          10
+        ]
+      },
+      {
+        "ui_index": 3,
+        "class_id": 4,
+        "display_name": "Rogue",
+        "main_hand_item_type_subtype": [
+          3,
+          3
+        ]
+      }
+    ],
+    "affects_face_availability": false,
+    "affects_haircut_availability": false,
+    "affects_base_body": false,
+    "affects_class_starter_gear": true,
+    "affects_combat_and_skill_class": true,
+    "evidence": [
+      {
+        "status": "CODE_CONFIRMED",
+        "reference": "Cube.exe 0x42B810/0x42B860; 0x42C132–0x42C16C",
+        "detail": "Class cycles 0..3 independently. Refresh writes class+1 before switching by kind alone. Tested bounds for the four class indices."
+      },
+      {
+        "status": "CODE_CONFIRMED",
+        "reference": "Cube.exe 0x43F7C0",
+        "detail": "Generator receives kind, appearance buffer and appearance seed, with no class field in its inputs."
+      },
+      {
+        "status": "CODE_CONFIRMED",
+        "reference": "Cube.exe 0x4772B0, class switch 0x47742E",
+        "detail": "Class-specific weapon and starter equipment."
+      },
+      {
+        "status": "CODE_CONFIRMED",
+        "reference": "Cube.exe 0x4DF880 and Creature+0x140",
+        "detail": "Class is used for progression/skills and is persisted separately."
+      }
+    ]
+  },
+  "save_format": {
+    "store": "Save/characters.db → blobs (key, value); numeric character keys and count key num; zlib for tested character payload",
+    "byte_order": "little-endian",
+    "version_tag": 11,
+    "appearance_block_size": 20,
+    "appearance_offset_formula": "0x3E + 13 * 0x118 + 4 + name_byte_length",
+    "header_marker": {
+      "offset": "0x00",
+      "type": "u32",
+      "sample": 1
+    },
+    "class": {
+      "record_offset": "0x34",
+      "type": "u8",
+      "range": [
+        1,
+        4
+      ]
+    },
+    "specialization": {
+      "record_offset": "0x35",
+      "type": "u8",
+      "appearance_field": false
+    },
+    "name": {
+      "length_offset": "0xE76",
+      "encoding": "u32 byte length plus NUL-terminated bytes"
+    },
+    "appearance_fields": {
+      "race": {
+        "offset": "0x00",
+        "type": "u32"
+      },
+      "gender": {
+        "offset": "0x04",
+        "type": "u8"
+      },
+      "reserved_alignment_05_07": {
+        "offset": "0x05",
+        "type": "3 bytes",
+        "meaning": "UNKNOWN"
+      },
+      "face_index": {
+        "offset": "0x08",
+        "type": "i32"
+      },
+      "haircut_index": {
+        "offset": "0x0C",
+        "type": "i32"
+      },
+      "hair_rgb": {
+        "offset": "0x10",
+        "type": "3 × u8",
+        "channels": [
+          "R",
+          "G",
+          "B"
+        ]
+      },
+      "reserved_alignment_13": {
+        "offset": "0x13",
+        "type": "1 byte",
+        "meaning": "UNKNOWN"
+      }
+    },
+    "later_fields": [
+      {
+        "field": "appearance_nodes",
+        "layout": "u32 count, count × 0x118 fixed records",
+        "meaning": "UNKNOWN"
+      },
+      {
+        "field": "appearance_map",
+        "layout": "u32 count, count × (i32 key, u32 length, counted string, 0x18 bytes)",
+        "meaning": "PARTIAL"
+      },
+      {
+        "field": "last_map_key",
+        "type": "u32"
+      },
+      {
+        "field": "world_name",
+        "layout": "u32 length, counted bytes"
+      }
+    ],
+    "sample": {
+      "appearance": [
+        0,
+        0,
+        0,
+        0,
+        [
+          255,
+          200,
+          50
+        ]
+      ],
+      "class_id": 1,
+      "specialization_id": 0,
+      "inflated_length": 63753,
+      "appearance_offset": 3711,
+      "node_count": 11,
+      "map_count": 1,
+      "version": 11
+    },
+    "evidence": [
+      {
+        "status": "CODE_CONFIRMED",
+        "reference": "Cube.exe 0x44D790 and 0x44BE40",
+        "detail": "Serializer writes class/spec, equipment, counted NUL-terminated name, and exactly 0x14 appearance bytes; load reads the appearance block and regenerates kind/model."
+      },
+      {
+        "status": "SAVE_CONFIRMED",
+        "reference": "Save/characters.db, key 0 (read-only)",
+        "detail": "Version 11 blob fully walked to terminal 11 skill ranks; no remaining bytes. Tested save is Human Male Warrior with Face/Haircut index 0."
+      }
+    ]
+  },
+  "limitations": {
+    "both_index_domains_start_at_zero": true,
+    "out_of_range_transition": "negative → last; >= count → 0; within range preserved",
+    "class_filters_face_and_haircut": false,
+    "class_change_preserves_base_slots": true
+  },
+  "missing_assets": []
+}

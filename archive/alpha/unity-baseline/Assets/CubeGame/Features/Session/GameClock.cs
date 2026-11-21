@@ -1,0 +1,167 @@
+using System;
+
+namespace CubeGame.Features.Session
+{
+    /// <summary>
+    /// The single source of simulation time (M0-00C §2, R-TIME). Game time advances in fixed ticks;
+    /// the presentation layer feeds real frame time exactly once per frame through <see cref="Advance"/>.
+    /// Time is kept as an integer tick counter, so 30/60/120 Hz frame rates produce identical tick
+    /// sequences and identical game-millisecond timestamps (Alpha formulas are expressed in ms).
+    ///
+    /// Tick rate 30 Hz: CubeGame decision (M0-00C A-2), PLACEHOLDER_NOT_ALPHA — Alpha's own update rate
+    /// is not used as a simulation constant anywhere in CubeGame.
+    /// </summary>
+    public sealed class GameClock
+    {
+        public const int DefaultTicksPerSecond = 30;
+
+        private const int WorldDayMs = 86_400_000;
+        private const int InitialWorldTimeMs = 32_400_000;
+        private const int WorldTimeRate = 10;
+        public const int InnDawnMs = 25_200_000;
+
+        /// <summary>Upper bound of ticks executed for one frame (protects against spiral of death).</summary>
+        public const int MaxTicksPerFrame = 8;
+
+        private readonly int _ticksPerSecond;
+        private double _accumulatorSeconds;
+
+        public GameClock(int ticksPerSecond = DefaultTicksPerSecond, long startTick = 0, long worldTimeOffsetMs = 0)
+        {
+            if (ticksPerSecond <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(ticksPerSecond));
+            }
+
+            if (startTick < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(startTick));
+            }
+
+            _ticksPerSecond = ticksPerSecond;
+            Tick = startTick;
+            WorldTimeOffsetMs = worldTimeOffsetMs;
+        }
+
+        /// <summary>Raised once per simulation tick, after <see cref="Tick"/> was incremented.</summary>
+        public event Action<GameClock> Ticked;
+
+        public int TicksPerSecond => _ticksPerSecond;
+
+        public long Tick { get; private set; }
+
+        public bool Paused { get; set; }
+
+        /// <summary>Game time in milliseconds (exact: tick * 1000 / rate, rounded down).</summary>
+        public long TimeMs => Tick * 1000L / _ticksPerSecond;
+
+        public long WorldTimeOffsetMs { get; private set; }
+
+        private long TotalWorldTimeMs => InitialWorldTimeMs + TimeMs * WorldTimeRate + WorldTimeOffsetMs;
+
+        /// <summary>Alpha world time at the normal rate (Cube.exe 0x60C678…0x60C6E2).</summary>
+        public int WorldTimeMs
+        {
+            get
+            {
+                int time = (int)(TotalWorldTimeMs % WorldDayMs);
+                return time == 0 ? WorldDayMs : time;
+            }
+        }
+
+        public int WorldDay => (int)(TotalWorldTimeMs / WorldDayMs);
+
+        public bool IsInnOpen => WorldTimeMs >= 64_800_000 || WorldTimeMs <= 21_600_000;
+
+        /// <summary>ALPHA_CODE_STATIC (0x610630): class 0x84 advances the calendar by a day and sets 07:00.</summary>
+        internal bool TryRestAtInn()
+        {
+            if (!IsInnOpen)
+            {
+                return false;
+            }
+
+            WorldTimeOffsetMs += WorldDayMs + InnDawnMs - TotalWorldTimeMs % WorldDayMs;
+            return true;
+        }
+
+        /// <summary>Time weight for terrain colour blending (Cube.exe 0x59D65B…0x59D6EB).</summary>
+        public double TerrainDaylightWeight
+        {
+            get
+            {
+                double distanceFromNoon = Math.Abs(2.0 * WorldTimeMs / WorldDayMs - 1.0);
+                double blend = 1.0 - distanceFromNoon * distanceFromNoon * distanceFromNoon;
+                double squared = blend * blend;
+                return squared * squared;
+            }
+        }
+
+        public double TickSeconds => 1.0 / _ticksPerSecond;
+
+        /// <summary>Fraction of the next tick already accumulated, for render interpolation [0,1).</summary>
+        public double Alpha => _accumulatorSeconds * _ticksPerSecond;
+
+        /// <summary>Real seconds dropped because a frame needed more than <see cref="MaxTicksPerFrame"/>.</summary>
+        public double DroppedSeconds { get; private set; }
+
+        /// <summary>Feeds real elapsed time; returns the number of ticks executed.</summary>
+        public int Advance(double realSeconds)
+        {
+            if (double.IsNaN(realSeconds) || double.IsInfinity(realSeconds) || realSeconds <= 0.0 || Paused)
+            {
+                return 0;
+            }
+
+            _accumulatorSeconds += realSeconds;
+            double step = TickSeconds;
+            int executed = 0;
+            while (_accumulatorSeconds + 1e-9 >= step)
+            {
+                if (executed >= MaxTicksPerFrame)
+                {
+                    DroppedSeconds += _accumulatorSeconds;
+                    _accumulatorSeconds = 0.0;
+                    break;
+                }
+
+                _accumulatorSeconds -= step;
+                if (_accumulatorSeconds < 0.0)
+                {
+                    _accumulatorSeconds = 0.0;
+                }
+
+                StepOnce();
+                executed++;
+            }
+
+            return executed;
+        }
+
+        /// <summary>Executes exactly <paramref name="ticks"/> ticks regardless of pause (tests, loading).</summary>
+        public void StepTicks(int ticks)
+        {
+            for (int i = 0; i < ticks; i++)
+            {
+                StepOnce();
+            }
+        }
+
+        public void Restore(long tick)
+        {
+            if (tick < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(tick));
+            }
+
+            Tick = tick;
+            _accumulatorSeconds = 0.0;
+        }
+
+        private void StepOnce()
+        {
+            Tick++;
+            Ticked?.Invoke(this);
+        }
+    }
+}

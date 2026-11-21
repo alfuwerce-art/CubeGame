@@ -1,0 +1,21 @@
+[
+  {"name": "matching sets pass", "expected": "clean", "passed": true, "problems": []}
+  {"name": "missing OBJ fails", "expected": "problems", "passed": true, "problems": ["missing OBJ for sample 'b'"]}
+  {"name": "extra OBJ fails", "expected": "problems", "passed": true, "problems": ["OBJ without matching .cubdec: 'ghost'"]}
+  {"name": "empty decoded set fails", "expected": "problems", "passed": true, "problems": ["no .cubdec inputs found in Assets/PilotData", "OBJ without matching .cubdec: 'a'"]}
+  {"name": "empty obj set fails", "expected": "problems", "passed": true, "problems": ["no .obj inputs found in Assets/PilotModels", "missing OBJ for sample 'a'"]}
+  {"name": "duplicate key fails", "expected": "problems", "passed": true, "problems": ["duplicate .cubdec key: a"]}
+  {"name": "correct voxel geometry passes", "expected": "clean", "passed": true, "problems": []}
+  {"name": "wrong vertex count fails", "expected": "problems", "passed": true, "problems": ["voxel mesh vertices 39 != 4 per face (40)"]}
+  {"name": "wrong triangle count fails", "expected": "problems", "passed": true, "problems": ["voxel mesh triangles 19 != 2 per face (20)"]}
+  {"name": "wrong bounds fails", "expected": "problems", "passed": true, "problems": ["voxel mesh: bounds (2,3,3) != expected solid extent (2,3,4)"]}
+  {"name": "negative bounds min fails", "expected": "problems", "passed": true, "problems": ["voxel mesh: negative bounds min (0,-1,0) (models start at 0 on every axis)"]}
+  {"name": "no faces fails", "expected": "problems", "passed": true, "problems": ["model exposes no faces"]}
+  {"name": "correct obj import passes", "expected": "clean", "passed": true, "problems": []}
+  {"name": "mirrored obj import passes", "expected": "clean", "passed": true, "problems": []}
+  {"name": "mirror without X flip fails", "expected": "problems", "passed": true, "problems": ["OBJ import (X mirrored by the importer): min (-2,0,0) != expected min (0,0,0)"]}
+  {"name": "failed obj import fails", "expected": "problems", "passed": true, "problems": ["OBJ import failed: no MeshFilter"]}
+  {"name": "obj triangle mismatch fails", "expected": "problems", "passed": true, "problems": ["OBJ import triangles 20 != 2 per face (22)"]}
+  {"name": "obj bounds mismatch fails", "expected": "problems", "passed": true, "problems": ["OBJ import: bounds (2,3,4) != expected solid extent (2,3,5)"]}
+  {"name": "obj import without groups fails", "expected": "problems", "passed": true, "problems": ["OBJ import produced no mesh groups"]}
+]

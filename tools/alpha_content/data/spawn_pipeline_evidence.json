@@ -1,0 +1,2096 @@
+{
+ "format": "cubegame.spawn_pipeline_evidence/1",
+ "cube_sha256": "84a7a132a84d4282338e7ea45a1940d32066d64e39cbafed8f2418d5a6dc30bf",
+ "spawn_ctor": "0x5ADB20",
+ "template_bytes": 4336,
+ "byte_checks": {
+  "template_ctor": [
+   {
+    "va": "0x5ADB23",
+    "bytes": "c706ecdb7100",
+    "meaning": "mov [esi],0x71DBEC Spawn vftable",
+    "ok": true
+   },
+   {
+    "va": "0x5ADB29",
+    "bytes": "c7460800004843",
+    "meaning": "mov [esi+8],200.0f activation radius default",
+    "ok": true
+   },
+   {
+    "va": "0x5ADB30",
+    "bytes": "c7462801000000",
+    "meaning": "mov [esi+0x28],1 faction default",
+    "ok": true
+   },
+   {
+    "va": "0x5ADB37",
+    "bytes": "c7462c04000000",
+    "meaning": "mov [esi+0x2c],4 kind default",
+    "ok": true
+   },
+   {
+    "va": "0x5ADB44",
+    "bytes": "c7463401000000",
+    "meaning": "mov [esi+0x34],1 level default",
+    "ok": true
+   },
+   {
+    "va": "0x5ADB4B",
+    "bytes": "c7463800000000",
+    "meaning": "mov [esi+0x38],0 respawn timer",
+    "ok": true
+   },
+   {
+    "va": "0x5ADB52",
+    "bytes": "c7463c00000000",
+    "meaning": "mov [esi+0x3c],0 day of death",
+    "ok": true
+   }
+  ],
+  "template_to_creature_condition": [
+   {
+    "va": "0x60FBC1",
+    "bytes": "8b4744",
+    "meaning": "mov eax,[edi+0x44] window end",
+    "ok": true
+   },
+   {
+    "va": "0x60FBC4",
+    "bytes": "394740",
+    "meaning": "cmp [edi+0x40],eax window start == end -> no window",
+    "ok": true
+   },
+   {
+    "va": "0x60FBC7",
+    "bytes": "7428",
+    "meaning": "je skip the time-of-day test",
+    "ok": true
+   },
+   {
+    "va": "0x60FBCF",
+    "bytes": "e83c1de6ff",
+    "meaning": "call 0x471910 world time of day (+0x80015C)",
+    "ok": true
+   },
+   {
+    "va": "0x60FBD4",
+    "bytes": "3b4740",
+    "meaning": "cmp eax,[edi+0x40]",
+    "ok": true
+   },
+   {
+    "va": "0x60FBD7",
+    "bytes": "0f8c56080000",
+    "meaning": "jl next template time < window start",
+    "ok": true
+   },
+   {
+    "va": "0x60FBE8",
+    "bytes": "3b4744",
+    "meaning": "cmp eax,[edi+0x44]",
+    "ok": true
+   },
+   {
+    "va": "0x60FBEB",
+    "bytes": "0f8f42080000",
+    "meaning": "jg next template time > window end",
+    "ok": true
+   },
+   {
+    "va": "0x60FBF7",
+    "bytes": "8d4748",
+    "meaning": "lea eax,[edi+0x48] template entity id",
+    "ok": true
+   },
+   {
+    "va": "0x60FBFB",
+    "bytes": "e800f4e1ff",
+    "meaning": "call 0x42F000 live creature of this id",
+    "ok": true
+   },
+   {
+    "va": "0x60FC02",
+    "bytes": "0f852b080000",
+    "meaning": "jne next template a creature already exists",
+    "ok": true
+   },
+   {
+    "va": "0x60FC08",
+    "bytes": "394738",
+    "meaning": "cmp [edi+0x38],eax(0) respawn timer",
+    "ok": true
+   },
+   {
+    "va": "0x60FC0B",
+    "bytes": "7d05",
+    "meaning": "jge",
+    "ok": true
+   },
+   {
+    "va": "0x60FC0D",
+    "bytes": "894738",
+    "meaning": "mov [edi+0x38],0 clamp a negative timer",
+    "ok": true
+   },
+   {
+    "va": "0x60FC12",
+    "bytes": "7415",
+    "meaning": "je spawn timer == 0",
+    "ok": true
+   },
+   {
+    "va": "0x60FC1A",
+    "bytes": "8b473c",
+    "meaning": "mov eax,[edi+0x3c] day of death",
+    "ok": true
+   },
+   {
+    "va": "0x60FC1D",
+    "bytes": "3b8160018000",
+    "meaning": "cmp eax,[ecx+0x800160] current day",
+    "ok": true
+   },
+   {
+    "va": "0x60FC23",
+    "bytes": "0f840a080000",
+    "meaning": "je next template same day and timer running",
+    "ok": true
+   },
+   {
+    "va": "0x60FC64",
+    "bytes": "f30f104708",
+    "meaning": "movss xmm0,[edi+8] activation radius vs player distance",
+    "ok": true
+   }
+  ],
+  "respawn_timer": [
+   {
+    "va": "0x60DF9F",
+    "bytes": "294838",
+    "meaning": "sub [eax+0x38],ecx timer -= frame milliseconds",
+    "ok": true
+   },
+   {
+    "va": "0x596C30",
+    "bytes": "c74038804f1200",
+    "meaning": "mov [eax+0x38],1200000 written when the creature dies",
+    "ok": true
+   },
+   {
+    "va": "0x596C3A",
+    "bytes": "8b8bb8010000",
+    "meaning": "mov ecx,[ebx+0x1b8] creature -> template index in its zone",
+    "ok": true
+   },
+   {
+    "va": "0x60C6C0",
+    "bytes": "ff8760018000",
+    "meaning": "inc [edi+0x800160] day counter",
+    "ok": true
+   }
+  ],
+  "wild_grid": [
+   {
+    "va": "0x5EAF9E",
+    "bytes": "2503000080",
+    "meaning": "and eax,0x80000003 rand()&3 == 0 -> cell skipped",
+    "ok": true
+   },
+   {
+    "va": "0x5EAFAA",
+    "bytes": "0f84e50b0000",
+    "meaning": "je next cell",
+    "ok": true
+   },
+   {
+    "va": "0x5EAFB3",
+    "bytes": "b90a000000",
+    "meaning": "mov ecx,10 rand()%10 jitter",
+    "ok": true
+   },
+   {
+    "va": "0x5EAFC0",
+    "bytes": "6bf655",
+    "meaning": "imul esi,esi,0x55 cell step 85",
+    "ok": true
+   },
+   {
+    "va": "0x5EAFC3",
+    "bytes": "83c618",
+    "meaning": "add esi,0x18 cell offset 24",
+    "ok": true
+   },
+   {
+    "va": "0x5EAFDA",
+    "bytes": "6bff55",
+    "meaning": "imul edi,edi,0x55",
+    "ok": true
+   },
+   {
+    "va": "0x5EAFEB",
+    "bytes": "83c718",
+    "meaning": "add edi,0x18",
+    "ok": true
+   },
+   {
+    "va": "0x5EB34D",
+    "bytes": "e8ce27fcff",
+    "meaning": "call 0x5ADB20 template of the cell",
+    "ok": true
+   },
+   {
+    "va": "0x5EB48C",
+    "bytes": "e82fa20000",
+    "meaning": "call 0x5F56C0 kind by climate",
+    "ok": true
+   },
+   {
+    "va": "0x5EB7B2",
+    "bytes": "e86988e5ff",
+    "meaning": "call 0x444020 level range of the kind",
+    "ok": true
+   },
+   {
+    "va": "0x5EB7DC",
+    "bytes": "895634",
+    "meaning": "mov [esi+0x34],edx level = min + rand()%(max-min+1)",
+    "ok": true
+   },
+   {
+    "va": "0x5EB838",
+    "bytes": "837e2801",
+    "meaning": "cmp [esi+0x28],1 hostile template",
+    "ok": true
+   },
+   {
+    "va": "0x5EB83E",
+    "bytes": "c7464000974901",
+    "meaning": "mov [esi+0x40],21600000 window start 06:00",
+    "ok": true
+   },
+   {
+    "va": "0x5EB845",
+    "bytes": "c74644005c2605",
+    "meaning": "mov [esi+0x44],86400000 window end 24:00",
+    "ok": true
+   },
+   {
+    "va": "0x5EB87A",
+    "bytes": "e8c186e5ff",
+    "meaning": "call 0x443F40 pack range of the kind",
+    "ok": true
+   },
+   {
+    "va": "0x5EB8D9",
+    "bytes": "e84222fcff",
+    "meaning": "call 0x5ADB20 template of a pack member",
+    "ok": true
+   },
+   {
+    "va": "0x5EBADD",
+    "bytes": "e8aeca0000",
+    "meaning": "call 0x5F8590 kind of the pack member",
+    "ok": true
+   },
+   {
+    "va": "0x5EBB35",
+    "bytes": "895734",
+    "meaning": "mov [edi+0x34],edx pack member level",
+    "ok": true
+   },
+   {
+    "va": "0x5EBB68",
+    "bytes": "f30f114754",
+    "meaning": "movss [edi+0x54],xmm0 yaw",
+    "ok": true
+   },
+   {
+    "va": "0x5EBBAE",
+    "bytes": "83f803",
+    "meaning": "cmp eax,3 3 cells per axis",
+    "ok": true
+   }
+  ],
+  "random_interaction_day_window": [
+   {
+    "va": "0x4DB404",
+    "bytes": "3d00974901",
+    "meaning": "cmp eax,21600000 world time < 06:00 -> night set",
+    "ok": true
+   },
+   {
+    "va": "0x4DB409",
+    "bytes": "7c0d",
+    "meaning": "jl",
+    "ok": true
+   },
+   {
+    "va": "0x4DB411",
+    "bytes": "3d806def04",
+    "meaning": "cmp eax,82800000 world time < 23:00 -> day set",
+    "ok": true
+   },
+   {
+    "va": "0x4DB416",
+    "bytes": "7c02",
+    "meaning": "jl",
+    "ok": true
+   }
+  ],
+  "vendor_classes": [
+   {
+    "va": "0x5BCC7A",
+    "bytes": "c6463084",
+    "meaning": "class 0x84",
+    "ok": true
+   },
+   {
+    "va": "0x5BCE42",
+    "bytes": "c6463080",
+    "meaning": "class 0x80",
+    "ok": true
+   },
+   {
+    "va": "0x5BCE53",
+    "bytes": "e8d8cc0000",
+    "meaning": "call 0x5C9B30 item list of class 0x80",
+    "ok": true
+   },
+   {
+    "va": "0x5BD01E",
+    "bytes": "c6463082",
+    "meaning": "class 0x82",
+    "ok": true
+   },
+   {
+    "va": "0x5BD1FA",
+    "bytes": "c6463081",
+    "meaning": "class 0x81",
+    "ok": true
+   },
+   {
+    "va": "0x5BD20B",
+    "bytes": "e890ce0000",
+    "meaning": "call 0x5CA0A0 item list of class 0x81",
+    "ok": true
+   },
+   {
+    "va": "0x5BD3D6",
+    "bytes": "c6463083",
+    "meaning": "class 0x83",
+    "ok": true
+   },
+   {
+    "va": "0x5BD3E7",
+    "bytes": "e8b4cc0000",
+    "meaning": "call 0x5CA0A0 item list of class 0x83",
+    "ok": true
+   }
+  ]
+ },
+ "immediate_checks": [
+  {
+   "name": "walk_path_pause_span",
+   "range": [
+    "0x58CFE0",
+    "0x58D630"
+   ],
+   "bytes": "a00f0000",
+   "meaning": "rand()%4000",
+   "occurrences": 1
+  },
+  {
+   "name": "walk_path_pause_base",
+   "range": [
+    "0x58CFE0",
+    "0x58D630"
+   ],
+   "bytes": "d0070000",
+   "meaning": "+2000 ms",
+   "occurrences": 1
+  },
+  {
+   "name": "spawn_location_world_time",
+   "range": [
+    "0x4DFAC0",
+    "0x4E0050"
+   ],
+   "bytes": "5c018000",
+   "meaning": "world time of day +0x80015C",
+   "occurrences": 1
+  },
+  {
+   "name": "inn_sleep_wake_time",
+   "range": [
+    "0x60C510",
+    "0x612000"
+   ],
+   "bytes": "80858001",
+   "meaning": "25 200 000 ms (07:00) after the day is advanced",
+   "occurrences": 1
+  }
+ ],
+ "template_sites": [
+  {
+   "va": "0x5B1C2E",
+   "function": "village_ruins_generator_0x5AF170",
+   "faction": [
+    6
+   ],
+   "kind": [
+    140
+   ],
+   "npc_class": []
+  },
+  {
+   "va": "0x5BA400",
+   "function": "village_ruins_generator_0x5AF170",
+   "faction": [
+    5
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5BAA2E",
+   "function": "village_ruins_generator_0x5AF170",
+   "faction": [
+    3
+   ],
+   "kind": [
+    4
+   ],
+   "npc_class": [
+    136
+   ]
+  },
+  {
+   "va": "0x5BCBF6",
+   "function": "village_ruins_generator_0x5AF170",
+   "faction": [
+    3
+   ],
+   "kind": [],
+   "npc_class": [
+    132
+   ]
+  },
+  {
+   "va": "0x5BCDBA",
+   "function": "village_ruins_generator_0x5AF170",
+   "faction": [
+    3
+   ],
+   "kind": [],
+   "npc_class": [
+    128
+   ]
+  },
+  {
+   "va": "0x5BCF96",
+   "function": "village_ruins_generator_0x5AF170",
+   "faction": [
+    3
+   ],
+   "kind": [],
+   "npc_class": [
+    130
+   ]
+  },
+  {
+   "va": "0x5BD172",
+   "function": "village_ruins_generator_0x5AF170",
+   "faction": [
+    3
+   ],
+   "kind": [],
+   "npc_class": [
+    129
+   ]
+  },
+  {
+   "va": "0x5BD34E",
+   "function": "village_ruins_generator_0x5AF170",
+   "faction": [
+    3
+   ],
+   "kind": [],
+   "npc_class": [
+    131
+   ]
+  },
+  {
+   "va": "0x5BD5C6",
+   "function": "village_ruins_generator_0x5AF170",
+   "faction": [
+    3
+   ],
+   "kind": [],
+   "npc_class": [
+    136
+   ]
+  },
+  {
+   "va": "0x5BE5A4",
+   "function": "village_ruins_generator_0x5AF170",
+   "faction": [
+    1
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5BE920",
+   "function": "village_ruins_generator_0x5AF170",
+   "faction": [
+    1
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5BEC57",
+   "function": "village_ruins_generator_0x5AF170",
+   "faction": [
+    1
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5BF016",
+   "function": "village_ruins_generator_0x5AF170",
+   "faction": [
+    1
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5D2591",
+   "function": "generator_0x5CC510",
+   "faction": [
+    6
+   ],
+   "kind": [
+    143
+   ],
+   "npc_class": []
+  },
+  {
+   "va": "0x5D28F6",
+   "function": "generator_0x5CC510",
+   "faction": [
+    6
+   ],
+   "kind": [
+    143
+   ],
+   "npc_class": []
+  },
+  {
+   "va": "0x5D2C5B",
+   "function": "generator_0x5CC510",
+   "faction": [
+    6
+   ],
+   "kind": [
+    143
+   ],
+   "npc_class": []
+  },
+  {
+   "va": "0x5D2FC7",
+   "function": "generator_0x5CC510",
+   "faction": [
+    6
+   ],
+   "kind": [
+    143
+   ],
+   "npc_class": [
+    2
+   ]
+  },
+  {
+   "va": "0x5D3AE0",
+   "function": "generator_0x5CC510",
+   "faction": [
+    1
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5D4D2A",
+   "function": "generator_0x5CC510",
+   "faction": [
+    1,
+    3
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5D5443",
+   "function": "generator_0x5CC510",
+   "faction": [
+    1
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5D5778",
+   "function": "generator_0x5CC510",
+   "faction": [
+    1,
+    3
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5D5BD3",
+   "function": "generator_0x5CC510",
+   "faction": [
+    1,
+    3
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5D703F",
+   "function": "generator_0x5D6040",
+   "faction": [],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5D7583",
+   "function": "generator_0x5D6040",
+   "faction": [],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5D9707",
+   "function": "generator_0x5D9460",
+   "faction": [
+    1
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5DE9A4",
+   "function": "generator_0x5DC6E0",
+   "faction": [
+    1
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5DEDC4",
+   "function": "generator_0x5DC6E0",
+   "faction": [
+    1
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5DF1D4",
+   "function": "generator_0x5DC6E0",
+   "faction": [
+    1
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5E660A",
+   "function": "zone_generator_0x5E4850",
+   "faction": [
+    6
+   ],
+   "kind": [
+    131,
+    132,
+    133,
+    135,
+    136,
+    137,
+    138
+   ],
+   "npc_class": []
+  },
+  {
+   "va": "0x5E67C5",
+   "function": "zone_generator_0x5E4850",
+   "faction": [
+    1
+   ],
+   "kind": [
+    59
+   ],
+   "npc_class": []
+  },
+  {
+   "va": "0x5EADCC",
+   "function": "zone_generator_0x5E4850",
+   "faction": [
+    1
+   ],
+   "kind": [
+    107
+   ],
+   "npc_class": []
+  },
+  {
+   "va": "0x5EB34D",
+   "function": "zone_generator_0x5E4850",
+   "faction": [
+    6
+   ],
+   "kind": [
+    121,
+    122,
+    123,
+    124,
+    125,
+    128
+   ],
+   "npc_class": []
+  },
+  {
+   "va": "0x5EB8D9",
+   "function": "zone_generator_0x5E4850",
+   "faction": [
+    1
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5F3837",
+   "function": "generator_0x5F0CE0",
+   "faction": [
+    6
+   ],
+   "kind": [],
+   "npc_class": []
+  },
+  {
+   "va": "0x5F41A2",
+   "function": "generator_0x5F0CE0",
+   "faction": [
+    3
+   ],
+   "kind": [
+    2
+   ],
+   "npc_class": [
+    1,
+    2,
+    131,
+    133,
+    134,
+    135,
+    137
+   ]
+  }
+ ],
+ "template_site_count": 35,
+ "executed_tables": {
+  "level_range_0x444020": [
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    47,
+    81
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    31,
+    47
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    14,
+    21
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    21,
+    31
+   ],
+   [
+    9,
+    14
+   ],
+   [
+    9,
+    14
+   ],
+   [
+    9,
+    14
+   ],
+   [
+    9,
+    14
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    31,
+    47
+   ],
+   [
+    31,
+    47
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    47,
+    81
+   ],
+   [
+    31,
+    47
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    9,
+    14
+   ],
+   [
+    21,
+    31
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    31,
+    47
+   ],
+   [
+    9,
+    14
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    14,
+    21
+   ],
+   [
+    180,
+    19981
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    21,
+    31
+   ],
+   [
+    21,
+    31
+   ],
+   [
+    21,
+    31
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    3,
+    6
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    21,
+    31
+   ],
+   [
+    21,
+    31
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    31,
+    47
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    31,
+    47
+   ],
+   [
+    81,
+    180
+   ],
+   [
+    180,
+    19981
+   ],
+   [
+    81,
+    180
+   ],
+   [
+    81,
+    180
+   ],
+   [
+    180,
+    19981
+   ],
+   [
+    31,
+    47
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    9,
+    14
+   ],
+   [
+    31,
+    47
+   ],
+   [
+    14,
+    21
+   ],
+   [
+    21,
+    31
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    81,
+    180
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    180,
+    19981
+   ],
+   [
+    6,
+    9
+   ],
+   [
+    21,
+    31
+   ],
+   [
+    6,
+    9
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    31,
+    47
+   ],
+   [
+    47,
+    81
+   ],
+   [
+    31,
+    47
+   ],
+   [
+    9,
+    14
+   ],
+   [
+    9,
+    14
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    180,
+    19981
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    180,
+    19981
+   ],
+   [
+    47,
+    81
+   ],
+   [
+    47,
+    81
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    31,
+    47
+   ],
+   [
+    9,
+    14
+   ],
+   [
+    21,
+    31
+   ],
+   [
+    21,
+    31
+   ],
+   [
+    47,
+    81
+   ],
+   [
+    14,
+    21
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ],
+   [
+    2,
+    4
+   ]
+  ],
+  "pack_range_0x443F40": [
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    3
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    3
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    3
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    3
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    3
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    3
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    3
+   ],
+   [
+    1,
+    3
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    3
+   ],
+   [
+    1,
+    3
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    5
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ]
+  ]
+ },
+ "problems": [],
+ "RESULT": "PASS"
+}

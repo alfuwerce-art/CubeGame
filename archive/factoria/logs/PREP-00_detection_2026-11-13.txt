@@ -1,0 +1,177 @@
+﻿
+===== META =====
+captured_at : 2026-11-13 11:48:54 +03:00
+hostname    : ЧЕТКО
+user        : bow
+powershell  : 5.1.26100.9818
+
+===== OS =====
+
+
+Caption        : Майкрософт Windows 11 Pro
+Version        : 10.0.26200
+BuildNumber    : 26200
+OSArchitecture : 64-разрядная
+InstallDate    : 03.06.2026 17:59:02
+LastBootUpTime : 13.11.2026 4:14:50
+TotalRAM_GB    : 31,24
+FreeRAM_GB     : 15,36
+
+
+
+
+===== MACHINE =====
+
+
+Manufacturer        : ASUSTeK COMPUTER INC.
+Model               : ASUS TUF Gaming A17 FA707NV_FA707NV
+SystemType          : x64-based PC
+TotalPhysicalMemory : 33546633216
+
+
+
+
+===== CPU =====
+
+
+Name                      : AMD Ryzen 5 7535HS with Radeon Graphics        
+NumberOfCores             : 6
+NumberOfLogicalProcessors : 12
+MaxClockSpeed             : 3301
+L3CacheSize               : 16384
+
+
+
+
+===== RAM_MODULES =====
+
+BankLabel       Capacity Speed Manufacturer PartNumber          
+---------       -------- ----- ------------ ----------          
+P0 CHANNEL A 17179869184  5600 Samsung      M425R2GA3PB0-CWMOD  
+P0 CHANNEL B 17179869184  5600 Samsung      M425R2GA3BB0-CWMOD  
+
+
+
+
+===== GPU_NVIDIA_SMI =====
+nvidia-smi: C:\WINDOWS\system32\nvidia-smi.exe
+name, driver_version, memory.total [MiB], memory.used [MiB], memory.free [MiB], temperature.gpu, utilization.gpu [%]
+NVIDIA GeForce RTX 4060 Laptop GPU, 610.47, 8188 MiB, 1487 MiB, 6470 MiB, 66, 38 %
+
+===== GPU_WMI =====
+
+Name                               DriverVersion AdapterRAM_GB
+----                               ------------- -------------
+AMD Radeon(TM) Graphics            32.0.11038.3            0,5
+NVIDIA GeForce RTX 4060 Laptop GPU 32.0.16.1047              4
+
+
+
+
+===== VOLUMES =====
+
+DriveLetter FileSystemLabel FileSystem Size_GB Free_GB HealthStatus
+----------- --------------- ---------- ------- ------- ------------
+          D Новый том       NTFS         953,9   641,7 Healthy     
+          C                 NTFS         475,9    67,5 Healthy     
+
+
+
+
+===== PATH_EXECUTABLE_PROBES =====
+python    FOUND  C:\Users\bow\AppData\Local\Programs\Python\Python313\python.exe
+py        FOUND  C:\WINDOWS\py.exe
+pip       FOUND  C:\Users\bow\AppData\Local\Programs\Python\Python313\Scripts\pip.exe
+git       FOUND  C:\Program Files\Git\cmd\git.exe
+node      MISSING
+npm       MISSING
+code      FOUND  C:\Users\bow\AppData\Local\Programs\Microsoft VS Code\bin\code.cmd
+blender   MISSING
+ffmpeg    MISSING
+ollama    FOUND  C:\Users\bow\AppData\Local\Programs\Ollama\ollama.exe
+n8n       MISSING
+7z        MISSING
+dotnet    FOUND  C:\Program Files\dotnet\dotnet.exe
+
+===== PYTHON =====
+ -V:3.14 *        C:\Users\bow\AppData\Local\Python\pythoncore-3.14-64\python.exe
+ -V:3.13          C:\Users\bow\AppData\Local\Programs\Python\Python313\python.exe
+version 3.13.14 (tags/v3.13.14:fd17997, Jun 10 2026, 13:03:48) [MSC v.1944 64 bit (AMD64)]
+executable C:\Users\bow\AppData\Local\Programs\Python\Python313\python.exe
+pip 26.1.2 from C:\Users\bow\AppData\Local\Programs\Python\Python313\Lib\site-packages\pip (python 3.13)
+
+
+===== GIT =====
+git version 2.55.0.windows.1
+user.name  : 
+user.email : 
+lab_is_repo: fatal: not a git repository (or any of the parent directories): .git
+
+===== UNITY =====
+
+FullName                                         Ver                     
+--------                                         ---                     
+D:\Unity\Hub\Editor\6000.3.27f2\Editor\Unity.exe 6000.3.27f2_22188f149405
+D:\Unity\6000.6.7f1\Editor\Unity.exe             6000.6.7f1_b22767f04f04 
+D:\Unity Hub\Unity Hub.exe                       3.22.5                  
+
+
+
+
+===== INSTALLED_RELEVANT =====
+
+DisplayName                                   DisplayVersion InstallLocation                                       
+-----------                                   -------------- ---------------                                       
+7-Zip 26.02 (x64)                             26.02          D:\programs\7-Zip\                                    
+Git                                           2.55.0         C:\Program Files\Git\                                 
+Microsoft Visual Studio Code (User)           1.145.2        C:\Users\bow\AppData\Local\Programs\Microsoft VS Code\
+Ollama version 0.40.10                        0.40.10        C:\Users\bow\AppData\Local\Programs\Ollama\           
+Python 3.13.14                                3.13-64        C:\Users\bow\AppData\Local\Python\pythoncore-3.13-64  
+Python 3.13.14 (64-bit)                       3.13.14150.0                                                         
+Python 3.13.14 Core Interpreter (64-bit)      3.13.14150.0                                                         
+Python 3.13.14 Development Libraries (64-bit) 3.13.14150.0                                                         
+Python 3.13.14 Documentation (64-bit)         3.13.14150.0                                                         
+Python 3.13.14 Executables (64-bit)           3.13.14150.0                                                         
+Python 3.13.14 pip Bootstrap (64-bit)         3.13.14150.0                                                         
+Python 3.13.14 Standard Library (64-bit)      3.13.14150.0                                                         
+Python 3.13.14 Tcl/Tk Support (64-bit)        3.13.14150.0                                                         
+Python 3.14.6                                 3.14-64        C:\Users\bow\AppData\Local\Python\pythoncore-3.14-64  
+Python Launcher                               3.13.14150.0                                                         
+Unity 6000.3.27f2                             6000.3.27f2                                                          
+Unity 6000.6.7f1                              6000.6.7f1                                                           
+Unity Hub 3.22.5                              3.22.5                                                               
+WinRAR 7.13 (64-разрядная)                    7.13.0         C:\Program Files\WinRAR                               
+
+
+
+
+===== ABSENT_TOOL_SEARCH =====
+blender.exe found       : 0
+Cascadeur*.exe found    : 0
+Comfy* dirs found       : 0
+port 8188 listening     : False
+port 11434 listening    : False
+7z.exe at registry path : False
+
+===== TOP_MEMORY_PROCESSES =====
+
+ProcessName        WS_MB    Id
+-----------        -----    --
+browser              674  4384
+browser              647 20140
+Happ                 501 15616
+explorer             471 10776
+MsMpEng              438  5536
+Memory Compression   431  3324
+browser              389 14960
+browser              295 15876
+browser              263 17116
+Taskmgr              181 21816
+
+
+
+
+===== ISOLATION_BOUNDARY =====
+lab path exists        : True
+CubeGame repo exists   : True
+lab is outside CubeGame: True

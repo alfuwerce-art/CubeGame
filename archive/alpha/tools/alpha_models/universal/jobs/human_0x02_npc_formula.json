@@ -1,0 +1,11 @@
+{
+ "kind": "0x02",
+ "seed_variant": [0, 0],
+ "variant": "human_0x02_npc_formula_vs_alpha",
+ "locomotion": "formula",
+ "amp": 0.191,
+ "accelerating": true,
+ "speed_xy": 5.0,
+ "reference_capture": {"path": "D:/Projects/CubeGame/.scratch/paramwalk/cap_npc_human.jsonl", "kind": "0x02"},
+ "note": "AI-driven NPC humans (kind 0x02, accelerating along the velocity, head lean +5) vs the parametric walk. Verifies the head_lean_ai term. No weapon layer."
+}

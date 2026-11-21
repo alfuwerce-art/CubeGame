@@ -1,0 +1,75 @@
+{
+  "race_id": "DRAGONKIN",
+  "race_anatomy": "compact reptilian humanoid, squared muzzle with small fangs, paired ivory horns, central stepped crest and visible segmented tail",
+  "appearance": "green voxel scales, amber slit eyes, red crest and tail ridge, dark russet tunic and boots",
+  "reference_id": "OWNER_DRAGONKIN",
+  "prepared_reference": "style08_dragonkin.png",
+  "prepared_reference_sha256": "5b9b513f4a27e69c66e202f9353455b6ba7f3fc069d38e16cb90e69f83c2ea50",
+  "prompt": "compact reptilian humanoid, squared muzzle with small fangs, paired ivory horns, central stepped crest and visible segmented tail, green voxel scales, amber slit eyes, red crest and tail ridge, dark russet tunic and boots, voxel fantasy RPG character creator avatar, single adult character, exact straight-on front view, full body centered, neutral stance, short cuboid limbs, compact proportions, oversized block head, clean hard-edged voxel geometry made of cubes of several sizes, restrained pixel texture, simple face, neutral plain grey background, soft even studio lighting",
+  "negative_prompt": "turnaround, multiple views, duplicate figure, extra limbs, cropped feet, cropped head, three-quarter view, side view, long limbs, child, anime, large eyes, fluffy hair, photorealism, plastic figurine, pedestal, smooth organic surfaces, flat sprite, landscape, foliage, HUD, watermark, text, motion blur, dynamic pose, weapon in front of body, elaborate armor",
+  "checkpoint": "DreamShaperXL_Turbo_v2_1.safetensors",
+  "lora": {
+    "name": "ral-vxl.safetensors",
+    "model_strength": 0.6,
+    "clip_strength": 0.6,
+    "author": "RalFinger",
+    "license_status": "EXPERIMENTAL / LICENSE_BLOCKED_FOR_PRODUCTION (FACT-D21)",
+    "sha256": "9dc480ee98c12a499bee1fc19ee0e13969a3c6b14be0e6ec133a11d563e83a25"
+  },
+  "reference_control": {
+    "mode": "ControlNet Canny",
+    "model": "controlnet-union-sdxl-1.0.safetensors",
+    "union_type": "canny/lineart/anime_lineart/mlsd",
+    "strength": 0.6,
+    "start_percent": 0,
+    "end_percent": 1,
+    "low_threshold": 0.35,
+    "high_threshold": 0.75,
+    "resize": "nearest-exact",
+    "ipadapter": null,
+    "img2img": null,
+    "sha256": "a9e13fd61f3193887791c8a0dd07a07202174dc47d5ddaea94ea1344f07c7467",
+    "license": "Apache-2.0"
+  },
+  "seed": 20261114,
+  "steps": 28,
+  "cfg": 5,
+  "sampler": "dpmpp_2m",
+  "scheduler": "normal",
+  "denoise": 1,
+  "width": 768,
+  "height": 1024,
+  "batch_size": 1,
+  "validation": "TECHNICAL_PASS / OWNER_VISUAL_REVIEW",
+  "result": {
+    "prompt_id": "1da4000f-4383-40c4-9a04-a1e982f57aed",
+    "file": "dragonkin_00001_.png",
+    "sha256": "1475f5400e128949d756fd4ccf670c126698b5e07e04dd51678d1799118fc6b8",
+    "size": [
+      768,
+      1024
+    ],
+    "seconds": 54.3,
+    "vram_baseline_whole_card_mib": 5467,
+    "vram_peak_whole_card_mib": 7546,
+    "rss_baseline_mib": 12813,
+    "rss_peak_mib": 12813,
+    "available_ram_baseline_mib": 4844,
+    "available_ram_min_mib": 4509,
+    "sampling_interval_seconds": 1
+  },
+  "checkpoint_sha256": "4496b36d48bfd7cfe4e5dbce3485db567bcefa2bef7238d290dbd45612125083",
+  "checkpoint_license": "CreativeML OpenRAIL++-M",
+  "runtime": {
+    "comfyui": "0.45.0",
+    "torch": "2.14.1+cu130",
+    "device": "RTX 4060 Laptop",
+    "args": [
+      "--novram",
+      "--reserve-vram",
+      "5",
+      "--disable-all-custom-nodes",
+      "--offline"
+    ]
+  }
+}

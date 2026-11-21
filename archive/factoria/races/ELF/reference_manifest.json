@@ -1,0 +1,90 @@
+{
+  "reference_id": "OWNER_ELF",
+  "source_filename": "эльф.png",
+  "source_resolution": [
+    1672,
+    941
+  ],
+  "source_sha256": "245e96156e5e6dc2822ae565b93f8f9b572943d6a72d0e65fc12eba8c467598d",
+  "source_rect_xyxy": [
+    680,
+    333,
+    1005,
+    720
+  ],
+  "crop_xyxy": [
+    656,
+    309,
+    1029,
+    744
+  ],
+  "mask_bbox_xyxy_source": [
+    700,
+    342,
+    972,
+    706
+  ],
+  "landmarks_px": {
+    "top_y": 344,
+    "chin_y": 508,
+    "shoulders_y": 550,
+    "crotch_y": 636,
+    "sole_y": 705,
+    "width_at_shoulder": 213
+  },
+  "landmarks_method": "Approximate manual landmarks; crown includes hair or headgear where it occludes the skull.",
+  "preprocessing": "COMFY-STYLE-07 prepare_character_reference.segment; OpenCV RNG seed 20261114; largest component; manual boot masks for Elf/Dwarf and full contour for Fildor; 6px margin; nearest-neighbour to fit 736x872; bottom margin 52px; background #9e9e9e",
+  "scale": 2.319149,
+  "input_filename": "style08_elf.png",
+  "input_sha256": "f781252920a9de4c4ec6dda0903af6d7881ca197c24a36c59c704322030890e8",
+  "input_resolution": [
+    768,
+    1024
+  ],
+  "local_only": true,
+  "mask_correction": {
+    "method": "add",
+    "polygon_source_px": [
+      [
+        765,
+        622
+      ],
+      [
+        909,
+        622
+      ],
+      [
+        917,
+        684
+      ],
+      [
+        911,
+        705
+      ],
+      [
+        851,
+        705
+      ],
+      [
+        839,
+        669
+      ],
+      [
+        819,
+        669
+      ],
+      [
+        807,
+        705
+      ],
+      [
+        752,
+        705
+      ],
+      [
+        754,
+        677
+      ]
+    ]
+  }
+}

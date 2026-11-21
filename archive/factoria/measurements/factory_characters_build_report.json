@@ -1,0 +1,52 @@
+{
+  "object_info_source": "measurements\\comfyui_object_info_2026-11-14_full.json",
+  "config": "workflows\\factory_characters\\characters_v1.json",
+  "workflows": {
+    "FACTORY_CHARACTER_GENERATION_V1.json": {
+      "status": "PASS",
+      "nodes": 10,
+      "links": 11,
+      "problems": [],
+      "warnings": []
+    },
+    "FACTORY_CHARACTER_BASE.json": {
+      "status": "PASS",
+      "nodes": 10,
+      "links": 11,
+      "problems": [],
+      "warnings": []
+    },
+    "FACTORY_CHARACTER_FICTIVERSE.json": {
+      "status": "PASS",
+      "nodes": 10,
+      "links": 11,
+      "problems": [],
+      "warnings": []
+    },
+    "FACTORY_CHARACTER_RAL.json": {
+      "status": "PASS",
+      "nodes": 10,
+      "links": 11,
+      "problems": [],
+      "warnings": []
+    },
+    "FACTORY_CHARACTER_IPADAPTER.json": {
+      "status": "PASS",
+      "nodes": 13,
+      "links": 15,
+      "problems": [],
+      "warnings": [
+        "LoadImage#8: widget image='factoria_xl_style_reference.png' not in options (file not present locally yet)"
+      ]
+    },
+    "FACTORY_CHARACTER_CONTROLNET.json": {
+      "status": "PASS",
+      "nodes": 16,
+      "links": 18,
+      "problems": [],
+      "warnings": [
+        "LoadImage#8: widget image='factoria_xl_pose_source.png' not in options (file not present locally yet)"
+      ]
+    }
+  }
+}

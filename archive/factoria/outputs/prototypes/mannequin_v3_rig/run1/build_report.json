@@ -1,0 +1,683 @@
+{
+  "actions": {
+    "attack": {
+      "bones": 20,
+      "fcurves": 83,
+      "frames": [
+        1,
+        5,
+        9,
+        13,
+        15
+      ],
+      "ground_snap_m": {
+        "1": 0.0313,
+        "5": 0.0308,
+        "9": 0.0068,
+        "13": 0.0313,
+        "15": 0.0313
+      }
+    },
+    "idle": {
+      "bones": 20,
+      "fcurves": 83,
+      "frames": [
+        1,
+        7,
+        13,
+        19,
+        25
+      ],
+      "ground_snap_m": {
+        "1": -0.0008,
+        "7": 0.0008,
+        "13": -0.0008,
+        "19": 0.0025,
+        "25": -0.0008
+      }
+    },
+    "walk": {
+      "bones": 20,
+      "fcurves": 83,
+      "frames": [
+        1,
+        5,
+        9,
+        13,
+        17
+      ],
+      "ground_snap_m": {
+        "1": -0.0069,
+        "5": 0.0033,
+        "9": -0.0069,
+        "13": 0.0033,
+        "17": -0.0069
+      }
+    }
+  },
+  "artifacts": {
+    "blend": "outputs/prototypes/mannequin_v3_rig/run1/mannequin_v3_rig.blend",
+    "blend_bytes": 119589,
+    "glb": "outputs/prototypes/mannequin_v3_rig/run1/mannequin_v3_male_rig.glb",
+    "glb_bytes": 190140,
+    "hierarchy": "outputs/prototypes/mannequin_v3_rig/run1/rig_hierarchy.txt"
+  },
+  "blender": "5.2.4 LTS",
+  "bones": [
+    {
+      "connected": false,
+      "deform": false,
+      "head": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "name": "root",
+      "parent": null,
+      "tail": [
+        0.0,
+        0.0,
+        0.14
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        0.0,
+        0.0,
+        0.5616
+      ],
+      "name": "pelvis",
+      "parent": "root",
+      "tail": [
+        0.0,
+        0.0,
+        0.7534
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.0,
+        0.0,
+        0.7534
+      ],
+      "name": "spine_01",
+      "parent": "pelvis",
+      "tail": [
+        0.0,
+        0.0,
+        0.7753
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.0,
+        0.0,
+        0.7753
+      ],
+      "name": "spine_02",
+      "parent": "spine_01",
+      "tail": [
+        0.0,
+        0.0,
+        1.1178
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.0,
+        0.0,
+        1.1178
+      ],
+      "name": "neck",
+      "parent": "spine_02",
+      "tail": [
+        0.0,
+        0.0,
+        1.1726
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.0,
+        0.0,
+        1.1726
+      ],
+      "name": "head",
+      "parent": "neck",
+      "tail": [
+        0.0,
+        0.0,
+        1.8
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        0.03,
+        0.0,
+        1.0978
+      ],
+      "name": "clavicle_l",
+      "parent": "spine_02",
+      "tail": [
+        0.2315,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.2315,
+        0.0,
+        1.0192
+      ],
+      "name": "upperarm_l",
+      "parent": "clavicle_l",
+      "tail": [
+        0.3932,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.3932,
+        0.0,
+        1.0192
+      ],
+      "name": "lowerarm_l",
+      "parent": "upperarm_l",
+      "tail": [
+        0.5342,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.5342,
+        0.0,
+        1.0192
+      ],
+      "name": "hand_l",
+      "parent": "lowerarm_l",
+      "tail": [
+        0.7411,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        0.1356,
+        0.0,
+        0.7397
+      ],
+      "name": "thigh_l",
+      "parent": "pelvis",
+      "tail": [
+        0.1356,
+        0.0,
+        0.3288
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.1356,
+        0.0,
+        0.3288
+      ],
+      "name": "calf_l",
+      "parent": "thigh_l",
+      "tail": [
+        0.1356,
+        0.0,
+        0.137
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        0.1356,
+        0.0,
+        0.137
+      ],
+      "name": "foot_l",
+      "parent": "calf_l",
+      "tail": [
+        0.1356,
+        -0.22,
+        0.03
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        -0.03,
+        0.0,
+        1.0978
+      ],
+      "name": "clavicle_r",
+      "parent": "spine_02",
+      "tail": [
+        -0.2315,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.2315,
+        0.0,
+        1.0192
+      ],
+      "name": "upperarm_r",
+      "parent": "clavicle_r",
+      "tail": [
+        -0.3932,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.3932,
+        0.0,
+        1.0192
+      ],
+      "name": "lowerarm_r",
+      "parent": "upperarm_r",
+      "tail": [
+        -0.5342,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.5342,
+        0.0,
+        1.0192
+      ],
+      "name": "hand_r",
+      "parent": "lowerarm_r",
+      "tail": [
+        -0.7411,
+        0.0,
+        1.0192
+      ]
+    },
+    {
+      "connected": false,
+      "deform": true,
+      "head": [
+        -0.1356,
+        0.0,
+        0.7397
+      ],
+      "name": "thigh_r",
+      "parent": "pelvis",
+      "tail": [
+        -0.1356,
+        0.0,
+        0.3288
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.1356,
+        0.0,
+        0.3288
+      ],
+      "name": "calf_r",
+      "parent": "thigh_r",
+      "tail": [
+        -0.1356,
+        0.0,
+        0.137
+      ]
+    },
+    {
+      "connected": true,
+      "deform": true,
+      "head": [
+        -0.1356,
+        0.0,
+        0.137
+      ],
+      "name": "foot_r",
+      "parent": "calf_r",
+      "tail": [
+        -0.1356,
+        -0.22,
+        0.03
+      ]
+    }
+  ],
+  "counts": {
+    "actions": 3,
+    "bones": 20,
+    "deform_bones": 19,
+    "parts": 18,
+    "polygons": 754,
+    "vertices": 696
+  },
+  "export_args": [
+    "export_animations",
+    "export_apply",
+    "export_format",
+    "export_skins",
+    "filepath",
+    "use_selection"
+  ],
+  "hierarchy_text": "root  head=(+0.0000, +0.0000, +0.0000) tail=(+0.0000, +0.0000, +0.1400) [offset]\n  pelvis  head=(+0.0000, +0.0000, +0.5616) tail=(+0.0000, +0.0000, +0.7534) [offset]\n    spine_01  head=(+0.0000, +0.0000, +0.7534) tail=(+0.0000, +0.0000, +0.7753) [connected]\n      spine_02  head=(+0.0000, +0.0000, +0.7753) tail=(+0.0000, +0.0000, +1.1178) [connected]\n        neck  head=(+0.0000, +0.0000, +1.1178) tail=(+0.0000, +0.0000, +1.1726) [connected]\n          head  head=(+0.0000, +0.0000, +1.1726) tail=(+0.0000, +0.0000, +1.8000) [connected]\n        clavicle_l  head=(+0.0300, +0.0000, +1.0978) tail=(+0.2315, +0.0000, +1.0192) [offset]\n          upperarm_l  head=(+0.2315, +0.0000, +1.0192) tail=(+0.3932, +0.0000, +1.0192) [connected]\n            lowerarm_l  head=(+0.3932, +0.0000, +1.0192) tail=(+0.5342, +0.0000, +1.0192) [connected]\n              hand_l  head=(+0.5342, +0.0000, +1.0192) tail=(+0.7411, +0.0000, +1.0192) [connected]\n        clavicle_r  head=(-0.0300, +0.0000, +1.0978) tail=(-0.2315, +0.0000, +1.0192) [offset]\n          upperarm_r  head=(-0.2315, +0.0000, +1.0192) tail=(-0.3932, +0.0000, +1.0192) [connected]\n            lowerarm_r  head=(-0.3932, +0.0000, +1.0192) tail=(-0.5342, +0.0000, +1.0192) [connected]\n              hand_r  head=(-0.5342, +0.0000, +1.0192) tail=(-0.7411, +0.0000, +1.0192) [connected]\n    thigh_l  head=(+0.1356, +0.0000, +0.7397) tail=(+0.1356, +0.0000, +0.3288) [offset]\n      calf_l  head=(+0.1356, +0.0000, +0.3288) tail=(+0.1356, +0.0000, +0.1370) [connected]\n        foot_l  head=(+0.1356, +0.0000, +0.1370) tail=(+0.1356, -0.2200, +0.0300) [connected]\n    thigh_r  head=(-0.1356, +0.0000, +0.7397) tail=(-0.1356, +0.0000, +0.3288) [offset]\n      calf_r  head=(-0.1356, +0.0000, +0.3288) tail=(-0.1356, +0.0000, +0.1370) [connected]\n        foot_r  head=(-0.1356, +0.0000, +0.1370) tail=(-0.1356, -0.2200, +0.0300) [connected]\n",
+  "issues": [],
+  "parts": {
+    "ear_l": {
+      "bbox": [
+        0.3082,
+        -0.08,
+        1.3507,
+        0.4178,
+        0.12,
+        1.5507
+      ],
+      "blocks": 1,
+      "bone": "head",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "ear_r": {
+      "bbox": [
+        -0.4178,
+        -0.08,
+        1.3507,
+        -0.3082,
+        0.12,
+        1.5507
+      ],
+      "blocks": 1,
+      "bone": "head",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "foot_l": {
+      "bbox": [
+        0.026,
+        -0.21,
+        0.0,
+        0.2508,
+        0.09,
+        0.137
+      ],
+      "blocks": 2,
+      "bone": "foot_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 52,
+      "vertices": 48
+    },
+    "foot_r": {
+      "bbox": [
+        -0.2508,
+        -0.21,
+        0.0,
+        -0.026,
+        0.09,
+        0.137
+      ],
+      "blocks": 2,
+      "bone": "foot_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 52,
+      "vertices": 48
+    },
+    "forearm_l": {
+      "bbox": [
+        0.4041,
+        -0.08,
+        0.948,
+        0.5465,
+        0.08,
+        1.1014
+      ],
+      "blocks": 2,
+      "bone": "lowerarm_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 52,
+      "vertices": 48
+    },
+    "forearm_r": {
+      "bbox": [
+        -0.5465,
+        -0.08,
+        0.948,
+        -0.4041,
+        0.08,
+        1.1014
+      ],
+      "blocks": 2,
+      "bone": "lowerarm_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 52,
+      "vertices": 48
+    },
+    "hand_l": {
+      "bbox": [
+        0.5466,
+        -0.1,
+        0.9151,
+        0.741,
+        0.1,
+        1.1233
+      ],
+      "blocks": 1,
+      "bone": "hand_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "hand_r": {
+      "bbox": [
+        -0.741,
+        -0.1,
+        0.9151,
+        -0.5466,
+        0.1,
+        1.1233
+      ],
+      "blocks": 1,
+      "bone": "hand_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "head": {
+      "bbox": [
+        -0.3082,
+        -0.3,
+        1.1726,
+        0.3082,
+        0.3,
+        1.7999
+      ],
+      "blocks": 2,
+      "bone": "head",
+      "mesh_note": "bevel_applied",
+      "polygons": 52,
+      "vertices": 48
+    },
+    "neck": {
+      "bbox": [
+        -0.163,
+        -0.13,
+        1.1178,
+        0.163,
+        0.13,
+        1.1726
+      ],
+      "blocks": 1,
+      "bone": "neck",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "shin_l": {
+      "bbox": [
+        0.0535,
+        -0.08,
+        0.137,
+        0.2014,
+        0.08,
+        0.2959
+      ],
+      "blocks": 1,
+      "bone": "calf_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "shin_r": {
+      "bbox": [
+        -0.2014,
+        -0.08,
+        0.137,
+        -0.0535,
+        0.08,
+        0.2959
+      ],
+      "blocks": 1,
+      "bone": "calf_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "thigh_l": {
+      "bbox": [
+        0.0452,
+        -0.09,
+        0.2959,
+        0.2205,
+        0.09,
+        0.7397
+      ],
+      "blocks": 2,
+      "bone": "thigh_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 52,
+      "vertices": 48
+    },
+    "thigh_r": {
+      "bbox": [
+        -0.2205,
+        -0.09,
+        0.2959,
+        -0.0452,
+        0.09,
+        0.7397
+      ],
+      "blocks": 2,
+      "bone": "thigh_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 52,
+      "vertices": 48
+    },
+    "torso_pelvis": {
+      "bbox": [
+        -0.2206,
+        -0.17,
+        0.5178,
+        0.226,
+        0.17,
+        0.7753
+      ],
+      "blocks": 3,
+      "bone": "pelvis",
+      "mesh_note": "bevel_applied",
+      "polygons": 78,
+      "vertices": 72
+    },
+    "torso_upper": {
+      "bbox": [
+        -0.2315,
+        -0.18,
+        0.7753,
+        0.2315,
+        0.18,
+        1.1179
+      ],
+      "blocks": 1,
+      "bone": "spine_02",
+      "mesh_note": "bevel_applied",
+      "polygons": 26,
+      "vertices": 24
+    },
+    "upper_arm_l": {
+      "bbox": [
+        0.2315,
+        -0.1,
+        0.9124,
+        0.4042,
+        0.1,
+        1.1261
+      ],
+      "blocks": 2,
+      "bone": "upperarm_l",
+      "mesh_note": "bevel_applied",
+      "polygons": 52,
+      "vertices": 48
+    },
+    "upper_arm_r": {
+      "bbox": [
+        -0.4042,
+        -0.1,
+        0.9124,
+        -0.2315,
+        0.1,
+        1.1261
+      ],
+      "blocks": 2,
+      "bone": "upperarm_r",
+      "mesh_note": "bevel_applied",
+      "polygons": 52,
+      "vertices": 48
+    }
+  },
+  "profile": "scripts/character/profiles/mannequin_v3_male.json",
+  "profile_sha256": "2b8d4535158c654dc2479d1cc8b2d0e1fac66323e057204753fe1ad5b8454f34",
+  "seconds": 0.4,
+  "stage": "MANNEQUIN-RIG-01/build",
+  "status": "BUILD_DONE"
+}

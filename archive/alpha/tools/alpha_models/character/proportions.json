@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "baseline": "S05A-1 (ACCEPTED, D50)",
+  "notes": [
+    "C+ model (D51): one uniform character scale, head+hair as a single scaled group, separate weapon correction.",
+    "Every factor carries an evidence status. VERIFIED_ALPHA means the value comes from Cube.exe code/data; PROXY_NOT_ALPHA means a documented technical approximation.",
+    "The head/torso width ratio is NOT rescaled by the engine: part sizes come from the authored .cub voxel counts (VoxelModel +0x44/+0x48/+0x4c are voxel counts) and Creature_drawModel centres parts by -0.5*size in voxel units. creature_getScaleVec4 returns (1,1,1,1) for a normal creature, so no per-part scale exists for body/head/hair.",
+    "Weapon scale: Creature_drawModel applies mat4_scaleAxes to the item model in the hand for specific weapon types (0.5 / 0.6 / 0.8 found). The greatsword class is mapped to 0.6 (PARTIAL: the weapon-type byte +0xaa9 to item-class mapping is not fully proven).",
+    "Attachment offsets found in set_vec3_offset_by_id (node ids 0x1a/0x1e -> z -0.9, 0x21 -> -0.2, 0x4a -> -0.3, 0x4b -> +0.1, 0x97 -> -0.35) are in voxel units; they are recorded for future rig work and are not applied to the proxy assembly.",
+    "Hair tint: the character colour triple (+0x1a0..0x1a2 of the creation widget) is written into the appearance struct (+0x10..+0x12) and consumed by creature_generateAppearance, i.e. the original game bakes the colour into the generated appearance instead of a runtime shader. The exact replacement code path is not recoverable from the inspected pseudo-C, so the pilot implements the approved T3 mask tint and marks it PARTIAL."
+  ],
+  "groups": {
+    "body": {
+      "scale": 1.0,
+      "status": "VERIFIED_ALPHA",
+      "evidence": "creature_getScaleVec4 returns (1,1,1,1) for a normal creature; no per-part scale in Creature_drawModel for body parts",
+      "appliesTo": [
+        "body",
+        "hand_l",
+        "hand_r",
+        "foot_l",
+        "foot_r"
+      ]
+    },
+    "head_hair": {
+      "scale": 1.0,
+      "status": "VERIFIED_ALPHA",
+      "evidence": "head and hair share the 18x16x16 authoring grid; the engine scales the whole creature uniformly, so the group stays 1.0 relative to the body",
+      "appliesTo": [
+        "head",
+        "hair"
+      ],
+      "singleApplication": "applied on the head node only; hair is its child and inherits the scale exactly once"
+    },
+    "weapon": {
+      "scale": 0.6,
+      "status": "PARTIAL",
+      "evidence": "Creature_drawModel: mat4_scaleAxes(0x3f19999a=0.6) around the in-hand weapon draw for weapon type 0x0c; 0.5 and 0.8 exist for other types",
+      "appliesTo": [
+        "sword"
+      ]
+    }
+  },
+  "artisticVariants": {
+    "note": "Optional looks for the producer's visual decision. NOT applied by default, never reported as Alpha values.",
+    "head_small": {
+      "group": "head_hair",
+      "scale": 0.85,
+      "status": "PROXY_NOT_ALPHA",
+      "purpose": "smaller head for a less stylised silhouette"
+    }
+  },
+  "tint": {
+    "mode": "mask",
+    "maskColor": [
+      255,
+      0,
+      0
+    ],
+    "status": "PARTIAL",
+    "notes": [
+      "T3: the original palette is preserved vertex-by-vertex; only vertices whose source voxel colour is listed in maskColors are blended with the tint colour in the shader.",
+      "maskColors = pure red (the hair's paint marker) and pure white (the hair's light base tone); both belong to the authored hair palette, every other colour stays untouched.",
+      "Pure RGB markers are never deleted automatically; hide lists stay explicit in assembly.json.",
+      "Decorative red voxels that are not in the mask stay untouched (verified per voxel coordinate)."
+    ],
+    "palettes": [
+      {
+        "name": "blonde",
+        "r": 214,
+        "g": 180,
+        "b": 90
+      },
+      {
+        "name": "brown",
+        "r": 110,
+        "g": 74,
+        "b": 42
+      },
+      {
+        "name": "black",
+        "r": 38,
+        "g": 34,
+        "b": 32
+      },
+      {
+        "name": "auburn",
+        "r": 150,
+        "g": 62,
+        "b": 34
+      },
+      {
+        "name": "white",
+        "r": 232,
+        "g": 228,
+        "b": 220
+      }
+    ],
+    "active": [
+      214,
+      180,
+      90
+    ],
+    "maskColors": [
+      255,
+      0,
+      0,
+      255,
+      255,
+      255
+    ]
+  }
+}

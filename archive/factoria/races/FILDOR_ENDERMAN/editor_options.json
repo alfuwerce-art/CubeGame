@@ -1,0 +1,38 @@
+{
+  "race_id": "FILDOR_ENDERMAN",
+  "alpha": {
+    "binding": "NO_MATCH_IN_CREATOR",
+    "race": null,
+    "race_index": null,
+    "fields": [],
+    "options_source": null,
+    "variants": {},
+    "class_filter": null,
+    "provenance": "ALPHA_DECOMPILED creator roster",
+    "detail": "Фильдор — имя файла, Enderman — подпись UI. Соответствие в каноне UNKNOWN."
+  },
+  "owner_screenshot": {
+    "status": "SCREENSHOT_OBSERVED",
+    "selected": "Enderman / Male / Mystic / Face 1 / Hair 2 / Particles 1",
+    "color_control": "Skin color"
+  },
+  "future_extensions": {
+    "status": "CUBEGAME_CONTRACT / PROPOSAL",
+    "slots": [
+      "Head",
+      "Face",
+      "Eyes",
+      "Torso",
+      "Arms",
+      "Hands",
+      "Legs",
+      "Feet",
+      "Equipment",
+      "Ears",
+      "Hair",
+      "ParticleEffects"
+    ],
+    "independent_eye_colors": true,
+    "racial_effects_proposed": true
+  }
+}

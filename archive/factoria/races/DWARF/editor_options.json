@@ -1,0 +1,68 @@
+{
+  "race_id": "DWARF",
+  "alpha": {
+    "binding": "PLAYABLE_LABEL_MATCH",
+    "race": "Dwarf",
+    "race_index": 2,
+    "fields": [
+      "Race",
+      "Gender",
+      "Class",
+      "Face",
+      "Haircut",
+      "Hair color"
+    ],
+    "options_source": "../../docs/tasks/COMFY-STYLE-08_ALPHA_MATRIX.json",
+    "variants": {
+      "Male": {
+        "style_id": 9,
+        "face_indices": [
+          0,
+          4
+        ],
+        "haircut_indices": [
+          0,
+          2
+        ]
+      },
+      "Female": {
+        "style_id": 10,
+        "face_indices": [
+          0,
+          4
+        ],
+        "haircut_indices": [
+          0,
+          4
+        ]
+      }
+    },
+    "class_filter": "No class branch in the face/hair lookup.",
+    "provenance": "ALPHA_DECOMPILED + ASSET_CONFIRMED",
+    "detail": null
+  },
+  "owner_screenshot": {
+    "status": "SCREENSHOT_OBSERVED",
+    "selected": "Dwarf / Male / Warrior / Face 1 / Beard 1",
+    "color_control": "Hair color"
+  },
+  "future_extensions": {
+    "status": "CUBEGAME_CONTRACT / PROPOSAL",
+    "slots": [
+      "Head",
+      "Face",
+      "Eyes",
+      "Torso",
+      "Arms",
+      "Hands",
+      "Legs",
+      "Feet",
+      "Equipment",
+      "Hair",
+      "Beard",
+      "Jaw"
+    ],
+    "independent_eye_colors": true,
+    "racial_effects_proposed": false
+  }
+}

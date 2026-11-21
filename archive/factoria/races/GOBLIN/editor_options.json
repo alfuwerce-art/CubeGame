@@ -1,0 +1,67 @@
+{
+  "race_id": "GOBLIN",
+  "alpha": {
+    "binding": "PLAYABLE_LABEL_MATCH",
+    "race": "Goblin",
+    "race_index": 4,
+    "fields": [
+      "Race",
+      "Gender",
+      "Class",
+      "Face",
+      "Haircut",
+      "Hair color"
+    ],
+    "options_source": "../../docs/tasks/COMFY-STYLE-08_ALPHA_MATRIX.json",
+    "variants": {
+      "Male": {
+        "style_id": 4,
+        "face_indices": [
+          0,
+          4
+        ],
+        "haircut_indices": [
+          0,
+          5
+        ]
+      },
+      "Female": {
+        "style_id": 5,
+        "face_indices": [
+          0,
+          4
+        ],
+        "haircut_indices": [
+          0,
+          5
+        ]
+      }
+    },
+    "class_filter": "No class branch in the face/hair lookup.",
+    "provenance": "ALPHA_DECOMPILED + ASSET_CONFIRMED",
+    "detail": null
+  },
+  "owner_screenshot": {
+    "status": "SCREENSHOT_OBSERVED",
+    "selected": "Goblin / Male / Rogue / Face 1 / Cap 1",
+    "color_control": "Skin color"
+  },
+  "future_extensions": {
+    "status": "CUBEGAME_CONTRACT / PROPOSAL",
+    "slots": [
+      "Head",
+      "Face",
+      "Eyes",
+      "Torso",
+      "Arms",
+      "Hands",
+      "Legs",
+      "Feet",
+      "Equipment",
+      "Ears",
+      "Tusks"
+    ],
+    "independent_eye_colors": true,
+    "racial_effects_proposed": false
+  }
+}

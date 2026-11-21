@@ -1,0 +1,226 @@
+{
+  "reference_id": "OWNER_FILDOR_ENDERMAN",
+  "source_filename": "Фильдор.png",
+  "source_resolution": [
+    1671,
+    941
+  ],
+  "source_sha256": "e8993d6efeb73d61f36ab462b0cca3b570c8a3d50e8dc416ac91e321c744a4dc",
+  "source_rect_xyxy": [
+    665,
+    283,
+    1002,
+    808
+  ],
+  "crop_xyxy": [
+    641,
+    259,
+    1026,
+    832
+  ],
+  "mask_bbox_xyxy_source": [
+    675,
+    295,
+    992,
+    803
+  ],
+  "landmarks_px": {
+    "top_y": 295,
+    "chin_y": 513,
+    "shoulders_y": 552,
+    "crotch_y": 717,
+    "sole_y": 800,
+    "width_at_shoulder": 228
+  },
+  "landmarks_method": "Approximate manual landmarks; crown includes hair or headgear where it occludes the skull.",
+  "preprocessing": "COMFY-STYLE-07 prepare_character_reference.segment; OpenCV RNG seed 20261114; largest component; manual boot masks for Elf/Dwarf and full contour for Fildor; 6px margin; nearest-neighbour to fit 736x872; bottom margin 52px; background #9e9e9e",
+  "scale": 1.676923,
+  "input_filename": "style08_fildor_enderman.png",
+  "input_sha256": "c9c5a6f61ec85e752caf70f69d13beb9f19937763b616d392aa87dc2c568cf72",
+  "input_resolution": [
+    768,
+    1024
+  ],
+  "local_only": true,
+  "mask_correction": {
+    "method": "replace",
+    "polygon_source_px": [
+      [
+        866,
+        298
+      ],
+      [
+        926,
+        295
+      ],
+      [
+        955,
+        325
+      ],
+      [
+        956,
+        376
+      ],
+      [
+        943,
+        404
+      ],
+      [
+        927,
+        412
+      ],
+      [
+        926,
+        435
+      ],
+      [
+        991,
+        426
+      ],
+      [
+        957,
+        451
+      ],
+      [
+        931,
+        460
+      ],
+      [
+        926,
+        520
+      ],
+      [
+        947,
+        535
+      ],
+      [
+        970,
+        557
+      ],
+      [
+        966,
+        595
+      ],
+      [
+        965,
+        641
+      ],
+      [
+        952,
+        672
+      ],
+      [
+        949,
+        760
+      ],
+      [
+        920,
+        763
+      ],
+      [
+        919,
+        782
+      ],
+      [
+        905,
+        800
+      ],
+      [
+        849,
+        802
+      ],
+      [
+        840,
+        766
+      ],
+      [
+        829,
+        766
+      ],
+      [
+        817,
+        796
+      ],
+      [
+        757,
+        797
+      ],
+      [
+        752,
+        772
+      ],
+      [
+        735,
+        765
+      ],
+      [
+        726,
+        729
+      ],
+      [
+        730,
+        676
+      ],
+      [
+        714,
+        659
+      ],
+      [
+        713,
+        635
+      ],
+      [
+        724,
+        599
+      ],
+      [
+        717,
+        574
+      ],
+      [
+        718,
+        555
+      ],
+      [
+        744,
+        532
+      ],
+      [
+        747,
+        504
+      ],
+      [
+        737,
+        467
+      ],
+      [
+        675,
+        430
+      ],
+      [
+        739,
+        433
+      ],
+      [
+        742,
+        398
+      ],
+      [
+        762,
+        367
+      ],
+      [
+        785,
+        346
+      ],
+      [
+        840,
+        345
+      ],
+      [
+        843,
+        320
+      ]
+    ]
+  }
+}

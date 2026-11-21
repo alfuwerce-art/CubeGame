@@ -1,0 +1,34 @@
+{
+  "id": "HUMAN_MALE_HEAD_CARRIER_V1",
+  "socket_id": "HUMAN_MALE_HEAD_SOCKET_V1",
+  "status": "FRONT_DESIGN_PROXY",
+  "profile": "workflows/character_factory/profiles/HUMAN/MALE.json",
+  "registered_consumers": ["BASE_BODY", "FACE_01–06", "HAIRCUT_01–15"],
+  "frame": {
+    "size": [768, 1024],
+    "axis_x": 384,
+    "crown_y": 118,
+    "pixels_per_voxel": 28,
+    "neck_join_y": 359
+  },
+  "head_planes": "Authored stepped FRONT projection in socket units. X is relative to the image centre (screen right). Y increases from the crown.",
+  "planes": {
+    "crown": [[-4.5, 0], [4.5, 0], [5.5, 1], [4.75, 1.45], [-4.75, 1.45], [-5.5, 1]],
+    "side_left": [[-5.5, 1], [-4.6, 1.45], [-4.6, 6.85], [-3.6, 7.45], [-3.6, 8], [-4.65, 7.65], [-4.65, 7.15], [-5.5, 6.7]],
+    "face_plane": [[-4.75, 1.3], [4.75, 1.3], [4.75, 6.9], [4.25, 6.9], [4.25, 7.45], [3.75, 7.45], [3.75, 8], [-3.75, 8], [-3.75, 7.45], [-4.25, 7.45], [-4.25, 6.9], [-4.75, 6.9]],
+    "ear_left_shape_relative_to_measured_centre": [[-2, -1.45], [-0.45, -1.45], [0.25, -0.95], [0.25, 1.15], [-0.4, 1.55], [-2, 1.55]],
+    "ear_left_plane_relative_to_measured_centre": [[-1.7, -1.11], [-0.47, -1.11], [-0.08, -0.78], [-0.08, 0.94], [-0.49, 1.23], [-1.7, 1.23]]
+  },
+  "style_reference": {
+    "file": "HUMAN_V1_STYLE_REFERENCE.png",
+    "sha256": "b9f3d6e41e68e8239ab61f70fc5ddf81f95e0e85124903841bdd2e1195977e77"
+  },
+  "body_pose": {
+    "file": "HUMAN_MALE_FRONT_POSE_SILHOUETTE.png",
+    "sha256": "c849c7d5998c99f512e8c6eac6098d3d27b617776c64be2117d15f4f6e735bca"
+  },
+  "body_plate": {
+    "file": "HUMAN_MALE_BASE_FRONT_V2.png",
+    "sha256": "dea26a722921c0b30e9c57f0abb090d883dd9abb77e782f94f5595d87d48cfcd"
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "task": "COMFY-MANNEQUIN-13",
+  "revision": "voxel-pixel",
+  "selected_case": "M13_J",
+  "status": "READY_FOR_OWNER_VISUAL_REVIEW",
+  "reference": {
+    "name": "human_warrior_reference_768x1024.png",
+    "sha256": "569ef0b5a79b24fe9fbb886508a06d50900c25f91738699c0b3bfdb4843d1a08"
+  },
+  "attachment_role": "visual style direction only; not a ComfyUI input or source for body proportions",
+  "output": {
+    "size_px": [
+      768,
+      1024
+    ],
+    "pixel_grid": [
+      384,
+      512
+    ],
+    "scale_factor": 2,
+    "sampler": "dpmpp_2m",
+    "scheduler": "karras",
+    "seed": 20261118,
+    "steps": 28,
+    "cfg": 5.6,
+    "denoise": 0.42
+  },
+  "style_lora": {
+    "model_strength": 0.64,
+    "clip_strength": 0.64
+  },
+  "controlnet": {
+    "mode": "canny/lineart/anime_lineart/mlsd",
+    "strength": 0.72,
+    "start": 0,
+    "end": 0.98,
+    "canny_low": 0.24,
+    "canny_high": 0.52
+  },
+  "models": {
+    "checkpoint": {
+      "file": "checkpoints\\sd_xl_base_1.0.safetensors",
+      "bytes": 6938078334,
+      "sha256": "31e35c80fc4829d14f90153f4c74cd59c90b779f6afe05a74cd6120b893f7e5b"
+    },
+    "lora": {
+      "file": "loras\\VoxelXL_v1.safetensors",
+      "bytes": 912554516,
+      "sha256": "7d9a5f11e1b38d97f75d2b84bfb5bb3bf95cd0e5f2500b002d13374eb4f88b5c"
+    },
+    "controlnet": {
+      "file": "controlnet\\controlnet-union-sdxl-1.0.safetensors",
+      "bytes": 2512030408,
+      "sha256": "a9e13fd61f3193887791c8a0dd07a07202174dc47d5ddaea94ea1344f07c7467"
+    }
+  },
+  "guide": {
+    "name": "mannequin_13_volume_owner_landmarks.png",
+    "sha256": "7e06047419095aeb5b778225cfcb6627cd300c7cf10723a0fb784ff0819fb36d"
+  },
+  "mask": {
+    "name": "mannequin_13_voxel_protection_mask.png",
+    "sha256": "92f68e1b1965fb9a515de5d17d9c3d78c554ff719809f1191e1fb462ac9482f6"
+  },
+  "workflow_sha256": "ce6deb343ef5f3d37ecb0ada05b527ed8d1363558ca69b630df804bf4291ff4e",
+  "api_sha256": "ec8c4b12fb6bbb049ee2d941b365ccaf1a7a0a4de3682728b10858bd4852ba1c",
+  "png_sha256": "534077f4ddaad9d480f64747acc80aacfb42f5306b2e97f4ee7d75582651d3f0",
+  "runs": [
+    {
+      "case": "M13_G",
+      "prompt_id": "94724e01-9e60-4625-a0d8-86057fd52d7d",
+      "seconds": 64.42,
+      "denoise": 0.34,
+      "controlnet_strength": 0.68,
+      "guide_sha256": "a3e755fa99d968c4ecf4ef43058c34d66b074c82343e026136f705d2e4c86475",
+      "api_sha256": "d03d03500301e2a429c0ac6c74005db072a9725a2d1efb0aa79dd0e550702e8a",
+      "png_sha256": "254825f010a9300e382d646fdef1451613b61718188f4081dbcc2e660fb6c2df",
+      "measurements": {
+        "rss_before_mib": 921,
+        "rss_peak_mib": 14222,
+        "rss_after_mib": 13679,
+        "system_ram_available_before_gib": 16.49,
+        "system_ram_available_min_gib": 3.48,
+        "vram_before_mib": 1715,
+        "vram_peak_mib": 3880,
+        "vram_after_mib": 1799,
+        "vram_delta_peak_mib": 2165,
+        "samples": 257,
+        "interval_seconds": 0.25,
+        "method": "psutil working set (RSS), psutil available system RAM, NVML whole-card dedicated VRAM"
+      }
+    },
+    {
+      "case": "M13_H",
+      "prompt_id": "19c37bd2-35fb-444c-8d4a-2b564dfc481f",
+      "seconds": 42.36,
+      "denoise": 0.48,
+      "controlnet_strength": 0.72,
+      "guide_sha256": "a3e755fa99d968c4ecf4ef43058c34d66b074c82343e026136f705d2e4c86475",
+      "api_sha256": "3dd97a13bf6a0cde8bb46f0fb0e61dc05ca4119d19c588dfff5440ce067a4aaf",
+      "png_sha256": "744e414d2cf0cb8e5cf6b6f9d0f6f8e9542a39f43bb8155e92d144028f17a0be",
+      "measurements": {
+        "rss_before_mib": 13679,
+        "rss_peak_mib": 13687,
+        "rss_after_mib": 13687,
+        "system_ram_available_before_gib": 4.34,
+        "system_ram_available_min_gib": 4.16,
+        "vram_before_mib": 1799,
+        "vram_peak_mib": 3896,
+        "vram_after_mib": 1816,
+        "vram_delta_peak_mib": 2097,
+        "samples": 169,
+        "interval_seconds": 0.25,
+        "method": "psutil working set (RSS), psutil available system RAM, NVML whole-card dedicated VRAM"
+      }
+    },
+    {
+      "case": "M13_I",
+      "prompt_id": "c7bcfe62-5439-4b8d-9ad6-8bc80b8232df",
+      "seconds": 40.35,
+      "denoise": 0.38,
+      "controlnet_strength": 0.71,
+      "guide_sha256": "a6f77bc1f7e1f8107ff818ac052e9d8359349db9f4976e426df7bd77041cba06",
+      "api_sha256": "cd851a9d25adcd42161486692bf20954ecaa91aee6f038b478249518156cfcab",
+      "png_sha256": "7052933982318eb55db91d3b85de8e49653c0f743c9b06d94647435891135b7b",
+      "measurements": {
+        "rss_before_mib": 13689,
+        "rss_peak_mib": 13703,
+        "rss_after_mib": 13691,
+        "system_ram_available_before_gib": 4.26,
+        "system_ram_available_min_gib": 4.13,
+        "vram_before_mib": 1805,
+        "vram_peak_mib": 3915,
+        "vram_after_mib": 1830,
+        "vram_delta_peak_mib": 2110,
+        "samples": 161,
+        "interval_seconds": 0.25,
+        "method": "psutil working set (RSS), psutil available system RAM, NVML whole-card dedicated VRAM"
+      }
+    },
+    {
+      "case": "M13_J",
+      "prompt_id": "5b143cf4-d943-4bf3-a538-0740af59805a",
+      "seconds": 45.14,
+      "denoise": 0.42,
+      "controlnet_strength": 0.72,
+      "guide_sha256": "7e06047419095aeb5b778225cfcb6627cd300c7cf10723a0fb784ff0819fb36d",
+      "api_sha256": "ec8c4b12fb6bbb049ee2d941b365ccaf1a7a0a4de3682728b10858bd4852ba1c",
+      "png_sha256": "534077f4ddaad9d480f64747acc80aacfb42f5306b2e97f4ee7d75582651d3f0",
+      "measurements": {
+        "rss_before_mib": 13692,
+        "rss_peak_mib": 13704,
+        "rss_after_mib": 13692,
+        "system_ram_available_before_gib": 3.92,
+        "system_ram_available_min_gib": 3.56,
+        "vram_before_mib": 1920,
+        "vram_peak_mib": 3980,
+        "vram_after_mib": 1898,
+        "vram_delta_peak_mib": 2060,
+        "samples": 180,
+        "interval_seconds": 0.25,
+        "method": "psutil working set (RSS), psutil available system RAM, NVML whole-card dedicated VRAM"
+      }
+    }
+  ]
+}

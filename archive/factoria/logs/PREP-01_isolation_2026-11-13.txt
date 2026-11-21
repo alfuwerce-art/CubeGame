@@ -1,0 +1,45 @@
+﻿=== PREP-01 isolation check 2026-11-13 12:28:44 ===
+--- CubeGame git status (read-only) ---
+?? Assets/CubeGame/Presentation/Gameplay/Resources/
+?? Assets/InitTestScene719c2da4-19a1-4559-9cd8-5b166a2202ef.unity
+?? Assets/InitTestScene719c2da4-19a1-4559-9cd8-5b166a2202ef.unity.meta
+?? docs/reports/M0_ALPHA_FULL_PORT_P3_POPULATION_AI_REPORT.md
+
+--- CubeGame HEAD ---
+776a6ceb92e834c4b1b1c93d82f35d7e8c9ca1d6  (HEAD -> review/m1-creature-family-research, origin/review/m1-creature-family-research)
+
+--- global PATH contains Blender? ---
+machine_PATH_has_blender=False user_PATH_has_blender=False
+--- project files changed in this session (git status) ---
+?? environments/
+?? logs/PREP-01_diagnostics_2026-11-13.txt
+?? logs/PREP-01_headless_smoke_2026-11-13.txt
+?? logs/PREP-01_rigify_skinning_2026-11-13.txt
+?? logs/PREP-01_rigify_skinning_stderr_2026-11-13.txt
+?? outputs/
+?? scripts/
+
+--- new files outside project created today under D:\programs ---
+
+Name                           LastWriteTime      
+----                           -------------      
+Adobe Premiere Pro 2026 26.2.2 28.07.2026 18:17:31
+Adobe Premiere Pro Auto-Save   28.07.2026 18:36:17
+Blender                        13.11.2026 12:19:59
+FSR Launcher                   02.07.2026 13:18:14
+Happ                           30.10.2026 10:00:25
+max-service                    06.10.2026 1:15:46 
+plugins                        06.10.2026 1:15:46 
+qml                            06.10.2026 1:15:46 
+Reg Organizer                  08.11.2026 9:31:24 
+Remote Mouse                   03.06.2026 21:27:14
+Telegram Desktop               10.11.2026 16:45:40
+_installers                    13.11.2026 12:07:57
+
+
+
+
+--- Проверка происхождения untracked-файлов CubeGame (не наши) ---
+Assets/...Resources/AlphaFont.ttf  LastWriteTime=2013-07-12 (исходный файл Alpha), .meta=2026-11-11 23:34
+docs/reports/M0_ALPHA_FULL_PORT_P3_POPULATION_AI_REPORT.md LastWriteTime=2026-11-13 11:00:07 (до начала сессии PREP-01 в 12:07)
+Вывод: файлы созданы до начала этой сессии; PREP-01 в D:\Projects\CubeGame ничего не писал.

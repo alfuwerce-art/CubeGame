@@ -1,0 +1,53 @@
+00:09.531  render           | Saved: 'D:\Projects\CubeGame Factory\outputs\blender\prep01_rest_pose.png'
+00:10.500  render           | Saved: 'D:\Projects\CubeGame Factory\outputs\blender\prep01_control_pose.png'
+Reloading external rigs...
+Reloading external metarigs...
+STAGE enable_rigify: OK before=[False, False] after=[True, True]
+STAGE add_human_metarig: OK object=metarig bones=159
+Fetch rig.
+Clear rig animation data.
+Create widgets collection: 0.001
+Duplicate rig: 0.009
+Instantiate rigs: 0.006
+Initialize rigs: 0.001
+Prepare bones: 0.002
+Generate bones: 5.442
+Parent bones: 0.045
+Configure bones: 0.043
+Preapply bones: 0.015
+Apply bones: 0.007
+Rig bones: 0.056
+Generate widgets: 0.042
+Assign layers: 0.053
+Finalize: 0.059
+The rest: 0.053
+Info: Successfully generated: "rig"
+STAGE rigify_generate: OK via=object_mode rig=rig deform=160 control=546
+STAGE build_mannequin: OK segments=160 verts_raw=1280 verts_remeshed=3926 components=1
+STAGE automatic_weights: OK groups=160 unweighted=0 weight_sum_min=0.7323 sum_off_from_1=2426 modifier=True
+STAGE pose_deformation: OK ik=0.562m fk=0.332m def_direct=0.0m
+STAGE render_evidence: OK rest=1.28s posed=0.69s distinct_images=True
+Info: Saved as "prep01_rigify_skinned.blend"
+STAGE save_blend: OK D:\Projects\CubeGame Factory\outputs\blender\prep01_rigify_skinned.blend
+
+FBX export starting... 'D:\\Projects\\CubeGame Factory\\outputs\\blender\\prep01_rigify_skinned.fbx'
+(bpy.data.armatures['rig'], 'POSE')
+export finished in 0.3069 sec.
+STAGE export_fbx: OK D:\Projects\CubeGame Factory\outputs\blender\prep01_rigify_skinned.fbx bytes=1577084
+FBX version: 7400
+STAGE fbx_roundtrip: OK {"armatures": 1, "meshes": 1, "bones": 706, "vertex_groups": 145, "max_displacement_after_rotation_m": 0.5659896444790915}
+PREP01_REPORT=D:\Projects\CubeGame Factory\outputs\reports\prep01_rigify_skinning.json
+PREP01_RESULT=PASS
+PREP01_STAGE enable_rigify=PASS :: before=[False, False] after=[True, True]
+PREP01_STAGE add_human_metarig=PASS :: object=metarig bones=159
+PREP01_STAGE rigify_generate=PASS :: via=object_mode rig=rig deform=160 control=546
+PREP01_STAGE build_mannequin=PASS :: segments=160 verts_raw=1280 verts_remeshed=3926 components=1
+PREP01_STAGE automatic_weights=PASS :: groups=160 unweighted=0 weight_sum_min=0.7323 sum_off_from_1=2426 modifier=True
+PREP01_STAGE pose_deformation=PASS :: ik=0.562m fk=0.332m def_direct=0.0m
+PREP01_STAGE render_evidence=PASS :: rest=1.28s posed=0.69s distinct_images=True
+PREP01_STAGE save_blend=PASS :: D:\Projects\CubeGame Factory\outputs\blender\prep01_rigify_skinned.blend
+PREP01_STAGE export_fbx=PASS :: D:\Projects\CubeGame Factory\outputs\blender\prep01_rigify_skinned.fbx bytes=1577084
+PREP01_STAGE fbx_roundtrip=PASS :: {"armatures": 1, "meshes": 1, "bones": 706, "vertex_groups": 145, "max_displacement_after_rotation_m": 0.5659896444790915}
+Blender 5.2.4 LTS (hash cd5dc428cce1 built 2026-11-10 01:34:34)
+
+Blender quit

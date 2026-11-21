@@ -1,0 +1,133 @@
+{
+  "detail_scale": 1.0,
+  "face_status": "AMBIGUOUS_FACE_LANDMARKS",
+  "family": "humanoid",
+  "max_box_voxels": 6,
+  "modules": {
+    "brows": {
+      "boxes": 0,
+      "unique_box_sizes": 0,
+      "voxels": 0
+    },
+    "eyes": {
+      "boxes": 0,
+      "unique_box_sizes": 0,
+      "voxels": 0
+    },
+    "foot_L": {
+      "boxes": 9,
+      "unique_box_sizes": 6,
+      "voxels": 98
+    },
+    "foot_R": {
+      "boxes": 9,
+      "unique_box_sizes": 6,
+      "voxels": 98
+    },
+    "forearm_L": {
+      "boxes": 9,
+      "unique_box_sizes": 6,
+      "voxels": 23
+    },
+    "forearm_R": {
+      "boxes": 7,
+      "unique_box_sizes": 6,
+      "voxels": 23
+    },
+    "hair": {
+      "boxes": 90,
+      "unique_box_sizes": 74,
+      "voxels": 509
+    },
+    "hand_L": {
+      "boxes": 21,
+      "unique_box_sizes": 16,
+      "voxels": 76
+    },
+    "hand_R": {
+      "boxes": 21,
+      "unique_box_sizes": 16,
+      "voxels": 76
+    },
+    "head": {
+      "boxes": 189,
+      "unique_box_sizes": 126,
+      "voxels": 925
+    },
+    "pelvis": {
+      "boxes": 12,
+      "unique_box_sizes": 8,
+      "voxels": 64
+    },
+    "shin_L": {
+      "boxes": 6,
+      "unique_box_sizes": 5,
+      "voxels": 48
+    },
+    "shin_R": {
+      "boxes": 6,
+      "unique_box_sizes": 5,
+      "voxels": 48
+    },
+    "thigh_L": {
+      "boxes": 13,
+      "unique_box_sizes": 9,
+      "voxels": 47
+    },
+    "thigh_R": {
+      "boxes": 11,
+      "unique_box_sizes": 8,
+      "voxels": 47
+    },
+    "torso": {
+      "boxes": 38,
+      "unique_box_sizes": 30,
+      "voxels": 144
+    },
+    "upper_arm_L": {
+      "boxes": 24,
+      "unique_box_sizes": 12,
+      "voxels": 58
+    },
+    "upper_arm_R": {
+      "boxes": 22,
+      "unique_box_sizes": 19,
+      "voxels": 58
+    }
+  },
+  "outputs": {
+    "glb": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02\\run1\\orc02_modular.glb",
+    "glb_bytes": 144756,
+    "glb_sha256": "3e83f4716091357b2abba5ef774782362faef5d1ce7e0804c4990bbf1a14f234"
+  },
+  "placement": {
+    "clip": "clips/walk.json",
+    "note": "позиции частей взяты из первого кадра клипа источника; анимационный масштаб частей не применялся",
+    "source": "CLIP_FRAME_0"
+  },
+  "profile": "orc",
+  "source": {
+    "actor_dir": "D:\\Projects\\CubeGame\\.scratch\\content\\actors/d86_kind_0x0b_formula",
+    "hashes": {
+      "models/body.cubdec": "d948ed921fd8fa6bf323dab29a9db6dbd55e354b21d52fd97ce8bf5592bfe79a",
+      "models/foot_l.cubdec": "f199c499cfff6aae28833c823c1690db1075e6ab3d133ba169e1ba3ac8d0efe7",
+      "models/foot_r.cubdec": "f199c499cfff6aae28833c823c1690db1075e6ab3d133ba169e1ba3ac8d0efe7",
+      "models/hair.cubdec": "f51ad10060079a4b4efe32e32a4395de4c209b20a1a7a8bfe412df6dc6b3ef65",
+      "models/hand_l.cubdec": "cba9980bd72edf4adc1666356aad3c1076b79ab1c5dc62131477caed0eb8a868",
+      "models/hand_r.cubdec": "cba9980bd72edf4adc1666356aad3c1076b79ab1c5dc62131477caed0eb8a868",
+      "models/head.cubdec": "cccaac344f8e29e6a0f51e9d5058e7523d8a01ac9363eddd130e3929b377ce8d",
+      "rig.json": "d223eb3b63f8b17c4993d429e02a57bc531a2f1437e6328783f5b0f632905363"
+    },
+    "rig": "alpha_creature/345ed3b095",
+    "variant": "d86_kind_0x0b_formula"
+  },
+  "timing": {
+    "seconds": 0.02
+  },
+  "totals": {
+    "boxes": 487,
+    "modules": 16,
+    "voxels": 2342
+  },
+  "wall_seconds": 0.02
+}

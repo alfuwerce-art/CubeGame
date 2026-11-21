@@ -1,0 +1,51 @@
+{
+  "profile": "orc",
+  "family": "humanoid",
+  "description": "Правила переработки реального Orc (actor d86_kind_0x0b_formula) в модульную voxel-геометрию. DATA, не хардкод конвейера.",
+  "source": {
+    "actor_relpath": "actors/d86_kind_0x0b_formula",
+    "rig_file": "rig.json",
+    "model_dir": "models",
+    "kind": "0x0b",
+    "expected_parts": ["body", "head", "hair", "hand_l", "hand_r", "foot_l", "foot_r"]
+  },
+  "placement": {
+    "note": "rig.json не содержит bind/rest позиций частей: они приходят из клипов. Здесь используется явный профиль сборки в воксельных единицах (1 воксель = 0.1 м), поэтому размещение помечено как PROFILE_DRIVEN, а не как извлечённый bind pose.",
+    "source": "CLIP_FRAME_0",
+    "clip": "clips/walk.json",
+    "voxel_scale_m": 0.1,
+    "body_center_z": 0.0,
+    "feet_z": -0.5,
+    "hand_x": 0.5,
+    "hand_z": 0.15
+  },
+  "body_split": {
+    "note": "Доли по Z внутри сетки body; X — половина ширины, |x| больше доли уходит в конечности.",
+    "pelvis_z_max": 0.30,
+    "torso_z_max": 0.78,
+    "arm_x_min": 0.30,
+    "upper_arm_z_min": 0.62,
+    "forearm_z_split": 0.70,
+    "leg_z_max": 0.42,
+    "thigh_z_split": 0.22
+  },
+  "joint_gap_fraction": 0.06,
+  "part_scale_overrides": {
+    "head": 0.55,
+    "hair": 0.55
+  },
+  "part_scale_note": "ПРОФИЛЬНАЯ АППРОКСИМАЦИЯ: сетки head/hair крупнее body (18x20x16 vs 10x8x10), а точный per-part voxel scale в rig.json отсутствует. Значения подобраны по отношению сеток и требуют подтверждения по Alpha runtime evidence.",
+  "detail": {
+    "note": "Иерархия крупная/средняя/мелкая: жадное слияние вокселей в кубоиды даёт разные размеры; min_run=1 сохраняет мелкие детали.",
+    "greedy_axis_order": ["x", "y", "z"],
+    "keep_small_detail": true,
+    "max_box_voxels": 6
+  },
+  "face": {
+    "note": "Глаза/брови выделяются по цветовому контрасту на фронтальной поверхности головы; если контраст не найден — модули пустые и в отчёт пишется AMBIGUOUS_FACE_LANDMARKS.",
+    "enabled": true,
+    "color_distance_min": 60,
+    "eye_zone_z": [0.45, 0.75],
+    "brow_zone_z": [0.70, 0.95]
+  }
+}

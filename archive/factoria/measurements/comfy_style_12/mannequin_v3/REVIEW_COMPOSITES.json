@@ -1,0 +1,60 @@
+{
+  "task": "COMFY-STYLE-12",
+  "composites": {
+    "review_male.png": {
+      "file": "outputs/factory/mannequin_v3\\review_male.png",
+      "size_xy": [
+        3852,
+        800
+      ],
+      "panels": [
+        "V3 REFERENCE (approved)",
+        "A  block plate only (flat)",
+        "B  block plate + depth 0.55",
+        "C  ref plate clean",
+        "D  ref plate clean + depth 0.55",
+        "E  ref plate + torso boundaries (CHOSEN)"
+      ]
+    },
+    "review_female.png": {
+      "file": "outputs/factory/mannequin_v3\\review_female.png",
+      "size_xy": [
+        3151,
+        800
+      ],
+      "panels": [
+        "V3 REFERENCE (approved)",
+        "F  ref plate clean",
+        "G  ref plate clean + depth 0.55",
+        "H  ref plate sealed + depth 0.55",
+        "I  ref plate + torso boundaries (CHOSEN)"
+      ]
+    },
+    "review_guides.png": {
+      "file": "outputs/factory/mannequin_v3\\review_guides.png",
+      "size_xy": [
+        2289,
+        800
+      ],
+      "panels": [
+        "MALE GUIDE (block plate)",
+        "MALE REFPLATE",
+        "FEMALE GUIDE (block plate)",
+        "FEMALE REFPLATE"
+      ]
+    },
+    "review_flat_diagnostics.png": {
+      "file": "outputs/factory/mannequin_v3\\review_flat_diagnostics.png",
+      "size_xy": [
+        2577,
+        800
+      ],
+      "panels": [
+        "block plate only (flat)",
+        "block plate + depth",
+        "ref plate (raw crop)",
+        "ref plate clean"
+      ]
+    }
+  }
+}

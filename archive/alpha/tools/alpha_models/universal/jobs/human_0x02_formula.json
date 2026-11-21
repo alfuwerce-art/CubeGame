@@ -1,0 +1,11 @@
+{
+ "kind": "0x02",
+ "seed_variant": [0, 0],
+ "variant": "human_0x02_formula_vs_alpha_no_weapon",
+ "locomotion": "formula",
+ "amp": 0.192,
+ "boost": true,
+ "speed_xy": 11.56,
+ "reference_capture": {"path": "D:/Projects/CubeGame/.scratch/s05a2/cap/session2.jsonl", "kind": "0x02"},
+ "note": "Biped formula (hands on a circle, head lean) vs the captured human player walk. No weapon layer: equipment is not part of the locomotion formula."
+}

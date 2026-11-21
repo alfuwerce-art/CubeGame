@@ -1,0 +1,124 @@
+{
+  "task": "COMFY-STYLE-12",
+  "case": "MANNEQUIN_V3_FEMALE_CN75",
+  "api_json": "workflows\\character_factory\\mannequin\\diag\\MANNEQUIN_V3_FEMALE_CN75.json",
+  "api_sha256": "543f93bd03412f91100235b9da4ae18eabcdb5cbd85ddc122b464b07f5771b8d",
+  "prompt_id": "da23cce4-f5b7-44cd-ad50-8674c3130826",
+  "status": "success",
+  "completed": true,
+  "params": {
+    "checkpoint": "sd_xl_base_1.0.safetensors",
+    "lora": "VoxelXL_v1.safetensors",
+    "lora_strength_model": 0.6,
+    "lora_strength_clip": 0.6,
+    "controlnet": "controlnet-union-sdxl-1.0.safetensors",
+    "controlnet_union_type": "canny/lineart/anime_lineart/mlsd",
+    "controlnet_strength": 0.75,
+    "controlnet_start": 0.0,
+    "controlnet_end": 1.0,
+    "canny_low": 0.35,
+    "canny_high": 0.75,
+    "seed": 20261117,
+    "steps": 28,
+    "cfg": 6.0,
+    "sampler": "dpmpp_2m",
+    "scheduler": "karras",
+    "denoise": 1.0,
+    "width": 768,
+    "height": 1024,
+    "batch_size": 1,
+    "guide_image": "HUMAN_FEMALE_MANNEQUIN_REFPLATE.png",
+    "filename_prefix": "MANNEQUIN_V3_FEMALE_CN75",
+    "ipadapter_nodes": 0,
+    "img2img_nodes": 0
+  },
+  "models": {
+    "checkpoint": {
+      "file": "sd_xl_base_1.0.safetensors",
+      "bytes": 6938078334,
+      "sha256": "31e35c80fc4829d14f90153f4c74cd59c90b779f6afe05a74cd6120b893f7e5b"
+    },
+    "lora": {
+      "file": "VoxelXL_v1.safetensors",
+      "bytes": 912554516,
+      "sha256": "7d9a5f11e1b38d97f75d2b84bfb5bb3bf95cd0e5f2500b002d13374eb4f88b5c"
+    },
+    "controlnet": {
+      "file": "controlnet-union-sdxl-1.0.safetensors",
+      "bytes": 2512030408,
+      "sha256": "a9e13fd61f3193887791c8a0dd07a07202174dc47d5ddaea94ea1344f07c7467"
+    }
+  },
+  "guide": {
+    "local_file": "outputs\\factory\\mannequin_v3\\HUMAN_FEMALE_MANNEQUIN_REFPLATE.png",
+    "local_sha256": "6f73a4381334229b3ac1a910d19d5068cc71a2aa651543c1c70a04333f4189fc",
+    "server_file": "D:\\programs\\ComfyUI\\ComfyUI\\input\\HUMAN_FEMALE_MANNEQUIN_REFPLATE.png",
+    "server_sha256": "6f73a4381334229b3ac1a910d19d5068cc71a2aa651543c1c70a04333f4189fc",
+    "match": true
+  },
+  "runtime": {
+    "comfyui": "0.45.0",
+    "python": "3.13.14 (tags/v3.13.14:fd17997, Jun 10 2",
+    "torch": "2.14.1+cu130",
+    "device": "cuda:0 NVIDIA GeForce RTX 4060 Laptop GPU : cudaMallocAsync",
+    "vram_total_mb": 8188,
+    "url": "http://127.0.0.1:8188",
+    "server_pid": 18124
+  },
+  "measurements": {
+    "generation_seconds": 46.1,
+    "peak_rss_mb": 13686,
+    "rss_before_mb": 13674,
+    "rss_after_mb": 13674,
+    "free_ram_before_gb": 5.28,
+    "min_free_ram_gb": 5.1,
+    "vram_used_before_mb": 1825,
+    "vram_peak_mb": 3946,
+    "vram_after_mb": 1854,
+    "vram_delta_peak_mb": 2121,
+    "samples": 93,
+    "method": "psutil RSS of the server process; pynvml whole-card VRAM (WDDM: no per-process VRAM)"
+  },
+  "images": [
+    {
+      "file": "outputs\\factory\\mannequin_v3\\run_female_diag_cn75\\MANNEQUIN_V3_FEMALE_CN75_00001_.png",
+      "bytes": 526892,
+      "sha256": "89fcca788827b62db2e99f23b7244ae22fb8ff3b594a7f7ff948013ad4a3df5f"
+    }
+  ],
+  "messages": [
+    [
+      "execution_start",
+      {
+        "prompt_id": "da23cce4-f5b7-44cd-ad50-8674c3130826",
+        "timestamp": 1794948962887
+      }
+    ],
+    [
+      "execution_cached",
+      {
+        "nodes": [
+          "checkpoint",
+          "lora",
+          "positive",
+          "negative",
+          "latent",
+          "guide",
+          "guide_scale",
+          "edges",
+          "controlnet",
+          "union_mode"
+        ],
+        "prompt_id": "da23cce4-f5b7-44cd-ad50-8674c3130826",
+        "timestamp": 1794948962890
+      }
+    ],
+    [
+      "execution_success",
+      {
+        "prompt_id": "da23cce4-f5b7-44cd-ad50-8674c3130826",
+        "timestamp": 1794949008434
+      }
+    ]
+  ]
+}

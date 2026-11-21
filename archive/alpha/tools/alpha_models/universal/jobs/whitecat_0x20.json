@@ -1,0 +1,6 @@
+{
+ "kind": "0x20",
+ "seed_variant": [0, 0],
+ "variant": "whitecat_0x20_captured",
+ "note": "Captured kind (WhiteCat). Models come from the static tables (creature_generateAppearance + model registry), clips from the family directory alpha_creature_<hash> built by `pipeline build-clips`."
+}

@@ -1,0 +1,1258 @@
+{
+ "format": "cubegame.world_ctor_evidence/1",
+ "status": "RESEARCH_DRAFT_NOT_APPROVED",
+ "note": "Name tables of cube::World::ctor_1 (Alpha 2013 client). Ids/names only: evidence data for the M0 content tables, not an approved game design and not a license to redistribute assets.",
+ "source": {
+  "file": ".scratch/CubeWorld-Reversal/cube/world/World.cpp",
+  "symbol": "cube::World::ctor_1 @ 0x0058eb00",
+  "extractor": "tools/alpha_research/extract_world_ctor_tables.py",
+  "pairing_rule": "value string assignment immediately following the map insert"
+ },
+ "objects": [
+  {
+   "id": 0,
+   "name": "Statue",
+   "ambiguous": false
+  },
+  {
+   "id": 1,
+   "name": "Door",
+   "ambiguous": false
+  },
+  {
+   "id": 2,
+   "name": "BigDoor",
+   "ambiguous": false
+  },
+  {
+   "id": 3,
+   "name": "Window",
+   "ambiguous": false
+  },
+  {
+   "id": 4,
+   "name": "CastleWindow",
+   "ambiguous": false
+  },
+  {
+   "id": 5,
+   "name": "Gate",
+   "ambiguous": false
+  },
+  {
+   "id": 6,
+   "name": "FireTrap",
+   "ambiguous": false
+  },
+  {
+   "id": 7,
+   "name": "SpikeTrap",
+   "ambiguous": false
+  },
+  {
+   "id": 8,
+   "name": "StompTrap",
+   "ambiguous": false
+  },
+  {
+   "id": 9,
+   "name": "Lever",
+   "ambiguous": false
+  },
+  {
+   "id": 10,
+   "name": "Chest",
+   "ambiguous": false
+  },
+  {
+   "id": 12,
+   "name": "Table",
+   "ambiguous": false
+  },
+  {
+   "id": 13,
+   "name": "Table",
+   "ambiguous": false
+  },
+  {
+   "id": 14,
+   "name": "Table",
+   "ambiguous": false
+  },
+  {
+   "id": 15,
+   "name": "Stool",
+   "ambiguous": false
+  },
+  {
+   "id": 16,
+   "name": "Stool",
+   "ambiguous": false
+  },
+  {
+   "id": 17,
+   "name": "Stool",
+   "ambiguous": false
+  },
+  {
+   "id": 18,
+   "name": "Bench",
+   "ambiguous": false
+  },
+  {
+   "id": 19,
+   "name": null,
+   "ambiguous": true
+  },
+  {
+   "id": 20,
+   "name": "BedTable",
+   "ambiguous": false
+  },
+  {
+   "id": 21,
+   "name": "MarketStand1",
+   "ambiguous": false
+  },
+  {
+   "id": 22,
+   "name": "MarketStand2",
+   "ambiguous": false
+  },
+  {
+   "id": 23,
+   "name": "MarketStand3",
+   "ambiguous": false
+  },
+  {
+   "id": 24,
+   "name": "Barrel",
+   "ambiguous": false
+  },
+  {
+   "id": 25,
+   "name": "Crate",
+   "ambiguous": false
+  },
+  {
+   "id": 26,
+   "name": "OpenCrate",
+   "ambiguous": false
+  },
+  {
+   "id": 27,
+   "name": "Sack",
+   "ambiguous": false
+  },
+  {
+   "id": 28,
+   "name": "Shelter",
+   "ambiguous": false
+  },
+  {
+   "id": 29,
+   "name": "Cupboard",
+   "ambiguous": false
+  },
+  {
+   "id": 30,
+   "name": "Desktop",
+   "ambiguous": false
+  },
+  {
+   "id": 31,
+   "name": "Counter",
+   "ambiguous": false
+  },
+  {
+   "id": 32,
+   "name": "Shelf1",
+   "ambiguous": false
+  },
+  {
+   "id": 33,
+   "name": "Shelf2",
+   "ambiguous": false
+  },
+  {
+   "id": 34,
+   "name": "Shelf3",
+   "ambiguous": false
+  },
+  {
+   "id": 44,
+   "name": "Corpse",
+   "ambiguous": false
+  },
+  {
+   "id": 45,
+   "name": "RuneStone",
+   "ambiguous": false
+  },
+  {
+   "id": 46,
+   "name": "Artifact",
+   "ambiguous": false
+  },
+  {
+   "id": 47,
+   "name": "FlowerBox1",
+   "ambiguous": false
+  },
+  {
+   "id": 48,
+   "name": "FlowerBox2",
+   "ambiguous": false
+  },
+  {
+   "id": 49,
+   "name": "FlowerBox3",
+   "ambiguous": false
+  },
+  {
+   "id": 50,
+   "name": "StreetLight",
+   "ambiguous": false
+  },
+  {
+   "id": 51,
+   "name": "FireStreetLight",
+   "ambiguous": false
+  },
+  {
+   "id": 52,
+   "name": "Fence1",
+   "ambiguous": false
+  },
+  {
+   "id": 53,
+   "name": "Fence2",
+   "ambiguous": false
+  },
+  {
+   "id": 54,
+   "name": "Fence3",
+   "ambiguous": false
+  },
+  {
+   "id": 55,
+   "name": "Fence4",
+   "ambiguous": false
+  },
+  {
+   "id": 56,
+   "name": "Vase1",
+   "ambiguous": false
+  },
+  {
+   "id": 57,
+   "name": "Vase2",
+   "ambiguous": false
+  },
+  {
+   "id": 58,
+   "name": "Vase3",
+   "ambiguous": false
+  },
+  {
+   "id": 59,
+   "name": "Vase4",
+   "ambiguous": false
+  },
+  {
+   "id": 60,
+   "name": "Vase5",
+   "ambiguous": false
+  },
+  {
+   "id": 61,
+   "name": "Vase6",
+   "ambiguous": false
+  },
+  {
+   "id": 62,
+   "name": "Vase7",
+   "ambiguous": false
+  },
+  {
+   "id": 63,
+   "name": "Vase8",
+   "ambiguous": false
+  },
+  {
+   "id": 64,
+   "name": "Vase9",
+   "ambiguous": false
+  },
+  {
+   "id": 65,
+   "name": "Campfire",
+   "ambiguous": false
+  },
+  {
+   "id": 66,
+   "name": "Tent",
+   "ambiguous": false
+  },
+  {
+   "id": 67,
+   "name": "BeachUmbrella",
+   "ambiguous": false
+  },
+  {
+   "id": 68,
+   "name": "BeachTowel",
+   "ambiguous": false
+  },
+  {
+   "id": 69,
+   "name": "SleepingMat",
+   "ambiguous": false
+  },
+  {
+   "id": 71,
+   "name": "Furnace",
+   "ambiguous": false
+  },
+  {
+   "id": 72,
+   "name": "Anvil",
+   "ambiguous": false
+  },
+  {
+   "id": 73,
+   "name": "SpinningWheel",
+   "ambiguous": false
+  },
+  {
+   "id": 74,
+   "name": "Loom",
+   "ambiguous": false
+  },
+  {
+   "id": 75,
+   "name": "SawBench",
+   "ambiguous": false
+  },
+  {
+   "id": 76,
+   "name": "Workbench",
+   "ambiguous": false
+  },
+  {
+   "id": 77,
+   "name": "CustomizationBench",
+   "ambiguous": false
+  }
+ ],
+ "items": [
+  {
+   "type": 1,
+   "subtype": 0,
+   "name": "Village",
+   "ambiguous": false
+  },
+  {
+   "type": 1,
+   "subtype": 1,
+   "name": "LifePotion",
+   "ambiguous": false
+  },
+  {
+   "type": 1,
+   "subtype": 2,
+   "name": "CactusPotion",
+   "ambiguous": false
+  },
+  {
+   "type": 1,
+   "subtype": 3,
+   "name": "ManaPotion",
+   "ambiguous": false
+  },
+  {
+   "type": 1,
+   "subtype": 4,
+   "name": "GinsengSoup",
+   "ambiguous": false
+  },
+  {
+   "type": 1,
+   "subtype": 5,
+   "name": "SnowBerryMash",
+   "ambiguous": false
+  },
+  {
+   "type": 1,
+   "subtype": 6,
+   "name": "MushroomSpit",
+   "ambiguous": false
+  },
+  {
+   "type": 1,
+   "subtype": 7,
+   "name": "Bomb",
+   "ambiguous": false
+  },
+  {
+   "type": 1,
+   "subtype": 8,
+   "name": "PineappleSlice",
+   "ambiguous": false
+  },
+  {
+   "type": 1,
+   "subtype": 9,
+   "name": "PumpkinMuffin",
+   "ambiguous": false
+  },
+  {
+   "type": 2,
+   "subtype": 0,
+   "name": "Formula",
+   "ambiguous": false
+  },
+  {
+   "type": 3,
+   "subtype": 0,
+   "name": "Sword",
+   "ambiguous": true
+  },
+  {
+   "type": 3,
+   "subtype": 1,
+   "name": null,
+   "ambiguous": true
+  },
+  {
+   "type": 3,
+   "subtype": 2,
+   "name": "Mace",
+   "ambiguous": true
+  },
+  {
+   "type": 3,
+   "subtype": 3,
+   "name": "Dagger",
+   "ambiguous": true
+  },
+  {
+   "type": 3,
+   "subtype": 4,
+   "name": "Fist",
+   "ambiguous": true
+  },
+  {
+   "type": 3,
+   "subtype": 5,
+   "name": "Longsword",
+   "ambiguous": false
+  },
+  {
+   "type": 3,
+   "subtype": 6,
+   "name": null,
+   "ambiguous": true
+  },
+  {
+   "type": 3,
+   "subtype": 7,
+   "name": "Crossbow",
+   "ambiguous": true
+  },
+  {
+   "type": 3,
+   "subtype": 8,
+   "name": "Boomerang",
+   "ambiguous": true
+  },
+  {
+   "type": 3,
+   "subtype": 9,
+   "name": "Arrow",
+   "ambiguous": false
+  },
+  {
+   "type": 3,
+   "subtype": 10,
+   "name": "Staff",
+   "ambiguous": false
+  },
+  {
+   "type": 3,
+   "subtype": 11,
+   "name": "Wand",
+   "ambiguous": false
+  },
+  {
+   "type": 3,
+   "subtype": 12,
+   "name": "Bracelet",
+   "ambiguous": false
+  },
+  {
+   "type": 3,
+   "subtype": 13,
+   "name": "Shield",
+   "ambiguous": false
+  },
+  {
+   "type": 3,
+   "subtype": 14,
+   "name": "Arrows",
+   "ambiguous": true
+  },
+  {
+   "type": 3,
+   "subtype": 15,
+   "name": "Greatsword",
+   "ambiguous": false
+  },
+  {
+   "type": 3,
+   "subtype": 16,
+   "name": "Greataxe",
+   "ambiguous": false
+  },
+  {
+   "type": 3,
+   "subtype": 17,
+   "name": "Greatmace",
+   "ambiguous": false
+  },
+  {
+   "type": 3,
+   "subtype": 20,
+   "name": "Torch",
+   "ambiguous": false
+  },
+  {
+   "type": 4,
+   "subtype": 0,
+   "name": "ChestArmor",
+   "ambiguous": false
+  },
+  {
+   "type": 5,
+   "subtype": 0,
+   "name": "Gloves",
+   "ambiguous": true
+  },
+  {
+   "type": 6,
+   "subtype": 0,
+   "name": "Boots",
+   "ambiguous": true
+  },
+  {
+   "type": 7,
+   "subtype": 0,
+   "name": "ShoulderArmor",
+   "ambiguous": false
+  },
+  {
+   "type": 8,
+   "subtype": 0,
+   "name": "Amulet",
+   "ambiguous": false
+  },
+  {
+   "type": 9,
+   "subtype": 0,
+   "name": "Ring",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 0,
+   "name": "Nugget",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 1,
+   "name": null,
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 2,
+   "name": "Feather",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 3,
+   "name": "Horn",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 4,
+   "name": "Claw",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 5,
+   "name": "Fiber",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 6,
+   "name": "Cobweb",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 7,
+   "name": "Hair",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 8,
+   "name": "Crystal",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 9,
+   "name": "Yarn",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 10,
+   "name": "Cube",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 11,
+   "name": "Capsule",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 12,
+   "name": "Flask",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 13,
+   "name": null,
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 14,
+   "name": "Spirit",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 15,
+   "name": "Mushroom",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 16,
+   "name": "Pumpkin",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 17,
+   "name": "Pineapple",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 18,
+   "name": "RadishSlice",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 19,
+   "name": "ShimmerMushroom",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 20,
+   "name": "GinsengRoot",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 21,
+   "name": "OnionSlice",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 22,
+   "name": "Heartflower",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 23,
+   "name": "PricklyPear",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 24,
+   "name": "FrozenHeartflower",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 25,
+   "name": "Soulflower",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 26,
+   "name": "WaterFlask",
+   "ambiguous": false
+  },
+  {
+   "type": 11,
+   "subtype": 27,
+   "name": "SnowBerry",
+   "ambiguous": false
+  },
+  {
+   "type": 12,
+   "subtype": 0,
+   "name": "Coin",
+   "ambiguous": false
+  },
+  {
+   "type": 13,
+   "subtype": 0,
+   "name": "PlatinumCoin",
+   "ambiguous": false
+  },
+  {
+   "type": 14,
+   "subtype": 0,
+   "name": "Leftovers",
+   "ambiguous": false
+  },
+  {
+   "type": 15,
+   "subtype": 0,
+   "name": "Beak",
+   "ambiguous": false
+  },
+  {
+   "type": 16,
+   "subtype": 0,
+   "name": "Painting",
+   "ambiguous": false
+  },
+  {
+   "type": 18,
+   "subtype": 0,
+   "name": "Candle",
+   "ambiguous": false
+  },
+  {
+   "type": 18,
+   "subtype": 1,
+   "name": "Candle",
+   "ambiguous": false
+  },
+  {
+   "type": 19,
+   "subtype": 0,
+   "name": null,
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 0,
+   "name": "Bait",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 19,
+   "name": "BubbleGum",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 22,
+   "name": "VanillaCupcake",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 23,
+   "name": "ChocolateCupcake",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 25,
+   "name": "CinnamonRole",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 26,
+   "name": "Waffle",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 27,
+   "name": "Croissant",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 30,
+   "name": "Candy",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 33,
+   "name": "PumpkinMash",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 34,
+   "name": "CottonCandy",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 35,
+   "name": "Carrot",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 36,
+   "name": "BlackberryMarmelade",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 37,
+   "name": "GreenJelly",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 38,
+   "name": "PinkJelly",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 39,
+   "name": "YellowJelly",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 40,
+   "name": "BlueJelly",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 50,
+   "name": "BananaSplit",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 53,
+   "name": "Popcorn",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 55,
+   "name": "LicoriceCandy",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 56,
+   "name": "CerealBar",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 57,
+   "name": "SaltedCaramel",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 58,
+   "name": "GingerTartlet",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 59,
+   "name": "MangoJuice",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 60,
+   "name": "FruitBasket",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 61,
+   "name": "MelonIceCream",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 62,
+   "name": "BloodOrangeJuice",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 63,
+   "name": "MilkChocolateBar",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 64,
+   "name": "MintChocolateBar",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 65,
+   "name": "WhiteChocolateBar",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 66,
+   "name": "CaramelChocolateBar",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 74,
+   "name": "SugarCandy",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 75,
+   "name": "AppleRing",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 86,
+   "name": "WaterIce",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 87,
+   "name": "ChocolateDonut",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 88,
+   "name": "Pancakes",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 90,
+   "name": "StrawberryCake",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 91,
+   "name": "ChocolateCake",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 92,
+   "name": "Lollipop",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 93,
+   "name": "Softice",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 98,
+   "name": "CandiedApple",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 99,
+   "name": "DateCookie",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 102,
+   "name": "Bread",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 103,
+   "name": "Curry",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 104,
+   "name": "Lolly",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 105,
+   "name": "ChocolateCookie",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 106,
+   "name": "StrawberryCocktail",
+   "ambiguous": false
+  },
+  {
+   "type": 20,
+   "subtype": 151,
+   "name": "BiscuitRole",
+   "ambiguous": false
+  },
+  {
+   "type": 21,
+   "subtype": 0,
+   "name": "Amulet1",
+   "ambiguous": false
+  },
+  {
+   "type": 21,
+   "subtype": 1,
+   "name": "Amulet2",
+   "ambiguous": false
+  },
+  {
+   "type": 21,
+   "subtype": 2,
+   "name": "JewelCase",
+   "ambiguous": false
+  },
+  {
+   "type": 21,
+   "subtype": 3,
+   "name": null,
+   "ambiguous": false
+  },
+  {
+   "type": 21,
+   "subtype": 4,
+   "name": "Medicine",
+   "ambiguous": false
+  },
+  {
+   "type": 21,
+   "subtype": 5,
+   "name": "Antivenom",
+   "ambiguous": false
+  },
+  {
+   "type": 21,
+   "subtype": 6,
+   "name": "BandAid",
+   "ambiguous": false
+  },
+  {
+   "type": 21,
+   "subtype": 7,
+   "name": "Crutch",
+   "ambiguous": false
+  },
+  {
+   "type": 21,
+   "subtype": 8,
+   "name": "Bandage",
+   "ambiguous": false
+  },
+  {
+   "type": 21,
+   "subtype": 9,
+   "name": "Salve",
+   "ambiguous": false
+  },
+  {
+   "type": 23,
+   "subtype": 0,
+   "name": "HangGlider",
+   "ambiguous": false
+  },
+  {
+   "type": 23,
+   "subtype": 1,
+   "name": "Boat",
+   "ambiguous": false
+  },
+  {
+   "type": 24,
+   "subtype": 0,
+   "name": "Lamp",
+   "ambiguous": false
+  },
+  {
+   "type": 25,
+   "subtype": 0,
+   "name": "ManaCube",
+   "ambiguous": false
+  }
+ ],
+ "skills": [
+  {
+   "id": 0,
+   "name": "SkillPetTaming"
+  },
+  {
+   "id": 1,
+   "name": "SkillPetRiding"
+  },
+  {
+   "id": 2,
+   "name": "SkillClimbing"
+  },
+  {
+   "id": 3,
+   "name": "SkillHangGliding"
+  },
+  {
+   "id": 4,
+   "name": "SkillSwimming"
+  },
+  {
+   "id": 5,
+   "name": "SkillBoatDriving"
+  },
+  {
+   "id": 6,
+   "name": "SkillAbility1"
+  },
+  {
+   "id": 7,
+   "name": "SkillAbility2"
+  },
+  {
+   "id": 8,
+   "name": "SkillAbility3"
+  },
+  {
+   "id": 9,
+   "name": "SkillAbility4"
+  },
+  {
+   "id": 10,
+   "name": "SkillAbility5"
+  },
+  {
+   "id": 21,
+   "name": "AbilityRangerKick"
+  },
+  {
+   "id": 34,
+   "name": "AbilityHealingStream"
+  },
+  {
+   "id": 48,
+   "name": "AbilityIntercept"
+  },
+  {
+   "id": 49,
+   "name": "AbilityTeleport"
+  },
+  {
+   "id": 50,
+   "name": "AbilityRetreat"
+  },
+  {
+   "id": 54,
+   "name": "AbilitySmash"
+  },
+  {
+   "id": 79,
+   "name": "AbilitySneak"
+  },
+  {
+   "id": 86,
+   "name": "AbilityCyclone"
+  },
+  {
+   "id": 88,
+   "name": "AbilityFireExplosion"
+  },
+  {
+   "id": 96,
+   "name": "AbilityShuriken"
+  },
+  {
+   "id": 97,
+   "name": "AbilityCamouflage"
+  },
+  {
+   "id": 99,
+   "name": "AbilityAim"
+  },
+  {
+   "id": 100,
+   "name": "AbilitySwiftness"
+  },
+  {
+   "id": 101,
+   "name": "AbilityBulwark"
+  },
+  {
+   "id": 102,
+   "name": "AbilityWarFrenzy"
+  },
+  {
+   "id": 103,
+   "name": "AbilityManaShield"
+  }
+ ]
+}

@@ -1,0 +1,4420 @@
+{
+  "build": {
+    "exe_sha256": "84a7a132a84d4282338e7ea45a1940d32066d64e39cbafed8f2418d5a6dc30bf",
+    "data1_sha256": "0e482f6d628414db017d983f62843e5dbdc52c5b54fd478f6f0e06c786639b9d",
+    "canonical_cube_game_reference": "1b75b27eb3f442528281a03f16eae56a6bce47c2"
+  },
+  "editor_races": [
+    {
+      "race": "Human",
+      "race_id": 0,
+      "variants": [
+        {
+          "sex": "Male",
+          "sex_id": 0,
+          "style_id": 2,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 1246,
+              "asset_id": "0x4DE",
+              "source": "data1.db/blobs/human-head-m01.cub",
+              "loader_va": "0x4F0855",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 605,
+              "distinct_voxel_colors": 9,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1247,
+              "asset_id": "0x4DF",
+              "source": "data1.db/blobs/human-head-m02.cub",
+              "loader_va": "0x4F0899",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 605,
+              "distinct_voxel_colors": 9,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1248,
+              "asset_id": "0x4E0",
+              "source": "data1.db/blobs/human-head-m03.cub",
+              "loader_va": "0x4F08DD",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 605,
+              "distinct_voxel_colors": 9,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1249,
+              "asset_id": "0x4E1",
+              "source": "data1.db/blobs/human-head-m04.cub",
+              "loader_va": "0x4F0921",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 605,
+              "distinct_voxel_colors": 9,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 1250,
+              "asset_id": "0x4E2",
+              "source": "data1.db/blobs/human-head-m05.cub",
+              "loader_va": "0x4F0965",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 605,
+              "distinct_voxel_colors": 9,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 1251,
+              "asset_id": "0x4E3",
+              "source": "data1.db/blobs/human-head-m06.cub",
+              "loader_va": "0x4F09A9",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 605,
+              "distinct_voxel_colors": 9,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 1252,
+              "asset_id": "0x4E4",
+              "source": "data1.db/blobs/human-hair-m01.cub",
+              "loader_va": "0x4F09ED",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1094,
+              "distinct_voxel_colors": 9,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1253,
+              "asset_id": "0x4E5",
+              "source": "data1.db/blobs/human-hair-m02.cub",
+              "loader_va": "0x4F0A31",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1128,
+              "distinct_voxel_colors": 7,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1254,
+              "asset_id": "0x4E6",
+              "source": "data1.db/blobs/human-hair-m03.cub",
+              "loader_va": "0x4F0A75",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1176,
+              "distinct_voxel_colors": 7,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1255,
+              "asset_id": "0x4E7",
+              "source": "data1.db/blobs/human-hair-m04.cub",
+              "loader_va": "0x4F0AB9",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1124,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 1256,
+              "asset_id": "0x4E8",
+              "source": "data1.db/blobs/human-hair-m05.cub",
+              "loader_va": "0x4F0AFD",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1043,
+              "distinct_voxel_colors": 6,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 1257,
+              "asset_id": "0x4E9",
+              "source": "data1.db/blobs/human-hair-m06.cub",
+              "loader_va": "0x4F0B41",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1100,
+              "distinct_voxel_colors": 6,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 6,
+              "registry_id": 1258,
+              "asset_id": "0x4EA",
+              "source": "data1.db/blobs/human-hair-m07.cub",
+              "loader_va": "0x4F0B85",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 905,
+              "distinct_voxel_colors": 13,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 7,
+              "registry_id": 1259,
+              "asset_id": "0x4EB",
+              "source": "data1.db/blobs/human-hair-m08.cub",
+              "loader_va": "0x4F0BC9",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 978,
+              "distinct_voxel_colors": 12,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 8,
+              "registry_id": 1260,
+              "asset_id": "0x4EC",
+              "source": "data1.db/blobs/human-hair-m09.cub",
+              "loader_va": "0x4F0C0D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                20
+              ],
+              "occupied_voxels": 1003,
+              "distinct_voxel_colors": 9,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 9,
+              "registry_id": 1261,
+              "asset_id": "0x4ED",
+              "source": "data1.db/blobs/human-hair-m10.cub",
+              "loader_va": "0x4F0C51",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                20
+              ],
+              "occupied_voxels": 1094,
+              "distinct_voxel_colors": 7,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 10,
+              "registry_id": 1262,
+              "asset_id": "0x4EE",
+              "source": "data1.db/blobs/human-hair-m11.cub",
+              "loader_va": "0x4F0C95",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 923,
+              "distinct_voxel_colors": 6,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 11,
+              "registry_id": 1263,
+              "asset_id": "0x4EF",
+              "source": "data1.db/blobs/human-hair-m12.cub",
+              "loader_va": "0x4F0CD9",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 939,
+              "distinct_voxel_colors": 6,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 12,
+              "registry_id": 1264,
+              "asset_id": "0x4F0",
+              "source": "data1.db/blobs/human-hair-m13.cub",
+              "loader_va": "0x4F0D1D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 1168,
+              "distinct_voxel_colors": 6,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 13,
+              "registry_id": 1265,
+              "asset_id": "0x4F1",
+              "source": "data1.db/blobs/human-hair-m14.cub",
+              "loader_va": "0x4F0D61",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 1014,
+              "distinct_voxel_colors": 6,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 14,
+              "registry_id": 1266,
+              "asset_id": "0x4F2",
+              "source": "data1.db/blobs/human-hair-m15.cub",
+              "loader_va": "0x4F0DA5",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 956,
+              "distinct_voxel_colors": 6,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.96,
+              0.96,
+              2.16
+            ],
+            "flags": 0,
+            "scale_head": 1.01,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 430,
+                "asset_id": "0x1AE",
+                "source": "data1.db/blobs/hand2.cub",
+                "loader_va": "0x4EE737",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 2
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 1,
+                "asset_id": "0x001",
+                "source": "data1.db/blobs/body4.cub",
+                "loader_va": "0x4EE5A5",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 560,
+                "distinct_voxel_colors": 23
+              }
+            },
+            "tail_registry_id": -1
+          }
+        },
+        {
+          "sex": "Female",
+          "sex_id": 1,
+          "style_id": 3,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 1267,
+              "asset_id": "0x4F3",
+              "source": "data1.db/blobs/human-head-f01.cub",
+              "loader_va": "0x4F0DE9",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 607,
+              "distinct_voxel_colors": 12,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1268,
+              "asset_id": "0x4F4",
+              "source": "data1.db/blobs/human-head-f02.cub",
+              "loader_va": "0x4F0E2D",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 607,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1269,
+              "asset_id": "0x4F5",
+              "source": "data1.db/blobs/human-head-f03.cub",
+              "loader_va": "0x4F0E71",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 607,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1270,
+              "asset_id": "0x4F6",
+              "source": "data1.db/blobs/human-head-f04.cub",
+              "loader_va": "0x4F0EB5",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 607,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 1271,
+              "asset_id": "0x4F7",
+              "source": "data1.db/blobs/human-head-f05.cub",
+              "loader_va": "0x4F0EF9",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 607,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 1272,
+              "asset_id": "0x4F8",
+              "source": "data1.db/blobs/human-head-f06.cub",
+              "loader_va": "0x4F0F3D",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 607,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 1273,
+              "asset_id": "0x4F9",
+              "source": "data1.db/blobs/human-hair-f01.cub",
+              "loader_va": "0x4F0F81",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                22,
+                16
+              ],
+              "occupied_voxels": 1177,
+              "distinct_voxel_colors": 7,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1274,
+              "asset_id": "0x4FA",
+              "source": "data1.db/blobs/human-hair-f02.cub",
+              "loader_va": "0x4F0FC5",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1096,
+              "distinct_voxel_colors": 6,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1275,
+              "asset_id": "0x4FB",
+              "source": "data1.db/blobs/human-hair-f03.cub",
+              "loader_va": "0x4F1009",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                22,
+                16
+              ],
+              "occupied_voxels": 1021,
+              "distinct_voxel_colors": 12,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1276,
+              "asset_id": "0x4FC",
+              "source": "data1.db/blobs/human-hair-f04.cub",
+              "loader_va": "0x4F104D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                22,
+                16
+              ],
+              "occupied_voxels": 1031,
+              "distinct_voxel_colors": 13,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 1277,
+              "asset_id": "0x4FD",
+              "source": "data1.db/blobs/human-hair-f05.cub",
+              "loader_va": "0x4F1091",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                22,
+                16
+              ],
+              "occupied_voxels": 992,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 1278,
+              "asset_id": "0x4FE",
+              "source": "data1.db/blobs/human-hair-f06.cub",
+              "loader_va": "0x4F10D5",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                22,
+                16
+              ],
+              "occupied_voxels": 989,
+              "distinct_voxel_colors": 7,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 6,
+              "registry_id": 1279,
+              "asset_id": "0x4FF",
+              "source": "data1.db/blobs/human-hair-f07.cub",
+              "loader_va": "0x4F1119",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                22,
+                20
+              ],
+              "occupied_voxels": 1154,
+              "distinct_voxel_colors": 8,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.96,
+              0.96,
+              2.16
+            ],
+            "flags": 0,
+            "scale_head": 1.01,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 430,
+                "asset_id": "0x1AE",
+                "source": "data1.db/blobs/hand2.cub",
+                "loader_va": "0x4EE737",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 2
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 1,
+                "asset_id": "0x001",
+                "source": "data1.db/blobs/body4.cub",
+                "loader_va": "0x4EE5A5",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 560,
+                "distinct_voxel_colors": 23
+              }
+            },
+            "tail_registry_id": -1
+          }
+        }
+      ]
+    },
+    {
+      "race": "Elf",
+      "race_id": 1,
+      "variants": [
+        {
+          "sex": "Male",
+          "sex_id": 0,
+          "style_id": 0,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 1236,
+              "asset_id": "0x4D4",
+              "source": "data1.db/blobs/elf-head-m01.cub",
+              "loader_va": "0x4F05AD",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 614,
+              "distinct_voxel_colors": 15,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1237,
+              "asset_id": "0x4D5",
+              "source": "data1.db/blobs/elf-head-m02.cub",
+              "loader_va": "0x4F05F1",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 614,
+              "distinct_voxel_colors": 15,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1238,
+              "asset_id": "0x4D6",
+              "source": "data1.db/blobs/elf-head-m03.cub",
+              "loader_va": "0x4F0635",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 614,
+              "distinct_voxel_colors": 15,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1239,
+              "asset_id": "0x4D7",
+              "source": "data1.db/blobs/elf-head-m04.cub",
+              "loader_va": "0x4F0679",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 614,
+              "distinct_voxel_colors": 15,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 1280,
+              "asset_id": "0x500",
+              "source": "data1.db/blobs/elf-hair-m01.cub",
+              "loader_va": "0x4F115D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1083,
+              "distinct_voxel_colors": 12,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1281,
+              "asset_id": "0x501",
+              "source": "data1.db/blobs/elf-hair-m02.cub",
+              "loader_va": "0x4F11A1",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1102,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1282,
+              "asset_id": "0x502",
+              "source": "data1.db/blobs/elf-hair-m03.cub",
+              "loader_va": "0x4F11E5",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1047,
+              "distinct_voxel_colors": 7,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1283,
+              "asset_id": "0x503",
+              "source": "data1.db/blobs/elf-hair-m04.cub",
+              "loader_va": "0x4F1229",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1076,
+              "distinct_voxel_colors": 7,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 1284,
+              "asset_id": "0x504",
+              "source": "data1.db/blobs/elf-hair-m05.cub",
+              "loader_va": "0x4F126D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1063,
+              "distinct_voxel_colors": 6,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 1285,
+              "asset_id": "0x505",
+              "source": "data1.db/blobs/elf-hair-m06.cub",
+              "loader_va": "0x4F12B1",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1109,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 6,
+              "registry_id": 1286,
+              "asset_id": "0x506",
+              "source": "data1.db/blobs/elf-hair-m07.cub",
+              "loader_va": "0x4F12F5",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1193,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 7,
+              "registry_id": 1287,
+              "asset_id": "0x507",
+              "source": "data1.db/blobs/elf-hair-m08.cub",
+              "loader_va": "0x4F1339",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1123,
+              "distinct_voxel_colors": 7,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 8,
+              "registry_id": 1288,
+              "asset_id": "0x508",
+              "source": "data1.db/blobs/elf-hair-m09.cub",
+              "loader_va": "0x4F137D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1177,
+              "distinct_voxel_colors": 14,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 9,
+              "registry_id": 1289,
+              "asset_id": "0x509",
+              "source": "data1.db/blobs/elf-hair-m10.cub",
+              "loader_va": "0x4F13C1",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1222,
+              "distinct_voxel_colors": 13,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.96,
+              0.96,
+              2.16
+            ],
+            "flags": 0,
+            "scale_head": 1.01,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 430,
+                "asset_id": "0x1AE",
+                "source": "data1.db/blobs/hand2.cub",
+                "loader_va": "0x4EE737",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 2
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 1,
+                "asset_id": "0x001",
+                "source": "data1.db/blobs/body4.cub",
+                "loader_va": "0x4EE5A5",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 560,
+                "distinct_voxel_colors": 23
+              }
+            },
+            "tail_registry_id": -1
+          }
+        },
+        {
+          "sex": "Female",
+          "sex_id": 1,
+          "style_id": 1,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 1240,
+              "asset_id": "0x4D8",
+              "source": "data1.db/blobs/elf-head-f01.cub",
+              "loader_va": "0x4F06BD",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 616,
+              "distinct_voxel_colors": 15,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1241,
+              "asset_id": "0x4D9",
+              "source": "data1.db/blobs/elf-head-f02.cub",
+              "loader_va": "0x4F0701",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 616,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1242,
+              "asset_id": "0x4DA",
+              "source": "data1.db/blobs/elf-head-f03.cub",
+              "loader_va": "0x4F0745",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 616,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1243,
+              "asset_id": "0x4DB",
+              "source": "data1.db/blobs/elf-head-f04.cub",
+              "loader_va": "0x4F0789",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 616,
+              "distinct_voxel_colors": 16,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 1244,
+              "asset_id": "0x4DC",
+              "source": "data1.db/blobs/elf-head-f05.cub",
+              "loader_va": "0x4F07CD",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 616,
+              "distinct_voxel_colors": 15,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 1245,
+              "asset_id": "0x4DD",
+              "source": "data1.db/blobs/elf-head-f06.cub",
+              "loader_va": "0x4F0811",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 616,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 1290,
+              "asset_id": "0x50A",
+              "source": "data1.db/blobs/elf-hair-f01.cub",
+              "loader_va": "0x4F1405",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                16
+              ],
+              "occupied_voxels": 1177,
+              "distinct_voxel_colors": 9,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1291,
+              "asset_id": "0x50B",
+              "source": "data1.db/blobs/elf-hair-f02.cub",
+              "loader_va": "0x4F1449",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                20
+              ],
+              "occupied_voxels": 1157,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1292,
+              "asset_id": "0x50C",
+              "source": "data1.db/blobs/elf-hair-f03.cub",
+              "loader_va": "0x4F148D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                20
+              ],
+              "occupied_voxels": 1294,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1293,
+              "asset_id": "0x50D",
+              "source": "data1.db/blobs/elf-hair-f04.cub",
+              "loader_va": "0x4F14D1",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                20
+              ],
+              "occupied_voxels": 1252,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 1294,
+              "asset_id": "0x50E",
+              "source": "data1.db/blobs/elf-hair-f05.cub",
+              "loader_va": "0x4F1515",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                20
+              ],
+              "occupied_voxels": 1241,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 1295,
+              "asset_id": "0x50F",
+              "source": "data1.db/blobs/elf-hair-f06.cub",
+              "loader_va": "0x4F1559",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                18,
+                20
+              ],
+              "occupied_voxels": 1185,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 6,
+              "registry_id": 1296,
+              "asset_id": "0x510",
+              "source": "data1.db/blobs/elf-hair-f07.cub",
+              "loader_va": "0x4F159D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                18,
+                20
+              ],
+              "occupied_voxels": 1292,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 7,
+              "registry_id": 1297,
+              "asset_id": "0x511",
+              "source": "data1.db/blobs/elf-hair-f08.cub",
+              "loader_va": "0x4F15E1",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                24
+              ],
+              "occupied_voxels": 1240,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 8,
+              "registry_id": 1298,
+              "asset_id": "0x512",
+              "source": "data1.db/blobs/elf-hair-f09.cub",
+              "loader_va": "0x4F1625",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                22,
+                16
+              ],
+              "occupied_voxels": 1246,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 9,
+              "registry_id": 1299,
+              "asset_id": "0x513",
+              "source": "data1.db/blobs/elf-hair-f10.cub",
+              "loader_va": "0x4F1669",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 1116,
+              "distinct_voxel_colors": 12,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.96,
+              0.96,
+              2.16
+            ],
+            "flags": 0,
+            "scale_head": 1.01,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 430,
+                "asset_id": "0x1AE",
+                "source": "data1.db/blobs/hand2.cub",
+                "loader_va": "0x4EE737",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 2
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 0,
+                "asset_id": "0x000",
+                "source": "data1.db/blobs/body2.cub",
+                "loader_va": "0x4EE56C",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 560,
+                "distinct_voxel_colors": 21
+              }
+            },
+            "tail_registry_id": -1
+          }
+        }
+      ]
+    },
+    {
+      "race": "Dwarf",
+      "race_id": 2,
+      "variants": [
+        {
+          "sex": "Male",
+          "sex_id": 0,
+          "style_id": 9,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 282,
+              "asset_id": "0x11A",
+              "source": "data1.db/blobs/dwarf-head-m01.cub",
+              "loader_va": "0x4F2F02",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                22
+              ],
+              "occupied_voxels": 824,
+              "distinct_voxel_colors": 19,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 283,
+              "asset_id": "0x11B",
+              "source": "data1.db/blobs/dwarf-head-m02.cub",
+              "loader_va": "0x4F2F4C",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                22
+              ],
+              "occupied_voxels": 835,
+              "distinct_voxel_colors": 21,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 284,
+              "asset_id": "0x11C",
+              "source": "data1.db/blobs/dwarf-head-m03.cub",
+              "loader_va": "0x4F2F96",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                22
+              ],
+              "occupied_voxels": 817,
+              "distinct_voxel_colors": 22,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 285,
+              "asset_id": "0x11D",
+              "source": "data1.db/blobs/dwarf-head-m04.cub",
+              "loader_va": "0x4F2FE0",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                22
+              ],
+              "occupied_voxels": 827,
+              "distinct_voxel_colors": 26,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 286,
+              "asset_id": "0x11E",
+              "source": "data1.db/blobs/dwarf-head-m05.cub",
+              "loader_va": "0x4F302A",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                22
+              ],
+              "occupied_voxels": 821,
+              "distinct_voxel_colors": 25,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 287,
+              "asset_id": "0x11F",
+              "source": "data1.db/blobs/dwarf-hair-m01.cub",
+              "loader_va": "0x4F3074",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                22
+              ],
+              "occupied_voxels": 865,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 288,
+              "asset_id": "0x120",
+              "source": "data1.db/blobs/dwarf-hair-m02.cub",
+              "loader_va": "0x4F30BE",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                22
+              ],
+              "occupied_voxels": 1183,
+              "distinct_voxel_colors": 20,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 289,
+              "asset_id": "0x121",
+              "source": "data1.db/blobs/dwarf-hair-m03.cub",
+              "loader_va": "0x4F3108",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                22
+              ],
+              "occupied_voxels": 1229,
+              "distinct_voxel_colors": 16,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.8,
+              0.8,
+              1.8
+            ],
+            "flags": 0,
+            "scale_head": 0.9,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 430,
+                "asset_id": "0x1AE",
+                "source": "data1.db/blobs/hand2.cub",
+                "loader_va": "0x4EE737",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 2
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 300,
+                "asset_id": "0x12C",
+                "source": "data1.db/blobs/dwarf-body.cub",
+                "loader_va": "0x4F3436",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 616,
+                "distinct_voxel_colors": 10
+              }
+            },
+            "tail_registry_id": -1
+          }
+        },
+        {
+          "sex": "Female",
+          "sex_id": 1,
+          "style_id": 10,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 290,
+              "asset_id": "0x122",
+              "source": "data1.db/blobs/dwarf-head-f01.cub",
+              "loader_va": "0x4F3152",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                22
+              ],
+              "occupied_voxels": 875,
+              "distinct_voxel_colors": 28,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 291,
+              "asset_id": "0x123",
+              "source": "data1.db/blobs/dwarf-head-f02.cub",
+              "loader_va": "0x4F319C",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                22
+              ],
+              "occupied_voxels": 865,
+              "distinct_voxel_colors": 27,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 292,
+              "asset_id": "0x124",
+              "source": "data1.db/blobs/dwarf-head-f03.cub",
+              "loader_va": "0x4F31E6",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                22
+              ],
+              "occupied_voxels": 875,
+              "distinct_voxel_colors": 28,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 293,
+              "asset_id": "0x125",
+              "source": "data1.db/blobs/dwarf-head-f04.cub",
+              "loader_va": "0x4F3230",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                22
+              ],
+              "occupied_voxels": 865,
+              "distinct_voxel_colors": 28,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 294,
+              "asset_id": "0x126",
+              "source": "data1.db/blobs/dwarf-head-f05.cub",
+              "loader_va": "0x4F327A",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                22
+              ],
+              "occupied_voxels": 865,
+              "distinct_voxel_colors": 30,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 295,
+              "asset_id": "0x127",
+              "source": "data1.db/blobs/dwarf-hair-f01.cub",
+              "loader_va": "0x4F32C4",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                24
+              ],
+              "occupied_voxels": 1264,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 296,
+              "asset_id": "0x128",
+              "source": "data1.db/blobs/dwarf-hair-f02.cub",
+              "loader_va": "0x4F330E",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                24
+              ],
+              "occupied_voxels": 1340,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 297,
+              "asset_id": "0x129",
+              "source": "data1.db/blobs/dwarf-hair-f03.cub",
+              "loader_va": "0x4F3358",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                26
+              ],
+              "occupied_voxels": 1130,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 298,
+              "asset_id": "0x12A",
+              "source": "data1.db/blobs/dwarf-hair-f04.cub",
+              "loader_va": "0x4F33A2",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                26
+              ],
+              "occupied_voxels": 1151,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 299,
+              "asset_id": "0x12B",
+              "source": "data1.db/blobs/dwarf-hair-f05.cub",
+              "loader_va": "0x4F33EC",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                26
+              ],
+              "occupied_voxels": 1216,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.8,
+              0.8,
+              1.8
+            ],
+            "flags": 0,
+            "scale_head": 0.9,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 430,
+                "asset_id": "0x1AE",
+                "source": "data1.db/blobs/hand2.cub",
+                "loader_va": "0x4EE737",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 2
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 301,
+                "asset_id": "0x12D",
+                "source": "data1.db/blobs/dwarf-body-female.cub",
+                "loader_va": "0x4F3480",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 568,
+                "distinct_voxel_colors": 12
+              }
+            },
+            "tail_registry_id": -1
+          }
+        }
+      ]
+    },
+    {
+      "race": "Orc",
+      "race_id": 3,
+      "variants": [
+        {
+          "sex": "Male",
+          "sex_id": 0,
+          "style_id": 11,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 1300,
+              "asset_id": "0x514",
+              "source": "data1.db/blobs/orc-head.cub",
+              "loader_va": "0x4F34CA",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 925,
+              "distinct_voxel_colors": 29,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1301,
+              "asset_id": "0x515",
+              "source": "data1.db/blobs/orc-head-m02.cub",
+              "loader_va": "0x4F1BD9",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 924,
+              "distinct_voxel_colors": 29,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1302,
+              "asset_id": "0x516",
+              "source": "data1.db/blobs/orc-head-m03.cub",
+              "loader_va": "0x4F1C1D",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 928,
+              "distinct_voxel_colors": 29,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1303,
+              "asset_id": "0x517",
+              "source": "data1.db/blobs/orc-head-m04.cub",
+              "loader_va": "0x4F1C61",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 924,
+              "distinct_voxel_colors": 30,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 1304,
+              "asset_id": "0x518",
+              "source": "data1.db/blobs/orc-head-m05.cub",
+              "loader_va": "0x4F1CA5",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 913,
+              "distinct_voxel_colors": 29,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 1310,
+              "asset_id": "0x51E",
+              "source": "data1.db/blobs/orc-hair-m01.cub",
+              "loader_va": "0x4F1CE9",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                20
+              ],
+              "occupied_voxels": 948,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1311,
+              "asset_id": "0x51F",
+              "source": "data1.db/blobs/orc-hair-m02.cub",
+              "loader_va": "0x4F1D2D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                18
+              ],
+              "occupied_voxels": 1137,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1312,
+              "asset_id": "0x520",
+              "source": "data1.db/blobs/orc-hair-m03.cub",
+              "loader_va": "0x4F1D71",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                20
+              ],
+              "occupied_voxels": 984,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1313,
+              "asset_id": "0x521",
+              "source": "data1.db/blobs/orc-hair-m04.cub",
+              "loader_va": "0x4F1DB5",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                20
+              ],
+              "occupied_voxels": 1124,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 1314,
+              "asset_id": "0x522",
+              "source": "data1.db/blobs/orc-hair-m05.cub",
+              "loader_va": "0x4F1DF9",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                18
+              ],
+              "occupied_voxels": 963,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 1315,
+              "asset_id": "0x523",
+              "source": "data1.db/blobs/orc-hair-m06.cub",
+              "loader_va": "0x4F1E3D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                18
+              ],
+              "occupied_voxels": 969,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 6,
+              "registry_id": 1316,
+              "asset_id": "0x524",
+              "source": "data1.db/blobs/orc-hair-m07.cub",
+              "loader_va": "0x4F1E81",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                18
+              ],
+              "occupied_voxels": 959,
+              "distinct_voxel_colors": 10,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 7,
+              "registry_id": 1317,
+              "asset_id": "0x525",
+              "source": "data1.db/blobs/orc-hair-m08.cub",
+              "loader_va": "0x4F1EC5",
+              "loader_flag": 0,
+              "asset_status": "MISSING_FROM_VERIFIED_DB"
+            },
+            {
+              "option_id": 8,
+              "registry_id": 1318,
+              "asset_id": "0x526",
+              "source": "data1.db/blobs/orc-hair-m09.cub",
+              "loader_va": "0x4F1F09",
+              "loader_flag": 0,
+              "asset_status": "MISSING_FROM_VERIFIED_DB"
+            },
+            {
+              "option_id": 9,
+              "registry_id": 1319,
+              "asset_id": "0x527",
+              "source": "data1.db/blobs/orc-hair-m10.cub",
+              "loader_va": "0x4F1F4D",
+              "loader_flag": 0,
+              "asset_status": "MISSING_FROM_VERIFIED_DB"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              1.04,
+              1.04,
+              2.34
+            ],
+            "flags": 0,
+            "scale_head": 0.9,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 302,
+                "asset_id": "0x12E",
+                "source": "data1.db/blobs/orc-hand.cub",
+                "loader_va": "0x4F3514",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 4
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 0,
+                "asset_id": "0x000",
+                "source": "data1.db/blobs/body2.cub",
+                "loader_va": "0x4EE56C",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 560,
+                "distinct_voxel_colors": 21
+              }
+            },
+            "tail_registry_id": -1
+          }
+        },
+        {
+          "sex": "Female",
+          "sex_id": 1,
+          "style_id": 12,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 1305,
+              "asset_id": "0x519",
+              "source": "data1.db/blobs/orc-head-f01.cub",
+              "loader_va": "0x4F355E",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 887,
+              "distinct_voxel_colors": 25,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1306,
+              "asset_id": "0x51A",
+              "source": "data1.db/blobs/orc-head-f02.cub",
+              "loader_va": "0x4F35A8",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 887,
+              "distinct_voxel_colors": 27,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1307,
+              "asset_id": "0x51B",
+              "source": "data1.db/blobs/orc-head-f03.cub",
+              "loader_va": "0x4F35F2",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 867,
+              "distinct_voxel_colors": 24,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1308,
+              "asset_id": "0x51C",
+              "source": "data1.db/blobs/orc-head-f04.cub",
+              "loader_va": "0x4F363C",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 871,
+              "distinct_voxel_colors": 25,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 1309,
+              "asset_id": "0x51D",
+              "source": "data1.db/blobs/orc-head-f05.cub",
+              "loader_va": "0x4F3686",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 871,
+              "distinct_voxel_colors": 28,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 1320,
+              "asset_id": "0x528",
+              "source": "data1.db/blobs/orc-hair-f01.cub",
+              "loader_va": "0x4F1F91",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 1143,
+              "distinct_voxel_colors": 13,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1321,
+              "asset_id": "0x529",
+              "source": "data1.db/blobs/orc-hair-f02.cub",
+              "loader_va": "0x4F1FD5",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 1155,
+              "distinct_voxel_colors": 13,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1322,
+              "asset_id": "0x52A",
+              "source": "data1.db/blobs/orc-hair-f03.cub",
+              "loader_va": "0x4F2019",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 993,
+              "distinct_voxel_colors": 13,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1323,
+              "asset_id": "0x52B",
+              "source": "data1.db/blobs/orc-hair-f04.cub",
+              "loader_va": "0x4F205D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 1037,
+              "distinct_voxel_colors": 14,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              1.04,
+              1.04,
+              2.34
+            ],
+            "flags": 0,
+            "scale_head": 0.8,
+            "scale_body": 0.95,
+            "offset_head": [
+              0.0,
+              1.5,
+              4.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 302,
+                "asset_id": "0x12E",
+                "source": "data1.db/blobs/orc-hand.cub",
+                "loader_va": "0x4F3514",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 4
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 0,
+                "asset_id": "0x000",
+                "source": "data1.db/blobs/body2.cub",
+                "loader_va": "0x4EE56C",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 560,
+                "distinct_voxel_colors": 21
+              }
+            },
+            "tail_registry_id": -1
+          }
+        }
+      ]
+    },
+    {
+      "race": "Goblin",
+      "race_id": 4,
+      "variants": [
+        {
+          "sex": "Male",
+          "sex_id": 0,
+          "style_id": 4,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 75,
+              "asset_id": "0x04B",
+              "source": "data1.db/blobs/goblin-head-m01.cub",
+              "loader_va": "0x4EFFD3",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 947,
+              "distinct_voxel_colors": 31,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 76,
+              "asset_id": "0x04C",
+              "source": "data1.db/blobs/goblin-head-m02.cub",
+              "loader_va": "0x4F0014",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 958,
+              "distinct_voxel_colors": 33,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 77,
+              "asset_id": "0x04D",
+              "source": "data1.db/blobs/goblin-head-m03.cub",
+              "loader_va": "0x4F0055",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 959,
+              "distinct_voxel_colors": 34,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 78,
+              "asset_id": "0x04E",
+              "source": "data1.db/blobs/goblin-head-m04.cub",
+              "loader_va": "0x4F0096",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 957,
+              "distinct_voxel_colors": 38,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 79,
+              "asset_id": "0x04F",
+              "source": "data1.db/blobs/goblin-head-m05.cub",
+              "loader_va": "0x4F00D7",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 959,
+              "distinct_voxel_colors": 43,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 80,
+              "asset_id": "0x050",
+              "source": "data1.db/blobs/goblin-hair-m01.cub",
+              "loader_va": "0x4F0118",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 947,
+              "distinct_voxel_colors": 16,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 81,
+              "asset_id": "0x051",
+              "source": "data1.db/blobs/goblin-hair-m02.cub",
+              "loader_va": "0x4F0159",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 971,
+              "distinct_voxel_colors": 16,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 82,
+              "asset_id": "0x052",
+              "source": "data1.db/blobs/goblin-hair-m03.cub",
+              "loader_va": "0x4F019A",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 1089,
+              "distinct_voxel_colors": 16,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 83,
+              "asset_id": "0x053",
+              "source": "data1.db/blobs/goblin-hair-m04.cub",
+              "loader_va": "0x4F01DB",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 981,
+              "distinct_voxel_colors": 16,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 84,
+              "asset_id": "0x054",
+              "source": "data1.db/blobs/goblin-hair-m05.cub",
+              "loader_va": "0x4F021C",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 1118,
+              "distinct_voxel_colors": 16,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 85,
+              "asset_id": "0x055",
+              "source": "data1.db/blobs/goblin-hair-m06.cub",
+              "loader_va": "0x4F025D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 1081,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.8,
+              0.8,
+              1.8
+            ],
+            "flags": 0,
+            "scale_head": 1.01,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 97,
+                "asset_id": "0x061",
+                "source": "data1.db/blobs/goblin-hand.cub",
+                "loader_va": "0x4F0569",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 3
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 0,
+                "asset_id": "0x000",
+                "source": "data1.db/blobs/body2.cub",
+                "loader_va": "0x4EE56C",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 560,
+                "distinct_voxel_colors": 21
+              }
+            },
+            "tail_registry_id": -1
+          }
+        },
+        {
+          "sex": "Female",
+          "sex_id": 1,
+          "style_id": 5,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 86,
+              "asset_id": "0x056",
+              "source": "data1.db/blobs/goblin-head-f01.cub",
+              "loader_va": "0x4F029E",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 934,
+              "distinct_voxel_colors": 27,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 87,
+              "asset_id": "0x057",
+              "source": "data1.db/blobs/goblin-head-f02.cub",
+              "loader_va": "0x4F02DF",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 951,
+              "distinct_voxel_colors": 32,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 88,
+              "asset_id": "0x058",
+              "source": "data1.db/blobs/goblin-head-f03.cub",
+              "loader_va": "0x4F0320",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 965,
+              "distinct_voxel_colors": 37,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 89,
+              "asset_id": "0x059",
+              "source": "data1.db/blobs/goblin-head-f04.cub",
+              "loader_va": "0x4F0361",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 967,
+              "distinct_voxel_colors": 41,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 90,
+              "asset_id": "0x05A",
+              "source": "data1.db/blobs/goblin-head-f05.cub",
+              "loader_va": "0x4F03A2",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 947,
+              "distinct_voxel_colors": 41,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 91,
+              "asset_id": "0x05B",
+              "source": "data1.db/blobs/goblin-hair-f01.cub",
+              "loader_va": "0x4F03E3",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 1332,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 92,
+              "asset_id": "0x05C",
+              "source": "data1.db/blobs/goblin-hair-f02.cub",
+              "loader_va": "0x4F0424",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 1353,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 93,
+              "asset_id": "0x05D",
+              "source": "data1.db/blobs/goblin-hair-f03.cub",
+              "loader_va": "0x4F0465",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 1411,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 94,
+              "asset_id": "0x05E",
+              "source": "data1.db/blobs/goblin-hair-f04.cub",
+              "loader_va": "0x4F04A6",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 1012,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 95,
+              "asset_id": "0x05F",
+              "source": "data1.db/blobs/goblin-hair-f05.cub",
+              "loader_va": "0x4F04E7",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 1179,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 96,
+              "asset_id": "0x060",
+              "source": "data1.db/blobs/goblin-hair-f06.cub",
+              "loader_va": "0x4F0528",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                16,
+                18
+              ],
+              "occupied_voxels": 932,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.8,
+              0.8,
+              1.8
+            ],
+            "flags": 0,
+            "scale_head": 1.01,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 97,
+                "asset_id": "0x061",
+                "source": "data1.db/blobs/goblin-hand.cub",
+                "loader_va": "0x4F0569",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 3
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 0,
+                "asset_id": "0x000",
+                "source": "data1.db/blobs/body2.cub",
+                "loader_va": "0x4EE56C",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 560,
+                "distinct_voxel_colors": 21
+              }
+            },
+            "tail_registry_id": -1
+          }
+        }
+      ]
+    },
+    {
+      "race": "Lizard",
+      "race_id": 5,
+      "variants": [
+        {
+          "sex": "Male",
+          "sex_id": 0,
+          "style_id": 7,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 98,
+              "asset_id": "0x062",
+              "source": "data1.db/blobs/lizard-head-m01.cub",
+              "loader_va": "0x4F2A8F",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 820,
+              "distinct_voxel_colors": 24,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 99,
+              "asset_id": "0x063",
+              "source": "data1.db/blobs/lizard-head-m02.cub",
+              "loader_va": "0x4F2AD6",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 917,
+              "distinct_voxel_colors": 27,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 100,
+              "asset_id": "0x064",
+              "source": "data1.db/blobs/lizard-hair-m01.cub",
+              "loader_va": "0x4F2B1D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 862,
+              "distinct_voxel_colors": 19,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 101,
+              "asset_id": "0x065",
+              "source": "data1.db/blobs/lizard-hair-m02.cub",
+              "loader_va": "0x4F2B64",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 922,
+              "distinct_voxel_colors": 19,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 102,
+              "asset_id": "0x066",
+              "source": "data1.db/blobs/lizard-hair-m03.cub",
+              "loader_va": "0x4F2BAB",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 880,
+              "distinct_voxel_colors": 19,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 103,
+              "asset_id": "0x067",
+              "source": "data1.db/blobs/lizard-hair-m04.cub",
+              "loader_va": "0x4F2BF2",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                16,
+                20,
+                18
+              ],
+              "occupied_voxels": 838,
+              "distinct_voxel_colors": 19,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 104,
+              "asset_id": "0x068",
+              "source": "data1.db/blobs/lizard-hair-m05.cub",
+              "loader_va": "0x4F2C39",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 866,
+              "distinct_voxel_colors": 19,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 105,
+              "asset_id": "0x069",
+              "source": "data1.db/blobs/lizard-hair-m06.cub",
+              "loader_va": "0x4F2C80",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                16,
+                20,
+                18
+              ],
+              "occupied_voxels": 877,
+              "distinct_voxel_colors": 21,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.96,
+              0.96,
+              2.16
+            ],
+            "flags": 0,
+            "scale_head": 1.01,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 111,
+                "asset_id": "0x06F",
+                "source": "data1.db/blobs/lizard-hand.cub",
+                "loader_va": "0x4F2E2A",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 4
+              },
+              "foot": {
+                "registry_id": 113,
+                "asset_id": "0x071",
+                "source": "data1.db/blobs/lizard-foot.cub",
+                "loader_va": "0x4F2EB8",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 97,
+                "distinct_voxel_colors": 4
+              },
+              "body": {
+                "registry_id": 112,
+                "asset_id": "0x070",
+                "source": "data1.db/blobs/lizard-body.cub",
+                "loader_va": "0x4F2E71",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  14,
+                  10
+                ],
+                "occupied_voxels": 656,
+                "distinct_voxel_colors": 13
+              }
+            },
+            "tail_registry_id": -1
+          }
+        },
+        {
+          "sex": "Female",
+          "sex_id": 1,
+          "style_id": 8,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 106,
+              "asset_id": "0x06A",
+              "source": "data1.db/blobs/lizard-head-f01.cub",
+              "loader_va": "0x4F2CC7",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 808,
+              "distinct_voxel_colors": 30,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 107,
+              "asset_id": "0x06B",
+              "source": "data1.db/blobs/lizard-head-f02.cub",
+              "loader_va": "0x4F2D0E",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 810,
+              "distinct_voxel_colors": 29,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 108,
+              "asset_id": "0x06C",
+              "source": "data1.db/blobs/lizard-head-f03.cub",
+              "loader_va": "0x4F2D55",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 808,
+              "distinct_voxel_colors": 32,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 109,
+              "asset_id": "0x06D",
+              "source": "data1.db/blobs/lizard-head-f04.cub",
+              "loader_va": "0x4F2D9C",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 803,
+              "distinct_voxel_colors": 25,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 110,
+              "asset_id": "0x06E",
+              "source": "data1.db/blobs/lizard-head-f05.cub",
+              "loader_va": "0x4F2DE3",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 803,
+              "distinct_voxel_colors": 24,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 100,
+              "asset_id": "0x064",
+              "source": "data1.db/blobs/lizard-hair-m01.cub",
+              "loader_va": "0x4F2B1D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 862,
+              "distinct_voxel_colors": 19,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 101,
+              "asset_id": "0x065",
+              "source": "data1.db/blobs/lizard-hair-m02.cub",
+              "loader_va": "0x4F2B64",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 922,
+              "distinct_voxel_colors": 19,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 102,
+              "asset_id": "0x066",
+              "source": "data1.db/blobs/lizard-hair-m03.cub",
+              "loader_va": "0x4F2BAB",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 880,
+              "distinct_voxel_colors": 19,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 103,
+              "asset_id": "0x067",
+              "source": "data1.db/blobs/lizard-hair-m04.cub",
+              "loader_va": "0x4F2BF2",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                16,
+                20,
+                18
+              ],
+              "occupied_voxels": 838,
+              "distinct_voxel_colors": 19,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 104,
+              "asset_id": "0x068",
+              "source": "data1.db/blobs/lizard-hair-m05.cub",
+              "loader_va": "0x4F2C39",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                10,
+                20,
+                18
+              ],
+              "occupied_voxels": 866,
+              "distinct_voxel_colors": 19,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 105,
+              "asset_id": "0x069",
+              "source": "data1.db/blobs/lizard-hair-m06.cub",
+              "loader_va": "0x4F2C80",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                16,
+                20,
+                18
+              ],
+              "occupied_voxels": 877,
+              "distinct_voxel_colors": 21,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.96,
+              0.96,
+              2.16
+            ],
+            "flags": 0,
+            "scale_head": 1.01,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 111,
+                "asset_id": "0x06F",
+                "source": "data1.db/blobs/lizard-hand.cub",
+                "loader_va": "0x4F2E2A",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 4
+              },
+              "foot": {
+                "registry_id": 113,
+                "asset_id": "0x071",
+                "source": "data1.db/blobs/lizard-foot.cub",
+                "loader_va": "0x4F2EB8",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 97,
+                "distinct_voxel_colors": 4
+              },
+              "body": {
+                "registry_id": 112,
+                "asset_id": "0x070",
+                "source": "data1.db/blobs/lizard-body.cub",
+                "loader_va": "0x4F2E71",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  14,
+                  10
+                ],
+                "occupied_voxels": 656,
+                "distinct_voxel_colors": 13
+              }
+            },
+            "tail_registry_id": -1
+          }
+        }
+      ]
+    },
+    {
+      "race": "Undead",
+      "race_id": 6,
+      "variants": [
+        {
+          "sex": "Male",
+          "sex_id": 0,
+          "style_id": 15,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 303,
+              "asset_id": "0x12F",
+              "source": "data1.db/blobs/undead-head-m01.cub",
+              "loader_va": "0x4F36D0",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 783,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 304,
+              "asset_id": "0x130",
+              "source": "data1.db/blobs/undead-head-m02.cub",
+              "loader_va": "0x4F371A",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 783,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 305,
+              "asset_id": "0x131",
+              "source": "data1.db/blobs/undead-head-m03.cub",
+              "loader_va": "0x4F3764",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 783,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 306,
+              "asset_id": "0x132",
+              "source": "data1.db/blobs/undead-head-m04.cub",
+              "loader_va": "0x4F37AE",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 781,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 307,
+              "asset_id": "0x133",
+              "source": "data1.db/blobs/undead-head-m05.cub",
+              "loader_va": "0x4F37F8",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 781,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 308,
+              "asset_id": "0x134",
+              "source": "data1.db/blobs/undead-head-m06.cub",
+              "loader_va": "0x4F3842",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 781,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 309,
+              "asset_id": "0x135",
+              "source": "data1.db/blobs/undead-hair-m01.cub",
+              "loader_va": "0x4F388C",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 781,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 310,
+              "asset_id": "0x136",
+              "source": "data1.db/blobs/undead-hair-m02.cub",
+              "loader_va": "0x4F38D6",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 834,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 311,
+              "asset_id": "0x137",
+              "source": "data1.db/blobs/undead-hair-m03.cub",
+              "loader_va": "0x4F3920",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 817,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 312,
+              "asset_id": "0x138",
+              "source": "data1.db/blobs/undead-hair-m04.cub",
+              "loader_va": "0x4F396A",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 874,
+              "distinct_voxel_colors": 15,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 313,
+              "asset_id": "0x139",
+              "source": "data1.db/blobs/undead-hair-m05.cub",
+              "loader_va": "0x4F39B4",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 812,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 314,
+              "asset_id": "0x13A",
+              "source": "data1.db/blobs/undead-hair-m06.cub",
+              "loader_va": "0x4F39FE",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 833,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.96,
+              0.96,
+              2.16
+            ],
+            "flags": 0,
+            "scale_head": 0.9,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 327,
+                "asset_id": "0x147",
+                "source": "data1.db/blobs/undead-hand.cub",
+                "loader_va": "0x4F3DC0",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 5
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 0,
+                "asset_id": "0x000",
+                "source": "data1.db/blobs/body2.cub",
+                "loader_va": "0x4EE56C",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 560,
+                "distinct_voxel_colors": 21
+              }
+            },
+            "tail_registry_id": -1
+          }
+        },
+        {
+          "sex": "Female",
+          "sex_id": 1,
+          "style_id": 16,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 315,
+              "asset_id": "0x13B",
+              "source": "data1.db/blobs/undead-head-f01.cub",
+              "loader_va": "0x4F3A48",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 769,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 316,
+              "asset_id": "0x13C",
+              "source": "data1.db/blobs/undead-head-f02.cub",
+              "loader_va": "0x4F3A92",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 769,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 317,
+              "asset_id": "0x13D",
+              "source": "data1.db/blobs/undead-head-f03.cub",
+              "loader_va": "0x4F3ADC",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 769,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 318,
+              "asset_id": "0x13E",
+              "source": "data1.db/blobs/undead-head-f04.cub",
+              "loader_va": "0x4F3B26",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 767,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 319,
+              "asset_id": "0x13F",
+              "source": "data1.db/blobs/undead-head-f05.cub",
+              "loader_va": "0x4F3B70",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 767,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 320,
+              "asset_id": "0x140",
+              "source": "data1.db/blobs/undead-head-f06.cub",
+              "loader_va": "0x4F3BBA",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 767,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 321,
+              "asset_id": "0x141",
+              "source": "data1.db/blobs/undead-hair-f01.cub",
+              "loader_va": "0x4F3C04",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 1085,
+              "distinct_voxel_colors": 13,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 322,
+              "asset_id": "0x142",
+              "source": "data1.db/blobs/undead-hair-f02.cub",
+              "loader_va": "0x4F3C4E",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 1153,
+              "distinct_voxel_colors": 12,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 323,
+              "asset_id": "0x143",
+              "source": "data1.db/blobs/undead-hair-f03.cub",
+              "loader_va": "0x4F3C98",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                18
+              ],
+              "occupied_voxels": 1075,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 324,
+              "asset_id": "0x144",
+              "source": "data1.db/blobs/undead-hair-f04.cub",
+              "loader_va": "0x4F3CE2",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 857,
+              "distinct_voxel_colors": 12,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 325,
+              "asset_id": "0x145",
+              "source": "data1.db/blobs/undead-hair-f05.cub",
+              "loader_va": "0x4F3D2C",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                16
+              ],
+              "occupied_voxels": 951,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 5,
+              "registry_id": 326,
+              "asset_id": "0x146",
+              "source": "data1.db/blobs/undead-hair-f06.cub",
+              "loader_va": "0x4F3D76",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                18,
+                20,
+                18
+              ],
+              "occupied_voxels": 980,
+              "distinct_voxel_colors": 11,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.96,
+              0.96,
+              2.16
+            ],
+            "flags": 0,
+            "scale_head": 0.9,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 327,
+                "asset_id": "0x147",
+                "source": "data1.db/blobs/undead-hand.cub",
+                "loader_va": "0x4F3DC0",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 5
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 0,
+                "asset_id": "0x000",
+                "source": "data1.db/blobs/body2.cub",
+                "loader_va": "0x4EE56C",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 560,
+                "distinct_voxel_colors": 21
+              }
+            },
+            "tail_registry_id": -1
+          }
+        }
+      ]
+    },
+    {
+      "race": "Frogman",
+      "race_id": 7,
+      "variants": [
+        {
+          "sex": "Male",
+          "sex_id": 0,
+          "style_id": 13,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 1324,
+              "asset_id": "0x52C",
+              "source": "data1.db/blobs/frogman-head-m01.cub",
+              "loader_va": "0x4F20A1",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 644,
+              "distinct_voxel_colors": 12,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1325,
+              "asset_id": "0x52D",
+              "source": "data1.db/blobs/frogman-head-m02.cub",
+              "loader_va": "0x4F20E5",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 632,
+              "distinct_voxel_colors": 12,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1326,
+              "asset_id": "0x52E",
+              "source": "data1.db/blobs/frogman-head-m03.cub",
+              "loader_va": "0x4F2129",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 644,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1327,
+              "asset_id": "0x52F",
+              "source": "data1.db/blobs/frogman-head-m04.cub",
+              "loader_va": "0x4F216D",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 632,
+              "distinct_voxel_colors": 15,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 1328,
+              "asset_id": "0x530",
+              "source": "data1.db/blobs/frogman-head-m05.cub",
+              "loader_va": "0x4F21B1",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 600,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 1329,
+              "asset_id": "0x531",
+              "source": "data1.db/blobs/frogman-hair-m01.cub",
+              "loader_va": "0x4F21F5",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 704,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1330,
+              "asset_id": "0x532",
+              "source": "data1.db/blobs/frogman-hair-m02.cub",
+              "loader_va": "0x4F2239",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 708,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1331,
+              "asset_id": "0x533",
+              "source": "data1.db/blobs/frogman-hair-m03.cub",
+              "loader_va": "0x4F227D",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 710,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1332,
+              "asset_id": "0x534",
+              "source": "data1.db/blobs/frogman-hair-m04.cub",
+              "loader_va": "0x4F22C4",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 722,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 4,
+              "registry_id": 1333,
+              "asset_id": "0x535",
+              "source": "data1.db/blobs/frogman-hair-m05.cub",
+              "loader_va": "0x4F230E",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 712,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.96,
+              0.96,
+              2.16
+            ],
+            "flags": 0,
+            "scale_head": 1.01,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 1342,
+                "asset_id": "0x53E",
+                "source": "data1.db/blobs/frogman-hand.cub",
+                "loader_va": "0x4F25A8",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 4
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 1,
+                "asset_id": "0x001",
+                "source": "data1.db/blobs/body4.cub",
+                "loader_va": "0x4EE5A5",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 560,
+                "distinct_voxel_colors": 23
+              }
+            },
+            "tail_registry_id": -1
+          }
+        },
+        {
+          "sex": "Female",
+          "sex_id": 1,
+          "style_id": 14,
+          "face": [
+            {
+              "option_id": 0,
+              "registry_id": 1334,
+              "asset_id": "0x536",
+              "source": "data1.db/blobs/frogman-head-f01.cub",
+              "loader_va": "0x4F2358",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 588,
+              "distinct_voxel_colors": 13,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1335,
+              "asset_id": "0x537",
+              "source": "data1.db/blobs/frogman-head-f02.cub",
+              "loader_va": "0x4F23A2",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 578,
+              "distinct_voxel_colors": 15,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1336,
+              "asset_id": "0x538",
+              "source": "data1.db/blobs/frogman-head-f03.cub",
+              "loader_va": "0x4F23EC",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 584,
+              "distinct_voxel_colors": 17,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1337,
+              "asset_id": "0x539",
+              "source": "data1.db/blobs/frogman-head-f04.cub",
+              "loader_va": "0x4F2436",
+              "loader_flag": 1,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 566,
+              "distinct_voxel_colors": 18,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "haircut": [
+            {
+              "option_id": 0,
+              "registry_id": 1338,
+              "asset_id": "0x53A",
+              "source": "data1.db/blobs/frogman-hair-f01.cub",
+              "loader_va": "0x4F2480",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 692,
+              "distinct_voxel_colors": 19,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 1,
+              "registry_id": 1339,
+              "asset_id": "0x53B",
+              "source": "data1.db/blobs/frogman-hair-f02.cub",
+              "loader_va": "0x4F24CA",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 716,
+              "distinct_voxel_colors": 21,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 2,
+              "registry_id": 1340,
+              "asset_id": "0x53C",
+              "source": "data1.db/blobs/frogman-hair-f03.cub",
+              "loader_va": "0x4F2514",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 692,
+              "distinct_voxel_colors": 19,
+              "asset_status": "ASSET_CONFIRMED"
+            },
+            {
+              "option_id": 3,
+              "registry_id": 1341,
+              "asset_id": "0x53D",
+              "source": "data1.db/blobs/frogman-hair-f04.cub",
+              "loader_va": "0x4F255E",
+              "loader_flag": 0,
+              "grid_width_depth_height": [
+                16,
+                17,
+                13
+              ],
+              "occupied_voxels": 716,
+              "distinct_voxel_colors": 21,
+              "asset_status": "ASSET_CONFIRMED"
+            }
+          ],
+          "runtime_defaults": {
+            "size": [
+              0.96,
+              0.96,
+              2.16
+            ],
+            "flags": 0,
+            "scale_head": 1.01,
+            "scale_body": 1.0,
+            "offset_head": [
+              0.0,
+              0.5,
+              5.0
+            ],
+            "body_slots": {
+              "hand": {
+                "registry_id": 1342,
+                "asset_id": "0x53E",
+                "source": "data1.db/blobs/frogman-hand.cub",
+                "loader_va": "0x4F25A8",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  6,
+                  4
+                ],
+                "occupied_voxels": 76,
+                "distinct_voxel_colors": 4
+              },
+              "foot": {
+                "registry_id": 432,
+                "asset_id": "0x1B0",
+                "source": "data1.db/blobs/foot.cub",
+                "loader_va": "0x4EE7AF",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  5,
+                  8,
+                  4
+                ],
+                "occupied_voxels": 98,
+                "distinct_voxel_colors": 2
+              },
+              "body": {
+                "registry_id": 1,
+                "asset_id": "0x001",
+                "source": "data1.db/blobs/body4.cub",
+                "loader_va": "0x4EE5A5",
+                "loader_flag": 1,
+                "grid_width_depth_height": [
+                  10,
+                  8,
+                  10
+                ],
+                "occupied_voxels": 560,
+                "distinct_voxel_colors": 23
+              }
+            },
+            "tail_registry_id": -1
+          }
+        }
+      ]
+    }
+  ],
+  "classes": {
+    "Warrior": 1,
+    "Ranger": 2,
+    "Mage": 3,
+    "Rogue": 4
+  },
+  "palette": {
+    "control": "Hair color",
+    "columns_rgb_hex_top_to_bottom": [
+      [
+        "330000",
+        "720000",
+        "B20000",
+        "FF0000",
+        "FF3F3F",
+        "FF7F7F",
+        "FFBFBF"
+      ],
+      [
+        "330C00",
+        "721C00",
+        "B22C00",
+        "FF3F00",
+        "FF6F3F",
+        "FF9F7F",
+        "FFCFBF"
+      ],
+      [
+        "331900",
+        "723900",
+        "B25900",
+        "FF7F00",
+        "FF9F3F",
+        "FFBF7F",
+        "FFDFBF"
+      ],
+      [
+        "333300",
+        "727200",
+        "B2B200",
+        "FFFF00",
+        "FFFF3F",
+        "FFFF7F",
+        "FFFFBF"
+      ],
+      [
+        "193300",
+        "397200",
+        "59B200",
+        "7FFF00",
+        "9FFF3F",
+        "BFFF7F",
+        "DFFFBF"
+      ],
+      [
+        "003300",
+        "007200",
+        "00B200",
+        "00FF00",
+        "3FFF3F",
+        "7FFF7F",
+        "BFFFBF"
+      ],
+      [
+        "003319",
+        "007239",
+        "00B259",
+        "00FF7F",
+        "3FFF9F",
+        "7FFFBF",
+        "BFFFDF"
+      ],
+      [
+        "003333",
+        "007272",
+        "00B2B2",
+        "00FFFF",
+        "3FFFFF",
+        "7FFFFF",
+        "BFFFFF"
+      ],
+      [
+        "001933",
+        "003972",
+        "0059B2",
+        "007FFF",
+        "3F9FFF",
+        "7FBFFF",
+        "BFDFFF"
+      ],
+      [
+        "000C33",
+        "001C72",
+        "002CB2",
+        "003FFF",
+        "3F6FFF",
+        "7F9FFF",
+        "BFCFFF"
+      ],
+      [
+        "000033",
+        "000072",
+        "0000B2",
+        "0000FF",
+        "3F3FFF",
+        "7F7FFF",
+        "BFBFFF"
+      ],
+      [
+        "0C0033",
+        "1C0072",
+        "2C00B2",
+        "3F00FF",
+        "6F3FFF",
+        "9F7FFF",
+        "CFBFFF"
+      ],
+      [
+        "190033",
+        "390072",
+        "5900B2",
+        "7F00FF",
+        "9F3FFF",
+        "BF7FFF",
+        "DFBFFF"
+      ],
+      [
+        "260033",
+        "560072",
+        "8500B2",
+        "BF00FF",
+        "CF3FFF",
+        "DF7FFF",
+        "EFBFFF"
+      ],
+      [
+        "330033",
+        "720072",
+        "B200B2",
+        "FF00FF",
+        "FF3FFF",
+        "FF7FFF",
+        "FFBFFF"
+      ],
+      [
+        "191919",
+        "393939",
+        "595959",
+        "7F7F7F",
+        "9F9F9F",
+        "BFBFBF",
+        "DFDFDF"
+      ]
+    ],
+    "default_rgb_hex": "FFC832",
+    "deduplicated_color_count": 112,
+    "provenance": "ALPHA_DECOMPILED 0x428E40, 16 columns x 7 hit-tested rows; re-evaluated color math"
+  },
+  "skeleton_creature": {
+    "kind": 17,
+    "flags": 1064,
+    "enabled_editor": false,
+    "models": {
+      "head": {
+        "registry_id": 328,
+        "asset_id": "0x148",
+        "source": "data1.db/blobs/skeleton-head.cub",
+        "loader_va": "0x4F3E54",
+        "loader_flag": 1,
+        "grid_width_depth_height": [
+          18,
+          20,
+          16
+        ],
+        "occupied_voxels": 720,
+        "distinct_voxel_colors": 14
+      },
+      "hair": {
+        "registry_id": 329,
+        "asset_id": "0x149",
+        "source": "data1.db/blobs/skeleton-eyes.cub",
+        "loader_va": "0x4F3E0A",
+        "loader_flag": 0,
+        "grid_width_depth_height": [
+          18,
+          20,
+          16
+        ],
+        "occupied_voxels": 20,
+        "distinct_voxel_colors": 2
+      },
+      "hand": {
+        "registry_id": 330,
+        "asset_id": "0x14A",
+        "source": "data1.db/blobs/skeleton-hand.cub",
+        "loader_va": "0x4F3E9E",
+        "loader_flag": 1,
+        "grid_width_depth_height": [
+          3,
+          6,
+          5
+        ],
+        "occupied_voxels": 28,
+        "distinct_voxel_colors": 2
+      },
+      "foot": {
+        "registry_id": 332,
+        "asset_id": "0x14C",
+        "source": "data1.db/blobs/skeleton-foot.cub",
+        "loader_va": "0x4F3F32",
+        "loader_flag": 1,
+        "grid_width_depth_height": [
+          5,
+          8,
+          4
+        ],
+        "occupied_voxels": 77,
+        "distinct_voxel_colors": 2
+      },
+      "body": {
+        "registry_id": 331,
+        "asset_id": "0x14B",
+        "source": "data1.db/blobs/skeleton-body.cub",
+        "loader_va": "0x4F3EE8",
+        "loader_flag": 1,
+        "grid_width_depth_height": [
+          10,
+          8,
+          11
+        ],
+        "occupied_voxels": 160,
+        "distinct_voxel_colors": 2
+      }
+    }
+  },
+  "save_sample": {
+    "version": 11,
+    "inflated_bytes": 63753,
+    "appearance_offset": 3711,
+    "race": 0,
+    "sex": 0,
+    "face": 0,
+    "haircut": 0,
+    "hair_rgb": [
+      255,
+      200,
+      50
+    ],
+    "class": 1
+  },
+  "claims": {
+    "ranges_and_widgets": "ALPHA_DECOMPILED",
+    "default_kind_slots": "EMULATED_ALPHA_CODE",
+    "asset_db_verification": "ASSET_CONFIRMED",
+    "screenshot_facts": "SCREENSHOT_OBSERVED"
+  }
+}

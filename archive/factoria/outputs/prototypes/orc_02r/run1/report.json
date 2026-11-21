@@ -1,0 +1,122 @@
+{
+  "artifacts": {
+    "blend": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02r\\run1\\blender\\orc_new.blend",
+    "descriptor": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02r\\run1\\descriptor.json",
+    "glb": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02r\\run1\\orc_new.glb",
+    "renders": [
+      "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02r\\run1\\blender\\orc_new_front.png",
+      "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02r\\run1\\blender\\orc_new_side.png",
+      "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02r\\run1\\blender\\orc_new_three_quarter.png"
+    ],
+    "roundtrip_glb": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02r\\run1\\blender\\orc_new_roundtrip.glb",
+    "validation": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02r\\run1\\validation.json"
+  },
+  "blockers": [],
+  "finished": "2026-11-13T18:55:43",
+  "numbers": {
+    "boxes": 1196,
+    "determinism_glb_sha256": "937e1f09af0c090934ce4f463a538ffcd30b60cb8663573cdbb16dcbb3522691",
+    "joint_gaps_voxels": {
+      "foot_L->shin_L": 0,
+      "foot_R->shin_R": 0,
+      "forearm_L->upper_arm_L": 0,
+      "forearm_R->upper_arm_R": 0,
+      "hand_L->forearm_L": 1,
+      "hand_R->forearm_R": 1,
+      "pelvis->torso": 0,
+      "shin_L->thigh_L": 0,
+      "shin_R->thigh_R": 0,
+      "torso->head": 0
+    },
+    "levels": {
+      "LARGE": {
+        "boxes": 362,
+        "voxels": 7235
+      },
+      "MEDIUM": {
+        "boxes": 644,
+        "voxels": 10681
+      },
+      "SMALL": {
+        "boxes": 190,
+        "voxels": 1624
+      }
+    },
+    "main_glb_sha256": "937e1f09af0c090934ce4f463a538ffcd30b60cb8663573cdbb16dcbb3522691",
+    "modules": 21,
+    "reference_check": {
+      "deviation_percent": 0.06,
+      "generated_anatomical_height_m": 1.849,
+      "generated_total_height_with_hair_m": 1.93,
+      "note": "рост (по макушке черепа) сверяется с измерениями старого Orc; силуэтные пропорции (крупная голова, короткие конечности, широкие плечи) взяты с УТВЕРЖДЁННОГО визуального эталона ORC-02R, а не из старой модели",
+      "reference_head_m": {
+        "clip_scale": 0.9,
+        "depth_m": 1.17,
+        "height_m": 0.9193,
+        "width_m": 1.5043
+      },
+      "reference_torso_m": {
+        "depth_m": 0.7429,
+        "height_m": 0.9286,
+        "width_m": 0.9286
+      },
+      "reference_total_height_m": 1.8479
+    },
+    "variation_glb_sha256": "148fc743e77ff0233273e227ebd79ddfabecd597232768e431dc9b178efec6de",
+    "voxels": 19540
+  },
+  "resources": {
+    "blender_pagefile_peak_mb": 1489.3,
+    "blender_ram_peak_mb": 1283.1,
+    "blender_seconds": 73.81,
+    "generator_seconds": 0.23,
+    "vram_delta_mb": 0
+  },
+  "result": "PASS",
+  "stages": {
+    "blender": {
+      "detail": "exit=0, result=PASS, 73.81s, пик RAM 1283 МБ",
+      "ok": true,
+      "ram_peak_mb": 1283.1,
+      "seconds": 73.81,
+      "stages": {
+        "axes_scale": true,
+        "blend_reopen": true,
+        "geometry_integrity": true,
+        "glb_roundtrip": true,
+        "import": true,
+        "independent_editing": true,
+        "joint_gaps": true,
+        "materials_colors": true,
+        "save_blend": true,
+        "three_views": true
+      },
+      "vram_delta_mb": 0
+    },
+    "determinism": {
+      "detail": "sha256 run1=937e1f09af0c run2=937e1f09af0c",
+      "identical": true,
+      "ok": true,
+      "seconds": 0.2
+    },
+    "generate_new_geometry": {
+      "detail": "19540 вокселей, 1196 кубоидов, 340328 байт GLB",
+      "ok": true,
+      "seconds": 0.23
+    },
+    "profile_variation": {
+      "detail": "изменение профиля даёт другой GLB (sha256 148fc743e77f), кубоидов 1211 (+15)",
+      "different": true,
+      "ok": true,
+      "seconds": 0.2
+    },
+    "reference_measurement": {
+      "detail": "используется существующий measurements\\orc_reference.json",
+      "ok": true
+    }
+  },
+  "started": "2026-11-13T18:54:28",
+  "status": "MODEL_PENDING_REVIEW",
+  "task": "ORC-02R",
+  "wall_seconds": 74.86
+}

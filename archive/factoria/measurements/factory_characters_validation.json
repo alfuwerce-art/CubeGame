@@ -1,0 +1,73 @@
+{
+  "workflows": {
+    "FACTORY_CHARACTER_BASE.json": {
+      "status": "PASS",
+      "prompt_nodes": 7,
+      "outputs": [
+        "10"
+      ],
+      "notes": [
+        "bypassed (pass-through): LoraLoader#3"
+      ],
+      "error": null,
+      "node_errors": null
+    },
+    "FACTORY_CHARACTER_CONTROLNET.json": {
+      "status": "PASS",
+      "prompt_nodes": 8,
+      "outputs": [
+        "16"
+      ],
+      "notes": [
+        "muted (not queued): LoadImage#8, Canny#9, LineArtPreprocessor#10, DWPreprocessor#11, ControlNetLoader#12",
+        "bypassed (pass-through): ControlNetApplyAdvanced#13"
+      ],
+      "error": null,
+      "node_errors": null
+    },
+    "FACTORY_CHARACTER_FICTIVERSE.json": {
+      "status": "PASS",
+      "prompt_nodes": 8,
+      "outputs": [
+        "10"
+      ],
+      "notes": [],
+      "error": null,
+      "node_errors": null
+    },
+    "FACTORY_CHARACTER_GENERATION_V1.json": {
+      "status": "PASS",
+      "prompt_nodes": 8,
+      "outputs": [
+        "10"
+      ],
+      "notes": [],
+      "error": null,
+      "node_errors": null
+    },
+    "FACTORY_CHARACTER_IPADAPTER.json": {
+      "status": "PASS",
+      "prompt_nodes": 8,
+      "outputs": [
+        "13"
+      ],
+      "notes": [
+        "muted (not queued): LoadImage#8",
+        "bypassed (pass-through): IPAdapterUnifiedLoader#9, IPAdapterAdvanced#10"
+      ],
+      "error": null,
+      "node_errors": null
+    },
+    "FACTORY_CHARACTER_RAL.json": {
+      "status": "PASS",
+      "prompt_nodes": 8,
+      "outputs": [
+        "10"
+      ],
+      "notes": [],
+      "error": null,
+      "node_errors": null
+    }
+  },
+  "ckpt_substituted": null
+}

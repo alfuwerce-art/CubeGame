@@ -1,0 +1,19 @@
+{
+  "status": "PARTIAL",
+  "spec_candidate_id": "20261114-120058",
+  "exact_match": "UNKNOWN",
+  "archived_png": "human_v1_latest_available.png",
+  "observed_png_filename": "reference_controlnet_00006_.png",
+  "png_sha256": "b9f3d6e41e68e8239ab61f70fc5ddf81f95e0e85124903841bdd2e1195977e77",
+  "reference_filename": "factoria_ref_human_warrior_768x1024.png",
+  "reference_sha256_current_local_input": "569ef0b5a79b24fe9fbb886508a06d50900c25f91738699c0b3bfdb4843d1a08",
+  "reference_hash_at_original_run": null,
+  "lora_author": "RalFinger",
+  "lora_usage": "EXPERIMENTAL / LICENSE_BLOCKED_FOR_PRODUCTION",
+  "approval": "OWNER_VISUAL_REVIEW",
+  "local_weight_sha256": {
+    "checkpoint": "4496b36d48bfd7cfe4e5dbce3485db567bcefa2bef7238d290dbd45612125083",
+    "lora": "9dc480ee98c12a499bee1fc19ee0e13969a3c6b14be0e6ec133a11d563e83a25",
+    "controlnet": "a9e13fd61f3193887791c8a0dd07a07202174dc47d5ddaea94ea1344f07c7467"
+  }
+}

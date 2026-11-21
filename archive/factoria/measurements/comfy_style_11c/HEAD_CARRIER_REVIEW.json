@@ -1,0 +1,317 @@
+{
+  "status": "READY_FOR_OWNER_VISUAL_REVIEW",
+  "comfyui_requests": 0,
+  "geometry": {
+    "socket_size_x_depth_z": [
+      14,
+      8,
+      8
+    ],
+    "projected_bounds_edge_xyxy": [
+      188,
+      118,
+      580,
+      342
+    ],
+    "head_centre_xy": [
+      384,
+      230
+    ],
+    "ear_centres_screen_xy": [
+      [
+        244,
+        230
+      ],
+      [
+        524,
+        230
+      ]
+    ],
+    "neck_anchor_xy": [
+      384,
+      342
+    ],
+    "neck_join_y": 359,
+    "plane_polygons_px": {
+      "neck": [
+        [
+          345,
+          341
+        ],
+        [
+          422,
+          341
+        ],
+        [
+          420,
+          359
+        ],
+        [
+          345,
+          359
+        ]
+      ],
+      "ear_left": [
+        [
+          188,
+          172
+        ],
+        [
+          254,
+          172
+        ],
+        [
+          254,
+          280
+        ],
+        [
+          241,
+          286
+        ],
+        [
+          189,
+          286
+        ]
+      ],
+      "ear_inner_left": [
+        [
+          194,
+          180
+        ],
+        [
+          239,
+          180
+        ],
+        [
+          239,
+          273
+        ],
+        [
+          196,
+          273
+        ]
+      ],
+      "ear_right": [
+        [
+          580,
+          172
+        ],
+        [
+          514,
+          172
+        ],
+        [
+          514,
+          280
+        ],
+        [
+          527,
+          286
+        ],
+        [
+          579,
+          286
+        ]
+      ],
+      "ear_inner_right": [
+        [
+          574,
+          180
+        ],
+        [
+          529,
+          180
+        ],
+        [
+          529,
+          273
+        ],
+        [
+          572,
+          273
+        ]
+      ],
+      "side_left": [
+        [
+          254,
+          126
+        ],
+        [
+          272,
+          126
+        ],
+        [
+          272,
+          314
+        ],
+        [
+          306,
+          314
+        ],
+        [
+          306,
+          342
+        ],
+        [
+          294,
+          342
+        ],
+        [
+          294,
+          315
+        ],
+        [
+          271,
+          315
+        ],
+        [
+          271,
+          301
+        ],
+        [
+          254,
+          301
+        ]
+      ],
+      "side_right": [
+        [
+          514,
+          126
+        ],
+        [
+          496,
+          126
+        ],
+        [
+          496,
+          314
+        ],
+        [
+          462,
+          314
+        ],
+        [
+          462,
+          342
+        ],
+        [
+          474,
+          342
+        ],
+        [
+          474,
+          315
+        ],
+        [
+          497,
+          315
+        ],
+        [
+          497,
+          301
+        ],
+        [
+          514,
+          301
+        ]
+      ],
+      "crown": [
+        [
+          254,
+          118
+        ],
+        [
+          514,
+          118
+        ],
+        [
+          514,
+          131
+        ],
+        [
+          254,
+          131
+        ]
+      ],
+      "face_plane": [
+        [
+          271,
+          130
+        ],
+        [
+          497,
+          130
+        ],
+        [
+          497,
+          313
+        ],
+        [
+          465,
+          313
+        ],
+        [
+          465,
+          342
+        ],
+        [
+          303,
+          342
+        ],
+        [
+          303,
+          313
+        ],
+        [
+          271,
+          313
+        ]
+      ]
+    }
+  },
+  "human_v1_observations": {
+    "human_v1_approximate_screen_px": {
+      "ears_outer_x": [
+        197,
+        591
+      ],
+      "ears_top_bottom_y": [
+        446,
+        562
+      ],
+      "outer_jaw_step_x": [
+        285,
+        510
+      ],
+      "chin_x": [
+        315,
+        477
+      ],
+      "jaw_step_and_chin_y": [
+        588,
+        616
+      ]
+    },
+    "hidden_crown": "Reference hair occludes the skull crown. Straight top follows the observed rectangular shape of the original Alpha head. Crown height and plane breaks remain design choices.",
+    "source_alpha_asset": "human-head-m01.cub",
+    "source_alpha_stored_blob_sha256": "d0194ecdc946a82fb5110a5b96619081805b6556f53ee80cec9acb343d8b1bff"
+  },
+  "result": {
+    "file": "HUMAN_MALE_HEAD_GEOMETRY_REVIEW.png",
+    "sha256": "dbb80609afd31ac5e742e222e4f6e24c8fdd6620fe10e8f29bde8f614fec1aae"
+  },
+  "carrier": {
+    "file": "HUMAN_MALE_HEAD_CARRIER_V2.png",
+    "sha256": "a446cce626f88ff3a2b5abcf7c4901a92ffad8e2a3f6e02c693fb9b16cc20f81"
+  },
+  "guide": {
+    "file": "HUMAN_MALE_HEAD_CARRIER_V2_GEOMETRY.png",
+    "sha256": "ce1085e6f3edfc50f978fdea1a60b2f05fb85ca24f33b6805df327e814f560af"
+  },
+  "comparison": {
+    "file": "HUMAN_MALE_HEAD_GEOMETRY_COMPARISON.jpg",
+    "sha256": "0e0c32d31f74280c720307b7860367e3c6966e1f75ed40e929851d72fe037884"
+  },
+  "background_restore_pixels": 426,
+  "outside_head_and_neck_rgb_pixels_changed": 0
+}

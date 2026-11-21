@@ -1,0 +1,109 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+environments/venv*/
+environments/**/Lib/
+environments/**/Scripts/
+environments/**/pyvenv.cfg
+
+# Инструменты и большие бинарники (устанавливаются локально, не публикуются)
+tools/
+*.exe
+*.msi
+*.zip
+*.7z
+*.tar.xz
+*.dmg
+
+# AI-веса и кэши (никогда не публиковать)
+*.ckpt
+*.safetensors
+*.pt
+*.pth
+*.onnx
+*.bin
+models/
+weights/
+
+# Тяжёлые выходы DCC (публикуются только по отдельному решению)
+outputs/**/*.blend1
+outputs/**/*.fbx
+outputs/**/*.glb
+!outputs/prototypes/**/*.glb
+outputs/**/*.gltf
+samples/**/*.fbx
+samples/**/*.glb
+
+# Логи запусков — публикуются как доказательства только текстовые .txt/.md/.log
+*.log
+
+# ОС / редакторы
+Thumbs.db
+desktop.ini
+.vs/
+.vscode/
+*.swp
+
+# Blender user-config лаборатории (машинно-специфично, не публикуется)
+environments/blender/
+
+# ORC-02: производные от закрытого Alpha контента — только локально, НЕ публиковать
+outputs/prototypes/orc_02/**/*.glb
+outputs/prototypes/orc_02/**/*.blend
+outputs/prototypes/orc_02/**/*.blend1
+outputs/prototypes/orc_02/**/*.png
+
+# ORC-02R: меши и рендеры новой модели публикуются отдельным решением;
+# в git идут только код, измерения (числа), descriptor/validation/report (метаданные)
+outputs/prototypes/orc_02r/**/*.glb
+outputs/prototypes/orc_02r/**/*.blend
+outputs/prototypes/orc_02r/**/*.blend1
+outputs/prototypes/orc_02r/**/*.png
+
+# COMFY-STYLE: полный снимок /api/object_info генерируется заново с сервера (2.3 МБ),
+# в git идёт только урезанный контракт используемых нод
+measurements/comfyui_object_info_*_full.json
+
+# COMFY-STYLE-04: примеры авторов моделей (LoRA/чекпоинтов) — чужие изображения,
+# скачаны локально только для оценки стиля до установки; в публичный репозиторий не идут
+outputs/comfyui/style_samples/
+
+# COMFY-STYLE-05: ��������������� ����������� (� �.�. ����������������� RAL) � ������ ��������
+outputs/factory/characters/*.png
+
+# COMFY-STYLE-07: owner references (Unity screenshots) and derived cutouts - local only
+references/characters_v1/
+outputs/factory/reference_v1/*.png
+measurements/tmp_ref_plumbing/
+measurements/*.png
+outputs/factory/reference_*/
+measurements/tmp_v2_plumbing/
+# COMFY-STYLE-08 — owner references and experimental images stay local
+outputs/factory/race_factory_v1/
+outputs/factory/characters_v2/*.png
+
+# COMFY-STYLE-11 local review images (experimental ral-vxl)
+outputs/factory/human_base_front_v1/
+outputs/factory/human_base_front_v2/
+outputs/factory/human_base_front_v3/
+outputs/factory/human_head_geometry_review/
+outputs/factory/human_head_v1_trace/
+
+# COMFY-STYLE-12 local mannequin frames and guide plates stay local
+outputs/factory/mannequin_v1/
+
+# COMFY-STYLE-12 MANNEQUIN V3: owner reference render, plates and frames stay local;
+# only numbers, hashes and the report are published
+outputs/factory/mannequin_v3/
+
+# MANNEQUIN-RIG-01: review images built on the owner-approved V3 reference stay local;
+# the generated model renders, rig diagram, numbers and the report are published
+outputs/prototypes/mannequin_v3_rig/run1/compare/
+outputs/prototypes/mannequin_v3_rig/run1/*.blend
+outputs/prototypes/mannequin_v3_rig/run1/*.blend1
+outputs/prototypes/mannequin_v3_rig/run1/*.glb
+
+# Local source, reference, export and review workspace
+/local/

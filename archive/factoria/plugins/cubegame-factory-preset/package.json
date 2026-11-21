@@ -1,0 +1,19 @@
+{
+  "name": "@local/cubegame-factory-preset",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent preset for the CubeGame Asset & Animation Factory Lab: 3D model creation, redesign, rigging and animation pipeline prepared and verified on the local machine.",
+  "exports": {
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "cordis.patch.yml",
+    "locale/*.json"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

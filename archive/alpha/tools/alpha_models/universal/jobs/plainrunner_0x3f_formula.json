@@ -1,0 +1,10 @@
+{
+ "kind": "0x3f",
+ "seed_variant": [0, 0],
+ "variant": "plainrunner_0x3f_formula_vs_alpha",
+ "locomotion": "formula",
+ "amp": 0.19,
+ "speed_xy": 3.9,
+ "reference_capture": {"path": "D:/Projects/CubeGame/.scratch/universal/cap/batch1.jsonl", "kind": "0x3f"},
+ "note": "Parametric walk checked against the captured PlainRunner frames in Unity (ALPHA check)."
+}

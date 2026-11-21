@@ -1,0 +1,93 @@
+{
+  "workflows": {
+    "FACTORIA_VOXEL_STYLE_BASE.json": {
+      "status": "PASS",
+      "prompt_nodes": 7,
+      "outputs": [
+        "9"
+      ],
+      "notes": [
+        "muted (not queued): LoraLoader#6"
+      ],
+      "error": null,
+      "node_errors": null
+    },
+    "FACTORIA_VOXEL_STYLE_CONTROL_TEMPLATE.json": {
+      "status": "PASS_WITH_OWNER_ACTION",
+      "prompt_nodes": 11,
+      "outputs": [],
+      "notes": [
+        "muted (not queued): CLIPVisionLoader#4, Canny#8, LineArtPreprocessor#9, DWPreprocessor#10, ControlNetLoader#11",
+        "bypassed (pass-through): ControlNetApplyAdvanced#15"
+      ],
+      "error": {
+        "type": "prompt_outputs_failed_validation",
+        "message": "Prompt outputs failed validation",
+        "details": "",
+        "extra_info": {}
+      },
+      "node_errors": {
+        "3": {
+          "errors": [
+            {
+              "type": "custom_validation_failed",
+              "message": "Custom validation failed for node",
+              "details": "image - Invalid image file: factoria_style_reference.png",
+              "extra_info": {
+                "input_name": "image"
+              }
+            }
+          ],
+          "dependent_outputs": [
+            "18"
+          ],
+          "class_type": "LoadImage"
+        }
+      },
+      "needs_owner_action": [
+        "LoadImage#3"
+      ],
+      "expected_gap_hint": {
+        "LoadImage#3": "style/control reference image is not in ComfyUI/input yet (owner step)"
+      }
+    },
+    "FACTORIA_VOXEL_STYLE_IPADAPTER.json": {
+      "status": "PASS_WITH_OWNER_ACTION",
+      "prompt_nodes": 10,
+      "outputs": [],
+      "notes": [
+        "muted (not queued): CLIPVisionLoader#4"
+      ],
+      "error": {
+        "type": "prompt_outputs_failed_validation",
+        "message": "Prompt outputs failed validation",
+        "details": "",
+        "extra_info": {}
+      },
+      "node_errors": {
+        "3": {
+          "errors": [
+            {
+              "type": "custom_validation_failed",
+              "message": "Custom validation failed for node",
+              "details": "image - Invalid image file: factoria_style_reference.png",
+              "extra_info": {
+                "input_name": "image"
+              }
+            }
+          ],
+          "dependent_outputs": [
+            "12"
+          ],
+          "class_type": "LoadImage"
+        }
+      },
+      "needs_owner_action": [
+        "LoadImage#3"
+      ],
+      "expected_gap_hint": {
+        "LoadImage#3": "style/control reference image is not in ComfyUI/input yet (owner step)"
+      }
+    }
+  }
+}

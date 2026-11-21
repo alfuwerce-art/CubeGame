@@ -1,0 +1,32 @@
+{
+  "object_info_source": "measurements\\comfyui_object_info_2026-11-13_full.json",
+  "config": "workflows\\factoria_voxel_style\\voxel_style_prompt_v1.json",
+  "workflows": {
+    "FACTORIA_VOXEL_STYLE_BASE.json": {
+      "status": "PASS",
+      "nodes": 9,
+      "links": 11,
+      "problems": [],
+      "warnings": []
+    },
+    "FACTORIA_VOXEL_STYLE_IPADAPTER.json": {
+      "status": "PASS",
+      "nodes": 12,
+      "links": 13,
+      "problems": [],
+      "warnings": [
+        "LoadImage#3: widget image='factoria_style_reference.png' not in options (file not present locally yet)"
+      ]
+    },
+    "FACTORIA_VOXEL_STYLE_CONTROL_TEMPLATE.json": {
+      "status": "PASS",
+      "nodes": 18,
+      "links": 20,
+      "problems": [],
+      "warnings": [
+        "LoadImage#3: widget image='factoria_style_reference.png' not in options (file not present locally yet)",
+        "LoadImage#5: widget image='factoria_control_source.png' not in options (file not present locally yet)"
+      ]
+    }
+  }
+}

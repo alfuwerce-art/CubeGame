@@ -1,0 +1,48 @@
+name: Harness self-check
+on:
+  pull_request:
+    paths:
+      - 'tools/harness/**'
+      - '.dsh/**'
+      - 'docs/**'
+      - 'AGENTS.md'
+      - 'PROJECT_MEMORY.md'
+      - 'README.md'
+  push:
+    branches:
+      - main
+      - integration/m0-all
+      - 'review/**'
+    paths:
+      - 'tools/harness/**'
+      - '.dsh/**'
+jobs:
+  node-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify hook syntax
+        run: node --check tools/harness/hook-pretool.mjs && node --check tools/harness/preflight.mjs
+      - name: Test hook decisions
+        run: node --test tools/harness/hook-pretool.test.mjs
+      - name: Validate example JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('.dsh/hooks.example.json', 'utf8'))"
+      - name: Validate CubeGame documentation and skills
+        run: node tools/harness/validate-project-knowledge.mjs
+
+      - name: Syntax-check read-only symbol and Unreal research scripts
+        run: |
+          node --check tools/harness/symbol-audit.mjs
+          node tools/harness/symbol-audit.mjs
+          python -m py_compile tools/experiments/unreal/audit_assets.py
+
+  windows-readonly-inspection:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect Windows DSH preflight script (read-only)
+        shell: pwsh
+        run: ./tools/harness/windows/Inspect-Dsh.ps1 -ProjectRoot '${{ github.workspace }}'

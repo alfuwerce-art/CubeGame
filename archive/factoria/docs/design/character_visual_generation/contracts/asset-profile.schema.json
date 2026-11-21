@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Factoria DESIGN-01 asset-profile",
+  "description": "Project schema, not a production API. Cross-contract rules are in ASSET_DATA_CONTRACTS.md.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "example": {
+      "type": "boolean"
+    },
+    "category": {
+      "$ref": "#/$defs/assetKind"
+    },
+    "type": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "slot": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "style_lock": {
+      "$ref": "#/$defs/pin"
+    },
+    "geometry_reference": {
+      "$ref": "#/$defs/pin"
+    },
+    "template": {
+      "$ref": "#/$defs/pin"
+    },
+    "compatible_races": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "compatible_body_forms": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "compatible_rigs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/pin"
+      },
+      "minItems": 1
+    },
+    "geometry": {
+      "type": "object",
+      "properties": {
+        "fit_policy": {
+          "$ref": "#/$defs/binding"
+        },
+        "sockets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "landmark_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "symmetry": {
+          "enum": [
+            "REQUIRED",
+            "ASYMMETRIC",
+            "UNSPECIFIED"
+          ]
+        },
+        "requires_pose_check": {
+          "type": "boolean"
+        },
+        "geometry_route": {
+          "enum": [
+            "UV",
+            "TEMPLATE",
+            "PROCEDURAL",
+            "VOXEL",
+            "IMAGE_TO_3D"
+          ]
+        }
+      },
+      "required": [
+        "fit_policy",
+        "sockets",
+        "landmark_ids",
+        "symmetry",
+        "requires_pose_check",
+        "geometry_route"
+      ],
+      "additionalProperties": false
+    },
+    "material": {
+      "type": "object",
+      "properties": {
+        "class": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+        },
+        "palette": {
+          "$ref": "#/$defs/pin"
+        },
+        "colorway": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+        }
+      },
+      "required": [
+        "class",
+        "palette",
+        "colorway"
+      ],
+      "additionalProperties": false
+    },
+    "required_views": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/view"
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "generate_views": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/view"
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "prompt_terms": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "negative_terms": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "outputs": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/role"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "technical": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/role"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "image",
+        "technical"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "version",
+    "example",
+    "category",
+    "type",
+    "slot",
+    "description",
+    "style_lock",
+    "geometry_reference",
+    "template",
+    "compatible_races",
+    "compatible_body_forms",
+    "compatible_rigs",
+    "geometry",
+    "material",
+    "required_views",
+    "generate_views",
+    "prompt_terms",
+    "negative_terms",
+    "seed",
+    "outputs"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "pin": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "assetKind": {
+      "enum": [
+        "BODY",
+        "FACE",
+        "HAIR",
+        "RACE_FEATURE",
+        "CLOTHING",
+        "ARMOR",
+        "WEAPON",
+        "ACCESSORY",
+        "MATERIAL"
+      ]
+    },
+    "view": {
+      "enum": [
+        "FRONT",
+        "BACK",
+        "LEFT",
+        "RIGHT",
+        "TOP",
+        "THREE_QUARTER"
+      ]
+    },
+    "role": {
+      "enum": [
+        "rgb_raw",
+        "rgb_worn",
+        "rgba_preview",
+        "texture_uv",
+        "alpha",
+        "component_id",
+        "material_id",
+        "silhouette",
+        "depth_metric",
+        "normal",
+        "camera",
+        "landmarks",
+        "blend",
+        "glb",
+        "validation"
+      ]
+    },
+    "binding": {
+      "enum": [
+        "NONE",
+        "UV_OVERLAY",
+        "RIGID_SOCKET",
+        "SEGMENTED_RIGID",
+        "SKINNED"
+      ]
+    }
+  }
+}

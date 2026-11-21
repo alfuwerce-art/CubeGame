@@ -1,0 +1,15 @@
+{
+ "variant": "as_captured_greatmace",
+ "weapon_subtype": 17,
+ "note": "The weapon actually equipped during the capture (wood-greatmace02.cub, vertex count identical to Alpha's mesh). Use it to compare against the Alpha capture one-to-one.",
+ "parts": {
+  "body": "body1.cub",
+  "head": "human-head-m01.cub",
+  "hair": "human-hair-m01.cub",
+  "weapon": "wood-greatmace02.cub",
+  "hand_l": "glove.cub",
+  "hand_r": "glove.cub",
+  "foot_l": "foot.cub",
+  "foot_r": "foot.cub"
+ }
+}

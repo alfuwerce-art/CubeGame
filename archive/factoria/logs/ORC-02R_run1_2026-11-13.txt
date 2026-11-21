@@ -1,0 +1,43 @@
+﻿python : D:\Projects\CubeGame Factory\scripts\orc02r\run_orc02r.py:4: SyntaxWarning: invalid escape sequence '\o'
+строка:1 знак:195
++ ... NG="utf-8"; python scripts\orc02r\run_orc02r.py --reference measureme ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (D:\Projects\Cub...e sequence '\o':String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  python scripts\orc02r\run_orc02r.py \
+STAGE reference_measurement: OK используется существующий measurements\orc_reference.json
+[generate] exit=0 0.2s
+   GENERATE_OK {"glb": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02r\\run1\\orc_new.glb", "bytes": 250092, "sha256": "b984a73bb8e2827cafc99f85cabb573f7d68c0a4cdb814c805e5ce7623895f66", "modules": 20, "voxels": 10894, "boxes": 868, "height_m": 2.04, "reference_height_m": 1.8479, "overlaps_trimmed": 0}
+STAGE generate_new_geometry: OK 10894 вокселей, 868 кубоидов, 250092 байт GLB
+[determinism] exit=0 0.28s
+   GENERATE_OK {"glb": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02r\\run1\\_determinism\\orc_new.glb", "bytes": 250092, "sha256": "b984a73bb8e2827cafc99f85cabb573f7d68c0a4cdb814c805e5ce7623895f66", "modules": 20, "voxels": 10894, "boxes": 868, "height_m": 2.04, "reference_height_m": 1.8479, "overlaps_trimmed": 0}
+STAGE determinism: OK sha256 run1=b984a73bb8e2 run2=b984a73bb8e2
+[variation] exit=0 0.37s
+   GENERATE_OK {"glb": "D:\\Projects\\CubeGame Factory\\outputs\\prototypes\\orc_02r\\run1\\_variation\\orc_new.glb", "bytes": 257440, "sha256": "f9912f84b890f47650b3373fc3d43edd9322dacbf7feb8cff3ba9a409fb62c18", "modules": 20, "voxels": 11031, "boxes": 895, "height_m": 2.04, "reference_height_m": 1.8479, "overlaps_trimmed": 0}
+STAGE profile_variation: OK изменение профиля даёт другой GLB (sha256 f9912f84b890), кубоидов 895 (+27)
+   STAGE import: OK 20 РјРѕРґСѓР»РµР№ Р·Р° 0.27s, РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‚: []
+   STAGE geometry_integrity: OK verts=6944 tris=10416 degenerate=[] nan=[]
+   STAGE materials_colors: OK materials=['orc_voxel_colors'] colored=20
+   STAGE axes_scale: OK dimensions(XYZ)=[0.78, 0.48, 2.04] РЅРёР· РјРѕРґРµР»Рё z=0.0 (РїРѕР» Р·=0, Y-upв†’Z-up РєРѕСЂСЂРµРєС‚РµРЅ)
+   STAGE independent_editing: OK forearm_L moved 0.1 m, others max 0.0 m
+   STAGE joint_gaps: OK РјРёРЅРёРјР°Р»СЊРЅС‹Р№ Р·Р°Р·РѕСЂ ok=True, РїРµСЂРµСЃРµС‡РµРЅРёСЏ=[]
+   STAGE save_blend: OK D:\Projects\CubeGame Factory\outputs\prototypes\orc_02r\run1\blender\orc_new.blend (170283 B)
+   STAGE blend_reopen: OK 20 РѕР±СЉРµРєС‚РѕРІ РїРѕСЃР»Рµ reopen
+   STAGE glb_roundtrip: OK {"objects": 20, "names_match": true, "unique_positions": 3696, "positions_identical": true, "triangles_match": true, "materials_match": true, "dimensions": [0.78, 0.48, 2.04]}
+   STAGE three_views: OK {"front": 22.9, "side": 22.92, "three_quarter": 41.84}
+   ORC02R_VALIDATION=PASS
+   ORC02R_STAGE import=PASS :: 20 РјРѕРґСѓР»РµР№ Р·Р° 0.27s, РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‚: []
+   ORC02R_STAGE geometry_integrity=PASS :: verts=6944 tris=10416 degenerate=[] nan=[]
+   ORC02R_STAGE materials_colors=PASS :: materials=['orc_voxel_colors'] colored=20
+   ORC02R_STAGE axes_scale=PASS :: dimensions(XYZ)=[0.78, 0.48, 2.04] РЅРёР· РјРѕРґРµР»Рё z=0.0 (РїРѕР» Р·=0, Y-upв†’Z-up РєРѕСЂСЂРµРєС‚РµРЅ)
+   ORC02R_STAGE independent_editing=PASS :: forearm_L moved 0.1 m, others max 0.0 m
+   ORC02R_STAGE joint_gaps=PASS :: РјРёРЅРёРјР°Р»СЊРЅС‹Р№ Р·Р°Р·РѕСЂ ok=True, РїРµСЂРµСЃРµС‡РµРЅРёСЏ=[]
+   ORC02R_STAGE save_blend=PASS :: D:\Projects\CubeGame Factory\outputs\prototypes\orc_02r\run1\blender\orc_new.blend (170283 B)
+   ORC02R_STAGE blend_reopen=PASS :: 20 РѕР±СЉРµРєС‚РѕРІ РїРѕСЃР»Рµ reopen
+   ORC02R_STAGE glb_roundtrip=PASS :: {"objects": 20, "names_match": true, "unique_positions": 3696, "positions_identical": true, "triangles_match": true, "materials_match": true, "dimensions": [0.78, 0.48, 2.04]}
+   ORC02R_STAGE three_views=PASS :: {"front": 22.9, "side": 22.92, "three_quarter": 41.84}
+   ORC02R_REPORT=D:\Projects\CubeGame Factory\outputs\prototypes\orc_02r\run1\validation.json
+STAGE blender: OK exit=0, result=PASS, 90.04s, пик RAM 1277 МБ
+RUN_ORC02R=PASS status=MODEL_PENDING_REVIEW
+RUN_REPORT=D:\Projects\CubeGame Factory\outputs\prototypes\orc_02r\run1\report.json

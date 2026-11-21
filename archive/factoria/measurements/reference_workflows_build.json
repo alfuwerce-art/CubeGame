@@ -1,0 +1,34 @@
+{
+  "object_info_source": "http://127.0.0.1:8188/object_info",
+  "config": "workflows/factory_reference/reference_characters_v1.json",
+  "workflows": {
+    "FACTORY_REFERENCE_IPADAPTER.json": {
+      "status": "PASS",
+      "nodes": 13,
+      "links": 15,
+      "problems": [],
+      "warnings": []
+    },
+    "FACTORY_REFERENCE_CONTROLNET.json": {
+      "status": "PASS",
+      "nodes": 15,
+      "links": 18,
+      "problems": [],
+      "warnings": []
+    },
+    "FACTORY_REFERENCE_IMG2IMG.json": {
+      "status": "PASS",
+      "nodes": 10,
+      "links": 13,
+      "problems": [],
+      "warnings": []
+    },
+    "FACTORY_REFERENCE_IPADAPTER_CONTROLNET.json": {
+      "status": "PASS",
+      "nodes": 18,
+      "links": 22,
+      "problems": [],
+      "warnings": []
+    }
+  }
+}

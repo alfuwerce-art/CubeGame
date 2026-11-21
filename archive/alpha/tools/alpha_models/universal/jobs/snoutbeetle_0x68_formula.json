@@ -1,0 +1,9 @@
+{
+ "kind": "0x68",
+ "seed_variant": [0, 0],
+ "variant": "snoutbeetle_0x68_formula_only",
+ "locomotion": "formula",
+ "amp": 0.19,
+ "speed_xy": 3.7,
+ "note": "NOT captured, new body plan (head + 2 feet, no body part): parametric walk only (FORMULA_VERIFIED). Status RECONSTRUCTED_FROM_EVIDENCE."
+}

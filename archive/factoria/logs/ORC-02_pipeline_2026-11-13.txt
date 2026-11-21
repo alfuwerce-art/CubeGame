@@ -1,0 +1,24 @@
+﻿=== ORC-02 pipeline evidence 2026-11-13 17:07:29 ===
+python=Python 3.13.14
+source_root=read-only D:\Projects\CubeGame\.scratch\content\actors\d86_kind_0x0b_formula
+--- run (repeat, %TEMP%) ---
+ORC02_OK {"glb": "C:\\Users\\bow\\AppData\\Local\\Temp\\orc02_r2\\orc02_modular.glb", "glb_bytes": 144756, "glb_sha256": "3e83f4716091357b2abba5ef774782362faef5d1ce7e0804c4990bbf1a14f234", "modules": 16, "voxels": 2342, "boxes": 487, "face_status": "AMBIGUOUS_FACE_LANDMARKS", "seconds": 0.02}
+
+--- run alt detail-scale 0.5 ---
+ORC02_OK {"glb": "C:\\Users\\bow\\AppData\\Local\\Temp\\orc02_alt\\orc02_modular.glb", "glb_bytes": 191564, "glb_sha256": "27af6083566a76619a8c9218c3251d50b59745d72c242b4cf1e297ad01cebef1", "modules": 16, "voxels": 2342, "boxes": 659, "face_status": "AMBIGUOUS_FACE_LANDMARKS", "seconds": 0.03}
+
+--- missing source error path ---
+python.exe : ORC02_ERROR {"code": "SOURCE_MISSING", "message": "��� rig.json: C:\\no_such_content\\actors/d86_kind_0x0b
+_formula\\rig.json"}
+строка:1 знак:901
++ ... --"; $o += (& python scripts\orc02\run_orc02.py --out "$env:TEMP\orc0 ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ORC02_ERROR {"c...ula\\rig.json"}:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+exit_code_error_path=2
+run1_sha256=3e83f4716091357b2abba5ef774782362faef5d1ce7e0804c4990bbf1a14f234
+repeat_sha256=3e83f4716091357b2abba5ef774782362faef5d1ce7e0804c4990bbf1a14f234
+deterministic=True
+alt_sha256=27af6083566a76619a8c9218c3251d50b59745d72c242b4cf1e297ad01cebef1 changed=True

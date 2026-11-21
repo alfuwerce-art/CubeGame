@@ -1,0 +1,73 @@
+{
+  "asset": "HUMAN_MALE_BASE_FRONT_V2_CN60_IPA50",
+  "controlnet": {
+    "model": "controlnet-union-sdxl-1.0.safetensors",
+    "sha256": "a9e13fd61f3193887791c8a0dd07a07202174dc47d5ddaea94ea1344f07c7467",
+    "union_type": "canny/lineart/anime_lineart/mlsd",
+    "low_threshold": 0.35,
+    "high_threshold": 0.75,
+    "strength": 0.6,
+    "start_percent": 0,
+    "end_percent": 1,
+    "resize_method": "nearest-exact",
+    "crop": "disabled"
+  },
+  "ipadapter": {
+    "file": "ip-adapter-plus_sdxl_vit-h.safetensors",
+    "sha256": "3f5062b8400c94b7159665b21ba5c62acdcd7682262743d7f2aefedef00e6581",
+    "clip_vision": "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors",
+    "clip_vision_sha256": "6ca9667da1ca9e0b0f75e46bb030f7e011f44f86cbfb8d5a36590fcd7507b030",
+    "weight": 0.5,
+    "weight_type": "style transfer",
+    "combine_embeds": "concat",
+    "start_at": 0.0,
+    "end_at": 0.8,
+    "embeds_scaling": "V only"
+  },
+  "sampling": {
+    "seed": 20261114,
+    "seed_mode": "fixed",
+    "steps": 28,
+    "cfg": 5,
+    "sampler_name": "dpmpp_2m",
+    "scheduler": "normal",
+    "denoise": 1
+  },
+  "model": {
+    "checkpoint": "DreamShaperXL_Turbo_v2_1.safetensors",
+    "checkpoint_sha256": "4496b36d48bfd7cfe4e5dbce3485db567bcefa2bef7238d290dbd45612125083",
+    "lora": "ral-vxl.safetensors",
+    "lora_sha256": "9dc480ee98c12a499bee1fc19ee0e13969a3c6b14be0e6ec133a11d563e83a25",
+    "lora_author": "RalFinger",
+    "strength_model": 0.6,
+    "strength_clip": 0.6,
+    "license_decision": "docs/decisions/FACT-D21-civitai-voxel-lora-license.md"
+  },
+  "resolution": [
+    768,
+    1024
+  ],
+  "inputs": {
+    "geometry_guide": {
+      "name": "HUMAN_MALE_FRONT_POSE_SILHOUETTE.png",
+      "sha256": "c849c7d5998c99f512e8c6eac6098d3d27b617776c64be2117d15f4f6e735bca"
+    },
+    "style_reference": {
+      "name": "HUMAN_V1_STYLE_REFERENCE.png",
+      "sha256": "b9f3d6e41e68e8239ab61f70fc5ddf81f95e0e85124903841bdd2e1195977e77"
+    }
+  },
+  "graph_sha256": "d73f538cbc5a4d48ae6e8c312802cc05d764e60b235a6d3ed5ead79cdd8a87fc",
+  "result": {
+    "file": "HUMAN_MALE_BASE_FRONT_V2_CN60_IPA50.png",
+    "sha256": "2668754d107f24ecffbc349ca8f8ef6730581860140cb75879804a422d2223f8",
+    "prompt_id": "a34dd8b3-97c9-4e70-996e-177568e299ef",
+    "seconds": 43.4,
+    "peak_card_vram_mib": 7517,
+    "initial_card_vram_mib": 5808,
+    "peak_comfy_rss_mib": 15056,
+    "initial_comfy_rss_mib": 15055,
+    "min_available_ram_mib": 2958,
+    "initial_available_ram_mib": 3723
+  }
+}
