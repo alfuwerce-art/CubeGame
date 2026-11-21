@@ -12,3 +12,7 @@ test('protects integration branch', () => assert.match(evaluateTool({ tool_name:
 test('rejects write outside workspace', () => assert.match(evaluateTool({ tool_name: 'write', tool_input: { file_path: 'C:\\Other\\file.txt' } }, ctx), /вне/));
 test('rejects .git manual edit', () => assert.match(evaluateTool({ tool_name: 'edit', tool_input: { file_path: 'C:\\Projects\\CubeGame\\.git\\config' } }, ctx), /\.git/));
 test('allows scoped edit', () => assert.equal(evaluateTool({ tool_name: 'write', tool_input: { file_path: 'docs\\agents\\test.md' } }, ctx), null));
+
+test('blocks pwsh force push (real DSH tool name)', () => assert.match(evaluateTool({ tool_name: 'pwsh', tool_input: { command: 'git push --force origin main' } }, ctx), /разрешения/));
+test('blocks encoded pwsh command', () => assert.match(evaluateTool({ tool_name: 'pwsh', tool_input: { command: 'pwsh -EncodedCommand SQBFAFgA' } }, ctx), /Закодированная/));
+test('blocks pwsh workdir outside workspace on writing', () => assert.match(evaluateTool({ tool_name: 'pwsh', tool_input: { command: 'Set-Content -Path file.txt -Value X', workdir: 'C:\\\\Outside' } }, ctx), /вне CubeGame/));
