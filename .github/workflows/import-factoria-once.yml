@@ -1,0 +1,25 @@
+name: One-time Factoria history import
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [integration/m0-all]
+    paths:
+      - "tools/import_factoria_subtree.sh"
+      - ".github/workflows/import-factoria-once.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  subtree-import:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'codex/factoria-unification' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: codex/factoria-unification
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Import Factoria subtree while preserving ancestry
+        run: bash tools/import_factoria_subtree.sh
