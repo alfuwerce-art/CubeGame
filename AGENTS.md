@@ -2,12 +2,14 @@
 
 **Единственный рабочий репозиторий проекта:** `alfuwerce-art/CubeGame`. Действующая цель — собственная игра на Unity. Автоматический конвейер создания моделей закрыт решением [D95](docs/decisions/D95-single-repository-close-model-pipeline.md).
 
-## Перед работой
+## Перед работой — короткий обязательный контекст
 
-1. Прочитать [PROJECT_MEMORY.md](PROJECT_MEMORY.md), [docs/ACTIVE_STAGE.md](docs/ACTIVE_STAGE.md) и данный документ.
-2. Прочитать [GDD](docs/GDD.md), [Roadmap](docs/ROADMAP.md), [действующие решения](docs/design/DECISIONS.md) и [D95](docs/decisions/D95-single-repository-close-model-pipeline.md).
-3. Проверить реальный GitHub HEAD, рабочую ветку, `git status`, коммиты, PR и конкретный объём поручения.
-4. Не принимать исторические исследования переноса Alpha, старые M0/M1-отчёты и закрытые производственные эксперименты за активные задания.
+1. Прочитать [PROJECT_MEMORY.md](PROJECT_MEMORY.md), [docs/ACTIVE_STAGE.md](docs/ACTIVE_STAGE.md), [Concept](docs/CONCEPT.md) и этот файл.
+2. Для **конкретной** задачи выборочно открыть релевантные GDD, Roadmap, решения, ADR и профильный [skill](.dsh/skills/). Не загружать все отчёты и архивы в постоянный контекст.
+3. Проверить `git status`, реальный GitHub HEAD, рабочую ветку, PR и явно разрешённый scope. Перед записью при доступном Node выполнить `node tools/harness/preflight.mjs`.
+4. История Alpha/M0/Factoria не является активным ТЗ. При конфликте источников фиксировать блокер и запрашивать решение, не фантазировать реализацию.
+
+**Правила по слоям:** [HARNESS_ARCHITECTURE](docs/agents/HARNESS_ARCHITECTURE.md). Общие принципы здесь; узкие процедуры — в skill, подсчёты и сверки — в скрипте, обязательные машинные блокировки — в проверенном hook/permissions/CI. Никто не меняет эти границы автоматически.
 
 ## Роли и полномочия
 
