@@ -27,3 +27,9 @@ jobs:
         run: node -e "JSON.parse(require('fs').readFileSync('.dsh/hooks.example.json', 'utf8'))"
       - name: Validate CubeGame documentation and skills
         run: node tools/harness/validate-project-knowledge.mjs
+
+      - name: Syntax-check read-only symbol and Unreal research scripts
+        run: |
+          node --check tools/harness/symbol-audit.mjs
+          node tools/harness/symbol-audit.mjs
+          python -m py_compile tools/experiments/unreal/audit_assets.py
