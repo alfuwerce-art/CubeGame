@@ -25,3 +25,5 @@ jobs:
         run: node --test tools/harness/hook-pretool.test.mjs
       - name: Validate example JSON
         run: node -e "JSON.parse(require('fs').readFileSync('.dsh/hooks.example.json', 'utf8'))"
+      - name: Validate CubeGame documentation and skills
+        run: node tools/harness/validate-project-knowledge.mjs
