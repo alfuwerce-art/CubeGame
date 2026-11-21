@@ -1,0 +1,21 @@
+{
+    "name": "CubeGame.Gameplay.Editor",
+    "rootNamespace": "CubeGame.Gameplay.EditorTools",
+    "references": [
+        "CubeGame.Core",
+        "CubeGame.Presentation",
+        "CubeGame.Gameplay",
+        "CubeGame.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

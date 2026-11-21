@@ -1,0 +1,17 @@
+{
+    "name": "CubeGame.Presentation",
+    "rootNamespace": "CubeGame.Presentation",
+    "references": [
+        "CubeGame.Core",
+        "CubeGame.Persistence"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

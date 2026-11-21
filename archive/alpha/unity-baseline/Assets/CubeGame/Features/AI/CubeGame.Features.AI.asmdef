@@ -1,0 +1,17 @@
+{
+    "name": "CubeGame.Features.AI",
+    "rootNamespace": "CubeGame.Features.AI",
+    "references": [
+        "CubeGame.Content",
+        "CubeGame.Features.Creatures"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
