@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'tools/harness/**'
+      - 'tools/experiments/unreal/**'
+      - '.github/workflows/harness-guard.yml'
       - '.dsh/**'
       - 'docs/**'
       - 'AGENTS.md'
@@ -46,3 +48,6 @@ jobs:
       - name: Inspect Windows DSH preflight script (read-only)
         shell: pwsh
         run: ./tools/harness/windows/Inspect-Dsh.ps1 -ProjectRoot '${{ github.workspace }}'
+      - name: Read-only Unreal environment inspection (no UE required on CI)
+        shell: pwsh
+        run: ./tools/experiments/unreal/Inspect-UnrealEnvironment.ps1 -RepoRoot '${{ github.workspace }}'
