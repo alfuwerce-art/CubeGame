@@ -1,10 +1,6 @@
 ---
 name: cubegame-art-validation
-description: "Evaluate voxel/pixel game visuals and movement with observable references."
+description: "Compare actual CubeGame art and movement against the target reference and protected baseline; identify regressions before owner review."
 ---
-# cubegame-art-validation
-1. Read Art Direction, the object brief and reference status.
-2. Compare silhouette, proportions, face, materials, palette, lighting and in-game camera.
-3. For motion inspect contact, pose, intersections and collisions; for biomes inspect distinct terrain and vegetation.
-4. Give expected-vs-observed discrepancies with severity and evidence.
-5. Owner sets final approval. Report unknowns where source geometry or runtime is unavailable.
+# Art validation
+Read ART_DIRECTION, REFERENCE_PROTOCOL, ASSET_ACCEPTANCE, applicable CHARACTER_STYLE_STANDARD and specific brief/passport. Capture actual matching pose, camera, lighting, scale: front, profile, 3/4, back and gameplay as applicable. Compare target/reference, baseline and result; inspect silhouette, local planes, proportions, anatomy, face, palette/materials and pixel/voxel forms. For local edits verify unchanged regions and dependencies, not only file hashes. For motion inspect full loop and extreme frames, foot/weapon contacts, stretch, intersections, clothing/attachments. For biome inspect distinct terrain/vegetation and readability. Record expected vs observed, severity and evidence for each criterion; technical PASS is not visual PASS. Missing views/runtime = NOT_RUN. Correct blocking defects or report PARTIAL/BLOCKED. No ACCEPTED without owner.

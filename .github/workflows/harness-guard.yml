@@ -4,6 +4,8 @@ on:
     paths:
       - 'tools/harness/**'
       - '.dsh/**'
+      - '.agents/**'
+      - '.github/workflows/harness-guard.yml'
       - 'docs/**'
       - 'AGENTS.md'
       - 'PROJECT_MEMORY.md'
@@ -16,6 +18,8 @@ on:
     paths:
       - 'tools/harness/**'
       - '.dsh/**'
+      - '.agents/**'
+      - '.github/workflows/harness-guard.yml'
 jobs:
   node-tests:
     runs-on: ubuntu-latest
@@ -28,6 +32,11 @@ jobs:
         run: node --check tools/harness/hook-pretool.mjs && node --check tools/harness/preflight.mjs
       - name: Test hook decisions
         run: node --test tools/harness/hook-pretool.test.mjs
+      - name: Verify task gate and mirrored Codex skills
+        run: |
+          node --check tools/harness/task-gate.mjs
+          node --test tools/harness/task-gate.test.mjs
+          node tools/harness/sync-skills.mjs --check
       - name: Validate example JSON
         run: node -e "JSON.parse(require('fs').readFileSync('.dsh/hooks.example.json', 'utf8'))"
       - name: Validate CubeGame documentation and skills
