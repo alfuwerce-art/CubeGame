@@ -45,13 +45,16 @@ export function validateContract(root,t){
  const skillNames=arr(t.skills,'skills');
  insist(skillNames.length>0,'At least one relevant skill required');
  for(const s of skillNames){insist(/^cubegame-[a-z0-9-]+$/.test(s),'Invalid skill name');const a='.agents/skills/'+s+'/SKILL.md',d='.dsh/skills/'+s+'/SKILL.md';insist(ctx.includes(a)||ctx.includes(d),'Skill not in context_files: '+s);}
+ const editable=arr(t.editable_context_files??[],'editable_context_files');
+ insist(!editable.length||t.kind==='docs','Only authorized docs tasks may edit context');
+ for(const p of editable)insist(ctx.includes(p)&&allowed(p,scopes),'Editable context must be in scope: '+p);
  const visual=['art','animation'].includes(t.kind);
- if(visual){for(const p of art)insist(ctx.includes(p),'Missing visual context '+p);insist(skillNames.includes('cubegame-art-validation'),'Art validation skill required');insist(skillNames.includes(t.kind==='art'?'cubegame-voxel-asset':'cubegame-rig-animation'),'Missing production skill');insist(arr(t.references,'references').length>0,'Visual reference required');for(const r of t.references)str(r,'reference');}
+ if(visual){for(const p of art)insist(ctx.includes(p),'Missing visual context '+p);if(t.asset_type==='character')insist(ctx.includes('docs/art/CHARACTER_STYLE_STANDARD.md'),'Character style standard required');insist(skillNames.includes('cubegame-art-validation'),'Art validation skill required');insist(skillNames.includes(t.kind==='art'?'cubegame-voxel-asset':'cubegame-rig-animation'),'Missing production skill');insist(arr(t.references,'references').length>0,'Visual reference required');for(const r of t.references)str(r,'reference');}
  for(const p of ctx)inside(root,p);
  const checks=arr(t.acceptance_checks,'acceptance_checks');
  insist(checks.length&&new Set(checks).size===checks.length,'Nonempty unique acceptance checks required');for(const c of checks)str(c,'acceptance check');
  const protect=arr(t.protected_files,'protected_files');for(const p of protect)resolveRef(root,t,p);
- return {ctx,protect,scopes,ext,visual};
+ return {ctx,protect,scopes,ext,visual,editable};
 }
 export function start(root,t){
  const v=validateContract(root,t);
@@ -69,8 +72,9 @@ export function check(root,t,r,result){
  git(root,'merge-base','--is-ancestor',t.base_sha,'HEAD');
  insist(JSON.stringify(r.context.map(x=>x.path))===JSON.stringify(v.ctx),'Context receipt incomplete');
  insist(JSON.stringify(r.protected.map(x=>x.file))===JSON.stringify(v.protect),'Protected receipt incomplete');
- for(const e of r.context)insist(fingerprint(root,t,e.path)===e.sha,'Context changed '+e.path);
+ for(const e of r.context)if(!v.editable.includes(e.path))insist(fingerprint(root,t,e.path)===e.sha,'Context changed '+e.path);
  for(const e of r.protected)insist(fingerprint(root,t,e.file)===e.sha,'Protected file changed '+JSON.stringify(e.file));
+ insist(/alfuwerce-art[/:]CubeGame(?:\.git)?$/i.test(git(root,'remote','get-url','origin')),'Wrong origin');
  const changed=[...new Set([...gitZ(root,'diff','--name-only','--no-renames','-z',t.base_sha,'--'),...gitZ(root,'diff','--cached','--name-only','--no-renames','-z',t.base_sha,'--'),...gitZ(root,'ls-files','--others','--exclude-standard','-z')])];
  for(const p of changed)insist(allowed(p,v.scopes),'Out-of-scope Git change '+p);
  const ext=arr(result.external_changed_paths??[],'external_changed_paths');
