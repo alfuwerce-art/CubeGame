@@ -1,19 +1,3 @@
-# Проверенная библиотека опыта AI harness
-
-Пока нет ни одной принятой записи. Это **не** база вымышленных улучшений и не источник игровых механик.
-
-После испытаний по [HARNESS_EVALUATION](../HARNESS_EVALUATION.md) создаётся короткая запись `<domain>-<YYYYMMDD>-<slug>.md` со ссылкой на PR и логи:
-
-```text
-Problem:
-Baseline: task / model / SHA / measurable failure
-Variant: exact skill, script or hook change
-Probe: identical task + isolated branch + metrics
-Independent validation: gameplay/test oracle
-Decision: ADOPT | REJECT | INCONCLUSIVE
-Applies to / does not apply to:
-Rollback:
-Owner review:
-```
-
-Загружать опыт по релевантному домену. Никогда не пересматривать `AGENTS.md`, права DSH или принятые художественные решения автоматически на основании одного прогона.
+# Библиотека опыта AI Harness
+[Аудит UE-сессии Codex 22–24.11](art-20261124-codex-audit.md) — наблюдения и кандидат изменений, не доказанное улучшение. Принятых измеренных улучшений пока нет.
+После испытаний по [HARNESS_EVALUATION](../HARNESS_EVALUATION.md) фиксировать Problem / Baseline (task, SHA, failure) / Variant / Probe / Independent validation / Decision ADOPT|REJECT|INCONCLUSIVE / Applies to / Rollback / Owner review. Загружать только релевантный опыт. Не пересматривать AGENTS, права или принятый арт автоматически по одному прогону.

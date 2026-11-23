@@ -1,10 +1,6 @@
 ---
 name: cubegame-rig-animation
-description: "Create and test a rig and animation for one specified character or creature."
+description: "Rig or animate a specified CubeGame character or creature; validate actual motion, weights, contacts and protected geometry."
 ---
-# cubegame-rig-animation
-1. Check accepted source mesh, action brief, engine compatibility and ownership.
-2. Match joints, pivots and weights to this model; test rest pose and moving parts.
-3. Animate the authorized action, checking root motion, foot contact, intersections and loop.
-4. Import into Unity or authorized isolated test environment; capture actual runtime movement.
-5. Report source rig, clip, game evidence, deformation defects and next corrections.
+# Rig and animation
+Check authorized mesh revision and action brief, rest pose, scale/pivots, engine version, dependency ownership, compatible skeleton and weights. Preserve source/accepted geometry and shared assets; snapshot before reimport and inspect dirty packages. Choose native engine tools if available (Control Rig/IK etc. only if suitable), do not build unnecessary systems. Verify hierarchy/weights, sample full clip and extreme poses, quantify abnormal stretch with locations and baseline, inspect intersections, root motion, contacts, loop and modular equipment when in scope. Capture actual playback/video and relevant logs. Use art-validation; no screenshot-only animation PASS. Fix root cause, change method after two failed corrections, report actual clip/source/runtime and remaining defects. Unity import only for integration tasks; UE isolated task stays in UE. Owner approves final motion.

@@ -10,7 +10,10 @@ const required = [
   'docs/agents/SKILLS_INDEX.md', 'docs/agents/HARNESS_ARCHITECTURE.md',
   'docs/agents/DEEPSEEK_HARNESS_SETUP.md', 'docs/design/DECISIONS.md',
   'docs/architecture/NAME_REGISTRY.md', 'docs/architecture/DEPENDENCY_MAP.md',
-  'docs/QUALITY_ATTRIBUTES.md', 'docs/art/ART_DIRECTION.md'
+  'docs/QUALITY_ATTRIBUTES.md', 'docs/art/ART_DIRECTION.md',
+  'docs/agents/CODEX_SETUP.md', 'docs/agents/HARNESS_TASK_TEMPLATE.md',
+  'docs/art/CHARACTER_STYLE_STANDARD.md', 'docs/art/REFERENCE_PROTOCOL.md', 'docs/art/ASSET_ACCEPTANCE.md',
+  'docs/art/assets/ASSET_REGISTER.md', 'docs/art/assets/ASSET_PASSPORT_TEMPLATE.md'
 ];
 let errors = [];
 for (const rel of required) if (!existsSync(path.join(root, rel))) errors.push('MISSING ' + rel);
@@ -58,6 +61,6 @@ for (const rel of activeFiles) {
   }
 }
 
-console.log(JSON.stringify({ status: errors.length ? 'FAIL' : 'PASS', skillsValidated: valid, documentsChecked: required.length, errors }, null, 2));
 if (valid < 9) errors.push('Expected at least 9 project skills');
+console.log(JSON.stringify({ status: errors.length ? 'FAIL' : 'PASS', skillsValidated: valid, documentsChecked: required.length, errors }, null, 2));
 if (errors.length) process.exitCode = 1;

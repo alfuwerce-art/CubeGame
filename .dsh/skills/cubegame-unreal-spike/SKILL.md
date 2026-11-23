@@ -1,10 +1,6 @@
 ---
 name: cubegame-unreal-spike
-description: "Research isolated Unreal editor scripting only under an explicit study task."
+description: "Run an explicitly authorized isolated Unreal editor research task without migrating CubeGame from Unity."
 ---
-# cubegame-unreal-spike
-1. Confirm the study's authorization, isolation from Unity and installed tools.
-2. Test exactly one small comparable editor operation with documented actual versions.
-3. Keep runtime code distinct from editor scripting; record logs, created files and memory use.
-4. Compare results against an equivalent Unity workflow using identical criteria.
-5. Report measurements and limitations. No game-engine migration without a new decision.
+# Unreal research
+Confirm exact authorized study, editor/project path, installed version, isolation, actual MCP/Python/Editor capabilities (read-only probe), licenses and dependency scope. One comparable operation or asset as requested, no unnecessary scene/export/import or migration. Distinguish runtime/editor; snapshot protected assets/shared skeleton and record changes, logs, memory where relevant. For art or animation apply voxel-asset/rig-animation/art-validation. Compare methods only when requested using same input and evidence. Report installed/verified vs unknown, failures, scope and reproducibility. External skills require evaluation and permission, not automatic installation. Unity remains game engine.
