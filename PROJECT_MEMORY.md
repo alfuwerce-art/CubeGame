@@ -1,5 +1,5 @@
 # CubeGame — межчатовая память
-**Дата:** 2026-11-24. **Репозиторий:** alfuwerce-art/CubeGame. **Workspace:** D:\Projects\CubeGame.
+**Дата:** 2026-11-25. **Репозиторий:** alfuwerce-art/CubeGame. **Workspace:** D:\Projects\CubeGame.
 
 **Игра:** самостоятельная Unity 3D action RPG для Windows, авторский детализированный voxel/pixel 3D, процедурный мир, контактный бой, развитие, экипировка, живые NPC, фракции, экономика, квесты, постоянные последствия. [GDD](docs/GDD.md), [Roadmap](docs/ROADMAP.md), [Decisions](docs/design/DECISIONS.md).
 
@@ -10,3 +10,5 @@
 **Агенты:** Codex/DeepSeek исполняют, ChatGPT проектирует/ревьюит, владелец принимает. DSH 0.2.2-rc.1/preset cubegame-dev и 9 навыков — по прежнему локальному отчёту; реальные hooks не подтверждены, последние Unity CI артефакты локальны. [Общий Harness](docs/agents/HARNESS_ARCHITECTURE.md), [Codex setup](docs/agents/CODEX_SETUP.md), [индекс skills](docs/agents/SKILLS_INDEX.md). Усиление процесса по аудиту — реализация на ревью; эффективность ещё не измерена.
 
 Перед задачей: AGENTS → эта память → ACTIVE_STAGE → нужный контекст/skills → контракт и проверки. Не перечитывать всю переписку и archive; не повторять утверждённые вопросы.
+
+**Обязательное временное правило владельца:** [утверждение полного эталона до фиксации размеров и разработки генератора](docs/art/TEMP_CREATURE_REFERENCE_RULE.md). При переходе к генератору запросить разрешение владельца на удаление правила.
