@@ -16,3 +16,6 @@
 6. Передать TASK, SHA/ветку, diff, реальные журналы/скриншоты/видео, PASS/FAIL/SKIP/BLOCKED/NOT_RUN и блокеры. Максимум READY_FOR_OWNER_REVIEW; ACCEPTED — только владелец. Не force-push, не удалять историю, не merge без явного разрешения. После решения владельца фиксировать точное решение и версию в памяти/паспорте, не объявлять принятым остальное.
 
 Unity строго по ProjectSettings/ProjectVersion.txt, одна сессия Editor на проект; [ADR-0001](docs/architecture/ADR-0001-modular-monolith.md). [Codex](docs/agents/CODEX_SETUP.md), [DSH](docs/agents/DEEPSEEK_HARNESS_SETUP.md). Скрипты/хуки не заменяют права ОС, реальные проверки и приёмку.
+
+## Временное обязательное правило для ассетов существ
+При работе над гуманоидами, животными, монстрами и их экипировкой выполнять [правило утверждения эталонов](docs/art/TEMP_CREATURE_REFERENCE_RULE.md). Удаление правила только после явного разрешения владельца.
