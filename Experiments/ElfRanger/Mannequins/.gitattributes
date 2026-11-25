@@ -1,0 +1,3 @@
+# Preserve the generated JSON bytes for the export checksums.
+*/geometry.json -text whitespace=cr-at-eol
+*/grip.json -text whitespace=cr-at-eol

@@ -67,13 +67,15 @@
       "ElfRanger_Visual.gltf": "19c8930fcd66ac37d7434d8bc426f3b44199b9b3db68ee310ab370eedcd60273",
       "ElfRanger_Visual.bin": "25655757e735305570d5d2cbfb08c846a0d05236ed8bc2fb3e56cfff1c358d34",
       "ElfRanger_Visual_Color.png": "d0c48e9e21a4def2cafcd6725d494ad55ebcca563be2186a2238f4da5efd1639",
-      "grip.json": "010f2acc575a9e6448d44620eb6f2060c0413d58d6a51c2a080f963472360976"
+      "grip.json": "010f2acc575a9e6448d44620eb6f2060c0413d58d6a51c2a080f963472360976",
+      "geometry.json": "eda87771505933d61638b943521482f01ae823a509661e168677bea05183f1e9"
     },
     "approved_female": {
       "ElfRanger_Visual.gltf": "3f4971de74e0301e4e4dbb24a36c7cd35bd46fc6b3e82830dc02894237941185",
       "ElfRanger_Visual.bin": "fd2b394633d916df8eedc976f7772222ca60fcafec67a76188878f7355d39c15",
       "ElfRanger_Visual_Color.png": "d0c48e9e21a4def2cafcd6725d494ad55ebcca563be2186a2238f4da5efd1639",
-      "grip.json": "010f2acc575a9e6448d44620eb6f2060c0413d58d6a51c2a080f963472360976"
+      "grip.json": "010f2acc575a9e6448d44620eb6f2060c0413d58d6a51c2a080f963472360976",
+      "geometry.json": "2865e69b2ed7c8fe6ae29a1ed6f6f6fe1898ce8e20f6d2ce2c7de2aa6247b08d"
     }
   },
   "male_protected_triangles_identical": {
@@ -92,8 +94,8 @@
     "female_native_sha256": "f213426150d432048f9bd615fafabb99eb797b2dda1cac5929a03afb7d794840",
     "protected_packages_identical": 28,
     "male_import": {
-      "source": "/Game/ElfRangerMannequin/женский_манекен.женский_манекен",
-      "copy": "/Game/ElfRangerMannequin/мужской_манекен.мужской_манекен",
+      "source": "/Game/ElfRangerMannequin/\u0436\u0435\u043d\u0441\u043a\u0438\u0439_\u043c\u0430\u043d\u0435\u043a\u0435\u043d.\u0436\u0435\u043d\u0441\u043a\u0438\u0439_\u043c\u0430\u043d\u0435\u043a\u0435\u043d",
+      "copy": "/Game/ElfRangerMannequin/\u043c\u0443\u0436\u0441\u043a\u043e\u0439_\u043c\u0430\u043d\u0435\u043a\u0435\u043d.\u043c\u0443\u0436\u0441\u043a\u043e\u0439_\u043c\u0430\u043d\u0435\u043a\u0435\u043d",
       "skeleton": "/Game/ElfRangerMannequin/SKEL_ElfRangerMannequin.SKEL_ElfRangerMannequin",
       "triangles": 76572,
       "sections": [
