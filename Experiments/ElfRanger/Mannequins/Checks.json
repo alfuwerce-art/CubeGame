@@ -1,0 +1,108 @@
+{
+  "shared_head_triangles": 944,
+  "shared_ear_triangles": 30520,
+  "bind_joints": 54,
+  "topology": {
+    "female": {
+      "BaseBody": {
+        "triangles": 66702,
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "reversed_or_degenerate_triangles": 0,
+        "duplicate_triangles": 0,
+        "non_normalized_weights": 0
+      },
+      "Head": {
+        "triangles": 944,
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "reversed_or_degenerate_triangles": 0,
+        "duplicate_triangles": 0,
+        "non_normalized_weights": 0
+      },
+      "Ears": {
+        "triangles": 30520,
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "reversed_or_degenerate_triangles": 0,
+        "duplicate_triangles": 0,
+        "non_normalized_weights": 0
+      }
+    },
+    "male": {
+      "BaseBody": {
+        "triangles": 45108,
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "reversed_or_degenerate_triangles": 0,
+        "duplicate_triangles": 0,
+        "non_normalized_weights": 0
+      },
+      "Head": {
+        "triangles": 944,
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "reversed_or_degenerate_triangles": 0,
+        "duplicate_triangles": 0,
+        "non_normalized_weights": 0
+      },
+      "Ears": {
+        "triangles": 30520,
+        "open_edges": 0,
+        "nonmanifold_edges": 0,
+        "reversed_or_degenerate_triangles": 0,
+        "duplicate_triangles": 0,
+        "non_normalized_weights": 0
+      }
+    }
+  },
+  "sha256": {
+    "before": {
+      "ElfRanger_Visual.gltf": "f44437e75706c51607c9747ed6ce8cfd4de0ddc97d8ea55c3a26d3bd3def0c4a",
+      "ElfRanger_Visual.bin": "f1144d85fc6ed3d9500bf33f9ed44e3454d2e5f9d79d83db502ddb687fd5573a",
+      "ElfRanger_Visual_Color.png": "d0c48e9e21a4def2cafcd6725d494ad55ebcca563be2186a2238f4da5efd1639",
+      "grip.json": "010f2acc575a9e6448d44620eb6f2060c0413d58d6a51c2a080f963472360976"
+    },
+    "after": {
+      "ElfRanger_Visual.gltf": "19c8930fcd66ac37d7434d8bc426f3b44199b9b3db68ee310ab370eedcd60273",
+      "ElfRanger_Visual.bin": "25655757e735305570d5d2cbfb08c846a0d05236ed8bc2fb3e56cfff1c358d34",
+      "ElfRanger_Visual_Color.png": "d0c48e9e21a4def2cafcd6725d494ad55ebcca563be2186a2238f4da5efd1639",
+      "grip.json": "010f2acc575a9e6448d44620eb6f2060c0413d58d6a51c2a080f963472360976",
+      "geometry.json": "eda87771505933d61638b943521482f01ae823a509661e168677bea05183f1e9"
+    },
+    "approved_female": {
+      "ElfRanger_Visual.gltf": "3f4971de74e0301e4e4dbb24a36c7cd35bd46fc6b3e82830dc02894237941185",
+      "ElfRanger_Visual.bin": "fd2b394633d916df8eedc976f7772222ca60fcafec67a76188878f7355d39c15",
+      "ElfRanger_Visual_Color.png": "d0c48e9e21a4def2cafcd6725d494ad55ebcca563be2186a2238f4da5efd1639",
+      "grip.json": "010f2acc575a9e6448d44620eb6f2060c0413d58d6a51c2a080f963472360976",
+      "geometry.json": "2865e69b2ed7c8fe6ae29a1ed6f6f6fe1898ce8e20f6d2ce2c7de2aa6247b08d"
+    }
+  },
+  "male_protected_triangles_identical": {
+    "BaseBody": 45108,
+    "Ears": 30520
+  },
+  "approved_female_native_sha256": "f213426150d432048f9bd615fafabb99eb797b2dda1cac5929a03afb7d794840",
+  "approved_female_local_commit": "ab6c162d3df6a82baef7deabc6f38313aa860295",
+  "shared_head_local_commit": "78a8d275235d37a637fd70d10f544e14bdcba838",
+  "publication_base_commit": "5561b5ecac1588f2409f1435af9606d94143c39a",
+  "two_exports_reproduced_byte_for_byte": true,
+  "preview_sha256": "c5df24f5a8643ba5dec154b7684bcc366787677d3e4885202a3c5cca885c81f4",
+  "ue_native_verification": {
+    "engine": "5.9.0-60738873+++UE5+Release-5.9",
+    "male_native_sha256": "014d8642646f5357c2e036e9e48463dfa9b5e9c505c93ceefc2d7e871d9b3273",
+    "female_native_sha256": "f213426150d432048f9bd615fafabb99eb797b2dda1cac5929a03afb7d794840",
+    "protected_packages_identical": 28,
+    "male_import": {
+      "source": "/Game/ElfRangerMannequin/\u0436\u0435\u043d\u0441\u043a\u0438\u0439_\u043c\u0430\u043d\u0435\u043a\u0435\u043d.\u0436\u0435\u043d\u0441\u043a\u0438\u0439_\u043c\u0430\u043d\u0435\u043a\u0435\u043d",
+      "copy": "/Game/ElfRangerMannequin/\u043c\u0443\u0436\u0441\u043a\u043e\u0439_\u043c\u0430\u043d\u0435\u043a\u0435\u043d.\u043c\u0443\u0436\u0441\u043a\u043e\u0439_\u043c\u0430\u043d\u0435\u043a\u0435\u043d",
+      "skeleton": "/Game/ElfRangerMannequin/SKEL_ElfRangerMannequin.SKEL_ElfRangerMannequin",
+      "triangles": 76572,
+      "sections": [
+        "BaseBody",
+        "Head",
+        "Ears"
+      ]
+    }
+  }
+}

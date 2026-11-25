@@ -1,0 +1,23 @@
+{
+  "BaseBody": {
+    "voxels": 101144,
+    "surface_quads": 21400,
+    "triangles": 45108,
+    "vertices": 41863,
+    "material": 0
+  },
+  "Head": {
+    "voxels": 0,
+    "surface_quads": 0,
+    "triangles": 944,
+    "vertices": 824,
+    "material": 1
+  },
+  "Ears": {
+    "voxels": 23204,
+    "surface_quads": 15260,
+    "triangles": 30520,
+    "vertices": 36718,
+    "material": 2
+  }
+}
