@@ -9,7 +9,7 @@
 | cubegame-unity-editor-automation | Автоматизация Unity Editor/CLI |
 | cubegame-debug-regression | Воспроизводимая ошибка Unity/C# |
 | cubegame-voxel-asset | Создание или локальная правка ассета |
-| cubegame-rig-animation | Риг, веса, анимация |
+| cubegame-rig-animation | Риг, веса, поиск/адаптация/коррекция анимаций, переходы, диагностика артефактов UE; [playbook](UE_ANIMATION_PLAYBOOK.md) |
 | cubegame-art-validation | Обязательная визуальная самопроверка любой art/animation задачи |
 | cubegame-unreal-spike | Явно разрешённое изолированное исследование UE |
 
