@@ -34,6 +34,6 @@ export function animationResult(t,r,resolveEvidence,readExport){
  requireIt(b.domains.technical.status===r.technical_status&&b.domains.visual.status===r.visual_status,'top-level verdict mismatch');
  if(a.gameplay_required)requireIt(b.domains.gameplay.status!=='SKIP','required gameplay cannot SKIP');
  const s=list(b.snapshots,'result snapshots');unique(s.map(x=>x.id),'result snapshot IDs');
- for(const x of s){const p=a.snapshots.find(z=>z.id===x.id);requireIt(p,'unknown snapshot '+x.id);const changed=compareTracks(readExport(p.baseline),readExport(x.candidate),p.allowed_keys);requireIt(!changed.length||(!ready&&b.domains.regression.status==='FAIL'),'protected tracks changed: '+changed.join(', '));}
+ for(const x of s){const p=a.snapshots.find(z=>z.id===x.id);requireIt(p,'unknown snapshot '+x.id);requireIt(!same(p.baseline,x.candidate),'candidate export must be separate from baseline');const changed=compareTracks(readExport(p.baseline),readExport(x.candidate),p.allowed_keys);requireIt(!changed.length||(!ready&&b.domains.regression.status==='FAIL'),'protected tracks changed: '+changed.join(', '));}
  if(ready||b.domains.regression.status==='PASS')requireIt(s.length===a.snapshots.length,'missing candidate snapshot');
 }

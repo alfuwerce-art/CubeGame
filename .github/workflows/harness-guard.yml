@@ -35,7 +35,7 @@ jobs:
       - name: Verify task gate and mirrored Codex skills
         run: |
           node --check tools/harness/task-gate.mjs
-          node --test tools/harness/task-gate.test.mjs
+          node --test tools/harness/task-gate.test.mjs tools/harness/animation-gate.test.mjs
           node tools/harness/sync-skills.mjs --check
       - name: Validate example JSON
         run: node -e "JSON.parse(require('fs').readFileSync('.dsh/hooks.example.json', 'utf8'))"

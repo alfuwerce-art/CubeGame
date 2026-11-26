@@ -27,3 +27,16 @@ test('contract cannot be modified after baseline',()=>fixture(({root,t,result})=
 test('declared external changes checked against explicit scope',()=>fixture(({root,t,result})=>{const ext=mkdtempSync(path.join(tmpdir(),'cg-external-'));try{writeFileSync(path.join(ext,'protected.bin'),'safe');const x={...t,external_root:ext,external_allowed_paths:['torso.bin'],protected_files:[{root:'external',path:'protected.bin'}]};const r=start(root,x);assert.throws(()=>check(root,x,r,{...result,external_changed_paths:['other.bin']}),/external change out of scope/);writeFileSync(path.join(ext,'protected.bin'),'changed');assert.throws(()=>check(root,x,r,result),/Protected file changed/);}finally{rmSync(ext,{recursive:true,force:true});}}));
 
 test('only explicit docs tasks may edit context',()=>fixture(({root,w,t,result})=>{const x={...t,kind:'docs',allowed_paths:['AGENTS.md'],editable_context_files:['AGENTS.md']};assert.throws(()=>start(root,{...x,kind:'art'}),/Only authorized docs/);const r=start(root,x);w('AGENTS.md','approved doc edit');assert.equal(check(root,x,r,result).status,'PASS');}));
+
+test('animation gate integrated with actual protected export and generic receipt',()=>fixture(({root,w,g,t,result})=>{
+ for(const p of ['.agents/skills/cubegame-rig-animation/SKILL.md','docs/agents/animation/QUALITY_PROTOCOL.md','docs/agents/animation/WORK_MODES.md','docs/agents/animation/TOOL_SELECTION.md','docs/agents/animation/REVIEW_LAB.md'])w(p,'context');
+ w('model/baseline.json',JSON.stringify({tracks:{finger:[0],body:[3]}}));
+ g('add','.');g('commit','-m','animation baseline');
+ const x={...t,kind:'animation',base_sha:g('rev-parse','HEAD'),skills:['cubegame-art-validation','cubegame-rig-animation'],context_files:[...t.context_files,'.agents/skills/cubegame-rig-animation/SKILL.md','docs/agents/animation/QUALITY_PROTOCOL.md','docs/agents/animation/WORK_MODES.md','docs/agents/animation/TOOL_SELECTION.md','docs/agents/animation/REVIEW_LAB.md'],protected_files:['model/base.bin','model/baseline.json'],animation:{checkpoint:'restore baseline',gameplay_required:true,requirements:[{id:'A',owner_request:'fingers',mode:'EDIT',target:'Run',check:'shape',preserve:'body'}],snapshots:[{id:'run',baseline:'model/baseline.json',allowed_keys:['finger']}]}};
+ const receipt=start(root,x);w('evidence/candidate.json',JSON.stringify({tracks:{finger:[1],body:[3]}}));
+ const v={status:'PASS',observation:'frame 5 side view actual observed motion',evidence:['evidence/report.txt']};
+ const y={...result,animation:{requirements:[{id:'A',...v}],domains:Object.fromEntries(['technical','motion','visual','gameplay','regression'].map(d=>[d,v])),snapshots:[{id:'run',candidate:'evidence/candidate.json'}]}};
+ assert.equal(check(root,x,receipt,y).status,'PASS');
+ w('evidence/candidate.json',JSON.stringify({tracks:{finger:[1],body:[4]}}));
+ assert.throws(()=>check(root,x,receipt,y),/protected tracks changed/);
+}));

@@ -17,3 +17,4 @@ test('missing snapshot and evidence rejected',()=>{const f=fixture();f.r.animati
 test('gameplay SKIP not allowed when required',()=>{const f=fixture();f.r.animation.domains.gameplay.status='SKIP';assert.throws(f.run,/gameplay/);});
 test('unprotected baseline and omitted check rejected',()=>{const f=fixture();f.t.protected_files=[];assert.throws(f.run,/baseline export/);const g=fixture();g.t.animation.requirements.pop();assert.throws(g.run,/every acceptance check/);});
 test('partial may honestly report regression and missing visual',()=>{const f=fixture();f.r.status='PARTIAL';f.r.animation.domains.visual.status='NOT_RUN';f.r.visual_status='NOT_RUN';f.r.animation.domains.regression.status='FAIL';f.data['candidate.json'].tracks.body=[9];f.run();});
+test('candidate cannot reuse baseline export path',()=>{const f=fixture();f.r.animation.snapshots[0].candidate='baseline.json';assert.throws(f.run,/separate from baseline/);});
