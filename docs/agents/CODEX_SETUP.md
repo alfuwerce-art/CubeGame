@@ -13,3 +13,5 @@ Codex использует корневой AGENTS.md и репозиторны�
 Обычный запрос: «Продолжи женский манекен, исправь только грудь, пресс и таз по приложенному референсу. Остальное сохрани». Агент сам находит документы, исходник, ограничения, выбирает skills и выполняет проверки; если сохранённый ассет или референс недоступен, сообщает точный блокер. Для локальной работы не требовать нового ТЗ на каждый элемент. Результат — краткий отчёт + открытая/воспроизводимая сцена по запросу, без самовольного merge.
 
 Статус подключения на ПК владельца: NOT_VERIFIED. Наличие этих файлов в Git не подтверждает локальную загрузку, работу инструмента или улучшение качества.
+
+For animation tasks read [quality protocol](animation/QUALITY_PROTOCOL.md), resume actual checkpoint and include animation contract/result fields in task-gate. First local pilot: [RUN-02](animation/RUN02_CHECKPOINT.md) and [Review Lab](animation/REVIEW_LAB.md). Verify discovery and actual tools; no automatic reset/switch over local work.

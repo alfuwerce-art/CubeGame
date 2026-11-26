@@ -1,6 +1,8 @@
 # UE 5.9 — animation adaptation, correction and validation
 Operational reference for cubegame-rig-animation. Applies to the current authorized CubeGame character/creature; not a new animation architecture or product decision. Adapt rules for non-humanoid rigs and artistic reference; do not impose biped constraints on creatures.
 
+Mandatory companion: [quality protocol](animation/QUALITY_PROTOCOL.md), [work modes](animation/WORK_MODES.md), [tool selection](animation/TOOL_SELECTION.md), [review lab](animation/REVIEW_LAB.md). Maintain requirement IDs and checkpoint; use animation task-gate extension. Existing tool suggestions below do not override scope or visual-only provenance restrictions.
+
 ## 1. Sources and selection
 - Local: `D:\Projects\скачанные анимации` — read-only inventory. Record accessible files, format, clip names, skeleton and provenance; inspect real contents, not filename alone. No modification or bulk upload.
 - [Game Animation Sample](https://dev.epicgames.com/documentation/unreal-engine/game-animation-sample-project-in-unreal-engine) — inspect start, loop, stop, turn, traversal and responsive capsule-driven locomotion. Inspect the actual installed version and animation assets. Migrate only selected dependencies if allowed.

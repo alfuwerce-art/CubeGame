@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, existsSync, realpathSync, statSync } from 
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { animationContract, animationResult } from './animation-gate.mjs';
 const core=['AGENTS.md','PROJECT_MEMORY.md','docs/ACTIVE_STAGE.md'];
 const art=['docs/art/ART_DIRECTION.md','docs/art/REFERENCE_PROTOCOL.md','docs/art/ASSET_ACCEPTANCE.md'];
 const kinds=new Set(['code','art','animation','docs','research']);
@@ -54,6 +55,7 @@ export function validateContract(root,t){
  const checks=arr(t.acceptance_checks,'acceptance_checks');
  insist(checks.length&&new Set(checks).size===checks.length,'Nonempty unique acceptance checks required');for(const c of checks)str(c,'acceptance check');
  const protect=arr(t.protected_files,'protected_files');for(const p of protect)resolveRef(root,t,p);
+ if(t.kind==='animation')animationContract(t);
  return {ctx,protect,scopes,ext,visual,editable};
 }
 export function start(root,t){
@@ -84,6 +86,7 @@ export function check(root,t,r,result){
  const evidence=arr(result.evidence,'evidence');insist(evidence.length>0,'Result evidence required');for(const e of evidence)resolveRef(root,t,e);
  const checks=arr(result.checks,'checks');insist(checks.length===t.acceptance_checks.length&&new Set(checks.map(c=>c.name)).size===checks.length,'Acceptance coverage mismatch');
  for(const c of checks){insist(t.acceptance_checks.includes(c.name)&&statuses.has(c.status),'Invalid criterion '+c.name);const ev=arr(c.evidence,'check evidence');if(c.status==='PASS')insist(ev.length>0,'PASS without evidence '+c.name);for(const e of ev)resolveRef(root,t,e);}
+ if(t.kind==='animation')animationResult(t,result,e=>resolveRef(root,t,e),e=>JSON.parse(readFileSync(resolveRef(root,t,e),'utf8')));
  if(result.status==='READY_FOR_OWNER_REVIEW'){insist(result.technical_status==='PASS'&&(!v.visual||result.visual_status==='PASS'),'READY requires relevant PASS');insist(checks.every(c=>c.status==='PASS'),'READY with incomplete criteria');}
  return {status:'PASS',task_status:result.status,changed,reported_external_changes:ext,limitations:['Receipt checks structure and bytes, not instruction comprehension or evidence truth.','Ignored Git files, unreported external operations, editor memory and visual quality are not independently verified.']};
 }
