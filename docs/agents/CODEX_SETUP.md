@@ -14,4 +14,4 @@ Codex использует корневой AGENTS.md и репозиторны�
 
 Статус подключения на ПК владельца: NOT_VERIFIED. Наличие этих файлов в Git не подтверждает локальную загрузку, работу инструмента или улучшение качества.
 
-For animation tasks read [quality protocol](animation/QUALITY_PROTOCOL.md), resume actual checkpoint and include animation contract/result fields in task-gate. First local pilot: [RUN-02](animation/RUN02_CHECKPOINT.md) and [Review Lab](animation/REVIEW_LAB.md). Verify discovery and actual tools; no automatic reset/switch over local work.
+For animation tasks keep cubegame-rig-animation as the primary skill even for editor launch, MCP, search, report, memory and archive. Do not switch to external docs skills; art-validation is subordinate. For animation tasks read [quality protocol](animation/QUALITY_PROTOCOL.md), resume actual checkpoint and include animation contract/result fields in task-gate. Current workstream (pilot history and next step): [RUN-02](animation/RUN02_CHECKPOINT.md) and [Review Lab](animation/REVIEW_LAB.md). Verify discovery and actual tools; no automatic reset/switch over local work.

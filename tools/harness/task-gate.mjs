@@ -55,7 +55,7 @@ export function validateContract(root,t){
  const checks=arr(t.acceptance_checks,'acceptance_checks');
  insist(checks.length&&new Set(checks).size===checks.length,'Nonempty unique acceptance checks required');for(const c of checks)str(c,'acceptance check');
  const protect=arr(t.protected_files,'protected_files');for(const p of protect)resolveRef(root,t,p);
- if(t.kind==='animation'){for(const p of ['QUALITY_PROTOCOL','WORK_MODES','TOOL_SELECTION','REVIEW_LAB'])insist(ctx.includes('docs/agents/animation/'+p+'.md'),'Missing animation context '+p);animationContract(t);}
+ if(t.kind==='animation'){insist(skillNames.every(s=>['cubegame-rig-animation','cubegame-art-validation'].includes(s)),'Animation skill lock: unrelated skill');for(const p of ['QUALITY_PROTOCOL','WORK_MODES','TOOL_SELECTION','REVIEW_LAB','SOURCE_SELECTION','EDITOR_RECOVERY'])insist(ctx.includes('docs/agents/animation/'+p+'.md'),'Missing animation context '+p);animationContract(t);}
  return {ctx,protect,scopes,ext,visual,editable};
 }
 export function start(root,t){

@@ -1,5 +1,5 @@
 # Tool selection — use the smallest suitable layer
-Check actual installed UE 5.9 capabilities, plugins, callable MCP/editor interfaces and permitted paths; record probe and actual action/output. Native UE is preferred, not a requirement to use all features. Use the existing [playbook](../UE_ANIMATION_PLAYBOOK.md) for official documentation and detailed retarget/transition procedure.
+This document is part of cubegame-rig-animation, not a separate skill. For editor/PIE problems follow [recovery](EDITOR_RECOVERY.md); for source selection follow [catalog](SOURCE_SELECTION.md). Check actual installed UE 5.9 capabilities, plugins, callable MCP/editor interfaces and permitted paths; record probe and actual action/output. Native UE is preferred, not a requirement to use all features. Use the existing [playbook](../UE_ANIMATION_PLAYBOOK.md) for official documentation and detailed retarget/transition procedure.
 | Task | Primary tool | Check |
 |---|---|---|
 | Original pose/key animation | Control Rig / FK Control Rig + Sequencer; verified native UE editor animation-data API when UI unavailable | block phases, curves, bake, reload and inspect actual sequence |

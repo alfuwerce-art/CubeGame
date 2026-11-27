@@ -1,5 +1,5 @@
 const statuses=new Set(['PASS','FAIL','SKIP','BLOCKED','NOT_RUN']);
-const modes=new Set(['CREATE','ADAPT','EDIT','REVIEW']);
+const modes=new Set(['SEARCH','CREATE','ADAPT','EDIT','REVIEW']);
 const domains=['technical','motion','visual','gameplay','regression'];
 const requireIt=(ok,msg)=>{if(!ok)throw Error('Animation: '+msg);};
 const nonempty=x=>typeof x==='string'&&x.trim().length>0;
